@@ -32,6 +32,8 @@
           "; signal: AbortSignal; configPath?: string | undefined; logsIndex?: string | undefined; teardown?: boolean | undefined; scenarioIds?: string[] | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
             "label": "{\n  log,\n  signal,\n  configPath,\n  logsIndex = 'logs',\n  teardown = false,\n  scenarioIds = [],\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+            "lineNumber": 96,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,6 +67,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 97,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -77,6 +83,8 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 98,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -91,6 +99,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 99,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -105,6 +115,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 100,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -119,6 +131,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 101,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -133,6 +147,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 102,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -163,6 +179,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 371,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,6 +195,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 374,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,6 +226,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 378,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -220,6 +242,8 @@
               "\"dramatic\" | \"subtle\""
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 381,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -241,6 +265,8 @@
           "() => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 385,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -268,6 +294,8 @@
           "; scenarioIds?: string[] | undefined; reset?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+        "lineNumber": 293,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,6 +307,8 @@
             "label": "{\n  log,\n  scenarioIds = [],\n  reset = false,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+            "lineNumber": 305,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -299,6 +329,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 306,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -313,6 +345,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 307,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -327,6 +361,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 308,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -346,6 +382,8 @@
         "label": "FailureScenario",
         "description": [],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -357,6 +395,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,6 +408,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,6 +421,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,6 +437,8 @@
               "\"dramatic\" | \"subtle\""
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -407,6 +453,8 @@
               "{ type: \"env\"; service: string; variable: string; value: string; description: string; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,6 +469,8 @@
               "{ type: \"env\"; service: string; variable: string; value: string; description: string; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -450,6 +500,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

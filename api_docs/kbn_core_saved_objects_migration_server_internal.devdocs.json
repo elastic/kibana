@@ -25,6 +25,8 @@
           "IDocumentMigrator"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   "DocumentMigratorOptions"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 72,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,6 +87,8 @@
               "SavedObjectsMigrationVersion"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -95,6 +103,8 @@
                   "MigrationVersionParams"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 83,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -115,6 +125,8 @@
               "() => void"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -139,6 +151,8 @@
               "<unknown>"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,6 +168,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 123,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -169,6 +185,8 @@
                   "DocumentMigrateOptions"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 124,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,6 +211,8 @@
               "<unknown>[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -208,6 +228,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 137,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -232,6 +254,8 @@
               ") => boolean"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -247,6 +271,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 150,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -262,6 +288,8 @@
                   "IsDowngradeRequiredOptions"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts",
+                "lineNumber": 151,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -287,6 +315,8 @@
           "IKibanaMigrator"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,6 +328,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,6 +344,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -328,6 +362,8 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -342,6 +378,8 @@
                   "KibanaMigratorOptions"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                "lineNumber": 99,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -361,6 +399,8 @@
               "DocumentMigrator"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -379,6 +419,8 @@
               "[]>"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -390,6 +432,8 @@
                 "label": "{\n    rerun = false,\n    skipVersionCheck = false,\n  }",
                 "description": [],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                "lineNumber": 148,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -404,6 +448,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                    "lineNumber": 148,
+                    "columnNumber": 8,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -418,6 +464,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                    "lineNumber": 148,
+                    "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -437,6 +485,8 @@
               "() => void"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -457,6 +507,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -474,6 +526,8 @@
               "IndexMapping"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -496,6 +550,8 @@
               "<unknown>"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -511,6 +567,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                "lineNumber": 240,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -526,6 +584,8 @@
                   "MigrateDocumentOptions"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                "lineNumber": 241,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -554,6 +614,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+        "lineNumber": 147,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -570,6 +632,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -588,6 +652,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -618,6 +684,8 @@
           "IndexMapping"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -636,6 +704,8 @@
               "SavedObjectsTypeMappingDefinitions"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -652,6 +722,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_active_mappings.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -676,6 +748,8 @@
           "SavedObjectsTypeMappingDefinitions"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_types_mappings.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -691,6 +765,8 @@
               "<any>[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/build_types_mappings.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -724,6 +800,8 @@
           ", \"bulk_index_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -738,6 +816,8 @@
               "BulkOverwriteTransformedDocumentsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
+            "lineNumber": 43,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -765,6 +845,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/calculate_exclude_filters.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -779,6 +861,8 @@
               "CalculateExcludeFiltersParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/calculate_exclude_filters.ts",
+            "lineNumber": 33,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -806,6 +890,8 @@
           ", {}>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -820,6 +906,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_cluster_routing_allocation.ts",
+            "lineNumber": 26,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -847,6 +935,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -861,6 +951,8 @@
               "CheckForUnknownDocsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
+            "lineNumber": 112,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -898,6 +990,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/clone_index.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -912,6 +1006,8 @@
               "CloneIndexParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/clone_index.ts",
+            "lineNumber": 55,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -937,6 +1033,8 @@
           ", {}>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/close_pit.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -951,6 +1049,8 @@
               "ClosePitParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/close_pit.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -973,6 +1073,8 @@
           "BulkOperationContainer"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+        "lineNumber": 308,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -987,6 +1089,8 @@
               "string"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "lineNumber": 308,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1011,6 +1115,8 @@
           "BulkIndexOperationTuple"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+        "lineNumber": 282,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1025,6 +1131,8 @@
               "SavedObjectsRawDoc"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1040,6 +1148,8 @@
               "Record<string, string>"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/model/helpers.ts",
+            "lineNumber": 284,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1073,6 +1183,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/create_index.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1087,6 +1199,8 @@
               "CreateIndexParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/create_index.ts",
+            "lineNumber": 68,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1116,6 +1230,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/fetch_indices.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1130,6 +1246,8 @@
               "FetchIndicesParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/fetch_indices.ts",
+            "lineNumber": 35,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1151,6 +1269,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1166,6 +1286,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+            "lineNumber": 31,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1187,6 +1309,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1202,6 +1326,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+            "lineNumber": 19,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1223,6 +1349,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1238,6 +1366,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+            "lineNumber": 27,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1259,6 +1389,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1274,6 +1406,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
+            "lineNumber": 12,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1301,6 +1435,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/open_pit.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1315,6 +1451,8 @@
               "OpenPitParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/open_pit.ts",
+            "lineNumber": 35,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1346,6 +1484,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1360,6 +1500,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "lineNumber": 39,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1375,6 +1517,8 @@
               "string"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "lineNumber": 40,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1390,6 +1534,8 @@
               "number"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "lineNumber": 41,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1406,6 +1552,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "lineNumber": 42,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1435,6 +1583,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1449,6 +1599,8 @@
               "ReadWithPitParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
+            "lineNumber": 46,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1476,6 +1628,8 @@
           ", { refreshed: boolean; }>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/refresh_index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1490,6 +1644,8 @@
               "RefreshIndexParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/refresh_index.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1519,6 +1675,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/reindex.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1533,6 +1691,8 @@
               "ReindexParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/reindex.ts",
+            "lineNumber": 50,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1560,6 +1720,8 @@
           ", \"remove_write_block_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/remove_write_block.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1574,6 +1736,8 @@
               "RemoveWriteBlockParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/remove_write_block.ts",
+            "lineNumber": 30,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1603,6 +1767,8 @@
           ", \"set_write_block_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/set_write_block.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1617,6 +1783,8 @@
               "SetWriteBlockParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/set_write_block.ts",
+            "lineNumber": 38,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1644,6 +1812,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/transform_docs.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1658,6 +1828,8 @@
               "TransformDocsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/transform_docs.ts",
+            "lineNumber": 23,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1691,6 +1863,8 @@
           ", \"update_aliases_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_aliases.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1705,6 +1879,8 @@
               "UpdateAliasesParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_aliases.ts",
+            "lineNumber": 46,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1734,6 +1910,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_and_pickup_mappings.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1748,6 +1926,8 @@
               "UpdateAndPickupMappingsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_and_pickup_mappings.ts",
+            "lineNumber": 40,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1777,6 +1957,8 @@
           ", \"update_mappings_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_mappings.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1791,6 +1973,8 @@
               "UpdateMappingsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/update_mappings.ts",
+            "lineNumber": 37,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1818,6 +2002,8 @@
           ", {}>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1833,6 +2019,8 @@
               " & { status: \"yellow\"; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+            "lineNumber": 37,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1860,6 +2048,8 @@
           ", {}>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1875,6 +2065,8 @@
               " & { status: \"green\"; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+            "lineNumber": 47,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1906,6 +2098,8 @@
           ", {}>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1920,6 +2114,8 @@
               "WaitForIndexStatusParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_index_status.ts",
+            "lineNumber": 69,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1949,6 +2145,8 @@
           ", \"pickup_updated_mappings_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_pickup_updated_mappings_task.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1964,6 +2162,8 @@
               "A"
             ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
+            "lineNumber": 166,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1995,6 +2195,8 @@
           ", \"reindex_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_reindex_task.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2010,6 +2212,8 @@
               "A"
             ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
+            "lineNumber": 166,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2039,6 +2243,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_task.ts",
+        "lineNumber": 94,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2053,6 +2259,8 @@
               "WaitForTaskParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_task.ts",
+            "lineNumber": 95,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2071,6 +2279,8 @@
         "label": "DocumentsTransformFailed",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2082,6 +2292,8 @@
             "label": "type",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2096,6 +2308,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2111,6 +2325,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2126,6 +2342,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2140,6 +2358,8 @@
         "label": "DocumentsTransformSuccess",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2155,6 +2375,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2169,6 +2391,8 @@
         "label": "EsResponseTooLargeError",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2183,6 +2407,8 @@
               "\"es_response_too_large\""
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2194,6 +2420,8 @@
             "label": "contentLength",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2208,6 +2436,8 @@
         "label": "KibanaMigratorOptions",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2299,7 +2529,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -2863,6 +3093,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -3208,6 +3440,8 @@
               "; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3222,6 +3456,8 @@
               "ISavedObjectTypeRegistryInternal"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3236,6 +3472,8 @@
               "{ [x: string]: string[]; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3250,6 +3488,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3280,6 +3520,8 @@
               "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3291,6 +3533,8 @@
             "label": "kibanaIndex",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3302,6 +3546,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3322,6 +3568,8 @@
               }
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3336,6 +3584,8 @@
               "DocLinksServiceSetup"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3347,6 +3597,8 @@
             "label": "waitForMigrationCompletion",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3361,6 +3613,8 @@
               "NodeRoles"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3375,6 +3629,8 @@
               "ElasticsearchCapabilities"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3391,6 +3647,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3405,6 +3663,8 @@
         "label": "UpdateByQueryResponse",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3416,6 +3676,8 @@
             "label": "taskId",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/pickup_updated_mappings.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

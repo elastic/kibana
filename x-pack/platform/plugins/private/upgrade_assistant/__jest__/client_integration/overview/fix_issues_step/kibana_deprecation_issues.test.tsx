@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import type { DomainDeprecationDetails } from '@kbn/core/public';
+import { screen, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
-import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
 import { esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
-  let testBed: OverviewTestBed;
   const { mockedKibanaDeprecations, mockedCriticalKibanaDeprecations } =
     kibanaDeprecationsServiceHelpers.defaultMockedResponses;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -32,21 +31,18 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
       // Set up with no ES deprecations.
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esNoDeprecations);
 
-      await act(async () => {
-        const deprecationService = deprecationsServiceMock.createStartContract();
-        kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response });
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response });
 
-        testBed = await setupOverviewPage(httpSetup, {
-          services: {
-            core: {
-              deprecations: deprecationService,
-            },
+      await setupOverviewPage(httpSetup, {
+        services: {
+          core: {
+            deprecations: deprecationService,
           },
-        });
+        },
       });
 
-      const { component } = testBed;
-      component.update();
+      await screen.findByTestId('kibanaStatsPanel');
     };
 
     describe('when there are critical and warning issues', () => {
@@ -55,17 +51,17 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
       });
 
       test('renders counts for both', () => {
-        const { exists, find } = testBed;
-
-        expect(exists('kibanaStatsPanel')).toBe(true);
-        expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain('2');
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        expect(panel).toBeInTheDocument();
+        expect(within(panel).getByTestId('criticalDeprecations')).toHaveTextContent('1');
+        expect(within(panel).getByTestId('warningDeprecations')).toHaveTextContent('2');
       });
 
       test('panel links to Kibana deprecations page', () => {
-        const { component, find } = testBed;
-        component.update();
-        expect(find('kibanaStatsPanel').find('a').props().href).toBe('/kibana_deprecations');
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        const link = panel.querySelector('a');
+        expect(link).not.toBeNull();
+        expect(link?.getAttribute('href')).toBe('/kibana_deprecations');
       });
     });
 
@@ -75,17 +71,17 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
       });
 
       test('renders a count for critical issues', () => {
-        const { exists, find } = testBed;
-
-        expect(exists('kibanaStatsPanel')).toBe(true);
-        expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        expect(panel).toBeInTheDocument();
+        expect(within(panel).getByTestId('criticalDeprecations')).toHaveTextContent('1');
+        expect(within(panel).queryByTestId('warningDeprecations')).not.toBeInTheDocument();
       });
 
       test('panel links to Kibana deprecations page', () => {
-        const { component, find } = testBed;
-        component.update();
-        expect(find('kibanaStatsPanel').find('a').props().href).toBe('/kibana_deprecations');
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        const link = panel.querySelector('a');
+        expect(link).not.toBeNull();
+        expect(link?.getAttribute('href')).toBe('/kibana_deprecations');
       });
     });
 
@@ -95,40 +91,36 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
       });
 
       test('renders a success state for the panel', () => {
-        const { exists } = testBed;
-        expect(exists('kibanaStatsPanel')).toBe(true);
-        expect(exists('kibanaStatsPanel.noDeprecationIssues')).toBe(true);
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        expect(panel).toBeInTheDocument();
+        expect(within(panel).getByTestId('noDeprecationIssues')).toBeInTheDocument();
       });
 
       test(`panel doesn't link to Kibana deprecations page`, () => {
-        const { component, find } = testBed;
-        component.update();
-        expect(find('kibanaStatsPanel').find('a').length).toBe(0);
+        const panel = screen.getByTestId('kibanaStatsPanel');
+        expect(panel.querySelector('a')).toBeNull();
       });
     });
   });
 
   describe(`When there's a load error`, () => {
     test('Handles network failure', async () => {
-      await act(async () => {
-        const deprecationService = deprecationsServiceMock.createStartContract();
-        kibanaDeprecationsServiceHelpers.setLoadDeprecations({
-          deprecationService,
-          mockRequestErrorMessage: 'Internal Server Error',
-        });
-
-        testBed = await setupOverviewPage(httpSetup, {
-          services: {
-            core: {
-              deprecations: deprecationService,
-            },
-          },
-        });
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({
+        deprecationService,
+        mockRequestErrorMessage: 'Internal Server Error',
       });
 
-      const { component, find } = testBed;
-      component.update();
-      expect(find('loadingIssuesError').text()).toBe(
+      await setupOverviewPage(httpSetup, {
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
+      });
+
+      const panel = await screen.findByTestId('kibanaStatsPanel');
+      expect(within(panel).getByTestId('loadingIssuesError')).toHaveTextContent(
         'Could not retrieve Kibana deprecation issues.'
       );
     });

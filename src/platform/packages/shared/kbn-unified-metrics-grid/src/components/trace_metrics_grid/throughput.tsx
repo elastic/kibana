@@ -7,36 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import React from 'react';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
+import { ACTION_OPEN_IN_DISCOVER } from '../../common/constants';
 import { Chart } from '../chart';
 import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getThroughputChart } from './trace_charts_definition';
 
-export const ThroughputChart = () => {
-  const {
-    filters,
-    services,
-    fetchParams,
-    discoverFetch$,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
-  const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
+type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
-  const { esqlQuery, seriesType, unit, color, title } = getThroughputChart({
-    dataSource,
-    indexes,
-    filters,
-    fieldName,
-  });
+const ThroughputChartContent = ({
+  esqlQuery,
+  seriesType,
+  unit,
+  color,
+  title,
+}: ThroughputChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
+    useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metric: {
-      name: fieldName,
+      name: 'id',
       instrument: 'histogram',
       unit,
       index: indexes,
@@ -57,10 +49,26 @@ export const ThroughputChart = () => {
       services={services}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
+      onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
       syncTooltips
       syncCursor
+      extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
     />
   );
+};
+
+export const ThroughputChart = () => {
+  const { filters, indexes } = useTraceMetricsContext();
+  const throughputChart = getThroughputChart({
+    indexes,
+    filters,
+  });
+
+  if (!throughputChart) {
+    return null;
+  }
+
+  return <ThroughputChartContent {...throughputChart} />;
 };

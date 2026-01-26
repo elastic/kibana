@@ -17,6 +17,8 @@ import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/ag
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
@@ -69,12 +71,21 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   },
   context
 ) => {
-  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } =
-    context;
+  const {
+    logger,
+    modelProvider,
+    toolProvider,
+    attachments,
+    request,
+    stateManager,
+    events,
+    promptManager,
+  } = context;
 
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
+  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -90,7 +101,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
@@ -99,6 +109,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     attachmentsService: attachments,
     request,
+    spaceId: context.spaceId,
     runner: context.runner,
   });
 
@@ -148,6 +159,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap,
       cycleLimit,
+      conversationTimestamp,
     }),
     {
       version: 'v2',
@@ -182,10 +194,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      getConversationState: () => getConversationState({ promptManager }),
       pendingRound,
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -205,20 +219,32 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 };
 
+const getConversationState = ({
+  promptManager,
+}: {
+  promptManager: PromptManager;
+}): ConversationInternalState => {
+  return {
+    prompt: promptManager.dump(),
+  };
+};
+
 const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
+  conversationTimestamp,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
+  conversationTimestamp: string;
 }): Command => {
   const initialMessages = conversationToLangchainMessages({
     conversation,
   });
 
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit, conversationTimestamp };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

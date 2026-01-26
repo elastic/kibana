@@ -30,6 +30,8 @@
           "\nGeneric interface that is implemented by the ToolingLog and the logger\nused by kbn_pm, which is responsible for running before the repo is\nbootstrapped and therefore can't use the ToolingLog."
         ],
         "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 25,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 25,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,6 +103,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -109,6 +119,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 29,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +136,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 29,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -144,6 +158,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +174,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 33,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -173,6 +191,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 33,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,6 +213,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -207,6 +229,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 37,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,6 +246,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 37,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -242,6 +268,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -256,6 +284,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 41,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -271,6 +301,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 41,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -291,6 +323,8 @@
               "(msg: string, ...rest: any[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -305,6 +339,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 45,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -320,6 +356,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+                "lineNumber": 45,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -346,6 +384,8 @@
           "\"info\" | \"debug\" | \"verbose\" | \"quiet\""
         ],
         "path": "src/platform/packages/private/kbn-some-dev-log/src/some_dev_log.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
