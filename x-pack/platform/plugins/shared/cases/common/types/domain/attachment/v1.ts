@@ -327,6 +327,35 @@ export type PersistableStateAttachmentAttributes = rt.TypeOf<
 >;
 
 /**
+ * Registered attachment (registry-based types)
+ * These attachments use their registry ID directly as the type field value.
+ */
+
+export const RegisteredAttachmentPayloadRt = rt.strict({
+  type: rt.string, // Registry ID (e.g., "dashboard", "visualization")
+  attachmentId: rt.string,
+  metaData: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  owner: rt.string,
+});
+
+const RegisteredAttachmentAttributesRt = rt.intersection([
+  RegisteredAttachmentPayloadRt,
+  AttachmentAttributesBasicRt,
+]);
+
+export const RegisteredAttachmentRt = rt.intersection([
+  RegisteredAttachmentAttributesRt,
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export type RegisteredAttachmentPayload = rt.TypeOf<typeof RegisteredAttachmentPayloadRt>;
+export type RegisteredAttachmentAttributes = rt.TypeOf<typeof RegisteredAttachmentAttributesRt>;
+export type RegisteredAttachment = rt.TypeOf<typeof RegisteredAttachmentRt>;
+
+/**
  * Common
  */
 
@@ -337,6 +366,7 @@ export const AttachmentPayloadRt = rt.union([
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
+  RegisteredAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
 ]);
 
@@ -346,6 +376,7 @@ export const AttachmentAttributesRt = rt.union([
   EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceAttachmentAttributesRt,
+  RegisteredAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
 ]);
 
@@ -355,6 +386,7 @@ const AttachmentAttributesNoSORt = rt.union([
   EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceNoSOAttachmentAttributesRt,
+  RegisteredAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
 ]);
 
@@ -364,6 +396,7 @@ const AttachmentAttributesWithoutRefsRt = rt.union([
   EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceWithoutRefsAttachmentAttributesRt,
+  RegisteredAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
 ]);
 
@@ -391,6 +424,7 @@ export const AttachmentPatchAttributesRt = rt.intersection([
     rt.exact(rt.partial(ActionsAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceNoSOAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceSOAttachmentPayloadRt.type.props)),
+    rt.exact(rt.partial(RegisteredAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(PersistableStateAttachmentPayloadRt.type.props)),
   ]),
   rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),

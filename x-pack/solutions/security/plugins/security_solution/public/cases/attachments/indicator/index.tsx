@@ -12,11 +12,11 @@ import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/c
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CASE_ATTACHMENT_TYPE_ID } from '../../../../../common/threat_intelligence/constants';
-import { EMPTY_VALUE } from '../../../constants/common';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
+import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/threat_intelligence/constants';
+import { EMPTY_VALUE } from '../../../threat_intelligence/constants/common';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
+import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
 
 /**
  * Indicator name, type, feed name and first seen values,
@@ -28,7 +28,9 @@ export interface AttachmentMetadata {
   indicatorFeedName: string;
 }
 
-const AttachmentChildrenLazy = React.lazy(() => import('../components/attachment_children'));
+const AttachmentChildrenLazy = React.lazy(
+  () => import('../../../threat_intelligence/modules/cases/components/attachment_children')
+);
 
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference

@@ -50,6 +50,10 @@ const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
       return OBSERVABLES_TAB;
     }
 
+    case CASE_VIEW_PAGE_TABS.DASHBOARDS: {
+      return 'Dashboards';
+    }
+
     // NOTE:this should not be called
     default:
       return ATTACHMENTS_TAB;

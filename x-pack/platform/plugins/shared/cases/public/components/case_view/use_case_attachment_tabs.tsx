@@ -19,6 +19,14 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { AttachmentType } from '../../../common/types/domain';
+import { DASHBOARD_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { isRegisteredAttachmentType } from '../../../common/utils/attachments';
+import type {
+  RegisteredAttachment,
+  AlertAttachment,
+  EventAttachment,
+} from '../../../common/types/domain';
+import type { SnakeToCamelCase } from '../../../common/types';
 
 const FilesBadge = ({
   activeTab,
@@ -179,6 +187,28 @@ const EventsBadge = ({
 
 EventsBadge.displayName = 'EventsBadge';
 
+const DashboardsBadge = ({
+  activeTab,
+  count,
+  euiTheme,
+}: {
+  activeTab: string;
+  count: number;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <EuiNotificationBadge
+    css={css`
+      margin-left: ${euiTheme.size.xs};
+    `}
+    data-test-subj="case-view-dashboards-stats-badge"
+    color={activeTab === CASE_VIEW_PAGE_TABS.DASHBOARDS ? 'accent' : 'subdued'}
+  >
+    {count}
+  </EuiNotificationBadge>
+);
+
+DashboardsBadge.displayName = 'DashboardsBadge';
+
 export interface CaseViewTab {
   badge?: ReactNode;
   id: CASE_VIEW_PAGE_TABS;
@@ -219,12 +249,14 @@ export const useCaseAttachmentTabs = ({
     return caseData.comments.reduce(
       (acc, comment) => {
         if (comment.type === AttachmentType.alert && features.alerts.enabled) {
-          acc.totalAlerts = Array.isArray(comment.alertId)
-            ? acc.totalAlerts + comment.alertId.length
+          const alertComment = comment as SnakeToCamelCase<AlertAttachment>;
+          acc.totalAlerts = Array.isArray(alertComment.alertId)
+            ? acc.totalAlerts + alertComment.alertId.length
             : acc.totalAlerts + 1;
         } else if (comment.type === AttachmentType.event && features.events.enabled) {
-          acc.totalEvents = Array.isArray(comment.eventId)
-            ? acc.totalEvents + comment.eventId.length
+          const eventComment = comment as SnakeToCamelCase<EventAttachment>;
+          acc.totalEvents = Array.isArray(eventComment.eventId)
+            ? acc.totalEvents + eventComment.eventId.length
             : acc.totalEvents + 1;
         }
         return acc;
@@ -233,11 +265,39 @@ export const useCaseAttachmentTabs = ({
     );
   }, [searchTerm, features, caseData]);
 
+  const isDashboardAttachment = (
+    attachment: CaseUI['comments'][number]
+  ): attachment is SnakeToCamelCase<RegisteredAttachment> => {
+    return (
+      isRegisteredAttachmentType(attachment.type) &&
+      attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
+      Boolean((attachment as SnakeToCamelCase<RegisteredAttachment>).attachmentId)
+    );
+  };
+
+  const dashboardsCount = useMemo(() => {
+    const attachments = caseData.comments || [];
+    const dashboardAttachments = attachments.filter(isDashboardAttachment);
+
+    if (!searchTerm) {
+      return dashboardAttachments.length;
+    }
+
+    // Apply search term filter if provided
+    return dashboardAttachments.filter((attachment) => {
+      const dashboardAttachment = attachment as SnakeToCamelCase<RegisteredAttachment>;
+      const id = dashboardAttachment.attachmentId || '';
+      const searchLower = searchTerm.toLowerCase();
+      return id.toLowerCase().includes(searchLower);
+    }).length;
+  }, [caseData.comments, searchTerm]);
+
   const totalAttachments =
     stats.totalAlerts +
     stats.totalEvents +
     Number(fileStatsData?.total) +
-    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
+    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0) +
+    dashboardsCount;
 
   const tabsConfig = useMemo(
     () => [
@@ -300,6 +360,13 @@ export const useCaseAttachmentTabs = ({
             },
           ]
         : []),
+      {
+        id: CASE_VIEW_PAGE_TABS.DASHBOARDS,
+        name: 'Dashboards',
+        badge: (
+          <DashboardsBadge count={dashboardsCount} activeTab={activeTab} euiTheme={euiTheme} />
+        ),
+      },
     ],
     [
       activeTab,
@@ -315,6 +382,7 @@ export const useCaseAttachmentTabs = ({
       isLoadingObservables,
       isObservablesFeatureEnabled,
       observables.length,
+      dashboardsCount,
     ]
   );
 

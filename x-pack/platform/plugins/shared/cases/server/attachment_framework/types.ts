@@ -32,6 +32,15 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
+export interface RegisteredAttachmentType {
+  id: string;
+  /**
+   * A function to validate data stored with the attachment type. This function should throw an error
+   * if the data is not in the form it expects.
+   */
+  schemaValidator?: (data: unknown) => void;
+}
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
@@ -39,4 +48,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
+  registerAttachment: (attachmentType: RegisteredAttachmentType) => void;
 }

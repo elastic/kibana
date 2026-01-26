@@ -32,6 +32,7 @@ import {
   AttachmentRt,
   AttachmentsRt,
   EventAttachmentPayloadRt,
+  RegisteredAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -72,6 +73,7 @@ const BasicAttachmentRequestRt = rt.union([
   AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
+  RegisteredAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
   EventAttachmentPayloadRt,
 ]);
@@ -101,6 +103,7 @@ export const AttachmentRequestRt = rt.union([
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
+  RegisteredAttachmentPayloadRt,
 ]);
 
 export const AttachmentRequestWithoutRefsRt = rt.union([

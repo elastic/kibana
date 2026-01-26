@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { RegisteredAttachmentTypeRegistry } from './client/attachment_framework/attachment_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { RenderAppProps } from './types';
 
@@ -31,6 +32,7 @@ export const renderApp = (deps: RenderAppProps) => {
 };
 
 interface CasesAppWithContextProps {
+  attachmentTypeRegistry: RegisteredAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
@@ -39,12 +41,14 @@ interface CasesAppWithContextProps {
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
   ({
     externalReferenceAttachmentTypeRegistry,
+    attachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     getFilesClient,
   }) => {
     return (
       <CasesApp
         externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+        attachmentTypeRegistry={attachmentTypeRegistry}
         persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
         getFilesClient={getFilesClient}
       />
@@ -71,6 +75,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
         <Router history={history}>
           <CasesAppWithContext
             externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
+            attachmentTypeRegistry={deps.attachmentTypeRegistry}
             persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
             getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
           />

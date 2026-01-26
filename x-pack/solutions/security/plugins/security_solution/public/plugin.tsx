@@ -65,7 +65,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import { generateAttachmentType } from './cases/attachments/indicator';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';

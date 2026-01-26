@@ -35,6 +35,7 @@ export const addFile = async (
     authorization,
     persistableStateAttachmentTypeRegistry,
     externalReferenceAttachmentTypeRegistry,
+    attachmentTypeRegistry,
     services: { userActionService },
     fileService,
   } = clientArgs;
@@ -82,6 +83,7 @@ export const addFile = async (
       query: commentReq,
       persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry,
+      attachmentTypeRegistry,
     });
 
     const createdDate = new Date().toISOString();

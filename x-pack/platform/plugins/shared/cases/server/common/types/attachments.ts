@@ -45,6 +45,8 @@ export interface AttachmentRequestAttributes {
   };
   persistableStateAttachmentState?: Record<string, JsonValue>;
   persistableStateAttachmentTypeId?: string;
+  attachmentId?: string;
+  metaData?: Record<string, JsonValue> | null;
 }
 
 export type AttachmentPersistedAttributes = AttachmentRequestAttributes &

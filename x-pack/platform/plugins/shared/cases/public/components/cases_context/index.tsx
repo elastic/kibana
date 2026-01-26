@@ -22,6 +22,7 @@ import type {
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { RegisteredAttachmentTypeRegistry } from '../../client/attachment_framework/attachment_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
@@ -37,6 +38,7 @@ import { casesQueryClient } from './query_client';
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
+  attachmentTypeRegistry: RegisteredAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
@@ -53,6 +55,7 @@ export interface CasesContextProps
     | 'owner'
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
+    | 'attachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
   > {
   basePath?: string;
@@ -72,6 +75,7 @@ export const CasesProvider: FC<
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
+    attachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     owner,
     permissions,
@@ -87,6 +91,7 @@ export const CasesProvider: FC<
   const value: CasesContextValue = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry,
+      attachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       owner,
       permissions: {

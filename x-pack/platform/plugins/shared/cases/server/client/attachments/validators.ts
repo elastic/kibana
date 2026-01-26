@@ -9,19 +9,23 @@ import Boom from '@hapi/boom';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isRegisteredAttachmentType,
 } from '../../../common/utils/attachments';
 import type { AttachmentRequest } from '../../../common/types/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
+import type { RegisteredAttachmentTypeRegistry } from '../../attachment_framework/attachment_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export const validateRegisteredAttachments = ({
   query,
   persistableStateAttachmentTypeRegistry,
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
 }: {
   query: AttachmentRequest;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  attachmentTypeRegistry: RegisteredAttachmentTypeRegistry;
 }) => {
   if (
     isCommentRequestTypeExternalReference(query) &&
@@ -39,5 +43,12 @@ export const validateRegisteredAttachments = ({
     throw Boom.badRequest(
       `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
     );
+  }
+
+  // For registry-based types, check if type is NOT in enum and validate against registry
+  if (isRegisteredAttachmentType(query.type)) {
+    if (!attachmentTypeRegistry.has(query.type)) {
+      throw Boom.badRequest(`Attachment type ${query.type} is not registered.`);
+    }
   }
 };

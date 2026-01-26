@@ -28,6 +28,7 @@ import type {
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
   CustomFieldTypes,
+  RegisteredAttachmentPayload,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
@@ -37,6 +38,7 @@ import {
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
+  RegisteredAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
 } from '../../common/types/domain';
@@ -52,6 +54,7 @@ import {
 } from '../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
+  isCommentRequestTypeRegistered,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
@@ -65,6 +68,7 @@ import {
   isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { RegisteredAttachmentTypeRegistry } from '../attachment_framework/attachment_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
@@ -72,7 +76,8 @@ import { casesCustomFields } from '../custom_fields';
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
   comment: AttachmentRequest,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
+  attachmentRegistry: RegisteredAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
@@ -127,6 +132,8 @@ export const decodeCommentRequest = (
     decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
+  } else if (isCommentRequestTypeRegistered(comment)) {
+    decodeRegisteredAttachment(comment, attachmentRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
     decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
@@ -152,6 +159,22 @@ const decodeExternalReferenceAttachment = (
   const metadata = attachment.externalReferenceMetadata;
   if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
     const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
+
+    attachmentType.schemaValidator?.(metadata);
+  }
+};
+
+const decodeRegisteredAttachment = (
+  attachment: AttachmentRequest,
+  attachmentRegistry: RegisteredAttachmentTypeRegistry
+) => {
+  decodeWithExcessOrThrow(RegisteredAttachmentPayloadRt)(attachment);
+
+  const registeredAttachmentPayload = attachment as RegisteredAttachmentPayload;
+  const metadata = registeredAttachmentPayload.metaData;
+  // Use attachment.type directly as the registry key (type IS the registry ID)
+  if (attachmentRegistry.has(registeredAttachmentPayload.type)) {
+    const attachmentType = attachmentRegistry.get(registeredAttachmentPayload.type);
 
     attachmentType.schemaValidator?.(metadata);
   }

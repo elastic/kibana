@@ -6,10 +6,10 @@
  */
 
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';
-import type { AttachmentMetadata } from './attachments';
-import { generateAttachmentsMetadata, generateAttachmentsWithoutOwner } from './attachments';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { generateMockFileIndicator } from '../../../../common/threat_intelligence/types/indicator';
+import type { AttachmentMetadata } from '.';
+import { generateAttachmentsMetadata, generateAttachmentsWithoutOwner } from '.';
 
 describe('generateAttachmentsWithoutOwner', () => {
   it('should return empty array if external reference id is empty', () => {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import { DASHBOARD_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
@@ -40,6 +41,7 @@ const ATTACHMENT_TABS = [
   CASE_VIEW_PAGE_TABS.EVENTS,
   CASE_VIEW_PAGE_TABS.FILES,
   CASE_VIEW_PAGE_TABS.OBSERVABLES,
+  CASE_VIEW_PAGE_TABS.DASHBOARDS,
 ];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
@@ -54,7 +56,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     renderAlertsTable,
     renderEventsTable,
   }) => {
-    const { features } = useCasesContext();
+    const { features, attachmentTypeRegistry } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -180,6 +182,24 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     onUpdateField={onUpdateField}
                   />
                 )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.DASHBOARDS &&
+                  (() => {
+                    const dashboardType = attachmentTypeRegistry.get(DASHBOARD_ATTACHMENT_TYPE);
+                    const DashboardListRenderer = dashboardType?.getAttachmentListRenderer?.();
+
+                    if (DashboardListRenderer) {
+                      return (
+                        <Suspense fallback={<EuiLoadingSpinner />}>
+                          <DashboardListRenderer
+                            caseData={caseWithFilteredAttachments}
+                            searchTerm={searchTerm}
+                            isLoading={isLoading}
+                          />
+                        </Suspense>
+                      );
+                    }
+                    return null;
+                  })()}
               </>
             </CaseViewAttachments>
           )}

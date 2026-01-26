@@ -15,6 +15,7 @@ type GetAllCasesSelectorModalPropsInternal = AllCasesSelectorModalProps & CasesC
 export type GetAllCasesSelectorModalProps = Omit<
   GetAllCasesSelectorModalPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
+  | 'attachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
 >;
@@ -24,6 +25,7 @@ const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
 );
 export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   getFilesClient,
   owner,
@@ -35,6 +37,7 @@ export const getAllCasesSelectorModalLazy = ({
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
+      attachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       getFilesClient,
       owner,

@@ -12,6 +12,7 @@ export * from './files';
 export * from './application';
 export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export { DASHBOARD_ATTACHMENT_TYPE } from './attachments';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;

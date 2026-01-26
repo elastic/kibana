@@ -8,9 +8,25 @@
 import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
-import type { CommentUserAction } from '../../../../common/types/domain';
+import type {
+  CommentUserAction,
+  RegisteredAttachment,
+  AlertAttachmentPayload,
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  UserCommentAttachment,
+  AlertAttachment,
+  EventAttachment,
+  ActionsAttachment,
+  ExternalReferenceAttachment,
+  PersistableStateAttachment,
+} from '../../../../common/types/domain';
 import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
+import {
+  isRegisteredAttachmentType,
+  isCommentRequestTypeRegistered,
+} from '../../../../common/utils/attachments';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { AttachmentUI } from '../../../containers/types';
@@ -19,6 +35,7 @@ import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
+import { createAttachmentUserActionBuilder } from './new_attachment';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import { createEventAttachmentUserActionBuilder } from './event';
@@ -29,6 +46,7 @@ interface DeleteLabelTitle {
   userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
+  attachmentTypeRegistry: UserActionBuilderArgs['attachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
 }
 
@@ -36,37 +54,55 @@ const getDeleteLabelTitle = ({
   userAction,
   caseData,
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
 
+  // Handle registered attachment types FIRST (type is the registry ID, not in enum)
+  // This must be checked before enum values to properly narrow the type
+  if (isCommentRequestTypeRegistered(comment)) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: attachmentTypeRegistry,
+      getId: () => comment.type,
+      getAttachmentProps: () => ({
+        attachmentId: comment.attachmentId,
+        metaData: comment.metaData,
+      }),
+    });
+  }
+
   if (comment.type === AttachmentType.alert) {
-    const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
+    const alertComment = comment as AlertAttachmentPayload;
+    const totalAlerts = Array.isArray(alertComment.alertId) ? alertComment.alertId.length : 1;
     const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
 
     return `${i18n.REMOVED_FIELD} ${alertLabel}`;
   }
 
   if (comment.type === AttachmentType.externalReference) {
+    const externalRefComment = comment as ExternalReferenceAttachmentPayload;
     return getDeleteLabelFromRegistry({
       caseData,
       registry: externalReferenceAttachmentTypeRegistry,
-      getId: () => comment.externalReferenceAttachmentTypeId,
+      getId: () => externalRefComment.externalReferenceAttachmentTypeId,
       getAttachmentProps: () => ({
-        externalReferenceId: comment.externalReferenceId,
-        externalReferenceMetadata: comment.externalReferenceMetadata,
+        externalReferenceId: externalRefComment.externalReferenceId,
+        externalReferenceMetadata: externalRefComment.externalReferenceMetadata,
       }),
     });
   }
 
   if (comment.type === AttachmentType.persistableState) {
+    const persistableComment = comment as PersistableStateAttachmentPayload;
     return getDeleteLabelFromRegistry({
       caseData,
       registry: persistableStateAttachmentTypeRegistry,
-      getId: () => comment.persistableStateAttachmentTypeId,
+      getId: () => persistableComment.persistableStateAttachmentTypeId,
       getAttachmentProps: () => ({
-        persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
-        persistableStateAttachmentState: comment.persistableStateAttachmentState,
+        persistableStateAttachmentTypeId: persistableComment.persistableStateAttachmentTypeId,
+        persistableStateAttachmentState: persistableComment.persistableStateAttachmentState,
       }),
     });
   }
@@ -112,6 +148,7 @@ const getDeleteCommentUserAction = ({
   userProfiles,
   caseData,
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
@@ -121,6 +158,7 @@ const getDeleteCommentUserAction = ({
   | 'handleOutlineComment'
   | 'userProfiles'
   | 'externalReferenceAttachmentTypeRegistry'
+  | 'attachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'caseData'
 >): EuiCommentProps[] => {
@@ -129,6 +167,7 @@ const getDeleteCommentUserAction = ({
     caseData,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    attachmentTypeRegistry,
   });
 
   const commonBuilder = createCommonUpdateUserActionBuilder({
@@ -148,6 +187,7 @@ const getCreateCommentUserAction = ({
   userProfiles,
   caseData,
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   attachment,
   commentRefs,
@@ -172,12 +212,30 @@ const getCreateCommentUserAction = ({
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
+  // Handle registered attachment types (type is the registry ID, not in enum)
+  if (isRegisteredAttachmentType(attachment.type)) {
+    // Type assertion: we know it's a RegisteredAttachment because type is not in enum
+    const registeredAttachment = attachment as SnakeToCamelCase<RegisteredAttachment>;
+    const registeredAttachmentBuilder = createAttachmentUserActionBuilder({
+      userAction,
+      userProfiles,
+      attachment: registeredAttachment,
+      attachmentTypeRegistry,
+      caseData,
+      isLoading: loadingCommentIds.includes(attachment.id),
+      handleDeleteComment,
+    });
+
+    return registeredAttachmentBuilder.build();
+  }
+
   switch (attachment.type) {
     case AttachmentType.user:
+      const userAttachment = attachment as SnakeToCamelCase<UserCommentAttachment>;
       const userBuilder = createUserAttachmentUserActionBuilder({
         appId,
         userProfiles,
-        attachment,
+        attachment: userAttachment,
         outlined: attachment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(attachment.id),
         commentRefs,
@@ -193,10 +251,11 @@ const getCreateCommentUserAction = ({
       return userBuilder.build();
 
     case AttachmentType.alert:
+      const alertAttachment = attachment as SnakeToCamelCase<AlertAttachment>;
       const alertBuilder = createAlertAttachmentUserActionBuilder({
         userProfiles,
         alertData,
-        attachment,
+        attachment: alertAttachment,
         userAction,
         getRuleDetailsHref,
         loadingAlertData,
@@ -209,9 +268,10 @@ const getCreateCommentUserAction = ({
       return alertBuilder.build();
 
     case AttachmentType.event:
+      const eventAttachment = attachment as SnakeToCamelCase<EventAttachment>;
       const eventBuilder = createEventAttachmentUserActionBuilder({
         userProfiles,
-        attachment,
+        attachment: eventAttachment,
         userAction,
         onShowAlertDetails,
         handleDeleteComment,
@@ -221,20 +281,22 @@ const getCreateCommentUserAction = ({
       return eventBuilder.build();
 
     case AttachmentType.actions:
+      const actionsAttachment = attachment as SnakeToCamelCase<ActionsAttachment>;
       const actionBuilder = createActionAttachmentUserActionBuilder({
         userProfiles,
         userAction,
-        attachment,
+        attachment: actionsAttachment,
         actionsNavigation,
       });
 
       return actionBuilder.build();
 
     case AttachmentType.externalReference:
+      const externalRefAttachment = attachment as SnakeToCamelCase<ExternalReferenceAttachment>;
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
         userProfiles,
-        attachment,
+        attachment: externalRefAttachment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
         isLoading: loadingCommentIds.includes(attachment.id),
@@ -244,10 +306,11 @@ const getCreateCommentUserAction = ({
       return externalReferenceBuilder.build();
 
     case AttachmentType.persistableState:
+      const persistableAttachment = attachment as SnakeToCamelCase<PersistableStateAttachment>;
       const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
         userAction,
         userProfiles,
-        attachment,
+        attachment: persistableAttachment,
         persistableStateAttachmentTypeRegistry,
         caseData,
         isLoading: loadingCommentIds.includes(attachment.id),
@@ -267,6 +330,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   casesConfiguration,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   userAction,
   commentRefs,
@@ -298,6 +362,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleOutlineComment,
         userProfiles,
         externalReferenceAttachmentTypeRegistry,
+        attachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
       });
     }
@@ -316,6 +381,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         userAction: attachmentUserAction,
         externalReferenceAttachmentTypeRegistry,
+        attachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
         attachment,
         commentRefs,
