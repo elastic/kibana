@@ -23,6 +23,7 @@ import type { TooltipContentProps } from './metric_explanation/tooltip_content';
 import { LensWrapper } from './lens_wrapper';
 import { ChartLoadError } from './chart_load_error';
 import { HOST_MISSING_FIELDS } from '../../common/visualizations/constants';
+import { createDataTestSubj } from '../../utils/create_data_test_subj';
 
 const MIN_HEIGHT = 300;
 const DEFAULT_DISABLED_ACTIONS = [
@@ -40,6 +41,7 @@ export type LensChartProps = BaseChartProps &
     lensAttributes: UseLensAttributesParams;
     withDefaultActions?: boolean;
     disabledActions?: string[];
+    dataTestSubj?: string;
   };
 
 export const LensChart = React.memo(
@@ -61,6 +63,7 @@ export const LensChart = React.memo(
     lensAttributes,
     withDefaultActions = true,
     disabledActions = DEFAULT_DISABLED_ACTIONS,
+    dataTestSubj,
   }: LensChartProps) => {
     const { formula, attributes, getExtraActions, error } = useLensAttributes(lensAttributes);
 
@@ -167,7 +170,11 @@ export const LensChart = React.memo(
         borderRadius={borderRadius}
         hasShadow={false}
         paddingSize={error ? 'm' : 'none'}
-        data-test-subj={id}
+        data-test-subj={createDataTestSubj({
+          dataTestSubj: dataTestSubj ?? id,
+          hasError: !!error,
+          isLoading,
+        })}
         css={css`
           position: relative;
           min-height: ${height}px;
