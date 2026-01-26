@@ -79,6 +79,9 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 
 export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
 
+// matches project layout, but it's a private value, TODO refactor within https://github.com/elastic/kibana/issues/250359
+const PROJECT_VIEW_MARGIN_BOTTOM = 8;
+
 /**
  * Flyout displaying an expanded row details
  */
@@ -113,6 +116,7 @@ export function UnifiedDocViewerFlyout({
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const chromeStyle = useObservable(services.chrome?.getChromeStyle$());
+  const isProjectStyle = chromeStyle === 'project';
   const DEFAULT_WIDTH = euiTheme.base * 34;
   const defaultWidth = flyoutDefaultWidth ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
@@ -224,7 +228,9 @@ export function UnifiedDocViewerFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={chromeStyle === 'project' ? euiTheme.base + 8 : euiTheme.base}
+        decreaseAvailableHeightBy={
+          isProjectStyle ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM : euiTheme.base
+        }
         initialTabId={initialTabId}
         initialDocViewerState={initialDocViewerState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
@@ -250,7 +256,7 @@ export function UnifiedDocViewerFlyout({
       hideFilteringOnComputedColumns,
       onInitialDocViewerStateChange,
       onUpdateSelectedTabId,
-      chromeStyle,
+      isProjectStyle,
     ]
   );
 
