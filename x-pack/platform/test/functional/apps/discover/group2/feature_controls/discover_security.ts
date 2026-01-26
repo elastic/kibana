@@ -32,7 +32,6 @@ export default function (ctx: FtrProviderContext) {
     header,
     unifiedFieldList,
     exports,
-    spaceSelector,
   } = getPageObjects([
     'common',
     'error',
@@ -43,7 +42,6 @@ export default function (ctx: FtrProviderContext) {
     'header',
     'unifiedFieldList',
     'exports',
-    'spaceSelector',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
