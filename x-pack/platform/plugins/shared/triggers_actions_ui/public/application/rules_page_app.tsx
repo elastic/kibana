@@ -8,7 +8,6 @@
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import {
   rulesAppDetailsRoute,
@@ -17,11 +16,11 @@ import {
   ruleLogsRoute,
   editRuleRoute,
 } from '@kbn/rule-data-utils';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
-import { queryClient } from './query_client';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
 const RuleDetailsRouteWrapper = lazy(
@@ -44,9 +43,9 @@ export const RulesPageApp = ({ deps }: { deps: TriggersAndActionsUiServices }) =
   return deps.rendering.addContext(
     <KibanaContextProvider services={{ ...deps }}>
       <Router history={deps.history}>
-        <QueryClientProvider client={queryClient}>
+        <ResponseOpsQueryClientProvider>
           <AppWithoutRouter />
-        </QueryClientProvider>
+        </ResponseOpsQueryClientProvider>
       </Router>
     </KibanaContextProvider>
   );

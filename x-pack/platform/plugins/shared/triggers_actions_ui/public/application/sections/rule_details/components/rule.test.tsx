@@ -9,7 +9,6 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -135,7 +134,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
@@ -338,7 +337,7 @@ describe('rules', () => {
     rerender(
       <IntlProvider locale="en" messages={{}}>
         <Suspense fallback={null}>
-          <QueryClientProvider client={queryClient}>
+          <TestQueryClientProvider>
             <RuleComponent
               {...mockAPIs}
               rule={rule}
@@ -350,7 +349,7 @@ describe('rules', () => {
                 reject: () => undefined,
               }}
             />
-          </QueryClientProvider>
+          </TestQueryClientProvider>
         </Suspense>
       </IntlProvider>
     );
