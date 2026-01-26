@@ -28,6 +28,12 @@ jest.mock('../../../../common', () => ({
   useGetIntegrationById: jest.fn(),
   useCreateUpdateIntegration: jest.fn(),
   generateId: jest.fn(() => 'mock-id'),
+  useKibana: jest.fn(() => ({
+    services: {
+      http: {},
+      notifications: { toasts: { addError: jest.fn() } },
+    },
+  })),
 }));
 jest.mock('../../../../common/lib/api', () => ({
   getInstalledPackages: jest.fn(() =>

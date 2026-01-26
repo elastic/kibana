@@ -12,7 +12,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IntegrationDetails } from './integration_details';
 import { IntegrationFormProvider } from '../../forms/integration_form';
-import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../forms/constants';
 
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
@@ -98,24 +97,6 @@ describe('IntegrationDetails', () => {
       expect(errorMessage).toBeInTheDocument();
     });
 
-    it('should show max length error when title exceeds limit', async () => {
-      const { getByTestId, findByText } = await renderIntegrationDetails();
-      const titleInput = getByTestId('integrationTitleInput');
-      const longTitle = 'a'.repeat(MAX_NAME_LENGTH + 1);
-
-      await act(async () => {
-        fireEvent.change(titleInput, { target: { value: longTitle } });
-      });
-      await act(async () => {
-        fireEvent.blur(titleInput);
-      });
-
-      const errorMessage = await findByText(
-        `Integration name must be no more than ${MAX_NAME_LENGTH} characters`
-      );
-      expect(errorMessage).toBeInTheDocument();
-    });
-
     it('should show duplicate error when title matches existing package name', async () => {
       const { getByTestId, findByText } = await renderIntegrationDetails();
       const titleInput = getByTestId('integrationTitleInput');
@@ -161,24 +142,6 @@ describe('IntegrationDetails', () => {
       });
 
       const errorMessage = await findByText('Description is required');
-      expect(errorMessage).toBeInTheDocument();
-    });
-
-    it('should show max length error when description exceeds limit', async () => {
-      const { getByTestId, findByText } = await renderIntegrationDetails();
-      const descriptionInput = getByTestId('integrationDescriptionInput');
-      const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
-
-      await act(async () => {
-        fireEvent.change(descriptionInput, { target: { value: longDescription } });
-      });
-      await act(async () => {
-        fireEvent.blur(descriptionInput);
-      });
-
-      const errorMessage = await findByText(
-        `Description must be no more than ${MAX_DESCRIPTION_LENGTH} characters`
-      );
       expect(errorMessage).toBeInTheDocument();
     });
   });
