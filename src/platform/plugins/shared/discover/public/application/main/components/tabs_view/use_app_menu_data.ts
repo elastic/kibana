@@ -23,7 +23,10 @@ import {
   selectAllTabs,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
+import {
+  DISCOVER_QUERY_MODE_KEY,
+  ESQL_TRANSITION_MODAL_KEY,
+} from '../../../../../common/constants';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { isEsqlSource } from '../../../../../common/data_sources';
 
@@ -98,6 +101,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
             } else {
               dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView?.id ?? '' }));
             }
+            services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
           },
         },
       ];

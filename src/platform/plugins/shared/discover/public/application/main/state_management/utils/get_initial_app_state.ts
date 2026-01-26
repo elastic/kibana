@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -20,6 +21,8 @@ import {
 } from '@kbn/discover-utils';
 import { getChartHidden } from '@kbn/unified-histogram';
 import { cloneDeep } from 'lodash';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
 import {
@@ -77,6 +80,30 @@ function getDefaultColumns(
     : undefined;
 }
 
+function isDataView(dataView: unknown): dataView is DataView {
+  return !!dataView && typeof dataView === 'object' && 'getIndexPattern' in dataView;
+}
+
+function getDefaultQuery({
+  persistedTab,
+  storage,
+  data,
+  dataView,
+}: {
+  persistedTab: DiscoverSessionTab | undefined;
+  storage: DiscoverServices['storage'];
+  data: DiscoverServices['data'];
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+}): Query | AggregateQuery | undefined {
+  if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
+
+  const queryMode = storage.get(DISCOVER_QUERY_MODE_KEY);
+  if (queryMode === 'esql' && isDataView(dataView))
+    return { esql: getInitialESQLQuery(dataView, true) };
+
+  return data.query.queryString.getDefaultQuery();
+}
+
 function getDefaultAppState({
   persistedTab,
   dataView,
@@ -87,8 +114,7 @@ function getDefaultAppState({
   services: DiscoverServices;
 }) {
   const { data, uiSettings, storage } = services;
-  const query =
-    persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
+  const query = getDefaultQuery({ persistedTab, storage, data, dataView });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
   // we assume the sort array is valid since we can't know for sure

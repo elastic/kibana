@@ -22,6 +22,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
@@ -244,6 +245,7 @@ export const useTopNavLinks = ({
         }),
         run: () => {
           if (dataView) {
+            services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
             dispatch(transitionFromDataViewToESQL({ dataView }));
             services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
           }
