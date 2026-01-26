@@ -182,8 +182,7 @@ it.each([
             ],
             requestBody: {
               content: {
-                'application/json; Elastic-Api-Version=1': {}, // Multiple body types
-                'application/json; Elastic-Api-Version=2': {},
+                'application/json; Elastic-Api-Version=2': {}, // Only the latest version
               },
             },
           },
