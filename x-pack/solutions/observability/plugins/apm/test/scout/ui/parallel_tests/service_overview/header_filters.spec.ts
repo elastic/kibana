@@ -67,10 +67,16 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
       const searchBar = page.getByTestId('apmUnifiedSearchBar');
       await searchBar.fill(`service.name: "${specialServiceName}"`);
       await searchBar.press('Enter');
+    });
+
+    await test.step('Verify URL contains special service name', async () => {
+      await expect(page.getByTestId('querySubmitButton')).toHaveText('Refresh');
 
       // Wait for URL to update with kuery parameter containing the special service name
       await page.waitForURL(
-        (url) => url.toString().includes(encodeURIComponent(specialServiceName)),
+        (url) => {
+          return url.toString().includes(encodeURIComponent(specialServiceName));
+        },
         { timeout: EXTENDED_TIMEOUT }
       );
       expect(page.url()).toContain(encodeURIComponent(specialServiceName));
