@@ -1,5 +1,5 @@
 {
-  "project_routing.create": {
+  "project.create_many_routing": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -10,7 +10,7 @@
       "PUT"
     ],
     "patterns": [
-      "_project_routing/{name}"
+      "_project_routing"
     ],
     "documentation": "",
     "availability": {

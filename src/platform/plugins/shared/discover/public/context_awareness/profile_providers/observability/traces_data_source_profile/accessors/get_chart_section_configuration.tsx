@@ -11,7 +11,7 @@ import { TraceMetricsGrid } from '@kbn/unified-metrics-grid';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
-export const createChartSection =
+export const getChartSectionConfiguration =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev) =>
   (params) => {

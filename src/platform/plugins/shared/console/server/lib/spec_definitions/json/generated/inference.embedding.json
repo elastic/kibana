@@ -1,5 +1,5 @@
 {
-  "inference.put_jinaai": {
+  "inference.embedding": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -11,20 +11,13 @@
         "0"
       ]
     },
-    "url_components": {
-      "task_type": [
-        "embedding",
-        "rerank",
-        "text_embedding"
-      ]
-    },
     "methods": [
-      "PUT"
+      "POST"
     ],
     "patterns": [
-      "_inference/{task_type}/{jinaai_inference_id}"
+      "_inference/embedding/{inference_id}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-jinaai",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference",
     "availability": {
       "stack": true,
       "serverless": true
