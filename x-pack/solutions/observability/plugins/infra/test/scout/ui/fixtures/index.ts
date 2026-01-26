@@ -22,17 +22,20 @@ import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
 import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
 import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
+import { NodeDetailsPage } from './page_objects/node_details/node_details';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
     assetDetailsPage: AssetDetailsPage;
+    nodeDetailsPage: NodeDetailsPage;
   };
 }
 
 export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
   apiServices: ObltApiServicesFixture & {
     inventoryViews: InventoryViewApiService;
+    nodeDetailsPage: NodeDetailsPage;
   };
 }
 
@@ -45,6 +48,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
       ...pageObjects,
       inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl),
       assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
+      nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
