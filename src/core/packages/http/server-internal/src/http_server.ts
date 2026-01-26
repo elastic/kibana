@@ -19,6 +19,7 @@ import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
@@ -170,6 +171,7 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+  userActivity?: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -235,6 +237,7 @@ export class HttpServer {
   public async setup({
     config$,
     executionContext,
+    userActivity,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -277,7 +280,7 @@ export class HttpServer {
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext);
+    this.setupRequestStateAssignment(config, executionContext, userActivity);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
@@ -527,7 +530,8 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
+    executionContext?: InternalExecutionContextSetup,
+    userActivity?: InternalUserActivityServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const stop = (request.app as KibanaRequestState).measureElu;
@@ -550,12 +554,16 @@ export class HttpServer {
     this.server!.ext('onRequest', (request, responseToolkit) => {
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
 
-      // request.raw.req.socket?.remoteAddress;
-      // parentContext?.space
-
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
+
+      if (userActivity) {
+        userActivity.setInjectedContext({
+          kibana: { space: { id: parentContext?.space } },
+          user: { ip: request.raw.req.socket?.remoteAddress },
+        });
+      }
 
       if (executionContext && parentContext) {
         executionContext.set(parentContext);

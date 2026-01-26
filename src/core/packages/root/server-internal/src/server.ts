@@ -297,9 +297,14 @@ export class Server {
 
     const injectionSetup = this.injection.setup();
 
+    const loggingSetup = this.logging.setup();
+
+    const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+      userActivity: userActivitySetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -332,16 +337,12 @@ export class Server {
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
-    const loggingSetup = this.logging.setup();
-
     const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
       coreUsageData: coreUsageDataSetup,
       logging: loggingSetup,
       docLinks: docLinksSetup,
     });
-
-    const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
 
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
