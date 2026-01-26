@@ -492,7 +492,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Filter lists"
               class="euiPagination emotion-euiPagination"
             >
               <span
@@ -1060,7 +1060,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Filter lists"
               class="euiPagination emotion-euiPagination"
             >
               <span
