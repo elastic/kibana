@@ -90,7 +90,7 @@ export const createPatternsDataSourceProfileProvider = (
                 esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
-              if (params.actions.openInNewTab) {
+              if (params.actions?.openInNewTab) {
                 params.actions.openInNewTab({
                   query,
                   timeRange: executeContext.timeRange,
