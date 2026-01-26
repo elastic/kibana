@@ -125,7 +125,7 @@ export class InventoryPage {
     );
   }
 
-  private async waitForNodesToLoad() {
+  public async waitForNodesToLoad() {
     await this.page
       .getByTestId('infraNodesOverviewLoadingPanel')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
