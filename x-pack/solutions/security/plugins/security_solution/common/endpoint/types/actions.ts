@@ -121,6 +121,8 @@ export interface ResponseActionRunScriptOutputContent {
   downloadUri?: string;
 }
 
+export type ResponseActionEndpointRunScriptOutputContent = ResponseActionExecuteOutputContent;
+
 export interface ResponseActionCancelOutputContent {
   code: string;
 }

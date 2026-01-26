@@ -31,6 +31,8 @@
           "; }"
         ],
         "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "; }"
         ],
         "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -66,6 +70,8 @@
         "label": "apiKeysMock",
         "description": [],
         "path": "src/core/packages/security/server-mocks/src/api_keys.mock.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,10 +84,12 @@
             "description": [],
             "signature": [
               "() => jest.MockedObjectDeep<",
-              "APIKeys",
+              "APIKeysType",
               ">"
             ],
             "path": "src/core/packages/security/server-mocks/src/api_keys.mock.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -98,6 +106,8 @@
         "label": "auditLoggerMock",
         "description": [],
         "path": "src/core/packages/security/server-mocks/src/audit.mock.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,6 +123,8 @@
               "MockedAuditLogger"
             ],
             "path": "src/core/packages/security/server-mocks/src/audit.mock.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -129,6 +141,8 @@
         "label": "securityServiceMock",
         "description": [],
         "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+        "lineNumber": 115,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,8 @@
               "() => { setup: jest.Mock<any, any, any>; start: jest.Mock<any, any, any>; stop: jest.Mock<any, any, any>; }"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -161,6 +177,8 @@
               ">"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -178,6 +196,8 @@
               "SecurityStartMock"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -196,6 +216,8 @@
               ">"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -213,6 +235,8 @@
               "InternalSecurityStartMock"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -231,6 +255,8 @@
               ">"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -257,6 +283,8 @@
               "; authentication_type: string; elastic_cloud_user: boolean; roles: string[]; }"
             ],
             "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -273,6 +301,8 @@
                   ", \"roles\"> & { roles: string[]; }>"
                 ],
                 "path": "src/core/packages/security/server-mocks/src/security_service.mock.ts",
+                "lineNumber": 122,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

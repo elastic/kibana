@@ -57,7 +57,7 @@ export async function cleanUpDuplicatedPackagePolicies(
             const policyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
-                id: monitor.id,
+                id: monitor.attributes.id,
               },
               location.id,
               spaceId
@@ -91,6 +91,11 @@ export async function cleanUpDuplicatedPackagePolicies(
 
     // if we have any to delete or any expected that were not found we need to perform a sync
     performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
+
+    debugLog(`Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`);
+    debugLog(
+      `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
+    );
 
     if (packagePoliciesToDelete.length > 0) {
       await deleteDuplicatePackagePolicies(

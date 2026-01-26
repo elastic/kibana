@@ -110,13 +110,25 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
   });
 
-  test('should show document filter controls when there is data by default', async ({
+  test('should hide document filter controls until condition is set', async ({
     page,
     pageObjects,
   }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.expectPreviewPanelVisible();
 
+    // Filter controls should not be visible until a condition is set
+    await expect(page.getByTestId('routingPreviewFilterControls')).toBeHidden();
+
+    // Set a condition to trigger matched percentage computation
+    await pageObjects.streams.fillRoutingRuleName('filter-controls-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'info',
+    });
+
+    // Now filter controls should be visible
     await expect(page.getByTestId('routingPreviewFilterControls')).toBeVisible();
   });
 

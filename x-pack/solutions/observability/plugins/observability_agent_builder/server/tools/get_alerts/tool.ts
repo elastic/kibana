@@ -9,11 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getToolHandler } from './handler';
@@ -60,19 +57,17 @@ const getAlertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional KQL (Kibana Query Language) filter to narrow down alerts. Examples: \'service.name: "frontend"\' (alerts for the frontend service), \'service.name: "checkout" AND host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU"\'.'
+      'KQL filter to narrow down alerts. Examples: \'service.name: "frontend"\', \'kibana.alert.rule.name: "High CPU"\'.'
     ),
   includeRecovered: z
     .boolean()
-    .optional()
-    .describe(
-      'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
-    ),
+    .default(false)
+    .describe('Whether to include recovered/closed alerts alongside active ones.'),
   fields: z
     .array(z.string())
     .optional()
     .describe(
-      'Optional list of fields to include in the alert documents. If not specified, a default set of common alert fields is returned. Use this to request specific fields like "error.message", "url.full", or any custom alert fields.'
+      'Fields to include in the alert documents. Use to request specific fields like "error.message" or "url.full".'
     ),
 });
 
@@ -80,10 +75,7 @@ export function createGetAlertsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof getAlertsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
@@ -106,13 +98,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
       },
     },
     handler: async (toolParams, { request }) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        kqlFilter,
-        includeRecovered,
-        fields,
-      } = toolParams;
+      const { start, end, kqlFilter, includeRecovered, fields } = toolParams;
 
       try {
         const { alerts, total } = await getToolHandler({

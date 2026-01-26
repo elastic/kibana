@@ -24,6 +24,8 @@
           "<string>[]) => void; placeholder?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
             "label": "{\n  uiActions,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}",
             "description": [],
             "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+            "lineNumber": 68,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -133,6 +137,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 69,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -147,6 +153,8 @@
                   "{ id: string; }[]"
                 ],
                 "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 70,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -163,6 +171,8 @@
                   "<string>[]) => void"
                 ],
                 "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 71,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -178,6 +188,8 @@
                       "<string>[]"
                     ],
                     "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                    "lineNumber": 71,
+                    "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -196,6 +208,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 72,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

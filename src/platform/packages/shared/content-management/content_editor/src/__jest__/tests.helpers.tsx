@@ -16,7 +16,7 @@ import type { Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
   const services = {
-    openFlyout: jest.fn(() => ({
+    openSystemFlyout: jest.fn(() => ({
       onClose: Promise.resolve(),
       close: () => Promise.resolve(),
     })),

@@ -68,7 +68,7 @@ export const AppMenuOverflowButton = ({
       onClick={handleClick}
       isSelected={isPopoverOpen}
       css={buttonCss}
-      data-test-subj="top-nav-menu-overflow-button"
+      data-test-subj="app-menu-overflow-button"
     />
   );
 
@@ -80,7 +80,6 @@ export const AppMenuOverflowButton = ({
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
-      popoverWidth={200}
       primaryActionItem={primaryActionItem}
       secondaryActionItem={secondaryActionItem}
       onClose={onPopoverClose}

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { NativeAPIKeysType } from './api_keys';
+import type { NativeAPIKeysWithContextType } from './api_keys_context';
+import type { UiamAPIKeysType, UiamAPIKeysWithContextType } from './uiam';
+
 export type {
-  APIKeys as APIKeysService,
+  NativeAPIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -24,5 +28,20 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './api_keys';
-export type { APIKeysServiceWithContext } from './api_keys_context';
+export type { NativeAPIKeysWithContextType } from './api_keys_context';
 export { isCreateRestAPIKeyParams } from './api_keys';
+
+export type {
+  UiamAPIKeysType,
+  UiamAPIKeysWithContextType,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+} from './uiam';
+
+export interface APIKeysType extends NativeAPIKeysType {
+  uiam: UiamAPIKeysType | null;
+}
+
+export interface APIKeysWithContextType extends NativeAPIKeysWithContextType {
+  uiam: UiamAPIKeysWithContextType | null;
+}

@@ -11,4 +11,4 @@ export const ADHOC_DATA_VIEW_RENDER_EVENT = 'ad_hoc_data_view';
 
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
-export const TABS_ENABLED_FEATURE_FLAG_KEY = 'discover.tabsEnabled';
+export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEnabled';

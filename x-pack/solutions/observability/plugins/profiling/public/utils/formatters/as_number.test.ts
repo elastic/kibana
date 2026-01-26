@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { asNumber } from './as_number';
+import { NOT_AVAILABLE_LABEL } from '../../../common';
 
 describe('asNumber', () => {
   it('rounds numbers appropriately', () => {
@@ -27,5 +28,11 @@ describe('asNumber', () => {
     expect(asNumber(2.4991e7)).toBe('24.99m');
 
     expect(asNumber(9e9)).toBe('9b');
+  });
+
+  it('handles non-finite values', () => {
+    expect(asNumber(Infinity)).toBe(NOT_AVAILABLE_LABEL);
+    expect(asNumber(-Infinity)).toBe(NOT_AVAILABLE_LABEL);
+    expect(asNumber(NaN)).toBe(NOT_AVAILABLE_LABEL);
   });
 });

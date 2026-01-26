@@ -12,6 +12,8 @@ You are given:
 
 ### Your Tasks
 
+Your job is to group fields and assign ECS names with appropriate GROK components. Do not provide explanations or rationale - only output the structured JSON response.
+
 For every field in the log:
 
 1. **Identify fields that should be grouped** into a single semantic unit  
@@ -19,18 +21,17 @@ For every field in the log:
    * Date/time and timezone tokens that belong to the same timestamp should be combined into one group.  
    * Separate timestamps must remain separate groups.  
    * Do not include non-date/time fields (e.g., `NOTSPACE`, `DATA`) in a timestamp group.  
-   * Epoch time values (seconds or milliseconds) can be mapped to `@timestamp` as a single field — specify in your rationale whether it is `epoch_seconds` or `epoch_millis`.
+   * Epoch time values (seconds or milliseconds) can be mapped to `@timestamp` as a single field.
 
 2. For **each final field** (combined or uncombined):
 
    * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).  
      * If the field doesn't fit ECS, use `custom.<name>` for the first such field. For additional fields that would map to the same ECS name append numeric suffixes: `custom.<name>2`, `custom.<name>3`, etc.  
+     * When in doubt, map unidentified fields to `message`.
 
    * Assign the **best matching standard GROK component**.  
-     * Any standard GROK pattern may be used.  
-     * Always pick the most **semantically descriptive** standard pattern possible that still matches **all** example values (for example, prefer `MONTHDAY` over `INT` when both would match).  
-     * If a candidate descriptive pattern does not match all examples, rule it out and select the next most descriptive pattern that does match all examples.  
-     * **If no more specific standard GROK pattern matches all examples, return the original pattern exactly as provided in the structured `review_fields`. Do not invent or substitute a generic pattern.**
+     * Always pick the most **semantically descriptive** standard pattern that matches **all** example values (e.g., prefer `MONTHDAY` over `INT`).  
+     * **If no specific standard GROK pattern matches all examples, use the original pattern from `review_fields` exactly as provided.**
 
 3. **Infer the log source**  
    * Set `log_source` to the most likely origin system (e.g., `System log`, `Nginx access log`).  
@@ -38,6 +39,8 @@ For every field in the log:
 ---
 
 ### Output Format
+
+**IMPORTANT**: You MUST respond using the `validate_response_schema` tool. Do NOT provide explanations, rationale, or any text outside the tool call.
 
 Return a JSON object in the following format:
 
@@ -80,7 +83,10 @@ Return a JSON object in the following format:
 }
 ```
 
-Use `columns` to list all source columns (combined or not) that map to this ECS field.
+**Important notes**:
+* Use `columns` to list all source columns (combined or not) that map to this ECS field.
+* Each field should be mapped exactly once.
+* Do not add explanations or commentary.
 
 ---
 

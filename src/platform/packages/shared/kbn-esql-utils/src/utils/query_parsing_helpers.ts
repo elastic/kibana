@@ -15,6 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
+  esqlCommandRegistry,
+  TRANSFORMATIONAL_COMMANDS,
 } from '@kbn/esql-language';
 
 import type {
@@ -90,11 +92,10 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
  */
 export function hasTransformationalCommand(esql?: string) {
   if (!esql) return false;
-  const transformationalCommands = ['stats', 'keep'];
   const { root } = Parser.parse(esql);
 
   // Check for direct transformational commands first
-  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
     root.commands.find(({ name }) => name === command)
   );
 
@@ -128,7 +129,7 @@ export function hasTransformationalCommand(esql?: string) {
       // Branch must have at least one command and all commands must be transformational
       return (
         branchCommands.length > 0 &&
-        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
       );
     });
   });
@@ -210,6 +211,12 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
+  // PromQL queries always use @timestamp as timefield
+  const isPromQLQuery = root.commands.some(({ name }) => name === 'promql');
+  if (isPromQLQuery && timeNamedParam) {
+    return '@timestamp';
+  }
+
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
@@ -642,3 +649,19 @@ export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []):
 
   return foundDateField;
 }
+
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * If the query contains PROMQL command, we will exclude it from this check.
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every(({ name }) => name !== 'promql') &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
