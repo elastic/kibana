@@ -6,12 +6,15 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceClient, ChatCompletionEvent } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
+import type { Observable } from 'rxjs';
+import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { AiInsightResult, ContextEvent } from './types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -49,11 +52,6 @@ interface GetAlertAiInsightParams {
   logger: Logger;
 }
 
-interface AlertAiInsightResult {
-  summary: string;
-  context: string;
-}
-
 export async function getAlertAiInsight({
   core,
   plugins,
@@ -63,7 +61,7 @@ export async function getAlertAiInsight({
   dataRegistry,
   request,
   logger,
-}: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
+}: GetAlertAiInsightParams): Promise<AiInsightResult> {
   const relatedContext = await fetchAlertContext({
     core,
     plugins,
@@ -72,14 +70,19 @@ export async function getAlertAiInsight({
     request,
     logger,
   });
-  const summary = await generateAlertSummary({
+  const events$: Observable<ChatCompletionEvent> = generateAlertSummary({
     inferenceClient,
     connectorId,
     alertDoc,
     context: relatedContext,
   });
 
-  return { summary, context: relatedContext };
+  const streamWithContext$ = concat(
+    of<ContextEvent>({ type: 'context', context: relatedContext }),
+    events$
+  );
+
+  return { events$: streamWithContext$, context: relatedContext };
 }
 
 // Time window offsets in minutes before alert start
@@ -203,7 +206,7 @@ async function fetchAlertContext({
   return contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
 }
 
-async function generateAlertSummary({
+function generateAlertSummary({
   inferenceClient,
   connectorId,
   alertDoc,
@@ -213,7 +216,7 @@ async function generateAlertSummary({
   connectorId: string;
   alertDoc: AlertDocForInsight;
   context: string;
-}): Promise<string> {
+}): Observable<ChatCompletionEvent> {
   const systemPrompt = dedent(`
     You are an SRE assistant. Help an SRE quickly understand likely cause, impact, and next actions for this alert using the provided context.
 
@@ -254,11 +257,10 @@ async function generateAlertSummary({
     Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment "Inconclusive" and propose the safest next diagnostic step.
   `);
 
-  const completion = await inferenceClient.chatComplete({
+  return inferenceClient.chatComplete({
     connectorId,
     system: systemPrompt,
     messages: [{ role: MessageRole.User, content: userPrompt }],
+    stream: true,
   });
-
-  return completion.content;
 }
