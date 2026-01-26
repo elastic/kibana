@@ -17,6 +17,8 @@ import type {
 import { isIdentifier } from '../../../ast/is';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
+import { sourceExists } from '../../definitions/utils/sources';
+import { errors } from '../../definitions/utils/errors';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
@@ -92,6 +94,33 @@ export const validate = (
     });
   }
 
+  const hasStart = usedParams.has('start');
+  const hasEnd = usedParams.has('end');
+
+  if (hasStart !== hasEnd) {
+    messages.push({
+      ...getMessageFromId({
+        messageId: 'promqlMissingParam',
+        values: { param: hasStart ? 'end' : 'start' },
+        locations: command.location,
+      }),
+    });
+  }
+
+  const indexParam = paramValues.get('index');
+  if (indexParam && _context?.timeSeriesSources) {
+    const indexValue = stripQuotes(indexParam.value);
+    const hasWildcard = indexValue.includes('*');
+
+    if (!hasWildcard && indexValue !== '') {
+      const sourcesSet = new Set(_context.timeSeriesSources.map((source) => source.name));
+
+      if (!sourceExists(indexValue, sourcesSet)) {
+        messages.push(errors.byId('unknownIndex', indexParam.location, { name: indexValue }));
+      }
+    }
+  }
+
   // Basic value checks: presence, and minimal format for start/end.
   for (const [param, { value, location, entryLocation }] of paramValues) {
     if (value === '') {
@@ -135,30 +164,6 @@ export const validate = (
     }
   }
 
-  const startValue = paramValues.get('start')?.value;
-  const endValue = paramValues.get('end')?.value;
-  if (startValue && endValue) {
-    const startNormalized = stripQuotes(startValue);
-    const endNormalized = stripQuotes(endValue);
-    const startIsPlaceholder = startNormalized === '?_tstart';
-    const endIsPlaceholder = endNormalized === '?_tend';
-
-    if (!startIsPlaceholder && !endIsPlaceholder) {
-      const startDate = Date.parse(startNormalized);
-      const endDate = Date.parse(endNormalized);
-
-      if (!Number.isNaN(startDate) && !Number.isNaN(endDate) && startDate >= endDate) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'promqlInvalidDateRange',
-            values: {},
-            locations: paramValues.get('end')?.location ?? command.location,
-          })
-        );
-      }
-    }
-  }
-
   const trimmedQueryText = queryText.trim();
   const tailQueryText = getPromqlQueryTail(command);
   const hasQuery = [trimmedQueryText, tailQueryText].some(
@@ -166,11 +171,14 @@ export const validate = (
   );
 
   if (!hasQuery) {
+    const queryLocation = looksLikePromqlParamAssignment(trimmedQueryText)
+      ? command.location
+      : command.query?.location ?? command.location;
     messages.push({
       ...getMessageFromId({
         messageId: 'promqlMissingQuery',
         values: {},
-        locations: command.query?.location ?? command.location,
+        locations: queryLocation,
       }),
     });
   }
@@ -238,8 +246,11 @@ function collectPromqlParamValues(
         continue;
       }
 
+      const rawValue = entry.value.text?.trim() ?? '';
+      const value = looksLikePromqlParamAssignment(rawValue) ? '' : rawValue;
+
       values.set(key, {
-        value: entry.value.text?.trim() ?? '',
+        value,
         location: entry.value.location ?? entry.location ?? command.location,
         // Keep the full entry location so empty values can highlight the param assignment, not the next token.
         entryLocation: entry.location ?? entry.key.location ?? command.location,

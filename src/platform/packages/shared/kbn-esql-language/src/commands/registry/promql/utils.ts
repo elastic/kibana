@@ -173,7 +173,7 @@ export interface PromqlParamDefinition {
   suggestedValues?: string[];
 }
 
-export const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
+export const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step'];
 
 const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
