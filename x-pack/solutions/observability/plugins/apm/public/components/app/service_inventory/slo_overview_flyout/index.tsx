@@ -277,26 +277,15 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [activeAlerts]
   );
 
-  const handleActiveAlertsClick = useCallback(
-    (sloItem: SLOWithSummaryResponse) => {
-      if (selectedSloId === sloItem.id) {
-        setSelectedSloTabId(undefined);
-        setSelectedSloId(null);
-        return;
-      }
+  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSloTabId(undefined);
+    setSelectedSloId(null);
 
-      // Force close any existing flyout first, then open the new one
-      setSelectedSloTabId(undefined);
-      setSelectedSloId(null);
-
-      // Use requestAnimationFrame to ensure the flyout is unmounted before opening the new one
-      requestAnimationFrame(() => {
-        setSelectedSloTabId(ALERTS_TAB_ID);
-        setSelectedSloId(sloItem.id);
-      });
-    },
-    [selectedSloId]
-  );
+    requestAnimationFrame(() => {
+      setSelectedSloTabId(ALERTS_TAB_ID);
+      setSelectedSloId(sloItem.id);
+    });
+  }, []);
 
   const statusCounts = useMemo(() => {
     const counts = {
@@ -398,29 +387,14 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setPage(0);
   }, []);
 
-  const handleSloClick = useCallback(
-    (sloId: string) => {
-      // If the same SLO is already selected, force close and reopen to ensure flyout appears
-      if (selectedSloId === sloId) {
-        setSelectedSloId(null);
-        setSelectedSloTabId(undefined);
-        requestAnimationFrame(() => {
-          setSelectedSloId(sloId);
-        });
-      } else if (selectedSloId) {
-        // Different SLO - close current and open new one
-        setSelectedSloId(null);
-        setSelectedSloTabId(undefined);
-        requestAnimationFrame(() => {
-          setSelectedSloId(sloId);
-        });
-      } else {
-        // No flyout open - just open it
-        setSelectedSloId(sloId);
-      }
-    },
-    [selectedSloId]
-  );
+  const handleSloClick = useCallback((sloId: string) => {
+    setSelectedSloId(null);
+    setSelectedSloTabId(undefined);
+
+    requestAnimationFrame(() => {
+      setSelectedSloId(sloId);
+    });
+  }, []);
 
   const handleCloseSloDetails = useCallback(() => {
     setSelectedSloId(null);
