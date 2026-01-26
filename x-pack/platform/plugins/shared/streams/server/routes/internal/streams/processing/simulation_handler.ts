@@ -186,6 +186,7 @@ export const simulateProcessing = async ({
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
+    docReports,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -916,9 +917,11 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * We filter out fields that were temporarily created during processing but don't exist in the final output documents.
  */
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
+  docReports: SimulationDocReport[],
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
@@ -926,7 +929,11 @@ const computeDetectedFields = async (
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
-  const uniqueFields = uniq(fields);
+  // Collect all fields that exist in any of the final output documents
+  const fieldsInFinalOutput = new Set(docReports.flatMap((doc) => Object.keys(doc.value)));
+
+  // Filter out fields that don't exist in the final output (temporary fields that were removed)
+  const uniqueFields = uniq(fields).filter((field) => fieldsInFinalOutput.has(field));
 
   // Short-circuit to avoid fetching streams fields if none is detected
   if (isEmpty(uniqueFields)) {
