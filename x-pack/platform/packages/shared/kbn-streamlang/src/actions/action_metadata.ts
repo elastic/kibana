@@ -500,8 +500,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.redact.tips.grokPatterns', {
-        defaultMessage:
-          'Common patterns include IP, EMAILADDRESS, MAC, UUID, USERNAME, and HOSTNAME',
+        defaultMessage: 'Common patterns include IP, EMAILADDRESS, MAC, UUID, and URI',
       }),
       i18n.translate('xpack.streamlang.actionMetadata.redact.tips.semantic', {
         defaultMessage:
