@@ -9,62 +9,84 @@
 
 /**
  * Custom serializer to handle Emotion-styled components in Enzyme shallow renders.
- * This runs AFTER enzyme-to-json to clean up Emotion's internal structures.
+ * This must run BEFORE enzyme-to-json to properly transform Emotion components.
  *
- * The problem: When using Enzyme's shallow() with Emotion-styled components (Emotion 11.12+),
- * the component's internal structure (ForwardRef with __EMOTION_TYPE_PLEASE_DO_NOT_USE__)
- * gets exposed in snapshots. This serializer transforms them back to the original component name.
- *
- * Example: <ForwardRef __EMOTION_TYPE_PLEASE_DO_NOT_USE__="dl"> → <dl>
+ * The problem: When using Enzyme's shallow() with Emotion-styled components,
+ * the component's internal structure (ForwardRef, __EMOTION_TYPE_PLEASE_DO_NOT_USE__)
+ * gets exposed in snapshots. This serializer intercepts those components and
+ * transforms them to match the expected format before enzyme-to-json processes them.
  */
 
 module.exports = {
   test(val) {
-    // After enzyme-to-json, match plain objects that represent Emotion's ForwardRef wrappers
-
     // Skip if not an object
     if (!val || typeof val !== 'object') {
       return false;
     }
 
-    // Must have type and props (enzyme-to-json output structure)
-    if (!val.type || !val.props || typeof val.props !== 'object') {
+    // Must have type and props to be a valid React element
+    if (!val.type || !val.props) {
       return false;
     }
 
-    // CRITICAL: Only match if this is a ForwardRef with Emotion's internal property
-    // This is the specific structure from Emotion 11.12+ after enzyme-to-json processes it
-    if (val.type === 'ForwardRef' && val.props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__) {
+    // Check if this is an Enzyme ShallowWrapper with Emotion props
+    if (val.props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__) {
+      return true;
+    }
+
+    // Also check for components with a css prop (function, object, or string)
+    // These are Emotion-styled components that need css prop normalization
+    // BUT skip if css is already the processed string "unknown styles" to avoid infinite recursion
+    if (val.props.css && val.props.css !== 'unknown styles') {
       return true;
     }
 
     return false;
   },
   serialize(val, config, indentation, depth, refs, printer) {
-    try {
-      // Clone props and extract the original component type
-      const props = { ...val.props };
-      const originalType = props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__;
+    const props = { ...val.props };
 
-      // Remove Emotion's internal property from props
-      delete props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__;
+    // Get the original component type before we modify props
+    const emotionType = props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__;
 
-      // Return the cleaned structure with the original component type
-      return printer(
-        {
-          ...val,
-          type: originalType, // Use the original type (e.g., 'dl', 'span', etc.)
-          props,
-        },
-        config,
-        indentation,
-        depth,
-        refs
-      );
-    } catch (error) {
-      // If serialization fails, fall back to printing the original value
-      // This prevents the serializer from breaking tests
-      return printer(val, config, indentation, depth, refs);
+    // Simplify the css prop to match the old snapshot format
+    // Handle css as object, function, or any truthy value
+    if (props.css) {
+      props.css = 'unknown styles';
     }
+
+    // Remove Emotion internals from props
+    delete props.__EMOTION_TYPE_PLEASE_DO_NOT_USE__;
+
+    // Try to get the original component name from Emotion's internal type
+    let componentName = null;
+    if (emotionType) {
+      // If emotionType is a string (like 'div', 'span'), use it directly
+      if (typeof emotionType === 'string') {
+        componentName = emotionType;
+      }
+      // Emotion wraps components, try to get the display name
+      else if (emotionType.displayName) {
+        componentName = emotionType.displayName;
+      } else if (emotionType.name) {
+        componentName = emotionType.name;
+      } else if (typeof emotionType === 'function' && emotionType.render) {
+        componentName = emotionType.render.displayName || emotionType.render.name;
+      }
+    }
+
+    // Return the cleaned up component structure
+    // Only replace the type if we successfully extracted a component name
+    return printer(
+      {
+        ...val,
+        type: componentName || val.type, // Preserve original type if we couldn't extract one
+        props,
+      },
+      config,
+      indentation,
+      depth,
+      refs
+    );
   },
 };
