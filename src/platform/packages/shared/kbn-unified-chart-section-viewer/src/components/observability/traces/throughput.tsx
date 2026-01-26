@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import React from 'react';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getThroughputChart } from './trace_charts_definition';
 
-type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>> & {
-  fieldName: string;
-};
+type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
 const ThroughputChartContent = ({
   esqlQuery,
@@ -24,14 +22,13 @@ const ThroughputChartContent = ({
   unit,
   color,
   title,
-  fieldName,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter } =
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metric: {
-      name: fieldName,
+      name: 'id',
       instrument: 'histogram',
       unit,
       index: indexes,
@@ -52,27 +49,26 @@ const ThroughputChartContent = ({
       services={services}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
+      onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
       syncTooltips
       syncCursor
+      extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
     />
   );
 };
 
 export const ThroughputChart = () => {
-  const { filters, dataSource, indexes } = useTraceMetricsContext();
-  const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
+  const { filters, indexes } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
-    dataSource,
     indexes,
     filters,
-    fieldName,
   });
 
   if (!throughputChart) {
     return null;
   }
 
-  return <ThroughputChartContent {...throughputChart} fieldName={fieldName} />;
+  return <ThroughputChartContent {...throughputChart} />;
 };
