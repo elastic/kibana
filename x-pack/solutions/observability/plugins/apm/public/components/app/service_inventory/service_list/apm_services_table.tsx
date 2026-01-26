@@ -251,7 +251,6 @@ export function getServiceColumns({
             width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
-              // If no SLO data is available, don't render the badge
               if (!sloStatus) {
                 return null;
               }

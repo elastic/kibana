@@ -14,7 +14,6 @@ import {
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import * as t from 'io-ts';
 import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -29,6 +28,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -99,7 +99,7 @@ const servicesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<ServicesItemsResponse> {
-    const { context, params, logger, request, core, plugins } = resources;
+    const { context, params, logger, request, core } = resources;
 
     const {
       searchQuery,
@@ -113,15 +113,10 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const coreContext = await context.core;
-    const savedObjectsClient = coreContext.savedObjects.client;
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const savedObjectsClient = (await context.core).savedObjects.client;
 
     const coreStart = await core.start();
-    const spacesStart = await plugins.spaces?.start();
-    const spaceId = spacesStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    // Resolve capabilities for SLOs, alerts, and ML
     const [sloCapabilities, apmCapabilities, mlCapabilities] = await Promise.all([
       coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'slo.*' }),
       coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'apm.*' }),
@@ -132,11 +127,12 @@ const servicesRoute = createApmServerRoute({
     const canReadAlerts = Boolean(apmCapabilities.apm?.['alerting:show']);
     const canReadMlJobs = Boolean(mlCapabilities.ml?.canGetJobs);
 
-    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
         getApmAlertsClient(resources),
+        getApmSloClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
@@ -149,8 +145,7 @@ const servicesRoute = createApmServerRoute({
       mlClient,
       apmEventClient,
       apmAlertsClient,
-      esClient,
-      spaceId,
+      sloClient,
       logger,
       start,
       end,

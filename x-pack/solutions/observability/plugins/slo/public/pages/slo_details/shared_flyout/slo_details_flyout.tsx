@@ -19,9 +19,9 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { SloTabId } from '@kbn/deeplinks-observability';
+import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
+import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -50,9 +50,7 @@ export default function SLODetailsFlyout({
   session = 'inherit',
   initialTabId,
 }: SLODetailsFlyoutProps) {
-  const {
-    http: { basePath },
-  } = useKibana().services;
+  const { share } = useKibana().services;
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
@@ -72,7 +70,9 @@ export default function SLODetailsFlyout({
   const isNotFound = isSuccess && !slo;
 
   const sloDetailsUrl = slo
-    ? basePath.prepend(paths.sloDetails(slo.id, slo.instanceId))
+    ? share?.url.locators
+        .get<SloDetailsLocatorParams>(sloDetailsLocatorID)
+        ?.getRedirectUrl({ sloId: slo.id, instanceId: slo.instanceId })
     : undefined;
 
   const getTitle = () => {

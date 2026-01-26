@@ -38,19 +38,21 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import rison from '@kbn/rison';
 import { AgentIcon } from '@kbn/custom-icons';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import {
   AlertConsumers,
   SLO_RULE_TYPE_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { SloTabId } from '@kbn/deeplinks-observability';
-import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
+import type { SloTabId, SloListLocatorParams } from '@kbn/deeplinks-observability';
+import { ALERTS_TAB_ID, sloListLocatorID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
+
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
 const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
@@ -104,7 +106,7 @@ const STATUS_PRIORITY: Record<string, number> = {
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { http, uiSettings, slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { http, uiSettings, slo: sloPlugin, share } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const { query } = useApmParams('/services');
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,16 +125,16 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const filtersQuery = useMemo(() => {
     const filters: Array<Record<string, unknown>> = [
-      { term: { 'service.name': serviceName } },
+      { term: { [SERVICE_NAME]: serviceName } },
       {
         terms: {
-          'slo.indicator.type': ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          'slo.indicator.type': APM_SLO_INDICATOR_TYPES,
         },
       },
     ];
 
     if (environment && environment !== 'ENVIRONMENT_ALL') {
-      filters.push({ term: { 'service.environment': environment } });
+      filters.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
     }
 
     if (selectedStatuses.length > 0) {
@@ -152,7 +154,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     return trimmed || undefined;
   }, [searchQuery]);
 
-  // Fetch SLOs and alerts in parallel
   useEffect(() => {
     if (!http) return;
 
@@ -161,7 +162,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
     const fetchSlosAndAlerts = async () => {
       try {
-        // First fetch SLOs with pagination
         const sloResponse = await http.fetch<{ results: SLOWithSummaryResponse[]; total: number }>(
           '/api/observability/slos',
           {
@@ -183,7 +183,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         const slos = sloResponse.results;
         const total = sloResponse.total;
 
-        // Then fetch alerts for those SLOs in parallel
         if (slos.length > 0) {
           const sloIdsAndInstanceIds = slos.map(
             (sloItem) => [sloItem.id, sloItem.instanceId ?? ALL_VALUE] as [string, string]
@@ -238,7 +237,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 },
               }),
             })
-            .catch(() => null); // Ignore alerts fetch errors
+            .catch(() => null);
 
           if (isMounted && alertsResponse) {
             const alertsMap = new Map<string, number>();
@@ -280,7 +279,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const handleActiveAlertsClick = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
-      // If the same SLO is already open, just close the flyout
       if (selectedSloId === sloItem.id) {
         setSelectedSloTabId(undefined);
         setSelectedSloId(null);
@@ -337,7 +335,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   }, [sloData, activeAlerts]);
 
   const sloAppUrl = useMemo(() => {
-    const searchParams = rison.encode({
+    const sloListLocator = share?.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+    if (!sloListLocator) return undefined;
+
+    return sloListLocator.getRedirectUrl({
       filters: [
         {
           meta: {
@@ -349,7 +350,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
             type: 'phrase',
           },
           query: {
-            match_phrase: { 'service.name': serviceName },
+            term: { 'service.name': serviceName },
           },
         },
         {
@@ -358,23 +359,16 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
             disabled: false,
             key: 'slo.indicator.type',
             negate: false,
-            params: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+            params: [...APM_SLO_INDICATOR_TYPES],
             type: 'phrases',
           },
           query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionDuration' } },
-                { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionErrorRate' } },
-              ],
-            },
+            terms: { 'slo.indicator.type': [...APM_SLO_INDICATOR_TYPES] },
           },
         },
       ],
     });
-    return http?.basePath.prepend(`/app/slos?search=${searchParams}`);
-  }, [http?.basePath, serviceName]);
+  }, [share?.url.locators, serviceName]);
 
   const serviceOverviewUrl = useMemo(() => {
     return link('/services/{serviceName}/overview', {
@@ -672,7 +666,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
         <EuiSpacer size="m" />
 
-        {/* Results count */}
         {totalSlos > 0 && (
           <>
             <EuiText size="s">
@@ -723,7 +716,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           data-test-subj="sloOverviewFlyoutTable"
         />
 
-        {/* Pagination */}
         {totalSlos > perPage && (
           <>
             <EuiSpacer size="m" />

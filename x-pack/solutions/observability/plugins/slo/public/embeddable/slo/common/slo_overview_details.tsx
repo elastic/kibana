@@ -35,10 +35,6 @@ export interface SloOverviewDetailsContentProps {
   initialTabId?: SloTabId;
 }
 
-/**
- * Content component for SLO overview details (without flyout wrapper).
- * Use this when you need to render the SLO details content inside your own flyout.
- */
 export function SloOverviewDetailsContent({
   slo,
   initialTabId = OVERVIEW_TAB_ID,
@@ -78,10 +74,6 @@ export interface SloOverviewDetailsFlyoutFooterProps {
   onClose: () => void;
 }
 
-/**
- * Footer component for SLO overview details flyout.
- * Use this when you need to render the SLO details footer inside your own flyout.
- */
 export function SloOverviewDetailsFlyoutFooter({
   slo,
   onClose,
@@ -119,11 +111,6 @@ export function SloOverviewDetailsFlyoutFooter({
   );
 }
 
-/**
- * Full flyout component for SLO overview details.
- * Use this when you want the complete flyout experience.
- * For custom flyout wrappers, use SloOverviewDetailsContent and SloOverviewDetailsFlyoutFooter instead.
- */
 export function SloOverviewDetails({
   slo,
   setSelectedSlo,

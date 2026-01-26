@@ -29,8 +29,6 @@ export interface ServicesItemsResponse {
   items: MergedServiceStat[];
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
-  // The highest priority sort field based on available data
-  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
   sortField: ServiceInventoryFieldName;
 }
 
