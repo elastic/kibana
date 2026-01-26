@@ -11,7 +11,7 @@ import type { ValuesType } from 'utility-types';
 import type { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
 import { meanBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/apm-synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';

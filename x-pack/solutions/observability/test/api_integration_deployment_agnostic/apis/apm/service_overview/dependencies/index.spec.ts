@@ -9,7 +9,7 @@ import type { DependencyNode } from '@kbn/apm-plugin/common/connections';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { NodeType } from '@kbn/apm-plugin/common/connections';
-import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/apm-synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { roundNumber } from '../../utils/common';
 import { generateData, dataConfig } from './generate_data';

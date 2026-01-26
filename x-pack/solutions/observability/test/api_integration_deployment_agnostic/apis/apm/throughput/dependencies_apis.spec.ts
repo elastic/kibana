@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import type { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/apm-synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 
