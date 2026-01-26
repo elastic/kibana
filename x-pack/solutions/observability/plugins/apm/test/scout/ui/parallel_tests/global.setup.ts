@@ -10,11 +10,15 @@ import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client'
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { testData } from '../fixtures';
 
-globalSetupHook('Ingest data to Elasticsearch', async ({ apmSynthtraceEsClient }) => {
-  const dataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
-    from: new Date(testData.OPBEANS_START_DATE).getTime(),
-    to: new Date(testData.OPBEANS_END_DATE).getTime(),
-  });
+globalSetupHook(
+  'Ingest data to Elasticsearch',
+  { tag: ['@ess', '@svlOblt'] },
+  async ({ apmSynthtraceEsClient }) => {
+    const dataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
 
-  await apmSynthtraceEsClient.index(dataGenerator);
-});
+    await apmSynthtraceEsClient.index(dataGenerator);
+  }
+);
