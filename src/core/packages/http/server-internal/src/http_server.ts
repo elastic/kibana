@@ -558,12 +558,9 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      if (userActivity) {
-        userActivity.setInjectedContext({
-          kibana: { space: { id: parentContext?.space } },
-          user: { ip: request.raw.req.socket?.remoteAddress },
-        });
-      }
+      userActivity?.setInjectedContext({
+        kibana: { space: { id: parentContext?.space } },
+      });
 
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
@@ -586,6 +583,22 @@ export class HttpServer {
     });
 
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      const credentials = request?.auth?.credentials as {
+        username?: string;
+        email?: string;
+        roles: string[];
+        profile_uid: string;
+      };
+      userActivity?.setInjectedContext({
+        user: {
+          ip: request.raw.req.socket?.remoteAddress,
+          id: credentials.profile_uid,
+          username: credentials.username,
+          email: credentials.email,
+          roles: credentials.roles,
+        },
+      });
+
       (request.app as KibanaRequestState).span?.end();
       (request.app as KibanaRequestState).span = null;
 

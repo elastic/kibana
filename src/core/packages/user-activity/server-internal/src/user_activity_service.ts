@@ -49,7 +49,7 @@ interface UserContext {
   id?: string;
   username?: string;
   email?: string;
-  roles?: string;
+  roles?: string[];
   ip?: string;
 }
 
