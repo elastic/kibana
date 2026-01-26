@@ -811,7 +811,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByText('SLOs (APM)')).toBeInTheDocument();
+      expect(screen.getByText('SLOs')).toBeInTheDocument();
     });
 
     it('does not render SLOs column when displaySlos is false', async () => {
@@ -819,7 +819,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.queryByText('SLOs (APM)')).not.toBeInTheDocument();
+      expect(screen.queryByText('SLOs')).not.toBeInTheDocument();
     });
 
     it('renders violated SLO badge when service has violated SLOs', async () => {

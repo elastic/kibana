@@ -246,7 +246,7 @@ export function getServiceColumns({
                   defaultMessage: 'The status of APM SLOs for this service',
                 })}
                 label={i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
-                  defaultMessage: 'SLOs (APM)',
+                  defaultMessage: 'SLOs',
                 })}
               />
             ),
