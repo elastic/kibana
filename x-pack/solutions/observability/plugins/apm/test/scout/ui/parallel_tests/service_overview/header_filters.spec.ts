@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const specialServiceName = 'service 1 / ? # [ ] @ ! $ &  ( ) * + , ; = < > % {} | ^ ` <>';
 
@@ -64,6 +65,8 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
     await test.step('Filter by service.name with special characters', async () => {
       const searchBar = page.getByTestId('apmUnifiedSearchBar');
+      await expect(searchBar).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(searchBar).toHaveValue('');
       await searchBar.fill(`service.name: "${specialServiceName}"`);
       await expect(searchBar).toHaveValue(`service.name: "${specialServiceName}"`);
       await expect(page.getByTestId('querySubmitButton')).toHaveText('Update');
@@ -72,6 +75,13 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
     await test.step('Verify URL contains special service name', async () => {
       await expect(page.getByTestId('querySubmitButton')).toHaveText('Refresh');
+
+      await page.waitForURL(
+        (url) => {
+          return url.toString().includes(encodeURIComponent(specialServiceName));
+        },
+        { timeout: EXTENDED_TIMEOUT }
+      );
 
       expect(page.url()).toContain(encodeURIComponent(specialServiceName));
     });
