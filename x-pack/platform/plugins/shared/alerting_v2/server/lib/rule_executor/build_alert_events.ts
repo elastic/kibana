@@ -10,6 +10,7 @@ import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import stringify from 'json-stable-stringify';
 
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import type { AlertEvent } from '../../resources/alert_events';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -23,7 +24,7 @@ function rowToDocument(columns: Array<{ name: string }>, row: ESQLRow): Record<s
   return doc;
 }
 
-function buildGrouping({
+function buildGroupHash({
   rowDoc,
   groupKeyFields,
   fallbackSeed,
@@ -31,25 +32,20 @@ function buildGrouping({
   rowDoc: Record<string, unknown>;
   groupKeyFields: string[];
   fallbackSeed: string;
-}) {
+}): string {
   if (!groupKeyFields || groupKeyFields.length === 0) {
-    return {
-      key: 'default',
-      value: sha256(fallbackSeed),
-    };
+    return sha256(fallbackSeed);
   }
 
-  const key = groupKeyFields.join('|');
-  const value = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
+  const keyPart = groupKeyFields.join('|');
+  const valuePart = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
 
-  return {
-    key: key.length > 0 ? key : 'default',
-    value: value.length > 0 ? value : sha256(fallbackSeed),
-  };
+  return sha256(`${keyPart}|${valuePart}`);
 }
 
 export interface BuildAlertEventsOpts {
   ruleId: string;
+  ruleVersion: number;
   spaceId: string;
   ruleAttributes: RuleSavedObjectAttributes;
   esqlResponse: ESQLSearchResponse;
@@ -61,11 +57,12 @@ export interface BuildAlertEventsOpts {
 
 export function buildAlertEventsFromEsqlResponse({
   ruleId,
+  ruleVersion,
   spaceId,
   ruleAttributes,
   esqlResponse,
   scheduledTimestamp,
-}: BuildAlertEventsOpts): Array<{ id: string; doc: Record<string, unknown> }> {
+}: BuildAlertEventsOpts): Array<{ id: string; doc: AlertEvent }> {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -80,9 +77,10 @@ export function buildAlertEventsFromEsqlResponse({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+
   return values.map((row, i) => {
     const rowDoc = rowToDocument(columns, row);
-    const grouping = buildGrouping({
+    const groupHash = buildGroupHash({
       rowDoc,
       groupKeyFields: ruleAttributes.groupingKey ?? [],
       get fallbackSeed(): string {
@@ -90,26 +88,22 @@ export function buildAlertEventsFromEsqlResponse({
       },
     });
 
-    // Include `source` in the tuple to prevent collisions when we later support external systems whose ids may overlap with internal rule ids.
-    const alertSeriesId = sha256(
-      `${source}|${ruleId}|${spaceId}|${grouping.key}|${grouping.value}`
-    );
-    // Deterministic document id: hash(@timestamp + alert_series_id)
-    const alertUuid = sha256(`${wroteAt}|${alertSeriesId}`);
+    // Deterministic document id: hash(@timestamp + rule_id + space_id + group_hash)
+    const alertUuid = sha256(`${wroteAt}|${ruleId}|${spaceId}|${groupHash}`);
 
-    const doc: Record<string, unknown> = {
+    const doc: AlertEvent = {
       '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
       rule: {
         id: ruleId,
-        ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
+        version: ruleVersion,
       },
-      grouping,
+      group_hash: groupHash,
       data: rowDoc,
-      status: 'breach',
-      alert_series_id: alertSeriesId,
+      status: 'breached',
       source,
-      ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
+      type: 'signal', // Initial events are signals; they become alerts after episode processing
+      // TODO: episode_id, episode_status, episode_status_count are populated during episode processing
     };
 
     return { id: alertUuid, doc };
