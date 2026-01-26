@@ -24,7 +24,7 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 jest.mock('../../../../hooks/use_streams_privileges');
 
 // Mock hooks used by StreamDescription
-jest.mock('../../../stream_detail_features/stream_description/use_stream_description_api', () => ({
+jest.mock('../../../stream_detail_systems/stream_description/use_stream_description_api', () => ({
   useStreamDescriptionApi: () => ({
     description: '',
     setDescription: jest.fn(),
@@ -45,12 +45,12 @@ jest.mock('../../../stream_detail_features/stream_description/use_stream_descrip
   }),
 }));
 
-// Mock hooks used by StreamFeatureConfiguration
-jest.mock('../../../stream_detail_features/stream_features/hooks/use_stream_features', () => ({
-  useStreamFeatures: () => ({
-    features: [],
-    refreshFeatures: jest.fn(),
-    featuresLoading: false,
+// Mock hooks used by StreamSystemConfiguration
+jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
+  useStreamSystems: () => ({
+    systems: [],
+    refreshSystems: jest.fn(),
+    systemsLoading: false,
   }),
 }));
 
@@ -60,8 +60,8 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/use_stream_features_api', () => ({
-  useStreamFeaturesApi: () => ({
+jest.mock('../../../../hooks/use_stream_systems_api', () => ({
+  useStreamSystemsApi: () => ({
     getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'idle' }),
     scheduleSystemIdentificationTask: jest.fn(),
     cancelSystemIdentificationTask: jest.fn(),
@@ -235,8 +235,8 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      // Check the Feature identification panel title is rendered
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
+      // Check the System identification panel title is rendered
+      expect(screen.getByText('System identification')).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
@@ -255,7 +255,7 @@ describe('WiredAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('Feature identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('System identification')).not.toBeInTheDocument();
     });
   });
 
@@ -355,8 +355,8 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByText('Import & export')).toBeInTheDocument();
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
-      // Feature identification
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
+      // System identification
+      expect(screen.getByText('System identification')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Delete stream (non-root)

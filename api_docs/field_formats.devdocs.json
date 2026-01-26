@@ -4739,7 +4739,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-        "lineNumber": 28,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4761,7 +4761,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 30,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4774,7 +4774,7 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 31,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4797,7 +4797,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 34,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4813,7 +4813,7 @@
               "() => { lookupEntries: {}[]; unknownKeyValue: null; }"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 41,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4831,7 +4831,7 @@
               "(val: string) => any"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-            "lineNumber": 48,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4847,7 +4847,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/field_formats/common/converters/static_lookup.ts",
-                "lineNumber": 48,
+                "lineNumber": 61,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
