@@ -54,6 +54,8 @@ export interface DocViewerTableRestorableState {
   searchTerm: string;
   // Array of field type filters (date, keyword, text, etc.)
   fieldTypeFilters: string[];
+  // Whether null values are hidden in the table
+  hideNullValues: boolean;
 }
 
 const { withRestorableState, useRestorableLocalStorage } =
@@ -132,6 +134,11 @@ const InternalDocViewerTable = ({
     LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES,
     []
   );
+  const [hideNullValues, setHideNullValues] = useRestorableLocalStorage(
+    'hideNullValues',
+    HIDE_NULL_VALUES,
+    false
+  );
 
   const tableFiltersCallbacks = useTableFiltersCallbacks({
     searchTerm,
@@ -141,7 +148,7 @@ const InternalDocViewerTable = ({
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
-  const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
+
   const [showOnlySelectedFields, setShowOnlySelectedFields] = useLocalStorage(
     SHOW_ONLY_SELECTED_FIELDS,
     false
@@ -250,7 +257,7 @@ const InternalDocViewerTable = ({
             return acc;
           }
           const shouldHideNullValue =
-            isEsqlMode && areNullValuesHidden && flattened[curFieldName] == null;
+            isEsqlMode && hideNullValues && flattened[curFieldName] == null;
           if (shouldHideNullValue) {
             return acc;
           }
@@ -283,7 +290,7 @@ const InternalDocViewerTable = ({
       ),
     [
       displayedFieldNames,
-      areNullValuesHidden,
+      hideNullValues,
       shouldShowOnlySelectedFields,
       fieldToItem,
       flattened,
@@ -310,9 +317,9 @@ const InternalDocViewerTable = ({
 
   const onHideNullValuesChange = useCallback(
     (e: EuiSwitchEvent) => {
-      setAreNullValuesHidden(e.target.checked);
+      setHideNullValues(e.target.checked);
     },
-    [setAreNullValuesHidden]
+    [setHideNullValues]
   );
 
   const onShowOnlySelectedFieldsChange = useCallback(
@@ -391,7 +398,7 @@ const InternalDocViewerTable = ({
                   defaultMessage: 'Hide null fields',
                   description: 'Switch label to hide fields with null values in the table',
                 })}
-                checked={areNullValuesHidden ?? false}
+                checked={hideNullValues ?? false}
                 onChange={onHideNullValuesChange}
                 compressed
                 data-test-subj="unifiedDocViewerHideNullValuesSwitch"
