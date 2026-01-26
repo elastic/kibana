@@ -15,7 +15,7 @@ export const PlaygroundDeprecationNotice = () => {
   return (
     <EuiCallOut
       iconType="info"
-      title={i18n.translate('xpack.searchPlayground.playgroundDeprecationNotice.label', {
+      title={i18n.translate('xpack.searchPlayground.playgroundDeprecationNotice.title', {
         defaultMessage: 'Deprecation Notice',
       })}
       color="warning"
