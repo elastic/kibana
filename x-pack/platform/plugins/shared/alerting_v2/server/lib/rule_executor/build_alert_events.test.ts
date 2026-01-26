@@ -45,6 +45,7 @@ describe('buildAlertEventsFromEsqlResponse', () => {
 
     const docs = buildAlertEventsFromEsqlResponse({
       ruleId: 'rule-123',
+      ruleVersion: 1,
       spaceId: 'default',
       ruleAttributes,
       esqlResponse,
@@ -61,15 +62,17 @@ describe('buildAlertEventsFromEsqlResponse', () => {
 
     expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
     expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');
-    expect(doc1.tags).toEqual(['esql', 'test']);
-    expect(doc1.rule).toEqual({ id: 'rule-123', tags: ['esql', 'test'] });
-    expect(doc1.grouping).toEqual({ key: 'host.name|region', value: 'host-a|us-east' });
+    expect(doc1.rule).toEqual({ id: 'rule-123', version: 1 });
+    expect(doc1.group_hash).toEqual(expect.any(String));
     expect(doc1.data).toEqual({ 'host.name': 'host-a', region: 'us-east', count: 10 });
-    expect(doc1.status).toBe('breach');
+    expect(doc1.status).toBe('breached');
     expect(doc1.source).toBe('internal');
-    expect(doc1.alert_series_id).toEqual(expect.any(String));
+    expect(doc1.type).toBe('signal');
 
-    expect(doc2.grouping).toEqual({ key: 'host.name|region', value: 'host-b|eu-west' });
+    expect(doc2.group_hash).toEqual(expect.any(String));
     expect(doc2.data).toEqual({ 'host.name': 'host-b', region: 'eu-west', count: 5 });
+
+    // Different grouping should produce different group_hash
+    expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
 });

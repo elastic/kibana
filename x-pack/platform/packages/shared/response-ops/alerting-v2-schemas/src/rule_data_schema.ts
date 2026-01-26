@@ -5,47 +5,57 @@
  * 2.0.
  */
 
-import { Parser } from '@kbn/esql-language';
 import { z } from '@kbn/zod';
-
-const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
+import { validateDuration, validateEsqlQuery } from './validation';
 
 const durationSchema = z.string().superRefine((value, ctx) => {
-  if (!DURATION_RE.test(value)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`,
-    });
+  const error = validateDuration(value);
+  if (error) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
   }
 });
 
-const withEsqlValidation = (schema: z.ZodString) =>
-  schema.superRefine((query, ctx) => {
-    const errors = Parser.parseErrors(query);
-    if (errors.length > 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Invalid ES|QL query: ${errors[0].message}`,
-      });
+const esqlQuerySchema = z
+  .string()
+  .min(1)
+  .max(10000)
+  .superRefine((value, ctx) => {
+    const error = validateEsqlQuery(value);
+    if (error) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
     }
   });
 
 const scheduleSchema = z
   .object({
-    custom: durationSchema,
+    custom: durationSchema.describe('Rule execution interval (e.g. 1m, 5m).'),
   })
-  .strict();
+  .strict()
+  .describe('Schedule configuration for the rule.');
 
 export const createRuleDataSchema = z
   .object({
-    name: z.string().min(1).max(64),
-    tags: z.array(z.string().max(64)).max(100).default([]),
+    name: z.string().min(1).max(64).describe('Human-readable rule name.'),
+    tags: z
+      .array(z.string().max(64).describe('Rule tag.'))
+      .max(100)
+      .default([])
+      .describe('Tags attached to the rule.'),
     schedule: scheduleSchema,
-    enabled: z.boolean().default(true),
-    query: withEsqlValidation(z.string().min(1).max(10000)),
-    timeField: z.string().min(1).max(128).default('@timestamp'),
-    lookbackWindow: durationSchema,
-    groupingKey: z.array(z.string()).max(16).default([]),
+    enabled: z.boolean().default(true).describe('Whether the rule is enabled.'),
+    query: esqlQuerySchema.describe('ES|QL query text to execute.'),
+    timeField: z
+      .string()
+      .min(1)
+      .max(128)
+      .default('@timestamp')
+      .describe('Time field to apply the lookback window to.'),
+    lookbackWindow: durationSchema.describe('Lookback window for the query (e.g. 5m, 1h).'),
+    groupingKey: z
+      .array(z.string())
+      .max(16)
+      .default([])
+      .describe('Fields to group alert events by.'),
   })
   .strip();
 
@@ -53,14 +63,25 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
 export const updateRuleDataSchema = z
   .object({
-    name: z.string().min(1).optional(),
-    tags: z.array(z.string()).optional(),
+    name: z.string().min(1).max(64).optional().describe('Human-readable rule name.'),
+    tags: z.array(z.string().max(64)).max(100).optional().describe('Tags attached to the rule.'),
     schedule: scheduleSchema.optional(),
-    enabled: z.boolean().optional(),
-    query: withEsqlValidation(z.string().min(1)).optional(),
-    timeField: z.string().min(1).optional(),
-    lookbackWindow: durationSchema.optional(),
-    groupingKey: z.array(z.string()).optional(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
+    query: esqlQuerySchema.optional().describe('ES|QL query text to execute.'),
+    timeField: z
+      .string()
+      .min(1)
+      .max(128)
+      .optional()
+      .describe('Time field to apply the lookback window to.'),
+    lookbackWindow: durationSchema
+      .optional()
+      .describe('Lookback window for the query (e.g. 5m, 1h).'),
+    groupingKey: z
+      .array(z.string())
+      .max(16)
+      .optional()
+      .describe('Fields to group alert events by.'),
   })
   .strip();
 

@@ -1188,6 +1188,7 @@
     "@kbn/workflows-ui": "link:src/platform/packages/shared/kbn-workflows-ui",
     "@kbn/workplace-ai-app": "link:x-pack/solutions/workplaceai/plugins/workplace_ai_app",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
+    "@kbn/yaml-rule-editor": "link:x-pack/platform/packages/shared/response-ops/yaml-rule-editor",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
     "@langchain/aws": "0.1.15",

@@ -7,8 +7,7 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "public/**/*",
-    "common/**/*"
+    "public/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -25,9 +24,16 @@
     "@kbn/spaces-utils",
     "@kbn/search-types",
     "@kbn/core-di",
+    "@kbn/core-di-browser",
     "@kbn/core-di-server",
     "@kbn/esql-utils",
     "@kbn/response-ops-retry-service",
+    "@kbn/core-application-browser",
+    "@kbn/shared-ux-router",
+    "@kbn/management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/esql-types",
+    "@kbn/yaml-rule-editor",
     "@kbn/core-http-server-mocks",
     "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
@@ -36,8 +42,9 @@
     "@kbn/es-errors",
     "@kbn/alerting-v2-schemas",
     "@kbn/zod",
-    "@kbn/zod-helpers",
-    "@kbn/core-di-internal"
+    "@kbn/core-di-internal",
+    "@kbn/i18n",
+    "@kbn/zod-helpers"
   ],
   "exclude": [
     "target/**/*"

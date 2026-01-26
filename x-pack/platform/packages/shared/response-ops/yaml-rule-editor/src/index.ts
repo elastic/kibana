@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './rule_data_schema';
-export { validateDuration, validateEsqlQuery } from './validation';
+export { YamlRuleEditor } from './yaml_rule_editor';
+export { DEFAULT_ESQL_PROPERTY_NAMES } from './types';
+export type { YamlRuleEditorProps, QueryContext, SchemaPropertyInfo } from './types';

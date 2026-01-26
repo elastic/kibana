@@ -111,6 +111,9 @@ export class RuleExecutorTaskRunner {
 
     const alertDocs = buildAlertEventsFromEsqlResponse({
       ruleId: params.ruleId,
+      // TODO: Implement rule versioning. For now, use 1 as a placeholder.
+      // The version should increment when the rule definition changes.
+      ruleVersion: 1,
       spaceId: params.spaceId,
       ruleAttributes: ruleDoc.attributes,
       esqlResponse,
