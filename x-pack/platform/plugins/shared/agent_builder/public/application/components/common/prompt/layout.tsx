@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiImage, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, EuiText, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const defaultPromptStyles = css`
   .euiEmptyPrompt__main {
@@ -15,36 +16,56 @@ const defaultPromptStyles = css`
   }
 `;
 
-export type PromptLayoutVariant = 'default' | 'embeddable';
+export const PROMPT_LAYOUT_VARIANTS = {
+  DEFAULT: 'default',
+  EMBEDDABLE: 'embeddable',
+} as const;
 
-export interface PromptLayoutProps {
-  imageSrc: string;
+export type PromptLayoutVariant =
+  | typeof PROMPT_LAYOUT_VARIANTS.DEFAULT
+  | typeof PROMPT_LAYOUT_VARIANTS.EMBEDDABLE;
+
+interface IconProps {
+  imageSrc?: string;
+  iconType?: IconType;
+}
+
+export type PromptLayoutProps = {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   primaryButton: React.ReactNode;
   secondaryButton?: React.ReactNode;
-  variant?: PromptLayoutVariant;
-}
+  variant: PromptLayoutVariant;
+} & IconProps;
 
 export const PromptLayout: React.FC<PromptLayoutProps> = ({
   imageSrc,
+  iconType,
   title,
   subtitle,
   primaryButton,
   secondaryButton,
-  variant = 'default',
+  variant,
 }) => {
   const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
 
-  const isEmbeddable = variant === 'embeddable';
+  const isEmbeddable = variant === PROMPT_LAYOUT_VARIANTS.EMBEDDABLE;
+
+  let iconContent: React.ReactNode;
+  if (imageSrc) {
+    iconContent = <EuiImage src={imageSrc} alt="" size="s" />;
+  } else if (iconType) {
+    iconContent = <EuiIcon type={iconType} size="xxl" />;
+  }
 
   return (
     <EuiEmptyPrompt
+      data-test-subj="errorPrompt"
       css={isEmbeddable ? undefined : defaultPromptStyles}
       hasShadow={!isEmbeddable}
       color={isEmbeddable ? 'transparent' : 'plain'}
-      icon={<EuiImage src={imageSrc} alt="" size="s" />}
-      title={<h2>{title}</h2>}
+      icon={iconContent}
+      title={<h2 data-test-subj="errorPromptTitle">{title}</h2>}
       body={
         <EuiText color="subdued" textAlign="center">
           {subtitle}
