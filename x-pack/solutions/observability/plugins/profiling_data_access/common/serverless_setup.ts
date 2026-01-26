@@ -52,5 +52,6 @@ export function createDefaultServerlessSetupState(): ServerlessSetupState {
 }
 
 export function areServerlessResourcesSetup(state: ServerlessSetupState): boolean {
-  return state.resource_management.enabled && state.resources.created;
+  // TODO: Check for Profiling plugin being enabled
+  return true;
 }
