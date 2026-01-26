@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useTaskPolling } from '../../hooks/use_task_polling';
@@ -38,7 +39,7 @@ export function FeatureIdentificationControl({
   const [{ loading: isGettingTask, value: task, error }, getTask] = useAsyncFn(
     getFeaturesIdentificationStatus
   );
-  const previousStatusRef = useRef<string | undefined>();
+  const previousStatusRef = useRef<TaskStatus | undefined>();
 
   useEffect(() => {
     getTask();
@@ -58,22 +59,30 @@ export function FeatureIdentificationControl({
 
     previousStatusRef.current = currentStatus;
 
-    if (currentStatus === 'in_progress') {
+    if (currentStatus === TaskStatus.InProgress) {
       onTaskStart();
-    } else if (currentStatus === 'completed') {
+    } else if (currentStatus === TaskStatus.Completed) {
       refreshFeatures();
       onTaskEnd();
-    } else if (
-      currentStatus === 'being_canceled' ||
-      currentStatus === 'canceled' ||
-      currentStatus === 'failed' ||
-      currentStatus === 'stale' ||
-      currentStatus === 'acknowledged' ||
-      currentStatus === 'not_started'
-    ) {
+    } else if (currentStatus !== undefined) {
       onTaskEnd();
     }
   }, [task?.status, refreshFeatures, onTaskStart, onTaskEnd]);
+
+  const handleStartIdentification = useCallback(() => {
+    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connectorId) return;
+
+    onTaskStart();
+    scheduleFeaturesIdentificationTask(connectorId).then(getTask);
+  }, [aiFeatures, onTaskStart, scheduleFeaturesIdentificationTask, getTask]);
+
+  const handleCancelIdentification = useCallback(() => {
+    cancelFeaturesIdentificationTask().then(() => {
+      getTask();
+      onTaskEnd();
+    });
+  }, [cancelFeaturesIdentificationTask, getTask, onTaskEnd]);
 
   if (error) {
     return <LoadingErrorCallout errorMessage={error.message} />;
@@ -83,24 +92,10 @@ export function FeatureIdentificationControl({
     return null;
   }
 
-  const handleStartIdentification = () => {
-    onTaskStart();
-    scheduleFeaturesIdentificationTask(aiFeatures?.genAiConnectors.selectedConnector!).then(() => {
-      getTask();
-    });
-  };
-
-  const handleCancelIdentification = () => {
-    cancelFeaturesIdentificationTask().then(() => {
-      getTask();
-      onTaskEnd();
-    });
-  };
-
   switch (task.status) {
-    case 'not_started':
-    case 'acknowledged':
-    case 'canceled':
+    case TaskStatus.NotStarted:
+    case TaskStatus.Acknowledged:
+    case TaskStatus.Canceled:
       return (
         <TriggerButton
           isLoading={isIdentifyingFeatures || isGettingTask}
@@ -108,7 +103,7 @@ export function FeatureIdentificationControl({
         />
       );
 
-    case 'completed':
+    case TaskStatus.Completed:
       return (
         <CompletedState
           featuresCount={task.features.length}
@@ -118,13 +113,13 @@ export function FeatureIdentificationControl({
         />
       );
 
-    case 'in_progress':
+    case TaskStatus.InProgress:
       return <InProgressState onCancel={handleCancelIdentification} />;
 
-    case 'being_canceled':
+    case TaskStatus.BeingCanceled:
       return <CancellingState />;
 
-    case 'failed':
+    case TaskStatus.Failed:
       return (
         <StateWithCallout
           isLoading={isIdentifyingFeatures || isGettingTask}
@@ -137,7 +132,7 @@ export function FeatureIdentificationControl({
         </StateWithCallout>
       );
 
-    case 'stale':
+    case TaskStatus.Stale:
       return (
         <StateWithCallout
           isLoading={isIdentifyingFeatures || isGettingTask}
