@@ -696,11 +696,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         .map((obj) => `${obj.type}:${obj.id}`)
         .sort()
         .join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}${
+      // Enhanced error message: when access control restrictions apply, provide additional context
+      // explaining that this may be due to lacking the "manage_access_control" privilege or
+      // attempting to modify objects owned by another user (in "write_restricted" mode).
+      const accessControlHint =
         inaccessibleObjects.size > 0
-          ? ', access control restrictions for ' + inaccessibleObjectsString
-          : ''
-      }`;
+          ? `. Access control restrictions for objects: ${inaccessibleObjectsString}. ` +
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          : '';
+      const msg = `Unable to ${authzAction} ${targetTypes}${accessControlHint}`;
       // if we are bypassing all auditing, or bypassing failure auditing, do not log the event
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
@@ -1225,18 +1229,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    const { types: typesRequiringAccessControl, objects: objectsRequiringAccessControl } =
+    const { types: typesRequiringAccessControl, objects: objectsRequiringPrivilegeCheck } =
       this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects,
         actions: new Set([action]),
       });
 
-    // Enforce RBAC + Access Control
-    // Get the objects that are owned by the current user so we can check for the 'update' action
-    // instead of 'manage_access_control'. The owner is required to have access to update an object
-    // in order to change its access control settings.
+    // Derive typesRequiringRbac for the authorization check below.
+    // Objects owned by the current user require the 'update' action instead of 'manage_access_control'.
     const typesRequiringRbac = new Set(
-      objectsRequiringAccessControl
+      objectsRequiringPrivilegeCheck
         .filter((object) => object.requiresManageAccessControl === false)
         .map((object) => object.type)
     );
@@ -1265,8 +1267,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        * list of SOs must all support access control.
        */
       this.accessControlService.enforceAccessControl({
-        typesRequiringAccessControl,
-        typesRequiringRbac,
+        objectsRequiringPrivilegeCheck,
         authorizationResult,
         currentSpace: namespaceString,
         addAuditEventFn: (types: string[]) => {

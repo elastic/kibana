@@ -26,6 +26,7 @@ import type {
   FormBasedPrivateState,
   FormBasedLayer,
 } from '@kbn/lens-common';
+import { getReferencedColumnIds } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import { columnToOperation } from './form_based';
 import type { OperationType, ColumnAdvancedParams } from './operations';
@@ -37,7 +38,6 @@ import {
   operationDefinitionMap,
   getExistingColumnGroups,
   isReferenced,
-  getReferencedColumnIds,
   hasTermsWithManyBuckets,
   updateColumnLabel,
 } from './operations';

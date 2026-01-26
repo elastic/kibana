@@ -16,6 +16,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "NavigationProps"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 78,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,6 +57,8 @@
           ", logoId: string, activeItemId?: string | undefined) => NavigationState"
         ],
         "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,6 +75,8 @@
               "boolean"
             ],
             "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,6 +94,8 @@
               "NavigationStructure"
             ],
             "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,6 +113,8 @@
               "string"
             ],
             "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,6 +132,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -140,6 +154,8 @@
         "label": "MenuItem",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +169,8 @@
               "\nThe URL for the menu item link."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -169,6 +187,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,6 +202,8 @@
               "\nThe unique identifier of the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +217,8 @@
               "\nThe label to display for the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,6 +235,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -228,6 +254,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +273,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -259,6 +289,8 @@
         "label": "NavigationProps",
         "description": [],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,6 +307,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,6 +322,8 @@
               "\nWhether the navigation is collapsed. This can be controlled by the parent component."
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -304,6 +340,8 @@
               "NavigationStructure"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,6 +358,8 @@
               "SideNavLogo"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +376,8 @@
               "(width: number) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -350,6 +392,8 @@
                   "number"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "lineNumber": 56,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -376,6 +420,8 @@
               ") => void) | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -394,6 +440,8 @@
                   "SecondaryMenuItem"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "lineNumber": 60,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -414,6 +462,8 @@
               "(isCollapsed: boolean) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -428,6 +478,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "lineNumber": 67,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,6 +500,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -464,6 +518,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -478,6 +534,8 @@
         "label": "NavigationStructure",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -495,6 +553,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -512,6 +572,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -526,6 +588,8 @@
         "label": "SecondaryMenuItem",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,6 +603,8 @@
               "\nThe URL for the menu item link."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -552,6 +618,8 @@
               "\nThe unique identifier of the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,6 +633,8 @@
               "\nThe label to display for the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +651,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -598,6 +670,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -614,6 +688,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -628,6 +704,8 @@
         "label": "SecondaryMenuSection",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -641,6 +719,8 @@
               "\nThe unique identifier of the secondary menu section."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +738,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -674,6 +756,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -688,6 +772,8 @@
         "label": "SideNavLogo",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -701,6 +787,8 @@
               "\nThe route ID of the logo, used for the active state."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -714,6 +802,8 @@
               "\nThe href of the logo link, typically the home page."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,6 +817,8 @@
               "\nThe label for the logo, typically the product name."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,6 +832,8 @@
               "\nThe logo type, e.g. `appObservability`, `appSecurity`, etc."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,6 +850,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -776,6 +872,8 @@
           "\"beta\" | \"techPreview\""
         ],
         "path": "src/core/packages/chrome/navigation/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

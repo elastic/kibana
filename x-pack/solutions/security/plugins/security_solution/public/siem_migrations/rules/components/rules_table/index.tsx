@@ -196,7 +196,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { mutateAsync: installMigrationRule } = useInstallMigrationRule(migrationId);
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(
-      migrationId,
+      migrationStats,
       translationStats
     );
     const { mutateAsync: updateIndexPattern } = useUpdateIndexPattern({
@@ -272,9 +272,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
     const onStartMigrationWithSettings = useCallback(
       (settings: RuleMigrationSettings) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+        startMigration(migrationStats, SiemMigrationRetryFilter.FAILED, settings);
       },
-      [migrationId, startMigration]
+      [migrationStats, startMigration]
     );
     const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
       useStartRulesMigrationModal({
@@ -452,6 +452,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   itemId={'id'}
                   data-test-subj={'rules-translation-table'}
                   columns={rulesColumns}
+                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
                 />
               </>
             )
