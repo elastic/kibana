@@ -7,15 +7,15 @@
 
 import { createLazyPageObject, type PageObjects, type ScoutPage } from '@kbn/scout';
 
-import { LensPage } from './lens_page';
+import { LensApp } from './lens_app';
 
 export interface LensPageObjects extends PageObjects {
-  lens: LensPage;
+  lens: LensApp;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): LensPageObjects {
   return {
     ...pageObjects,
-    lens: createLazyPageObject(LensPage, page),
+    lens: createLazyPageObject(LensApp, page),
   };
 }

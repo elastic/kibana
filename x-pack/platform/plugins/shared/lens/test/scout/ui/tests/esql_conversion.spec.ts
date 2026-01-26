@@ -13,11 +13,6 @@ const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
 };
 
-const KBN_ARCHIVES = {
-  ESQL_CONVERSION_DASHBOARD:
-    'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json',
-};
-
 const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
 };
@@ -27,7 +22,12 @@ const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 };
 
+const KBN_ARCHIVES = {
+  ESQL_CONVERSION_DASHBOARD:
+    'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json',
+};
 const ESQL_CONVERSION_DASHBOARD_TEST_ID = 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
+const METRIC_VISUALIZATION_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
 
 test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -55,14 +55,12 @@ test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
     await page.getByTestId(ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
 
     // Verify dashboard loaded with the test visualization
-    await expect(page.getByText('Average of bytes')).toBeVisible();
+    await dashboard.waitForPanelsToLoad(1);
 
     // Enter edit mode to access visualization actions
-    await page.getByTestId('dashboardEditMode').click(); // dashboard.switchToEditMode()
+    await dashboard.switchToEditMode();
 
-    // Open lens in-line editor
-    page.getByText('Average of bytes').hover();
-    page.getByTestId('embeddablePanelAction-editPanel').click();
+    dashboard.openInLineEditor(METRIC_VISUALIZATION_ID);
 
     lens.getConvertToEsqlButton().click();
 

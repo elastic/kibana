@@ -118,5 +118,22 @@ export class DashboardApp {
     throw new Error(`Timeout waiting for ${expectedCount} elements matching ${options.selector}`);
   }
 
-  // swhitch to edit mode
+  async switchToEditMode() {
+    const isInEditMode = await this.page.testSubj.isVisible('dashboardViewOnlyMode');
+    if (!isInEditMode) {
+      await this.page.testSubj.click('dashboardEditMode');
+      await this.page.testSubj.waitForSelector('embeddablePanelDragHandle', { state: 'visible' });
+    }
+  }
+
+  async openInLineEditor(id: string) {
+    // Hover over the panel to show action buttons
+    const embeddableSelector = `[data-test-embeddable-id="${id}"]`;
+    await this.page.locator(embeddableSelector).hover();
+
+    // Wait for the edit button to appear and click it
+    const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
+    await this.page.locator(editVisualizationConfigurationSelector).waitFor({ state: 'visible' });
+    await this.page.locator(editVisualizationConfigurationSelector).click();
+  }
 }

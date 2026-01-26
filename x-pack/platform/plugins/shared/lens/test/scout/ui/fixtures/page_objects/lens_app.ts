@@ -7,7 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
-export class LensPage {
+export class LensApp {
   constructor(private readonly page: ScoutPage) {}
 
   getConvertToEsqlButton() {
