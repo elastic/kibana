@@ -40,16 +40,23 @@ import {
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
 import type { TableFiltersProps } from './table_filters';
-import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './table_filters';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES,
+  TableFilters,
+  useTableFiltersCallbacks,
+} from './table_filters';
 import { FieldRow } from './field_row';
 import { TableGrid } from './table_grid';
 
 export interface DocViewerTableRestorableState {
   // Main search input value
   searchTerm: string;
+  // Array of field type filters (date, keyword, text, etc.)
+  fieldTypeFilters: string[];
 }
 
-const { withRestorableState, useRestorableState } =
+const { withRestorableState, useRestorableLocalStorage } =
   createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
@@ -115,7 +122,21 @@ const InternalDocViewerTable = ({
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
-  const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
+  const [searchTerm, setSearchTerm] = useRestorableLocalStorage(
+    'searchTerm',
+    LOCAL_STORAGE_KEY_SEARCH_TERM,
+    ''
+  );
+  const [fieldTypeFilters, setFieldTypeFilters] = useRestorableLocalStorage(
+    'fieldTypeFilters',
+    LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES,
+    []
+  );
+
+  const tableFiltersCallbacks = useTableFiltersCallbacks({
+    searchTerm,
+    selectedFieldTypes: fieldTypeFilters,
+  });
 
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
@@ -154,12 +175,12 @@ const InternalDocViewerTable = ({
     [setSearchTerm]
   );
 
-  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
-    storage,
-    storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
-    searchTerm,
-    onChangeSearchTerm,
-  });
+  const onChangeFieldTypes = useCallback(
+    (newFieldTypes: string[]) => {
+      setFieldTypeFilters(newFieldTypes);
+    },
+    [setFieldTypeFilters]
+  );
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {
@@ -240,7 +261,7 @@ const InternalDocViewerTable = ({
           if (isPinned) {
             acc.pinnedRows.push(row);
           } else {
-            if (onFilterField(row)) {
+            if (tableFiltersCallbacks.onFilterField(row)) {
               // filter only unpinned fields
               acc.restRows.push(row);
             }
@@ -267,7 +288,7 @@ const InternalDocViewerTable = ({
       fieldToItem,
       flattened,
       isEsqlMode,
-      onFilterField,
+      tableFiltersCallbacks,
       pinnedFields,
       shouldShowFieldHandler,
     ]
@@ -326,7 +347,13 @@ const InternalDocViewerTable = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <TableFilters {...tableFiltersProps} allFields={allFields} />
+        <TableFilters
+          searchTerm={searchTerm}
+          onChangeSearchTerm={onChangeSearchTerm}
+          selectedFieldTypes={fieldTypeFilters}
+          onChangeFieldTypes={onChangeFieldTypes}
+          allFields={allFields}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -398,7 +425,7 @@ const InternalDocViewerTable = ({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             columns={columns}
-            onFindSearchTermMatch={onFindSearchTermMatch}
+            onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
             searchTerm={searchTerm}
             initialPageSize={initialPageSize}
             onChangePageSize={onChangePageSize}
