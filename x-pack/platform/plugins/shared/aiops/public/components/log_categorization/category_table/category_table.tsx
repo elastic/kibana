@@ -298,6 +298,9 @@ export const CategoryTable: FC<Props> = ({
               }
             : undefined;
         }}
+        tableCaption={i18n.translate('xpack.aiops.logCategorization.categoryTable.tableCaption', {
+          defaultMessage: 'Log pattern categories',
+        })}
       />
     </div>
   );
