@@ -66,6 +66,7 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
     await test.step('Filter by service.name with special characters', async () => {
       const searchBar = page.getByTestId('apmUnifiedSearchBar');
       await searchBar.fill(`service.name: "${specialServiceName}"`);
+      await expect(searchBar).toHaveValue(`service.name: "${specialServiceName}"`);
       await searchBar.press('Enter');
     });
 
