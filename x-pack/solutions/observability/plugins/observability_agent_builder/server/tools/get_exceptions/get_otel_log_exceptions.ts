@@ -120,13 +120,7 @@ async function getLogExceptionCategories({
 
   return buckets.map((bucket) => {
     const hit = bucket.sample?.hits?.hits?.[0];
-    const fields = unwrapEsFields(hit?.fields as Record<string, unknown[]>);
-
-    // Include the index from the hit metadata
-    const hitIndex = hit?._index;
-    if (hitIndex) {
-      fields._index = hitIndex;
-    }
+    const fields = unwrapEsFields(hit?.fields);
 
     const lastSeen = bucket.last_seen?.value
       ? new Date(bucket.last_seen.value).toISOString()
@@ -141,15 +135,6 @@ async function getLogExceptionCategories({
   });
 }
 
-/**
- * Queries log indices for exceptions that haven't been processed into error format.
- * Uses categorize_text aggregation to group similar exception messages.
- *
- * Exceptions in logs are identified by:
- * - event.name: "exception" (per OTel semantic conventions)
- * - OR exception.type field exists
- * - AND processor.event does NOT exist (not processed into error format)
- */
 export async function getLogExceptionGroups({
   core,
   esClient,

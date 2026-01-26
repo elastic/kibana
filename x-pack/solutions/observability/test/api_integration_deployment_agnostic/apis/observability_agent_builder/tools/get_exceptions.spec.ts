@@ -100,14 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       logsSynthtraceEsClient = clients.logsEsClient;
     });
 
-    after(async () => {
-      if (apmSynthtraceEsClient) {
-        await apmSynthtraceEsClient.clean();
-      }
-      if (logsSynthtraceEsClient) {
-        await logsSynthtraceEsClient.clean();
-      }
-    });
+    // after(async () => {
+    //   await apmSynthtraceEsClient.clean();
+    //   await logsSynthtraceEsClient.clean();
+    // });
 
     it('returns error groups with expected structure', async () => {
       const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
@@ -218,13 +214,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
-      it('returns "over 14 days ago" for errors that existed before the lookback window', () => {
+      it('returns "over 7 days ago" for errors that existed before the lookback window', () => {
         const oldGroup = errorGroups.find((group) => {
           const sample = group.sample as Record<string, unknown>;
           return sample['error.exception.message'] === 'Cannot invoke method on null object';
         });
 
-        expect(oldGroup!.firstSeen).to.be('over 14 days ago');
+        expect(oldGroup!.firstSeen).to.be('over 7 days ago');
       });
 
       it('returns an ISO timestamp for errors that first appeared within the lookback window', () => {
@@ -326,7 +322,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Find a group with a known exception type from our test data
         const smtpGroup = logExceptionGroups.find((group) => {
           const sample = group.sample as Record<string, unknown>;
-          return sample['exception.type'] === 'SmtpConnectionException';
+          return sample['error.exception.type'] === 'SmtpConnectionException';
         });
 
         expect(smtpGroup).to.not.be(undefined);
@@ -352,17 +348,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         logExceptionGroups = results[0].data.logExceptionGroups;
       });
 
-      it('includes exception.stacktrace for groups that have it', () => {
+      it('includes stack trace for groups that have it', () => {
         // SmtpConnectionException has a stacktrace defined
         const groupWithStackTrace = logExceptionGroups.find((group) => {
           const sample = group.sample as Record<string, unknown>;
-          return sample['exception.type'] === 'SmtpConnectionException';
+          return sample['error.exception.type'] === 'SmtpConnectionException';
         });
 
         expect(groupWithStackTrace).to.not.be(undefined);
         const sample = groupWithStackTrace!.sample as Record<string, unknown>;
 
-        const stackTrace = sample['exception.stacktrace'] as string;
+        const stackTrace = sample['error.stack_trace'] as string;
         expect(stackTrace).to.be.a('string');
         expect(stackTrace).to.contain('SmtpClient.connect');
       });

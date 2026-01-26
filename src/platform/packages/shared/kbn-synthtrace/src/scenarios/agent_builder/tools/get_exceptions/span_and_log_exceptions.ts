@@ -368,12 +368,13 @@ export function generateLogExceptionGroupsData({
             .defaults({
               'service.name': serviceConfig.name,
               'service.environment': serviceConfig.environment,
+
               // OTel exception fields (per OTel semantic conventions)
               'event.name': 'exception',
-              'exception.type': exceptionConfig.type,
-              'exception.message': exceptionConfig.message,
+              'error.exception.type': exceptionConfig.type,
+              'error.exception.message': exceptionConfig.message,
               ...(exceptionConfig.stacktrace
-                ? { 'exception.stacktrace': exceptionConfig.stacktrace }
+                ? { 'error.stack_trace': exceptionConfig.stacktrace }
                 : {}),
             })
             .timestamp(timestamp);

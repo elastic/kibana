@@ -14,13 +14,17 @@ import type { ApmEventClient } from './types';
 import type { ErrorGroupSample } from './get_error_groups';
 import { getTotalHits } from '../../utils/get_total_hits';
 
-const LOOKBACK_DAYS = 14;
+const LOOKBACK_DAYS = 7;
 
 /**
- * Fetches "first seen" for each error group using a fixed 14-day lookback window
- * (not the user's query range). This helps distinguish new errors from recurring ones.
+ * Fetches "first seen" for each error group using a lookback window (7 days)
+ * This helps distinguish new errors from recurring ones.
  *
- * Returns an exact ISO timestamp if first seen within 14 days, or "over 14 days ago" otherwise.
+ * This is a two-step process:
+ * 1. Find the earliest occurrence within the lookback window (possibly slow, but time-range-bounded).
+ * 2. In parallel, check which error groups existed before the lookback window (not time-range-bounded, but very fast with terminate_after: 1).
+ *
+ * Returns an exact ISO timestamp for recent error (first seen within 7 days), or "over 7 days ago" otherwise.
  */
 export async function getFirstSeenPerGroup({
   apmEventClient,

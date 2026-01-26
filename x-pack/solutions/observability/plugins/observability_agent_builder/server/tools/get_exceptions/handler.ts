@@ -12,7 +12,7 @@ import type {
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
-import { getApmErrorGroups } from './get_error_groups';
+import { getErrorGroups } from './get_error_groups';
 import { getLogExceptionGroups } from './get_otel_log_exceptions';
 
 type GetErrorGroupsResult = Awaited<ReturnType<typeof getToolHandler>>;
@@ -50,7 +50,7 @@ export async function getToolHandler({
 
   // Query error groups and log exception groups in parallel
   const [errorGroups, logExceptionGroups] = await Promise.all([
-    getApmErrorGroups({
+    getErrorGroups({
       apmEventClient,
       startMs,
       endMs,

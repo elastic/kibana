@@ -20,9 +20,8 @@ import type { ApmEventClient } from './types';
 import type { ErrorGroupSample } from './get_error_groups';
 
 /**
- * Fetches downstream service resource for errors that occurred during outbound calls.
- * Uses parallel queries (msearch) with terminate_after for efficiency.
- * Each query is scoped to the specific (traceId, serviceName) pair from the error.
+ * Fetches the name of the downstream service resource for errors that occurred during outbound calls.
+ * This can be useful for identifying which external services are contributing to errors in the application.
  */
 export async function getDownstreamServicePerGroup({
   apmEventClient,

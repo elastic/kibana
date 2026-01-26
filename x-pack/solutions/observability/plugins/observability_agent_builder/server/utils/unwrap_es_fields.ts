@@ -10,12 +10,12 @@
  * This utility unwraps single-element arrays to their first value,
  * while preserving multi-element arrays.
  */
-export function unwrapEsFields(
+export function unwrapEsFields<T = Record<string, unknown>>(
   fields: Record<string, unknown[] | undefined> | undefined
-): Record<string, unknown> {
+): T {
   return Object.fromEntries(
     Object.entries(fields ?? {}).map(([key, value]) => [key, unwrapEsFieldValue(value)])
-  );
+  ) as T;
 }
 
 /**
