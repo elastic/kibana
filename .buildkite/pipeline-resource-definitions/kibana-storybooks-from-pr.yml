@@ -17,6 +17,7 @@ spec:
       name: kibana / storybooks from PR
       description: 'Builds Storybooks from a PR.'
     spec:
+      repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/storybooks_from_pr.yml
       provider_settings:
         build_pull_requests: true
