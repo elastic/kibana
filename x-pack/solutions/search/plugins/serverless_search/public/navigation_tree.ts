@@ -45,6 +45,7 @@ export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
 }: ApplicationStart & { showAiAssistant?: boolean }): NavigationTreeDefinition {
+  const isRulesAppRegistered = isAppRegistered('rules');
   return {
     body: [
       {
@@ -239,7 +240,10 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
+              {
+                link: isRulesAppRegistered ? 'rules' : 'management:triggersActions',
+                breadcrumbStatus: 'hidden',
+              },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },

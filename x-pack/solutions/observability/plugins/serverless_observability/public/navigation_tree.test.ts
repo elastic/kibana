@@ -52,6 +52,30 @@ describe('Navigation Tree', () => {
     expect(agentsNode).toBeDefined();
   });
 
+  it('uses rules link when rules app is registered', () => {
+    const { footer } = createNavigationTree({ isRulesAppRegistered: true });
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const alertsAndInsightsSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'alerts_and_insights'
+    );
+    const rulesLink = alertsAndInsightsSection?.children?.find(
+      (item: any) => item.link === 'rules'
+    );
+    expect(rulesLink).toBeDefined();
+  });
+
+  it('uses management:triggersActions link when rules app is not registered', () => {
+    const { footer } = createNavigationTree({ isRulesAppRegistered: false });
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const alertsAndInsightsSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'alerts_and_insights'
+    );
+    const triggersActionsLink = alertsAndInsightsSection?.children?.find(
+      (item: any) => item.link === 'management:triggersActions'
+    );
+    expect(triggersActionsLink).toBeDefined();
+  });
+
   describe('filterForFeatureAvailability', () => {
     it('should return empty array if feature flag is false', () => {
       const node = {

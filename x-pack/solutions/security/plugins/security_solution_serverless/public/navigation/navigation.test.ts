@@ -70,7 +70,11 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(AIChatExperience.Classic, false);
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
+      AIChatExperience.Classic,
+      false,
+      services.application.isAppRegistered('rules')
+    );
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];

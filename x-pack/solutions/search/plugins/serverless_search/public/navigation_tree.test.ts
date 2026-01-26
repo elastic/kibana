@@ -64,4 +64,30 @@ describe('Navigation Tree', () => {
       })
     );
   });
+
+  it('uses rules link when rules app is registered', () => {
+    mockApplication.isAppRegistered.mockReturnValue(true);
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const alertsAndInsightsSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'settings_alerts'
+    );
+    const rulesLink = alertsAndInsightsSection?.children?.find(
+      (item: any) => item.link === 'rules'
+    );
+    expect(rulesLink).toBeDefined();
+  });
+
+  it('uses management:triggersActions link when rules app is not registered', () => {
+    mockApplication.isAppRegistered.mockReturnValue(false);
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const alertsAndInsightsSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'settings_alerts'
+    );
+    const triggersActionsLink = alertsAndInsightsSection?.children?.find(
+      (item: any) => item.link === 'management:triggersActions'
+    );
+    expect(triggersActionsLink).toBeDefined();
+  });
 });

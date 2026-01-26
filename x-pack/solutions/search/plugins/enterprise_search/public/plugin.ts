@@ -280,6 +280,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         getNavigationTreeDefinition({
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
+          isRulesAppRegistered: core.application.isAppRegistered('rules'),
         })
       );
     });

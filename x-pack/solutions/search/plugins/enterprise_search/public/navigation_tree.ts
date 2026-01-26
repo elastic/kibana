@@ -38,9 +38,11 @@ const icon = 'logoElasticsearch';
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
+  isRulesAppRegistered,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
+  isRulesAppRegistered?: boolean;
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
@@ -245,7 +247,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
-                    { link: 'management:triggersActions' },
+                    { link: isRulesAppRegistered ? 'rules' : 'management:triggersActions' },
                     { link: 'management:triggersActionsConnectors' },
                     { link: 'management:reporting' },
                     { link: 'management:jobsListLink' },

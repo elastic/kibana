@@ -59,6 +59,7 @@ export class ServerlessObservabilityPlugin
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          isRulesAppRegistered: core.application.isAppRegistered('rules'),
         });
       })
     );

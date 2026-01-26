@@ -38,8 +38,9 @@ export const registerSolutionNavigation = async (
   );
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
+  const isRulesAppRegistered = services.application.isAppRegistered('rules');
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled)
+    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, isRulesAppRegistered)
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);

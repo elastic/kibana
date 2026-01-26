@@ -48,10 +48,12 @@ function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
+  isRulesAppRegistered,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
+  isRulesAppRegistered?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -533,7 +535,7 @@ function createNavTree({
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'management:triggersActions',
+                link: isRulesAppRegistered ? 'rules' : 'management:triggersActions',
               },
               {
                 link: 'management:triggersActionsConnectors',
@@ -663,6 +665,7 @@ export const createDefinition = (
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+        isRulesAppRegistered: coreStart.application.isAppRegistered('rules'),
       })
     )
   ),
