@@ -257,7 +257,7 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   action: 'join' as const,
   from: [],
   to: '',
-  delimiter: '',
+  delimiter: ',',
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -605,13 +605,15 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'join') {
-      const { from, to, ignore_failure } = formState;
+      const { delimiter, from, to, ignore_failure, ignore_missing } = formState;
       return {
         processorDefinition: {
           action: 'join',
+          delimiter,
           from,
           to,
           ignore_failure,
+          ignore_missing,
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as JoinProcessor,
