@@ -810,6 +810,7 @@ export const cli = () => {
       const clean = Boolean(cliContext.flags.clean);
       const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
       const skipRulesetPreview = Boolean(cliContext.flags['skip-ruleset-preview']);
+      const validateFixtures = Boolean(cliContext.flags['validate-fixtures']);
       const attacks = Boolean(cliContext.flags.attacks);
       const createCases = Boolean(cliContext.flags.cases);
       const shouldGenerateAttackDiscoveries = attacks || createCases;
@@ -974,7 +975,7 @@ export const cli = () => {
         const loaded: EpisodeDocs[] = [];
         for (const fspec of fileSets) {
           log.info(`Loading ${fspec.episodeId} fixtures...`);
-          loaded.push(await loadEpisode(fspec));
+          loaded.push(await loadEpisode(fspec, { validateFixtures }));
         }
 
         await ensureGeneratorIndices({ esClient, endMs, episodeIds, log, indexPrefix });
@@ -1163,7 +1164,14 @@ export const cli = () => {
           'indexPrefix',
           'max-preview-invocations',
         ],
-        boolean: ['clean', 'skip-alerts', 'skip-ruleset-preview', 'attacks', 'cases'],
+        boolean: [
+          'clean',
+          'skip-alerts',
+          'skip-ruleset-preview',
+          'attacks',
+          'cases',
+          'validate-fixtures',
+        ],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -1188,6 +1196,7 @@ export const cli = () => {
           'skip-ruleset-preview': false,
           attacks: false,
           cases: false,
+          'validate-fixtures': true,
         },
         allowUnexpected: false,
         help: `
@@ -1206,6 +1215,7 @@ export const cli = () => {
         --skip-ruleset-preview            Skip previews of the ruleset rules (baseline attribution only; faster)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
+        --no-validate-fixtures            Disable fixture validation (default: validation enabled)
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)

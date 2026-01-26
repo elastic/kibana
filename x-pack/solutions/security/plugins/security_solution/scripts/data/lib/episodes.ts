@@ -12,12 +12,16 @@ import { createInterface } from 'readline';
 import { PassThrough } from 'stream';
 import crypto from 'crypto';
 import { faker } from '@faker-js/faker';
-import { isRecord } from './type_guards';
+import { isRecord, isString } from './type_guards';
 
 export interface EpisodeFileSet {
   episodeId: string; // e.g. ep1
   dataPath: string;
   alertsPath: string;
+}
+
+export interface LoadEpisodeOptions {
+  validateFixtures?: boolean;
 }
 
 export interface EpisodeDocs {
@@ -63,23 +67,76 @@ const setNested = (obj: Record<string, unknown>, path: string[], value: unknown)
   cur[path[path.length - 1]] = value;
 };
 
-export const readNdjson = async (filePath: string): Promise<Array<Record<string, unknown>>> => {
+const truncateLine = (line: string, maxChars: number = 200): string => {
+  const singleLine = line.replace(/\s+/g, ' ').trim();
+  if (singleLine.length <= maxChars) return singleLine;
+  return `${singleLine.slice(0, maxChars)}…`;
+};
+
+export interface NdjsonValidationContext {
+  filePath: string;
+  line: number;
+  rawLine: string;
+}
+
+export interface ReadNdjsonOptions {
+  validate?: (doc: Record<string, unknown>, ctx: NdjsonValidationContext) => void;
+}
+
+export const readNdjson = async (
+  filePath: string,
+  options: ReadNdjsonOptions = {}
+): Promise<Array<Record<string, unknown>>> => {
   const fileStream = fs.createReadStream(filePath);
   const out = new PassThrough();
   const docs: Array<Record<string, unknown>> = [];
 
+  const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+    return isRecord(value) && !Array.isArray(value);
+  };
+
   const rl = createInterface({ input: out, crlfDelay: Infinity });
   const reader = (async () => {
+    let lineNumber = 0;
     for await (const line of rl) {
+      lineNumber++;
       if (line) {
-        const parsed: unknown = JSON.parse(line);
-        if (!isRecord(parsed)) {
-          throw new Error(`Invalid NDJSON line (expected object) in ${filePath}`);
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(line);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          throw new Error(
+            `Invalid JSON in ${filePath}:${lineNumber}: ${msg}. Line: "${truncateLine(line)}"`
+          );
         }
-        docs.push(parsed);
+        if (!isPlainObject(parsed)) {
+          throw new Error(
+            `Invalid NDJSON line (expected object) in ${filePath}:${lineNumber}. Line: "${truncateLine(
+              line
+            )}"`
+          );
+        }
+        const doc = parsed;
+
+        try {
+          options.validate?.(doc, { filePath, line: lineNumber, rawLine: line });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          throw new Error(
+            `Invalid fixture in ${filePath}:${lineNumber}: ${msg}. Line: "${truncateLine(line)}"`
+          );
+        }
+
+        docs.push(doc);
       }
     }
   })();
+  // IMPORTANT: handle rejections immediately to avoid PromiseRejectionHandledWarning in Node.
+  let readerError: unknown;
+  const readerHandled = reader.catch((e) => {
+    readerError = e;
+  });
 
   if (filePath.endsWith('.gz')) {
     const gunzip = createGunzip();
@@ -87,14 +144,31 @@ export const readNdjson = async (filePath: string): Promise<Array<Record<string,
   } else {
     await pipeline(fileStream, out);
   }
-  await reader;
+  await readerHandled;
+  if (readerError) {
+    throw readerError;
+  }
 
   return docs;
 };
 
-export const loadEpisode = async (files: EpisodeFileSet): Promise<EpisodeDocs> => {
-  const dataDocs = await readNdjson(files.dataPath);
-  const alertDocs = await readNdjson(files.alertsPath);
+export const loadEpisode = async (
+  files: EpisodeFileSet,
+  options: LoadEpisodeOptions = {}
+): Promise<EpisodeDocs> => {
+  const validateFixtures = options.validateFixtures ?? true;
+  const dataDocs = await readNdjson(
+    files.dataPath,
+    validateFixtures
+      ? { validate: createEndpointAwareValidator({ expectedEventKind: 'event' }) }
+      : {}
+  );
+  const alertDocs = await readNdjson(
+    files.alertsPath,
+    validateFixtures
+      ? { validate: createEndpointAwareValidator({ expectedEventKind: 'alert' }) }
+      : {}
+  );
 
   const timestamps = [...dataDocs, ...alertDocs]
     .map((d) => getTimestampMs(d))
@@ -110,6 +184,69 @@ export const loadEpisode = async (files: EpisodeFileSet): Promise<EpisodeDocs> =
   const maxTimestampMs = Math.max(...timestamps);
 
   return { episodeId: files.episodeId, dataDocs, alertDocs, minTimestampMs, maxTimestampMs };
+};
+
+const looksLikeEndpointDoc = (doc: Record<string, unknown>): boolean => {
+  const module = getNested(doc, ['event', 'module']);
+  if (module === 'endpoint') return true;
+
+  const eventDataset = getNested(doc, ['event', 'dataset']);
+  if (typeof eventDataset === 'string' && eventDataset.startsWith('endpoint.')) return true;
+
+  const dsDataset = getNested(doc, ['data_stream', 'dataset']);
+  if (typeof dsDataset === 'string' && dsDataset.startsWith('endpoint.')) return true;
+
+  return false;
+};
+
+const isParseableIsoTimestamp = (value: unknown): boolean => {
+  if (!isString(value)) return false;
+  const ms = Date.parse(value);
+  return Number.isFinite(ms);
+};
+
+const createEndpointAwareValidator = ({
+  expectedEventKind,
+}: {
+  expectedEventKind: 'event' | 'alert';
+}): ReadNdjsonOptions['validate'] => {
+  return (doc) => {
+    // Always: require a parseable timestamp.
+    const ts = doc['@timestamp'];
+    const created = getNested(doc, ['event', 'created']);
+    if (!isParseableIsoTimestamp(ts) && !isParseableIsoTimestamp(created)) {
+      throw new Error('missing/invalid @timestamp (or event.created)');
+    }
+
+    // Endpoint-aware: validate a minimal set of stable invariants.
+    if (!looksLikeEndpointDoc(doc)) return;
+
+    const kind = getNested(doc, ['event', 'kind']);
+    if (!isString(kind)) {
+      throw new Error('missing/invalid event.kind (expected string)');
+    }
+    if (kind !== expectedEventKind) {
+      throw new Error(`unexpected event.kind="${kind}" (expected "${expectedEventKind}")`);
+    }
+
+    const dataset = getNested(doc, ['event', 'dataset']);
+    if (!isString(dataset) || dataset.length === 0) {
+      throw new Error('missing/invalid event.dataset (expected string)');
+    }
+
+    const dataStream = getNested(doc, ['data_stream']);
+    if (dataStream == null) return;
+    if (!isRecord(dataStream)) {
+      throw new Error('invalid data_stream (expected object)');
+    }
+
+    const dsType = dataStream.type;
+    const dsDataset = dataStream.dataset;
+    const dsNamespace = dataStream.namespace;
+    if (!isString(dsType) || !isString(dsDataset) || !isString(dsNamespace)) {
+      throw new Error('missing/invalid data_stream.type/dataset/namespace (expected strings)');
+    }
+  };
 };
 
 export interface ScaleEpisodesOptions {
