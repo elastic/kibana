@@ -17,9 +17,11 @@ import type { CustomScriptsRequestQueryParams } from '../../../../common/api/end
 
 const CLEAR_SELECTION_LABEL = i18n.translate(
   'xpack.securitySolution.endpointRunscriptScriptSelector.clearSelection',
-  {
-    defaultMessage: 'Clear selection',
-  }
+  { defaultMessage: 'Clear selection' }
+);
+const SELECT_INPUT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.endpointRunscriptScriptSelector.placeholder',
+  { defaultMessage: 'Select a script' }
 );
 
 export interface EndpointRunscriptScriptSelectorProps {
@@ -43,7 +45,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
   ({ osType, selectedScriptId, onChange, onScriptsLoaded, 'data-test-subj': dataTestSubj }) => {
     const hasAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data, isLoading } = useGetCustomScripts<EndpointScript>(
+    const { data, isLoading, error } = useGetCustomScripts<EndpointScript>(
       'endpoint',
       { osType },
       {
@@ -78,9 +80,6 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
       }
 
       return data.map<EuiSuperSelectOption<EndpointScript>>((script) => {
-        // TODO:PT add ability to clear selection (inputDisplay)
-        // TODO:PT add more display info. to the dropdownDisplay
-
         return {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value: script.meta!,
@@ -120,10 +119,10 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
 
     useEffect(() => {
       // If scripts were loaded and we can't find the selected script, then emit change (script could have been deleted)
-      if (data && !selectedScript && selectedScriptId) {
+      if ((data || error) && !selectedScript && selectedScriptId) {
         onChange(undefined);
       }
-    }, [data, onChange, selectedScript, selectedScriptId]);
+    }, [data, error, onChange, selectedScript, selectedScriptId]);
 
     if (!hasAuthz) {
       return null;
@@ -136,11 +135,10 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         valueOfSelected={selectedScript}
         fullWidth
         isLoading={isLoading}
+        isInvalid={!!error}
+        placeholder={error ? error.message : SELECT_INPUT_PLACEHOLDER}
         onChange={handleScriptSelectorOnChange}
-        aria-label={i18n.translate(
-          'xpack.securitySolution.endpointRunscriptScriptSelector.selectorLabel',
-          { defaultMessage: 'Select a script' }
-        )}
+        aria-label={SELECT_INPUT_PLACEHOLDER}
       />
     );
   }

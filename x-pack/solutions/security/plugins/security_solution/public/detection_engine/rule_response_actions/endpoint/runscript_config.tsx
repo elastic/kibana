@@ -401,11 +401,18 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
 
     const scriptTimeoutOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
+        const userProvidedTimeoutValue = ev.target.value;
         const updatedConfig = {
           ...config,
-          timeout: ev.target.value ? (ev.target.value as unknown as number) : undefined,
+          timeout: userProvidedTimeoutValue ? Number(userProvidedTimeoutValue) : undefined,
         };
-        const { isValid, errors } = validateConfig(updatedConfig);
+        const { isValid, errors, timeout } = validateConfig(updatedConfig);
+
+        // IF timeout validation failed, then continue to display the exact value the user
+        // entered, so that they have an opportunity to correct it.
+        if (userProvidedTimeoutValue && !timeout.isValid) {
+          updatedConfig.timeout = userProvidedTimeoutValue as unknown as number;
+        }
 
         onChange({
           isValid,
