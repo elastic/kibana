@@ -24,8 +24,8 @@
  * await indexCorrelatedLogs({
  *   logsEsClient,
  *   logs: [
- *     { level: 'info', message: 'Request started', 'service.name': 'my-service', 'trace.id': 'abc123' },
- *     { level: 'error', message: 'Request failed', 'service.name': 'my-service', 'trace.id': 'abc123' },
+ *     { 'log.level': 'info', message: 'Request started', 'service.name': 'my-service', 'trace.id': 'abc123' },
+ *     { 'log.level': 'error', message: 'Request failed', 'service.name': 'my-service', 'trace.id': 'abc123' },
  *   ],
  * });
  * ```
@@ -108,21 +108,29 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       service: 'payment-service',
       correlation: { 'trace.id': `trace-payment-${baseTimestamp}` },
       logs: [
-        { level: 'info', message: 'Payment request received', '@timestamp': baseTimestamp },
-        { level: 'info', message: 'Validating card details', '@timestamp': baseTimestamp + 100 },
-        { level: 'info', message: 'Contacting payment gateway', '@timestamp': baseTimestamp + 200 },
+        { 'log.level': 'info', message: 'Payment request received', '@timestamp': baseTimestamp },
         {
-          level: 'error',
+          'log.level': 'info',
+          message: 'Validating card details',
+          '@timestamp': baseTimestamp + 100,
+        },
+        {
+          'log.level': 'info',
+          message: 'Contacting payment gateway',
+          '@timestamp': baseTimestamp + 200,
+        },
+        {
+          'log.level': 'error',
           message: 'Payment gateway timeout after 30s',
           '@timestamp': baseTimestamp + 30200,
         },
         {
-          level: 'warn',
+          'log.level': 'warn',
           message: 'Initiating retry (attempt 2/3)',
           '@timestamp': baseTimestamp + 30300,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Payment succeeded on retry',
           '@timestamp': baseTimestamp + 32000,
         },
@@ -134,9 +142,13 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       service: 'order-service',
       correlation: { 'request.id': `req-order-${baseTimestamp}` },
       logs: [
-        { level: 'info', message: 'Order created', '@timestamp': baseTimestamp + 5000 },
-        { level: 'info', message: 'Inventory check passed', '@timestamp': baseTimestamp + 5100 },
-        { level: 'info', message: 'Order confirmed', '@timestamp': baseTimestamp + 5200 },
+        { 'log.level': 'info', message: 'Order created', '@timestamp': baseTimestamp + 5000 },
+        {
+          'log.level': 'info',
+          message: 'Inventory check passed',
+          '@timestamp': baseTimestamp + 5100,
+        },
+        { 'log.level': 'info', message: 'Order confirmed', '@timestamp': baseTimestamp + 5200 },
       ],
     }),
 
@@ -145,19 +157,23 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       service: 'auth-service',
       correlation: { 'session.id': `session-auth-${baseTimestamp}` },
       logs: [
-        { level: 'info', message: 'Login attempt started', '@timestamp': baseTimestamp + 10000 },
         {
-          level: 'warn',
+          'log.level': 'info',
+          message: 'Login attempt started',
+          '@timestamp': baseTimestamp + 10000,
+        },
+        {
+          'log.level': 'warn',
           message: 'Invalid password (attempt 1/3)',
           '@timestamp': baseTimestamp + 10100,
         },
         {
-          level: 'warn',
+          'log.level': 'warn',
           message: 'Invalid password (attempt 2/3)',
           '@timestamp': baseTimestamp + 12000,
         },
         {
-          level: 'error',
+          'log.level': 'error',
           message: 'Account locked after 3 failed attempts',
           '@timestamp': baseTimestamp + 14000,
         },
@@ -170,27 +186,27 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       correlation: { 'transaction.id': `txn-ship-${baseTimestamp}` },
       logs: [
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Shipping label generation started',
           '@timestamp': baseTimestamp + 20000,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Address validation passed',
           '@timestamp': baseTimestamp + 20100,
         },
         {
-          level: 'error',
+          'log.level': 'error',
           message: 'Carrier API returned 503 Service Unavailable',
           '@timestamp': baseTimestamp + 20200,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Fallback to secondary carrier',
           '@timestamp': baseTimestamp + 20300,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Shipping label generated successfully',
           '@timestamp': baseTimestamp + 20500,
         },
@@ -203,12 +219,12 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       correlation: { 'correlation.id': `corr-notify-${baseTimestamp}` },
       logs: [
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Email notification queued',
           '@timestamp': baseTimestamp + 25000,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Email sent successfully',
           '@timestamp': baseTimestamp + 25500,
         },
@@ -220,19 +236,23 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
       service: 'inventory-service',
       correlation: { 'span.id': `span-db-${baseTimestamp}` },
       logs: [
-        { level: 'info', message: 'Database query started', '@timestamp': baseTimestamp + 30000 },
         {
-          level: 'warn',
+          'log.level': 'info',
+          message: 'Database query started',
+          '@timestamp': baseTimestamp + 30000,
+        },
+        {
+          'log.level': 'warn',
           message: 'Query taking longer than expected (>5s)',
           '@timestamp': baseTimestamp + 35000,
         },
         {
-          level: 'error',
+          'log.level': 'error',
           message: 'Database connection pool exhausted',
           '@timestamp': baseTimestamp + 40000,
         },
         {
-          level: 'info',
+          'log.level': 'info',
           message: 'Connection recovered after pool expansion',
           '@timestamp': baseTimestamp + 42000,
         },
@@ -251,8 +271,8 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
  *   service: 'payment-service',
  *   correlation: { 'trace.id': 'trace-123' },
  *   logs: [
- *     { level: 'info', message: 'Request started' },
- *     { level: 'error', message: 'Request failed' },
+ *     { 'log.level': 'info', message: 'Request started' },
+ *     { 'log.level': 'error', message: 'Request failed' },
  *   ],
  * });
  *
@@ -273,8 +293,8 @@ function generateDefaultSequences(baseTimestamp: number): CorrelatedLogEvent[] {
  *   service: 'order-service',
  *   correlation: { order_id: 'ORD-789' },
  *   logs: [
- *     { level: 'info', message: 'Order created' },
- *     { level: 'error', message: 'Order failed' },
+ *     { 'log.level': 'info', message: 'Order created' },
+ *     { 'log.level': 'error', message: 'Order failed' },
  *   ],
  * });
  */
