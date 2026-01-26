@@ -484,6 +484,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           defaultMessage: 'SLI Value',
         }),
         width: '90px',
+        align: 'center',
         render: (sliValue: number, sloItem: SLOWithSummaryResponse) => {
           if (sloItem.summary?.status === 'NO_DATA') return '-';
           return numeral(sliValue).format(percentFormat);
@@ -495,6 +496,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           defaultMessage: 'Objective',
         }),
         width: '80px',
+        align: 'center',
         render: (target: number) => numeral(target).format(percentFormat),
       },
     ],
@@ -504,7 +506,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const activeFiltersCount = selectedStatuses.length;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size="s" ownFocus session="start">
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size="m" ownFocus session="start">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
@@ -709,7 +711,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         <sloPlugin.getSLODetailsFlyout
           sloId={selectedSloId}
           onClose={handleCloseSloDetails}
-          size="m"
+          size="s"
           hideFooter
           session="inherit"
           initialTabId={selectedSloTabId}
