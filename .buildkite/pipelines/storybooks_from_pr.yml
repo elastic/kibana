@@ -14,11 +14,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       machineType: n2-standard-2
-      preemptible: true
     timeout_in_minutes: 50
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - wait: ~
@@ -36,6 +35,5 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       machineType: n2-standard-2
-      preemptible: true
     timeout_in_minutes: 5
 
