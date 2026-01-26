@@ -11,7 +11,7 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
 import { validate } from './validate';
-import { EsqlKeywords } from '../../definitions/keywords';
+import { Commands } from '../../definitions/keywords';
 
 const whereCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -19,7 +19,7 @@ const whereCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const whereCommand = {
-  name: EsqlKeywords.Commands.WHERE,
+  name: Commands.WHERE,
   methods: whereCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.whereDoc', {

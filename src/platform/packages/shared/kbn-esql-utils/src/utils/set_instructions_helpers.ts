@@ -12,7 +12,7 @@ import {
   isFunctionExpression,
   isLiteral,
   LeafPrinter,
-  EsqlKeywords,
+  SettingNames,
 } from '@kbn/esql-language';
 
 /**
@@ -38,7 +38,7 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
       if (!instructionFunction) continue;
 
       const identifierArg = instructionFunction.args.find(isIdentifier);
-      if (identifierArg?.name !== EsqlKeywords.Settings.PROJECT_ROUTING) continue;
+      if (identifierArg?.name !== SettingNames.PROJECT_ROUTING) continue;
 
       const valueArg = instructionFunction.args[1];
       if (!valueArg || Array.isArray(valueArg)) continue;

@@ -13,7 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
-import { EsqlKeywords } from '../../definitions/keywords';
+import { Commands } from '../../definitions/keywords';
 
 const dissectCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -23,7 +23,7 @@ const dissectCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const dissectCommand = {
-  name: EsqlKeywords.Commands.DISSECT,
+  name: Commands.DISSECT,
   methods: dissectCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.dissectDoc', {

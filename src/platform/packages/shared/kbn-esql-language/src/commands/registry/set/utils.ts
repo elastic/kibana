@@ -8,7 +8,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import { EsqlKeywords } from '../../definitions/keywords';
 import type { ESQLAstItem } from '../../../types';
 import { isMap, SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
@@ -16,6 +15,7 @@ import { getCommandMapExpressionSuggestions } from '../../definitions/utils/auto
 import { settings } from '../../definitions/generated/settings';
 import { confidenceLevelValueItems, numOfRowsValueItems } from '../complete_items';
 import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -87,7 +87,7 @@ const getApproximateCompletionItems = (
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find(
-      (s) => s.name === EsqlKeywords.Settings.APPROXIMATE
+      (s) => s.name === Settings.APPROXIMATE
     ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
@@ -142,9 +142,9 @@ const getApproximateCompletionItems = (
 };
 
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
-  [EsqlKeywords.Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
-  [EsqlKeywords.Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
-  [EsqlKeywords.Settings.APPROXIMATE]: getApproximateCompletionItems,
+  [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
+  [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
+  [Settings.APPROXIMATE]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (

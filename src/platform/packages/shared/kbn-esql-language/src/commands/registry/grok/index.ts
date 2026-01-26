@@ -13,7 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
-import { EsqlKeywords } from '../../definitions/keywords';
+import { Commands } from '../../definitions/keywords';
 
 const grokCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -23,7 +23,7 @@ const grokCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const grokCommand = {
-  name: EsqlKeywords.Commands.GROK,
+  name: Commands.GROK,
   methods: grokCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.grokDoc', {

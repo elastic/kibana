@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlSettingNames } from './generated/settings';
-import { EsqlFunctionNames } from './generated/function_names';
-import { EsqlCommandNames } from './generated/commands/commands';
-
-export const EsqlKeywords = {
-  Functions: EsqlFunctionNames,
-  Commands: EsqlCommandNames,
-  Settings: EsqlSettingNames,
-};
+export { EsqlSettingNames as Settings } from './generated/settings';
+export { EsqlFunctionNames as Functions } from './generated/function_names';
+export { EsqlCommandNames as Commands } from './generated/commands/commands';

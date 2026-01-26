@@ -13,7 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
-import { EsqlKeywords } from '../../definitions/keywords';
+import { Commands } from '../../definitions/keywords';
 
 const forkCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -23,7 +23,7 @@ const forkCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const forkCommand = {
-  name: EsqlKeywords.Commands.FORK,
+  name: Commands.FORK,
   methods: forkCommandMethods,
   metadata: {
     hidden: false,

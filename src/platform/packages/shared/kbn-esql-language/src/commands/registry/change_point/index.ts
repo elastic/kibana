@@ -13,7 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
-import { EsqlKeywords } from '../../definitions/keywords';
+import { Commands } from '../../definitions/keywords';
 
 const changePointCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -23,7 +23,7 @@ const changePointCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const changePointCommand: ICommand = {
-  name: EsqlKeywords.Commands.CHANGE_POINT,
+  name: Commands.CHANGE_POINT,
   methods: changePointCommandMethods,
   metadata: {
     preview: true,
