@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import {
@@ -23,28 +21,54 @@ import { useGetMissingResources } from '../../../common/hooks/use_get_missing_re
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { MigrationSource } from '../../../common/types';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
 
+const RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION: Record<MigrationSource, string> = {
+  [MigrationSource.SPLUNK]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK,
+  [MigrationSource.QRADAR]: i18n.RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR,
+};
+
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const { openFlyout } = useMigrationDataInputContext();
+  const { openFlyout, isFlyoutOpen } = useMigrationDataInputContext();
+  const [flyoutMigrationId, setFlyoutMigrationId] = useState<string | undefined>();
+  const handleMissingResourcesIndexed = useCallback(() => {
+    setFlyoutMigrationId(undefined);
+  }, []);
   const { telemetry } = useKibana().services.siemMigrations.rules;
-  const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
+  const { missingResourceCount, onMissingResourcesFetched } = useMissingResources({
+    migrationSource: migrationStats.vendor,
+    handleMissingResourcesIndexed,
+  });
+  const { getMissingResources, isLoading: isLoadingMissingResources } = useGetMissingResources(
+    'rule',
+    onMissingResourcesFetched
+  );
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
   }, [getMissingResources, migrationStats.id]);
 
+  // Check for missing resources when the flyout is closed
+  useEffect(() => {
+    if (!isFlyoutOpen && flyoutMigrationId && migrationStats.id === flyoutMigrationId) {
+      getMissingResources(migrationStats.id);
+    }
+  }, [getMissingResources, flyoutMigrationId, migrationStats.id, isFlyoutOpen]);
+
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
+    setFlyoutMigrationId(migrationStats.id);
     telemetry.reportSetupMigrationOpenResources({
       migrationId: migrationStats.id,
-      missingResourcesCount: missingResources.length,
+      missingResourcesCount: missingResourceCount,
+      vendor: migrationStats.vendor,
     });
-  }, [openFlyout, migrationStats, telemetry, missingResources.length]);
+  }, [openFlyout, migrationStats, telemetry, missingResourceCount]);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
@@ -65,9 +89,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { startMigration, isLoading: isStarting } = useStartMigration();
   const onStartMigrationWithSettings = useCallback(
     (settings: RuleMigrationSettings) => {
-      startMigration(migrationStats.id, undefined, settings);
+      startMigration(migrationStats, undefined, settings);
     },
-    [migrationStats.id, startMigration]
+    [migrationStats, startMigration]
   );
   const { modal: startMigrationModal, showModal: showStartMigrationModal } =
     useStartRulesMigrationModal({ type: 'start', migrationStats, onStartMigrationWithSettings });
@@ -85,41 +109,39 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               <EuiFlexItem>
                 <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                   <span>{migrationPanelDescription}</span>
-                  {!isLoading && missingResources.length > 0 && (
-                    <span> {i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}</span>
+                  {!isLoadingMissingResources && missingResourceCount > 0 && (
+                    <span>
+                      {' '}
+                      {RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION[migrationStats.vendor]}
+                    </span>
                   )}
                 </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isLoading ? (
-            <CenteredLoadingSpinner />
-          ) : (
-            <>
-              {missingResources.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="ruleMigrationMissingResourcesButton"
-                    aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
-                    iconType="download"
-                    iconSide="right"
-                    onClick={onOpenFlyout}
-                    size="s"
-                  >
-                    {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <StartTranslationButton
-                  migrationId={migrationStats.id}
-                  isStopped={isStopped}
-                  startMigration={isStopped ? startMigration : showStartMigrationModal}
-                  isStarting={isStarting}
-                />
-              </EuiFlexItem>
-            </>
+          {missingResourceCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="ruleMigrationMissingResourcesButton"
+                aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE}
+                iconType="download"
+                iconSide="right"
+                onClick={onOpenFlyout}
+                size="s"
+                isLoading={isLoadingMissingResources}
+              >
+                {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <StartTranslationButton
+              migrationStats={migrationStats}
+              isStopped={isStopped}
+              startMigration={isStopped ? startMigration : showStartMigrationModal}
+              isStarting={isStarting}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {migrationStats.last_execution?.error && (
           <>

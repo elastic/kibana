@@ -80,4 +80,10 @@ export class MonacoEditorService extends FtrService {
       `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`
     );
   }
+
+  public getCodeEditorSuggestWidget() {
+    return this.findService.byCssSelector(
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
+    );
+  }
 }

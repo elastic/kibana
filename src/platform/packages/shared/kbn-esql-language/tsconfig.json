@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/esql-types",
+    "@kbn/core-pricing-common",
+    "@kbn/licensing-types",
+    "@kbn/field-types",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
