@@ -304,7 +304,9 @@ async function getSuggestionsWithinCommandExpression(
   // Determine if we're suggesting indices or fields based on the command context
   // Indices are suggested in FROM/TS commands, fields are suggested in other commands
   const commandName = astContext.command.name.toLowerCase();
-  const sourceCommands = new Set(esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase()));
+  const sourceCommands = new Set(
+    esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase())
+  );
   const isSourceCommand = sourceCommands.has(commandName);
   // STATS and inline stats don't primarily suggest field names, they suggest aggregation functions
   const isStatsCommand = commandName === 'stats' || commandName === 'inline stats';
