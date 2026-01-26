@@ -44,7 +44,8 @@
     "@kbn/zod",
     "@kbn/core-di-internal",
     "@kbn/i18n",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": [
     "target/**/*"
