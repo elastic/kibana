@@ -179,6 +179,38 @@ export class StreamsApp {
     }
   }
 
+  async verifyDiscoverButtonSourceCommand(
+    streamName: string,
+    expectedCommand: 'FROM' | 'TS'
+  ): Promise<void> {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Check for the expected source command in the URL-encoded ESQL query
+    const expectedFragment = encodeURIComponent(`${expectedCommand} ${streamName}`);
+    const unexpectedCommand = expectedCommand === 'FROM' ? 'TS' : 'FROM';
+    const unexpectedFragment = encodeURIComponent(`${unexpectedCommand} ${streamName}`);
+
+    if (!href.includes(expectedFragment)) {
+      throw new Error(
+        `Expected "${expectedCommand} ${streamName}" in Discover link but it was not found. href=${href}`
+      );
+    }
+
+    if (href.includes(unexpectedFragment)) {
+      throw new Error(
+        `Unexpected "${unexpectedCommand} ${streamName}" found in Discover link. Expected "${expectedCommand}". href=${href}`
+      );
+    }
+  }
+
   async verifyStreamsAreInTable(streamNames: string[]) {
     for (const name of streamNames) {
       await expect(
