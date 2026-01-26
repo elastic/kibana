@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
+import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { PromptLayout, PROMPT_LAYOUT_VARIANTS, type PromptLayoutVariant } from './layout';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { appPaths } from '../../../utils/app_paths';
 
 export type ErrorPromptType =
   | 'GENERIC_ERROR'
@@ -79,44 +75,13 @@ const ERROR_DETAILS_MAPPINGS: Record<ErrorPromptType, ErrorDetails> = {
   },
 };
 
-const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
-  'xpack.agentBuilder.appError.startNewConversationButtonLabel',
-  {
-    defaultMessage: 'Start new conversation',
-  }
-);
-
 interface ErrorPromptProps {
   errorType: ErrorPromptType;
   imageSrc?: string;
-  primaryButton?: React.ReactNode;
+  primaryButton: React.ReactNode;
   secondaryButton?: React.ReactNode;
   variant?: PromptLayoutVariant;
 }
-
-const StartNewConversationAction: React.FC = () => {
-  const { navigateToAgentBuilderUrl } = useNavigation();
-  const { isEmbeddedContext, setConversationId } = useConversationContext();
-
-  const handleClick = useCallback(() => {
-    if (isEmbeddedContext) {
-      setConversationId?.(undefined);
-    } else {
-      navigateToAgentBuilderUrl(appPaths.chat.new);
-    }
-  }, [isEmbeddedContext, setConversationId, navigateToAgentBuilderUrl]);
-
-  return (
-    <EuiButton
-      color="primary"
-      fill
-      onClick={handleClick}
-      data-test-subj="startNewConversationButton"
-    >
-      {NEW_CONVERSATION_BUTTON_LABEL}
-    </EuiButton>
-  );
-};
 
 export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   errorType,
@@ -134,7 +99,7 @@ export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
       imageSrc={imageSrc}
       title={errorDetails.title}
       subtitle={errorDetails.description}
-      primaryButton={primaryButton ?? <StartNewConversationAction />}
+      primaryButton={primaryButton}
       secondaryButton={secondaryButton ?? null}
     />
   );

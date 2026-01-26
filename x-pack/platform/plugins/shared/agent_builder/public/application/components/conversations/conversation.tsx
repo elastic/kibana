@@ -34,6 +34,7 @@ import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
+import { StartNewConversationButton } from './actions/start_new_conversation_button';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -110,7 +111,13 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   if (errorType) {
-    return <ErrorPrompt errorType={errorType} variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />;
+    return (
+      <ErrorPrompt
+        errorType={errorType}
+        variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE}
+        primaryButton={<StartNewConversationButton />}
+      />
+    );
   }
 
   return (
