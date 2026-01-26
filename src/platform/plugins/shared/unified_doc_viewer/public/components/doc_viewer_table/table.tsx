@@ -60,6 +60,8 @@ export interface DocViewerTableRestorableState {
   pinnedFields: string[];
   // Current rows per page selection
   rowsPerPage: number;
+  // Current page number
+  pageNumber: number;
 }
 
 const { withRestorableState, useRestorableLocalStorage } =
@@ -96,7 +98,7 @@ const InternalDocViewerTable = ({
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id ?? 'unknown';
 
@@ -115,23 +117,21 @@ const InternalDocViewerTable = ({
     HIDE_NULL_VALUES,
     false
   );
-
   const [showOnlySelectedFields, setShowOnlySelectedFields] = useRestorableLocalStorage(
     'showOnlySelectedFields',
     SHOW_ONLY_SELECTED_FIELDS,
     false
+  );
+  const [pinnedFieldsRaw, setPinnedFieldsRaw] = useRestorableLocalStorage(
+    'pinnedFields',
+    getPinnedFieldsStorageKey(currentDataViewId),
+    []
   );
 
   const tableFiltersCallbacks = useTableFiltersCallbacks({
     searchTerm,
     selectedFieldTypes: fieldTypeFilters,
   });
-
-  const [pinnedFieldsRaw, setPinnedFieldsRaw] = useRestorableLocalStorage(
-    'pinnedFields',
-    getPinnedFieldsStorageKey(currentDataViewId),
-    []
-  );
 
   // Ensure pinnedFields is always an array (handles legacy format or corrupted data)
   const pinnedFields = useMemo(
@@ -312,6 +312,15 @@ const InternalDocViewerTable = ({
     [setInitialPageSizeRaw]
   );
 
+  const [pageNumber, setPageNumber] = useRestorableLocalStorage('pageNumber', '', 0);
+
+  const onChangePageNumber = useCallback(
+    (newPageNumber: number) => {
+      setPageNumber(newPageNumber);
+    },
+    [setPageNumber]
+  );
+
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
   const { width: containerWidth } = useResizeObserver(containerRef);
 
@@ -436,6 +445,8 @@ const InternalDocViewerTable = ({
             searchTerm={searchTerm}
             initialPageSize={initialPageSize}
             onChangePageSize={onChangePageSize}
+            initialPageIndex={pageNumber}
+            onChangePageIndex={onChangePageNumber}
             pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
             hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}

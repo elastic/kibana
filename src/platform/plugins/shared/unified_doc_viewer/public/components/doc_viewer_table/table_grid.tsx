@@ -67,6 +67,8 @@ export interface TableGridProps {
   searchTerm?: string;
   initialPageSize: number;
   onChangePageSize?: (newPageSize: number) => void;
+  initialPageIndex?: number;
+  onChangePageIndex?: (newPageIndex: number) => void;
   pinnedFields?: string[];
   onTogglePinned?: (field: string) => void;
   hidePinColumn?: boolean;
@@ -96,6 +98,8 @@ export function TableGrid({
   searchTerm,
   initialPageSize,
   onChangePageSize,
+  initialPageIndex = 0,
+  onChangePageIndex,
   onTogglePinned,
   hidePinColumn = false,
   customRenderCellValue,
@@ -145,8 +149,17 @@ export function TableGrid({
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize,
+    initialPageIndex,
     totalItems: rows.length,
   });
+
+  const handleChangePageIndex = useCallback(
+    (newPageIndex: number) => {
+      onChangePageIndex?.(newPageIndex);
+      changePageIndex(newPageIndex);
+    },
+    [changePageIndex, onChangePageIndex]
+  );
 
   const handleChangePageSize = useCallback(
     (newPageSize: number) => {
@@ -162,13 +175,13 @@ export function TableGrid({
     return showPagination
       ? {
           onChangeItemsPerPage: handleChangePageSize,
-          onChangePage: changePageIndex,
+          onChangePage: handleChangePageIndex,
           pageIndex: curPageIndex,
           pageSize,
           pageSizeOptions: PAGE_SIZE_OPTIONS,
         }
       : undefined;
-  }, [showPagination, handleChangePageSize, changePageIndex, curPageIndex, pageSize]);
+  }, [showPagination, handleChangePageSize, handleChangePageIndex, curPageIndex, pageSize]);
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
