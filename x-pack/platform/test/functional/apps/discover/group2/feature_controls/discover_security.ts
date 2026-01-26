@@ -183,6 +183,8 @@ export default function (ctx: FtrProviderContext) {
           full_name: 'test user',
         });
 
+        await security.forceLogout();
+
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: true,
         });
