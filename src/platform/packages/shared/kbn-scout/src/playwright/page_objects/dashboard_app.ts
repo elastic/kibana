@@ -122,6 +122,12 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector('dashboardPanelSelectionList', { state: 'visible' });
   }
 
+  async openNewLensPanel() {
+    await this.openAddPanelFlyout();
+    await this.page.testSubj.click('create-action-Lens');
+    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+  }
+
   async saveDashboard(name: string) {
     await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
     await this.page.testSubj.fill('savedObjectTitle', name);
@@ -580,6 +586,14 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE', {
       state: 'hidden',
     });
+  }
+
+  async expectEmptyPlaceholderVisible() {
+    await this.page.testSubj.waitForSelector('emptyPlaceholder', { state: 'visible' });
+  }
+
+  async expectXYVisChartVisible() {
+    await this.page.testSubj.waitForSelector('xyVisChart', { state: 'visible' });
   }
 
   async clickTimeRangeBadge() {

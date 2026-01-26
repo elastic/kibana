@@ -8,7 +8,7 @@
  */
 
 import { spaceTest, expect, tags } from '@kbn/scout';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 import {
   LENS_BASIC_KIBANA_ARCHIVE,
   LENS_BASIC_DATA_VIEW,
@@ -23,34 +23,9 @@ const createDashboard = async (pageObjects: PageObjects, dashboardName: string) 
   await pageObjects.dashboard.saveDashboard(dashboardName);
 };
 
-const addByValueLensPanel = async (pageObjects: PageObjects, page: ScoutPage) => {
-  await pageObjects.dashboard.openAddPanelFlyout();
-  await page.testSubj.click('create-action-Lens');
-  await page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
-
-  await page.testSubj.click('lnsXY_yDimensionPanel > lns-empty-dimension');
-  await page.testSubj.click('lns-indexPatternDimension-average');
-  await page.testSubj.click('indexPattern-dimension-field');
-  await page.testSubj.typeWithDelay('indexPattern-dimension-field > comboBoxSearchInput', 'bytes');
-  await page.testSubj.click('lns-fieldOption-bytes');
-  await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-  await page.testSubj.click('lnsXY_xDimensionPanel > lns-empty-dimension');
-  await page.testSubj.click('lns-indexPatternDimension-date_histogram');
-  await page.testSubj.click('indexPattern-dimension-field');
-  await page.testSubj.typeWithDelay(
-    'indexPattern-dimension-field > comboBoxSearchInput',
-    '@timestamp'
-  );
-  await page.testSubj.click('lns-fieldOption-@timestamp');
-  await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-  await page.testSubj.click('lnsXY_splitDimensionPanel > lns-empty-dimension');
-  await page.testSubj.click('lns-indexPatternDimension-terms');
-  await page.testSubj.click('indexPattern-dimension-field');
-  await page.testSubj.typeWithDelay('indexPattern-dimension-field > comboBoxSearchInput', 'ip');
-  await page.testSubj.click('lns-fieldOption-ip');
-  await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
+const addByValueLensPanel = async (pageObjects: PageObjects) => {
+  await pageObjects.dashboard.openNewLensPanel();
+  await pageObjects.lens.configureXYDimensions();
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForRenderComplete();
 };
@@ -90,16 +65,17 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
 
   spaceTest(
     'by value: can add a custom time range to a panel',
-    async ({ pageObjects, page }, testInfo) => {
+    async ({ pageObjects }, testInfo) => {
       await spaceTest.step('create dashboard and add by-value lens panel', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
-        await addByValueLensPanel(pageObjects, page);
+        await addByValueLensPanel(pageObjects);
       });
 
       await spaceTest.step('apply custom time range and verify badge', async () => {
         await applyCustomTimeRange(pageObjects);
         await pageObjects.dashboard.expectTimeRangeBadgeExists();
-        await expect(page.testSubj.locator('emptyPlaceholder')).toBeVisible();
+        await pageObjects.dashboard.expectEmptyPlaceholderVisible();
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
         await pageObjects.dashboard.clickQuickSave();
       });
     }
@@ -107,10 +83,10 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
 
   spaceTest(
     'by value: can remove a custom time range from a panel',
-    async ({ pageObjects, page }, testInfo) => {
+    async ({ pageObjects }, testInfo) => {
       await spaceTest.step('create dashboard and add by-value lens panel', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
-        await addByValueLensPanel(pageObjects, page);
+        await addByValueLensPanel(pageObjects);
       });
 
       await spaceTest.step('apply custom time range', async () => {
@@ -121,26 +97,28 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
       await spaceTest.step('remove custom time range and verify panel', async () => {
         await removeCustomTimeRange(pageObjects);
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
-        await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+        await pageObjects.dashboard.expectXYVisChartVisible();
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
       });
     }
   );
 
   spaceTest(
     'by reference: can add a custom time range to panel',
-    async ({ pageObjects, page }, testInfo) => {
+    async ({ pageObjects }, testInfo) => {
       const libraryTitle = `My by reference visualization - ${testInfo.title.replace(/\s+/g, '-')}`;
 
       await spaceTest.step('create dashboard and save Lens to library', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
-        await addByValueLensPanel(pageObjects, page);
+        await addByValueLensPanel(pageObjects);
         await pageObjects.dashboard.saveToLibrary(libraryTitle);
       });
 
       await spaceTest.step('apply custom time range and verify badge', async () => {
         await applyCustomTimeRange(pageObjects, libraryTitle);
         await pageObjects.dashboard.expectTimeRangeBadgeExists();
-        await expect(page.testSubj.locator('emptyPlaceholder')).toBeVisible();
+        await pageObjects.dashboard.expectEmptyPlaceholderVisible();
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
         await pageObjects.dashboard.clickQuickSave();
       });
     }
@@ -148,12 +126,12 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
 
   spaceTest(
     'by reference: can remove a custom time range from a panel',
-    async ({ pageObjects, page }, testInfo) => {
+    async ({ pageObjects }, testInfo) => {
       const libraryTitle = `My by reference visualization - ${testInfo.title.replace(/\s+/g, '-')}`;
 
       await spaceTest.step('create dashboard and save Lens to library', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
-        await addByValueLensPanel(pageObjects, page);
+        await addByValueLensPanel(pageObjects);
         await pageObjects.dashboard.saveToLibrary(libraryTitle);
       });
 
@@ -165,7 +143,8 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
       await spaceTest.step('remove custom time range and verify panel', async () => {
         await removeCustomTimeRange(pageObjects);
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
-        await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+        await pageObjects.dashboard.expectXYVisChartVisible();
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
       });
     }
   );
