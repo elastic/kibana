@@ -84,7 +84,9 @@ export interface FilterOption {
  * />
  * ```
  */
-export interface CategoryAccordionTableProps<T = unknown> {
+export interface CategoryAccordionTableProps<
+  T extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Array of categories with their items.
    * Each item should contain all the data needed to render the table columns,

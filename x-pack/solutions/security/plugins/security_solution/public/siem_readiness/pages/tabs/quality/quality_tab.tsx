@@ -36,7 +36,7 @@ import {
 } from './quality_add_case_details';
 
 // Extended IndexInfo with computed fields
-interface IndexInfoWithStatus extends IndexInfo {
+interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   status: 'incompatible' | 'healthy';
   incompatibleFieldCount: number;
   checkedAt: number | undefined;

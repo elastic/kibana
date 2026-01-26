@@ -84,4 +84,5 @@ export interface SiemReadinessPackageInfo {
   title: string;
   version: string;
   status: string;
+  categories?: string[];
 }
