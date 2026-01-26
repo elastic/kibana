@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return warning header when serializer parameter is provided', async () => {
-        const { body, headers } = await supertest
+        const { headers } = await supertest
           .post(
             `${LIST_ITEM_URL}/_import?type=ip&serializer=(?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))`
           )
@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return warning header when deserializer parameter is provided', async () => {
-        const { body, headers } = await supertest
+        const { headers } = await supertest
           .post(`${LIST_ITEM_URL}/_import?type=ip&deserializer={{value}}`)
           .set('kbn-xsrf', 'true')
           .attach('file', getImportListItemAsBuffer(['127.0.0.1', '127.0.0.2']), 'list_items.txt')
