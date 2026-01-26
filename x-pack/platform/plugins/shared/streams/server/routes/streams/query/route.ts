@@ -78,7 +78,7 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context }) => {
-    const { streamsClient, assetClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -109,7 +109,7 @@ const upsertQueryStreamRoute = createServerRoute({
     }
 
     const [assets, attachments] = await Promise.all([
-      assetClient.getAssets(name),
+      queryClient.getAssets(name),
       attachmentClient.getAttachments(name),
     ]);
 
@@ -125,7 +125,8 @@ const upsertQueryStreamRoute = createServerRoute({
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
 
-    const { name: _name, ...stream } = definition;
+    // Remove name and updated_at from definition - these are not allowed in UpsertRequest
+    const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
     const upsertRequest: Streams.QueryStream.UpsertRequest = {
       dashboards,

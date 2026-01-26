@@ -11,6 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { DeleteStreamPanel } from '../data_management/stream_detail_management/advanced_view/delete_stream';
 import { ImportExportPanel } from '../data_management/stream_detail_management/advanced_view/import_export';
+import { StreamConfigurationPanel } from './stream_configuration_panel';
 
 export function QueryStreamsAdvancedView({
   definition,
@@ -31,6 +32,7 @@ export function QueryStreamsAdvancedView({
           <EuiSpacer />
         </>
       )}
+      <StreamConfigurationPanel definition={definition} refreshDefinition={refreshDefinition} />
       <EuiSpacer />
       <DeleteStreamPanel definition={definition} />
       <EuiSpacer />

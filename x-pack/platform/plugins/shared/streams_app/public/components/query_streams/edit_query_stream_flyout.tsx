@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect } from 'react';
 import {
   EuiButton,
@@ -21,13 +22,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController, useBoolean } from '@kbn/react-hooks';
+import { useAbortController } from '@kbn/react-hooks';
 import type { AggregateQuery } from '@kbn/es-query';
 import { useForm } from 'react-hook-form';
 import { css } from '@emotion/css';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { isError } from 'lodash';
-import type { SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { esqlResultToPlainObjects } from '../../util/esql_result_to_plain_objects';
 import { QueryStreamForm } from './query_stream_form';
 import { QueryStreamPreviewPanel } from './query_stream_preview_panel';
@@ -37,39 +38,21 @@ import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 
-interface CreateQueryStreamFlyoutProps {
-  onQueryStreamCreated: () => void;
+interface EditQueryStreamFlyoutProps {
+  definition: Streams.QueryStream.GetResponse;
+  onClose: () => void;
+  onSave: () => void;
 }
 
 interface FormState {
-  name: string;
   esqlQuery: string;
 }
 
-export function CreateQueryStreamFlyout({ onQueryStreamCreated }: CreateQueryStreamFlyoutProps) {
-  const [isFlyoutOpen, { toggle: toggleFlyout, off: closeFlyout }] = useBoolean(false);
-
-  return (
-    <>
-      <EuiButton onClick={toggleFlyout} size="s">
-        {i18n.translate('xpack.streams.streamsListView.createQueryStreamButtonLabel', {
-          defaultMessage: 'Create Query stream',
-        })}
-      </EuiButton>
-      {isFlyoutOpen && (
-        <QueryStreamFlyout onClose={closeFlyout} onQueryStreamCreated={onQueryStreamCreated} />
-      )}
-    </>
-  );
-}
-
-const QueryStreamFlyout = ({
+export function EditQueryStreamFlyout({
+  definition,
   onClose,
-  onQueryStreamCreated,
-}: {
-  onClose: () => void;
-  onQueryStreamCreated: () => void;
-}) => {
+  onSave,
+}: EditQueryStreamFlyoutProps) {
   const { dependencies, core } = useKibana();
   const { notifications } = core;
   const {
@@ -78,47 +61,43 @@ const QueryStreamFlyout = ({
   } = dependencies.start;
 
   const { timeState } = useTimefilter();
+  const streamName = definition.stream.name;
+  const initialQuery = definition.stream.query.esql;
 
   const { formState, register, handleSubmit, setValue, watch } = useForm<FormState>({
     defaultValues: {
-      name: '',
-      esqlQuery: '',
+      esqlQuery: initialQuery,
     },
   });
 
-  register('name', {
-    required: i18n.translate('xpack.streams.createQueryStreamFlyout.nameRequired', {
-      defaultMessage: 'Name is required',
-    }),
-  });
   register('esqlQuery', {
-    required: i18n.translate('xpack.streams.createQueryStreamFlyout.queryRequired', {
+    required: i18n.translate('xpack.streams.editQueryStreamFlyout.queryRequired', {
       defaultMessage: 'Query is required',
     }),
   });
-  const { name: streamName, esqlQuery } = watch();
+  const esqlQuery = watch('esqlQuery');
 
   const abortController = useAbortController();
 
-  const handleQueryStreamCreation = handleSubmit(async (formData) => {
+  const handleQueryStreamUpdate = handleSubmit(async (formData) => {
     try {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-        params: { path: { name: formData.name }, body: { query: { esql: formData.esqlQuery } } },
+        params: { path: { name: streamName }, body: { query: { esql: formData.esqlQuery } } },
         signal: abortController.signal,
       });
-      onQueryStreamCreated();
+      onSave();
       onClose();
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.streams.createQueryStreamFlyout.successTitle', {
-          defaultMessage: 'Query stream created successfully',
+        title: i18n.translate('xpack.streams.editQueryStreamFlyout.successTitle', {
+          defaultMessage: 'Query stream updated successfully',
         }),
         toastLifeTimeMs: 3000,
       });
     } catch (error) {
       const formattedError = getFormattedError(error);
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.streams.createQueryStreamFlyout.errorTitle', {
-          defaultMessage: 'Error creating query stream',
+        title: i18n.translate('xpack.streams.editQueryStreamFlyout.errorTitle', {
+          defaultMessage: 'Error updating query stream',
         }),
         text: formattedError.message,
         toastLifeTimeMs: 3000,
@@ -150,7 +129,7 @@ const QueryStreamFlyout = ({
   );
 
   useEffect(() => {
-    // Update query on timerange change
+    // Execute query on mount to show initial preview
     if (esqlQuery) {
       handleQuerySubmit({ esql: esqlQuery });
     }
@@ -158,12 +137,13 @@ const QueryStreamFlyout = ({
   }, [handleQuerySubmit]);
 
   return (
-    <EuiFlyout size="l" onClose={onClose} aria-labelledby="create-query-stream-flyout-title">
+    <EuiFlyout size="l" onClose={onClose} aria-labelledby="edit-query-stream-flyout-title">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id="create-query-stream-flyout-title">
-            {i18n.translate('xpack.streams.createQueryStreamFlyout.createQueryStreamTitleLabel', {
-              defaultMessage: 'Create Query Stream',
+          <h2 id="edit-query-stream-flyout-title">
+            {i18n.translate('xpack.streams.editQueryStreamFlyout.editQueryStreamTitleLabel', {
+              defaultMessage: 'Edit Query Stream: {streamName}',
+              values: { streamName },
             })}
           </h2>
         </EuiTitle>
@@ -199,12 +179,6 @@ const QueryStreamFlyout = ({
                       paddingSize="l"
                     >
                       <QueryStreamForm>
-                        <QueryStreamForm.StreamName
-                          partitionName={streamName}
-                          onChange={(name) => setValue('name', name, { shouldValidate: true })}
-                          error={formState.errors.name?.message}
-                          isInvalid={Boolean(formState.errors.name?.message)}
-                        />
                         <QueryStreamForm.ESQLEditor
                           isLoading={isLoadingQueryResults}
                           query={{ esql: esqlQuery }}
@@ -236,7 +210,7 @@ const QueryStreamFlyout = ({
                         flex-direction: column;
                       `}
                     >
-                      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
+                      <EuiFlexItem grow={false} data-test-subj="queryStreamPreviewPanel">
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
                           <EuiFlexGroup component="span" gutterSize="s">
                             <EuiIcon type="inspect" />
@@ -268,27 +242,28 @@ const QueryStreamFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiButtonEmpty
-            data-test-subj="streamsAppCreateQueryStreamFlyoutCancelButton"
+            data-test-subj="streamsAppEditQueryStreamFlyoutCancelButton"
             iconType="cross"
             onClick={onClose}
             flush="left"
           >
-            {i18n.translate('xpack.streams.createQueryStreamFlyout.cancelButtonLabel', {
+            {i18n.translate('xpack.streams.editQueryStreamFlyout.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
           <EuiButton
-            data-test-subj="streamsAppCreateQueryStreamFlyoutCreateButton"
+            data-test-subj="streamsAppEditQueryStreamFlyoutSaveButton"
             isLoading={formState.isSubmitting}
             disabled={(formState.isSubmitted && !formState.isValid) || !!documentsError}
-            onClick={handleQueryStreamCreation}
+            onClick={handleQueryStreamUpdate}
           >
-            {i18n.translate('xpack.streams.createQueryStreamFlyout.createQueryStreamButtonLabel', {
-              defaultMessage: 'Create Query Stream',
+            {i18n.translate('xpack.streams.editQueryStreamFlyout.saveButtonLabel', {
+              defaultMessage: 'Save',
             })}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-};
+}
+
