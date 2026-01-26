@@ -159,6 +159,7 @@ export function QuickSearchVisor({
                 }}
                 appName="esqlEditorVisor"
                 dataTestSubj="esqlVisorKQLQueryInput"
+                size="s"
               />
             )}
           </div>
