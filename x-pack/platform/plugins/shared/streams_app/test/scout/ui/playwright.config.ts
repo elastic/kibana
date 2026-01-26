@@ -8,6 +8,6 @@
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './tests',
+  testDir: './tests/discover_integration*.spec.ts',
   runGlobalSetup: true,
 });
