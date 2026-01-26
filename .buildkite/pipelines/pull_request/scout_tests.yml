@@ -3,8 +3,6 @@ steps:
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2d-standard-4
-      preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     key: build_scout_tests
     timeout_in_minutes: 15
     depends_on:
