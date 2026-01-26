@@ -58,7 +58,6 @@ export const mockDataStreamParams: DataStreamParams = {
 
 export const mockIntegrationData: IntegrationAttributes = {
   integration_id: 'test-integration-id',
-  data_stream_count: 2,
   created_by: 'test-user',
   status: TASK_STATUSES.pending,
   metadata: {

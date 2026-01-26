@@ -8,7 +8,7 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { inspectStep } from './build_workflow_lookup';
+import { buildWorkflowLookup, inspectStep } from './build_workflow_lookup';
 
 describe('inspectStep', () => {
   describe('simple step parsing', () => {
@@ -524,5 +524,56 @@ steps:
       expect(result.level4.parentStepId).toBe('level3');
       expect(result.level4.propInfos).toHaveProperty('message');
     });
+  });
+});
+
+describe('buildWorkflowLookup', () => {
+  it('should build a workflow lookup from a yaml string', () => {
+    const yaml = `
+name: test
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+    expect(result).toMatchObject({
+      steps: {
+        step1: {
+          stepId: 'step1',
+          stepType: 'console',
+        },
+      },
+    });
+  });
+
+  it('should not treat inputs as steps', () => {
+    const yaml = `
+name: test
+inputs:
+  - name: people
+    type: array
+    default:
+      - alice
+      - bob
+  - name: greeting
+    type: string
+    default: Hello
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    // Should only have step1, not the inputs
+    expect(Object.keys(result.steps)).toHaveLength(1);
+    expect(result.steps).toHaveProperty('step1');
+    expect(result.steps).not.toHaveProperty('people');
+    expect(result.steps).not.toHaveProperty('greeting');
+    expect(result.steps.step1.stepId).toBe('step1');
+    expect(result.steps.step1.stepType).toBe('console');
   });
 });

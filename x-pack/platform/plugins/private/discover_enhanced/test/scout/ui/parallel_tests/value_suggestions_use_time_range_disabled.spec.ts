@@ -8,9 +8,7 @@
 import { expect, tags } from '@kbn/scout';
 import { spaceTest, testData, assertionMessages } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/246229
-// FLAKY: https://github.com/elastic/kibana/issues/246228
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover app - value suggestions: useTimeRange disabled',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
@@ -27,6 +25,8 @@ spaceTest.describe.skip(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

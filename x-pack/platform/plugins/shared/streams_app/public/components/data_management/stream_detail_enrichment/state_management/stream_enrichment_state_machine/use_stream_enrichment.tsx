@@ -85,6 +85,13 @@ export const useStreamEnrichmentEvents = () => {
       reorderStep: (stepId: string, direction: 'up' | 'down') => {
         service.send({ type: 'step.reorder', stepId, direction });
       },
+      reorderStepByDragDrop: (
+        sourceStepId: string,
+        targetStepId: string,
+        operation: 'before' | 'after' | 'inside'
+      ) => {
+        service.send({ type: 'step.reorderByDragDrop', sourceStepId, targetStepId, operation });
+      },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },
@@ -93,6 +100,12 @@ export const useStreamEnrichmentEvents = () => {
       },
       refreshSimulation: () => {
         service.send({ type: 'simulation.refresh' });
+      },
+      filterSimulationByCondition: (conditionId: string) => {
+        service.send({ type: 'simulation.filterByCondition', conditionId });
+      },
+      clearSimulationConditionFilter: () => {
+        service.send({ type: 'simulation.clearConditionFilter' });
       },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });

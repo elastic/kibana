@@ -12,7 +12,13 @@ import type {
   ObservabilityAgentBuilderPluginPublicStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
-import { createLogAIInsight, createLogsAIInsightRenderer } from './components/log_ai_insight';
+import {
+  createAlertAIInsight,
+  createErrorSampleAIInsight,
+  createLogAIInsight,
+  createLogsAIInsightRenderer,
+} from './components/insights';
+import { registerAttachmentUiDefinitions } from './attachment_types';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -45,7 +51,15 @@ export class ObservabilityAgentBuilderPlugin
       id: 'observability-logs-ai-insight',
       render: createLogsAIInsightRenderer(LogAIInsight),
     });
-    return {};
+
+    registerAttachmentUiDefinitions({
+      attachments: plugins.agentBuilder.attachments,
+    });
+
+    return {
+      getAlertAIInsight: () => createAlertAIInsight(core, plugins),
+      getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
+    };
   }
 
   public stop() {}

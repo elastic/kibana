@@ -82,6 +82,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/licensing-types",
     "@kbn/connector-schemas",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

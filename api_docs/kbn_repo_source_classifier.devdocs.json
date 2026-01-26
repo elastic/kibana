@@ -26,6 +26,8 @@
         "label": "RepoSourceClassifier",
         "description": [],
         "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   }
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
+                "lineNumber": 26,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -85,6 +91,8 @@
               }
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -99,6 +107,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
+                "lineNumber": 269,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,6 +130,8 @@
         "label": "ModuleId",
         "description": [],
         "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,6 +148,8 @@
               "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,6 +166,8 @@
               "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -168,6 +184,8 @@
               "\"shared\" | \"private\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +199,8 @@
               "repo relative path to the module's source file"
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,6 +218,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -215,6 +237,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +255,8 @@
               "string[]"
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -251,6 +277,8 @@
           "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
         ],
         "path": "packages/kbn-repo-source-classifier/src/module_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
