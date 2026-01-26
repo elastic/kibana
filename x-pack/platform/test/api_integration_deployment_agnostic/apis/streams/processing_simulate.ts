@@ -509,6 +509,110 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Temporary field handling', () => {
+      it('should not surface temporary fields in top-level detected_fields when created and then removed', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-temp',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    set: {
+                      field: 'attributes.temp_field',
+                      value: 'temporary_value',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'attributes.temp_field',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        // Top-level detected_fields should NOT include the temporary field
+        // since it was removed before the final output
+        expect(response.body.detected_fields).to.eql([]);
+
+        // Per-document detected_fields should still track per-processor changes
+        const { detected_fields, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(detected_fields).to.eql([
+          { processor_id: 'set-temp', name: 'attributes.temp_field' },
+        ]);
+
+        // The final document value should NOT have the temp field
+        expect(value).to.not.have.property('attributes.temp_field');
+
+        // Per-processor metrics should still show the field was detected by the set processor
+        const processorsMetrics = response.body.processors_metrics;
+        expect(processorsMetrics['set-temp'].detected_fields).to.eql(['attributes.temp_field']);
+        expect(processorsMetrics['remove-temp'].detected_fields).to.eql([]);
+      });
+
+      it('should not auto-configure ECS fields that only exist as temporary fields', async () => {
+        // Use a known ECS field pattern that would normally be auto-configured
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    set: {
+                      field: 'host.name',
+                      value: 'temp-host',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'host.name',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // Top-level detected_fields should NOT include the ECS field
+        // since it was removed - so it shouldn't be auto-configured
+        expect(response.body.detected_fields).to.eql([]);
+
+        // The final document should NOT have host.name
+        expect(response.body.documents[0].value).to.not.have.property('host.name');
+      });
+    });
+
     describe('Geo point field handling', () => {
       const CLASSIC_STREAM_NAME = 'logs-geotest-default';
 
