@@ -28,7 +28,7 @@ export const generateReportHandler: FleetRequestHandler<
   null,
   TypeOf<typeof PostGenerateAgentsReportRequestSchema.body>
 > = async (context, request, response) => {
-  const { agentIds, fields, timezone, sort } = request.body;
+  const { agents, fields, timezone, sort } = request.body;
   const logger = appContextService.getLogger();
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
 
@@ -45,7 +45,7 @@ export const generateReportHandler: FleetRequestHandler<
   }
 
   const jobConfig = {
-    jobParams: getJobParams(agentIds, fields, runtimeFields, timezone, sort),
+    jobParams: getJobParams(agents, fields, runtimeFields, timezone, sort),
     exportTypeId: 'csv_searchsource',
   };
 
@@ -93,7 +93,7 @@ export const getSortFieldForAPI = (field: string): string => {
 };
 
 const getJobParams = (
-  agentIds: string[],
+  agents: string[] | string,
   fields: string[],
   runtimeFields: string,
   timezone: string,
@@ -115,7 +115,7 @@ const getJobParams = (
     fieldFormats: {} as FieldFormatsStartCommon,
   });
 
-  const query = `agent.id:(${agentIds.join(' OR ')})`;
+  const query = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
 
   const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
   const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;

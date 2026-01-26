@@ -370,7 +370,7 @@ export interface BulkChangeAgentPrivilegeLevelResponse {
 
 export interface PostGenerateAgentsReportRequest {
   body: {
-    agentIds: string[] | string;
+    agents: string[] | string;
     fields: string[];
     timezone: string;
     sort?: {

@@ -25,7 +25,7 @@ export function useExportCSV() {
     columns: ExportField[],
     sortOptions?: { field?: string; direction?: 'asc' | 'desc' }
   ) => {
-    const agentIds = Array.isArray(agents) ? agents.map((agent) => agent.id) : agents;
+    const _agents = Array.isArray(agents) ? agents.map((agent) => agent.id) : agents;
     const fields = columns.map((column) => column.field);
     const timezone =
       uiSettings.get('dateFormat:tz') === 'Browser'
@@ -35,7 +35,7 @@ export function useExportCSV() {
 
     try {
       await sendPostGenerateAgentsReport({
-        agentIds,
+        agents: _agents,
         fields,
         timezone,
         sort: sortOptions,
