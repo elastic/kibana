@@ -115,7 +115,7 @@ export function UnifiedDocViewerFlyout({
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
-  const chromeStyle = useObservable(services.chrome?.getChromeStyle$());
+  const chromeStyle = useObservable(services.chrome.getChromeStyle$(), 'classic');
   const isProjectStyle = chromeStyle === 'project';
   const DEFAULT_WIDTH = euiTheme.base * 34;
   const defaultWidth = flyoutDefaultWidth ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
