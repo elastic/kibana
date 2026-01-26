@@ -60,9 +60,9 @@ test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
     // Enter edit mode to access visualization actions
     await dashboard.switchToEditMode();
 
-    dashboard.openInLineEditor(METRIC_VISUALIZATION_ID);
+    await dashboard.openInLineEditor(METRIC_VISUALIZATION_ID);
 
-    lens.getConvertToEsqlButton().click();
+    await lens.getConvertToEsqlButton().click();
 
     await expect(lens.getConvertToEsqModal()).toBeVisible();
 
