@@ -429,6 +429,23 @@ const getAvailableProcessors: (
       );
     },
   },
+  concat: {
+    type: 'concat' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatInputDisplay',
+      {
+        defaultMessage: 'Concat',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.concatHelpText"
+          defaultMessage="Join field values and text into a single string and write it to a target field."
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -472,6 +489,8 @@ const PROCESSOR_GROUP_MAP: Record<
   uppercase: 'set',
   lowercase: 'set',
   trim: 'set',
+  join: 'set',
+  concat: 'set',
 };
 
 const getProcessorDescription =
