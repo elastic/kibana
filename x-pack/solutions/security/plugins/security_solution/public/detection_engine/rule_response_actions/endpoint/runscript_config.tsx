@@ -26,10 +26,15 @@ import type { AutomatedRunScriptConfig, EndpointScript } from '../../../../commo
 import type { EndpointRunscriptScriptSelectorProps } from '../../../management/components/endpoint_runscript_script_selector';
 import { EndpointRunscriptScriptSelector } from '../../../management/components/endpoint_runscript_script_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { OS_TITLES } from '../../../management/common/translations';
+import { CONSOLE_COMMANDS, OS_TITLES } from '../../../management/common/translations';
 import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
+
+interface ValidationState {
+  isValid: boolean;
+  errors?: string[];
+}
 
 const RUNSCRIPT_CONFIG_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.runscriptConfig.runscriptConfigurationLabel',
@@ -64,9 +69,7 @@ const SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT = i18n.translate(
   { defaultMessage: 'Selected script requires arguments to be provided' }
 );
 
-const validateTimeoutValue = (
-  value: string | number | undefined
-): { isValid: boolean; errors?: string[] } => {
+const validateTimeoutValue = (value: string | number | undefined): ValidationState => {
   if (value) {
     const timeoutValue = Number(value);
 
@@ -107,6 +110,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
     const isAutomatedRunsScriptEnabled = useIsExperimentalFeatureEnabled(
       'responseActionsEndpointAutomatedRunScript'
     );
+    const [validationState, setValidationState] = useState<ValidationState>({ isValid: true });
 
     const fieldConfig: FieldConfig<AutomatedRunScriptConfig> = useMemo(() => {
       const config: FieldConfig<AutomatedRunScriptConfig> = {
@@ -118,14 +122,21 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
         validations: [
           {
             validator: ({ value }) => {
-              const isInvalid =
-                !value.linux.scriptId && !value.macos.scriptId && !value.windows.scriptId;
-
-              if (isInvalid) {
+              if (!value.linux.scriptId && !value.macos.scriptId && !value.windows.scriptId) {
                 return {
                   code: 'invalid_script_id',
                   isInvalid: true,
                   message: RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
+                };
+              }
+
+              if (!validationState.isValid) {
+                return {
+                  code: 'invalid_runscript_config',
+                  isInvalid: true,
+                  message: `${CONSOLE_COMMANDS.runscript.title}: ${
+                    validationState.errors?.join('; ') ?? ''
+                  }`,
                 };
               }
             },
@@ -134,7 +145,20 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
       };
 
       return config;
+    }, [validationState.errors, validationState.isValid]);
+
+    const runscriptConfigOnChangeHandler = useCallback<
+      AutomatedRunScriptConfigurationProps['onChange']
+    >((runscriptFormState) => {
+      setValidationState(runscriptFormState);
     }, []);
+
+    const runscriptComponentProps = useMemo(() => {
+      return {
+        onChange: runscriptConfigOnChangeHandler,
+        'data-test-subj': 'runscript-config-field',
+      };
+    }, [runscriptConfigOnChangeHandler]);
 
     if (!isAutomatedRunsScriptEnabled) {
       return null;
@@ -146,7 +170,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
         <UseField<AutomatedRunScriptConfig>
           path={`${basePath}.config`}
           component={AutomatedRunScriptConfiguration}
-          componentProps={{ 'data-test-subj': 'runscript-config-field' }}
+          componentProps={runscriptComponentProps}
           config={fieldConfig}
           isDisabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
@@ -159,17 +183,24 @@ RunscriptConfig.displayName = 'RunscriptConfig';
 
 export interface AutomatedRunScriptConfigurationProps {
   field: FieldHook<AutomatedRunScriptConfig>;
+  onChange: (validationState: ValidationState) => void;
   'data-test-subj'?: string;
 }
 
 export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProps>(
   (props) => {
-    const { field, 'data-test-subj': dataTestSubj } = props;
+    const { field, onChange, 'data-test-subj': dataTestSubj } = props;
     const { onChange: fieldOnChange, value } = field;
     const getTestId = useTestIdGenerator(dataTestSubj);
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
+    type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
+    const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
+      linux: { isValid: true },
+      macos: { isValid: true },
+      windows: { isValid: true },
+    });
 
-    const emitChange = useCallback(
+    const emitUseFieldChange = useCallback(
       (newValue: AutomatedRunScriptConfig) => {
         const event = new Event('change', {
           bubbles: true,
@@ -207,8 +238,36 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
                     showFieldLabels={index === 0}
                     config={value[osType]}
                     data-test-subj={getTestId(osType)}
-                    onChange={({ updatedConfig }) => {
-                      emitChange({
+                    onChange={({ updatedConfig, isValid, errors }) => {
+                      const updatedValidationState: RunscriptOsValidationState = {
+                        ...osValidationState,
+                        [osType]: { isValid, errors },
+                      };
+
+                      setOsValidationState(updatedValidationState);
+                      onChange({
+                        isValid: Object.values(updatedValidationState).every(
+                          ({ isValid: isOsValueValid }) => isOsValueValid
+                        ),
+                        errors: Object.entries(updatedValidationState).reduce(
+                          (acc, [platform, osValidationResult]) => {
+                            if (!osValidationResult.isValid) {
+                              acc.push(
+                                ...(osValidationResult.errors ?? []).map(
+                                  (errorMessage) =>
+                                    `${
+                                      OS_TITLES[platform as keyof typeof OS_TITLES]
+                                    }: ${errorMessage}`
+                                )
+                              );
+                            }
+
+                            return acc;
+                          },
+                          [] as string[]
+                        ),
+                      });
+                      emitUseFieldChange({
                         ...value,
                         [osType]: updatedConfig,
                       });
@@ -229,11 +288,11 @@ export interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
   config: EndpointRunScriptActionRequestParams;
-  onChange: (updates: {
-    updatedConfig: EndpointRunScriptActionRequestParams;
-    isValid: boolean;
-    errors?: string[];
-  }) => void;
+  onChange: (
+    updates: ValidationState & {
+      updatedConfig: EndpointRunScriptActionRequestParams;
+    }
+  ) => void;
   /** If `true` (default) each field will include a label */
   showFieldLabels?: boolean;
 }
@@ -243,30 +302,73 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
-    const timeoutValidationError = useMemo(() => {
-      if (config.timeout) {
-        return validateTimeoutValue(config.timeout).errors?.join('; ');
-      }
-    }, [config.timeout]);
+    interface OsConfigValidationResult extends ValidationState {
+      timeout: ValidationState;
+      arguments: ValidationState;
+    }
+    const validateConfig = useCallback(
+      (
+        updatedConfig: EndpointRunScriptActionRequestParams,
+        updatedScriptSelected: EndpointScript | undefined = scriptSelected
+      ): OsConfigValidationResult => {
+        const validationResult: OsConfigValidationResult = {
+          isValid: true,
+          timeout: { isValid: true },
+          arguments: { isValid: true },
+        };
+
+        validationResult.timeout = validateTimeoutValue(updatedConfig.timeout);
+
+        if (updatedScriptSelected?.requiresInput && !updatedConfig.scriptInput) {
+          validationResult.arguments.isValid = false;
+          (validationResult.arguments.errors = validationResult.arguments.errors ?? []).push(
+            SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
+          );
+        }
+
+        validationResult.isValid =
+          validationResult.timeout.isValid && validationResult.arguments.isValid;
+        validationResult.errors = validationResult.isValid
+          ? undefined
+          : (validationResult.timeout.errors ?? [])
+              .map((errMessage) => `${SCRIPT_TIMEOUT_LABEL}: ${errMessage}`)
+              .concat(
+                (validationResult.arguments.errors ?? []).map(
+                  (errMessage) => `${SCRIPT_ARGUMENTS_LABEL}: ${errMessage}`
+                )
+              );
+
+        return validationResult;
+      },
+      [scriptSelected]
+    );
+
+    const currentValidationState = useMemo(() => {
+      return validateConfig(config);
+    }, [config, validateConfig]);
 
     const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
       useCallback(
         (selectedScript) => {
+          const updatedConfig = {
+            ...config,
+            scriptId: selectedScript?.id ?? '',
+            // reset script input ++ timeout if no script is selected
+            ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
+          };
+          const updatedConfigValidationResult = validateConfig(updatedConfig, selectedScript);
+
           if (selectedScript?.id !== config.scriptId) {
             onChange({
-              isValid: true,
-              updatedConfig: {
-                ...config,
-                scriptId: selectedScript?.id ?? '',
-                // reset script input ++ timeout if no script is selected
-                ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
-              },
+              isValid: updatedConfigValidationResult.isValid,
+              errors: updatedConfigValidationResult.errors,
+              updatedConfig,
             });
           }
 
           setSelectedScript(selectedScript);
         },
-        [config, onChange]
+        [config, onChange, validateConfig]
       );
 
     const scriptSelectionOnScriptsLoadedHandler = useCallback<
@@ -282,28 +384,36 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
 
     const scriptParamsOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
+        const updatedConfig = {
+          ...config,
+          scriptInput: ev.target.value ?? '',
+        };
+        const { isValid, errors } = validateConfig(updatedConfig);
+
         onChange({
-          isValid: true,
-          updatedConfig: {
-            ...config,
-            scriptInput: ev.target.value ?? '',
-          },
+          isValid,
+          errors,
+          updatedConfig,
         });
       },
-      [config, onChange]
+      [config, onChange, validateConfig]
     );
 
     const scriptTimeoutOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
+        const updatedConfig = {
+          ...config,
+          timeout: ev.target.value ? (ev.target.value as unknown as number) : undefined,
+        };
+        const { isValid, errors } = validateConfig(updatedConfig);
+
         onChange({
-          ...validateTimeoutValue(ev.target.value),
-          updatedConfig: {
-            ...config,
-            timeout: ev.target.value as unknown as number,
-          },
+          isValid,
+          errors,
+          updatedConfig,
         });
       },
-      [config, onChange]
+      [config, onChange, validateConfig]
     );
 
     return (
@@ -360,10 +470,15 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               ) : undefined
             }
             helpText={
-              scriptSelected?.requiresInput ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT : undefined
+              !currentValidationState.arguments.errors && scriptSelected?.requiresInput
+                ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
+                : undefined
             }
+            isInvalid={!currentValidationState.arguments.isValid}
+            error={currentValidationState.arguments.errors?.join('; ')}
           >
             <EuiFieldText
+              isInvalid={!currentValidationState.arguments.isValid}
               name="scriptParms"
               disabled={!scriptSelected}
               value={config.scriptInput}
@@ -374,8 +489,8 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            isInvalid={!!timeoutValidationError}
-            error={timeoutValidationError}
+            isInvalid={!currentValidationState.timeout.isValid}
+            error={currentValidationState.timeout.errors?.join('; ')}
             label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
             labelAppend={
               showFieldLabels ? (
@@ -400,7 +515,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             }
           >
             <EuiFieldText
-              isInvalid={!!timeoutValidationError}
+              isInvalid={!currentValidationState.timeout.isValid}
               name="timeout"
               disabled={!scriptSelected}
               fullWidth
