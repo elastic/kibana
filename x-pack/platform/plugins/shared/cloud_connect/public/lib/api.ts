@@ -35,6 +35,11 @@ export interface DisconnectClusterResponse {
   message: string;
 }
 
+export interface RotateApiKeyResponse {
+  success: boolean;
+  message: string;
+}
+
 export class CloudConnectApiService {
   constructor(private readonly client: HttpSetup) {}
 
@@ -82,6 +87,13 @@ export class CloudConnectApiService {
     return await this.sendRequest<DisconnectClusterResponse>({
       path: `${API_BASE_PATH}/cluster`,
       method: 'delete',
+    });
+  }
+
+  public async rotateApiKey() {
+    return await this.sendRequest<RotateApiKeyResponse>({
+      path: `${API_BASE_PATH}/cluster/apikey/_rotate`,
+      method: 'post',
     });
   }
 }

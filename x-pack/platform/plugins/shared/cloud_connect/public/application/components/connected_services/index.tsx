@@ -19,6 +19,9 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -54,6 +57,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isRotatingApiKey, setIsRotatingApiKey] = useState(false);
 
   const localLicense = useObservable(licensing.license$);
   const currentLicenseType = localLicense?.type;
@@ -101,7 +105,49 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
     onDisconnect();
   };
 
+  const handleRotateApiKey = async () => {
+    closeActionsPopover();
+    setIsRotatingApiKey(true);
+
+    const { error } = await apiService.rotateApiKey();
+
+    setIsRotatingApiKey(false);
+
+    if (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.cloudConnect.rotateApiKey.errorTitle', {
+          defaultMessage: 'Failed to rotate API key',
+        }),
+        text: error.message,
+      });
+      return;
+    }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.cloudConnect.rotateApiKey.successTitle', {
+        defaultMessage: 'API key rotated successfully',
+      }),
+    });
+  };
+
   const actionsMenuItems = [
+    <EuiContextMenuItem key="rotate" onClick={handleRotateApiKey} disabled={isRotatingApiKey}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.cloudConnect.connectedServices.actions.rotateApiKey"
+              defaultMessage="Rotate API key"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {isRotatingApiKey && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiContextMenuItem>,
     <EuiContextMenuItem key="disconnect" onClick={showDisconnectModal}>
       <EuiText color="danger" size="s">
         <FormattedMessage
