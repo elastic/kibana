@@ -30,7 +30,5 @@
     "@kbn/es-types",
     "@kbn/security-plugin-types-server",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/security-plugin",
-    "@kbn/core-saved-objects-server",
   ]
 }
