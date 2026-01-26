@@ -13,9 +13,16 @@ describe('episodes fixtures', () => {
   const createdFiles: string[] = [];
 
   const createNdjsonFile = (lines: string[]): string => {
-    const tmpRoot = path.join(process.cwd(), 'target', 'security_solution_data_generator_episode_tests');
+    const tmpRoot = path.join(
+      process.cwd(),
+      'target',
+      'security_solution_data_generator_episode_tests'
+    );
     fs.mkdirSync(tmpRoot, { recursive: true });
-    const filePath = path.join(tmpRoot, `episode-${Date.now()}-${Math.random().toString(16).slice(2)}.ndjson`);
+    const filePath = path.join(
+      tmpRoot,
+      `episode-${Date.now()}-${Math.random().toString(16).slice(2)}.ndjson`
+    );
     fs.writeFileSync(filePath, `${lines.join('\n')}\n`, 'utf8');
     createdFiles.push(filePath);
     return filePath;
@@ -48,7 +55,12 @@ describe('episodes fixtures', () => {
     const dataPath = createNdjsonFile([
       JSON.stringify({
         '@timestamp': '2023-01-01T00:00:00.000Z',
-        event: { kind: 'event', module: 'endpoint', dataset: 'endpoint.events.process', created: '2023-01-01T00:00:00.000Z' },
+        event: {
+          kind: 'event',
+          module: 'endpoint',
+          dataset: 'endpoint.events.process',
+          created: '2023-01-01T00:00:00.000Z',
+        },
         data_stream: { type: 'logs', dataset: 'endpoint.events.process', namespace: 'default' },
       }),
     ]);
@@ -57,19 +69,31 @@ describe('episodes fixtures', () => {
     const alertsPath = createNdjsonFile([
       JSON.stringify({
         '@timestamp': '2023-01-01T00:00:01.000Z',
-        event: { kind: 'event', module: 'endpoint', dataset: 'endpoint.alerts', created: '2023-01-01T00:00:01.000Z' },
+        event: {
+          kind: 'event',
+          module: 'endpoint',
+          dataset: 'endpoint.alerts',
+          created: '2023-01-01T00:00:01.000Z',
+        },
         data_stream: { type: 'logs', dataset: 'endpoint.alerts', namespace: 'default' },
       }),
     ]);
 
-    await expect(loadEpisode({ episodeId: 'epX', dataPath, alertsPath })).rejects.toThrow(`${alertsPath}:1`);
+    await expect(loadEpisode({ episodeId: 'epX', dataPath, alertsPath })).rejects.toThrow(
+      `${alertsPath}:1`
+    );
   });
 
   it('can skip fixture validation', async () => {
     const dataPath = createNdjsonFile([
       JSON.stringify({
         '@timestamp': '2023-01-01T00:00:00.000Z',
-        event: { kind: 'event', module: 'endpoint', dataset: 'endpoint.events.process', created: '2023-01-01T00:00:00.000Z' },
+        event: {
+          kind: 'event',
+          module: 'endpoint',
+          dataset: 'endpoint.events.process',
+          created: '2023-01-01T00:00:00.000Z',
+        },
         data_stream: { type: 'logs', dataset: 'endpoint.events.process', namespace: 'default' },
       }),
     ]);
@@ -78,7 +102,12 @@ describe('episodes fixtures', () => {
     const alertsPath = createNdjsonFile([
       JSON.stringify({
         '@timestamp': '2023-01-01T00:00:01.000Z',
-        event: { kind: 'event', module: 'endpoint', dataset: 'endpoint.alerts', created: '2023-01-01T00:00:01.000Z' },
+        event: {
+          kind: 'event',
+          module: 'endpoint',
+          dataset: 'endpoint.alerts',
+          created: '2023-01-01T00:00:01.000Z',
+        },
         data_stream: { type: 'logs', dataset: 'endpoint.alerts', namespace: 'default' },
       }),
     ]);
@@ -88,4 +117,3 @@ describe('episodes fixtures', () => {
     ).resolves.toMatchObject({ episodeId: 'epX' });
   });
 });
-
