@@ -47,8 +47,10 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-import type { VarGroupSelection } from '../create_package_policy_page/components/steps/components';
-import { computeDefaultVarGroupSelections } from '../create_package_policy_page/components/steps/components';
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
