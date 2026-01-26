@@ -12,37 +12,63 @@ import type { Logger } from '@kbn/logging';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { map } from 'rxjs';
 import type { ConsoleAppenderConfig, FileAppenderConfig } from '@kbn/core-logging-server';
+import { AsyncLocalStorage } from 'async_hooks';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
 
-/** @internal */
 interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
 }
 
-export interface UserActivityObjectDescriptor {
+interface EventParams {
   id: string;
   name: string;
   type: string;
   tags: string[];
 }
 
-export interface UserActivityEventDescriptor {
+interface ObjectParams {
   action: string;
   type: string;
 }
 
 export interface TrackUserActionParams {
   message?: string;
-  event: UserActivityEventDescriptor;
-  object: UserActivityObjectDescriptor;
+  event: EventParams;
+  object: ObjectParams;
+}
+
+interface SessionContext {
+  id?: string;
+}
+
+interface SpaceContext {
+  id?: string;
+}
+
+interface UserContext {
+  id?: string;
+  username?: string;
+  email?: string;
+  roles?: string;
+  ip?: string;
+}
+
+interface InjectedContext {
+  session?: SessionContext;
+  kibana?: {
+    space?: SpaceContext;
+  };
+  user?: UserContext;
 }
 
 export interface InternalUserActivityServiceSetup {
   trackUserAction(params: TrackUserActionParams): void;
+  setInjectedContext(newContext: InjectedContext): void;
 }
 
 export interface InternalUserActivityServiceStart {
   trackUserAction(params: TrackUserActionParams): void;
+  setInjectedContext(newContext: InjectedContext): void;
 }
 
 export class UserActivityService
@@ -51,8 +77,11 @@ export class UserActivityService
   private readonly logger: Logger;
   private enabled = false;
 
+  private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
+
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('user_activity', 'event');
+    this.injectedContextAsyncStorage = new AsyncLocalStorage<InjectedContext>();
   }
 
   setup({ logging }: UserActivitySetupDeps): InternalUserActivityServiceSetup {
@@ -88,12 +117,14 @@ export class UserActivityService
 
     return {
       trackUserAction: this.trackUserAction,
+      setInjectedContext: this.setInjectedContext,
     };
   }
 
   start() {
     return {
       trackUserAction: this.trackUserAction,
+      setInjectedContext: this.setInjectedContext,
     };
   }
 
@@ -101,7 +132,7 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({ message, event, object }: TrackUserActionParams): void => {
+  private trackUserAction = ({ message, event, object }: TrackUserActionParams) => {
     if (!this.enabled) return;
 
     if (!message) {
@@ -109,7 +140,27 @@ export class UserActivityService
       message = `fill this with the values we are yet to obtain`;
     }
 
-    this.logger.info(message, { message, event, object });
+    const injectedContext = this.getInjectedContext();
+
+    this.logger.info(message, { message, event, object, ...injectedContext });
+  };
+
+  private setInjectedContext = (newContext: InjectedContext) => {
+    if (!this.enabled) return;
+
+    const current = this.injectedContextAsyncStorage.getStore() ?? {};
+
+    this.injectedContextAsyncStorage.enterWith({
+      session: { ...current.session, ...newContext.session },
+      kibana: {
+        space: { ...current.kibana?.space, ...newContext.kibana?.space },
+      },
+      user: { ...current.user, ...newContext.user },
+    });
+  };
+
+  private getInjectedContext = () => {
+    return this.injectedContextAsyncStorage.getStore() ?? {};
   };
 }
 

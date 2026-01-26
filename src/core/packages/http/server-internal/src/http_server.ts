@@ -550,6 +550,9 @@ export class HttpServer {
     this.server!.ext('onRequest', (request, responseToolkit) => {
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
 
+      // request.raw.req.socket?.remoteAddress;
+      // parentContext?.space
+
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
