@@ -1200,8 +1200,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
@@ -2320,8 +2320,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
@@ -4178,8 +4178,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
@@ -5242,8 +5242,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
@@ -7056,8 +7056,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
@@ -8110,8 +8110,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
@@ -9950,8 +9950,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
@@ -11005,8 +11005,8 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:navLinks/securitySolutionRules",
                 "ui:securitySolutionRulesV2/read_rules",
                 "ui:securitySolutionRulesV2/edit_rules",
-                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
                 "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
