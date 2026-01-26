@@ -15,10 +15,7 @@ import {
 import { dump } from 'js-yaml';
 import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { generateAgentConfigTar } from './generate_agent_config';
-import {
-  injectWiredStreamsRouting,
-  createWiredStreamsRoutingProcessor,
-} from './inject_wired_streams_routing';
+import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -459,17 +456,16 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        let config = await packageClient.getAgentPolicyConfigYAML(
+        const config = await packageClient.getAgentPolicyConfigYAML(
           pkg.name,
           pkg.version,
           (input) =>
             !['httpjson', 'winlog'].includes(input.type) &&
-            (metricsEnabled || !input.type.endsWith('/metrics'))
+            (metricsEnabled || !input.type.endsWith('/metrics')),
+          undefined, // prerelease
+          undefined, // ignoreUnverified
+          writeToLogsStreams // injectWiredStreamsRouting
         );
-
-        if (writeToLogsStreams) {
-          config = injectWiredStreamsRouting(config as string);
-        }
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 

@@ -145,7 +145,8 @@ export interface PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ): Promise<string>;
 
   reinstallEsAssets(
@@ -337,7 +338,8 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
 
@@ -354,7 +356,8 @@ class PackageClientImpl implements PackageClient {
       'yml',
       isInputIncluded,
       prerelease,
-      ignoreUnverified
+      ignoreUnverified,
+      injectWiredStreamsRouting
     );
   }
 
