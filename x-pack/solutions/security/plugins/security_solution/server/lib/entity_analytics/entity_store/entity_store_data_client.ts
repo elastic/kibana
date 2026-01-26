@@ -49,6 +49,11 @@ import type {
   GetEntityStoreStatusResponse,
 } from '../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
+  GetResolutionStatusResponse,
+  GraphNode,
+  GraphEdge,
+} from '../../../../common/api/entity_analytics/entity_store/resolution/get_resolution_status.gen';
+import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
@@ -1204,6 +1209,106 @@ export class EntityStoreDataClient {
   }
 
   /**
+   * Unlink entities by clearing their Resolved_by field (FIELDS Architecture).
+   * This removes the resolution relationship, making the entities standalone primaries again.
+   * Also executes the enrich policy to ensure field retention on next transform cycle.
+   */
+  public async unlinkEntities(params: {
+    entityType: EntityType;
+    entityIds: string[];
+  }): Promise<{
+    unlinked: boolean;
+    entity_ids: string[];
+    errors?: Array<{ entity_id: string; message: string }>;
+  }> {
+    const { entityType, entityIds } = params;
+    const { namespace, logger } = this.options;
+    const index = getEntitiesIndexName(entityType, namespace);
+
+    // Check that the engine is running
+    const engineRunning = await this.isEngineRunning(entityType);
+    if (!engineRunning) {
+      throw new Error(`Entity engine for ${entityType} is not running`);
+    }
+
+    const errors: Array<{ entity_id: string; message: string }> = [];
+    const unlinkedIds: string[] = [];
+
+    // Update each entity to clear Resolved_by field
+    for (const entityId of entityIds) {
+      try {
+        const updateResult = await this.esClient.updateByQuery({
+          index,
+          query: {
+            term: {
+              'entity.id': entityId,
+            },
+          },
+          script: {
+            source: `
+              if (ctx._source.entity != null && ctx._source.entity.relationships != null) {
+                ctx._source.entity.relationships.remove('Resolved_by');
+              }
+            `,
+            lang: 'painless',
+          },
+          conflicts: 'proceed',
+          refresh: true,
+        });
+
+        if (updateResult.updated && updateResult.updated > 0) {
+          unlinkedIds.push(entityId);
+          this.log('info', entityType, `Unlinked entity ${entityId}`);
+        } else if (updateResult.version_conflicts && updateResult.version_conflicts > 0) {
+          errors.push({
+            entity_id: entityId,
+            message: 'Version conflict during update',
+          });
+        } else {
+          errors.push({
+            entity_id: entityId,
+            message: 'Entity not found or already unlinked',
+          });
+        }
+      } catch (e) {
+        logger.error(`Error unlinking entity ${entityId}: ${e.message}`);
+        errors.push({
+          entity_id: entityId,
+          message: e.message,
+        });
+      }
+    }
+
+    // Execute enrich policy to ensure field retention on next transform cycle
+    if (unlinkedIds.length > 0) {
+      try {
+        const description = engineDescriptionRegistry[entityType];
+        await executeFieldRetentionEnrichPolicy({
+          entityType,
+          version: description.version,
+          esClient: this.esClient,
+          logger,
+          options: { namespace },
+        });
+        this.log(
+          'info',
+          entityType,
+          `Executed enrich policy after unlinking ${unlinkedIds.length} entities`
+        );
+      } catch (e) {
+        logger.error(`Error executing enrich policy: ${e.message}`);
+        // Don't fail the operation if enrich policy fails - the background task will pick it up
+      }
+    }
+
+    return {
+      unlinked: unlinkedIds.length > 0,
+      entity_ids: unlinkedIds,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+  }
+
+  /**
    * List primary entities with resolved counts for grouped view (FIELDS Architecture).
    * Primary entities are those without a Resolved_by field.
    * Implements QUERY-1 (deduplicated view) with pagination.
@@ -1370,6 +1475,237 @@ export class EntityStoreDataClient {
       .filter((source): source is EntityRecord => !!source);
 
     return { secondaries, total };
+  }
+
+  /**
+   * Get resolution status for a specific entity (FIELDS Architecture).
+   * Returns whether entity is primary, secondary, or standalone,
+   * along with related entities and pre-formatted graph data.
+   * Implements API-F3 (Get Resolution).
+   */
+  public async getResolutionStatus(params: {
+    entityType: EntityType;
+    entityId: string;
+  }): Promise<GetResolutionStatusResponse> {
+    const { entityType, entityId } = params;
+    const index = getEntitiesIndexName(entityType, this.options.namespace);
+
+    // Step 1: Fetch the entity by ID
+    const entityResponse = await this.esClient.search<EntityRecord>({
+      index,
+      query: {
+        term: { 'entity.id': entityId },
+      },
+      size: 1,
+      ignore_unavailable: true,
+    });
+
+    if (entityResponse.hits.hits.length === 0) {
+      // Entity not found - return standalone with empty graph
+      return {
+        resolution_status: 'standalone',
+        graph_data: { nodes: [], edges: [] },
+      };
+    }
+
+    const entity = entityResponse.hits.hits[0]._source as EntityRecord;
+    const resolvedBy = (entity as unknown as Record<string, unknown>)?.entity as
+      | { relationships?: { Resolved_by?: string } }
+      | undefined;
+    const resolvedByValue = resolvedBy?.relationships?.Resolved_by;
+
+    // Step 2: Determine resolution status
+    if (resolvedByValue) {
+      // This is a SECONDARY entity - fetch its primary
+      const primaryResponse = await this.esClient.search<EntityRecord>({
+        index,
+        query: {
+          term: { 'entity.id': resolvedByValue },
+        },
+        size: 1,
+        ignore_unavailable: true,
+      });
+
+      const primaryEntity = primaryResponse.hits.hits[0]?._source as EntityRecord | undefined;
+
+      // Also fetch other secondaries of this primary (siblings)
+      const siblingsResponse = await this.esClient.search<EntityRecord>({
+        index,
+        query: {
+          term: { 'entity.relationships.Resolved_by': resolvedByValue },
+        },
+        size: MAX_SEARCH_RESPONSE_SIZE,
+        ignore_unavailable: true,
+      });
+
+      const allSecondaries = siblingsResponse.hits.hits
+        .map((hit) => hit._source as EntityRecord)
+        .filter((s): s is EntityRecord => !!s);
+
+      return {
+        resolution_status: 'secondary',
+        primary_entity: primaryEntity ? this.mapEntityToResolutionEntity(primaryEntity) : undefined,
+        secondary_entities: allSecondaries
+          .map((s) => this.mapEntityToResolutionEntity(s))
+          .filter((e): e is NonNullable<typeof e> => !!e),
+        graph_data: this.buildResolutionGraphData(
+          primaryEntity,
+          allSecondaries,
+          entityType,
+          entityId
+        ),
+      };
+    }
+
+    // Step 3: Check if this is a PRIMARY (has secondaries pointing to it)
+    const secondariesResponse = await this.esClient.search<EntityRecord>({
+      index,
+      query: {
+        term: { 'entity.relationships.Resolved_by': entityId },
+      },
+      size: MAX_SEARCH_RESPONSE_SIZE,
+      ignore_unavailable: true,
+    });
+
+    const secondaries = secondariesResponse.hits.hits
+      .map((hit) => hit._source as EntityRecord)
+      .filter((s): s is EntityRecord => !!s);
+
+    if (secondaries.length > 0) {
+      // This is a PRIMARY entity
+      return {
+        resolution_status: 'primary',
+        primary_entity: this.mapEntityToResolutionEntity(entity),
+        secondary_entities: secondaries
+          .map((s) => this.mapEntityToResolutionEntity(s))
+          .filter((e): e is NonNullable<typeof e> => !!e),
+        graph_data: this.buildResolutionGraphData(entity, secondaries, entityType, entityId),
+      };
+    }
+
+    // Step 4: STANDALONE entity - no resolution relationships
+    return {
+      resolution_status: 'standalone',
+      graph_data: { nodes: [], edges: [] },
+    };
+  }
+
+  /**
+   * Maps an EntityRecord to the simplified ResolutionEntity format.
+   */
+  private mapEntityToResolutionEntity(
+    record: EntityRecord
+  ): GetResolutionStatusResponse['primary_entity'] {
+    // Build response object handling EntityRecord union type
+    const result: Record<string, unknown> = {
+      '@timestamp': record['@timestamp'],
+      entity: record.entity,
+    };
+
+    // Add entity-type-specific field (union type: HostEntityRecord | UserEntityRecord)
+    if ('user' in record && record.user) {
+      result.user = record.user;
+    }
+    if ('host' in record && record.host) {
+      result.host = record.host;
+    }
+
+    // Add asset if present (filter 'deleted' criticality)
+    if (record.asset?.criticality && record.asset.criticality !== 'deleted') {
+      result.asset = { criticality: record.asset.criticality };
+    }
+
+    return result as GetResolutionStatusResponse['primary_entity'];
+  }
+
+  /**
+   * Build graph visualization data from resolution entities.
+   * Primary node is centered (blue), secondaries are radial (warning/orange).
+   */
+  private buildResolutionGraphData(
+    primary: EntityRecord | undefined,
+    secondaries: EntityRecord[],
+    entityType: EntityType,
+    currentEntityId: string
+  ): { nodes: GraphNode[]; edges: GraphEdge[] } {
+    const nodes: GraphNode[] = [];
+    const edges: GraphEdge[] = [];
+
+    // Determine shape based on entity type
+    const getShape = (type: EntityType): GraphNode['shape'] => {
+      switch (type) {
+        case EntityType.user:
+          return 'ellipse'; // Users are ellipse/circle
+        case EntityType.host:
+          return 'rectangle'; // Hosts are rectangle
+        default:
+          return 'diamond';
+      }
+    };
+
+    // Determine icon based on entity type
+    const getIcon = (type: EntityType): string => {
+      switch (type) {
+        case EntityType.user:
+          return 'user';
+        case EntityType.host:
+          return 'storage';
+        default:
+          return 'node';
+      }
+    };
+
+    const shape = getShape(entityType);
+    const icon = getIcon(entityType);
+
+    // Add primary node (blue, center)
+    if (primary) {
+      const primaryRecord = primary as unknown as Record<string, unknown>;
+      const primaryEntity = primaryRecord.entity as { id?: string; name?: string } | undefined;
+      const primaryId = primaryEntity?.id ?? 'primary';
+
+      nodes.push({
+        id: primaryId,
+        label: primaryEntity?.name ?? primaryId,
+        icon,
+        shape,
+        color: 'primary',
+      });
+    }
+
+    // Add secondary nodes (warning/orange, or danger if current)
+    secondaries.forEach((secondary, index) => {
+      const secondaryRecord = secondary as unknown as Record<string, unknown>;
+      const secondaryEntity = secondaryRecord.entity as { id?: string; name?: string } | undefined;
+      const secondaryId = secondaryEntity?.id ?? `secondary-${index}`;
+      const isCurrentEntity = secondaryId === currentEntityId;
+
+      nodes.push({
+        id: secondaryId,
+        label: secondaryEntity?.name ?? secondaryId,
+        icon,
+        shape,
+        // Highlight the current entity differently if it's a secondary
+        color: isCurrentEntity ? 'danger' : 'warning',
+      });
+
+      // Add edge from secondary to primary (showing resolution relationship)
+      if (primary) {
+        const primaryRecord = primary as unknown as Record<string, unknown>;
+        const primaryEntity = primaryRecord.entity as { id?: string } | undefined;
+        const primaryId = primaryEntity?.id;
+        if (primaryId) {
+          edges.push({
+            id: `edge-${secondaryId}-to-${primaryId}`,
+            source: secondaryId,
+            target: primaryId,
+            color: 'subdued',
+          });
+        }
+      }
+    });
+
+    return { nodes, edges };
   }
 
   public async applyDataViewIndices(): Promise<{

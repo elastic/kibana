@@ -21,6 +21,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { EntityResolutionAccordion } from '../shared/components/entity_resolution';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -73,6 +74,7 @@ export const HostPanelContent = ({
         entity={{ name: hostName, type: EntityType.host }}
         onChange={onAssetCriticalityChange}
       />
+      <EntityResolutionAccordion entityType={EntityType.host} entityId={hostName} />
       <EntityInsight
         value={hostName}
         field={EntityIdentifierFields.hostName}

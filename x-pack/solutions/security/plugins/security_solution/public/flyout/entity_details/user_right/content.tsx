@@ -22,6 +22,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
+import { EntityResolutionAccordion } from '../shared/components/entity_resolution';
 
 interface UserPanelContentProps {
   userName: string;
@@ -74,6 +75,7 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
       />
+      <EntityResolutionAccordion entityType={EntityType.user} entityId={userName} />
       <EntityInsight
         value={userName}
         field={EntityIdentifierFields.userName}

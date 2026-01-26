@@ -111,3 +111,56 @@ export const GROUPED_VIEW_TOGGLE = i18n.translate(
     defaultMessage: 'Grouped view',
   }
 );
+
+export const COLUMN_ACTIONS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.columnActions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const PREVIEW_ENTITY_ARIA_LABEL = (name: string) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.previewEntityAriaLabel',
+    {
+      values: { name },
+      defaultMessage: 'Preview entity with name {name}',
+    }
+  );
+
+export const UNLINK_ENTITY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.unlinkEntity',
+  {
+    defaultMessage: 'Unlink',
+  }
+);
+
+export const UNLINK_ENTITY_ARIA_LABEL = (name: string) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.unlinkEntityAriaLabel',
+    {
+      values: { name },
+      defaultMessage: 'Unlink entity {name}',
+    }
+  );
+
+export const UNLINK_ENTITY_SUCCESS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.unlinkEntitySuccess',
+  {
+    defaultMessage: 'Entity unlinked successfully',
+  }
+);
+
+export const UNLINK_ENTITY_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.unlinkEntityError',
+  {
+    defaultMessage: 'Failed to unlink entity',
+  }
+);
+
+export const RESOLVED_ENTITIES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.groupedTable.resolvedEntitiesTableCaption',
+  {
+    defaultMessage: 'Resolved entities',
+  }
+);

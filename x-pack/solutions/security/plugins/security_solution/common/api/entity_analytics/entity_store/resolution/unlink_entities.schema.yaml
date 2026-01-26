@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Unlink Entities (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/unlink:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: UnlinkEntities
+      summary: Unlink secondary entities from their primary entity
+      description: >
+        Clears the Resolved_by field on secondary entities, removing the resolution relationship.
+        The entities will become standalone primaries again. Also triggers enrich policy execution
+        to ensure field retention on next transform cycle.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entity_ids
+              properties:
+                entity_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: Array of entity.id values for entities to unlink
+      responses:
+        '200':
+          description: Entities unlinked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - unlinked
+                  - entity_ids
+                properties:
+                  unlinked:
+                    type: boolean
+                    description: Whether the unlinking operation was successful
+                  entity_ids:
+                    type: array
+                    items:
+                      type: string
+                    description: The entity IDs that were unlinked
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - entity_id
+                        - message
+                      properties:
+                        entity_id:
+                          type: string
+                        message:
+                          type: string
+                    description: Any errors that occurred during unlinking (partial success)
+        '400':
+          description: Bad request - invalid entity type or entity IDs
+        '503':
+          description: Engine not running

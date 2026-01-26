@@ -289,6 +289,36 @@ import type {
   UpsertEntityResponse,
 } from './entity_analytics/entity_store/entities/upsert_entity.gen';
 import type {
+  GetResolutionStatusRequestQueryInput,
+  GetResolutionStatusRequestParamsInput,
+  GetResolutionStatusResponse,
+} from './entity_analytics/entity_store/resolution/get_resolution_status.gen';
+import type {
+  LinkEntitiesRequestParamsInput,
+  LinkEntitiesRequestBodyInput,
+  LinkEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/link_entities.gen';
+import type {
+  ListFilterableEntitiesRequestQueryInput,
+  ListFilterableEntitiesRequestParamsInput,
+  ListFilterableEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/list_filterable_entities.gen';
+import type {
+  ListPrimaryEntitiesRequestQueryInput,
+  ListPrimaryEntitiesRequestParamsInput,
+  ListPrimaryEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/list_primaries.gen';
+import type {
+  ListSecondaryEntitiesRequestQueryInput,
+  ListSecondaryEntitiesRequestParamsInput,
+  ListSecondaryEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/list_secondaries.gen';
+import type {
+  UnlinkEntitiesRequestParamsInput,
+  UnlinkEntitiesRequestBodyInput,
+  UnlinkEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/unlink_entities.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
@@ -1882,6 +1912,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Returns the resolution status for a specific entity, including: - Whether the entity is primary, secondary, or standalone - If secondary: the primary entity it resolves to - If primary: all secondary entities that resolve to it - Pre-formatted graph data for visualization
+
+    */
+  async getResolutionStatus(props: GetResolutionStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetResolutionStatus`);
+    return this.kbnClient
+      .request<GetResolutionStatusResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/status', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
    */
   async getRiskEngineStatus() {
@@ -2351,6 +2399,23 @@ providing you with the most current and effective threat detection capabilities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Sets the Resolved_by field on secondary entities to point to the primary entity. This establishes the resolution relationship where the primary entity represents all linked secondary entities. Also triggers enrich policy execution to ensure field retention on next transform cycle.
+
+    */
+  async linkEntities(props: LinkEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API LinkEntities`);
+    return this.kbnClient
+      .request<LinkEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/link', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * List entities records, paging, sorting and filtering as needed.
    */
   async listEntities(props: ListEntitiesProps) {
@@ -2393,11 +2458,65 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns a list of primary entities (entities without Resolved_by) for the resolution selection UI. In FIELDS architecture, primaries are entities that don't have the Resolved_by field set.
+
+    */
+  async listFilterableEntities(props: ListFilterableEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListFilterableEntities`);
+    return this.kbnClient
+      .request<ListFilterableEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/entities', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Returns paginated list of primary entities (entities without Resolved_by) with their resolved_count for the Data Grid grouped view.
+
+    */
+  async listPrimaryEntities(props: ListPrimaryEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListPrimaryEntities`);
+    return this.kbnClient
+      .request<ListPrimaryEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/primaries', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
       .request<ListPrivMonUsersResponse>({
         path: '/api/entity_analytics/monitoring/users/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Returns all entities that have Resolved_by pointing to the specified primary entity. Used for expanding grouped view rows.
+
+    */
+  async listSecondaryEntities(props: ListSecondaryEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListSecondaryEntities`);
+    return this.kbnClient
+      .request<ListSecondaryEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/secondaries', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3087,6 +3206,23 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Clears the Resolved_by field on secondary entities, removing the resolution relationship. The entities will become standalone primaries again. Also triggers enrich policy execution to ensure field retention on next transform cycle.
+
+    */
+  async unlinkEntities(props: UnlinkEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UnlinkEntities`);
+    return this.kbnClient
+      .request<UnlinkEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/unlink', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Updates mutable fields of an existing dashboard migration
    */
   async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
@@ -3521,6 +3657,10 @@ export interface GetPolicyResponseProps {
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
+export interface GetResolutionStatusProps {
+  query: GetResolutionStatusRequestQueryInput;
+  params: GetResolutionStatusRequestParamsInput;
+}
 export interface GetRuleExecutionEventsProps {
   query: GetRuleExecutionEventsRequestQueryInput;
   params: GetRuleExecutionEventsRequestParamsInput;
@@ -3589,14 +3729,30 @@ export interface InstallPrepackedTimelinesProps {
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
 }
+export interface LinkEntitiesProps {
+  params: LinkEntitiesRequestParamsInput;
+  body: LinkEntitiesRequestBodyInput;
+}
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
 }
+export interface ListFilterableEntitiesProps {
+  query: ListFilterableEntitiesRequestQueryInput;
+  params: ListFilterableEntitiesRequestParamsInput;
+}
+export interface ListPrimaryEntitiesProps {
+  query: ListPrimaryEntitiesRequestQueryInput;
+  params: ListPrimaryEntitiesRequestParamsInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListSecondaryEntitiesProps {
+  query: ListSecondaryEntitiesRequestQueryInput;
+  params: ListSecondaryEntitiesRequestParamsInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -3695,6 +3851,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnlinkEntitiesProps {
+  params: UnlinkEntitiesRequestParamsInput;
+  body: UnlinkEntitiesRequestBodyInput;
 }
 export interface UpdateDashboardMigrationProps {
   params: UpdateDashboardMigrationRequestParamsInput;

@@ -20,6 +20,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, Pagination, CriteriaWithPagination } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
@@ -29,7 +30,14 @@ import { useExpandableRows } from './use_expandable_rows';
 import { ExpandedSecondariesPanel } from './expanded_secondaries_panel';
 import { RiskScoreLevel } from '../../../severity/common';
 import { formatRiskScore } from '../../../../common';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../../../flyout/entity_details/shared/constants';
+import { EntityType as EntityTypeEnum } from '../../../../../../common/entity_analytics/types';
 import * as i18n from './translations';
+
+const GROUPED_ENTITIES_TABLE_ID = 'GroupedEntitiesList-table';
 
 // Risk data interface for type casting entity-type-specific risk fields
 interface EntityRiskData {
@@ -56,12 +64,31 @@ const getRiskScoreField = (type: EntityType): string => {
   }
 };
 
+// Convert string entity type to EntityType enum
+const getEntityTypeEnum = (type: EntityType): EntityTypeEnum => {
+  switch (type) {
+    case 'user':
+      return EntityTypeEnum.user;
+    case 'host':
+      return EntityTypeEnum.host;
+    case 'service':
+      return EntityTypeEnum.service;
+    default:
+      return EntityTypeEnum.generic;
+  }
+};
+
 export const GroupedEntitiesTable: React.FC<GroupedEntitiesTableProps> = ({
   entityType,
   skip = false,
 }) => {
+  const { openRightPanel } = useExpandableFlyoutApi();
+
   // Get the correct risk field path for this entity type
   const riskScoreField = useMemo(() => getRiskScoreField(entityType), [entityType]);
+
+  // Get entity type enum for flyout panel lookup
+  const entityTypeEnum = useMemo(() => getEntityTypeEnum(entityType), [entityType]);
 
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -111,9 +138,51 @@ export const GroupedEntitiesTable: React.FC<GroupedEntitiesTableProps> = ({
     renderItem: renderExpandedItem,
   });
 
+  // Open entity flyout
+  const openEntityFlyout = useCallback(
+    (item: PrimaryEntity) => {
+      const name = item.entity?.name;
+      if (!name) return;
+
+      const panelKey = EntityPanelKeyByType[entityTypeEnum];
+      const paramName = EntityPanelParamByType[entityTypeEnum];
+
+      if (panelKey && paramName) {
+        openRightPanel({
+          id: panelKey,
+          params: {
+            [paramName]: name,
+            contextID: GROUPED_ENTITIES_TABLE_ID,
+            scopeId: GROUPED_ENTITIES_TABLE_ID,
+          },
+        });
+      }
+    },
+    [entityTypeEnum, openRightPanel]
+  );
+
   // Table columns
   const columns: Array<EuiBasicTableColumn<PrimaryEntity>> = useMemo(
     () => [
+      // Actions column (flyout preview)
+      {
+        name: i18n.COLUMN_ACTIONS,
+        width: '60px',
+        render: (item: PrimaryEntity) => {
+          const name = item.entity?.name;
+          if (!name || !EntityPanelKeyByType[entityTypeEnum]) {
+            return null;
+          }
+
+          return (
+            <EuiButtonIcon
+              iconType="expand"
+              onClick={() => openEntityFlyout(item)}
+              aria-label={i18n.PREVIEW_ENTITY_ARIA_LABEL(name)}
+            />
+          );
+        },
+      },
       // Expander column
       {
         align: RIGHT_ALIGNMENT,
@@ -214,7 +283,7 @@ export const GroupedEntitiesTable: React.FC<GroupedEntitiesTableProps> = ({
         ),
       },
     ],
-    [entityType, rows, riskScoreField]
+    [entityType, entityTypeEnum, rows, riskScoreField, openEntityFlyout]
   );
 
   // Handle table changes (pagination, sorting)

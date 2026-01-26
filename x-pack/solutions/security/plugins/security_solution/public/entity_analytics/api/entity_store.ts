@@ -20,15 +20,19 @@ import type {
 import type {
   ListFilterableEntitiesResponse,
   LinkEntitiesResponse,
+  UnlinkEntitiesResponse,
   ListPrimaryEntitiesResponse,
   ListSecondaryEntitiesResponse,
+  GetResolutionStatusResponse,
 } from '../../../common/api/entity_analytics/entity_store/resolution';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import {
   LIST_FILTERABLE_ENTITIES_URL,
   LINK_ENTITIES_URL,
+  UNLINK_ENTITIES_URL,
   LIST_PRIMARIES_URL,
   LIST_SECONDARIES_URL,
+  GET_RESOLUTION_STATUS_URL,
 } from '../../../common/entity_analytics/entity_store/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -120,6 +124,18 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const unlinkEntities = async (params: { entityType: EntityType; entityIds: string[] }) => {
+      const { entityType, entityIds } = params;
+      const url = UNLINK_ENTITIES_URL.replace('{entityType}', entityType);
+      return http.fetch<UnlinkEntitiesResponse>(url, {
+        method: 'POST',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({
+          entity_ids: entityIds,
+        }),
+      });
+    };
+
     const listPrimaryEntities = async (params: {
       entityType: EntityType;
       page?: number;
@@ -158,6 +174,18 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const getResolutionStatus = async (params: { entityType: EntityType; entityId: string }) => {
+      const { entityType, entityId } = params;
+      const url = GET_RESOLUTION_STATUS_URL.replace('{entityType}', entityType);
+      return http.fetch<GetResolutionStatusResponse>(url, {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          entity_id: entityId,
+        },
+      });
+    };
+
     return {
       enableEntityStore,
       getEntityStoreStatus,
@@ -168,8 +196,10 @@ export const useEntityStoreRoutes = () => {
       // Entity Resolution
       listFilterableEntities,
       linkEntities,
+      unlinkEntities,
       listPrimaryEntities,
       listSecondaryEntities,
+      getResolutionStatus,
     };
   }, [http]);
 };

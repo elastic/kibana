@@ -58,16 +58,40 @@ import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-s
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
 import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import type {
+  GetResolutionStatusRequestQueryInput,
+  GetResolutionStatusRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/get_resolution_status.gen';
+import type {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import type {
+  LinkEntitiesRequestParamsInput,
+  LinkEntitiesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  ListFilterableEntitiesRequestQueryInput,
+  ListFilterableEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_filterable_entities.gen';
+import type {
+  ListPrimaryEntitiesRequestQueryInput,
+  ListPrimaryEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_primaries.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
+import type {
+  ListSecondaryEntitiesRequestQueryInput,
+  ListSecondaryEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_secondaries.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import type {
+  UnlinkEntitiesRequestParamsInput,
+  UnlinkEntitiesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/unlink_entities.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
@@ -400,6 +424,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Returns the resolution status for a specific entity, including: - Whether the entity is primary, secondary, or standalone - If secondary: the primary entity it resolves to - If primary: all secondary entities that resolve to it - Pre-formatted graph data for visualization
+
+      */
+  getResolutionStatus(props: GetResolutionStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/status', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
    * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
    */
   getRiskEngineStatus(kibanaSpace: string = 'default') {
@@ -467,6 +508,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Sets the Resolved_by field on secondary entities to point to the primary entity. This establishes the resolution relationship where the primary entity represents all linked secondary entities. Also triggers enrich policy execution to ensure field retention on next transform cycle.
+
+      */
+  linkEntities(props: LinkEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/link', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
    * List entities records, paging, sorting and filtering as needed.
    */
   listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
@@ -492,9 +550,60 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * Returns a list of primary entities (entities without Resolved_by) for the resolution selection UI. In FIELDS architecture, primaries are entities that don't have the Resolved_by field set.
+
+      */
+  listFilterableEntities(props: ListFilterableEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/entities', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Returns paginated list of primary entities (entities without Resolved_by) with their resolved_count for the Data Grid grouped view.
+
+      */
+  listPrimaryEntities(props: ListPrimaryEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/primaries', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
   listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Returns all entities that have Resolved_by pointing to the specified primary entity. Used for expanding grouped view rows.
+
+      */
+  listSecondaryEntities(props: ListSecondaryEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/secondaries', props.params),
+          kibanaSpace
+        )
+      )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -620,6 +729,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+      * Clears the Resolved_by field on secondary entities, removing the resolution relationship. The entities will become standalone primaries again. Also triggers enrich policy execution to ensure field retention on next transform cycle.
+
+      */
+  unlinkEntities(props: UnlinkEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/unlink', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -772,6 +898,10 @@ export interface GetEntitySourceProps {
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
+export interface GetResolutionStatusProps {
+  query: GetResolutionStatusRequestQueryInput;
+  params: GetResolutionStatusRequestParamsInput;
+}
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
@@ -779,14 +909,30 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface LinkEntitiesProps {
+  params: LinkEntitiesRequestParamsInput;
+  body: LinkEntitiesRequestBodyInput;
+}
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
 }
+export interface ListFilterableEntitiesProps {
+  query: ListFilterableEntitiesRequestQueryInput;
+  params: ListFilterableEntitiesRequestParamsInput;
+}
+export interface ListPrimaryEntitiesProps {
+  query: ListPrimaryEntitiesRequestQueryInput;
+  params: ListPrimaryEntitiesRequestParamsInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListSecondaryEntitiesProps {
+  query: ListSecondaryEntitiesRequestQueryInput;
+  params: ListSecondaryEntitiesRequestParamsInput;
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
@@ -802,6 +948,10 @@ export interface StopEntityEngineProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnlinkEntitiesProps {
+  params: UnlinkEntitiesRequestParamsInput;
+  body: UnlinkEntitiesRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

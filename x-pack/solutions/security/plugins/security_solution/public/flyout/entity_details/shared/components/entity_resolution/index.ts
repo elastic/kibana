@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export * from './list_filterable_entities.gen';
-export * from './link_entities.gen';
-export * from './unlink_entities.gen';
-export * from './list_primaries.gen';
-export * from './list_secondaries.gen';
-export * from './get_resolution_status.gen';
+export { EntityResolutionAccordion } from './entity_resolution_accordion';

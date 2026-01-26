@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Get Resolution Status (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/status:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetResolutionStatus
+      summary: Get resolution status for an entity
+      description: >
+        Returns the resolution status for a specific entity, including:
+        - Whether the entity is primary, secondary, or standalone
+        - If secondary: the primary entity it resolves to
+        - If primary: all secondary entities that resolve to it
+        - Pre-formatted graph data for visualization
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: entity_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The entity.id to get resolution status for
+      responses:
+        '200':
+          description: Resolution status returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - resolution_status
+                  - graph_data
+                properties:
+                  resolution_status:
+                    $ref: '#/components/schemas/ResolutionStatus'
+                  primary_entity:
+                    $ref: '#/components/schemas/ResolutionEntity'
+                    description: >
+                      The primary entity. If current entity is primary, this is itself.
+                      If current entity is secondary, this is the entity it's resolved to.
+                  secondary_entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResolutionEntity'
+                    description: >
+                      Secondary entities resolved to the primary.
+                      Only populated if resolution_status is 'primary' or 'secondary'.
+                  graph_data:
+                    $ref: '#/components/schemas/GraphData'
+                    description: Pre-formatted graph data for visualization
+        '400':
+          description: Bad request - invalid entity type or missing entity_id
+        '404':
+          description: Entity not found
+        '503':
+          description: Engine not running
+
+components:
+  schemas:
+    ResolutionStatus:
+      type: string
+      enum:
+        - primary
+        - secondary
+        - standalone
+      description: >
+        Resolution status of the entity:
+        - primary: Entity has secondaries resolved to it (or is standalone with no resolution)
+        - secondary: Entity is resolved to a primary via Resolved_by field
+        - standalone: Entity has no resolution relationships
+
+    GraphNodeColor:
+      type: string
+      enum:
+        - primary
+        - danger
+        - warning
+
+    GraphNodeShape:
+      type: string
+      enum:
+        - hexagon
+        - pentagon
+        - ellipse
+        - rectangle
+        - diamond
+
+    GraphEdgeColor:
+      type: string
+      enum:
+        - primary
+        - danger
+        - warning
+        - subdued
+
+    GraphNode:
+      type: object
+      required:
+        - id
+        - color
+        - shape
+      properties:
+        id:
+          type: string
+          description: Unique node identifier (entity.id)
+        label:
+          type: string
+          description: Display label (entity.name)
+        icon:
+          type: string
+          description: Icon name (e.g., 'user', 'storage')
+        color:
+          $ref: '#/components/schemas/GraphNodeColor'
+        shape:
+          $ref: '#/components/schemas/GraphNodeShape'
+        tag:
+          type: string
+          description: Optional tag label
+
+    GraphEdge:
+      type: object
+      required:
+        - id
+        - source
+        - target
+        - color
+      properties:
+        id:
+          type: string
+          description: Unique edge identifier
+        source:
+          type: string
+          description: Source node ID
+        target:
+          type: string
+          description: Target node ID
+        color:
+          $ref: '#/components/schemas/GraphEdgeColor'
+
+    GraphData:
+      type: object
+      required:
+        - nodes
+        - edges
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+
+    ResolutionEntity:
+      type: object
+      description: Simplified entity record for resolution response
+      properties:
+        '@timestamp':
+          type: string
+          format: date-time
+        entity:
+          $ref: '../entities/common.schema.yaml#/components/schemas/EntityField'
+        user:
+          type: object
+          additionalProperties: true
+        host:
+          type: object
+          additionalProperties: true
+        service:
+          type: object
+          additionalProperties: true
+        asset:
+          $ref: '../entities/common.schema.yaml#/components/schemas/Asset'
