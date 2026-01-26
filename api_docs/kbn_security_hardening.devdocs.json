@@ -31,6 +31,8 @@
         "label": "unsafeConsole",
         "description": [],
         "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +63,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,6 +79,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,6 +95,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -101,6 +111,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -115,6 +127,8 @@
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

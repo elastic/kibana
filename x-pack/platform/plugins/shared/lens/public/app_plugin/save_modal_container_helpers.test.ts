@@ -30,7 +30,7 @@ describe('redirectToDashboard', () => {
     });
     expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('security', {
       path: '#/view/id',
-      state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
+      state: [{ serializedState: { test: 'test' }, type: 'lens' }],
     });
   });
 
@@ -49,7 +49,7 @@ describe('redirectToDashboard', () => {
     });
     expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
       path: '#/view/id',
-      state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
+      state: [{ serializedState: { test: 'test' }, type: 'lens' }],
     });
   });
 });

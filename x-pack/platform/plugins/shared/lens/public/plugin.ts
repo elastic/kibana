@@ -78,7 +78,12 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import {
+  LENS_CONTENT_TYPE,
+  LENS_ITEM_LATEST_VERSION,
+} from '@kbn/lens-common/content_management/constants';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -125,7 +130,7 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
+
 import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
@@ -161,6 +166,7 @@ export interface LensPluginSetupDependencies {
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
@@ -421,10 +427,8 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                } satisfies LensByRefSerializedState,
-              },
+                savedObjectId: savedObject.id,
+              } satisfies LensByRefSerializedState,
             },
             {
               displaySuccessMessage: true,

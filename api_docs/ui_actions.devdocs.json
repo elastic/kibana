@@ -20,6 +20,8 @@
           " extends Error"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,6 +49,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -72,6 +78,8 @@
           "[]>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +94,8 @@
               "BuildContextMenuParams"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+            "lineNumber": 123,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,6 +131,8 @@
           "<Context, object>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +154,8 @@
               "<Context, {}>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -186,6 +200,8 @@
           "<Context>>>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,6 +218,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -215,6 +233,8 @@
               "\nA unique identifier for this action instance."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -228,6 +248,8 @@
               "\nThe action type is what determines the context shape."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -252,6 +274,8 @@
               "<Context>) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -273,6 +297,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,6 +327,8 @@
               "<Context>) => string"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -322,6 +350,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 77,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,6 +380,8 @@
               "<Context>) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -371,6 +403,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 83,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -399,6 +433,8 @@
               "<Context>) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -420,6 +456,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 88,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,6 +486,8 @@
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -469,6 +509,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 95,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -497,6 +539,8 @@
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -518,6 +562,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 102,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -538,6 +584,8 @@
               "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -552,6 +600,8 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 107,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -574,6 +624,8 @@
               "((context: Context) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -588,6 +640,8 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 114,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -608,6 +662,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,6 +680,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -638,6 +696,8 @@
               "ActionExtension | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -654,6 +714,8 @@
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -676,6 +738,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -692,6 +756,8 @@
               "React.MouseEvent<Element, MouseEvent> | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -716,6 +782,8 @@
           "<Context>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -737,6 +805,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -763,6 +833,8 @@
           "<Context>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -776,6 +848,8 @@
               "\nID that uniquely identifies this object."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -789,6 +863,8 @@
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -805,6 +881,8 @@
               "React.FC<{ context: Context; }> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,6 +899,8 @@
               "(context: Context) => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -835,6 +915,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 36,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -855,6 +937,8 @@
               "(context: Context) => string"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -869,6 +953,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 41,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -889,6 +975,8 @@
               "((context: Context) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -903,6 +991,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 47,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -923,6 +1013,8 @@
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -937,6 +1029,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 54,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -957,6 +1051,8 @@
               "(context: Context) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -971,6 +1067,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 60,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -998,6 +1096,8 @@
               "<Context> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1030,6 +1130,8 @@
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1041,6 +1143,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1057,6 +1161,8 @@
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1070,6 +1176,8 @@
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1086,6 +1194,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1102,6 +1212,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1116,6 +1228,8 @@
         "label": "VisualizeFieldContext",
         "description": [],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1127,6 +1241,8 @@
             "label": "fieldName",
             "description": [],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1191,6 +1307,8 @@
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1205,6 +1323,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1226,6 +1346,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1240,6 +1362,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1261,6 +1385,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1281,6 +1407,8 @@
           "\"ACTION_VISUALIZE_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1296,6 +1424,8 @@
           "\"ACTION_VISUALIZE_GEO_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1311,6 +1441,8 @@
           "\"ACTION_VISUALIZE_LENS_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1348,6 +1480,8 @@
           "<undefined> | undefined) | undefined; couldBecomeCompatible?: ((context: Context) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1372,6 +1506,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1387,6 +1523,8 @@
           "\"ADD_PANEL_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1417,6 +1555,8 @@
           "<Context, object>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1439,6 +1579,8 @@
           "<Context>[]"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1454,6 +1596,8 @@
           "\"ROW_CLICK_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1485,6 +1629,8 @@
           "; columns?: string[] | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1500,6 +1646,8 @@
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1515,6 +1663,8 @@
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1529,6 +1679,8 @@
         "label": "addPanelMenuTrigger",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1540,6 +1692,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1551,6 +1705,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,6 +1718,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1576,6 +1734,8 @@
         "label": "rowClickTrigger",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1587,6 +1747,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1598,6 +1760,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1609,6 +1773,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1623,6 +1789,8 @@
         "label": "visualizeFieldTrigger",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1634,6 +1802,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1645,6 +1815,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1656,6 +1828,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1670,6 +1844,8 @@
         "label": "visualizeGeoFieldTrigger",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1681,6 +1857,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1692,6 +1870,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1703,6 +1883,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1769,6 +1951,8 @@
         "<any, {}>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1869,6 +2053,8 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
+      "lineNumber": 34,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

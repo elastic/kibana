@@ -15,6 +15,8 @@
         "label": "fatalErrorsServiceMock",
         "description": [],
         "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "() => jest.Mocked<FatalErrorsServiceContract>"
             ],
             "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -47,6 +51,8 @@
               ">"
             ],
             "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -65,6 +71,8 @@
               ">"
             ],
             "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
