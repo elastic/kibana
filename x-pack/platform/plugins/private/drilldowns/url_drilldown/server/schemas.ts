@@ -13,19 +13,15 @@ import {
 } from '../common/constants';
 
 export const urlDrilldownSchema = schema.object({
-  encode_url: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_ENCODE_URL,
-      meta: {
-        description: 'When true, URL is escaped using percent encoding',
-      },
-    })
-  ),
-  open_in_new_tab: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_OPEN_IN_NEW_TAB,
-    })
-  ),
+  encode_url: schema.boolean({
+    defaultValue: DEFAULT_ENCODE_URL,
+    meta: {
+      description: 'When true, URL is escaped using percent encoding',
+    },
+  }),
+  open_in_new_tab: schema.boolean({
+    defaultValue: DEFAULT_OPEN_IN_NEW_TAB,
+  }),
   type: schema.literal(URL_DRILLDOWN_TYPE),
   url: schema.string({
     meta: {

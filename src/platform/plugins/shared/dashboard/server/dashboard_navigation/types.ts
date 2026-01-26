@@ -10,4 +10,4 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { dashboardNavigationOptionsSchema } from './schemas';
 
-export type DashboardNavigationOptions = Required<TypeOf<typeof dashboardNavigationOptionsSchema>>;
+export type DashboardNavigationOptions = TypeOf<typeof dashboardNavigationOptionsSchema>;

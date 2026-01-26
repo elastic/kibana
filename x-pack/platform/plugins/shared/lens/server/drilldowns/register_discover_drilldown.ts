@@ -13,7 +13,9 @@ import {
 } from '../../common/constants';
 
 export const discoverDrilldownSchema = schema.object({
-  open_in_new_tab: schema.maybe(schema.boolean()),
+  open_in_new_tab: schema.boolean({
+    defaultValue: true
+  }),
   type: schema.literal(DISCOVER_DRILLDOWN_TYPE),
 });
 
