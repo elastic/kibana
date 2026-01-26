@@ -333,13 +333,13 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           meta: {
             alias: null,
             disabled: false,
-            key: 'service.name',
+            key: SERVICE_NAME,
             negate: false,
             params: { query: serviceName },
             type: 'phrase',
           },
           query: {
-            term: { 'service.name': serviceName },
+            match_phrase: { [SERVICE_NAME]: serviceName },
           },
         },
         {
