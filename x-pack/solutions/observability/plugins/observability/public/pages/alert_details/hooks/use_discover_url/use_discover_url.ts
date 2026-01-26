@@ -28,6 +28,7 @@ import {
   getSyntheticsStatusRuleData,
   getSyntheticsTlsRuleData,
   getAlertsIndexPatternRuleData,
+  getApmErrorCountRuleData,
 } from './get_rule_data';
 
 const viewInDiscoverSupportedRuleTypes = [
@@ -72,7 +73,7 @@ const getLocatorParamsMap: Record<
   [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [ApmRuleType.TransactionDuration]: getAlertsIndexPatternRuleData,
   [ApmRuleType.TransactionErrorRate]: getAlertsIndexPatternRuleData,
-  [ApmRuleType.ErrorCount]: getAlertsIndexPatternRuleData,
+  [ApmRuleType.ErrorCount]: getApmErrorCountRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {

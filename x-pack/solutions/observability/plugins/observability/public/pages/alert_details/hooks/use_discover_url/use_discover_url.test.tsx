@@ -401,10 +401,12 @@ describe('useDiscoverUrl', () => {
 
       renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
 
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-        dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
-        timeRange: expectedTimeRange,
-      });
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
+          timeRange: expectedTimeRange,
+        })
+      );
     });
   });
 });
