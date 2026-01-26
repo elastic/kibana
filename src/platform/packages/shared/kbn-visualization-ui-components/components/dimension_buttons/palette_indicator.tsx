@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AccessorConfig } from './types';
+import { MAX_PALETTE_INDICATOR_COLORS } from './constants';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
   if (accessorConfig.triggerIconType !== 'colorBy' || !accessorConfig.palette) return null;
@@ -30,7 +31,8 @@ export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorC
           }
         `}
         size="xs"
-        palette={accessorConfig.palette}
+        // limiting the visible colors to a max to avoid too many colors
+        palette={accessorConfig.palette.slice(0, MAX_PALETTE_INDICATOR_COLORS)}
       />
     </div>
   );
