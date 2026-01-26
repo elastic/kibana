@@ -29,16 +29,19 @@ export const fetchLogDocumentById = async (
     }
   | undefined
 > => {
-  const logSources = await logSourcesService.getLogSources();
-  const indexPattern = logSources
-    .map((source: { indexPattern: string }) => source.indexPattern)
-    .join(',');
+  const queryIndex =
+    index ??
+    (await logSourcesService
+      .getLogSources()
+      .then((logSources) =>
+        logSources.map((source: { indexPattern: string }) => source.indexPattern).join(',')
+      ));
 
   const result = await lastValueFrom(
     data.search.search(
       {
         params: {
-          index: index ?? indexPattern,
+          index: queryIndex,
           size: 1,
           body: {
             timeout: '20s',
