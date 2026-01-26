@@ -232,12 +232,13 @@ describe('AgentBulkActions', () => {
 
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeEnabled();
     });
-    it('should show export to CSV action if not in serverless mode', async () => {
+    it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
       mockStartServices(false);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
+          generateAgentReports: false,
         },
         integrations: {},
       } as any);
@@ -257,14 +258,16 @@ describe('AgentBulkActions', () => {
 
       const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
       expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeDisabled();
     });
 
-    it('should disable export to CSV action in serverless mode', async () => {
+    it('should show enabled CSV action if user has generateAgentReports permission', async () => {
       mockStartServices(true);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
+          generateAgentReports: true,
         },
         integrations: {},
       } as any);
@@ -283,7 +286,8 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
       const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).not.toBeInTheDocument();
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
     });
   });
 
@@ -405,12 +409,13 @@ describe('AgentBulkActions', () => {
       expect(results.queryByText(/Remove root privilege/)).not.toBeInTheDocument();
     });
 
-    it('should show export to CSV action if not in serverless mode', async () => {
+    it('should show enabled CSV action if user has generateAgentReports permission', async () => {
       mockStartServices(false);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
+          generateAgentReports: true,
         },
         integrations: {},
       } as any);
@@ -430,14 +435,16 @@ describe('AgentBulkActions', () => {
 
       const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
       expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
     });
 
-    it('should hide export to CSV action if in serverless mode', async () => {
+    it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
       mockStartServices(true);
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
+          generateAgentReports: false,
         },
         integrations: {},
       } as any);
@@ -456,7 +463,8 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Maintenance and diagnostics');
 
       const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
-      expect(exportToCSVButton).not.toBeInTheDocument();
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeDisabled();
     });
   });
 
