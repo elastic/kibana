@@ -72,11 +72,14 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           }
 
           const profilingData = fs.readFileSync(dataFilePath, 'utf8');
-          const operations = profilingData.split('\n').filter((line: string) => line.trim());
+          const operations = profilingData
+            .split('\n')
+            .filter((line: string) => line.trim())
+            .map((line: string) => JSON.parse(line));
 
           // Use esClient for bulk operations
           const response = await esClient.bulk({
-            body: operations.join('\n') + '\n',
+            body: operations,
             refresh: 'wait_for',
             timeout: '1m',
           });
