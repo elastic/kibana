@@ -160,8 +160,8 @@ export async function loadIndices(
     const aliasList = Array.isArray(aliases)
       ? aliases
       : typeof aliases === 'string' && aliases !== 'none'
-        ? [aliases]
-        : [];
+      ? [aliases]
+      : [];
 
     aliasList.forEach((alias) => {
       if (!alias) return;
@@ -192,7 +192,7 @@ export async function loadIndices(
             const targets = aliasToIndexNames.get(enrichedIndex.name);
             if (targets && targets.length) {
               // Don't overwrite the concrete index name with the alias name.
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
               const { name, ...rest } = enrichedIndex;
               targets.forEach((targetIndexName) => {
                 const target = indices[targetIndexName];
