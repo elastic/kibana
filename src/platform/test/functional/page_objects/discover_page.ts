@@ -1005,4 +1005,8 @@ export class DiscoverPageObject extends FtrService {
   public async ensureNoUnsavedChangesIndicator() {
     await this.testSubjects.missingOrFail('split-button-notification-indicator');
   }
+
+  public resetQueryMode() {
+    return this.browser.removeLocalStorageItem('discover.defaultQueryMode');
+  }
 }

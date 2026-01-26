@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('tabs sharing', function () {
     beforeEach(async () => {
+      await discover.resetQueryMode();
       await unifiedTabs.clearRecentlyClosedTabs();
     });
 

@@ -230,6 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('field usage events', () => {
       beforeEach(async () => {
+        await discover.resetQueryMode();
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
