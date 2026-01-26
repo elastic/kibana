@@ -18,6 +18,7 @@ import type { AiInsightResult, ContextEvent } from './types';
 export interface GetLogAiInsightsParams {
   index: string;
   id: string;
+  spaceId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
@@ -28,6 +29,7 @@ export interface GetLogAiInsightsParams {
 export async function getLogAiInsights({
   index,
   id,
+  spaceId,
   request,
   esClient,
   dataRegistry,
@@ -38,7 +40,7 @@ export async function getLogAiInsights({
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
 
-    ${getEntityLinkingInstructions()}
+    ${getEntityLinkingInstructions(spaceId)}
   `);
 
   const logEntry = await getLogDocumentById({

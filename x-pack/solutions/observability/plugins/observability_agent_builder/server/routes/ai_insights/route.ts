@@ -135,15 +135,18 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { index, id } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      const { inference, spaces } = startDeps;
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
+      const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+
       const result = await getLogAiInsights({
         index,
         id,
+        spaceId,
         inferenceClient,
         connectorId,
         request,
