@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-RELEASE_BUILD="${RELEASE_BUILD:="false"}"
-VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
+RELEASE_BUILD="true"
+VERSION_QUALIFIER=""
 
 BASE_VERSION="$(jq -r '.version' package.json)"
 

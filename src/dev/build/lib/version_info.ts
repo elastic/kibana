@@ -26,10 +26,7 @@ type ResolvedType<T extends Promise<any>> = T extends Promise<infer X> ? X : nev
 export type VersionInfo = ResolvedType<ReturnType<typeof getVersionInfo>>;
 
 export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Options) {
-  const buildVersion = pkg.version.concat(
-    versionQualifier ? `-${versionQualifier}` : '',
-    isRelease ? '' : '-SNAPSHOT'
-  );
+  const buildVersion = pkg.version;
 
   const buildSha = fs.existsSync(join(REPO_ROOT, '.git'))
     ? (await execa('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT })).stdout
