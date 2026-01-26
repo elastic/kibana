@@ -96,3 +96,8 @@ export type CustomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
   { type: 'custom-samples' }
 >;
+
+export type FailureStoreDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'failure-store' }
+>;
