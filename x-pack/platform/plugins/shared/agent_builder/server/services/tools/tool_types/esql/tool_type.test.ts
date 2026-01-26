@@ -6,7 +6,7 @@
  */
 
 import { getEsqlToolType } from './tool_type';
-import type { LegacyEsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql_legacy';
+import type { LegacyEsqlToolConfig } from './esql_legacy';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';
 import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 

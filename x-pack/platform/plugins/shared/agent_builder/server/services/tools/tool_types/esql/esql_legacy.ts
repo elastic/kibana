@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { EsqlToolParam, EsqlToolPersistedConfig } from './esql';
-import { EsqlToolFieldType, type EsqlToolFieldTypes, type EsqlToolParamValue } from './esql';
+import type { EsqlToolParam } from '@kbn/agent-builder-common/tools/types/esql';
+import {
+  EsqlToolFieldType,
+  type EsqlToolFieldTypes,
+  type EsqlToolParamValue,
+  type EsqlToolConfig,
+} from '@kbn/agent-builder-common/tools/types/esql';
 
 /**
  * Legacy/persisted param type values that may exist in older tool definitions.
@@ -85,11 +90,19 @@ export interface LegacyEsqlToolConfig {
   params: Record<string, LegacyEsqlToolParam>;
 }
 
+type EsqlToolStorageConfig = EsqlToolConfig & { schema_version: number };
+
+/**
+ * Persisted configuration shape for ES|QL tools.
+ * Can be either a legacy config (schema_version: undefined) or a current config (schema_version: number).
+ */
+export type EsqlToolPersistedConfig = EsqlToolStorageConfig | LegacyEsqlToolConfig;
+
 /**
  * schema_version is undefined for legacy configs
  */
 export const isLegacyEsqlToolConfig = (
   config: EsqlToolPersistedConfig
 ): config is LegacyEsqlToolConfig => {
-  return config.schema_version == null;
+  return config.schema_version === undefined;
 };

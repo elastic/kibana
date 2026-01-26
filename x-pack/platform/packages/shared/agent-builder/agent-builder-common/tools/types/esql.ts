@@ -6,7 +6,6 @@
  */
 
 import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
-import type { LegacyEsqlToolConfig } from './esql_legacy';
 
 /**
  * Current configuration schema version for persisted ES|QL tools.
@@ -57,9 +56,6 @@ export type EsqlToolConfig = {
   query: string;
   params: Record<string, EsqlToolParam>;
 };
-
-type EsqlToolStorageConfig = EsqlToolConfig & { schema_version: number };
-export type EsqlToolPersistedConfig = EsqlToolStorageConfig | LegacyEsqlToolConfig;
 
 export type EsqlToolDefinition = ToolDefinition<ToolType.esql, EsqlToolConfig>;
 export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<ToolType.esql, EsqlToolConfig>;

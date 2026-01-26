@@ -8,16 +8,14 @@
 import type { ZodObject } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
-import type {
-  EsqlToolConfig,
-  EsqlToolPersistedConfig,
-} from '@kbn/agent-builder-common/tools/types/esql';
+import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';
 
 import {
   convertLegacyEsqlToolFieldType,
   convertLegacyEsqlToolParamDefaultValue,
   isLegacyEsqlToolConfig,
-} from '@kbn/agent-builder-common/tools/types/esql_legacy';
+  type EsqlToolPersistedConfig,
+} from './esql_legacy';
 import type { ToolTypeDefinition } from '../definitions';
 import { createHandler } from './create_handler';
 import { createSchemaFromParams } from './create_schema';

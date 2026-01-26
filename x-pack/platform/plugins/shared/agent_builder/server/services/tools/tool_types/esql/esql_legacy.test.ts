@@ -10,7 +10,10 @@ import {
   convertLegacyEsqlToolParamDefaultValue,
   isLegacyEsqlToolConfig,
 } from './esql_legacy';
-import { EsqlToolFieldType, ESQL_CONFIG_SCHEMA_VERSION } from './esql';
+import {
+  EsqlToolFieldType,
+  ESQL_CONFIG_SCHEMA_VERSION,
+} from '@kbn/agent-builder-common/tools/types/esql';
 
 describe('esql_legacy', () => {
   describe('convertLegacyEsqlToolFieldType', () => {
@@ -64,9 +67,8 @@ describe('esql_legacy', () => {
   });
 
   describe('isLegacyEsqlToolConfig', () => {
-    it('treats null or undefined schema_version as legacy', () => {
+    it('treats undefined schema_version as legacy', () => {
       expect(isLegacyEsqlToolConfig({ schema_version: undefined } as any)).toBe(true);
-      expect(isLegacyEsqlToolConfig({ schema_version: null } as any)).toBe(true);
     });
 
     it('treats missing schema_version as legacy', () => {
