@@ -104,6 +104,12 @@ export function compileGrokPatternToRegex(
 }
 
 /**
+ * Maximum pattern length to prevent ReDoS attacks.
+ * This is a generous limit that should accommodate any legitimate Grok pattern.
+ */
+const MAX_PATTERN_LENGTH = 10000;
+
+/**
  * Resolves nested Grok pattern references within a regex pattern.
  * For example, %{IPV4} within a pattern definition.
  *
@@ -117,8 +123,13 @@ function resolveNestedPatterns(
   customPatternDefinitions?: Record<string, string>,
   seen: Set<string> = new Set()
 ): string {
+  // Safety check to prevent ReDoS on excessively long patterns
+  if (pattern.length > MAX_PATTERN_LENGTH) {
+    return pattern;
+  }
+
   // Match nested pattern references like %{PATTERN} or %{PATTERN:field} or %{PATTERN:field:type}
-  const nestedPatternRegex = /%\{([A-Z0-9_]+)(?::[^}]*)?\}/g;
+  const nestedPatternRegex = /%\{([A-Z0-9_]+)(?::[A-Za-z0-9_@#$%&*+=.\-]*)?(?::[a-z]*)?\}/g;
 
   return pattern.replace(nestedPatternRegex, (match, nestedSyntax) => {
     // Prevent infinite recursion
