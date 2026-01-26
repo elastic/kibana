@@ -18,7 +18,7 @@ import {
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense, useStartServices } from '../../../../hooks';
+import { useAuthz, useLicense } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -69,7 +69,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
-  const { cloud } = useStartServices();
 
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
