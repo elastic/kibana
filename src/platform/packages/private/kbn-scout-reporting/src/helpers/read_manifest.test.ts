@@ -25,10 +25,16 @@ describe('read_manifest', () => {
       expect(getKibanaModulePath(configPath)).toBe(expectedPath);
     });
 
-    it(`should throw an error if 'scout' is not in the path`, () => {
+    it('should resolve the manifest path correctly for a scout_* config path', () => {
+      const configPath = '/plugins/my_plugin/test/scout_custom_config/api/playwright.config.ts';
+      const expectedPath = path.resolve('/plugins/my_plugin/kibana.jsonc');
+      expect(getKibanaModulePath(configPath)).toBe(expectedPath);
+    });
+
+    it(`should throw an error if 'scout' or 'scout_*' is not in the path`, () => {
       const configPath = '/plugins/my_plugin/tests/playwright.config.ts';
       expect(() => getKibanaModulePath(configPath)).toThrow(
-        /Invalid path: "scout" directory not found/
+        /Invalid path: "scout" or "scout_\*" directory not found/
       );
     });
   });

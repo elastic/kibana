@@ -14,6 +14,8 @@
           "({ columnId, dataView, fieldFormats, isCompressed, isSingleLine, row, shouldShowFieldHandler, }: ContentProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/content.tsx",
+        "lineNumber": 91,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "ContentProps"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/content.tsx",
+            "lineNumber": 91,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,6 +59,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 152,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,6 +75,8 @@
               "ResourceFieldsProps"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 152,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,6 +106,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 191,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,6 +122,8 @@
               "Omit<ResourceFieldsProps, \"fields\" | \"getAvailableFields\">"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 191,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -149,6 +161,8 @@
           " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, any[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; }; id: string; isAnchor?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 220,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +183,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 220,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,6 +212,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,6 +228,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+            "lineNumber": 19,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -229,6 +249,8 @@
           "(field: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 250,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +265,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 250,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -271,6 +295,8 @@
           "TraceDocument"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 138,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,6 +317,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 138,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -344,6 +372,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -359,6 +389,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -376,6 +408,8 @@
           "({ fields, limited, onFilter, ...props }: ResourceProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/resource.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -390,6 +424,8 @@
               "ResourceProps"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/resource.tsx",
+            "lineNumber": 26,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -417,6 +453,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -437,6 +475,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 129,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -464,6 +504,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -484,6 +526,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 51,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -502,6 +546,8 @@
         "label": "ResourceFieldDescriptor",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -520,6 +566,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -534,6 +582,8 @@
               "(() => JSX.Element) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -547,6 +597,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -558,6 +610,8 @@
             "label": "value",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +633,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,6 +649,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -607,6 +665,8 @@
         "label": "SummaryColumnFactoryDeps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -628,6 +688,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,6 +704,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,6 +720,8 @@
               "(fieldName: string) => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -668,6 +734,8 @@
                 "label": "fieldName",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+                "lineNumber": 13,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -685,6 +753,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -699,6 +769,8 @@
               "CoreStart"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,6 +792,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -772,6 +846,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -795,6 +871,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -835,6 +913,8 @@
               "; closePopover: () => void; isCompressed?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+            "lineNumber": 19,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -877,6 +957,8 @@
           "; closePopover: () => void; isCompressed?: boolean | undefined; } & { isTracesSummary?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -23,6 +23,7 @@ import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/pu
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationListingStartDependencies {
@@ -32,7 +33,7 @@ export interface EventAnnotationListingStartDependencies {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   contentManagement: ContentManagementPublicStart;
   lens: LensPublicStart;
   embeddable: EmbeddableStart;
@@ -89,7 +90,7 @@ export class EventAnnotationListingPlugin
             notifications: coreStart.notifications,
             uiSettings: coreStart.uiSettings,
             dataViews: pluginsStart.dataViews,
-            unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             data: pluginsStart.data,
             storage: new Storage(localStorage),
           },

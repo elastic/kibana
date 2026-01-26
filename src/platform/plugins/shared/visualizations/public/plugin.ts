@@ -69,6 +69,7 @@ import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plu
 
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -175,6 +176,7 @@ export interface VisualizationsStartDeps {
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
@@ -427,6 +429,7 @@ export class VisualizationsPlugin
           visEditorsRegistry,
           listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          kql: pluginsStart.kql,
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
           contentManagement: pluginsStart.contentManagement,
@@ -494,10 +497,7 @@ export class VisualizationsPlugin
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: [],
+              savedObjectId: savedObject.id,
             },
           },
           {

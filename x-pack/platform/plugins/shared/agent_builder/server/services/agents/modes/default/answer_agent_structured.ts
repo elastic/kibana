@@ -10,8 +10,10 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
+import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
 import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../utils/attachment_presentation';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { errorAction } from './actions';
@@ -29,6 +31,8 @@ export const structuredOutputSchema = z.object({
     .describe('Optional structured data to include in the response'),
 });
 
+const wrappedSchemaProp = 'response';
+
 /**
  * Structured output answer agent with structured error handling.
  * This agent uses structured output mode and returns structured error responses.
@@ -40,6 +44,7 @@ export const createAnswerAgentStructured = ({
   events,
   outputSchema,
   attachmentTypes,
+  versionedAttachmentPresentation,
 }: {
   chatModel: InferenceChatModel;
   configuration: ResolvedConfiguration;
@@ -48,28 +53,19 @@ export const createAnswerAgentStructured = ({
   outputSchema?: Record<string, unknown>;
   logger: Logger;
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
     try {
-      let schemaToUse = outputSchema
-        ? (outputSchema as Record<string, any>)
-        : structuredOutputSchema;
-
-      // Add description to JSON Schema if it doesn't have one, for some reason without it this doesnt seem to work reliably
-      if (
-        !('description' in schemaToUse) &&
-        typeof schemaToUse === 'object' &&
-        schemaToUse !== null
-      ) {
-        schemaToUse = {
-          ...schemaToUse,
-          description:
-            "Use this structured format to respond to the user's request with the required data.",
-        };
-      }
+      const { schema: schemaToUse, wrapped } = wrapJsonSchema({
+        schema: outputSchema ?? structuredOutputSchema,
+        property: wrappedSchemaProp,
+        description:
+          "Use this structured format to respond to the user's request with the required data.",
+      });
 
       const structuredModel = chatModel
         .withStructuredOutput(schemaToUse, {
@@ -83,12 +79,19 @@ export const createAnswerAgentStructured = ({
         customInstructions: configuration.answer.instructions,
         capabilities,
         initialMessages: state.initialMessages,
+        conversationTimestamp: state.conversationTimestamp,
         actions: state.mainActions,
         answerActions: state.answerActions,
         attachmentTypes,
+        versionedAttachmentPresentation,
       });
 
-      const response = await structuredModel.invoke(prompt);
+      let response = await structuredModel.invoke(prompt);
+      // unwrap response if schema was wrapped
+      if (wrapped && response[wrappedSchemaProp]) {
+        response = response[wrappedSchemaProp];
+      }
+
       const action = processStructuredAnswerResponse(response);
 
       return {

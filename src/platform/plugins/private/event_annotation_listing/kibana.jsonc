@@ -16,7 +16,7 @@
       "presentationUtil",
       "visualizations",
       "dataViews",
-      "unifiedSearch",
+      "kql",
       "kibanaUtils",
       "contentManagement",
       "embeddable"

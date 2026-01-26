@@ -15,7 +15,8 @@ const TEST_DASHBOARD_TITLE = 'Attachments Test Dashboard';
 const TEST_RULE_NAME = 'attachments-test-rule';
 const TEST_SLO_NAME = 'Attachments Test SLO';
 
-test.describe('Attachments', { tag: ['@ess', '@svlOblt'] }, () => {
+// TODO: Re-enable on serverless once https://github.com/elastic/kibana/issues/248090 is resolved
+test.describe('Attachments', { tag: ['@ess'] }, () => {
   let ruleId: string;
   let sloId: string;
 

@@ -74,10 +74,15 @@ export function buildWorkflowLookup(
     };
   }
 
-  Object.assign(
-    steps,
-    inspectStep(yamlDocument?.contents, lineCounter) // stepItems can be null if there are no steps defined yet
-  );
+  // Only process the 'steps' section, not the entire document
+  // This prevents inputs (which also have 'name' and 'type') from being treated as steps
+  const stepsNode = (yamlDocument.contents as any).get('steps');
+  if (stepsNode) {
+    Object.assign(
+      steps,
+      inspectStep(stepsNode, lineCounter) // stepItems can be null if there are no steps defined yet
+    );
+  }
 
   return {
     steps,

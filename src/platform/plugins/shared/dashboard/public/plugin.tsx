@@ -123,7 +123,16 @@ export interface DashboardSetup {
   registerListingPageTab: (tab: DashboardListingTab) => void;
 }
 
+/**
+ * The start contract for the Dashboard plugin.
+ * Provides services for interacting with dashboards from other plugins.
+ */
 export interface DashboardStart {
+  /**
+   * Returns the service for finding dashboards.
+   *
+   * @returns A promise that resolves to the {@link FindDashboardsService}.
+   */
   findDashboardsService: () => Promise<FindDashboardsService>;
 }
 

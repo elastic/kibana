@@ -36,7 +36,7 @@ export class DiscoverApp {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
@@ -47,7 +47,7 @@ export class DiscoverApp {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');
     await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
   async saveSearch(name: string) {
@@ -56,6 +56,12 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  async waitUntilFieldListHasCountOfFields() {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
   }
 
   async waitForHistogramRendered() {
@@ -116,6 +122,11 @@ export class DiscoverApp {
     });
   }
 
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -143,10 +154,14 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 

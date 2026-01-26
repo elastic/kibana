@@ -87,7 +87,8 @@ export default function (providerContext: FtrProviderContext) {
     return range.map((idx) => getPolicyId(idx));
   }
 
-  describe('Package Policy - perf reusable policies', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/248504
+  describe.skip('Package Policy - perf reusable policies', function () {
     skipIfNoDockerRegistry(providerContext);
     this.timeout(2 * 60 * 1000); // 2 minutes
     let policyIds: string[] = [];
