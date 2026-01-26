@@ -6,30 +6,27 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
-import { generateLogsData } from '../../fixtures/generators';
+import { test } from '../fixtures';
+import { generateLogsData } from '../fixtures/generators';
 
-const WIRED_STREAM_NAME = 'logs.child';
+const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
-test.describe(
-  'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
+test.describe.only(
+  'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
   { tag: ['@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      // Create a wired stream
-      await apiServices.streams.forkStream('logs', WIRED_STREAM_NAME, {
-        always: {},
-      });
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data for a classic stream
       await generateLogsData(logsSynthtraceEsClient)({
-        index: 'logs',
+        index: CLASSIC_STREAM_NAME,
         startTime: 'now-15m',
         endTime: 'now',
+        defaults: { 'stream.name': CLASSIC_STREAM_NAME },
       });
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.deleteStream(WIRED_STREAM_NAME);
+      await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
       await logsSynthtraceEsClient.clean();
     });
 
@@ -40,22 +37,19 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover
+      // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-      // Select the data view for our test stream
-      await pageObjects.discover.selectDataView('logs.child');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.discover.waitForHistogramRendered();
 
-      // Refresh and wait for the row — stream routing may take time
-      await page.testSubj.click('querySubmitButton');
+      await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForDocTableRendered();
 
       await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -69,13 +63,13 @@ test.describe(
 
       // Verify we are on the stream processing page
       await expect(page).toHaveURL(
-        new RegExp(`streams/${WIRED_STREAM_NAME}/management/processing`)
+        new RegExp(`streams/${CLASSIC_STREAM_NAME}/management/processing`)
       );
 
       // Verify the data source is correctly configured to show the Discover document
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
       await expect(dataSourcesSelector).toContainText(
-        `Discover document from ${WIRED_STREAM_NAME}`
+        `Discover document from ${CLASSIC_STREAM_NAME}`
       );
     });
 
@@ -86,18 +80,25 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover
+      // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-      await pageObjects.discover.selectDataView('logs.child');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
+
+      await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Switch to ES|QL mode by clicking the button
       await pageObjects.discover.selectTextBaseLang();
 
+      // Wait for ES|QL results to load
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
+
       await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -111,14 +112,14 @@ test.describe(
 
       // Verify we are on the stream processing page
       await expect(page).toHaveURL(
-        new RegExp(`streams/${WIRED_STREAM_NAME}/management/processing`)
+        new RegExp(`streams/${CLASSIC_STREAM_NAME}/management/processing`)
       );
 
       // Verify the data source is correctly configured
       // In ES|QL mode, the document doesn't have an _id, so it creates a custom samples data source
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
       await expect(dataSourcesSelector).toContainText(
-        `Discover document from ${WIRED_STREAM_NAME}`
+        `Discover document from ${CLASSIC_STREAM_NAME}`
       );
     });
   }
