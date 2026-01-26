@@ -156,7 +156,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -372,7 +372,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -451,7 +451,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -480,7 +480,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -518,7 +518,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -533,7 +533,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies and use the name of package policies instead of id', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -592,7 +592,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<OutputSOAttributes>({
             type: 'ingest-outputs',
             perPage: 10000,

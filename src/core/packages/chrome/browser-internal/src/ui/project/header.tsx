@@ -25,25 +25,19 @@ import type {
   ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
-  ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
 import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { debounceTime, EMPTY } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
-import { HeaderTopBanner } from '../header/header_top_banner';
-import { AppMenuBar } from './app_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../header/header_page_announcer';
 
@@ -104,13 +98,9 @@ const headerStrings = {
 };
 
 export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
-  headerBanner$?: Observable<ChromeUserBanner | undefined> | null;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  actionMenu$?: Observable<MountPoint | undefined> | null;
-  appMenu$?: Observable<AppMenuConfig | undefined> | null;
   docLinks: DocLinksStart;
-  children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
@@ -124,7 +114,6 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
-  isFixed?: boolean;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -215,13 +204,11 @@ const Logo = ({
 export const ProjectHeader = ({
   application,
   kibanaVersion,
-  children,
   prependBasePath,
   docLinks,
   customBranding$,
   isServerless,
   breadcrumbsAppendExtensions$,
-  isFixed = true,
   ...observables
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -237,17 +224,10 @@ export const ProjectHeader = ({
 
   return (
     <>
-      {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader
-            position={isFixed ? 'fixed' : 'static'}
-            className="header__firstBar"
-            css={topBarStyles}
-          >
+          <EuiHeader position={'static'} className="header__firstBar" css={topBarStyles}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              {children}
-
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
                   breadcrumbs$={observables.breadcrumbs$}
@@ -310,14 +290,6 @@ export const ProjectHeader = ({
           </EuiHeader>
         </div>
       </header>
-
-      {(observables.actionMenu$ || observables.appMenu$) && (
-        <AppMenuBar
-          appMenuActions$={observables.actionMenu$}
-          appMenu$={observables.appMenu$ ?? EMPTY}
-          isFixed={true}
-        />
-      )}
     </>
   );
 };
