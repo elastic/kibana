@@ -59,11 +59,7 @@ export const ConnectToElasticsearch = () => {
         </EuiFlexItem>
       </EuiShowFor>
       <EuiShowFor sizes={['xl']}>
-        <EuiFlexItem
-          css={css({
-            borderLeft: euiTheme.colors.borderBaseSubdued,
-          })}
-        >
+        <EuiFlexItem>
           <EuiButton
             data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
             color="text"
