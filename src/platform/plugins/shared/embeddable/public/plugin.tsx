@@ -31,7 +31,7 @@ import {
   registerLegacyURLTransform,
   hasLegacyURLTransform,
   getLegacyURLTransform,
-} from './transforms_registry';
+} from './bwc/legacy_url_transform';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;

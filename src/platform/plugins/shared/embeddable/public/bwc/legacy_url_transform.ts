@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
-import type { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
+import type { DrilldownTransforms, EmbeddableTransforms } from '../../common';
+import type { getTransformDrilldownsOut } from '../../common/drilldowns/transform_drilldowns_out';
 
 const registry: {
   [key: string]: (
@@ -16,6 +16,10 @@ const registry: {
   ) => Promise<EmbeddableTransforms['transformOut']>;
 } = {};
 
+/*
+ * Container applications such as Dashboard store embeddable state in URLs.
+ * Use this registry for BWC when reading state from URLs
+ */
 export function registerLegacyURLTransform(
   type: string,
   getTransformOut: (
@@ -29,14 +33,14 @@ export function registerLegacyURLTransform(
   registry[type] = getTransformOut;
 }
 
-export async function getLegacyURLTransform(type: string) {
-  const { getTransformDrilldownsOut } = await import(
-    '../common/drilldowns/transform_drilldowns_out'
+export async function getLegacyURLTransform(embeddableType: string) {
+  const { getTransformDrilldownsOut, transformDashboardDrilldown } = await import(
+    '../async_module'
   );
-  // TODO replace with function that gets transformDrilldownOut from registry
-  const placeholderGetDrilldownTransformOut = (drilldownType: string) => undefined;
-  const transformDrilldownsOut = getTransformDrilldownsOut(placeholderGetDrilldownTransformOut);
-  return await registry[type]?.(transformDrilldownsOut);
+  const transformDrilldownsOut = getTransformDrilldownsOut((drilldownType: string) => {
+    return drilldownType === 'dashboard_drilldown' ? transformDashboardDrilldown : undefined;
+  });
+  return await registry[embeddableType]?.(transformDrilldownsOut);
 }
 
 export function hasLegacyURLTransform(type: string) {
