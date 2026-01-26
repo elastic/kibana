@@ -7233,6 +7233,25 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.dockerRegistryPort",
+        "type": "string",
+        "tags": [],
+        "label": "dockerRegistryPort",
+        "description": [
+          "\nThis is used by CI to set the docker registry port\nyou can also define this environment variable locally when running tests which\nwill spin up a local docker package registry locally for you\nif this is defined it takes precedence over the `packageRegistryOverride` variable"
+        ],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.EsTestCluster",
         "type": "Type",
         "tags": [],
@@ -7271,8 +7290,8 @@
         "tags": [],
         "label": "fleetPackageRegistryDockerImage",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/index.ts",
-        "lineNumber": 88,
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7552,6 +7571,132 @@
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/kbn/users.ts",
             "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.packageRegistryDocker",
+        "type": "Object",
+        "tags": [],
+        "label": "packageRegistryDocker",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.image",
+            "type": "string",
+            "tags": [],
+            "label": "image",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.portInContainer",
+            "type": "number",
+            "tags": [],
+            "label": "portInContainer",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.port",
+            "type": "string",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.waitForLogLine",
+            "type": "string",
+            "tags": [],
+            "label": "waitForLogLine",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.waitForLogLineTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "waitForLogLineTimeoutMs",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.packageRegistryDocker.preferCached",
+            "type": "boolean",
+            "tags": [],
+            "label": "preferCached",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
