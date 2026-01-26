@@ -36,7 +36,9 @@ import { useInventoryViewsContext } from './use_inventory_views';
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',
   steps: 10,
+  rules: [],
   reverseColors: false,
+  type: 'gradient',
 };
 
 export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {

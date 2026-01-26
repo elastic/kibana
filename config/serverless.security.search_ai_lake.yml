@@ -25,6 +25,9 @@ xpack.features.overrides:
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
   securitySolutionSiemMigrations.hidden: true
+  
+  ### Workflows Management should be moved from Analytics category to Security .
+  workflowsManagement.category: "security"
   ### Agent Builder feature is available in this tier; move it from Analytics category to Security.
   agentBuilder:
     category: 'security'
