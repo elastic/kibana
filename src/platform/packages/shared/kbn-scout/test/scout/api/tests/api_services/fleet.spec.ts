@@ -262,7 +262,8 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
   apiTest('should get fleet server hosts', async ({ apiServices }) => {
     // Note: The get method doesn't return a value in current implementation
     // This test verifies it doesn't throw an error
-    await apiServices.fleet.server_hosts.get();
+    const resp = await apiServices.fleet.server_hosts.get();
+    expect(resp.status).toBe(200);
   });
 
   apiTest('should create a fleet server host with parameters', async ({ apiServices }) => {
