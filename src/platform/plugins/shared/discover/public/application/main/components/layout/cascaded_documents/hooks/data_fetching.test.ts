@@ -65,7 +65,7 @@ describe('data_fetching related hooks', () => {
       appliedFunctions: [{ identifier: 'count', aggregation: 'count' }],
     };
 
-    const defaultCascadeConfig: CascadedDocumentsState = {
+    const defaultCascadedDocumentsState: CascadedDocumentsState = {
       availableCascadeGroups: ['category'],
       selectedCascadeGroups: ['category'],
     };
@@ -73,7 +73,7 @@ describe('data_fetching related hooks', () => {
     it('should return empty array when rows are undefined', () => {
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          cascadedDocumentsState: defaultCascadedDocumentsState,
           rows: undefined,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -86,7 +86,7 @@ describe('data_fetching related hooks', () => {
     it('should return empty array when rows are empty', () => {
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          cascadedDocumentsState: defaultCascadedDocumentsState,
           rows: [],
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -105,7 +105,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          cascadedDocumentsState: defaultCascadedDocumentsState,
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -129,7 +129,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          cascadedDocumentsState: defaultCascadedDocumentsState,
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -157,7 +157,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          cascadedDocumentsState: defaultCascadedDocumentsState,
           rows: mockRows,
           queryMeta: queryMetaWithMultipleFunctions,
           esqlVariables: undefined,
@@ -180,14 +180,14 @@ describe('data_fetching related hooks', () => {
         { key: 'myVar', value: 'actualField', type: ESQLVariableType.FIELDS },
       ];
 
-      const cascadeConfigWithVariable: CascadedDocumentsState = {
+      const cascadedDocumentsStateWithVariable: CascadedDocumentsState = {
         availableCascadeGroups: ['??myVar'],
         selectedCascadeGroups: ['??myVar'],
       };
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: cascadeConfigWithVariable,
+          cascadedDocumentsState: cascadedDocumentsStateWithVariable,
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables,
