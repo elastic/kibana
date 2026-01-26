@@ -105,6 +105,7 @@ const InternalDocViewerTable = ({
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
+  hideFilteringOnComputedColumns,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -403,6 +404,7 @@ const InternalDocViewerTable = ({
             onChangePageSize={onChangePageSize}
             pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
+            hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
           />
         </EuiFlexItem>
       )}
