@@ -75,17 +75,6 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 }
 
 export function StreamDetailRoutingImpl() {
-  const { appParams, core } = useKibana();
-
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
-
-  const definition = routingSnapshot.context.definition;
-
-  const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' });
-
   const {
     appParams,
     core,
@@ -96,20 +85,21 @@ export function StreamDetailRoutingImpl() {
     },
   } = useKibana();
 
-  const { onPageReady } = usePerformanceContext();
-  const { timeState } = useTimefilter();
-
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+  
+  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
 
   const definition = routingSnapshot.context.definition;
 
-  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
-
   const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' }) &&
-    hasRoutingChanges;
+    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' }) && hasRoutingChanges;
+
+
+  const { onPageReady } = usePerformanceContext();
+  const { timeState } = useTimefilter();
+
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {

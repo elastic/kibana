@@ -61,7 +61,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
   const { features } = useStreamsPrivileges();
 
-  const canUseQueryMode = features.queryStreams?.enabled;
+  const canUseQueryMode = features.queryStreams.enabled;
 
   const { changeChildStreamsMode } = useStreamRoutingEvents();
 
@@ -152,8 +152,8 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
   const isEditingOrReorderingStreams =
-    routingSnapshot.matches({ ready: 'editingRule' }) ||
-    routingSnapshot.matches({ ready: 'reorderingRules' });
+    routingSnapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'reorderingRules' } });
 
   // This isRefreshing tracks async gap between operation completion and server data arrival
   const { isRefreshing } = routingSnapshot.context;

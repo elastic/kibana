@@ -11,8 +11,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { DeleteStreamPanel } from '../data_management/stream_detail_management/advanced_view/delete_stream';
 import { ImportExportPanel } from '../data_management/stream_detail_management/advanced_view/import_export';
-import { StreamDescription } from '../stream_detail_features/stream_description';
-import { StreamFeatureConfiguration } from '../stream_detail_features/stream_feature_configuration';
+import { StreamDescription } from '../stream_detail_systems/stream_description';
+import { StreamSystemConfiguration } from '../stream_detail_systems/stream_system_configuration';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 export function QueryStreamsAdvancedView({
   definition,
@@ -25,6 +26,8 @@ export function QueryStreamsAdvancedView({
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
 
+  const aiFeatures = useAIFeatures();
+
   return (
     <>
       {contentPacks?.enabled && (
@@ -36,9 +39,9 @@ export function QueryStreamsAdvancedView({
 
       {significantEvents?.available && (
         <>
-          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} aiFeatures={aiFeatures} />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} />
+          <StreamSystemConfiguration definition={definition.stream} aiFeatures={aiFeatures}   />
         </>
       )}
       <EuiSpacer />
