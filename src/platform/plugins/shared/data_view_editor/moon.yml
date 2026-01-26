@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/rollup'
   - '@kbn/css-utils'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
