@@ -204,11 +204,10 @@ const QueryStreamFlyout = ({
                     >
                       <QueryStreamForm>
                         <QueryStreamForm.StreamName
-                          value={streamName}
+                          partitionName={streamName}
                           onChange={(name) => setValue('name', name, { shouldValidate: true })}
                           error={formState.errors.name?.message}
                           isInvalid={Boolean(formState.errors.name?.message)}
-                          nestedStreamNameAllowed
                         />
                         <QueryStreamForm.ESQLEditor
                           isLoading={isLoadingQueryResults}

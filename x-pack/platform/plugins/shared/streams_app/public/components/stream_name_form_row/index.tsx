@@ -228,8 +228,9 @@ export function StreamNameFormRow({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
-    setLocalStreamName(`${prefix}${newPartitionName}`);
-    onChange(`${prefix}${newPartitionName}`);
+    const newStreamName = prefix ? `${prefix}${newPartitionName}` : newPartitionName;
+    setLocalStreamName(newStreamName);
+    onChange(newStreamName);
   };
 
   return (
