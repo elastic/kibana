@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/response-ops-react-query'
 tags:
   - plugin
   - prod
