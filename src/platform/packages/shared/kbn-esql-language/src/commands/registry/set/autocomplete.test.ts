@@ -11,6 +11,18 @@ import { autocomplete } from './autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import { settings } from '../../definitions/generated/settings';
+import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
+
+jest.mock('../../definitions/generated/settings', () => {
+  const originalModule = jest.requireActual('../../definitions/generated/settings');
+  return {
+    ...originalModule,
+    settings: originalModule.settings.map((s: any) =>
+      s.name === 'project_routing' ? { ...s, ignoreAsSuggestion: false } : s
+    ),
+  };
+});
 
 const setExpectSuggestions = (
   query: string,
@@ -81,12 +93,12 @@ describe('SET Autocomplete', () => {
 
     describe('Project routing setting', () => {
       it('suggests common project routing values after assignment operator', async () => {
-        await setExpectSuggestions('SET project_routing = ', ['"_alias: *";', '"_alias:_origin";']);
+        await setExpectSuggestions('SET project_routing = ', ['"_alias:*";', '"_alias:_origin";']);
       });
 
       it('suggests common project routing values for partial input', async () => {
         await setExpectSuggestions('SET project_routing = "_alias:', [
-          '_alias: *',
+          '_alias:*',
           '_alias:_origin',
         ]);
       });
@@ -94,11 +106,48 @@ describe('SET Autocomplete', () => {
 
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
-        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"LOAD";', '"NULLIFY";']);
+        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"NULLIFY";']);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'LOAD', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'NULLIFY']);
+      });
+    });
+
+    describe('Approximate setting', () => {
+      const setting = settings.find((s) => s.name === Settings.APPROXIMATE) as unknown as {
+        mapParams: string;
+      };
+      it('suggests parameter names after assignment operator', async () => {
+        await setExpectSuggestions('SET approximate = ', ['false;', 'true;', '{ $0 };']);
+      });
+
+      it('suggests map parameter names after selecting the map option', async () => {
+        const parameters = parseMapParams(setting?.mapParams || '');
+        const paramNames = Object.keys(parameters).map((paramName) => `"${paramName}": `);
+        await setExpectSuggestions('SET approximate = { ', paramNames);
+      });
+
+      it('suggests map parameter name after completing a parameter entry', async () => {
+        await setExpectSuggestions('SET approximate = { "num_rows": 100, ', [
+          '"confidence_level": ',
+        ]);
+      });
+
+      it('suggests map parameter values after parameter name and colon: num_rows', async () => {
+        await setExpectSuggestions('SET approximate = { "num_rows": ', [
+          '100000',
+          '1000000',
+          '500000',
+        ]);
+      });
+
+      it('suggests map parameter values after parameter name and colon:confidence_level', async () => {
+        await setExpectSuggestions('SET approximate = { "confidence_level": ', [
+          '0.99',
+          '0.95',
+          '0.9',
+        ]);
       });
     });
   });
