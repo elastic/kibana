@@ -4,17 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  fleetPackageRegistryDockerImage,
-  FtrConfigProviderContext,
-  Config,
-  defineDockerServersConfig,
-} from '@kbn/test';
+import type { FtrConfigProviderContext, Config } from '@kbn/test';
+import { defineDockerServersConfig, packageRegistryDocker, dockerRegistryPort } from '@kbn/test';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { ServerlessProjectType } from '@kbn/es';
-import path from 'path';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import type { ServerlessProjectType } from '@kbn/es';
+import type { DeploymentAgnosticCommonServices } from '../services';
+import { services } from '../services';
 import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T> {
@@ -72,17 +68,6 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       );
     }
 
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../serverless/shared/config.base.ts')
     );
@@ -96,16 +81,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         ...(options.services || services),
       },
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
-          preferCached: true,
-        },
+        registry: packageRegistryDocker,
       }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
