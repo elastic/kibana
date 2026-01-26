@@ -95,13 +95,20 @@ export const SecondaryMenuItemComponent = ({
     max-width: ${SIDE_PANEL_WIDTH / 16 - ITEM_HORIZONTAL_SPACING_OFFSET / 16}rem;
   `;
 
+  /* Always show non-new badges. Show new ones if isNew check allows it
+  badgeType might be undefined for primary items with new secondary items,
+  we still want to show the new badge in nested menu if the child item is new */
+  const getBadge = () => {
+    if (badgeType && badgeType !== 'new') return <BetaBadge type={badgeType} />;
+    if (isNew) return <BetaBadge type="new" />;
+  };
+
   const content = (
     <div css={labelAndBadgeStyles}>
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
       </span>
-      {/* Always show non-new badges, only show new ones if isNew check allows it */}
-      {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
+      {getBadge()}
     </div>
   );
 

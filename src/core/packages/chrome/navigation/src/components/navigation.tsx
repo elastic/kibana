@@ -284,7 +284,7 @@ export const Navigation = ({
                                   key={item.id}
                                   aria-describedby={ariaDescribedBy}
                                   isHighlighted={item.id === visuallyActivePageId}
-                                  isNew={getIsNewSecondary(item.id)}
+                                  isNew={getIsNewPrimary(item.id)}
                                   hasSubmenu={hasSubmenu}
                                   onClick={() => {
                                     handleItemClick(item);
