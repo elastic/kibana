@@ -133,7 +133,6 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
         aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER } } },
       },
     },
-    expand_wildcards: ['open', 'hidden'],
   });
   const ruleTypeIdBuckets = response.aggregations?.ruleTypeIds.buckets;
   if (!ruleTypeIdBuckets) {
