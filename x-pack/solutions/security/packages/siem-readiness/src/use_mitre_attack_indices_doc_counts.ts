@@ -20,7 +20,7 @@ interface IndicesDocCountsResponse {
   indices: IndexDocCount[];
 }
 
-export const useIndicesDocCounts = (ruleIndices: string[] = []) => {
+export const useMitreAttackIndicesDocCounts = (ruleIndices: string[] = []) => {
   const { http } = useKibana<CoreStart>().services;
 
   return useQuery(

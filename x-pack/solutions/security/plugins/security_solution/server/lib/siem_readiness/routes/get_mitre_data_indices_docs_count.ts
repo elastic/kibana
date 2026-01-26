@@ -52,16 +52,10 @@ export const getMitreDataIndicesDocsCountRoute = (
         try {
           const { indices } = request.body;
 
-          if (!indices || !Array.isArray(indices) || indices.length === 0) {
-            return response.badRequest({
-              body: { message: 'Indices array is required and cannot be empty' },
-            });
-          }
-
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const indexDocCounts = await getIndicesDocumentCounts(esClient, indices);
+          const indexDocCounts = await getIndicesDocumentCounts(esClient, indices || []);
 
           return response.ok({
             body: {
@@ -84,61 +78,44 @@ async function getIndicesDocumentCounts(
   esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<IndexDocCount[]> {
-  const results: IndexDocCount[] = [];
+  // If indices is empty, return immediately to avoid ES calls
+  if (indices.length === 0) return [];
 
-  const batchSize = 10;
-  for (let i = 0; i < indices.length; i += batchSize) {
-    const batch = indices.slice(i, i + batchSize);
-    const batchPromises = batch.map(async (index): Promise<IndexDocCount> => {
-      try {
-        const indexExists = await esClient.indices.exists({
-          index,
-          allow_no_indices: false,
-        });
+  const promises = indices.map(async (index): Promise<IndexDocCount> => {
+    try {
+      // Direct count call is more efficient than exists + count
+      const { count } = await esClient.count({
+        index,
+        ignore_unavailable: true, // Returns 0 if index doesn't exist
+        allow_no_indices: true,
+      });
 
-        if (!indexExists) {
-          return {
-            index,
-            docCount: 0,
-            exists: false,
-          };
+      return {
+        index,
+        docCount: count ?? 0,
+        exists: true, // Note: with ignore_unavailable, it's hard to distinguish "empty" vs "missing" without a second call
+      };
+    } catch (error) {
+      // Handle the case where the index truly doesn't exist or permissions are missing
+      const is404 = error.meta?.statusCode === 404;
+      return {
+        index,
+        docCount: 0,
+        exists: false,
+        error: is404 ? undefined : error.message,
+      };
+    }
+  });
+
+  const results = await Promise.allSettled(promises);
+  return results.map((res, idx) =>
+    res.status === 'fulfilled'
+      ? res.value
+      : {
+          index: indices[idx],
+          docCount: 0,
+          exists: false,
+          error: res.reason?.message,
         }
-
-        const countResponse = await esClient.count({
-          index,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-
-        return {
-          index,
-          docCount: countResponse.count || 0,
-          exists: true,
-        };
-      } catch (error) {
-        return {
-          index,
-          docCount: 0,
-          exists: false,
-          error: error.message || 'Failed to get document count',
-        };
-      }
-    });
-
-    const batchResults = await Promise.allSettled(batchPromises);
-    batchResults.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        results.push(result.value);
-      } else {
-        results.push({
-          index: 'unknown',
-          docCount: 0,
-          exists: false,
-          error: result.reason?.message || 'Promise rejected',
-        });
-      }
-    });
-  }
-
-  return results;
+  );
 }

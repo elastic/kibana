@@ -101,7 +101,6 @@ export const RuleCoveragePanel: React.FC = () => {
     {
       id: `mitre-id`,
       label: 'MITRE ATT&CK enabled rules',
-      // isDisabled: true,
     },
   ];
 

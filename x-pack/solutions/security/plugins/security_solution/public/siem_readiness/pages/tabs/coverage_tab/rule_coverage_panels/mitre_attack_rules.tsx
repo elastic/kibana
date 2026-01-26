@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   useSiemReadinessApi,
-  useIndicesDocCounts,
+  useMitreAttackIndicesDocCounts,
   useIntegrationDisplayNames,
 } from '@kbn/siem-readiness';
 import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
@@ -145,7 +145,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   }, [getDetectionRules.data]);
 
   // Get document counts for all indices
-  const { data: docCounts } = useIndicesDocCounts(allRuleIndices);
+  const { data: docCounts } = useMitreAttackIndicesDocCounts(allRuleIndices);
 
   const threatFields = useMemo((): ThreatElement[] => {
     if (!getDetectionRules.data?.data) return [];
@@ -353,7 +353,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
     return result;
   }, [staticTactics, integrationsFromEnabledRules, docCounts]);
-  // console.log(missingIntegrationsByTactic);
+
   const treemapData = useMemo((): TreemapDataItem[] => {
     return staticTactics.map((tacticName, index) => {
       const tacticData = tacticNameCounts.find((t) => t.name === tacticName);
@@ -429,7 +429,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
             'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.summary',
             {
               defaultMessage:
-                'This diagram shows what MITRE ATT&CK tactics have enabled rules mapped to them and if any of those rules are missing required integrations',
+                'This diagram shows which MITRE ATT&CK tactics have enabled rules mapped to them and whether any of those rules are missing required integrations',
             }
           )}
         </EuiText>
@@ -464,7 +464,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               padding: '1px',
             }}
           >
-            {treemapData.map((item, index) => (
+            {treemapData.map((item) => (
               <EuiPopover
                 key={item.id}
                 button={
