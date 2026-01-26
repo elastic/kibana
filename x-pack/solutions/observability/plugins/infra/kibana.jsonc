@@ -21,6 +21,8 @@
       "dashboard",
       "discover",
       "embeddable",
+      "esql",
+      "expressions",
       "features",
       "fieldFormats",
       "lens",
