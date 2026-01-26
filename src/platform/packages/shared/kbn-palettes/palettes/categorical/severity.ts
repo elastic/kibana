@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
-import { KbnPalette } from '../../../constants';
+import { KbnCategoricalPalette } from '../../classes/categorical_palette';
+import { KbnPalette } from '../../constants';
 
 export const severityPalette = new KbnCategoricalPalette({
   id: KbnPalette.Severity,
