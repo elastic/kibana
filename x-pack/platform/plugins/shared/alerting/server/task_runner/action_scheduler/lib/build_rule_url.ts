@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { RuleTypeParams } from '@kbn/alerting-types';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import type { GetViewInAppRelativeUrlFn } from '../../../types';
 import type { ActionSchedulerRule } from '../types';
 
@@ -38,7 +38,7 @@ export const buildRuleUrl = <Params extends RuleTypeParams>(
 
   const relativePath = opts.getViewInAppRelativeUrl
     ? opts.getViewInAppRelativeUrl({ rule: opts.rule, start: opts.start, end: opts.end })
-    : `${triggersActionsRoute}${getRuleDetailsRoute(opts.rule.id)}`;
+    : `rules${getRulesAppDetailsRoute(opts.rule.id)}`;
 
   try {
     const basePathname = new URL(opts.kibanaBaseUrl).pathname;
