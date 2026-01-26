@@ -116,6 +116,14 @@ describe('getDataStreamDetails', () => {
         },
       },
     } as any);
+
+    mockESClient.fieldCaps.mockResolvedValue({
+      fields: {
+        'host.name': {
+          keyword: { type: 'keyword', aggregatable: true },
+        },
+      },
+    } as any);
   });
 
   afterEach(() => {
