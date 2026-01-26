@@ -16,7 +16,7 @@ import {
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
@@ -39,6 +39,15 @@ export const ConsoleTutorialsGroup = () => {
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
+
+  // Restrict tutorials to load only in the embedded console for now.
+  // The TryInConsole component is not used for these elements. Revisit this implementation
+  //  if there is a need to open them in the dev tools console page.
+  const openConsole = useCallback(
+    (request: string) =>
+      consolePlugin?.openEmbeddedConsole && consolePlugin.openEmbeddedConsole(request),
+    [consolePlugin]
+  );
 
   const tutorials: TutorialMetadata[] = useMemo(
     () => [
@@ -147,10 +156,7 @@ export const ConsoleTutorialsGroup = () => {
             css={tutorialCardStyles}
             data-test-subj={`${tutorial.dataTestSubj}-btn`}
             data-telemetry-id={tutorial.dataTestSubj}
-            onClick={() =>
-              consolePlugin?.openEmbeddedConsole &&
-              consolePlugin.openEmbeddedConsole(tutorial.request)
-            }
+            onClick={() => openConsole(tutorial.request)}
           >
             {/* Icon */}
             <EuiFlexItem className="tutorialIcon" grow={false}>
