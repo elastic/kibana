@@ -105,6 +105,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   saveTableOptionsToUrl?: boolean;
 
   tableCaption?: string;
+
+  rowProps?: (item: T) => Record<string, unknown>;
+
+  'data-test-subj'?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -336,6 +340,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           sorting={sorting}
           onChange={onTableChange}
           tableCaption={props.tableCaption}
+          rowProps={props.rowProps}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>
