@@ -125,8 +125,7 @@ export interface ESQLCallbacks {
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
-  onOpenIndicesBrowser?: () => void;
-  onOpenFieldsBrowser?: () => void;
+  isResourceBrowserEnabled?: boolean;
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number

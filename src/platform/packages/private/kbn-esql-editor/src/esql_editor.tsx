@@ -734,6 +734,7 @@ const ESQLEditorInternal = function ESQLEditor({
           }) ?? []
         );
       },
+      isResourceBrowserEnabled: enableResourceBrowser,
     };
     return callbacks;
   }, [
@@ -747,6 +748,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedSources,
     core,
     data.query.timefilter.timefilter,
+    enableResourceBrowser,
     data.search.search,
     data.dataViews,
     memoizedFieldsFromESQL,
@@ -993,16 +995,8 @@ const ESQLEditorInternal = function ESQLEditor({
       ESQLLang.getSuggestionProvider?.({
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
-        onOpenIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
-        onOpenFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
       }),
-    [
-      esqlCallbacks,
-      telemetryCallbacks,
-      enableResourceBrowser,
-      openIndicesBrowser,
-      openFieldsBrowser,
-    ]
+    [esqlCallbacks, telemetryCallbacks]
   );
 
   const hoverProvider = useMemo(

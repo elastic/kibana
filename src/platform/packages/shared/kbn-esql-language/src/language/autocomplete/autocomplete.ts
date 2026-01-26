@@ -158,7 +158,7 @@ export async function suggest(
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
 
       // Add indices browser suggestion if enabled and we have source command suggestions
-      if (sourceCommandsSuggestions.length > 0 && resourceRetriever?.onOpenIndicesBrowser) {
+      if (sourceCommandsSuggestions.length > 0 && resourceRetriever?.isResourceBrowserEnabled) {
         return [
           createIndicesBrowserSuggestion(),
           ...headerCommandsSuggestions,
@@ -224,7 +224,7 @@ export async function suggest(
 
     // Add prepended resource browser suggestion if enabled
     // Show indices browser when in FROM/TS commands (where indices are suggested)
-    if (isSourceCommand && resourceRetriever?.onOpenIndicesBrowser) {
+    if (isSourceCommand && resourceRetriever?.isResourceBrowserEnabled) {
       return [createIndicesBrowserSuggestion(), ...commandsSpecificSuggestions];
     }
 
@@ -233,7 +233,7 @@ export async function suggest(
       !isSourceCommand &&
       !isStatsCommand &&
       hasFieldSuggestions &&
-      resourceRetriever?.onOpenFieldsBrowser
+      resourceRetriever?.isResourceBrowserEnabled
     ) {
       return [createFieldsBrowserSuggestion(), ...commandsSpecificSuggestions];
     }
