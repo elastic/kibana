@@ -2492,7 +2492,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-
           return {
             ...defaultInput,
             enabled: input.enabled,
@@ -3463,34 +3462,41 @@ function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !packagePolicyTemplate) {
+  if (!input.enabled || !input.migrate_from || !packagePolicyTemplate) {
     return undefined;
   }
-
   const packageInputs = getNormalizedInputs(packagePolicyTemplate);
 
   if (!packageInputs.length) {
     return undefined;
   }
+  let templatePath: string;
 
-  const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
-  if (!packageInput) {
-    throw new InputNotFoundError(
-      `Input template not found, unable to find input type ${input.type}`
+  if (input.migrate_from) {
+    const packageInputToMigrate = packageInputs.find(
+      (pkgInput) => pkgInput.title === input.migrate_from
     );
-  }
-  if (!packageInput.template_path) {
-    return undefined;
+    if (!packageInputToMigrate?.template_path) return undefined;
+    templatePath = packageInputToMigrate.template_path;
+  } else {
+    const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
+    if (!packageInput) {
+      throw new InputNotFoundError(
+        `Input template not found, unable to find input type ${input.type}`
+      );
+    }
+    if (!packageInput.template_path) {
+      return undefined;
+    }
+    templatePath = packageInput.template_path;
   }
 
   const [pkgInputTemplate] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
-    path.endsWith(`/agent/input/${packageInput.template_path!}`)
+    path.endsWith(`/agent/input/${templatePath!}`)
   );
 
   if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new InputNotFoundError(
-      `Unable to load input template at /agent/input/${packageInput.template_path!}`
-    );
+    throw new InputNotFoundError(`Unable to load input template at /agent/input/${templatePath!}`);
   }
 
   return compileTemplate(
@@ -3803,7 +3809,6 @@ export function updatePackageInputs(
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
-
       return policyTemplateStillIncludesInput;
     }),
   ];
@@ -3834,6 +3839,19 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // Handle migration from another input type
+      if (update.migrate_from !== undefined) {
+        const originalInputToMigrate = basePackagePolicy.inputs.find(
+          (i) => i.type === update.migrate_from
+        );
+        if (originalInputToMigrate) {
+          originalInput = { ...originalInputToMigrate, enabled: false };
+          update.vars = deepMergeVars(originalInputToMigrate.vars, update.vars, true);
+          update.enabled = true;
+          // TO DO: handle streams
+        }
+      }
+
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
@@ -3908,7 +3926,6 @@ export function updatePackageInputs(
         }
       }
     }
-
     // Filter all stream that have been removed from the input
     originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (

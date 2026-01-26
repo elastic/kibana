@@ -73,6 +73,7 @@ export const PackagePolicyInputsSchema = {
   vars: schema.maybe(ConfigRecordSchema),
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
