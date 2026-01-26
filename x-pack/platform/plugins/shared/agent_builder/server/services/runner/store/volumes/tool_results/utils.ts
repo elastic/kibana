@@ -8,8 +8,8 @@
 import type { ConversationRound, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filesystem';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { FileEntryType } from '../../filesystem';
 import type { ToolCallFileEntry } from './types';
 
 export const getToolCallEntryPath = ({

@@ -8,14 +8,21 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
-import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
+import type {
+  ToolProvider,
+  ExecutableTool,
+  ScopedRunner,
+  BuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
+import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
@@ -24,6 +31,7 @@ export const selectTools = async ({
   toolProvider,
   agentConfiguration,
   attachmentsService,
+  filesystem,
   spaceId,
   runner,
 }: {
@@ -31,6 +39,7 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
+  filesystem: IFileSystemStore;
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
@@ -55,6 +64,10 @@ export const selectTools = async ({
     runner,
   });
 
+  // create tools for filesystem
+  const fsTools = getStoreTools({ fsStore: filesystem });
+  const convertedFsTools = fsTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+
   // pick tools from provider (from agent config and attachment-type tools)
   const registryTools = await pickTools({
     selection: [attachmentToolSelection, ...agentConfiguration.tools],
@@ -66,6 +79,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...registryTools,
+    ...convertedFsTools,
   ];
 
   const deduped = new Map<string, ExecutableTool>();
@@ -88,15 +102,26 @@ const createVersionedAttachmentTools = ({
   runner: ScopedRunner;
 }): ExecutableTool[] => {
   const builtinTools = createAttachmentTools({ attachmentManager: attachmentStateManager });
+  return builtinTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+};
 
-  return builtinTools.map((tool) => ({
+/**
+ * Converts a builtin attachment tool to an executable tool that runs through the runner.
+ */
+const builtinToolToExecutable = ({
+  tool,
+  runner,
+}: {
+  tool: BuiltinToolDefinition;
+  runner: ScopedRunner;
+}): ExecutableTool => {
+  return {
     id: tool.id,
     type: ToolType.builtin,
     description: tool.description,
     tags: tool.tags,
     configuration: {},
     readonly: true,
-    isAvailable: async () => ({ status: 'available' as const }),
     getSchema: () => tool.schema,
     execute: async (params) => {
       return runner.runInternalTool({
@@ -115,7 +140,7 @@ const createVersionedAttachmentTools = ({
         },
       });
     },
-  }));
+  };
 };
 
 const getVersionedAttachmentBoundTools = async ({

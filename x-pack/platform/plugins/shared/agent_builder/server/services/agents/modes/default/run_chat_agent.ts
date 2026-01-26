@@ -80,6 +80,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
+    filesystem,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation });
@@ -108,6 +109,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
+    filesystem,
     request,
     spaceId: context.spaceId,
     runner: context.runner,
