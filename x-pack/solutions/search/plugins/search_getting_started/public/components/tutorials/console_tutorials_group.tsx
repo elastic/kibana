@@ -29,7 +29,6 @@ interface TutorialMetadata {
   description: string;
   request: string;
   icon: string;
-  buttonRef: React.RefObject<HTMLButtonElement>;
   isNew?: boolean;
 }
 
@@ -65,7 +64,6 @@ export const ConsoleTutorialsGroup = () => {
         ),
         request: consoleTutorials.basics,
         icon: 'search',
-        buttonRef: React.createRef<HTMLButtonElement>(),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
@@ -81,7 +79,6 @@ export const ConsoleTutorialsGroup = () => {
         ),
         request: consoleTutorials.semanticSearch,
         icon: 'bullseye',
-        buttonRef: React.createRef<HTMLButtonElement>(),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
@@ -94,7 +91,6 @@ export const ConsoleTutorialsGroup = () => {
         }),
         request: consoleTutorials.esql,
         icon: 'console',
-        buttonRef: React.createRef<HTMLButtonElement>(),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
@@ -107,7 +103,6 @@ export const ConsoleTutorialsGroup = () => {
         }),
         request: consoleTutorials.timeSeriesDataStreams,
         icon: 'clock',
-        buttonRef: React.createRef<HTMLButtonElement>(),
         isNew: true,
       },
     ],
