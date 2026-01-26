@@ -210,6 +210,7 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "autoPushCase": null,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
