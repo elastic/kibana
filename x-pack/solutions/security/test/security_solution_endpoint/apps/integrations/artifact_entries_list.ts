@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe.skip('For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 

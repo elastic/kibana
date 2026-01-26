@@ -186,6 +186,7 @@ src/core/packages/elasticsearch/client-server-mocks @elastic/kibana-core
 src/core/packages/elasticsearch/server @elastic/kibana-core
 src/core/packages/elasticsearch/server-internal @elastic/kibana-core
 src/core/packages/elasticsearch/server-mocks @elastic/kibana-core
+src/core/packages/elasticsearch/server-utils @elastic/kibana-core
 src/core/packages/environment/server-internal @elastic/kibana-core
 src/core/packages/environment/server-mocks @elastic/kibana-core
 src/core/packages/execution-context/browser @elastic/kibana-core
@@ -1108,6 +1109,8 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
+x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa @elastic/search-kibana
+
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -1622,9 +1625,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/platform/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/platform/test/api_integration_basic/apis/aiops @elastic/ml-ui
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
 /x-pack/platform/test/functional/apps/aiops @elastic/ml-ui

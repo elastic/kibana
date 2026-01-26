@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/presentation-publishing'
   - '@kbn/saved-search-plugin'
+  - '@kbn/unified-data-table'
 tags:
   - shared-browser
   - package
