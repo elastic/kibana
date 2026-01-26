@@ -10,7 +10,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import {
+  toSavedSearchAttributes,
+  type DiscoverSession,
+  type SavedSearchByValueAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
@@ -27,7 +31,7 @@ export interface OnSaveDiscoverSessionParams {
   state: DiscoverStateContainer;
   initialCopyOnSave?: boolean;
   onClose?: () => void;
-  onSaveCb?: () => void;
+  onSaveCb?: (valueState?: SavedSearchByValueAttributes) => void;
 }
 
 export const onSaveDiscoverSession = async ({
@@ -121,23 +125,31 @@ export const onSaveDiscoverSession = async ({
     return { id: response.discoverSession?.id };
   };
 
-  const saveModal = (
-    <DiscoverSessionSaveModal
-      isTimeBased={isTimeBased}
-      services={services}
-      title={persistedDiscoverSession?.title ?? ''}
-      showCopyOnSave={
-        !services.embeddableEditor.isEmbeddedEditor() && !!persistedDiscoverSession?.id
-      }
-      initialCopyOnSave={initialCopyOnSave}
-      description={persistedDiscoverSession?.description}
-      timeRestore={timeRestore}
-      tags={persistedDiscoverSession?.tags ?? []}
-      managed={persistedDiscoverSession?.managed ?? false}
-      onSave={onSave}
-      onClose={onClose ?? (() => {})}
-    />
-  );
+  if (services.embeddableEditor.isByValueEditor()) {
+    const savedSearch = state.savedSearchState.getState();
+    const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+    const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-  showSaveModal(saveModal);
+    onSaveCb?.({ ...attributes, references });
+  } else {
+    const saveModal = (
+      <DiscoverSessionSaveModal
+        isTimeBased={isTimeBased}
+        services={services}
+        title={persistedDiscoverSession?.title ?? ''}
+        showCopyOnSave={
+          !services.embeddableEditor.isEmbeddedEditor() && !!persistedDiscoverSession?.id
+        }
+        initialCopyOnSave={initialCopyOnSave}
+        description={persistedDiscoverSession?.description}
+        timeRestore={timeRestore}
+        tags={persistedDiscoverSession?.tags ?? []}
+        managed={persistedDiscoverSession?.managed ?? false}
+        onSave={onSave}
+        onClose={onClose ?? (() => {})}
+      />
+    );
+
+    showSaveModal(saveModal);
+  }
 };

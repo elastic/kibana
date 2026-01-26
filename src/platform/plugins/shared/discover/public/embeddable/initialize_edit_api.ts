@@ -20,6 +20,7 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
+import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux/tab_mapping_utils';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -38,6 +39,8 @@ export async function getAppTarget(
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
 
   const urlWithoutLocationState = await discoverServices.locator.getUrl({});
+  const pathWithoutLocationState =
+    discoverServices.core.http.basePath.remove(urlWithoutLocationState);
 
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
@@ -46,7 +49,13 @@ export async function getAppTarget(
   const editPath = discoverServices.core.http.basePath.remove(editUrl);
   const editApp = useRedirect ? 'r' : 'discover';
 
-  return { path: editPath, app: editApp, editUrl, urlWithoutLocationState };
+  return {
+    path: editPath,
+    app: editApp,
+    editUrl,
+    urlWithoutLocationState,
+    pathWithoutLocationState,
+  };
 }
 
 export function initializeEditApi<
@@ -84,12 +93,34 @@ export function initializeEditApi<
     onEdit: async () => {
       const appTarget = await getAppTarget(partialApi, discoverServices);
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
+      const isByReference = Boolean(partialApi.savedObjectId$.getValue());
+      const valueInput = isByReference
+        ? undefined
+        : fromSavedSearchToSavedObjectTab({
+            tab: {
+              id: uuid,
+              label: i18n.translate('discover.embeddable.byValueTabName', {
+                defaultMessage: 'By-value Discover session',
+              }),
+            },
+            savedSearch: partialApi.savedSearch$.getValue(),
+            services: discoverServices,
+          });
+      let app: string;
+      let path: string | undefined;
 
-      await stateTransfer.navigateToEditor(appTarget.app, {
-        path: appTarget.path,
+      if (isByReference) {
+        ({ app, path } = appTarget);
+      } else {
+        app = 'discover';
+        path = appTarget.pathWithoutLocationState;
+      }
+
+      await stateTransfer.navigateToEditor(app, {
+        path,
         state: {
           embeddableId: uuid,
-          valueInput: undefined,
+          valueInput,
           searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
           originatingApp: parentApiContext.currentAppId,
           originatingPath: parentApiContext.getCurrentPath?.(),
