@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface TopNavDefaultItem {
-  disabled?: boolean;
-}
+import type { IconType } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
 
-export interface TopNavDefaultMenu {
-  newItem?: TopNavDefaultItem;
-  openItem?: TopNavDefaultItem;
-  shareItem?: TopNavDefaultItem;
-  alertsItem?: TopNavDefaultItem;
-  inspectItem?: TopNavDefaultItem;
-  saveItem?: TopNavDefaultItem;
-}
-
-export interface TopNavCustomization {
-  id: 'top_nav';
-  defaultMenu?: TopNavDefaultMenu;
+export interface FlyoutActionItem {
+  id: string;
+  enabled: boolean;
+  label: string;
+  helpText?: string;
+  iconType: IconType;
+  onClick: (() => void) | MouseEventHandler;
+  href?: string;
+  dataTestSubj?: string;
 }
