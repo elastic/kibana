@@ -16,6 +16,7 @@ import {
   ATTACK_GROUP_TEST_ID_SUFFIX,
   ATTACK_STATUS_TEST_ID_SUFFIX,
   ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX,
+  EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '.';
 
 jest.mock(
@@ -36,7 +37,11 @@ const mockAttack = getMockAttackDiscoveryAlerts()[0];
 describe('AttackGroupContent', () => {
   it('should render component with attack details', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_GROUP_TEST_ID_SUFFIX}`)).toBeInTheDocument();
@@ -52,10 +57,32 @@ describe('AttackGroupContent', () => {
     expect(getByTestId('mock-subtitle')).toBeInTheDocument();
   });
 
+  it('should call openAttackDetailsFlyout when "Open attack details" button is clicked', () => {
+    const openAttackDetailsFlyoutMock = jest.fn();
+    const { getByTestId } = render(
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={openAttackDetailsFlyoutMock}
+      />
+    );
+
+    const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    button.click();
+
+    expect(openAttackDetailsFlyoutMock).toHaveBeenCalledTimes(1);
+  });
+
   it('should render an empty state when the attack title is empty', () => {
     const attackWithEmptyTitle = { ...mockAttack, title: '' };
     const { getByTestId } = render(
-      <AttackGroupContent attack={attackWithEmptyTitle} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={attackWithEmptyTitle}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeEmptyDOMElement();
@@ -63,7 +90,12 @@ describe('AttackGroupContent', () => {
 
   it('should show anonymized values in title when showAnonymized is true', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
@@ -73,7 +105,12 @@ describe('AttackGroupContent', () => {
 
   it('should show original values in title when showAnonymized is false', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized={false} />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized={false}
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
