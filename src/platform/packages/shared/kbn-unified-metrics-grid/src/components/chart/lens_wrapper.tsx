@@ -13,7 +13,6 @@ import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plu
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
-import { ChartTitle } from './chart_title';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
@@ -56,10 +55,6 @@ export function LensWrapper({
       position: absolute;
       height: 100%;
       width: 100%;
-    }
-
-    & .embPanel__header {
-      visibility: hidden;
     }
 
     & .lnsExpressionRenderer {
@@ -110,10 +105,10 @@ export function LensWrapper({
       <PresentationPanelQuickActionContext.Provider
         value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
       >
-        <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
+          titleHighlight={titleHighlight}
           extraActions={extraActions}
           abortController={abortController}
           disabledActions={disabledActions}
