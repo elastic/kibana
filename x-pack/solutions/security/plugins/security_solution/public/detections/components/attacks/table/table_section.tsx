@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
-import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
@@ -270,6 +270,8 @@ export const TableSection = React.memo(
       [openSchedulesFlyout]
     );
 
+    const sort = useMemo<GroupingSort>(() => [{ latestTimestamp: { order: 'desc' } }], []);
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -293,6 +295,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           getAdditionalActionButtons={getAdditionalActionButtons}
           emptyGroupingComponent={emptyGroupingComponent}
+          sort={sort}
         />
       </div>
     );

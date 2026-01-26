@@ -282,6 +282,22 @@ describe('<TableSection />', () => {
     });
   });
 
+  it('should pass correct sort object to GroupedAlertsTable', async () => {
+    (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
+    (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.sort).toEqual([{ latestTimestamp: { order: 'desc' } }]);
+    });
+  });
+
   describe('showAnonymizedSwitch', () => {
     beforeEach(() => {
       (useUserData as jest.Mock).mockReturnValue([
