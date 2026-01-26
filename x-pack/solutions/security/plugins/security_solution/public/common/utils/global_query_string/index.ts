@@ -10,6 +10,7 @@ import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 import { encode } from '@kbn/rison';
+import { cloneDeep } from 'lodash';
 import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
@@ -77,33 +78,51 @@ export const useUpdateUrlParam = <State extends {}>(urlParamKey: string) => {
   return updateUrlParam;
 };
 
+const encodeGlobalUrlParams = (params: Record<string, unknown>) => {
+  const encoded: Record<string, string> = {};
+
+  Object.keys(params).forEach((paramName) => {
+    const value = params[paramName];
+
+    if (!value || (typeof value === 'object' && isEmpty(value))) {
+      return;
+    }
+
+    try {
+      encoded[paramName] = encode(value);
+    } catch {
+      // Just ignore parameters which unable to encode
+    }
+  });
+
+  return encodeQueryString(pickBy((value) => !isEmpty(value), encoded));
+};
+
 export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
-  const globalQueryString = useMemo(() => {
-    const encodedGlobalUrlParam: Record<string, string> = {};
 
+  return useMemo(() => {
     if (!globalUrlParam) {
       return '';
     }
 
-    Object.keys(globalUrlParam).forEach((paramName) => {
-      const value = globalUrlParam[paramName];
+    return encodeGlobalUrlParams(globalUrlParam);
+  }, [globalUrlParam]);
+};
 
-      if (!value || (typeof value === 'object' && isEmpty(value))) {
-        return;
-      }
+export const useGlobalQueryStringWithOverrides = (overrides?: Record<string, unknown>) => {
+  const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  return useMemo(() => {
+    const merged = { ...(globalUrlParam ?? {}) } as Record<string, unknown>;
 
-      try {
-        encodedGlobalUrlParam[paramName] = encode(value);
-      } catch {
-        // Just ignore parameters which unable to encode
+    Object.keys(overrides ?? {}).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(merged, key)) {
+        if (overrides) merged[key] = cloneDeep(overrides[key]);
       }
     });
 
-    return encodeQueryString(pickBy((value) => !isEmpty(value), encodedGlobalUrlParam));
-  }, [globalUrlParam]);
-
-  return globalQueryString;
+    return encodeGlobalUrlParams(merged);
+  }, [globalUrlParam, overrides]);
 };
 
 /**
