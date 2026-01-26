@@ -143,6 +143,11 @@ export class DiscoverApp {
     });
   }
 
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -167,6 +172,27 @@ export class DiscoverApp {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async revertUnsavedChanges() {
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async clickFieldSort(field: string, sortOption: string) {
+    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    await header.click();
+    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
+      state: 'visible',
+    });
+    await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
   async getDocHeader(): Promise<string> {
