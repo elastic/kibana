@@ -56,6 +56,7 @@ import {
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
+import { wrapOnDot } from '../../text_utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -474,7 +475,7 @@ export function getTextBasedDatasource({
     },
 
     DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
+      const layerFields = TextBasedDatasource.getSelectedFields?.(props.state);
       return (
         <TextBasedDataPanel
           data={data}
@@ -488,13 +489,10 @@ export function getTextBasedDatasource({
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
-      return (
-        <TextBasedDimensionTrigger
-          {...props}
-          expressions={expressions}
-          columnLabelMap={columnLabelMap}
-        />
-      );
+      const uniqueLabel = columnLabelMap[props.columnId];
+      const formattedLabel = wrapOnDot(uniqueLabel);
+
+      return <TextBasedDimensionTrigger id={props.columnId} label={formattedLabel} />;
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
@@ -527,7 +525,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(
+            column.customLabel && column.label ? column.label : column.fieldName
+          );
         });
       });
 
@@ -536,6 +536,7 @@ export function getTextBasedDatasource({
     getDropProps,
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
+      const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
       return {
         datasourceId: 'textBased',
 
@@ -550,7 +551,7 @@ export function getTextBasedDatasource({
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
-          const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
+
           let scale: OperationMetadata['scale'] = 'ordinal';
           switch (column?.meta?.type) {
             case 'date':
@@ -566,8 +567,8 @@ export function getTextBasedDatasource({
 
           if (column) {
             return {
-              dataType: column?.meta?.type as DataType,
-              label: columnLabelMap[columnId] ?? column?.fieldName,
+              dataType: column.meta?.type as DataType,
+              label: columnLabelMap[columnId] ?? column.fieldName,
               isBucketed: Boolean(isNotNumeric(column)),
               inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
