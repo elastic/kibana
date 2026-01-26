@@ -171,9 +171,9 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
-    // the gist of the change, making Webpack listen to `node_modules/@elastic/eui` change
+    // make Webpack listen to `node_modules/@elastic/eui*` changes
     watchOptions: {
-      ignored: /[\\/]node_modules[\\/](?!@elastic($|[\\/]$|[\\/]eui([\\/]|$)))/,
+      ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
     },
 
     // snapshot: {
