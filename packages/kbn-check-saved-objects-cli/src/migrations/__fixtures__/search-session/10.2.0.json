@@ -9,12 +9,7 @@
       "locatorId": "DISCOVER_APP_LOCATOR",
       "initialState": {},
       "restoreState": {},
-      "idMapping": {
-        "search1": {
-          "id": "newSearchId1",
-          "strategy": "esql_async"
-        }
-      },
+      "idMapping": {},
       "realmType": "realmType",
       "realmName": "realmName",
       "username": "username",
@@ -32,21 +27,12 @@
       "locatorId": "DISCOVER_APP_LOCATOR",
       "initialState": {},
       "restoreState": {},
-      "idMapping": {
-        "search1": {
-          "id": "newSearchId1",
-          "strategy": "esql_async",
-          "status": "completed",
-          "startedAt": "2021-03-26T01:00:00.000Z",
-          "completedAt": "2021-03-26T01:05:00.000Z"
-        }
-      },
+      "idMapping": {},
       "realmType": "realmType",
       "realmName": "realmName",
       "username": "username",
       "version": "10.1.0",
-      "isCanceled": false,
-      "status": "completed"
+      "isCanceled": false
     }
   ]
 }
