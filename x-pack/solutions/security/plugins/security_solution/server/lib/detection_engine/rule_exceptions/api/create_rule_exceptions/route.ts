@@ -31,7 +31,6 @@ import { checkDefaultRuleExceptionListReferences } from '../../../rule_managemen
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -67,7 +66,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = await ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
-          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -90,7 +88,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            detectionRulesClient,
             alertingRulesClient: rulesClient,
           });
 
@@ -110,13 +107,11 @@ export const createRuleExceptions = async ({
   items,
   rule,
   listsClient,
-  detectionRulesClient,
   alertingRulesClient,
 }: {
   items: CreateRuleExceptionListItemProps[];
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  detectionRulesClient: IDetectionRulesClient;
   alertingRulesClient: RulesClient;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
@@ -151,7 +146,6 @@ export const createRuleExceptions = async ({
       const defaultList = await createAndAssociateDefaultExceptionList({
         rule,
         listsClient,
-        detectionRulesClient,
         removeOldAssociation: true,
         alertingRulesClient,
       });
@@ -162,7 +156,6 @@ export const createRuleExceptions = async ({
     const defaultList = await createAndAssociateDefaultExceptionList({
       rule,
       listsClient,
-      detectionRulesClient,
       removeOldAssociation: false,
       alertingRulesClient,
     });

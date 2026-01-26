@@ -95,7 +95,7 @@ describe('<AlertDescription />', () => {
 
   beforeEach(() => {
     jest.mocked(useUserPrivileges).mockReturnValue({
-      rulesPrivileges: { read: true },
+      rulesPrivileges: { rules: { read: true } },
     } as ReturnType<typeof useUserPrivileges>);
   });
 
@@ -169,7 +169,7 @@ describe('<AlertDescription />', () => {
 
     it('should render rule preview button as disabled if user does not have read privileges for rules', () => {
       jest.mocked(useUserPrivileges).mockReturnValue({
-        rulesPrivileges: { read: false },
+        rulesPrivileges: { rules: { read: false } },
       } as ReturnType<typeof useUserPrivileges>);
 
       const { getByTestId } = renderDescription(
