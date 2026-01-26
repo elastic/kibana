@@ -15,7 +15,6 @@ import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType } from '../domain/definitions/entity_schema';
-import { LogExtractionParams } from '../routes/constants';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
@@ -112,24 +111,24 @@ export async function scheduleExtractEntityTask({
   taskManager,
   type,
   namespace,
-  logExtractionParams
+  frequency
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   type: EntityType;
-  logExtractionParams?: LogExtractionParams;
+  frequency?: string;
   namespace: string;
 }): Promise<void> {
   try {
     const taskType = getTaskType(type);
     const taskId = getTaskId(type, namespace);
-    const interval = logExtractionParams?.frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
+    const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled({
       id: taskId,
       taskType,
       schedule: { interval },
       state: { namespace },
-      params: logExtractionParams ?? {},
+      params: {},
     });
   } catch (e) {
     logger.error(`Error scheduling extract entity tasks, received ${e.message}`);

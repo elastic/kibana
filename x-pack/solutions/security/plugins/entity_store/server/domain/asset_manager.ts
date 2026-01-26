@@ -12,8 +12,8 @@ import { getEntityDefinition } from './definitions/registry';
 import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import { EngineDescriptorClient } from './definitions/saved_objects';
-import { LogExtractionParams } from '../routes/constants';
+import { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
+import { LogExtractionBodyParams } from '../routes/constants';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -38,12 +38,12 @@ export class AssetManager {
     this.namespace = deps.namespace;
   }
 
-  public async init(type: EntityType, logExtractionParams?: LogExtractionParams) {
-    await this.install(type); // TODO: async
-    await this.start(type, logExtractionParams);
+  public async init(type: EntityType, logExtractionParams?: LogExtractionBodyParams) {
+    await this.install(type, logExtractionParams); // TODO: async
+    await this.start(type, logExtractionParams?.frequency);
   }
 
-  public async start(type: EntityType, logExtractionParams?: LogExtractionParams) {
+  public async start(type: EntityType, logExtractionFrequency?: string) {
     this.logger.debug(`Scheduling extract entity task for type: ${type}`);
 
     // TODO: if this fails, set status to failed
@@ -51,7 +51,7 @@ export class AssetManager {
       logger: this.logger,
       taskManager: this.taskManager,
       type,
-      logExtractionParams,
+      frequency: logExtractionFrequency,
       namespace: this.namespace,
     });
   }
@@ -65,14 +65,15 @@ export class AssetManager {
     });
   }
 
-  public async install(type: EntityType): Promise<ManagedEntityDefinition> {
+  public async install(type: EntityType, logExtractionParams?: LogExtractionBodyParams): Promise<ManagedEntityDefinition> {
     // TODO: return early if already installed
     try {
       this.logger.debug(`Installing assets for entity type: ${type}`);
       const definition = getEntityDefinition({ type });
+      const initialState = this.calculateInitialState(logExtractionParams);
 
       await Promise.all([
-        this.engineDescriptorClient.init(type),
+        this.engineDescriptorClient.init(type, initialState),
         installElasticsearchAssets({
           esClient: this.esClient,
           logger: this.logger,
@@ -110,5 +111,31 @@ export class AssetManager {
       this.logger.error(`Error uninstalling assets for entity type ${type}: ${error}`);
       throw error;
     }
+  }
+
+  private calculateInitialState(logExtractionParams?: LogExtractionBodyParams): Partial<LogExtractionState> {
+    if (!logExtractionParams) {
+      return {};
+    }
+
+    const fieldsToExtract: Array<keyof LogExtractionBodyParams> = [
+      'filter',
+      'fieldHistoryLength',
+      'additionalIndexPattern',
+      'lookbackPeriod',
+      'delay',
+      'docsLimit',
+      'frequency',
+    ];
+
+    const result: Partial<LogExtractionState> = {};
+    for (const key of fieldsToExtract) {
+      const value = logExtractionParams[key];
+      if (value !== undefined) {
+        (result as Record<string, unknown>)[key] = value;
+      }
+    }
+
+    return result;
   }
 }

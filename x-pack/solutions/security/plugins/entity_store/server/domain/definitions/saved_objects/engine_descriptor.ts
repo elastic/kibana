@@ -35,8 +35,9 @@ export class EngineDescriptorClient {
         });
     }
 
-    async init(entityType: EntityType): Promise<EngineDescriptor | void> {
+    async init(entityType: EntityType, initialState: Partial<LogExtractionState>): Promise<EngineDescriptor | void> {
         const defaultLogExtractionState = LogExtractionState.parse({});
+        const logExtractionState = { ...defaultLogExtractionState, ...initialState };
         const defaultVersionState = VersionState.parse({});
         const engineDescriptor = await this.find(entityType);
 
@@ -52,7 +53,7 @@ export class EngineDescriptorClient {
             {
                 status: ENGINE_STATUS.INSTALLING,
                 type: entityType,
-                logExtractionState: defaultLogExtractionState,
+                logExtractionState,
                 versionState: defaultVersionState,
             },
             { id }

@@ -8,14 +8,14 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS, LogExtractionParams } from '../constants';
+import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS, LogExtractionBodyParams } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_schema';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-  logExtraction: LogExtractionParams.optional(),
+  logExtraction: LogExtractionBodyParams.optional(),
 });
 
 export function registerInstall(router: EntityStorePluginRouter) {

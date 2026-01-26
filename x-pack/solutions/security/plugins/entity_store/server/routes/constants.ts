@@ -21,8 +21,8 @@ export const API_VERSIONS = {
   },
 };
 
-export type LogExtractionParams = z.infer<typeof LogExtractionParams>;
-export const LogExtractionParams = z.object({
+export type LogExtractionBodyParams = z.infer<typeof LogExtractionBodyParams>;
+export const LogExtractionBodyParams = z.object({
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int().optional().default(10),
   additionalIndexPattern: z.string().optional(),
@@ -31,10 +31,10 @@ export const LogExtractionParams = z.object({
     .regex(/[smdh]$/)
     .optional()
     .default('3h'),
-  timeout: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
+  // timeout: z
+  //   .string()
+  //   .regex(/[smdh]$/)
+  //   .optional(),
   frequency: z
     .string()
     .regex(/[smdh]$/)
@@ -44,5 +44,5 @@ export const LogExtractionParams = z.object({
     .regex(/[smdh]$/)
     .optional()
     .default('1m'),
-  docsLimit: z.number().int().optional().default(-1),
+  docsLimit: z.number().int().optional().default(10000),
 });
