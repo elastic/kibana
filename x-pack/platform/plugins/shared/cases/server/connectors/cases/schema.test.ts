@@ -26,6 +26,7 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "autoPushCase": null,
         "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
