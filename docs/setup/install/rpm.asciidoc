@@ -137,7 +137,7 @@ You can then generate an enrollment token for {kib} with the
 
 [source,sh]
 ----
-bin/elasticsearch-create-enrollment-token -s kibana
+/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
 ----
 
 Start {kib} and enter the enrollment token to securely connect {kib} with {es}.
