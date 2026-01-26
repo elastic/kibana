@@ -177,8 +177,25 @@ force_clean_ports() {
   set +e
   echo "LSOF: $(which lsof)"
   for port in "$@"; do
-    echo "Force cleaning port: $port"
+    echo "Force cleaning port: '$port'"
     LSOF_ENTRY=$(lsof -i ":$port")
+    if [[ -z "$LSOF_ENTRY" ]]; then
+      echo "No process found using port $port, checking docker..."
+      DOCKER_PS=$(docker ps -a)
+      echo "Docker PS: $DOCKER_PS"
+      ENTRY_WITH_PORT=$(echo "$DOCKER_PS" | grep ":$port->")
+      if [[ -z "$ENTRY_WITH_PORT" ]]; then
+        echo "No docker container found using port $port"
+        continue
+      else
+        CONTAINER_ID=$(echo "$ENTRY_WITH_PORT" | awk '{print $1}')
+        echo "Found docker container using port $port: $CONTAINER_ID"
+        echo "Stopping and removing container $CONTAINER_ID"
+        docker stop "$CONTAINER_ID" || true
+        docker rm "$CONTAINER_ID" || true
+        continue
+      fi
+    fi
     echo "Found: $LSOF_ENTRY"
     PID=$(lsof -i ":$port" -t | head -n 1)
     kill -9 "$PID" || true
