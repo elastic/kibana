@@ -7,3 +7,7 @@ steps:
         --message "Storybook deployment $STORYBOOK_URL" \
         --context "kibana-storybooks-from-pr" \
         --clear-previous
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+    timeout_in_minutes: 80
