@@ -296,7 +296,13 @@ describe('TableActions', () => {
         const user = userEvent.setup();
         await user.click(screen.getByText('Filter for value'));
 
-        expect(onFilterMock).toHaveBeenCalledWith(expect.any(Object), 'test-value', '+');
+        expect(onFilterMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'extension',
+          }),
+          'test-value',
+          '+'
+        );
       });
 
       it('should call onFilter with correct params for FilterOut action', async () => {
@@ -318,7 +324,13 @@ describe('TableActions', () => {
         const user = userEvent.setup();
         await user.click(screen.getByText('Filter out value'));
 
-        expect(onFilterMock).toHaveBeenCalledWith(expect.any(Object), 'test-value', '-');
+        expect(onFilterMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'extension',
+          }),
+          'test-value',
+          '-'
+        );
       });
     });
 
