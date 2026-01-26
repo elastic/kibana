@@ -441,7 +441,7 @@ describe('SearchSLODefinitions', () => {
       const result = await searchSLODefinitions.execute({});
 
       expect(result.results[0]).toEqual({
-        id: { slo_id: 'slo-1' },
+        id: 'slo-1',
         name: '',
         groupBy: [],
       });
