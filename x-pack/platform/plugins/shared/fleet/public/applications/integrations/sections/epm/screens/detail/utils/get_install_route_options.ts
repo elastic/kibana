@@ -19,6 +19,7 @@ const EXCLUDED_PACKAGES = [
   'problemchild',
   'security_detection_engine',
   'synthetics',
+  'agentless_hello_world',
 ];
 
 interface GetInstallPkgRouteOptionsParams {

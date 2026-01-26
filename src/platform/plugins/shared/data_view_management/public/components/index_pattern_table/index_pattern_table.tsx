@@ -392,6 +392,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           onTableChange={onTableChange}
           search={search}
           selection={dataViews.getCanSaveSync() ? selection : undefined}
+          tableCaption={title}
         />
       </ContextWrapper>
       {flyoutOpen && (

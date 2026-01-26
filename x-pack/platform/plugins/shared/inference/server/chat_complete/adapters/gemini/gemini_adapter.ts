@@ -110,7 +110,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
+          items: convertSchemaType({ def: def.items }),
         };
       case 'object':
         return {
@@ -131,20 +131,19 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
       case 'string':
         return {
           type: Gemini.SchemaType.STRING,
+          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
+          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'number':
         return {
           type: Gemini.SchemaType.NUMBER,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
     }
   };

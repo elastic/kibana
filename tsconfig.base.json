@@ -1108,6 +1108,8 @@
       "@kbn/fs/*": ["x-pack/platform/packages/shared/kbn-fs/*"],
       "@kbn/ftr-apis-plugin": ["src/platform/plugins/private/ftr_apis"],
       "@kbn/ftr-apis-plugin/*": ["src/platform/plugins/private/ftr_apis/*"],
+      "@kbn/ftr-benchmarks": ["src/platform/packages/shared/kbn-ftr-benchmarks"],
+      "@kbn/ftr-benchmarks/*": ["src/platform/packages/shared/kbn-ftr-benchmarks/*"],
       "@kbn/ftr-common-functional-services": ["src/platform/packages/shared/kbn-ftr-common-functional-services"],
       "@kbn/ftr-common-functional-services/*": ["src/platform/packages/shared/kbn-ftr-common-functional-services/*"],
       "@kbn/ftr-common-functional-ui-services": ["src/platform/packages/shared/kbn-ftr-common-functional-ui-services"],
