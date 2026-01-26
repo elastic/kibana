@@ -2533,6 +2533,24 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
+          type: 'histogram',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'histogram',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'histogram',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
           type: 'integer',
           optional: false,
           description: 'Expression to evaluate.',
@@ -2635,6 +2653,24 @@ const coalesceDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'tdigest',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'tdigest',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'tdigest',
       minParams: 1,
     },
     {
