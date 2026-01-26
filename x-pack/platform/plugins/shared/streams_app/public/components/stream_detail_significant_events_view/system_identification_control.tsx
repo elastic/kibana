@@ -14,7 +14,7 @@ import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
 import { StreamSystemsFlyout } from '../stream_detail_systems/stream_systems/stream_systems_flyout';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
 interface SystemIdentificationControlProps {
   definition: Streams.all.Definition;
@@ -87,7 +87,8 @@ export function SystemIdentificationControl({
   }
 
   const triggerButton = (
-    <ConnectorListButton
+    <ConnectorListButtonBase
+      aiFeatures={aiFeatures}
       buttonProps={{
         size: 'm',
         iconType: 'sparkles',
@@ -159,7 +160,8 @@ export function SystemIdentificationControl({
 
   if (task.status === 'being_canceled') {
     return (
-      <ConnectorListButton
+      <ConnectorListButtonBase
+        aiFeatures={aiFeatures}
         buttonProps={{
           size: 'm',
           iconType: 'sparkles',

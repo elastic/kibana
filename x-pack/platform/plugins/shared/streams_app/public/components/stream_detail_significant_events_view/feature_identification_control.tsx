@@ -14,7 +14,7 @@ import { TaskStatus, type Streams } from '@kbn/streams-schema';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
 interface FeatureIdentificationControlProps {
   definition: Streams.all.Definition;
@@ -104,7 +104,13 @@ export function FeatureIdentificationControl({
     case TaskStatus.NotStarted:
     case TaskStatus.Acknowledged:
     case TaskStatus.Canceled:
-      return <TriggerButton isLoading={isLoading} onClick={handleStartIdentification} />;
+      return (
+        <TriggerButton
+          isLoading={isLoading}
+          onClick={handleStartIdentification}
+          aiFeatures={aiFeatures}
+        />
+      );
 
     case TaskStatus.Completed:
       return (
@@ -113,6 +119,7 @@ export function FeatureIdentificationControl({
           onStartIdentification={handleStartIdentification}
           showNoResultsCallout={task.features.length === 0 && !isNoResultsDismissed}
           onDismissNoResults={dismissNoResults}
+          aiFeatures={aiFeatures}
         />
       );
 
@@ -120,7 +127,7 @@ export function FeatureIdentificationControl({
       return <InProgressState onCancel={handleCancelIdentification} />;
 
     case TaskStatus.BeingCanceled:
-      return <CancellingState />;
+      return <CancellingState aiFeatures={aiFeatures} />;
 
     case TaskStatus.Failed:
       return (
@@ -130,6 +137,7 @@ export function FeatureIdentificationControl({
           calloutTitle={TASK_FAILED_TITLE}
           calloutColor="danger"
           calloutIcon="error"
+          aiFeatures={aiFeatures}
         >
           {task.error}
         </StateWithCallout>
@@ -143,6 +151,7 @@ export function FeatureIdentificationControl({
           calloutTitle={TASK_STALE_TITLE}
           calloutColor="warning"
           calloutIcon="warning"
+          aiFeatures={aiFeatures}
         >
           {TASK_STALE_DESCRIPTION}
         </StateWithCallout>
@@ -164,11 +173,13 @@ const COMMON_BUTTON_PROPS = {
 interface TriggerButtonProps {
   isLoading: boolean;
   onClick: () => void;
+  aiFeatures: AIFeatures | null;
 }
 
-function TriggerButton({ isLoading, onClick }: TriggerButtonProps) {
+function TriggerButton({ isLoading, onClick, aiFeatures }: TriggerButtonProps) {
   return (
-    <ConnectorListButton
+    <ConnectorListButtonBase
+      aiFeatures={aiFeatures}
       buttonProps={{
         ...COMMON_BUTTON_PROPS,
         isLoading,
@@ -184,6 +195,7 @@ interface CompletedStateProps {
   onStartIdentification: () => void;
   showNoResultsCallout: boolean;
   onDismissNoResults: () => void;
+  aiFeatures: AIFeatures | null;
 }
 
 function CompletedState({
@@ -191,12 +203,17 @@ function CompletedState({
   onStartIdentification,
   showNoResultsCallout,
   onDismissNoResults,
+  aiFeatures,
 }: CompletedStateProps) {
   if (showNoResultsCallout) {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <TriggerButton isLoading={isLoading} onClick={onStartIdentification} />
+          <TriggerButton
+            isLoading={isLoading}
+            onClick={onStartIdentification}
+            aiFeatures={aiFeatures}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCallOut
@@ -213,7 +230,9 @@ function CompletedState({
     );
   }
 
-  return <TriggerButton isLoading={isLoading} onClick={onStartIdentification} />;
+  return (
+    <TriggerButton isLoading={isLoading} onClick={onStartIdentification} aiFeatures={aiFeatures} />
+  );
 }
 
 interface InProgressStateProps {
@@ -245,9 +264,14 @@ function InProgressState({ onCancel }: InProgressStateProps) {
   );
 }
 
-function CancellingState() {
+interface CancellingStateProps {
+  aiFeatures: AIFeatures | null;
+}
+
+function CancellingState({ aiFeatures }: CancellingStateProps) {
   return (
-    <ConnectorListButton
+    <ConnectorListButtonBase
+      aiFeatures={aiFeatures}
       buttonProps={{
         ...COMMON_BUTTON_PROPS,
         isDisabled: true,
@@ -265,6 +289,7 @@ interface StateWithCalloutProps {
   calloutColor: 'danger' | 'warning' | 'primary';
   calloutIcon: 'error' | 'warning' | 'search';
   children: React.ReactNode;
+  aiFeatures: AIFeatures | null;
 }
 
 function StateWithCallout({
@@ -274,11 +299,16 @@ function StateWithCallout({
   calloutColor,
   calloutIcon,
   children,
+  aiFeatures,
 }: StateWithCalloutProps) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <TriggerButton isLoading={isLoading} onClick={onStartIdentification} />
+        <TriggerButton
+          isLoading={isLoading}
+          onClick={onStartIdentification}
+          aiFeatures={aiFeatures}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCallOut
