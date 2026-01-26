@@ -31,8 +31,8 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
     return [
       {
         attackId: attack.id,
-        assignees: attack?.assignees,
-        relatedAlertIds: attack?.alertIds ?? [],
+        assignees: attack.assignees,
+        relatedAlertIds: attack.alertIds,
       },
     ];
   }, [attack]);
