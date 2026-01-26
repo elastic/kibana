@@ -16,6 +16,7 @@ import '@kbn/code-editor-mock/jest_helper';
 import { JSONRuleEditor } from './json_rule_editor';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { VisualRuleEditor } from './visual_rule_editor';
+import * as VisualRuleEditorModule from './visual_rule_editor';
 import { AllRule, FieldRule } from '../../model';
 
 describe('RuleEditorPanel', () => {
@@ -112,7 +113,7 @@ describe('RuleEditorPanel', () => {
   it('catches errors thrown by child components', () => {
     // Mock VisualRuleEditor to throw an error
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(require('./visual_rule_editor'), 'VisualRuleEditor').mockImplementation(() => {
+    jest.spyOn(VisualRuleEditorModule, 'VisualRuleEditor').mockImplementation(() => {
       throw new Error('Something awful happened here.');
     });
 
