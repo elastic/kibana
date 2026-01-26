@@ -225,7 +225,12 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2 id={this.props.ariaLabelId}>
+            <h2
+              id={
+                /* Provide a label to the aria-labelledby prop of the enclosing EuiFlyout */
+                this.props.ariaLabelId
+              }
+            >
               {this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}
             </h2>
           </EuiTitle>

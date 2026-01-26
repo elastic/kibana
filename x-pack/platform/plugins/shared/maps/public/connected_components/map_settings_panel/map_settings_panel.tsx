@@ -55,7 +55,12 @@ export function MapSettingsPanel({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
-          <h2 id={ariaLabelId}>
+          <h2
+            id={
+              /* Provide a label to the aria-labelledby prop of the enclosing EuiFlyout */
+              ariaLabelId
+            }
+          >
             <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>

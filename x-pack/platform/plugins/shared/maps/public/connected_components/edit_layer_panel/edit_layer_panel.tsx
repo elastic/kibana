@@ -219,7 +219,14 @@ export class EditLayerPanel extends Component<Props, State> {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
-                  <h2 id={this.props.ariaLabelId}>{this.state.displayName}</h2>
+                  <h2
+                    id={
+                      /* Provide a label to the aria-labelledby prop of the enclosing EuiFlyout */
+                      this.props.ariaLabelId
+                    }
+                  >
+                    {this.state.displayName}
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
