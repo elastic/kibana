@@ -163,7 +163,9 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
             search={searchConfig}
             pagination={true}
             sorting={true}
-            tableCaption="Saved views"
+            tableCaption={i18n.translate('xpack.infra.openView.table.tableCaption', {
+              defaultMessage: 'Saved views',
+            })}
             data-test-subj="savedViews-viewsTable"
           />
         </EuiFlyoutBody>
