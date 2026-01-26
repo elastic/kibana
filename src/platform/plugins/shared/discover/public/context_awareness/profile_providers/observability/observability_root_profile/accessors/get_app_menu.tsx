@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { AppMenuRegistry } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -48,30 +48,29 @@ const registerDatasetQualityLink = (
     share?.url.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
 
   if (dataQualityLocator) {
-    registry.registerCustomAction({
+    registry.registerItem({
       id: 'dataset-quality-link',
-      type: AppMenuActionType.custom,
-      controlProps: {
-        label: i18n.translate('discover.observabilitySolution.appMenu.datasets', {
-          defaultMessage: 'Data sets',
-        }),
-        testId: 'discoverAppMenuDatasetQualityLink',
-        onClick: ({ onFinishAction }) => {
-          const refresh = timefilter.getRefreshInterval();
-          const { from, to } = timefilter.getTime();
+      label: i18n.translate('discover.observabilitySolution.appMenu.datasets', {
+        defaultMessage: 'Data sets',
+      }),
+      order: 5,
+      iconType: 'database',
+      testId: 'discoverAppMenuDatasetQualityLink',
+      run: ({ context: { onFinishAction } }) => {
+        const refresh = timefilter.getRefreshInterval();
+        const { from, to } = timefilter.getTime();
 
-          dataQualityLocator.navigate({
-            filters: {
-              timeRange: {
-                from: from ?? 'now-24h',
-                to: to ?? 'now',
-                refresh,
-              },
+        dataQualityLocator.navigate({
+          filters: {
+            timeRange: {
+              from: from ?? 'now-24h',
+              to: to ?? 'now',
+              refresh,
             },
-          });
+          },
+        });
 
-          onFinishAction();
-        },
+        onFinishAction();
       },
     });
   }
@@ -88,106 +87,102 @@ const registerCustomThresholdRuleAction = (
 ) => {
   if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) return;
 
-  registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+  registry.registerPopoverItem(AppMenuActionId.alerts, {
     id: 'custom-threshold-rule',
-    type: AppMenuActionType.custom,
-    order: 101,
-    controlProps: {
-      label: i18n.translate('discover.observabilitySolution.appMenu.customThresholdRule', {
-        defaultMessage: 'Create custom threshold rule',
-      }),
-      iconType: 'bell',
-      testId: 'discoverAppMenuCustomThresholdRule',
-      onClick: ({ onFinishAction }) => {
-        const index = dataView?.toMinimalSpec();
-        const { filters, query } = data.query.getState();
+    order: 2,
+    iconType: 'bell',
+    testId: 'discoverAppMenuCustomThresholdRule',
+    label: i18n.translate('discover.observabilitySolution.appMenu.customThresholdRule', {
+      defaultMessage: 'Create custom threshold rule',
+    }),
 
-        // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
-        // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
-        // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
-        const plugins = { ...services, data };
-        if (!isValidRuleFormPlugins(plugins)) return null;
+    run: ({ context: { onFinishAction } }) => {
+      const index = dataView?.toMinimalSpec();
+      const { filters, query } = data.query.getState();
 
-        return (
-          <RuleFormFlyout
-            plugins={{
-              ...plugins,
-              ruleTypeRegistry,
-              actionTypeRegistry,
-            }}
-            consumer={AlertConsumers.ALERTS}
-            validConsumers={[
-              AlertConsumers.LOGS,
-              AlertConsumers.INFRASTRUCTURE,
-              AlertConsumers.OBSERVABILITY,
-              AlertConsumers.STACK_ALERTS,
-              AlertConsumers.ALERTS,
-            ]}
-            multiConsumerSelection={AlertConsumers.ALERTS}
-            ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
-            initialValues={{
-              params: {
-                searchConfiguration: {
-                  index,
-                  query,
-                  filter: filters,
-                },
+      // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+      // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+      // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
+      const plugins = { ...services, data };
+      if (!isValidRuleFormPlugins(plugins)) return null;
+
+      return (
+        <RuleFormFlyout
+          plugins={{
+            ...plugins,
+            ruleTypeRegistry,
+            actionTypeRegistry,
+          }}
+          consumer={AlertConsumers.ALERTS}
+          validConsumers={[
+            AlertConsumers.LOGS,
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.OBSERVABILITY,
+            AlertConsumers.STACK_ALERTS,
+            AlertConsumers.ALERTS,
+          ]}
+          multiConsumerSelection={AlertConsumers.ALERTS}
+          ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+          initialValues={{
+            params: {
+              searchConfiguration: {
+                index,
+                query,
+                filter: filters,
               },
-            }}
-            onSubmit={onFinishAction}
-            onCancel={onFinishAction}
-          />
-        );
-      },
+            },
+          }}
+          onSubmit={onFinishAction}
+          onCancel={onFinishAction}
+        />
+      );
     },
   });
 };
 
 const registerCreateSLOAction = (
   registry: AppMenuRegistry,
-  { data, discoverShared, application }: ProfileProviderServices,
+  allServices: ProfileProviderServices,
   { dataView, isEsqlMode }: AppMenuExtensionParams
 ) => {
+  const { data, discoverShared, application } = allServices;
   const sloFeature = discoverShared.features.registry.getById('observability-create-slo');
   const hasSloPermission = application.capabilities.slo?.write;
 
   if (sloFeature && hasSloPermission) {
-    registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+    registry.registerPopoverItem(AppMenuActionId.alerts, {
       id: 'create-slo',
-      type: AppMenuActionType.custom,
-      order: 102,
-      controlProps: {
-        label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
-          defaultMessage: 'Create SLO',
-        }),
-        iconType: 'visGauge',
-        testId: 'discoverAppMenuCreateSlo',
-        onClick: ({ onFinishAction }) => {
-          const index = dataView?.getIndexPattern();
-          const timestampField = dataView?.timeFieldName;
-          const { filters, query: kqlQuery } = data.query.getState();
+      order: 3,
+      label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
+        defaultMessage: 'Create SLO',
+      }),
+      iconType: 'visGauge',
+      testId: 'discoverAppMenuCreateSlo',
+      run: ({ context: { onFinishAction } }) => {
+        const index = dataView?.getIndexPattern();
+        const timestampField = dataView?.timeFieldName;
+        const { filters, query: kqlQuery } = data.query.getState();
 
-          const filter = isEsqlMode
-            ? {}
-            : {
-                kqlQuery: isOfQueryType(kqlQuery) ? kqlQuery.query : '',
-                filters: filters?.map(({ meta, query }) => ({ meta, query })),
-              };
+        const filter = isEsqlMode
+          ? {}
+          : {
+              kqlQuery: isOfQueryType(kqlQuery) ? kqlQuery.query : '',
+              filters: filters?.map(({ meta, query }) => ({ meta, query })),
+            };
 
-          return sloFeature.createSLOFlyout({
-            initialValues: {
-              indicator: {
-                type: 'sli.kql.custom',
-                params: {
-                  index,
-                  timestampField,
-                  filter,
-                },
+        return sloFeature.createSLOFlyout({
+          initialValues: {
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index,
+                timestampField,
+                filter,
               },
             },
-            onClose: onFinishAction,
-          });
-        },
+          },
+          onClose: onFinishAction,
+        });
       },
     });
   }
