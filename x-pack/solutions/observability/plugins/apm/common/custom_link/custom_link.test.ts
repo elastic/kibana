@@ -125,7 +125,9 @@ describe('Custom link', () => {
         labels: { targetUrl: 'https://elastic.co/page?param=value&other=test' },
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
-      expect(result).toBe('https://kibana.com/redirect?url=https://elastic.co/page?param=value&other=test');
+      expect(result).toBe(
+        'https://kibana.com/redirect?url=https://elastic.co/page?param=value&other=test'
+      );
     });
 
     it('still encodes non-URL values that contain special characters', () => {
@@ -135,7 +137,9 @@ describe('Custom link', () => {
         labels: { info: 'not a url: with special chars!' },
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
-      expect(result).toBe('https://kibana.com/app/apm/my%20service?label=not%20a%20url%3A%20with%20special%20chars!');
+      expect(result).toBe(
+        'https://kibana.com/app/apm/my%20service?label=not%20a%20url%3A%20with%20special%20chars!'
+      );
     });
 
     it('handles mixed URL and non-URL values', () => {
@@ -145,7 +149,9 @@ describe('Custom link', () => {
         labels: { targetUrl: 'https://elastic.co/docs' },
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
-      expect(result).toBe('https://kibana.com/app/opbeans%20java/redirect?url=https://elastic.co/docs');
+      expect(result).toBe(
+        'https://kibana.com/app/opbeans%20java/redirect?url=https://elastic.co/docs'
+      );
     });
   });
 });
