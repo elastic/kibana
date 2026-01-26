@@ -110,7 +110,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds support for multi-value variables using MV_CONTAINS functions [#239266]({{kib-pull}}239266).
 * Adds inline suggestions to {{esql}} queries  [#235162]({{kib-pull}}235162).
 * Allows selecting field data type in the lookup index editor interface of the {{esql}} editor [#241637]({{kib-pull}}241637).
-* Adds support for subqueries [#241921]({{kib-pull}}241921).
 * Adds support for expressions in functions [#236343]({{kib-pull}}236343).
 * Improves computed suggestions for expressions [#246421]({{kib-pull}}246421).
 * Renders string-only suggestions for Like and RLike operators [#244903]({{kib-pull}}244903).
