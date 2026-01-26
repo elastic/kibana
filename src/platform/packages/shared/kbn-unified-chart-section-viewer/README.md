@@ -1,3 +1,3 @@
-# @kbn/unified-metrics-grid
+# @kbn/unified-chart-section-viewer
 
-This package contains the metrics grid component used to render the metrics content in Discover.
+This package contains the chart section component used to render the metrics content in Discover.
