@@ -54,6 +54,11 @@ Get site pages
 :   List pages for a site.
     - **siteId** (required): The site ID.
 
+Get site page contents
+:   Get page content (including `canvasLayout`) for a site page.
+    - **siteId** (required): The site ID.
+    - **pageId** (required): The page ID.
+
 Get site drives
 :   List drives for a site.
     - **siteId** (required): The site ID.
