@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -56,6 +55,8 @@ export interface DocViewerTableRestorableState {
   fieldTypeFilters: string[];
   // Whether null values are hidden in the table
   hideNullValues: boolean;
+  // Whether to show only selected fields in the table
+  showOnlySelectedFields: boolean;
 }
 
 const { withRestorableState, useRestorableLocalStorage } =
@@ -140,6 +141,12 @@ const InternalDocViewerTable = ({
     false
   );
 
+  const [showOnlySelectedFields, setShowOnlySelectedFields] = useRestorableLocalStorage(
+    'showOnlySelectedFields',
+    SHOW_ONLY_SELECTED_FIELDS,
+    false
+  );
+
   const tableFiltersCallbacks = useTableFiltersCallbacks({
     searchTerm,
     selectedFieldTypes: fieldTypeFilters,
@@ -147,11 +154,6 @@ const InternalDocViewerTable = ({
 
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
-  );
-
-  const [showOnlySelectedFields, setShowOnlySelectedFields] = useLocalStorage(
-    SHOW_ONLY_SELECTED_FIELDS,
-    false
   );
 
   const flattened = hit.flattened;
