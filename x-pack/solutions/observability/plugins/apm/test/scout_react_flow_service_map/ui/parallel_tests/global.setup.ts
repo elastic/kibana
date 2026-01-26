@@ -6,8 +6,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { opbeans } from '../../../scout/ui/fixtures/synthtrace/opbeans';
+import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { testData } from '../fixtures';
 
 globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
@@ -25,7 +24,7 @@ globalSetupHook(
       log.info('Fleet agents setup completed');
     }
 
-    const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+    const opbeansDataGenerator = opbeans({
       from: new Date(testData.START_DATE).getTime(),
       to: new Date(testData.END_DATE).getTime(),
     });

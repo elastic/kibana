@@ -13,9 +13,12 @@ import type {
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { ReactFlowServiceMapPage } from './page_objects/react_flow_service_map';
+import { START_DATE, END_DATE } from './constants';
 
-// Re-export test data from main scout fixtures
-export { testData } from '../../../scout/ui/fixtures';
+export const testData = {
+  START_DATE,
+  END_DATE,
+};
 
 export interface ReactFlowTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {

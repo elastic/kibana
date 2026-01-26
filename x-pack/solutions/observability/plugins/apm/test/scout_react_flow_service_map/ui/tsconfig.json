@@ -4,6 +4,6 @@
     "outDir": "target/types"
   },
   "include": ["**/*.ts"],
-  "kbn_references": ["@kbn/synthtrace-client", "@kbn/scout-oblt", "@kbn/apm-types"],
+  "kbn_references": ["@kbn/synthtrace-client", "@kbn/scout-oblt"],
   "exclude": ["target/**/*"]
 }

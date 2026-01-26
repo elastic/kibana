@@ -6,7 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { waitForApmSettingsHeaderLink } from '../../../../scout/ui/fixtures/page_helpers';
+
+const EXTENDED_TIMEOUT = 45000;
 
 export class ReactFlowServiceMapPage {
   public reactFlowServiceMap: Locator;
@@ -29,7 +30,10 @@ export class ReactFlowServiceMapPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return await waitForApmSettingsHeaderLink(this.page);
+    // Wait for the APM settings header link to ensure page has loaded
+    await this.page
+      .getByTestId('apmSettingsHeaderLink')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async waitForReactFlowServiceMapToLoad() {
