@@ -45,8 +45,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { docLinks, http, chrome, analytics, notifications } = kibana.services;
-  const isFeedbackEnabled = notifications.feedback.isEnabled();
-
+  const isFeedbackEnabled = useMemo(() => notifications.feedback.isEnabled(), [notifications]);
   const { euiTheme } = useEuiTheme();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
