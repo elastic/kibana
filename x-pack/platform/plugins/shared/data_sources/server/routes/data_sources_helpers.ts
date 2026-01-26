@@ -9,11 +9,17 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import type {
+  ActionResult,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
+import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
+import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
+import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -45,6 +51,54 @@ function slugify(input: string): string {
 }
 
 /**
+ * Bulk imports MCP tools for a Data Source that uses the MCP stack connector.
+ */
+async function importMcpTools(
+  registry: ToolRegistry,
+  actions: ActionsPluginStart,
+  request: KibanaRequest,
+  connectorId: string,
+  toolNames: string[],
+  name: string,
+  logger: Logger
+): Promise<string[]> {
+  if (toolNames.length === 0) {
+    return [];
+  }
+
+  const mcpTools = await getNamedMcpTools({
+    actions,
+    request,
+    connectorId,
+    toolNames,
+    logger,
+  });
+
+  if (mcpTools === undefined) {
+    throw new Error(`No imported connector tools found for ${name}`);
+  }
+
+  let importedToolIds: string[] = [];
+  try {
+    if (mcpTools && mcpTools.length > 0) {
+      const { results } = await bulkCreateMcpTools({
+        registry,
+        actions,
+        request,
+        connectorId,
+        tools: mcpTools,
+        namespace: name,
+      });
+      importedToolIds = results.map((result) => result.toolId);
+      logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
+    }
+  } catch (error) {
+    throw new Error(`Error bulk importing MCP tools for ${name}: ${error}`);
+  }
+  return importedToolIds;
+}
+
+/**
  * Creates data source Saved Object, as well as all related resources (stack connectors, tools, workflows)
  *
  * Supports two patterns:
@@ -70,6 +124,7 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
+  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   let finalStackConnectorId: string;
 
@@ -80,15 +135,12 @@ export async function createDataSourceAndRelatedResources(
   }
   // Pattern 2: Create new stack connector (direct API call)
   else {
-    const toolRegistry = await agentBuilder.tools.getRegistry({ request });
     const stackConnectorConfig = dataSource.stackConnector;
     const stackConnector: ActionResult = await createStackConnector(
-      toolRegistry,
       actions,
       request,
       stackConnectorConfig,
       name,
-      toolIds,
       credentials,
       logger
     );
@@ -96,10 +148,24 @@ export async function createDataSourceAndRelatedResources(
     finalStackConnectorId = stackConnector.id;
   }
 
+  const stackConnector = dataSource.stackConnector;
+  if (stackConnector.type === '.mcp' && stackConnector.importedTools) {
+    logger.info(`imported tools: ${stackConnector.importedTools}`);
+    const importedToolIds = await importMcpTools(
+      toolRegistry,
+      actions,
+      request,
+      finalStackConnectorId,
+      stackConnector.importedTools,
+      name,
+      logger
+    );
+    toolIds.push(...importedToolIds);
+  }
+
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
   const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
-  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
