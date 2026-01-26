@@ -329,7 +329,7 @@ export function useFetchAgentsData() {
         }
         // Fetch agent policies, use a local cache
         const policyIds = agentsResponse.items.map((agent) =>
-          removeVersionSuffixFromPolicyId(agent?.policy_id)
+          removeVersionSuffixFromPolicyId(agent?.policy_id!)
         );
         const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 
