@@ -6,6 +6,7 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -35,6 +36,8 @@ export class InventoryPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
+  public readonly k8sPodWaffleContextMenu: Locator;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
@@ -62,6 +65,10 @@ export class InventoryPage {
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+
+    this.k8sPodWaffleContextMenu = this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Kubernetes Pod details' });
   }
 
   private async waitForNodesToLoad() {
@@ -79,6 +86,43 @@ export class InventoryPage {
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
     }
+  }
+
+  public async goToPageWithSavedView(savedViewId: string) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    await this.page.goto(url);
+
+    await this.waitForPageToLoad();
+  }
+
+  public async goToPageWithSavedViewAndAssetDetailsFlyout({
+    savedViewId,
+    assetId,
+    entityType,
+  }: {
+    savedViewId: string;
+    assetId: string;
+    entityType: 'host' | 'container';
+  }) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        assetDetailsFlyout: `(detailsItemId:${assetId},entityType:${entityType})`,
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    await this.page.goto(url);
+
+    await this.waitForPageToLoad();
   }
 
   public async reload() {
@@ -102,6 +146,16 @@ export class InventoryPage {
     await this.k8sTourDismissButton.click();
   }
 
+  public async addDismissK8sTourInitScript() {
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    await this.page.addInitScript(
+      ([k8sTourStorageKey]) => {
+        window.localStorage.setItem(k8sTourStorageKey, 'true');
+      },
+      [KUBERNETES_TOUR_STORAGE_KEY]
+    );
+  }
+
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Escape');
@@ -116,6 +170,11 @@ export class InventoryPage {
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
     };
+  }
+
+  public async clickWaffleNode(nodeName: string) {
+    const node = await this.getWaffleNode(nodeName);
+    await node.container.click();
   }
 
   public async showHosts() {
