@@ -77,8 +77,10 @@ interface SloStatusConfig {
   showCount: boolean;
   tooltipContent: string;
   ariaLabel: (serviceName: string) => string;
-  badgeLabel: (count?: number) => string;
+  badgeLabel: (count?: number | string) => string;
 }
+
+export const SLO_COUNT_CAP = 100;
 
 const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
   violated: {
@@ -93,7 +95,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         defaultMessage: 'View violated SLOs for {serviceName}',
         values: { serviceName },
       }),
-    badgeLabel: (count?: number) =>
+    badgeLabel: (count?: number | string) =>
       i18n.translate('xpack.apm.servicesTable.sloViolated', {
         defaultMessage: '{count} Violated',
         values: { count },
@@ -111,7 +113,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         defaultMessage: 'View degrading SLOs for {serviceName}',
         values: { serviceName },
       }),
-    badgeLabel: (count?: number) =>
+    badgeLabel: (count?: number | string) =>
       i18n.translate('xpack.apm.servicesTable.sloDegrading', {
         defaultMessage: '{count} Degrading',
         values: { count },
@@ -256,6 +258,12 @@ export function getServiceColumns({
               }
 
               const config = SLO_STATUS_CONFIG[sloStatus];
+              const cappedCount =
+                config.showCount && sloCount
+                  ? sloCount > SLO_COUNT_CAP
+                    ? `>${SLO_COUNT_CAP}`
+                    : sloCount
+                  : undefined;
 
               return (
                 <EuiToolTip position="bottom" content={config.tooltipContent}>
@@ -265,7 +273,7 @@ export function getServiceColumns({
                     onClick={() => onSloBadgeClick?.(serviceName, agentName)}
                     onClickAriaLabel={config.ariaLabel(serviceName)}
                   >
-                    {config.badgeLabel(config.showCount ? sloCount : undefined)}
+                    {config.badgeLabel(cappedCount)}
                   </EuiBadge>
                 </EuiToolTip>
               );

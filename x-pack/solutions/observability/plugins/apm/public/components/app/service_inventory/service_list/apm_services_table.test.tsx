@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import { ApmServicesTable, getServiceColumns } from './apm_services_table';
+import { ApmServicesTable, getServiceColumns, SLO_COUNT_CAP } from './apm_services_table';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { apmRouter } from '../../../routing/apm_route_config';
@@ -927,6 +927,112 @@ describe('ApmServicesTable', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('sloOverviewFlyout')).toBeInTheDocument();
+      });
+    });
+
+    describe('SLO count capping', () => {
+      it(`displays exact count when violated SLO count is ${SLO_COUNT_CAP} or less`, async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'violated',
+            sloCount: SLO_COUNT_CAP,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(screen.getByText(`${SLO_COUNT_CAP} Violated`)).toBeInTheDocument();
+      });
+
+      it(`displays >${SLO_COUNT_CAP} when violated SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'violated',
+            sloCount: SLO_COUNT_CAP + 50,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(
+          screen.getByText(new RegExp(`>\\s*${SLO_COUNT_CAP}\\s+Violated`))
+        ).toBeInTheDocument();
+      });
+
+      it(`displays exact count when degrading SLO count is ${SLO_COUNT_CAP} or less`, async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'degrading',
+            sloCount: 50,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(screen.getByText('50 Degrading')).toBeInTheDocument();
+      });
+
+      it(`displays >${SLO_COUNT_CAP} when degrading SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'degrading',
+            sloCount: SLO_COUNT_CAP + 899,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(
+          screen.getByText(new RegExp(`>\\s*${SLO_COUNT_CAP}\\s+Degrading`))
+        ).toBeInTheDocument();
+      });
+
+      it('does not display count for healthy status regardless of sloCount', async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'healthy',
+            sloCount: SLO_COUNT_CAP + 400,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(screen.getByText('Healthy')).toBeInTheDocument();
+        expect(screen.queryByText(`${SLO_COUNT_CAP + 400} Healthy`)).not.toBeInTheDocument();
+        expect(screen.queryByText(`>${SLO_COUNT_CAP} Healthy`)).not.toBeInTheDocument();
+      });
+
+      it('does not display count for noData status regardless of sloCount', async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'noData',
+            sloCount: SLO_COUNT_CAP + 100,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(screen.getByText('No data')).toBeInTheDocument();
+        expect(screen.queryByText(`${SLO_COUNT_CAP + 100} No data`)).not.toBeInTheDocument();
+        expect(screen.queryByText(`>${SLO_COUNT_CAP} No data`)).not.toBeInTheDocument();
       });
     });
   });
