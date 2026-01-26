@@ -64,6 +64,10 @@ export class FileUploadTelemetryService {
     return crypto.randomUUID().substring(0, 13);
   }
 
+  public static getFileExtension(fileName: string): string {
+    return fileName.split('.').pop() ?? 'unknown';
+  }
+
   private reportEvent(eventType: string, eventData: Record<string, unknown>) {
     try {
       this.analytics.reportEvent(eventType, eventData);

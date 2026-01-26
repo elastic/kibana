@@ -19,7 +19,6 @@ import type { GeoUploadWizardProps, FileUploadGeoResults } from '../lazy_load_bu
 import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage, hasSidecarFiles } from './utils';
-import { getFileExtension } from '../importer/validate_file';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -145,7 +144,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       upload_success: uploadSuccess,
       upload_cancelled: uploadCancelled,
       upload_time_ms: uploadTimeMs,
-      file_extension: getFileExtension(this._file),
+      file_extension: FileUploadTelemetryService.getFileExtension(this._file.name),
     });
 
     // Track telemetry for each sidecar file
@@ -162,7 +161,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
           upload_success: uploadSuccess, // Same success status as main file
           upload_cancelled: uploadCancelled,
           upload_time_ms: 0, // Sidecar files don't have separate upload time
-          file_extension: getFileExtension(sidecarFile),
+          file_extension: FileUploadTelemetryService.getFileExtension(sidecarFile.name),
         });
       });
     }

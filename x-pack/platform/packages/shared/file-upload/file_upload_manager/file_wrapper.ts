@@ -587,7 +587,7 @@ export class FileWrapper {
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: analysisResults.results.format,
-        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
         file_size_bytes: this.file.size ?? 0,
         num_lines_analyzed: analysisResults.results.num_lines_analyzed,
         num_messages_analyzed: analysisResults.results.num_messages_analyzed,
@@ -605,7 +605,7 @@ export class FileWrapper {
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: 'unknown',
-        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
         file_size_bytes: this.file.size ?? 0,
         num_lines_analyzed: 0,
         num_messages_analyzed: 0,
@@ -638,7 +638,7 @@ export class FileWrapper {
       upload_success: resp?.success === true,
       upload_cancelled: importStatus === STATUS.ABORTED,
       upload_time_ms: uploadTimeMs,
-      file_extension: this.file.name.split('.').pop() ?? 'unknown',
+      file_extension: FileUploadTelemetryService.getFileExtension(this.file.name),
     });
   }
 }
