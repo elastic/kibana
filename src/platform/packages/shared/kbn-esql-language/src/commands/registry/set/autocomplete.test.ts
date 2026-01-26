@@ -12,6 +12,7 @@ import type { ICommandCallbacks } from '../types';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import { settings } from '../../definitions/generated/settings';
 import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
 
 jest.mock('../../definitions/generated/settings', () => {
   const originalModule = jest.requireActual('../../definitions/generated/settings');
@@ -114,7 +115,7 @@ describe('SET Autocomplete', () => {
     });
 
     describe('Approximate setting', () => {
-      const setting = settings.find((s) => s.name === 'approximate') as unknown as {
+      const setting = settings.find((s) => s.name === Settings.APPROXIMATE) as unknown as {
         mapParams: string;
       };
       it('suggests parameter names after assignment operator', async () => {

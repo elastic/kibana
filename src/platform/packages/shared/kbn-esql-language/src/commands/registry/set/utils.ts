@@ -15,6 +15,7 @@ import { getCommandMapExpressionSuggestions } from '../../definitions/utils/auto
 import { settings } from '../../definitions/generated/settings';
 import { confidenceLevelValueItems, numOfRowsValueItems } from '../complete_items';
 import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -86,7 +87,9 @@ const getApproximateCompletionItems = (
   settingRightSide: ESQLAstItem | null
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
-    const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
+    const approximateSetting = settings.find(
+      (s) => s.name === Settings.APPROXIMATE
+    ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
@@ -140,9 +143,9 @@ const getApproximateCompletionItems = (
 };
 
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
-  project_routing: getProjectRoutingCommonCompletionItems,
-  unmapped_fields: getUnmappedFieldsCompletionItems,
-  approximate: getApproximateCompletionItems,
+  [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
+  [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
+  [Settings.APPROXIMATE]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (
