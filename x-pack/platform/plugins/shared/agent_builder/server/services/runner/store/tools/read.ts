@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
+import { filesystemTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
@@ -14,7 +15,6 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -35,8 +35,8 @@ export const readTool = ({
   fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: `${fsToolsNamespace}.read`,
-    description: `Read an entry from the filesystem`,
+    id: filesystemTools.read,
+    description: `Read the content of a file on the filesystem`,
     type: ToolType.builtin,
     schema,
     tags: ['store'],

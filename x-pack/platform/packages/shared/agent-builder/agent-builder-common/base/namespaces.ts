@@ -11,9 +11,9 @@
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
-  platformFs: 'platform.fs',
-  observability: 'observability',
+  platformFilesystem: 'platform.filesystem',
   platformDashboard: 'platform.dashboard',
+  observability: 'observability',
   security: 'security',
 } as const;
 
@@ -22,7 +22,7 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
-  internalNamespaces.platformFs,
+  internalNamespaces.platformFilesystem,
   internalNamespaces.observability,
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
   internalNamespaces.security,

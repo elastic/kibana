@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
+import { filesystemTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({
   pattern: z.string().describe('The pattern to search for'),
@@ -33,7 +33,7 @@ export const grepTool = ({
   fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: `${fsToolsNamespace}.grep`,
+    id: filesystemTools.grep,
     description: `Search for text matching a pattern in files`,
     type: ToolType.builtin,
     schema,

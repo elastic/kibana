@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
+import { filesystemTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { IFileSystemStore, FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({
   pattern: z.string().describe('Glob pattern to match files (e.g., "/**/*.json", "/logs/*.log")'),
@@ -22,7 +22,7 @@ export const globTool = ({
   fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: `${fsToolsNamespace}.glob`,
+    id: filesystemTools.glob,
     description: `Find files matching a glob pattern`,
     type: ToolType.builtin,
     schema,

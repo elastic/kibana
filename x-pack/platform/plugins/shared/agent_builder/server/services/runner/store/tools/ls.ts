@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
+import { filesystemTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type {
@@ -14,7 +15,6 @@ import type {
   LsEntry,
   FileEntryMetadata,
 } from '@kbn/agent-builder-server/runner/filesystem';
-import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({
   path: z.string().describe('Path of the directory to list'),
@@ -33,7 +33,7 @@ export const lsTool = ({
   fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: `${fsToolsNamespace}.ls`,
+    id: filesystemTools.ls,
     description: `List files and directories at the given path`,
     type: ToolType.builtin,
     schema,
