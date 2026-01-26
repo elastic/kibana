@@ -115,8 +115,8 @@ async function getTestConfig({
         ...testConfig.get('kbnTestServer.serverArgs'),
         ...(kibanaConfig
           ? Object.entries(kibanaConfig).map(([key, value]) =>
-            Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
-          )
+              Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
+            )
           : []),
       ],
     },
