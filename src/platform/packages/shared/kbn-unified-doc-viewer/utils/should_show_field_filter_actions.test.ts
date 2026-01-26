@@ -8,7 +8,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '../types';
 import {
   shouldShowFieldFilterInOutActions,
   shouldShowFieldFilterExistAction,
