@@ -29,7 +29,7 @@ import {
   getSyntheticsTlsRuleData,
   getAlertsIndexPatternRuleData,
   getApmErrorCountRuleDataOrEmpty,
-  getApmTransactionErrorRateRuleDataOrEmpty,
+  getApmTransactionRuleDataOrEmpty,
 } from './get_rule_data';
 
 const viewInDiscoverSupportedRuleTypes = [
@@ -72,8 +72,8 @@ const getLocatorParamsMap: Record<
   [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [METRIC_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
-  [ApmRuleType.TransactionDuration]: getAlertsIndexPatternRuleData,
-  [ApmRuleType.TransactionErrorRate]: getApmTransactionErrorRateRuleDataOrEmpty,
+  [ApmRuleType.TransactionDuration]: getApmTransactionRuleDataOrEmpty,
+  [ApmRuleType.TransactionErrorRate]: getApmTransactionRuleDataOrEmpty,
   [ApmRuleType.ErrorCount]: getApmErrorCountRuleDataOrEmpty,
 };
 

@@ -9,6 +9,7 @@ import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
+import type { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import type { TypeOf } from '@kbn/config-schema';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
@@ -20,9 +21,17 @@ import {
 } from '@kbn/apm-types';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-export const apmTransactionErrorRateParamsToKqlQuery = (
-  params: TypeOf<typeof transactionErrorRateParamsSchema>
-): string => {
+type TransactionRuleParams =
+  | TypeOf<typeof transactionErrorRateParamsSchema>
+  | TypeOf<typeof transactionDurationParamsSchema>;
+
+type ApmTransactionRuleDataResult = {
+  discoverAppLocatorParams: DiscoverAppLocatorParams & {
+    query: { query: string; language: 'kuery' };
+  };
+} | null;
+
+export const apmTransactionParamsToKqlQuery = (params: TransactionRuleParams): string => {
   const filters = [];
 
   if (params.serviceName) {
@@ -52,19 +61,13 @@ export const apmTransactionErrorRateParamsToKqlQuery = (
   return `(${filters.join(' AND ')})`;
 };
 
-type ApmTransactionErrorRateRuleDataResult = {
-  discoverAppLocatorParams: DiscoverAppLocatorParams & {
-    query: { query: string; language: 'kuery' };
-  };
-} | null;
-
-export const getApmTransactionErrorRateRuleData = ({
+export const getApmTransactionRuleData = ({
   alert,
   rule,
 }: {
   alert: TopAlert;
   rule: Rule;
-}): ApmTransactionErrorRateRuleDataResult => {
+}): ApmTransactionRuleDataResult => {
   const indexPattern =
     ALERT_INDEX_PATTERN in alert.fields ? alert.fields[ALERT_INDEX_PATTERN] : undefined;
 
@@ -72,13 +75,13 @@ export const getApmTransactionErrorRateRuleData = ({
     return null;
   }
 
-  const ruleParams = rule.params as TypeOf<typeof transactionErrorRateParamsSchema>;
+  const ruleParams = rule.params as TransactionRuleParams;
 
   const queryText = ruleParams.searchConfiguration?.query?.query;
   const kqlQuery =
     typeof queryText === 'string' && queryText
       ? queryText
-      : apmTransactionErrorRateParamsToKqlQuery(ruleParams);
+      : apmTransactionParamsToKqlQuery(ruleParams);
 
   const discoverAppLocatorParams = {
     dataViewSpec: {
@@ -96,12 +99,12 @@ export const getApmTransactionErrorRateRuleData = ({
   };
 };
 
-export const getApmTransactionErrorRateRuleDataOrEmpty = ({
+export const getApmTransactionRuleDataOrEmpty = ({
   alert,
   rule,
 }: {
   alert: TopAlert;
   rule: Rule;
 }) => {
-  return getApmTransactionErrorRateRuleData({ alert, rule }) ?? {};
+  return getApmTransactionRuleData({ alert, rule }) ?? {};
 };

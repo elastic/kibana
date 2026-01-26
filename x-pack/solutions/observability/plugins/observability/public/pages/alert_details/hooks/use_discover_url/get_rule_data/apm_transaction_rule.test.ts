@@ -8,9 +8,9 @@
 import { ALERT_INDEX_PATTERN, ApmRuleType } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../../typings/alerts';
-import { getApmTransactionErrorRateRuleData } from './apm_transaction_error_rate_rule';
+import { getApmTransactionRuleData } from './apm_transaction_rule';
 
-describe('getApmTransactionErrorRateRuleData', () => {
+describe('getApmTransactionRuleData', () => {
   const mockAlert: TopAlert = {
     fields: {
       [ALERT_INDEX_PATTERN]: 'metrics-apm*,apm-*',
@@ -29,7 +29,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         fields: {},
       } as unknown as TopAlert;
 
-      const result = getApmTransactionErrorRateRuleData({
+      const result = getApmTransactionRuleData({
         alert: alertWithoutIndex,
         rule: baseRule,
       });
@@ -50,7 +50,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule });
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule });
 
       expect(result).toEqual({
         discoverAppLocatorParams: {
@@ -76,7 +76,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -94,7 +94,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -112,7 +112,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -130,7 +130,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -144,7 +144,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         params: {},
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe('');
@@ -180,7 +180,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
 
       testCases.forEach(({ params, expectedQuery }) => {
         const rule: Rule = { ...baseRule, params };
-        const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+        const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
         expect(result).toBeDefined();
         expect(result.discoverAppLocatorParams?.query?.query).toBe(expectedQuery);
       });
@@ -194,7 +194,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       } as unknown as TopAlert;
 
-      const result = getApmTransactionErrorRateRuleData({
+      const result = getApmTransactionRuleData({
         alert: customIndexAlert,
         rule: baseRule,
       })!;
@@ -221,7 +221,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -245,7 +245,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       const queryString = result.discoverAppLocatorParams?.query?.query;
@@ -270,7 +270,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -291,7 +291,7 @@ describe('getApmTransactionErrorRateRuleData', () => {
         },
       };
 
-      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
