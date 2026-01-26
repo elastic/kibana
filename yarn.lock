@@ -23884,7 +23884,7 @@ langchain@0.3.37:
     yaml "^2.2.1"
     zod "^3.25.32"
 
-langsmith@0.3.29, "langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29:
+langsmith@0.3.29:
   version "0.3.29"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.29.tgz#75b8df90b8a724f320ff0cdc784768117e17a922"
   integrity sha512-JPF2B339qpYy9FyuY4Yz1aWYtgPlFc/a+VTj3L/JcFLHCiMP7+Ig8I9jO+o1QwVa+JU3iugL1RS0wwc+Glw0zA==
@@ -23897,7 +23897,7 @@ langsmith@0.3.29, "langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29:
     semver "^7.6.3"
     uuid "^10.0.0"
 
-langsmith@^0.3.67:
+"langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29, langsmith@^0.3.67:
   version "0.3.72"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.72.tgz#82e1dc8e23d7e1101e9e26353b18fb3170884f29"
   integrity sha512-XjTonMq2fIebzV0BRlPx8mi+Ih/NsQT6W484hrW/pJYuq0aT5kpLtzQthVVmsXH8ZYYkgkbQ5Gh5Mz1qoCrAwg==
