@@ -18,6 +18,7 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
@@ -71,6 +72,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   onSelect,
   position,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, esql } = kibana.services;
 
@@ -360,8 +362,14 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
         <EuiIcon type="arrowLeft" />
-        &emsp;
-        <EuiLink color="text">{i18nKeys.integrationFilterTitle}</EuiLink>
+        <EuiLink
+          color="text"
+          css={css`
+            padding-left: ${euiTheme.size.s};
+          `}
+        >
+          {i18nKeys.integrationFilterTitle}
+        </EuiLink>
       </EuiPopoverTitle>
       <EuiSelectable
         options={integrationFilterOptions}
