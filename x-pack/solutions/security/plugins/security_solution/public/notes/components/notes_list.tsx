@@ -10,7 +10,6 @@ import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elast
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DeleteConfirmModal } from './delete_confirm_modal';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
@@ -18,11 +17,7 @@ import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
-import {
-  ReqStatus,
-  selectCreateNoteStatus,
-  selectNotesTablePendingDeleteIds,
-} from '../store/notes.slice';
+import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'added a note',
@@ -59,10 +54,6 @@ export interface NotesListProps {
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
-
-  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
-  const isDeleteModalVisible = pendingDeleteIds.length > 0;
-
   return (
     <>
       <EuiCommentList>
@@ -103,7 +94,6 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
-      {isDeleteModalVisible && <DeleteConfirmModal refetch={false} />}
     </>
   );
 });
