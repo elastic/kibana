@@ -26,6 +26,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  noDocuments: {
+    light: () => import('./no_documents_light.svg'),
+    dark: () => import('./no_documents_dark.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.noDocumentsImage', {
+      defaultMessage: 'No documents image for the streams app',
+    }),
+  },
   significantEventsEmptyState: {
     light: () => import('./sig_events_empty_state_light.svg'),
     dark: () => import('./sig_events_empty_state_dark.svg'),
@@ -140,5 +147,6 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
     };
   }, [colorMode, dark, light]);
 
-  return imageSrc ? <EuiImage size="m" {...props} alt={alt} src={imageSrc} /> : null;
+  const { size = 'm', ...restProps } = props;
+  return imageSrc ? <EuiImage size={size} {...restProps} alt={alt} src={imageSrc} /> : null;
 }

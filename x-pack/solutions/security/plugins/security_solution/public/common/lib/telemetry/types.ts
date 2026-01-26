@@ -9,7 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
   AgentBuilderEventTypes,
   AgentBuilderTelemetryEventsMap,
-} from '@kbn/onechat-common/telemetry';
+} from '@kbn/agent-builder-common/telemetry';
 import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
@@ -59,6 +59,10 @@ import type {
   AIValueReportEventTypes,
   AIValueReportTelemetryEventsMap,
 } from './events/ai_value_report/types';
+import type {
+  TrialCompanionEventTypes,
+  TrialCompanionTelemetryEventsMap,
+} from './events/trial_companion/types';
 
 export * from './events/app/types';
 export * from './events/alerts_grouping/types';
@@ -70,7 +74,7 @@ export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
-export * from '@kbn/onechat-common/telemetry';
+export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -107,6 +111,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? RuleUpgradeTelemetryEventsMap[T]
   : T extends AIValueReportEventTypes
   ? AIValueReportTelemetryEventsMap[T]
+  : T extends TrialCompanionEventTypes
+  ? TrialCompanionTelemetryEventsMap[T]
   : T extends AgentBuilderEventTypes
   ? AgentBuilderTelemetryEventsMap[T]
   : never;
@@ -127,4 +133,5 @@ export type TelemetryEventTypes =
   | SiemMigrationsDashboardEventTypes
   | RuleUpgradeEventTypes
   | AIValueReportEventTypes
+  | TrialCompanionEventTypes
   | AgentBuilderEventTypes;

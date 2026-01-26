@@ -495,6 +495,146 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  uppercase: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.uppercase.name', {
+      defaultMessage: 'Uppercase',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.uppercase.description', {
+      defaultMessage: 'Convert a field to uppercase',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.uppercase.usage', {
+      defaultMessage: 'Convert a field to uppercase',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uppercase.examples.simple', {
+          defaultMessage: 'Convert a field to uppercase into a target field',
+        }),
+        yaml: `- action: uppercase
+  from: message
+  to: message_upper`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.uppercase.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  lowercase: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.lowercase.name', {
+      defaultMessage: 'Lowercase',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.lowercase.description', {
+      defaultMessage: 'Convert a field to lowercase',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.lowercase.usage', {
+      defaultMessage: 'Convert a field to lowercase',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.lowercase.examples.simple', {
+          defaultMessage: 'Convert a field to lowercase into a target field',
+        }),
+        yaml: `- action: lowercase
+  from: message
+  to: message_lower`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.lowercase.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  trim: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.trim.name', {
+      defaultMessage: 'Trim',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.trim.description', {
+      defaultMessage: 'Trim a field',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.trim.usage', {
+      defaultMessage: 'Trim a field',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.trim.examples.simple', {
+          defaultMessage: 'Trim opening and closing whitespace from a field into a target field',
+        }),
+        yaml: `- action: trim
+  from: message
+  to: message_trimmed`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.trim.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  join: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.join.name', {
+      defaultMessage: 'Join',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.join.description', {
+      defaultMessage: 'Join fields with a delimiter',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.join.usage', {
+      defaultMessage:
+        'Provide `from` for the list of source fields, `delimiter` for the string to join with, and `to` for the target field',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.join.examples.simple', {
+          defaultMessage: 'Join multiple fields into a target field with a delimiter',
+        }),
+        yaml: `- action: join
+  from: [field1, field2, field3]
+  delimiter: ", "
+  to: my_joined_field`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.join.tips.ignoreMissing', {
+        defaultMessage:
+          'Ignore missing fields by setting ignore_missing to true. This will omit missing fields from the joined string',
+      }),
+    ],
+  },
+
+  concat: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.concat.name', {
+      defaultMessage: 'Concat',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.concat.description', {
+      defaultMessage: 'Concatenate one or more fields and literals',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.concat.usage', {
+      defaultMessage:
+        'Provide a `to` field to store the concatenated value along with a `from` array to specify the values to concatenate. Use `type` to specify the type of from values (field or literal).',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.concat.examples.simple', {
+          defaultMessage: 'Concatenate two fields with an underscore between',
+        }),
+        yaml: `- action: concat
+    from:
+      - type: field
+        value: first_name
+      - type: literal
+        value: _
+      - type: field
+        value: last_name
+    to: full_name`,
+      },
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

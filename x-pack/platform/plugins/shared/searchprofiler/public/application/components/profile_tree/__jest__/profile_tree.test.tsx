@@ -5,34 +5,44 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { searchResponse } from './fixtures/search_response';
 import type { Props } from '../profile_tree';
 import { ProfileTree } from '../profile_tree';
 
 describe('ProfileTree', () => {
-  it('renders', async () => {
+  it('renders', () => {
     const props: Props = {
       onHighlight: () => {},
       target: 'searches',
       data: searchResponse,
       onDataInitError: jest.fn(),
     };
-    const init = registerTestBed(ProfileTree);
-    await init(props);
+
+    render(<ProfileTree {...props} />);
+
+    expect(screen.getByTestId('profileTree')).toBeInTheDocument();
+    // Stable UI boundary from fixture data (IndexDetails)
+    expect(
+      screen.getByText((_content, node) => {
+        if (node?.tagName !== 'H3') return false;
+        return /Index:\s+\.kibana_1/.test(node.textContent ?? '');
+      })
+    ).toBeInTheDocument();
   });
 
-  it('does not throw despite bad profile data', async () => {
+  it('does not throw despite bad profile data', () => {
     // For now, ignore the console.error that gets logged.
     const props: Props = {
       onHighlight: () => {},
       target: 'searches',
       onDataInitError: jest.fn(),
-      data: [{}] as any,
+      // Intentionally invalid runtime data to validate error handling.
+      data: [{}] as unknown as Props['data'],
     };
 
-    const init = registerTestBed(ProfileTree);
-    await init(props);
+    render(<ProfileTree {...props} />);
     expect(props.onDataInitError).toHaveBeenCalled();
   });
 });

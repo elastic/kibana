@@ -8,11 +8,11 @@
  */
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
-import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -75,6 +75,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   private createHandlerContext(input: unknown): StepHandlerContext {
     return {
       input,
+      rawInput: this.node.configuration.with || {},
       config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
@@ -83,8 +84,11 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getScopedEsClient: () => {
           return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
         },
-        renderInputTemplate: (value) => {
-          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
+        renderInputTemplate: (value, additionalContext) => {
+          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+            value,
+            additionalContext
+          );
         },
         getFakeRequest: () => {
           return this.stepExecutionRuntime.contextManager.getFakeRequest();

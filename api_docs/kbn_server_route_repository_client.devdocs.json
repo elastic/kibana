@@ -24,6 +24,8 @@
           "<TRepository, TClientOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
             "label": "core",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,6 +55,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -71,6 +77,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +93,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -104,6 +114,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +130,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+            "lineNumber": 12,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -146,6 +160,8 @@
           "<TServerRouteRepository, TAdditionalClientOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 257,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,6 +194,8 @@
               "<TServerRouteRepository, TEndpoint>>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 261,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -192,6 +210,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 262,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -217,6 +237,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 263,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,6 +279,8 @@
               "<TReturnType> : never : never"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -271,6 +295,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 270,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -296,6 +322,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 271,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -352,6 +380,8 @@
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 236,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -367,6 +397,8 @@
           "HttpFetchOptions"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 289,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

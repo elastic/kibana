@@ -10,33 +10,39 @@
 import React from 'react';
 import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
+import { ACTION_OPEN_IN_DISCOVER } from '../../common/constants';
 import { Chart } from '../chart';
 import { useChartLayersFromEsql } from '../chart/hooks/use_chart_layers_from_esql';
 import { getErrorRateChart } from './trace_charts_definition';
 
 const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
-export const ErrorRateChart = () => {
-  const {
-    filters,
-    services,
-    fetchParams,
-    discoverFetch$,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
+type UseChartLayersFromEsqlArgs = Parameters<typeof useChartLayersFromEsql>[0];
+
+type ErrorRateChartContentProps = Pick<
+  UseChartLayersFromEsqlArgs,
+  'query' | 'seriesType' | 'unit' | 'color'
+> & {
+  title: string;
+};
+
+const ErrorRateChartContent = ({
+  query,
+  seriesType,
+  unit,
+  color,
+  title,
+}: ErrorRateChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+    useTraceMetricsContext();
   const { abortController, timeRange } = fetchParams;
 
-  const { esqlQuery, seriesType, unit, color, title } = getErrorRateChart({
-    dataSource,
-    indexes,
-    filters,
-  });
-
-  const chartLayers = useChartLayersFromEsql({
-    query: esqlQuery,
+  const {
+    layers: chartLayers,
+    loading: isLoadingColumns,
+    error: columnsError,
+  } = useChartLayersFromEsql({
+    query,
     seriesType,
     services,
     timeRange,
@@ -47,18 +53,47 @@ export const ErrorRateChart = () => {
 
   return (
     <Chart
-      esqlQuery={esqlQuery}
+      esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
       services={services}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
+      onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
       syncCursor
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
+      isLoading={isLoadingColumns}
+      error={columnsError}
+      extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+    />
+  );
+};
+
+export const ErrorRateChart = () => {
+  const { filters, indexes } = useTraceMetricsContext();
+
+  const errorRateChart = getErrorRateChart({
+    indexes,
+    filters,
+  });
+
+  if (!errorRateChart) {
+    return null;
+  }
+
+  const { esqlQuery, seriesType, unit, color, title } = errorRateChart;
+
+  return (
+    <ErrorRateChartContent
+      query={esqlQuery}
+      seriesType={seriesType}
+      unit={unit}
+      color={color}
+      title={title}
     />
   );
 };

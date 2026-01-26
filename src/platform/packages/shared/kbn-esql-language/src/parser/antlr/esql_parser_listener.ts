@@ -1,4 +1,4 @@
-// Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.2
+// Generated from src/parser/antlr/esql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
 
@@ -84,10 +84,15 @@ import { CompletionCommandContext } from "./esql_parser.js";
 import { InlineStatsCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
 import { FuseConfigurationContext } from "./esql_parser.js";
+import { FuseKeyByFieldsContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
 import { SetFieldContext } from "./esql_parser.js";
+import { MmrCommandContext } from "./esql_parser.js";
+import { MmrQueryVectorParameterContext } from "./esql_parser.js";
+import { MmrQueryVectorExpressionContext } from "./esql_parser.js";
+import { MmrOptionalQueryVectorContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -904,6 +909,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFuseConfiguration?: (ctx: FuseConfigurationContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.fuseKeyByFields`.
+	 * @param ctx the parse tree
+	 */
+	enterFuseKeyByFields?: (ctx: FuseKeyByFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fuseKeyByFields`.
+	 * @param ctx the parse tree
+	 */
+	exitFuseKeyByFields?: (ctx: FuseKeyByFieldsContext) => void;
+	/**
 	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
 	 * @param ctx the parse tree
 	 */
@@ -943,6 +958,50 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitSetField?: (ctx: SetFieldContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.mmrCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMmrCommand?: (ctx: MmrCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mmrCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMmrCommand?: (ctx: MmrCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by the `mmrQueryVectorParameter`
+	 * labeled alternative in `esql_parser.mmrQueryVectorParams`.
+	 * @param ctx the parse tree
+	 */
+	enterMmrQueryVectorParameter?: (ctx: MmrQueryVectorParameterContext) => void;
+	/**
+	 * Exit a parse tree produced by the `mmrQueryVectorParameter`
+	 * labeled alternative in `esql_parser.mmrQueryVectorParams`.
+	 * @param ctx the parse tree
+	 */
+	exitMmrQueryVectorParameter?: (ctx: MmrQueryVectorParameterContext) => void;
+	/**
+	 * Enter a parse tree produced by the `mmrQueryVectorExpression`
+	 * labeled alternative in `esql_parser.mmrQueryVectorParams`.
+	 * @param ctx the parse tree
+	 */
+	enterMmrQueryVectorExpression?: (ctx: MmrQueryVectorExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `mmrQueryVectorExpression`
+	 * labeled alternative in `esql_parser.mmrQueryVectorParams`.
+	 * @param ctx the parse tree
+	 */
+	exitMmrQueryVectorExpression?: (ctx: MmrQueryVectorExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.mmrOptionalQueryVector`.
+	 * @param ctx the parse tree
+	 */
+	enterMmrOptionalQueryVector?: (ctx: MmrOptionalQueryVectorContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mmrOptionalQueryVector`.
+	 * @param ctx the parse tree
+	 */
+	exitMmrOptionalQueryVector?: (ctx: MmrOptionalQueryVectorContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.

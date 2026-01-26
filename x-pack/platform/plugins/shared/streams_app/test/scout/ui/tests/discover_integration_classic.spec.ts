@@ -37,20 +37,26 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover
+      // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
+
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
 
       // Expand the first document row to open the flyout
       const expandButton = page.locator(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
 
+      // Wait for the row to be rendered before clicking
+      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -81,23 +87,32 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover
+      // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
+
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Switch to ES|QL mode by clicking the button
       await pageObjects.discover.selectTextBaseLang();
 
+      // Wait for ES|QL results to load
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
+
       // Expand the first document row to open the flyout
       const expandButton = page.locator(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
 
+      // Wait for the row to be rendered before clicking
+      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');

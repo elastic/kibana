@@ -13,6 +13,7 @@ import {
   AGENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
   TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
@@ -38,6 +39,7 @@ import {
   KUBERNETES_POD_UID,
   CONTAINER_ID,
   HOST_HOSTNAME,
+  HOST_NAME,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -60,6 +62,7 @@ const requiredFields = asMutableArray([
 const optionalFields = asMutableArray([
   PROCESSOR_NAME,
   SERVICE_LANGUAGE_NAME,
+  SERVICE_ENVIRONMENT,
   URL_FULL,
   TRANSACTION_PAGE_URL,
   HTTP_RESPONSE_STATUS_CODE,
@@ -72,6 +75,7 @@ const optionalFields = asMutableArray([
   USER_AGENT_VERSION,
   KUBERNETES_POD_UID,
   HOST_HOSTNAME,
+  HOST_NAME,
   CONTAINER_ID,
 ] as const);
 

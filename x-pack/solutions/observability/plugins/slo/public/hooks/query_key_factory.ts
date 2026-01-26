@@ -61,7 +61,14 @@ export const sloKeys = {
     includeOutdatedOnly: boolean;
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
+  searchDefinitions: (params: {
+    search: string;
+    size: number;
+    searchAfter?: string;
+    remoteName?: string;
+  }) => [...sloKeys.all, 'searchDefinitions', params] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  allHealth: () => [...sloKeys.all, 'health'] as const,
   health: (list: Array<{ id: string; instanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
   burnRates: (
@@ -81,15 +88,13 @@ export const sloKeys = {
     groupBy?: string[];
   }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
-  groupings: (params: {
+  instances: (params: {
     sloId: string;
-    instanceId: string;
-    groupingKey: string;
     search?: string;
-    afterKey?: string;
-    excludeStale?: boolean;
+    searchAfter?: string;
+    size: number;
     remoteName?: string;
-  }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  }) => [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 
