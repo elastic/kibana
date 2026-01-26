@@ -64,6 +64,38 @@ const SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT = i18n.translate(
   { defaultMessage: 'Selected script requires arguments to be provided' }
 );
 
+const validateTimeoutValue = (
+  value: string | number | undefined
+): { isValid: boolean; errors?: string[] } => {
+  if (value) {
+    const timeoutValue = Number(value);
+
+    if (isNaN(timeoutValue)) {
+      return {
+        isValid: false,
+        errors: [
+          i18n.translate('xpack.securitySolution.runscriptConfig.invalidTimeoutValue', {
+            defaultMessage: 'Value must be a number',
+          }),
+        ],
+      };
+    }
+
+    if (timeoutValue < 1) {
+      return {
+        isValid: false,
+        errors: [
+          i18n.translate('xpack.securitySolution.runscriptConfig.timeoutMustBeGreaterThanZero', {
+            defaultMessage: 'Value must be greater than 0',
+          }),
+        ],
+      };
+    }
+  }
+
+  return { isValid: true };
+};
+
 export interface RunscriptConfigProps {
   basePath: string;
   disabled: boolean;
@@ -175,7 +207,7 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
                     showFieldLabels={index === 0}
                     config={value[osType]}
                     data-test-subj={getTestId(osType)}
-                    onChange={(updatedConfig) => {
+                    onChange={({ updatedConfig }) => {
                       emitChange({
                         ...value,
                         [osType]: updatedConfig,
@@ -197,7 +229,11 @@ export interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
   config: EndpointRunScriptActionRequestParams;
-  onChange: (updatedConfig: EndpointRunScriptActionRequestParams) => void;
+  onChange: (updates: {
+    updatedConfig: EndpointRunScriptActionRequestParams;
+    isValid: boolean;
+    errors?: string[];
+  }) => void;
   /** If `true` (default) each field will include a label */
   showFieldLabels?: boolean;
 }
@@ -207,17 +243,24 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
-    // TODO:PT maybe allow timeout to be entered using the `1h, 10m` etc. type of format and convert it to seconds for API call?
+    const timeoutValidationError = useMemo(() => {
+      if (config.timeout) {
+        return validateTimeoutValue(config.timeout).errors?.join('; ');
+      }
+    }, [config.timeout]);
 
     const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
       useCallback(
         (selectedScript) => {
           if (selectedScript?.id !== config.scriptId) {
             onChange({
-              ...config,
-              scriptId: selectedScript?.id ?? '',
-              // reset script input ++ timeout if no script is selected
-              ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
+              isValid: true,
+              updatedConfig: {
+                ...config,
+                scriptId: selectedScript?.id ?? '',
+                // reset script input ++ timeout if no script is selected
+                ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
+              },
             });
           }
 
@@ -240,8 +283,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     const scriptParamsOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
         onChange({
-          ...config,
-          scriptInput: ev.target.value ?? '',
+          isValid: true,
+          updatedConfig: {
+            ...config,
+            scriptInput: ev.target.value ?? '',
+          },
         });
       },
       [config, onChange]
@@ -250,8 +296,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     const scriptTimeoutOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
         onChange({
-          ...config,
-          timeout: ev.target.value ? Number(ev.target.value) : undefined,
+          ...validateTimeoutValue(ev.target.value),
+          updatedConfig: {
+            ...config,
+            timeout: ev.target.value as unknown as number,
+          },
         });
       },
       [config, onChange]
@@ -272,6 +321,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               wrap={false}
               gutterSize="s"
               alignItems="center"
+              justifyContent="center"
               css={css`
                 width: 10ch;
               `}
@@ -324,6 +374,8 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
+            isInvalid={!!timeoutValidationError}
+            error={timeoutValidationError}
             label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
             labelAppend={
               showFieldLabels ? (
@@ -348,6 +400,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             }
           >
             <EuiFieldText
+              isInvalid={!!timeoutValidationError}
               name="timeout"
               disabled={!scriptSelected}
               fullWidth
