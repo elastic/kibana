@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getDrilldownsSchema } from './schemas';
 import type { DrilldownSetup } from './types';
 
 export function getDrilldownRegistry() {
   const registry: { [key: string]: DrilldownSetup } = {};
+
+  function getSchemasForSupportedTriggers(supportedTriggers: string[]) {
+    return Object.values(registry)
+      .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
+        return supportedTriggers.some((trigger) => drilldownSupportedTriggers.includes(trigger));
+      })
+      .map(({ schema }) => schema);
+  }
 
   return {
     registerDrilldown: (type: string, drilldown: DrilldownSetup) => {
@@ -26,12 +35,7 @@ export function getDrilldownRegistry() {
     getTransformOut: (type: string) => {
       return registry[type]?.transformOut;
     },
-    getSchemasForSupportedTriggers: (supportedTriggers: string[]) => {
-      return Object.values(registry)
-        .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
-          return supportedTriggers.some((trigger) => drilldownSupportedTriggers.includes(trigger));
-        })
-        .map(({ schema }) => schema);
-    },
+    getDrilldownsSchema: (supportedTriggers: string[]) =>
+      getDrilldownsSchema(getSchemasForSupportedTriggers(supportedTriggers)),
   };
 }

@@ -30,7 +30,6 @@ import type { DrilldownSetup } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import { getTransformDrilldownsIn } from '../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
-import { getDrilldownsSchema } from './drilldowns/schemas';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -101,9 +100,16 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableSchemas: () =>
         Object.values(this.transformsRegistry)
-          .map((transformSetup) => transformSetup?.getSchema?.(this.getDrilldownsSchema))
+          .map((transformSetup) =>
+            transformSetup?.getSchema?.(this.drilldownRegistry.getDrilldownsSchema)
+          )
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (embeddableType: string) => {
+        const transformsSetup = this.transformsRegistry[embeddableType];
+        if (!transformsSetup) {
+          return;
+        }
+
         const drilldownTransforms = {
           transformIn: getTransformDrilldownsIn((drilldownType: string) =>
             this.drilldownRegistry.getTransformIn(drilldownType)
@@ -112,17 +118,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
             this.drilldownRegistry.getTransformOut(drilldownType)
           ),
         };
-        const transformsSetup = this.transformsRegistry[embeddableType];
-        if (!transformsSetup) {
-          return;
-        }
 
         return {
           ...(transformsSetup.getTransforms
             ? transformsSetup.getTransforms(drilldownTransforms)
             : {}),
           ...(transformsSetup.getSchema
-            ? { schema: transformsSetup.getSchema(this.getDrilldownsSchema) }
+            ? { schema: transformsSetup.getSchema(this.drilldownRegistry.getDrilldownsSchema) }
             : {}),
           ...(typeof transformsSetup.throwOnUnmappedPanel === 'boolean'
             ? { throwOnUnmappedPanel: transformsSetup.throwOnUnmappedPanel }
@@ -171,7 +173,4 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       }
     );
   };
-
-  private getDrilldownsSchema = (supportedTriggers: string[]) =>
-    getDrilldownsSchema(this.drilldownRegistry.getSchemasForSupportedTriggers(supportedTriggers));
 }

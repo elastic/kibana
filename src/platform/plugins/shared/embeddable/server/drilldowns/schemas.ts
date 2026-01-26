@@ -10,18 +10,15 @@
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export function getDrilldownsSchema(configSchemas: Type<{ type: string }>[]) {
+export function getDrilldownsSchema(configs: Type<{ type: string }>[]) {
   return schema.object({
-    drilldowns: schema.maybe(schema.arrayOf(getDrilldownSchema(configSchemas))),
+    drilldowns: schema.maybe(schema.arrayOf(getDrilldownSchema(configs))),
   });
 }
 
-export function getDrilldownSchema(configSchemas: Type<{ type: string }>[]) {
+export function getDrilldownSchema(configs: Type<{ type: string }>[]) {
   return schema.object({
-    config: schema.discriminatedUnion(
-      'type',
-      configSchemas as [ObjectType<{ type: Type<string> }>]
-    ),
+    config: schema.discriminatedUnion('type', configs as [ObjectType<{ type: Type<string> }>]),
     label: schema.maybe(schema.string()),
     triggers: schema.arrayOf(
       schema.string({
