@@ -57,7 +57,12 @@ export const getApmErrorCountRuleData = ({
   }
 
   const ruleParams = rule.params as TypeOf<typeof errorCountParamsSchema>;
-  const kqlQuery = apmErrorCountParamsToKqlQuery(ruleParams);
+
+  const queryText = ruleParams.searchConfiguration?.query?.query;
+  const kqlQuery =
+    typeof queryText === 'string' && queryText
+      ? queryText
+      : apmErrorCountParamsToKqlQuery(ruleParams);
 
   const discoverAppLocatorParams = {
     dataViewSpec: {
@@ -74,3 +79,6 @@ export const getApmErrorCountRuleData = ({
     discoverAppLocatorParams,
   };
 };
+
+export const getApmErrorCountRuleDataOrEmpty = ({ alert, rule }: { alert: TopAlert; rule: Rule }) =>
+  getApmErrorCountRuleData({ alert, rule }) || {};

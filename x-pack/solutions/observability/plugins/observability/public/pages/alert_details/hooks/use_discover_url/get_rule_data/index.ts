@@ -11,4 +11,5 @@ export { getSLOBurnRateRuleData } from './slo_burn_rate_rule';
 export { getSyntheticsStatusRuleData } from './synthetics_status_rule';
 export { getSyntheticsTlsRuleData } from './synthetics_tls_rule';
 export { getAlertsIndexPatternRuleData } from './alerts_index_pattern_rules';
-export { getApmErrorCountRuleData } from './apm_error_count_rule';
+export { getApmErrorCountRuleDataOrEmpty } from './apm_error_count_rule';
+export { getApmTransactionErrorRateRuleDataOrEmpty } from './apm_transaction_error_rate_rule';

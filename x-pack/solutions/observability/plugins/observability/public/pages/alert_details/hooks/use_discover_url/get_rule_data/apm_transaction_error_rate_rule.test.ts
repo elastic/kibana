@@ -8,28 +8,31 @@
 import { ALERT_INDEX_PATTERN, ApmRuleType } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../../typings/alerts';
-import { getApmErrorCountRuleData } from './apm_error_count_rule';
+import { getApmTransactionErrorRateRuleData } from './apm_transaction_error_rate_rule';
 
-describe('getApmErrorCountRuleData', () => {
+describe('getApmTransactionErrorRateRuleData', () => {
   const mockAlert: TopAlert = {
     fields: {
-      [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
+      [ALERT_INDEX_PATTERN]: 'metrics-apm*,apm-*',
     },
     start: Date.now(),
   } as unknown as TopAlert;
 
   const baseRule: Rule = {
-    ruleTypeId: ApmRuleType.ErrorCount,
+    ruleTypeId: ApmRuleType.TransactionErrorRate,
     params: {},
   } as unknown as Rule;
 
   describe('when alert has no index pattern', () => {
-    it('returns empty object', () => {
+    it('returns null', () => {
       const alertWithoutIndex = {
         fields: {},
       } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: alertWithoutIndex, rule: baseRule });
+      const result = getApmTransactionErrorRateRuleData({
+        alert: alertWithoutIndex,
+        rule: baseRule,
+      });
 
       expect(result).toBeNull();
     });
@@ -41,23 +44,24 @@ describe('getApmErrorCountRuleData', () => {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
+          transactionType: 'request',
+          transactionName: 'POST /api/checkout',
           environment: 'production',
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule });
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule });
 
       expect(result).toEqual({
         discoverAppLocatorParams: {
           dataViewSpec: {
-            title: 'logs-apm.error-*',
+            title: 'metrics-apm*,apm-*',
             timeFieldName: '@timestamp',
           },
           query: {
             language: 'kuery',
             query:
-              '(service.name: checkout-service AND error.grouping_key: abc123 AND service.environment: production AND processor.event: error)',
+              '(service.name:"checkout-service" AND transaction.type:"request" AND transaction.name:"POST /api/checkout" AND service.environment:"production")',
           },
         },
       });
@@ -67,119 +71,119 @@ describe('getApmErrorCountRuleData', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
-          errorGroupingKey: 'abc123',
+          transactionType: 'request',
           environment: 'production',
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(error.grouping_key: abc123 AND service.environment: production AND processor.event: error)'
+        '(transaction.type:"request" AND service.environment:"production")'
       );
     });
 
-    it('excludes error.grouping_key filter when not provided', () => {
+    it('excludes transaction.type filter when not provided', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
+          transactionName: 'GET /api/products',
           environment: 'production',
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND service.environment: production AND processor.event: error)'
+        '(service.name:"checkout-service" AND transaction.name:"GET /api/products" AND service.environment:"production")'
       );
     });
 
-    it('excludes service.environment filter when ENVIRONMENT_ALL', () => {
+    it('excludes transaction.name filter when not provided', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
+          transactionType: 'request',
+          environment: 'production',
+        },
+      };
+
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"checkout-service" AND transaction.type:"request" AND service.environment:"production")'
+      );
+    });
+
+    it('excludes service environment filter when ENVIRONMENT_ALL', () => {
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'checkout-service',
+          transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND error.grouping_key: abc123 AND processor.event: error)'
+        '(service.name:"checkout-service" AND transaction.type:"request")'
       );
     });
 
-    it('includes only processor.event filter when no other params provided', () => {
+    it('returns empty query when no params provided', () => {
       const rule: Rule = {
         ...baseRule,
         params: {},
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe('processor.event: error');
+      expect(result.discoverAppLocatorParams?.query?.query).toBe('');
     });
 
     it('handles all combinations of optional params', () => {
       const testCases = [
         {
           params: { serviceName: 'service-a' },
-          expectedQuery: '(service.name: service-a AND processor.event: error)',
+          expectedQuery: 'service.name:"service-a"',
         },
         {
-          params: { errorGroupingKey: 'xyz789' },
-          expectedQuery: '(error.grouping_key: xyz789 AND processor.event: error)',
+          params: { transactionType: 'page-load' },
+          expectedQuery: 'transaction.type:"page-load"',
+        },
+        {
+          params: { transactionName: 'GET /' },
+          expectedQuery: 'transaction.name:"GET /"',
         },
         {
           params: { environment: 'staging' },
-          expectedQuery: '(service.environment: staging AND processor.event: error)',
+          expectedQuery: 'service.environment:"staging"',
         },
         {
-          params: { serviceName: 'service-b', environment: 'development' },
-          expectedQuery:
-            '(service.name: service-b AND service.environment: development AND processor.event: error)',
+          params: { serviceName: 'service-b', transactionType: 'request' },
+          expectedQuery: '(service.name:"service-b" AND transaction.type:"request")',
         },
         {
-          params: { errorGroupingKey: 'def456', environment: 'qa' },
-          expectedQuery:
-            '(error.grouping_key: def456 AND service.environment: qa AND processor.event: error)',
+          params: { transactionType: 'request', transactionName: 'POST /api/users' },
+          expectedQuery: '(transaction.type:"request" AND transaction.name:"POST /api/users")',
         },
       ];
 
       testCases.forEach(({ params, expectedQuery }) => {
         const rule: Rule = { ...baseRule, params };
-        const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+        const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
         expect(result).toBeDefined();
         expect(result.discoverAppLocatorParams?.query?.query).toBe(expectedQuery);
       });
-    });
-
-    it('uses kuery as query language', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'test-service',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.language).toBe('kuery');
-    });
-
-    it('sets @timestamp as timeFieldName', () => {
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule: baseRule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.dataViewSpec?.timeFieldName).toBe('@timestamp');
     });
 
     it('uses index pattern from alert fields', () => {
@@ -190,7 +194,10 @@ describe('getApmErrorCountRuleData', () => {
         },
       } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: customIndexAlert, rule: baseRule })!;
+      const result = getApmTransactionErrorRateRuleData({
+        alert: customIndexAlert,
+        rule: baseRule,
+      })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.dataViewSpec?.title).toBe('custom-apm-index-*');
@@ -203,7 +210,8 @@ describe('getApmErrorCountRuleData', () => {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
+          transactionType: 'request',
+          transactionName: 'POST /api/checkout',
           environment: 'production',
           searchConfiguration: {
             query: {
@@ -213,7 +221,7 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -226,7 +234,8 @@ describe('getApmErrorCountRuleData', () => {
         ...baseRule,
         params: {
           serviceName: 'ignored-service',
-          errorGroupingKey: 'ignored-key',
+          transactionType: 'ignored-type',
+          transactionName: 'ignored-name',
           environment: 'ignored-env',
           searchConfiguration: {
             query: {
@@ -236,13 +245,14 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       const queryString = result.discoverAppLocatorParams?.query?.query;
       expect(queryString).toBe('my.custom.query: true');
       expect(queryString).not.toContain('ignored-service');
-      expect(queryString).not.toContain('ignored-key');
+      expect(queryString).not.toContain('ignored-type');
+      expect(queryString).not.toContain('ignored-name');
       expect(queryString).not.toContain('ignored-env');
     });
 
@@ -251,7 +261,7 @@ describe('getApmErrorCountRuleData', () => {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
+          transactionType: 'request',
           searchConfiguration: {
             query: {
               query: '',
@@ -260,11 +270,11 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND error.grouping_key: abc123 AND processor.event: error)'
+        '(service.name:"checkout-service" AND transaction.type:"request")'
       );
     });
 
@@ -273,6 +283,7 @@ describe('getApmErrorCountRuleData', () => {
         ...baseRule,
         params: {
           serviceName: 'checkout-service',
+          transactionType: 'request',
           environment: 'production',
           searchConfiguration: {
             query: {},
@@ -280,11 +291,11 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmTransactionErrorRateRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND service.environment: production AND processor.event: error)'
+        '(service.name:"checkout-service" AND transaction.type:"request" AND service.environment:"production")'
       );
     });
   });
