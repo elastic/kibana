@@ -6,7 +6,11 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT, KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
+import {
+  EXTENDED_TIMEOUT,
+  KUBERNETES_TOUR_STORAGE_KEY,
+  KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
+} from '../constants';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -155,6 +159,16 @@ export class InventoryPage {
         window.localStorage.setItem(k8sTourStorageKey, 'true');
       },
       [KUBERNETES_TOUR_STORAGE_KEY]
+    );
+  }
+
+  public async addClearK8sCardDismissedInitScript() {
+    // Clear the K8s dashboard promotion card dismissed state to ensure cards are visible
+    await this.page.addInitScript(
+      ([k8sCardDismissedKey]) => {
+        window.localStorage.removeItem(k8sCardDismissedKey);
+      },
+      [KUBERNETES_CARD_DISMISSED_STORAGE_KEY]
     );
   }
 
