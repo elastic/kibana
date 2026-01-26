@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { ClusterDetails, ServiceType } from '../../../types';
 
@@ -102,7 +103,9 @@ export const useClusterConnection = () => {
         setAutoEnablingEis(false);
         if (updateError) {
           notifications.toasts.addError(updateError as Error, {
-            title: 'Failed to auto-enable Elastic Inference Service',
+            title: i18n.translate('xpack.cloudConnect.autoEnableEis.errorTitle', {
+              defaultMessage: 'Failed to auto-enable Elastic Inference Service',
+            }),
           });
         } else {
           setClusterDetails((prev) => updateServiceEnabled(prev, 'eis', true));
