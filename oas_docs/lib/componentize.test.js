@@ -557,7 +557,7 @@ describe('componentizeObjectSchemas', () => {
   });
 
   describe('top-level schema extraction (from componentization example)', () => {
-    it.skip('should extract top-level response schema and nested properties', async () => {
+    it('should extract top-level response schema and nested properties', async () => {
       const testDoc = {
         openapi: '3.0.3',
         info: { title: 'Test', version: '1.0.0' },
@@ -634,12 +634,6 @@ describe('componentizeObjectSchemas', () => {
           host: { type: 'string' },
         },
       });
-      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200_Config_From', {
-        type: 'string',
-      });
-      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200_Config_Host', {
-        type: 'string',
-      });
 
       await componentizeObjectSchemas(testFile, { log: mockLog });
 
@@ -648,7 +642,7 @@ describe('componentizeObjectSchemas', () => {
       expect(result).toEqual(expectedDoc);
     });
 
-    it.skip('should extract top-level request schema', async () => {
+    it('should extract top-level request schema', async () => {
       const testDoc = {
         openapi: '3.0.3',
         info: { title: 'Test', version: '1.0.0' },
