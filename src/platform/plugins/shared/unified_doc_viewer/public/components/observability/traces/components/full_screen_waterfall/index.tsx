@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
-import { css, Global } from '@emotion/react';
+import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -124,17 +124,7 @@ export const FullScreenWaterfall = ({
   }
 
   return (
-    <>
-      {/** This global style is a temporary fix until we migrate to the
-       * new flyout system (with child) instead of full screen */}
-      <Global
-        styles={css`
-          .euiDataGridRowCell__popover {
-            z-index: ${euiTheme.levels.modal} !important;
-          }
-        `}
-      />
-      <EuiFlyout
+    <EuiFlyout
         session="start"
         size="m"
         onClose={onExitFullScreen}
@@ -190,6 +180,5 @@ export const FullScreenWaterfall = ({
           )
         ) : null}
       </EuiFlyout>
-    </>
   );
 };
