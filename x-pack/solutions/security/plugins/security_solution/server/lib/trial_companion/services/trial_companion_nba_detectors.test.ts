@@ -59,6 +59,15 @@ describe('Trial companion NBA detectors', () => {
     jest.clearAllMocks();
   });
 
+  const buildCountResponse = (count: number): CountResponse => ({
+    count,
+    _shards: {
+      failed: 0,
+      successful: 0,
+      total: 0,
+    },
+  });
+
   it.each([
     [10, undefined],
     [1, undefined],
@@ -91,6 +100,7 @@ describe('Trial companion NBA detectors', () => {
       [
         'installed one default package',
         [createPackageListItem('endpoint', 'installed')],
+        buildCountResponse(1),
         Milestone.M1,
       ],
       [
@@ -99,11 +109,13 @@ describe('Trial companion NBA detectors', () => {
           createPackageListItem('trial-companion', 'installed'),
           createPackageListItem('trial-test', 'installed'),
         ],
+        buildCountResponse(1),
         undefined,
       ],
       [
         'not installed',
         [createPackageListItem('endpoint', ''), createPackageListItem('trial-companion', '')],
+        buildCountResponse(1),
         Milestone.M1,
       ],
       [
@@ -115,6 +127,7 @@ describe('Trial companion NBA detectors', () => {
           createPackageListItem('elastic_agent', 'installed'),
           createPackageListItem('fleet_server', 'installed'),
         ],
+        buildCountResponse(1),
         Milestone.M1,
       ],
       [
@@ -123,14 +136,28 @@ describe('Trial companion NBA detectors', () => {
           createPackageListItem('trial-test', 'installed'),
           createPackageListItem('fleet_server', 'installed'),
         ],
+        buildCountResponse(1),
         undefined,
-      ], // TODO: test esClient
-    ])('returns milestone based on packages in %s', async (_tcName, packageList, expected) => {
-      packageClient.getPackages.mockResolvedValueOnce(packageList);
-      await expect(installedPackagesM1(deps.logger, packageService, esClient)()).resolves.toEqual(
-        expected
-      );
-    });
+      ],
+      [
+        'all installed no agent',
+        [
+          createPackageListItem('trial-test', 'installed'),
+          createPackageListItem('fleet_server', 'installed'),
+        ],
+        buildCountResponse(0),
+        Milestone.M1,
+      ],
+    ])(
+      'returns milestone based on packages in %s',
+      async (_tcName, packageList, esResponse, expected) => {
+        packageClient.getPackages.mockResolvedValueOnce(packageList);
+        esClient.count.mockResolvedValueOnce(esResponse);
+        await expect(installedPackagesM1(deps.logger, packageService, esClient)()).resolves.toEqual(
+          expected
+        );
+      }
+    );
     it('propagates error from package service', async () => {
       packageClient.getPackages.mockRejectedValueOnce(new Error('test error'));
       await expect(
@@ -188,26 +215,20 @@ describe('Trial companion NBA detectors', () => {
     });
 
     describe('aiFeaturesM5', () => {
-      const buildCountResponse = (count: number): CountResponse => ({
-        count,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-        },
-      });
-
       it.each([
-        ['0 alerts, 0 conversations', 0, 0, Milestone.M5],
-        ['0 alerts, 3 conversations', 0, 3, undefined],
-        ['2 alerts, 0 conversations', 2, 0, undefined],
-        ['5 alerts, 12 conversations', 5, 12, undefined],
+        ['0 alerts, 0 conversations, 0 charts', 0, 0, 0, Milestone.M5],
+        ['0 alerts, 3 conversations, 0 charts', 0, 3, 0, undefined],
+        ['2 alerts, 0 conversations, 0 charts', 2, 0, 0, undefined],
+        ['5 alerts, 12 conversations, 0 charts', 5, 12, 0, undefined],
+        ['5 alerts, 12 conversations, 1 charts', 5, 12, 1, undefined],
+        ['0 alerts, 0 conversations, 1 charts', 0, 0, 7, undefined],
       ])(
         'compares count of attack discovery alerts and assistant conversations - %s',
-        async (_tcName, alerts, assistant, expected) => {
+        async (_tcName, alerts, assistant, chart, expected) => {
           (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(alerts));
           (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(assistant));
-          await expect(aiFeaturesM5(esClient, detectorsLogger)()).resolves.toEqual(expected);
+          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(chart));
+          await expect(aiFeaturesM5(esClient)()).resolves.toEqual(expected);
         }
       );
     });

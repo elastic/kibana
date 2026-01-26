@@ -56,7 +56,7 @@ export const installedPackagesM1 = (
       });
       logger.debug(`agentLogs: ${JSON.stringify(agentLogs)}`);
 
-      if (nonDefaultPackages.length === 0 || agentLogs.count === 0) {
+      if (nonDefaultPackages.length === 0 || !agentLogs.count || agentLogs.count === 0) {
         return Milestone.M1;
       }
       return undefined;
