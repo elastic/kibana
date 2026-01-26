@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/response-ops/recurring-schedule-form'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/recurring-schedule-form'],
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/response-ops/recurring-schedule-form/setup_tests.ts',
+    '<rootDir>/x-pack/platform/packages/shared/response-ops/recurring-schedule-form/setup_tests.ts',
   ],
 };
