@@ -12,6 +12,17 @@ import type { ICommandCallbacks } from '../types';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import { settings } from '../../definitions/generated/settings';
 import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
+
+jest.mock('../../definitions/generated/settings', () => {
+  const originalModule = jest.requireActual('../../definitions/generated/settings');
+  return {
+    ...originalModule,
+    settings: originalModule.settings.map((s: any) =>
+      s.name === 'project_routing' ? { ...s, ignoreAsSuggestion: false } : s
+    ),
+  };
+});
 
 const setExpectSuggestions = (
   query: string,
@@ -95,16 +106,16 @@ describe('SET Autocomplete', () => {
 
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
-        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"LOAD";', '"NULLIFY";']);
+        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"NULLIFY";']);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'LOAD', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'NULLIFY']);
       });
     });
 
     describe('Approximate setting', () => {
-      const setting = settings.find((s) => s.name === 'approximate') as unknown as {
+      const setting = settings.find((s) => s.name === Settings.APPROXIMATE) as unknown as {
         mapParams: string;
       };
       it('suggests parameter names after assignment operator', async () => {
