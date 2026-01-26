@@ -931,7 +931,23 @@ describe('ApmServicesTable', () => {
     });
 
     describe('SLO count capping', () => {
-      it(`displays exact count when violated SLO count is ${SLO_COUNT_CAP} or less`, async () => {
+      it(`displays exact count when violated SLO count is less than ${SLO_COUNT_CAP}`, async () => {
+        const servicesWithSlos: ServiceListItem[] = [
+          {
+            ...mockService,
+            sloStatus: 'violated',
+            sloCount: SLO_COUNT_CAP - 1,
+          },
+        ];
+
+        renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+        await screen.findByRole('table');
+
+        expect(screen.getByText(`${SLO_COUNT_CAP - 1} Violated`)).toBeInTheDocument();
+      });
+
+      it(`displays ${SLO_COUNT_CAP}+ when violated SLO count equals ${SLO_COUNT_CAP}`, async () => {
         const servicesWithSlos: ServiceListItem[] = [
           {
             ...mockService,
@@ -944,10 +960,10 @@ describe('ApmServicesTable', () => {
 
         await screen.findByRole('table');
 
-        expect(screen.getByText(`${SLO_COUNT_CAP} Violated`)).toBeInTheDocument();
+        expect(screen.getByText(`${SLO_COUNT_CAP}+ Violated`)).toBeInTheDocument();
       });
 
-      it(`displays >${SLO_COUNT_CAP} when violated SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
+      it(`displays ${SLO_COUNT_CAP}+ when violated SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
         const servicesWithSlos: ServiceListItem[] = [
           {
             ...mockService,
@@ -960,12 +976,10 @@ describe('ApmServicesTable', () => {
 
         await screen.findByRole('table');
 
-        expect(
-          screen.getByText(new RegExp(`>\\s*${SLO_COUNT_CAP}\\s+Violated`))
-        ).toBeInTheDocument();
+        expect(screen.getByText(`${SLO_COUNT_CAP}+ Violated`)).toBeInTheDocument();
       });
 
-      it(`displays exact count when degrading SLO count is ${SLO_COUNT_CAP} or less`, async () => {
+      it(`displays exact count when degrading SLO count is less than ${SLO_COUNT_CAP}`, async () => {
         const servicesWithSlos: ServiceListItem[] = [
           {
             ...mockService,
@@ -981,7 +995,7 @@ describe('ApmServicesTable', () => {
         expect(screen.getByText('50 Degrading')).toBeInTheDocument();
       });
 
-      it(`displays >${SLO_COUNT_CAP} when degrading SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
+      it(`displays ${SLO_COUNT_CAP}+ when degrading SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
         const servicesWithSlos: ServiceListItem[] = [
           {
             ...mockService,
@@ -994,9 +1008,7 @@ describe('ApmServicesTable', () => {
 
         await screen.findByRole('table');
 
-        expect(
-          screen.getByText(new RegExp(`>\\s*${SLO_COUNT_CAP}\\s+Degrading`))
-        ).toBeInTheDocument();
+        expect(screen.getByText(`${SLO_COUNT_CAP}+ Degrading`)).toBeInTheDocument();
       });
 
       it('does not display count for healthy status regardless of sloCount', async () => {
@@ -1014,7 +1026,7 @@ describe('ApmServicesTable', () => {
 
         expect(screen.getByText('Healthy')).toBeInTheDocument();
         expect(screen.queryByText(`${SLO_COUNT_CAP + 400} Healthy`)).not.toBeInTheDocument();
-        expect(screen.queryByText(`>${SLO_COUNT_CAP} Healthy`)).not.toBeInTheDocument();
+        expect(screen.queryByText(`${SLO_COUNT_CAP}+ Healthy`)).not.toBeInTheDocument();
       });
 
       it('does not display count for noData status regardless of sloCount', async () => {
@@ -1032,7 +1044,7 @@ describe('ApmServicesTable', () => {
 
         expect(screen.getByText('No data')).toBeInTheDocument();
         expect(screen.queryByText(`${SLO_COUNT_CAP + 100} No data`)).not.toBeInTheDocument();
-        expect(screen.queryByText(`>${SLO_COUNT_CAP} No data`)).not.toBeInTheDocument();
+        expect(screen.queryByText(`${SLO_COUNT_CAP}+ No data`)).not.toBeInTheDocument();
       });
     });
   });

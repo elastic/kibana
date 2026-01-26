@@ -260,8 +260,8 @@ export function getServiceColumns({
               const config = SLO_STATUS_CONFIG[sloStatus];
               const cappedCount =
                 config.showCount && sloCount
-                  ? sloCount > SLO_COUNT_CAP
-                    ? `>${SLO_COUNT_CAP}`
+                  ? sloCount >= SLO_COUNT_CAP
+                    ? `${SLO_COUNT_CAP}+`
                     : sloCount
                   : undefined;
 
