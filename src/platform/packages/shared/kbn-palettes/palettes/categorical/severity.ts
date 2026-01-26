@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface TopNavDefaultItem {
-  disabled?: boolean;
-}
+import { i18n } from '@kbn/i18n';
+import { KbnCategoricalPalette } from '../../classes/categorical_palette';
+import { KbnPalette } from '../../constants';
 
-export interface TopNavDefaultMenu {
-  newItem?: TopNavDefaultItem;
-  openItem?: TopNavDefaultItem;
-  shareItem?: TopNavDefaultItem;
-  alertsItem?: TopNavDefaultItem;
-  inspectItem?: TopNavDefaultItem;
-  saveItem?: TopNavDefaultItem;
-}
-
-export interface TopNavCustomization {
-  id: 'top_nav';
-  defaultMenu?: TopNavDefaultMenu;
-}
+export const severityPalette = new KbnCategoricalPalette({
+  id: KbnPalette.Severity,
+  name: i18n.translate('palettes.severity.name', {
+    defaultMessage: 'Severity',
+  }),
+  colorCount: 6,
+  colors: ['#24C292', '#B5E5F2', '#FCD883', '#FF995E', '#EE4C48', '#E3E8F2'],
+});
