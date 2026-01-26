@@ -7,26 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useFindAlertsQuery } from './use_find_alerts_query';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+
+const mockServices = {
+  http: httpServiceMock.createStartContract(),
+  toasts: notificationServiceMock.createStartContract().toasts,
+};
+
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useFindAlertsQuery', () => {
-  const mockServices = {
-    http: httpServiceMock.createStartContract(),
-    toasts: notificationServiceMock.createStartContract().toasts,
-  };
-
-  const queryClient = new QueryClient(testQueryClientConfig);
-
-  const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

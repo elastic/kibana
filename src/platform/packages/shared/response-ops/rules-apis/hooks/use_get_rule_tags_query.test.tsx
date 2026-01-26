@@ -12,8 +12,6 @@ import { useGetRuleTagsQuery } from './use_get_rule_tags_query';
 import { getRuleTags } from '../apis/get_rule_tags';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient } from '@kbn/react-query';
-import { testQueryClientConfig } from '../test_utils';
 import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
@@ -24,9 +22,7 @@ const mockGetRuleTags = jest.mocked(getRuleTags);
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const { provider: wrapper } = createTestResponseOpsQueryClient({
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
   dependencies: { notifications },
 });
 
@@ -115,7 +111,7 @@ describe('useGetRuleTagsQuery', () => {
       total: 10,
     });
 
-    result.current.fetchNextPage();
+    await result.current.fetchNextPage();
 
     expect(mockGetRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({

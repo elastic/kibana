@@ -12,8 +12,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../common/auth/use_secret_headers');
 
@@ -36,10 +36,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   };
 });
 
-const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 const invalidJsonTitle = `{"fields":{"summary":"wrong","description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const invalidJsonBoth = `{"fields":{"summary":"wrong","description":"wrong","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
@@ -96,7 +93,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     expect(await screen.findByTestId('authNone')).toBeInTheDocument();
@@ -140,7 +137,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
@@ -159,7 +156,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
@@ -177,7 +174,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     const authNoneToggle = await screen.findByTestId('authNone');
@@ -215,7 +212,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
@@ -278,7 +275,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
@@ -325,7 +322,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
       await userEvent.click(await screen.findByTestId('casesWebhookNext'));
@@ -359,7 +356,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       expect(await screen.findByTestId('webhookViewHeadersSwitch')).toHaveAttribute(
@@ -392,7 +389,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
       await userEvent.click(await screen.findByTestId('casesWebhookNext'));
@@ -435,7 +432,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
 

@@ -7,23 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
-import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const { QueryClient, QueryClientProvider, useQuery } = ReactQuery;
+const { useQuery } = ReactQuery;
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 const mockDataView = { fields: [] } as unknown as DataView;
 

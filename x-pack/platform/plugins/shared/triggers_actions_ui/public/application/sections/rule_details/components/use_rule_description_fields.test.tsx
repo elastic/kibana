@@ -9,11 +9,12 @@ import React from 'react';
 import { AsyncField, createPrebuildFields } from './use_rule_description_fields';
 import { screen, render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import {} from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { existsFilter } from '@kbn/es-query/src/filters/stubs';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../../common/lib/kibana/kibana_react');
 
@@ -28,31 +29,19 @@ jest.mocked(useKibana).mockReturnValue({
   },
 } as unknown as ReturnType<typeof useKibana>);
 
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
+
 describe('use_rule_description_fields', () => {
-  let queryClient: QueryClient;
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">{children}</IntlProvider>
-      </QueryClientProvider>
-    );
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-          gcTime: 0,
-          staleTime: 0,
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          refetchOnReconnect: false,
-        },
-      },
-    });
   });
 
   afterEach(() => {

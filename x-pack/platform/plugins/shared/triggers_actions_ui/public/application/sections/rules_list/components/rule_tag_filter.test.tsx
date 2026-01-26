@@ -7,21 +7,12 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
 import { getRuleTags } from '@kbn/response-ops-rules-apis/apis/get_rule_tags';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const onChangeMock = jest.fn();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
 
 const observe = jest.fn();
 const unobserve = jest.fn();
@@ -29,9 +20,11 @@ const disconnect = jest.fn();
 
 jest.mock('../../../../common/lib/kibana');
 
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
 const WithProviders = ({ children }: { children: any }) => (
   <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <TestQueryClientProvider>{children}</TestQueryClientProvider>
   </IntlProvider>
 );
 

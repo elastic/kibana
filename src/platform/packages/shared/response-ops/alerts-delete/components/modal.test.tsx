@@ -12,9 +12,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -37,26 +37,17 @@ const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
   });
 };
 
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <IntlProvider locale="en">
+    <TestQueryClientProvider>{children}</TestQueryClientProvider>
+  </IntlProvider>
+);
+
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
   const servicesMock = { http, notifications };
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        gcTime: 0,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <IntlProvider locale="en">
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </IntlProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -344,23 +335,6 @@ describe('AlertDelete Modal', () => {
 describe('AlertDelete Modal Error Handling', () => {
   const closeModalMock = jest.fn();
   const servicesMock = { http, notifications };
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        gcTime: 0,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <IntlProvider locale="en">
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </IntlProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();

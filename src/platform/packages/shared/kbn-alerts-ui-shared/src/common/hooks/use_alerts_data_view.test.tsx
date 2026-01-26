@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -16,8 +14,8 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
-import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { useAlertsDataView } from './use_alerts_data_view';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/fetch_alerts_index_names');
 const mockFetchAlertsIndexNames = jest
@@ -44,11 +42,7 @@ const mockServices = {
 
 mockServices.dataViewsService.create.mockResolvedValue(mockDataView);
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useAlertsDataView', () => {
   beforeEach(() => {

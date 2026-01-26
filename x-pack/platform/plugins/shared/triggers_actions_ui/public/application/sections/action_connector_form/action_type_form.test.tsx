@@ -6,7 +6,6 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type {
@@ -29,6 +28,7 @@ import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_varia
 import userEvent from '@testing-library/user-event';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -108,6 +108,8 @@ jest.mock('../../hooks/use_rule_alert_fields', () => ({
     fields: [],
   }),
 }));
+
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 describe('action_type_form', () => {
   afterEach(() => {
@@ -775,7 +777,7 @@ function getActionTypeForm({
   };
 
   return (
-    <QueryClientProvider client={new QueryClient()}>
+    <TestQueryClientProvider>
       <ActionTypeForm
         actionConnector={actionConnector ?? actionConnectorDefault}
         actionItem={actionItem ?? actionItemDefault}
@@ -798,6 +800,6 @@ function getActionTypeForm({
         featureId={featureId}
         ruleTypeId={ruleTypeId}
       />
-    </QueryClientProvider>
+    </TestQueryClientProvider>
   );
 }

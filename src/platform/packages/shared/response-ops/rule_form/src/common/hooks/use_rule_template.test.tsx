@@ -7,29 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRuleTemplate } from './use_rule_template';
 import { loadRuleTemplate } from '../apis/create_rule_from_template';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 // Mocks
 jest.mock('../apis/create_rule_from_template', () => ({
   loadRuleTemplate: jest.fn(),
 }));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useRuleTemplate', () => {
   const mockHttp = {} as HttpStart;

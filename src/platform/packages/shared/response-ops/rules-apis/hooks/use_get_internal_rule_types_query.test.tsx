@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetInternalRuleTypesQuery } from './use_get_internal_rule_types_query';
 import type { InternalRuleType } from '../apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '../apis/get_internal_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { testQueryClientConfig } from '../test_utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const mockInternalRuleTypes = [
   { id: 'a' },
@@ -28,11 +25,7 @@ const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
 
 const http = httpServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-export const Wrapper = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useGetInternalRuleTypesQuery', () => {
   beforeEach(() => {
@@ -51,7 +44,7 @@ describe('useGetInternalRuleTypesQuery', () => {
           http,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -17,7 +18,6 @@ import { useKibana } from '@kbn/reporting-public';
 import { mockScheduledReports } from '../../../common/test/fixtures';
 
 import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
@@ -26,6 +26,7 @@ import moment from 'moment';
 import { updateScheduleReport } from '../apis/update_schedule_report';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { transformScheduledReport } from '../utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -43,11 +44,20 @@ const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
 const mockUpdateScheduleReport = jest.mocked(updateScheduleReport);
 
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: PropsWithChildren) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
+
 describe('EditScheduledReportFlyout', () => {
   const onClose = jest.fn();
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
-  const queryClient = new QueryClient();
   let user: ReturnType<typeof userEvent.setup>;
   const today = new Date('2025-11-10T12:00:00.000Z');
 
@@ -116,13 +126,7 @@ describe('EditScheduledReportFlyout', () => {
   });
 
   it('renders correctly', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <EditScheduledReportFlyout {...defaultProps} />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<EditScheduledReportFlyout {...defaultProps} />, { wrapper });
 
     expect(await screen.findByTestId('editScheduledReportFlyout')).toBeInTheDocument();
     expect(await screen.findByTestId('scheduleExportForm')).toBeInTheDocument();
@@ -132,14 +136,11 @@ describe('EditScheduledReportFlyout', () => {
   it('submits the form correctly', async () => {
     user = userEvent.setup({ delay: null });
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <EditScheduledReportFlyout
-            {...defaultProps}
-            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <EditScheduledReportFlyout
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />,
+      { wrapper }
     );
 
     const titleInput = await screen.findByTestId('reportTitleInput');
@@ -180,14 +181,11 @@ describe('EditScheduledReportFlyout', () => {
   it('nullifies the email notification when toggling it off', async () => {
     user = userEvent.setup({ delay: null });
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <EditScheduledReportFlyout
-            {...defaultProps}
-            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <EditScheduledReportFlyout
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />,
+      { wrapper }
     );
 
     const emailToggle = await screen.findByTestId('sendByEmailToggle');
@@ -225,14 +223,11 @@ describe('EditScheduledReportFlyout', () => {
   it('cancels the form correctly', async () => {
     user = userEvent.setup({ delay: null });
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <EditScheduledReportFlyout
-            {...defaultProps}
-            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <EditScheduledReportFlyout
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />,
+      { wrapper }
     );
 
     const cancelButton = await screen.findByTestId('scheduleExportCancelButton');

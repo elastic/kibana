@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -89,6 +89,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -134,20 +135,13 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
       <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        <TestQueryClientProvider>{ui}</TestQueryClientProvider>
       </Suspense>
     </IntlProvider>
   );

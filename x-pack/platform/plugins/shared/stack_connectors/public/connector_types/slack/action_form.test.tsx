@@ -16,7 +16,7 @@ import type { IToasts } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -52,14 +52,8 @@ const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
 );
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 // GET api/actions/connector_types?feature_id=alerting
 loadActionTypes.mockResolvedValue([
@@ -180,9 +174,9 @@ describe('ActionForm - Slack API Connector', () => {
 
     render(
       <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
+        <TestQueryClientProvider>
           <ActionForm {...testProps} />
-        </QueryClientProvider>
+        </TestQueryClientProvider>
       </IntlProvider>
     );
 

@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { useLoadConnectorTypes } from './use_load_connector_types';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const queryClient = new QueryClient();
-
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 const http = httpServiceMock.createStartContract();
 

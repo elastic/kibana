@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { IToasts } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,6 +17,7 @@ import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../types';
 import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helper';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({
@@ -39,14 +40,15 @@ const addDangerMock = jest.fn();
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: PropsWithChildren) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
 
 describe('Connector rules list', () => {
   beforeAll(() => {
@@ -72,19 +74,16 @@ describe('Connector rules list', () => {
 
   it('renders correctly', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConnectorRulesList
-            connector={
-              {
-                id: 'test-id',
-                isPreconfigured: false,
-                isSystemAction: false,
-              } as ActionConnector
-            }
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConnectorRulesList
+        connector={
+          {
+            id: 'test-id',
+            isPreconfigured: false,
+            isSystemAction: false,
+          } as ActionConnector
+        }
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -95,19 +94,16 @@ describe('Connector rules list', () => {
 
   it('should allow for sorting by name', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConnectorRulesList
-            connector={
-              {
-                id: 'test-id',
-                isPreconfigured: false,
-                isSystemAction: false,
-              } as ActionConnector
-            }
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConnectorRulesList
+        connector={
+          {
+            id: 'test-id',
+            isPreconfigured: false,
+            isSystemAction: false,
+          } as ActionConnector
+        }
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -131,19 +127,16 @@ describe('Connector rules list', () => {
 
   it('should allow for searching by text', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConnectorRulesList
-            connector={
-              {
-                id: 'test-id',
-                isPreconfigured: false,
-                isSystemAction: false,
-              } as ActionConnector
-            }
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConnectorRulesList
+        connector={
+          {
+            id: 'test-id',
+            isPreconfigured: false,
+            isSystemAction: false,
+          } as ActionConnector
+        }
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -161,19 +154,16 @@ describe('Connector rules list', () => {
 
   it('should find preconfigured rules correctly', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConnectorRulesList
-            connector={
-              {
-                id: 'test-id',
-                isPreconfigured: true,
-                isSystemAction: false,
-              } as ActionConnector
-            }
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConnectorRulesList
+        connector={
+          {
+            id: 'test-id',
+            isPreconfigured: true,
+            isSystemAction: false,
+          } as ActionConnector
+        }
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -192,19 +182,16 @@ describe('Connector rules list', () => {
 
   it('should find system actions rules correctly', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConnectorRulesList
-            connector={
-              {
-                id: 'test-id',
-                isPreconfigured: false,
-                isSystemAction: true,
-              } as ActionConnector
-            }
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConnectorRulesList
+        connector={
+          {
+            id: 'test-id',
+            isPreconfigured: false,
+            isSystemAction: true,
+          } as ActionConnector
+        }
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {

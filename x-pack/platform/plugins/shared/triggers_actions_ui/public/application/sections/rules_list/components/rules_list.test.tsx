@@ -11,7 +11,6 @@ import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/mainten
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
   fireEvent,
@@ -45,6 +44,7 @@ import {
   ruleTypeFromApi,
 } from './test_helper';
 import userEvent from '@testing-library/user-event';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -155,18 +155,12 @@ const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rul
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const AllTheProviders = ({ children }: { children: any }) => (
   <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <TestQueryClientProvider>{children}</TestQueryClientProvider>
   </IntlProvider>
 );
 

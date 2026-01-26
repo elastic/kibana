@@ -15,11 +15,11 @@ import {
 } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { RuleStatusPanel } from './rule_status_panel';
 import { mockRule } from './test_helpers';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
   loadExecutionLogAggregations: jest.fn(),
@@ -29,20 +29,13 @@ const { loadExecutionLogAggregations } = jest.requireMock(
   '../../../lib/rule_api/load_execution_log_aggregations'
 );
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const RuleStatusPanelWithProvider = (props: RuleStatusPanelWithApiProps) => {
   return (
-    <QueryClientProvider client={queryClient}>
+    <TestQueryClientProvider>
       <RuleStatusPanel {...props} />
-    </QueryClientProvider>
+    </TestQueryClientProvider>
   );
 };
 

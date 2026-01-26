@@ -11,8 +11,8 @@ import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -86,6 +86,8 @@ const mockedRuleTypeIndex = new Map(
   })
 );
 
+const { provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('Rule Definition', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
   let ruleTypeRegistry: ReturnType<typeof ruleTypeRegistryMock.create>;
@@ -139,14 +141,13 @@ describe('Rule Definition', () => {
 
   it('renders rule definition ', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleDefinition = screen.getByTestId('ruleSummaryRuleDefinition');
     expect(ruleDefinition).toBeInTheDocument();
@@ -154,14 +155,13 @@ describe('Rule Definition', () => {
 
   it('show rule type name from "useGetRuleTypesPermissions"', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
 
     expect(useGetRuleTypesPermissions).toHaveBeenCalled();
@@ -172,14 +172,13 @@ describe('Rule Definition', () => {
 
   it('show rule type description "', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
     expect(ruleDescription).toBeInTheDocument();
@@ -188,14 +187,13 @@ describe('Rule Definition', () => {
 
   it('show SIEM rule type description "', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule({ consumer: 'siem', ruleTypeId: 'siem_rule' })}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule({ consumer: 'siem', ruleTypeId: 'siem_rule' })}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
     expect(ruleDescription).toBeInTheDocument();
@@ -204,14 +202,13 @@ describe('Rule Definition', () => {
 
   it('show Attack Discovery rule type description "', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule({ consumer: 'siem', ruleTypeId: 'attack-discovery' })}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule({ consumer: 'siem', ruleTypeId: 'attack-discovery' })}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
     expect(ruleDescription).toBeInTheDocument();
@@ -220,14 +217,13 @@ describe('Rule Definition', () => {
 
   it('show rule conditions only if the rule allows multiple conditions', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleCondition = screen.getByTestId('ruleSummaryRuleConditions');
     expect(ruleCondition).toBeInTheDocument();
@@ -236,14 +232,13 @@ describe('Rule Definition', () => {
 
   it('show rule interval with human readable value', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const ruleInterval = screen.getByTestId('ruleSummaryRuleInterval');
     expect(ruleInterval).toBeInTheDocument();
@@ -252,14 +247,13 @@ describe('Rule Definition', () => {
 
   it('show edit button when user has permissions', async () => {
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const editButton = screen.getByTestId('ruleDetailsEditButton');
     expect(editButton).toBeInTheDocument();
@@ -268,14 +262,13 @@ describe('Rule Definition', () => {
   it('hide edit button when user DOES NOT have permissions', async () => {
     (capabilities.hasAllPrivilege as jest.Mock).mockReturnValue(false);
     render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleDefinition
-          rule={mockRule()}
-          actionTypeRegistry={actionTypeRegistry}
-          onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
-        />
-      </QueryClientProvider>
+      <RuleDefinition
+        rule={mockRule()}
+        actionTypeRegistry={actionTypeRegistry}
+        onEditRule={jest.fn()}
+        ruleTypeRegistry={ruleTypeRegistry}
+      />,
+      { wrapper }
     );
     const editButton = screen.queryByTestId('ruleDetailsEditButton');
     expect(editButton).toBeNull();

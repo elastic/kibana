@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 import { useHealthCheck } from './use_health_check';
 import { healthCheckErrors } from '../apis';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/fetch_ui_health_status/fetch_ui_health_status', () => ({
   fetchUiHealthStatus: jest.fn(),
@@ -30,11 +29,7 @@ const { fetchAlertingFrameworkHealth } = jest.requireMock(
   '../apis/fetch_alerting_framework_health/fetch_alerting_framework_health'
 );
 
-const queryClient = new QueryClient();
-
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 const httpMock = jest.fn();
 

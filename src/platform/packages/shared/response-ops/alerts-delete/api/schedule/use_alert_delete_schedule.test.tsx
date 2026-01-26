@@ -7,33 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { useAlertDeleteSchedule } from './use_alert_delete_schedule';
 import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { AlertDeleteParams } from '@kbn/alerting-types';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const http = httpServiceMock.createStartContract();
 
 jest.mock('./create_alert_delete_schedule');
 
+const { provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('useAlertDeleteSchedule', () => {
   const mockOnSuccess = jest.fn();
   const mockOnError = jest.fn();
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -73,17 +63,6 @@ describe('useAlertDeleteSchedule', () => {
 describe('useAlertDeleteSchedule with muted console.errors', () => {
   const mockOnSuccess = jest.fn();
   const mockOnError = jest.fn();
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();

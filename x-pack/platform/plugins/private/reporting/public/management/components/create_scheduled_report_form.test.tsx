@@ -18,7 +18,6 @@ import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { mockScheduledReports } from '../../../common/test/fixtures';
 
 import { CreateScheduledReportForm } from './create_scheduled_report_form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
@@ -27,6 +26,7 @@ import { scheduleReport } from '../apis/schedule_report';
 import moment from 'moment';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { transformScheduledReport } from '../utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -51,13 +51,22 @@ const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
 const mockScheduleReport = jest.mocked(scheduleReport);
 
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
+
 describe('createScheduledReportForm', () => {
   const onClose = jest.fn();
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
   const uiSettings = coreMock.createSetup().uiSettings;
   const apiClient = new ReportingAPIClient(http, uiSettings, 'x.x.x');
-  const queryClient = new QueryClient();
   let user: ReturnType<typeof userEvent.setup>;
   const today = new Date('2025-11-10T12:00:00.000Z');
 
@@ -134,13 +143,7 @@ describe('createScheduledReportForm', () => {
   });
 
   it('renders correctly', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <CreateScheduledReportForm {...defaultProps} />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<CreateScheduledReportForm {...defaultProps} />, { wrapper });
 
     expect(await screen.findByTestId('scheduleExportForm')).toBeInTheDocument();
     expect(await screen.findByTestId('scheduleExportSubmitButton')).toBeInTheDocument();
@@ -149,14 +152,11 @@ describe('createScheduledReportForm', () => {
   it('submits the form correctly', async () => {
     user = userEvent.setup({ delay: null });
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <CreateScheduledReportForm
-            {...defaultProps}
-            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <CreateScheduledReportForm
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+      />,
+      { wrapper }
     );
 
     const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
@@ -189,23 +189,20 @@ describe('createScheduledReportForm', () => {
   it('submits the form passing email fields correctly', async () => {
     user = userEvent.setup({ delay: null });
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <CreateScheduledReportForm
-            {...defaultProps}
-            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-            scheduledReport={{
-              ...defaultProps.scheduledReport,
-              sendByEmail: true,
-              emailRecipients: ['to@example.com'],
-              emailCcRecipients: ['cc@example.com'],
-              emailBccRecipients: ['bcc@example.com'],
-              emailSubject: 'subject',
-              emailMessage: 'message',
-            }}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <CreateScheduledReportForm
+        {...defaultProps}
+        availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+        scheduledReport={{
+          ...defaultProps.scheduledReport,
+          sendByEmail: true,
+          emailRecipients: ['to@example.com'],
+          emailCcRecipients: ['cc@example.com'],
+          emailBccRecipients: ['bcc@example.com'],
+          emailSubject: 'subject',
+          emailMessage: 'message',
+        }}
+      />,
+      { wrapper }
     );
 
     const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
@@ -245,13 +242,7 @@ describe('createScheduledReportForm', () => {
 
   it('cancels the form correctly', async () => {
     user = userEvent.setup({ delay: null });
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <CreateScheduledReportForm {...defaultProps} />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<CreateScheduledReportForm {...defaultProps} />, { wrapper });
 
     const cancelButton = await screen.findByTestId('scheduleExportCancelButton');
 

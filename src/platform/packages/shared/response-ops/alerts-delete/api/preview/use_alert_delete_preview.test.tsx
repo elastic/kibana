@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertDeletePreview } from './use_alert_delete_preview';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAlertDeletePreview } from './get_alert_delete_preview';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const http = httpServiceMock.createStartContract();
 
@@ -20,13 +19,9 @@ jest.mock('./get_alert_delete_preview', () => ({
   getAlertDeletePreview: jest.fn(),
 }));
 
+const { provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('useAlertDeletePreview', () => {
-  const queryClient = new QueryClient();
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

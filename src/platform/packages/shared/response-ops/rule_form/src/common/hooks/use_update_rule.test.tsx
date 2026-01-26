@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 import { useUpdateRule } from './use_update_rule';
 import type { UpdateRuleBody } from '../apis/update_rule';
 import type { RuleTypeParams } from '../types';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   params: {
@@ -60,11 +59,7 @@ const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   },
 };
 
-const queryClient = new QueryClient();
-
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 jest.mock('../apis/update_rule/update_rule', () => ({
   updateRule: jest.fn(),

@@ -7,7 +7,6 @@
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
   fireEvent,
@@ -28,6 +27,7 @@ import {
   ruleType,
   ruleTypeFromApi,
 } from './test_helper';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -129,23 +129,17 @@ ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
 
-const AllTheProviders = ({ children }: { children: any }) => (
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: any }) => (
   <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <TestQueryClientProvider>{children}</TestQueryClientProvider>
   </IntlProvider>
 );
 
 const renderWithProviders = (ui: any) => {
-  return render(ui, { wrapper: AllTheProviders });
+  return render(ui, { wrapper });
 };
 
 describe('Rules list Bulk Disable', () => {

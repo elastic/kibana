@@ -13,8 +13,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -49,7 +49,15 @@ jest.mock('./actions_connectors_event_log_list_table', () => {
   );
 });
 
-const queryClient = new QueryClient();
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
 
 describe('ActionsConnectorsHome', () => {
   beforeEach(() => {
@@ -74,13 +82,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     expect(loadAllActions).toHaveBeenCalled();
@@ -104,13 +109,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     const tabs = await screen.findAllByRole('tab');
@@ -136,13 +138,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
@@ -169,13 +168,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
@@ -202,13 +198,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
@@ -233,13 +226,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
@@ -268,13 +258,10 @@ describe('ActionsConnectorsHome', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <ActionsConnectorsHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
+      <Router history={props.history}>
+        <ActionsConnectorsHome {...props} />
+      </Router>,
+      { wrapper }
     );
 
     expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
