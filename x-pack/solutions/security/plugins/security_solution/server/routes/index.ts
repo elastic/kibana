@@ -8,6 +8,7 @@
 import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
 
@@ -56,6 +57,7 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 
 export const initRoutes = (
@@ -75,6 +77,7 @@ export const initRoutes = (
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
+  trialCompanionDeps: TrialCompanionRoutesDeps,
   enableDataGeneratorRoutes: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
@@ -151,6 +154,8 @@ export const initRoutes = (
   registerAssetInventoryRoutes({ router, logger });
 
   registerSiemReadinessRoutes({ router, logger });
+
+  registerTrialCompanionRoutes(trialCompanionDeps);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);
