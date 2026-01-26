@@ -23,6 +23,10 @@ export interface EnricherResponse {
   source: string;
   indices?: Index[];
   error?: boolean;
+  /**
+   * Apply this enricher's updates to any index aliases
+   */
+  applyToAliases?: boolean;
 }
 export type Enricher = (client: HttpSetup) => Promise<EnricherResponse>;
 

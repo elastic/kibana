@@ -612,5 +612,47 @@ describe('<IndexManagementHome />', () => {
       expect(navigateToUrl).toHaveBeenCalledTimes(1);
       expect(navigateToUrl).toHaveBeenCalledWith(url);
     });
+
+    it('applies enricher updates to indices via alias when applyToAliases is true', async () => {
+      const indexName = 'concrete-index';
+      const aliasName = 'my-alias';
+
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        { ...createNonDataStreamIndex(indexName), aliases: [aliasName] },
+      ]);
+
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add(async () => ({
+        source: 'alias enricher',
+        applyToAliases: true,
+        indices: [{ name: aliasName, isRollupIndex: true }],
+      }));
+
+      try {
+        await renderHome(httpSetup, {
+          appServicesContext: {
+            services: {
+              extensionsService: {
+                _columns: [
+                  {
+                    fieldName: 'isRollupIndex',
+                    label: 'Rollup flag',
+                    order: 999,
+                    render: (index: Index) => (index.isRollupIndex ? <div>ROLLUP</div> : null),
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        await screen.findByTestId('indexTable');
+        expect(await screen.findByText('ROLLUP')).toBeInTheDocument();
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
+    });
   });
 });

@@ -153,6 +153,27 @@ export async function loadIndices(
     `${API_BASE_PATH}/indices_get`
   );
 
+  // Pre-compute an alias -> index names lookup for enrichers that return data keyed by alias.
+  const aliasToIndexNames = new Map<string, string[]>();
+  Object.entries(indices).forEach(([indexName, index]) => {
+    const aliases = index.aliases;
+    const aliasList = Array.isArray(aliases)
+      ? aliases
+      : typeof aliases === 'string' && aliases !== 'none'
+        ? [aliases]
+        : [];
+
+    aliasList.forEach((alias) => {
+      if (!alias) return;
+      const existing = aliasToIndexNames.get(alias);
+      if (existing) {
+        existing.push(indexName);
+      } else {
+        aliasToIndexNames.set(alias, [indexName]);
+      }
+    });
+  });
+
   onIndicesLoaded(Object.values(indices));
 
   // iterate over all the requests for additional info
@@ -161,8 +182,25 @@ export async function loadIndices(
       // iterate over the array of additional data and merge it into the original index data
       if (enriched.indices) {
         enriched.indices.forEach((enrichedIndex) => {
-          if (indices[enrichedIndex.name]) {
-            Object.assign(indices[enrichedIndex.name], enrichedIndex);
+          const directMatch = indices[enrichedIndex.name];
+          if (directMatch) {
+            Object.assign(directMatch, enrichedIndex);
+            return;
+          }
+
+          if (enriched.applyToAliases) {
+            const targets = aliasToIndexNames.get(enrichedIndex.name);
+            if (targets && targets.length) {
+              // Don't overwrite the concrete index name with the alias name.
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { name, ...rest } = enrichedIndex;
+              targets.forEach((targetIndexName) => {
+                const target = indices[targetIndexName];
+                if (target) {
+                  Object.assign(target, rest);
+                }
+              });
+            }
           }
         });
         onIndicesLoaded(Object.values(indices));

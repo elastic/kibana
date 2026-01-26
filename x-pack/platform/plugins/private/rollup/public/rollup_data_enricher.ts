@@ -21,6 +21,7 @@ export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherRes
     .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices')
     .then((response) => {
       return {
+        applyToAliases: true,
         indices: Object.keys(response).reduce((acc, rollupJob) => {
           response[rollupJob].rollup_jobs.forEach((job) => {
             acc.push({
