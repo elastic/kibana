@@ -37,45 +37,45 @@ The script ships with ready-made specifications located in `config.ts`.
 
 Feel free to extend or tweak these specs in `src/hf_dataset_loader/config.ts`.
 
-## OneChat datasets
+## AgentBuilder datasets
 
-The loader also supports **OneChat datasets** from the `elastic/OneChatAgent` repository. These are CSV-based datasets with predefined mappings stored in `index-mappings.jsonl` files.
+The loader also supports **AgentBuilder datasets** from the `elastic/AgentBuilderAgent` repository. These are CSV-based datasets with predefined mappings stored in `index-mappings.jsonl` files.
 
-**Note**: To access OneChat datasets, you need to be a member of the Elastic organization on HuggingFace. Sign up with your `@elastic.co` email address to request access (automated process).
+**Note**: To access AgentBuilder datasets, you need to be a member of the Elastic organization on HuggingFace. Sign up with your `@elastic.co` email address to request access (automated process).
 
-### OneChat syntax
+### AgentBuilder syntax
 
-Use the format `onechat/<directory>/<dataset>` to load OneChat datasets:
+Use the format `agent_builder/<directory>/<dataset>` to load AgentBuilder datasets:
 
 ```bash
-# Load all OneChat datasets
---datasets onechat/knowledge-base/*
+# Load all AgentBuilder datasets
+--datasets agent_builder/knowledge-base/*
 
-# Load a single OneChat dataset
---datasets onechat/knowledge-base/wix_knowledge_base
+# Load a single AgentBuilder dataset
+--datasets agent_builder/knowledge-base/wix_knowledge_base
 
-# Mix OneChat and regular datasets
---datasets onechat/knowledge-base/wix_knowledge_base,beir-msmarco
+# Mix AgentBuilder and regular datasets
+--datasets agent_builder/knowledge-base/wix_knowledge_base,beir-msmarco
 
-# Load multiple OneChat datasets
---datasets onechat/knowledge-base/wix_knowledge_base,onechat/users/user_profiles
+# Load multiple AgentBuilder datasets
+--datasets agent_builder/knowledge-base/wix_knowledge_base,agent_builder/users/user_profiles
 ```
 
 ### How it works
 
-1. The loader fetches `<directory>/index-mappings.jsonl` from the OneChat repository
+1. The loader fetches `<directory>/index-mappings.jsonl` from the AgentBuilder repository
 2. Downloads the corresponding CSV file from `<directory>/datasets/`
 3. Creates Elasticsearch indices with the predefined mappings from `index-mappings.jsonl` file.
 4. Loads the CSV data into the index.
 
 ### Available datasets
 
-Run the loader without `--datasets` to see all available OneChat and regular HuggingFace datasets.
+Run the loader without `--datasets` to see all available AgentBuilder and regular HuggingFace datasets.
 
 ### Naming convention
 
 - Repository file: `knowledge-base/datasets/wix_knowledge_base.csv`
-- Loader dataset name: `onechat/knowledge-base/wix_knowledge_base`
+- Loader dataset name: `agent_builder/knowledge-base/wix_knowledge_base`
 - Elasticsearch index: `wix_knowledge_base`
 
 ## Disabling local cache

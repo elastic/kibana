@@ -10,25 +10,40 @@
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-  describe('>= 8.19 state', () => {
-    test('should extract labelPosition', () => {
+  describe('>=9.4 state', () => {
+    test('should extract controls', () => {
+      const controlGroupInput94 = {
+        controls: [
+          {
+            config: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'machine.os.keyword',
+              selectedOptions: ['win 7'],
+            },
+            grow: true,
+            type: 'optionsListControl',
+            width: 'small',
+          },
+          {
+            config: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'name.keyword',
+              selectedOptions: ['US'],
+            },
+            grow: false,
+            type: 'optionsListControl',
+            width: 'medium',
+          },
+        ],
+      };
       const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          labelPosition: 'twoLine',
-        },
+        controlGroupInput: controlGroupInput94,
       });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
+      expect(dashboardState.pinned_panels).toEqual(controlGroupInput94.controls);
     });
+  });
 
-    test('should extract autoApplySelections', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          autoApplySelections: false,
-        },
-      });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-    });
-
+  describe('>= 8.19 to <9.4 state', () => {
     test('should extract controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
@@ -40,80 +55,256 @@ describe('extractDashboardState', () => {
                 selectedOptions: ['win 7'],
               },
               grow: true,
-              order: 0,
               type: 'optionsListControl',
               width: 'small',
             },
           ],
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
-          controlConfig: {
+          config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
             fieldName: 'machine.os.keyword',
             selectedOptions: ['win 7'],
           },
           grow: true,
-          order: 0,
           type: 'optionsListControl',
           width: 'small',
+        },
+      ]);
+    });
+
+    test('should set `useGlobalFilters` via `ignoreParentSettings`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          ignoreParentSettings: {
+            ignoreQuery: true,
+          },
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+      ]);
+    });
+
+    test('should set `useGlobalFilters` via `chainingSystem', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          chainingSystem: 'NONE',
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          type: 'optionsListControl',
+        },
+      ]);
+    });
+
+    test('should set `ignoreValidations` via `ignoreParentSettings`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          ignoreParentSettings: {
+            ignoreValidations: true,
+          },
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+              },
+              type: 'optionsListControl',
+            },
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'name.keyword',
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: true,
+            ignoreValidations: true,
+          },
+          type: 'optionsListControl',
+        },
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            useGlobalFilters: true,
+            ignoreValidations: true,
+          },
+          type: 'optionsListControl',
         },
       ]);
     });
   });
 
   describe('>= 8.16 to < 8.19 state', () => {
-    test('should convert controlGroupState to controlGroupInput', () => {
+    test('should convert controlGroupState to controlGroupInput and preserve order', () => {
       const dashboardState = extractDashboardState({
         controlGroupState: {
-          autoApplySelections: false,
           initialChildControlState: {
             ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
               dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
               fieldName: 'machine.os.keyword',
               grow: false,
               selectedOptions: ['win 7'],
+              type: 'optionsListControl',
+              order: 2,
+            },
+            ['d3d7af60-4c81-11e8-b3d7-01146121b73d']: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'name.keyword',
+              grow: true,
+              width: 'small',
+              selectedOptions: ['US', 'Canada'],
+              type: 'optionsListControl',
+              order: 1,
             },
           },
           labelPosition: 'twoLine',
         },
       });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+
+      expect(dashboardState.pinned_panels).toEqual([
         {
-          controlConfig: {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            selectedOptions: ['US', 'Canada'],
+          },
+          type: 'optionsListControl',
+          grow: true,
+          width: 'small',
+          uid: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+        },
+        {
+          config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
             fieldName: 'machine.os.keyword',
             selectedOptions: ['win 7'],
           },
+          type: 'optionsListControl',
           grow: false,
-          id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+        },
+      ]);
+    });
+
+    test('should recieve proper `autoApplyFilters` value', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          autoApplySelections: false,
+        },
+      });
+      expect(dashboardState.options?.auto_apply_filters).toEqual(false);
+    });
+
+    test('should set `useGlobalFilters`', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupState: {
+          ignoreParentSettings: {
+            ignoreFilters: true,
+          },
+          initialChildControlState: {
+            ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'machine.os.keyword',
+              type: 'optionsListControl',
+              order: 1,
+            },
+          },
+        },
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            useGlobalFilters: false,
+            ignoreValidations: false,
+          },
+          uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          type: 'optionsListControl',
         },
       ]);
     });
   });
 
   describe('< 8.16 state', () => {
-    test('should convert controlStyle to labelPosition', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          controlStyle: 'twoLine',
-        },
-      });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-    });
-
-    test('should convert showApplySelections to autoApplySelections', () => {
-      const dashboardState = extractDashboardState({
-        controlGroupInput: {
-          showApplySelections: true,
-        },
-      });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-    });
-
     test('should convert panels to controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
@@ -125,26 +316,34 @@ describe('extractDashboardState', () => {
                 selectedOptions: ['win 7'],
               },
               grow: true,
-              order: 0,
               type: 'optionsListControl',
               width: 'small',
             },
           },
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
-          controlConfig: {
+          config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
             fieldName: 'machine.os.keyword',
             selectedOptions: ['win 7'],
           },
+          uid: '8311639d-92e5-4aa5-99a4-9502b10eead5',
           grow: true,
-          order: 0,
           type: 'optionsListControl',
           width: 'small',
         },
       ]);
+    });
+
+    test('should recieve proper `autoApplyFilters` value', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          showApplySelections: true,
+        },
+      });
+      expect(dashboardState.options?.auto_apply_filters).toEqual(false);
     });
   });
 });

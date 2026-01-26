@@ -27,12 +27,9 @@ import type {
   DateRange,
 } from '@kbn/lens-common';
 
+import { getFormulaColumnsFromLayer, hasStateFormulaColumn } from '@kbn/lens-common';
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
-import {
-  getFormulaColumnsFromLayer,
-  hasStateFormulaColumn,
-} from './operations/definitions/helpers';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 
 export function onRefreshIndexPattern() {

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildKibanaRequestFromAction } from './kibana_request_builder';
+import { buildKibanaRequest } from './kibana_request_builder';
 
-describe('buildKibanaRequestFromAction', () => {
+describe('buildKibanaRequest', () => {
   describe('Space ID handling', () => {
     describe('without space ID', () => {
       it('should build request without space prefix when spaceId is not provided', () => {
-        const result = buildKibanaRequestFromAction('kibana.createCaseDefaultSpace', {
+        const result = buildKibanaRequest('kibana.createCase', {
           title: 'Test Case',
           description: 'Test Description',
           owner: 'cases',
@@ -24,8 +24,8 @@ describe('buildKibanaRequestFromAction', () => {
       });
 
       it('should build request without space prefix when spaceId is undefined', () => {
-        const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+        const result = buildKibanaRequest(
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -41,8 +41,8 @@ describe('buildKibanaRequestFromAction', () => {
 
     describe('with default space', () => {
       it('should not add space prefix for default space', () => {
-        const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+        const result = buildKibanaRequest(
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -58,8 +58,8 @@ describe('buildKibanaRequestFromAction', () => {
 
     describe('with custom space', () => {
       it('should add space prefix for non-default space', () => {
-        const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+        const result = buildKibanaRequest(
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -72,8 +72,8 @@ describe('buildKibanaRequestFromAction', () => {
       });
 
       it('should handle space IDs with special characters', () => {
-        const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+        const result = buildKibanaRequest(
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -86,8 +86,8 @@ describe('buildKibanaRequestFromAction', () => {
       });
 
       it('should handle space prefix with path parameters', () => {
-        const result = buildKibanaRequestFromAction(
-          'kibana.getCaseDefaultSpace',
+        const result = buildKibanaRequest(
+          'kibana.getCase',
           {
             caseId: 'test-case-123',
           },
@@ -100,7 +100,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     describe('with different API endpoints', () => {
       it('should add space prefix to alerting endpoints using raw API', () => {
-        const result = buildKibanaRequestFromAction(
+        const result = buildKibanaRequest(
           'kibana.request',
           {
             method: 'GET',
@@ -114,7 +114,7 @@ describe('buildKibanaRequestFromAction', () => {
       });
 
       it('should add space prefix to data views endpoints using raw API', () => {
-        const result = buildKibanaRequestFromAction(
+        const result = buildKibanaRequest(
           'kibana.request',
           {
             method: 'GET',
@@ -128,7 +128,7 @@ describe('buildKibanaRequestFromAction', () => {
       });
 
       it('should add space prefix to alert management endpoints', () => {
-        const result = buildKibanaRequestFromAction(
+        const result = buildKibanaRequest(
           'kibana.SetAlertsStatus',
           {
             status: 'acknowledged',
@@ -144,7 +144,7 @@ describe('buildKibanaRequestFromAction', () => {
 
   describe('Raw API format', () => {
     it('should handle raw API format without space modification', () => {
-      const result = buildKibanaRequestFromAction(
+      const result = buildKibanaRequest(
         'kibana.request',
         {
           method: 'POST',
@@ -161,7 +161,7 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle request parameter with custom headers', () => {
-      const result = buildKibanaRequestFromAction(
+      const result = buildKibanaRequest(
         'kibana.request',
         {
           request: {
@@ -181,8 +181,8 @@ describe('buildKibanaRequestFromAction', () => {
 
   describe('Request structure', () => {
     it('should return proper request structure with all fields', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.createCase',
         {
           title: 'Test Case',
           description: 'Description',
@@ -205,8 +205,8 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle query parameters', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.getCase',
         {
           caseId: 'test-case-id',
           includeComments: true,
@@ -220,11 +220,7 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle requests with no body', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
-        { caseId: 'test-case' },
-        'monitoring'
-      );
+      const result = buildKibanaRequest('kibana.getCase', { caseId: 'test-case' }, 'monitoring');
 
       expect(result.path).toBe('/s/monitoring/api/cases/test-case');
       expect(result.method).toBe('GET');
@@ -234,8 +230,8 @@ describe('buildKibanaRequestFromAction', () => {
 
   describe('Edge cases', () => {
     it('should handle empty string as space ID', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.createCase',
         {
           title: 'Test',
           description: 'Test',
@@ -250,8 +246,8 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle path parameters with space prefix', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.getCase',
         {
           caseId: 'case-123',
         },
@@ -263,15 +259,31 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should throw error for unknown action type', () => {
       expect(() => {
-        buildKibanaRequestFromAction('unknown.action.type', {}, 'some-space');
+        buildKibanaRequest('unknown.action.type', {}, 'some-space');
       }).toThrow('No connector definition found');
+    });
+
+    it('should support backward-compatible type aliases', () => {
+      // Old type name should still work and resolve to the new connector
+      const result = buildKibanaRequest(
+        'kibana.createCaseDefaultSpace',
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'cases',
+        },
+        'test-space'
+      );
+
+      expect(result.path).toBe('/s/test-space/api/cases');
+      expect(result.method).toBe('POST');
     });
   });
 
   describe('Method handling', () => {
     it('should use POST method for create operations', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.createCase',
         {
           title: 'Test',
           description: 'Test',
@@ -284,17 +296,13 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should use GET method for retrieval operations', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
-        { caseId: 'test-id' },
-        'test-space'
-      );
+      const result = buildKibanaRequest('kibana.getCase', { caseId: 'test-id' }, 'test-space');
 
       expect(result.method).toBe('GET');
     });
 
     it('should use POST method for update operations', () => {
-      const result = buildKibanaRequestFromAction(
+      const result = buildKibanaRequest(
         'kibana.SetAlertsStatus',
         {
           status: 'acknowledged',
@@ -309,8 +317,8 @@ describe('buildKibanaRequestFromAction', () => {
 
   describe('Real-world scenarios', () => {
     it('should handle case creation in security space', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.createCase',
         {
           title: 'Security Incident',
           description: 'Suspicious activity detected',
@@ -331,7 +339,7 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle alert status updates in observability space', () => {
-      const result = buildKibanaRequestFromAction(
+      const result = buildKibanaRequest(
         'kibana.SetAlertsStatus',
         {
           status: 'closed',
@@ -351,8 +359,8 @@ describe('buildKibanaRequestFromAction', () => {
     });
 
     it('should handle case comment operations in analytics space', () => {
-      const result = buildKibanaRequestFromAction(
-        'kibana.addCaseCommentDefaultSpace',
+      const result = buildKibanaRequest(
+        'kibana.addCaseComment',
         {
           caseId: 'analytics-case-1',
           comment: 'Adding analysis results to the case',

@@ -30,6 +30,8 @@
           "(version: unknown) => { result: true; value: number; } | { result: false; value: null; }"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning-utils/lib/validate_version.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning-utils/lib/validate_version.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
