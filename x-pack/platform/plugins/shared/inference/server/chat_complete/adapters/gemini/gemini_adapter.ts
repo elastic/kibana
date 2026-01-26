@@ -28,6 +28,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
   }) => {
     const connector = executor.getConnector();
     const useThoughtSignature = mustUseThoughtSignature(
@@ -49,6 +50,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     }).pipe(

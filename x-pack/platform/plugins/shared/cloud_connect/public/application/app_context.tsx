@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudConnectApiConfig } from '../types';
 import type { CloudConnectTelemetryService } from '../telemetry/client';
 import type { CloudConnectApiService } from '../lib/api';
@@ -15,6 +16,7 @@ export interface CloudConnectedAppContextValue {
   chrome: CoreStart['chrome'];
   application: CoreStart['application'];
   http: CoreStart['http'];
+  licensing: LicensingPluginStart;
   docLinks: CoreStart['docLinks'];
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
@@ -23,6 +25,9 @@ export interface CloudConnectedAppContextValue {
   apiService: CloudConnectApiService;
   clusterConfig?: CloudConnectApiConfig;
   hasConfigurePermission?: boolean;
+  hasActionsSavePrivilege?: boolean;
+  hasAnyDefaultLLMConnectors?: boolean;
+  setHasAnyDefaultLLMConnectors?: (value: boolean) => void;
 }
 
 const CloudConnectedAppContext = createContext<CloudConnectedAppContextValue | null>(null);
@@ -31,8 +36,27 @@ export const CloudConnectedAppContextProvider: React.FC<{
   value: CloudConnectedAppContextValue;
   children: React.ReactNode;
 }> = ({ value, children }) => {
+  const [hasAnyDefaultLLMConnectors, setHasAnyDefaultLLMConnectors] = useState(
+    value.clusterConfig?.hasAnyDefaultLLMConnectors ?? false
+  );
+
+  // Sync with config when it loads/changes
+  useEffect(() => {
+    if (value.clusterConfig?.hasAnyDefaultLLMConnectors !== undefined) {
+      setHasAnyDefaultLLMConnectors(value.clusterConfig.hasAnyDefaultLLMConnectors);
+    }
+  }, [value.clusterConfig?.hasAnyDefaultLLMConnectors]);
+
+  const contextValue = {
+    ...value,
+    hasAnyDefaultLLMConnectors,
+    setHasAnyDefaultLLMConnectors,
+  };
+
   return (
-    <CloudConnectedAppContext.Provider value={value}>{children}</CloudConnectedAppContext.Provider>
+    <CloudConnectedAppContext.Provider value={contextValue}>
+      {children}
+    </CloudConnectedAppContext.Provider>
   );
 };
 

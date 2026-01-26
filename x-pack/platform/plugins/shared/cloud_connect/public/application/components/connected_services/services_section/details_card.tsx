@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiBadge,
   EuiBetaBadge,
+  EuiCallOut,
   EuiText,
   EuiLink,
   EuiButtonEmpty,
@@ -26,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import type { ServiceType } from '../../../../types';
 
@@ -48,7 +50,45 @@ export interface ServiceCardProps {
   isCardDisabled?: boolean;
   subscriptionRequired?: boolean;
   hasActiveSubscription?: boolean;
+  validLicenseTypes?: string[];
+  currentLicenseType?: string;
 }
+
+const isLicenseValid = (
+  validLicenseTypes: string[] | undefined,
+  currentLicenseType: string | undefined
+): boolean => {
+  // If no license requirements, it's valid
+  if (!validLicenseTypes || validLicenseTypes.length === 0) {
+    return true;
+  }
+  // If no current license type, consider it valid
+  if (!currentLicenseType) {
+    return true;
+  }
+
+  return validLicenseTypes.includes(currentLicenseType);
+};
+
+const formatLicenseList = (licenses: string[]): string => {
+  const formatted = licenses.map((license) =>
+    license.toLowerCase() === 'trial' ? 'trial' : capitalize(license)
+  );
+
+  if (formatted.length === 1) {
+    return formatted[0];
+  }
+
+  if (formatted.length === 2) {
+    return `${formatted[0]} or ${formatted[1]}`;
+  }
+
+  // For 3 or more items: "trial, Basic or Enterprise"
+  const allButLast = formatted.slice(0, -1).join(', ');
+  const last = formatted[formatted.length - 1];
+
+  return `${allButLast} or ${last}`;
+};
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   serviceKey,
@@ -69,12 +109,22 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   isCardDisabled = false,
   subscriptionRequired = false,
   hasActiveSubscription = true,
+  validLicenseTypes,
+  currentLicenseType,
 }) => {
-  const { hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
+  const {
+    hasConfigurePermission,
+    hasActionsSavePrivilege,
+    hasAnyDefaultLLMConnectors,
+    telemetryService,
+  } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
 
   const closePopover = () => setIsPopoverOpen(false);
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
+  const closeLicensePopover = () => setIsLicensePopoverOpen(false);
+  const toggleLicensePopover = () => setIsLicensePopoverOpen(!isLicensePopoverOpen);
 
   const renderBadge = () => {
     if (isCardDisabled && badge) {
@@ -127,7 +177,87 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
 
   const renderActions = () => {
-    if (isCardDisabled || !supported) {
+    if (isCardDisabled) {
+      return null;
+    }
+
+    if (!isLicenseValid(validLicenseTypes, currentLicenseType) && !supported) {
+      const formattedLicenses = formatLicenseList(validLicenseTypes!);
+
+      return (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="serviceCardLicenseMessage"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.requiresDifferentLicense"
+                defaultMessage="Requires {licenses} license"
+                values={{ licenses: formattedLicenses }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  iconType="info"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.cloudConnect.connectedServices.service.licenseInfoAriaLabel',
+                    {
+                      defaultMessage: 'License information',
+                    }
+                  )}
+                  onClick={toggleLicensePopover}
+                  data-test-subj="serviceCardLicenseInfoButton"
+                />
+              }
+              isOpen={isLicensePopoverOpen}
+              closePopover={closeLicensePopover}
+              panelPaddingSize="s"
+              anchorPosition="upCenter"
+            >
+              <div style={{ maxWidth: '300px' }}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.cloudConnect.connectedServices.service.licenseInfo"
+                    defaultMessage="{viewSubscriptionLink} or {extendTrialLink}."
+                    values={{
+                      extendTrialLink: (
+                        <EuiLink href="https://www.elastic.co/trialextension" target="_blank">
+                          {i18n.translate(
+                            'xpack.cloudConnect.connectedServices.service.extendTrial',
+                            {
+                              defaultMessage: 'extend your trial',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                      viewSubscriptionLink: (
+                        <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                          {i18n.translate(
+                            'xpack.cloudConnect.connectedServices.service.viewSubscriptionOptions',
+                            {
+                              defaultMessage: 'View subscription options',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </div>
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!supported) {
       return null;
     }
 
@@ -361,6 +491,58 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
         <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
       </EuiFlexGroup>
+
+      {serviceKey === 'eis' && !hasActionsSavePrivilege && !hasAnyDefaultLLMConnectors && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.cloudConnect.connectedServices.service.missingPrivileges',
+              {
+                defaultMessage: 'Missing privileges',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.missingPrivilegesDescription"
+                defaultMessage="Full LLM functionality requires **Customize sub-feature privileges** to be switched on in the Kibana {privilege} privilege. When it is switched off, some features will be unavailable. Contact your administrator to make this change."
+                values={{
+                  privilege: <strong>Actions and Connectors</strong>,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {serviceKey === 'eis' &&
+        enabled &&
+        hasActionsSavePrivilege &&
+        !hasAnyDefaultLLMConnectors && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.missingLLMConnectors',
+                {
+                  defaultMessage: 'Missing LLM connectors',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.service.missingLLMConnectorsDescription"
+                  defaultMessage="Configuring LLM models will provide an enhanced experience. Reconnect EIS to install them."
+                />
+              </p>
+            </EuiCallOut>
+          </>
+        )}
     </EuiPanel>
   );
 };

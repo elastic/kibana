@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { StepContext } from '@kbn/workflows';
+import type { StepContext, WorkflowInput } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -22,6 +22,14 @@ import { z } from '@kbn/zod/v4';
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodType;
+}
+
+export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {
+  /**
+   * Workflow inputs definition with their default values.
+   * Used to pre-populate input fields in the test step modal.
+   */
+  inputsDefinition?: WorkflowInput[];
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
@@ -57,9 +65,30 @@ function readPropertyRecursive(
   return object;
 }
 
+/**
+ * Build inputs object from workflow input definitions with their default values.
+ * This allows the test step modal to pre-populate input fields with defined defaults.
+ */
+function buildInputsFromDefinition(
+  inputsDefinition: WorkflowInput[] | undefined
+): Record<string, unknown> | undefined {
+  if (!inputsDefinition || inputsDefinition.length === 0) {
+    return undefined;
+  }
+
+  const inputs: Record<string, unknown> = {};
+  for (const input of inputsDefinition) {
+    if (input.default !== undefined) {
+      inputs[input.name] = input.default;
+    }
+  }
+
+  return Object.keys(inputs).length > 0 ? inputs : undefined;
+}
+
 export function buildContextOverride(
   workflowGraph: WorkflowGraph,
-  staticData: Pick<StepContext, 'consts' | 'workflow'>
+  staticData: StaticContextData
 ): ContextOverrideData {
   const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
@@ -70,6 +99,12 @@ export function buildContextOverride(
     )
   );
   const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
+
+  // Build the static data with inputs defaults for lookup
+  const staticDataWithInputs = {
+    ...staticData,
+    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
+  };
 
   inputsParsed.forEach((pathParts) => {
     let current = contextOverride;
@@ -82,7 +117,7 @@ export function buildContextOverride(
         // Set a default value for the final property
         current[part] =
           current[part] ||
-          readPropertyRecursive(pathParts.slice(0, i + 1), staticData) ||
+          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
           'replace with your data';
       } else {
         // Create nested object if it doesn't exist

@@ -210,6 +210,9 @@ const registerHttpRequestMockHelpers = (
   const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
 
+  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+
   const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
 
@@ -239,6 +242,7 @@ const registerHttpRequestMockHelpers = (
     setExecuteEnrichPolicyResponse,
     setLoadIndexDetailsResponse,
     setCreateIndexResponse,
+    setLoadIndexDocCountResponse,
     setGetMatchingIndices,
     setGetFieldsFromIndices,
     setCreateEnrichPolicy,

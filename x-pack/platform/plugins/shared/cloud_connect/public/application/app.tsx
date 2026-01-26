@@ -63,6 +63,7 @@ export const CloudConnectedAppMain: React.FC = () => {
     ...appContext,
     clusterConfig: config!,
     hasConfigurePermission: appContext.application.capabilities.cloudConnect?.configure === true,
+    hasActionsSavePrivilege: appContext.application.capabilities.actions?.save === true,
   };
 
   return (

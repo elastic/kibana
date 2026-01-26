@@ -139,6 +139,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -197,6 +201,10 @@ export interface ChatCompleteResponse<
    * The text content of the LLM response.
    */
   content: string;
+  /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
   /**
    * The eventual tool calls performed by the LLM.
    */
