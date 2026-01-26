@@ -42,9 +42,13 @@ import type {
   AgentBuilderStartDependencies,
   ConversationFlyoutRef,
 } from './types';
-import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import {
+  setSidebarServices,
+  setSidebarRuntimeContext,
+  clearSidebarRuntimeContext,
+} from './sidebar';
 
 export class AgentBuilderPlugin
   implements
@@ -96,6 +100,16 @@ export class AgentBuilderPlugin
 
     registerWorkflowSteps(deps.workflowsExtensions);
 
+    // Register sidebar app for conversation UI
+    core.chrome.sidebar.registerApp({
+      appId: 'agentBuilder',
+      loadComponent: async () => {
+        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+        return SidebarConversation;
+      },
+      restoreOnReload: false,
+    });
+
     return {};
   }
 
@@ -136,32 +150,46 @@ export class AgentBuilderPlugin
 
     this.internalServices = internalServices;
 
-    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    // Initialize services for sidebar component (accessed via observable)
+    setSidebarServices(core, internalServices);
 
-    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+
+    const openSidebarInternal = (options?: OpenConversationFlyoutOptions) => {
       const config = options ?? this.conversationFlyoutActiveConfig;
 
-      // If a flyout is already open, update its props instead of creating a new one
+      // If already open, update props instead of creating new
       if (this.activeFlyoutRef && this.flyoutCallbacks) {
         this.flyoutCallbacks.updateProps(config);
         return { flyoutRef: this.activeFlyoutRef };
       }
 
-      // Create new flyout and set up prop updates
-      const { flyoutRef } = openConversationFlyout(config, {
-        coreStart: core,
-        services: internalServices,
+      // Set runtime context before opening
+      setSidebarRuntimeContext({
+        options: config,
         onRegisterCallbacks: (callbacks) => {
           this.flyoutCallbacks = callbacks;
         },
         onClose: () => {
           this.activeFlyoutRef = null;
           this.flyoutCallbacks = null;
+          clearSidebarRuntimeContext();
         },
       });
 
-      this.activeFlyoutRef = flyoutRef;
+      sidebar.open();
 
+      const flyoutRef: ConversationFlyoutRef = {
+        close: () => {
+          sidebar.close();
+          this.activeFlyoutRef = null;
+          this.flyoutCallbacks = null;
+          clearSidebarRuntimeContext();
+        },
+      };
+
+      this.activeFlyoutRef = flyoutRef;
       return { flyoutRef };
     };
 
@@ -171,9 +199,9 @@ export class AgentBuilderPlugin
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
-        // set config until flyout is next opened
+        // Set config until flyout is next opened
         this.conversationFlyoutActiveConfig = config;
-        // if there is already an active flyout, update its props
+        // If there is already an active flyout, update its props
         if (this.activeFlyoutRef && this.flyoutCallbacks) {
           this.flyoutCallbacks.updateProps(config);
           return { flyoutRef: this.activeFlyoutRef };
@@ -187,7 +215,7 @@ export class AgentBuilderPlugin
         }
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        return openFlyoutInternal(options);
+        return openSidebarInternal(options);
       },
       toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
         if (this.activeFlyoutRef) {
@@ -200,7 +228,7 @@ export class AgentBuilderPlugin
           return;
         }
 
-        openFlyoutInternal(options);
+        openSidebarInternal(options);
       },
     };
 
