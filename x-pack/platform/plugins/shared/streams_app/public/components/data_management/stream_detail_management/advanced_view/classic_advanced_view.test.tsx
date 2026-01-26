@@ -60,10 +60,16 @@ jest.mock('../../../../hooks/use_stream_features', () => ({
     featuresLoading: false,
     refreshFeatures: jest.fn(),
     error: null,
+  }),
+}));
+
+jest.mock('../../../../hooks/use_stream_features_api', () => ({
+  useStreamFeaturesApi: () => ({
     getFeaturesIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
     scheduleFeaturesIdentificationTask: jest.fn(),
     cancelFeaturesIdentificationTask: jest.fn(),
-    acknowledgeFeaturesIdentificationTask: jest.fn(),
+    deleteFeature: jest.fn(),
+    deleteFeaturesInBulk: jest.fn(),
   }),
 }));
 

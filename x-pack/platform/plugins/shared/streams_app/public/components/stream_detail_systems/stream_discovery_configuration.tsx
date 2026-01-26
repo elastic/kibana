@@ -113,6 +113,7 @@ export function StreamDiscoveryConfiguration({
                     getFeaturesIdentificationStatus={getFeaturesIdentificationStatus}
                     scheduleFeaturesIdentificationTask={scheduleFeaturesIdentificationTask}
                     cancelFeaturesIdentificationTask={cancelFeaturesIdentificationTask}
+                    isIdentifyingFeatures={isIdentifyingFeatures}
                     onTaskStart={handleFeatureTaskStart}
                     onTaskEnd={handleFeatureTaskEnd}
                   />
