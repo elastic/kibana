@@ -87,12 +87,8 @@ function getAggregationTemplate({
   placeholderName: string;
   customFunction?: string;
 }): string {
-  if (instrument === 'histogram') {
-    if (type === 'exponential_histogram') {
-      return `PERCENTILE(??${placeholderName}, 95)`;
-    }
-
-    return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
+  if (type === 'exponential_histogram' || type === 'tdigest') {
+    return `PERCENTILE(??${placeholderName}, 95)`;
   }
 
   if (instrument === 'counter') {
