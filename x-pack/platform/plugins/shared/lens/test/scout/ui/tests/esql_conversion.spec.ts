@@ -9,36 +9,34 @@ import { expect } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
-export const ES_ARCHIVES = {
+const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
 };
 
-export const KBN_ARCHIVES = {
+const KBN_ARCHIVES = {
   ESQL_CONVERSION_DASHBOARD:
-    'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql-conversion-dashboard.json',
+    'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json',
 };
 
-export const DATA_VIEW_ID = {
+const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
 };
 
-export const LOGSTASH_IN_RANGE_DATES = {
+const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
 };
 
-const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+const ESQL_CONVERSION_DASHBOARD_TEST_ID = 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
 
 test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
-    await kbnClient.importExport.load(
-      'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json'
-    );
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
+    await kbnClient.importExport.load(KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
     await uiSettings.set({
-      defaultIndex: 'logstash-*',
+      defaultIndex: DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "Sep 19, 2015 @ 06:31:44.000", "to": "Sep 23, 2015 @ 18:31:44.000"}`,
+      'timepicker:timeDefaults': `{ "from": "${LOGSTASH_IN_RANGE_DATES.from}", "to": "${LOGSTASH_IN_RANGE_DATES.to}"}`,
     });
   });
 
@@ -47,17 +45,34 @@ test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('should show switch to query mode button', async ({ browserAuth, page }) => {
+  test('should display ES|QL conversion modal', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await page.gotoApp('dashboards');
-    await page.getByTestId('dashboardListingTitleLink-ES|QL-Conversion-Dashboard').click();
-    await expect(page.getByText('Average of bytes')).toBeVisible();
-    // dashboard.switchToEditMode()
-    await page.getByTestId('dashboardEditMode').click();
 
+    const { dashboard, lens } = pageObjects;
+
+    // Navigate to the test dashboard
+    await dashboard.goto();
+    await page.getByTestId(ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
+
+    // Verify dashboard loaded with the test visualization
+    await expect(page.getByText('Average of bytes')).toBeVisible();
+
+    // Enter edit mode to access visualization actions
+    await page.getByTestId('dashboardEditMode').click(); // dashboard.switchToEditMode()
+
+    // Open lens in-line editor
     page.getByText('Average of bytes').hover();
     page.getByTestId('embeddablePanelAction-editPanel').click();
 
-    await expect(page.getByRole('button', { name: 'Convert to ES|QL' })).toBeEnabled();
+    lens.getConvertToEsqlButton().click();
+
+    await expect(lens.getConvertToEsqModal()).toBeVisible();
+
+    await lens.getConvertToEsqModalConfirmButton().click();
+
+    await expect(lens.getConvertToEsqModal()).toBeHidden();
+
+    // TODO: Add conversion assertions once logic is implemented (https://github.com/elastic/kibana/pull/248078)
+    // For now, this test only verifies the UI flow up to modal interaction
   });
 });

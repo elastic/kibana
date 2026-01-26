@@ -117,4 +117,6 @@ export class DashboardApp {
 
     throw new Error(`Timeout waiting for ${expectedCount} elements matching ${options.selector}`);
   }
+
+  // swhitch to edit mode
 }

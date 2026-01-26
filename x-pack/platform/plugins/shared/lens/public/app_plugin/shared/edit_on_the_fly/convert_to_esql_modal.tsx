@@ -223,6 +223,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         defaultMessage: 'Switch to query mode',
       })}
       confirmButtonDisabled={!isConfirmButtonEnabled}
+      data-test-subj="lnsConverToEsqlModal"
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {

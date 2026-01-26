@@ -92,7 +92,7 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
+    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
   }
 
   if (parseResult?.fullKey) {
@@ -130,7 +130,6 @@ export function buildAutocompleteContext({
     absoluteOffset,
     focusedStepInfo,
     focusedYamlPair,
-    // TODO: add currentTriggerInfo
 
     // context
     contextSchema,
@@ -147,5 +146,8 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+
+    // workflow definition (for JSON Schema autocompletion)
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

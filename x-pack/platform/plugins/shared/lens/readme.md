@@ -255,10 +255,6 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens`
   - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens_http2`     
 
-##### Scout tests
-
-[WIP]
-
 ## Developing tips
 
 Lens state is kept in the Redux Store. To enable redux logger, open Chrome Developer Tools and type in the console: `window.ELASTIC_LENS_LOGGER=true`.
