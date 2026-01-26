@@ -1303,26 +1303,6 @@
       }
     }
   },
-  "entity-store-api-key": {
-    "dynamic": false,
-    "properties": {
-      "apiKey": {
-        "type": "binary"
-      },
-      "id": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "keyword"
-      },
-      "namespace": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      }
-    }
-  },
   "epm-packages": {
     "dynamic": false,
     "properties": {

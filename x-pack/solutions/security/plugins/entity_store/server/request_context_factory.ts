@@ -16,7 +16,6 @@ import type {
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
-import { getApiKeyManager, type ApiKeyManager } from './infra/auth';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -32,7 +31,7 @@ export async function createRequestHandlerContext({
   request,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [coreStart, startPlugins] = await coreSetup.getStartServices();
+  const [, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
 
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
@@ -43,15 +42,6 @@ export async function createRequestHandlerContext({
     request
   );
 
-  const apiKeyManager: ApiKeyManager = getApiKeyManager({
-    core: coreStart,
-    logger,
-    security: startPlugins.security,
-    encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-    request,
-    namespace,
-  });
-
   return {
     core,
     logger,
@@ -59,8 +49,7 @@ export async function createRequestHandlerContext({
       logger,
       core.elasticsearch.client.asCurrentUser,
       taskManagerStart,
-      namespace,
-      apiKeyManager
+      namespace
     ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient: new LogsExtractionClient(

@@ -394,13 +394,6 @@
     "timestampField",
     "type"
   ],
-  "entity-store-api-key": [
-    "apiKey",
-    "id",
-    "name",
-    "namespace",
-    "type"
-  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",

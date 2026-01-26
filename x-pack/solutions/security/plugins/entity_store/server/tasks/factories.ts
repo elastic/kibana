@@ -5,68 +5,37 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { EntityStoreStartPlugins } from '../types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { EntityStoreCoreSetup } from '../types';
 import { LogsExtractionClient } from '../domain/logs_extraction_client';
-import { getApiKeyManager } from '../infra/auth';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
-  apiKey: { id: string; name: string; apiKey: string };
 }
 
-/**
- * Factory function to create a LogsExtractionClient with all required dependencies.
- * This handles the boilerplate of:
- * - Getting the API key manager
- * - Retrieving the API key
- * - Creating clients from the API key
- * - Creating the dataViewsService
- * - Instantiating the LogsExtractionClient
- *
- * @param params - Factory parameters
- * @returns LogsExtractionClient and API key, or null if API key is not found
- */
 export async function createLogsExtractionClient({
   core,
-  plugins,
+  fakeRequest,
   logger,
   namespace,
 }: {
-  core: CoreStart;
-  plugins: EntityStoreStartPlugins;
+  core: EntityStoreCoreSetup;
   logger: Logger;
   namespace: string;
-}): Promise<LogsExtractionClientFactoryResult | null> {
-  // Get API key manager
-  const apiKeyManager = getApiKeyManager({
-    core,
-    logger,
-    security: plugins.security,
-    encryptedSavedObjects: plugins.encryptedSavedObjects,
-    namespace,
-  });
+  fakeRequest: KibanaRequest;
+}): Promise<LogsExtractionClientFactoryResult> {
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
-  // Get API key
-  const apiKey = await apiKeyManager.getApiKey();
+  const clusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
+  const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+  const internalUserClient = coreStart.elasticsearch.client.asInternalUser;
 
-  if (!apiKey) {
-    logger.warn(`No API key found, cannot create LogsExtractionClient for namespace: ${namespace}`);
-    return null;
-  }
-
-  // Get clients from API key
-  const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
-  const internalUserClient = core.elasticsearch.client.asInternalUser;
-
-  // Create dataViewsService with proper clients
-  const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+  const dataViewsService = await pluginsStart.dataViews.dataViewsServiceFactory(
     soClient,
     internalUserClient
   );
 
-  // Create LogsExtractionClient with proper initialization
   const logsExtractionClient = new LogsExtractionClient(
     logger,
     namespace,
@@ -76,6 +45,5 @@ export async function createLogsExtractionClient({
 
   return {
     logsExtractionClient,
-    apiKey,
   };
 }

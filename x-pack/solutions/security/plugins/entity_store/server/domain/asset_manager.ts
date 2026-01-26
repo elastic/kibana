@@ -6,34 +6,31 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getEntityDefinition } from './definitions/registry';
 import type { EntityType } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import type { ApiKeyManager } from '../infra/auth';
 
 export class AssetManager {
   constructor(
     private logger: Logger,
     private esClient: ElasticsearchClient,
     private taskManager: TaskManagerStartContract,
-    private namespace: string,
-    private apiKeyManager: ApiKeyManager
+    private namespace: string
   ) {}
 
-  public async initStore() {
-    // Generate API key if dependencies are available
-    await this.generateApiKey();
-  }
-
-  public async initEntityType(type: EntityType, logExtractionFrequency?: string) {
+  public async initEntityType(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionFrequency?: string
+  ) {
     await this.install(type); // TODO: async
-    await this.start(type, logExtractionFrequency);
+    await this.start(request, type, logExtractionFrequency);
   }
 
-  public async start(type: EntityType, logExtractionFrequency?: string) {
+  public async start(request: KibanaRequest, type: EntityType, logExtractionFrequency?: string) {
     this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
     // TODO: if this fails, set status to failed
@@ -43,6 +40,7 @@ export class AssetManager {
       type,
       frequency: logExtractionFrequency,
       namespace: this.namespace,
+      request,
     });
   }
 
@@ -83,24 +81,5 @@ export class AssetManager {
     });
 
     this.logger.get(type).debug(`Uninstalled definition: ${type}`);
-  }
-
-  private async generateApiKey(): Promise<void> {
-    try {
-      // Check if API key already exists
-      const existingApiKey = await this.apiKeyManager.getApiKey();
-      if (existingApiKey) {
-        this.logger.debug('API key already exists, skipping generation');
-        return;
-      }
-
-      // Generate new API key
-      this.logger.info('Generating API key');
-      await this.apiKeyManager.generate();
-      this.logger.info('Successfully generated API key');
-    } catch (error) {
-      this.logger.error(`Failed to generate API key: ${error.message}`, error);
-      throw error;
-    }
   }
 }
