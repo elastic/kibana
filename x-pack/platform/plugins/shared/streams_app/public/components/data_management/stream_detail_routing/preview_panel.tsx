@@ -271,11 +271,13 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
         {hasPrivileges ? (
-          <DocumentMatchFilterControls
-            onFilterChange={setDocumentMatchFilter}
-            matchedDocumentPercentage={approximateMatchingPercentage}
-            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
-          />
+          <EuiFlexItem grow={false}>
+            <DocumentMatchFilterControls
+              onFilterChange={setDocumentMatchFilter}
+              matchedDocumentPercentage={approximateMatchingPercentage}
+              isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+            />
+          </EuiFlexItem>
         ) : (
           <EuiFlexItem grow={false} />
         )}
