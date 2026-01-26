@@ -20,6 +20,7 @@ import type {
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
+  RedactProcessor,
   RemoveByPrefixProcessor,
   RemoveProcessor,
   RenameProcessor,
@@ -154,6 +155,9 @@ const actionStepValidators: {
     if ('to' in step && step.to) {
       checkFieldName(step.to);
     }
+  },
+  redact: (step: RedactProcessor) => {
+    checkFieldName(step.from);
   },
   math: (step: MathProcessor) => {
     checkFieldName(step.to);
