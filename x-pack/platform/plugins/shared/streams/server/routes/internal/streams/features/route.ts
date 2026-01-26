@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { baseFeatureSchema, type Feature } from '@kbn/streams-schema';
+import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -146,6 +147,60 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
+export const bulkFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk changes to features',
+    description: 'Add or delete features in bulk for a given stream',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            index: z.object({
+              feature: featureSchema,
+            }),
+          }),
+          z.object({
+            delete: z.object({
+              id: z.string(),
+            }),
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<StorageClientBulkResponse> => {
+    const { featureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { name },
+      body: { operations },
+    } = params;
+
+    await streamsClient.ensureStream(name);
+
+    return featureClient.bulk(name, operations);
+  },
+});
+
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
 export const featuresStatusRoute = createServerRoute({
@@ -278,6 +333,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
 };

@@ -45,12 +45,25 @@ jest.mock('../../../stream_detail_systems/stream_description/use_stream_descript
   }),
 }));
 
-// Mock hooks used by StreamSystemConfiguration
+// Mock hooks used by StreamDiscoveryConfiguration
 jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
   useStreamSystems: () => ({
     systems: [],
     refreshSystems: jest.fn(),
     systemsLoading: false,
+  }),
+}));
+
+jest.mock('../../../../hooks/use_stream_features', () => ({
+  useStreamFeatures: () => ({
+    features: [],
+    featuresLoading: false,
+    refreshFeatures: jest.fn(),
+    error: null,
+    getFeaturesIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
+    scheduleFeaturesIdentificationTask: jest.fn(),
+    cancelFeaturesIdentificationTask: jest.fn(),
+    acknowledgeFeaturesIdentificationTask: jest.fn(),
   }),
 }));
 
@@ -212,7 +225,7 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Stream description')).toBeInTheDocument();
     });
 
-    it('should render Feature identification panel when significantEvents feature is enabled', () => {
+    it('should render Stream discovery panel when significantEvents feature is enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: { enabled: true },
@@ -226,8 +239,8 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Check the System identification panel title is rendered
-      expect(screen.getByText('System identification')).toBeInTheDocument();
+      // Check the Stream discovery panel title is rendered
+      expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
@@ -245,7 +258,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('System identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is undefined', () => {
@@ -263,7 +276,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('System identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
   });
 
@@ -424,8 +437,8 @@ describe('ClassicAdvancedView', () => {
 
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
-      // System identification
-      expect(screen.getByText('System identification')).toBeInTheDocument();
+      // Stream discovery (contains Features and Systems)
+      expect(screen.getByText('Stream discovery')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Elasticsearch assets

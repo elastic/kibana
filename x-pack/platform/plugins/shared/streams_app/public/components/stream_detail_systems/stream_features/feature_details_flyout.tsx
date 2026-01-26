@@ -1,0 +1,290 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHealth,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { upperFirst } from 'lodash';
+import type { Feature } from '@kbn/streams-schema';
+import { useBoolean } from '@kbn/react-hooks';
+import React from 'react';
+import { InfoPanel } from '../../info_panel';
+import { DeleteFeatureModal } from './delete_feature_modal';
+import { getConfidenceColor, getStatusColor } from './use_stream_features_table';
+
+interface FeatureDetailsFlyoutProps {
+  feature: Feature;
+  onClose: () => void;
+  onDelete?: () => Promise<void>;
+  isDeleting?: boolean;
+}
+
+const noDataPlaceholder = '-';
+
+export function FeatureDetailsFlyout({
+  feature,
+  onClose,
+  onDelete,
+  isDeleting = false,
+}: FeatureDetailsFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'featureDetailsFlyoutTitle',
+  });
+  const [isActionsPopoverOpen, { off: closeActionsPopover, toggle: toggleActionsPopover }] =
+    useBoolean(false);
+  const [isDeleteModalVisible, { on: showDeleteModal, off: hideDeleteModal }] = useBoolean(false);
+
+  const handleDeleteClick = () => {
+    closeActionsPopover();
+    showDeleteModal();
+  };
+
+  const formattedValue = Object.values(feature.value).join(', ');
+
+  const generalInfoItems = [
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
+        defaultMessage: 'Name',
+      }),
+      description: <EuiText size="s">{feature.name || noDataPlaceholder}</EuiText>,
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
+        defaultMessage: 'Value',
+      }),
+      description: <EuiText size="s">{formattedValue || noDataPlaceholder}</EuiText>,
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
+        defaultMessage: 'Type',
+      }),
+      description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
+        defaultMessage: 'Created by',
+      }),
+      description: (
+        <EuiBadge color="hollow">
+          {i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
+            defaultMessage: 'LLM',
+          })}
+        </EuiBadge>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
+        defaultMessage: 'Status',
+      }),
+      description: (
+        <EuiHealth color={getStatusColor(feature.status)}>{upperFirst(feature.status)}</EuiHealth>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
+        defaultMessage: 'Confidence',
+      }),
+      description: (
+        <EuiHealth color={getConfidenceColor(feature.confidence)}>{feature.confidence}</EuiHealth>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
+        defaultMessage: 'Last seen',
+      }),
+      description: <EuiText size="s">{feature.last_seen || noDataPlaceholder}</EuiText>,
+    },
+    {
+      title: i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
+        defaultMessage: 'Tags',
+      }),
+      description:
+        feature.tags.length > 0 ? (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {feature.tags.map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="s">{noDataPlaceholder}</EuiText>
+        ),
+    },
+  ];
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      type="push"
+      ownFocus={false}
+      size="40%"
+      hideCloseButton
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2 id={flyoutTitleId}>{formattedValue}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" responsive={false}>
+              {onDelete && (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButtonIcon
+                        data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
+                        iconType="boxesVertical"
+                        aria-label={i18n.translate(
+                          'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
+                          { defaultMessage: 'Actions' }
+                        )}
+                        onClick={toggleActionsPopover}
+                      />
+                    }
+                    isOpen={isActionsPopoverOpen}
+                    closePopover={closeActionsPopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          key="delete"
+                          icon={<EuiIcon type="trash" color="danger" />}
+                          css={css`
+                            color: ${euiTheme.colors.danger};
+                          `}
+                          onClick={handleDeleteClick}
+                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                        >
+                          {i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
+                            defaultMessage: 'Delete',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  data-test-subj="streamsAppFeatureDetailsFlyoutCloseButton"
+                  iconType="cross"
+                  aria-label={i18n.translate(
+                    'xpack.streams.featureDetailsFlyout.closeButtonAriaLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  onClick={onClose}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <InfoPanel
+              title={i18n.translate('xpack.streams.featureDetailsFlyout.generalInformationLabel', {
+                defaultMessage: 'General information',
+              })}
+            >
+              {generalInfoItems.map((item, index) => (
+                <React.Fragment key={index}>
+                  <EuiDescriptionList
+                    type="column"
+                    columnWidths={[1, 2]}
+                    compressed
+                    listItems={[item]}
+                  />
+                  {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
+                </React.Fragment>
+              ))}
+            </InfoPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <InfoPanel
+              title={i18n.translate('xpack.streams.featureDetailsFlyout.descriptionLabel', {
+                defaultMessage: 'Description',
+              })}
+            >
+              <EuiText>
+                {feature.description ||
+                  i18n.translate('xpack.streams.featureDetailsFlyout.noDescriptionAvailable', {
+                    defaultMessage: 'No description available',
+                  })}
+              </EuiText>
+            </InfoPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <InfoPanel
+              title={i18n.translate('xpack.streams.featureDetailsFlyout.evidenceLabel', {
+                defaultMessage: 'Evidence',
+              })}
+            >
+              {feature.evidence.length > 0 ? (
+                <>
+                  {feature.evidence.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiHealth color="subdued" />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s">{item}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                    </React.Fragment>
+                  ))}
+                </>
+              ) : (
+                <EuiText size="s">
+                  {i18n.translate('xpack.streams.featureDetailsFlyout.noEvidenceAvailable', {
+                    defaultMessage: 'No evidence available',
+                  })}
+                </EuiText>
+              )}
+            </InfoPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      {isDeleteModalVisible && onDelete && (
+        <DeleteFeatureModal
+          features={[feature]}
+          isLoading={isDeleting}
+          onCancel={hideDeleteModal}
+          onConfirm={onDelete}
+        />
+      )}
+    </EuiFlyout>
+  );
+}
