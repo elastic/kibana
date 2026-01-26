@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import { uniq } from 'lodash';
+import { uniq, capitalize } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -133,7 +133,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       return availableTypes.length > 0
         ? availableTypes.map((type) => ({
             id: type,
-            label: type.charAt(0).toUpperCase() + type.slice(1),
+            label: capitalize(type),
           }))
         : [
             { id: 'logs', label: 'Logs' },

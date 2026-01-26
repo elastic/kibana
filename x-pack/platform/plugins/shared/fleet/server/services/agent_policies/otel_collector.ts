@@ -88,6 +88,45 @@ export function generateOtelcolConfig(
   return attachOtelcolExporter(config, dataOutput);
 }
 
+function generateOtelTypeTransforms(
+  type: string,
+  dataset: string,
+  namespace: string
+): Record<string, any> {
+  let otelType: string;
+  let context: string;
+
+  switch (type) {
+    case 'logs':
+      otelType = 'log';
+      context = 'log';
+      break;
+    case 'metrics':
+      otelType = 'metric';
+      context = 'datapoint';
+      break;
+    case 'traces':
+      otelType = 'trace';
+      context = 'span';
+      break;
+    default:
+      throw new FleetError(`unexpected data stream type ${type}`);
+  }
+
+  return {
+    [`${otelType}_statements`]: [
+      {
+        context,
+        statements: [
+          `set(attributes["data_stream.type"], "${type}")`,
+          `set(attributes["data_stream.dataset"], "${dataset}")`,
+          `set(attributes["data_stream.namespace"], "${namespace}")`,
+        ],
+      },
+    ],
+  };
+}
+
 function generateOTelAttributesTransform(
   type: string,
   dataset: string,
@@ -105,79 +144,20 @@ function generateOTelAttributesTransform(
     )?.available_types ?? [];
   const hasMultipleAvailableTypes = availableTypes && availableTypes.length > 1;
 
-  // If package has multiple signal types, generate transform with statements for all types
+  let transformStatements: Record<string, any> = {};
+  // If package has multiple signal types, generate transform with statements only for the available types
   if (hasMultipleAvailableTypes) {
-    const transformStatements: Record<string, any> = {};
-
     availableTypes.forEach((availableType) => {
-      let otelType: string;
-      let context: string;
-      switch (availableType) {
-        case 'logs':
-          otelType = 'log';
-          context = 'log';
-          break;
-        case 'metrics':
-          otelType = 'metric';
-          context = 'datapoint';
-          break;
-        case 'traces':
-          otelType = 'trace';
-          context = 'span';
-          break;
-        default:
-          throw new FleetError(`Unexpected available type ${availableType} in available_types`);
-      }
-
-      transformStatements[`${otelType}_statements`] = [
-        {
-          context,
-          statements: [
-            `set(attributes["data_stream.type"], "${availableType}")`,
-            `set(attributes["data_stream.dataset"], "${dataset}")`,
-            `set(attributes["data_stream.namespace"], "${namespace}")`,
-          ],
-        },
-      ];
+      const typeTransforms = generateOtelTypeTransforms(availableType, dataset, namespace);
+      Object.assign(transformStatements, typeTransforms);
     });
-
-    return {
-      [`transform/${suffix}-routing`]: transformStatements,
-    };
+  } else {
+    // Single signal type
+    transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
 
-  // Single signal type - generate transform as before
-  let otelType: string;
-  let context: string;
-  switch (type) {
-    case 'logs':
-      otelType = 'log';
-      context = 'log';
-      break;
-    case 'metrics':
-      otelType = 'metric';
-      context = 'datapoint';
-      break;
-    case 'traces':
-      otelType = 'trace';
-      context = 'span';
-      break;
-    default:
-      throw new FleetError(`unexpected data stream type ${type}`);
-  }
   return {
-    [`transform/${suffix}-routing`]: {
-      [`${otelType}_statements`]: [
-        {
-          context,
-          statements: [
-            `set(attributes["data_stream.type"], "${type}")`,
-            `set(attributes["data_stream.dataset"], "${dataset}")`,
-            `set(attributes["data_stream.namespace"], "${namespace}")`,
-          ],
-        },
-      ],
-    },
+    [`transform/${suffix}-routing`]: transformStatements,
   };
 }
 
