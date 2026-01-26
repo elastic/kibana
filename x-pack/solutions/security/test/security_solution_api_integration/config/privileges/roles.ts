@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import type { Role } from '../services/types';
+import type { CustomRole } from '../services/types';
 
 /**
  * Roles for privilege tests
  */
 
-export const secAllV1: Role = {
+export const secAllV1: CustomRole = {
   name: 'sec_all_v1',
   privileges: {
     elasticsearch: {
@@ -32,7 +32,7 @@ export const secAllV1: Role = {
     ],
   },
 };
-export const secReadV1: Role = {
+export const secReadV1: CustomRole = {
   name: 'sec_read_v1',
   privileges: {
     elasticsearch: {
@@ -53,7 +53,7 @@ export const secReadV1: Role = {
     ],
   },
 };
-export const secNoneV1: Role = {
+export const secNoneV1: CustomRole = {
   name: 'sec_none_v1',
   privileges: {
     elasticsearch: {
@@ -75,7 +75,7 @@ export const secNoneV1: Role = {
   },
 };
 
-export const secTimelineAllV2: Role = {
+export const secTimelineAllV2: CustomRole = {
   name: 'sec_timeline_all',
   privileges: {
     elasticsearch: {
@@ -98,7 +98,7 @@ export const secTimelineAllV2: Role = {
   },
 };
 
-export const secTimelineReadV2: Role = {
+export const secTimelineReadV2: CustomRole = {
   name: 'sec_timeline_read',
   privileges: {
     elasticsearch: {
@@ -121,7 +121,7 @@ export const secTimelineReadV2: Role = {
   },
 };
 
-export const secTimelineNoneV2: Role = {
+export const secTimelineNoneV2: CustomRole = {
   name: 'sec_timeline_none',
   privileges: {
     elasticsearch: {
@@ -144,7 +144,7 @@ export const secTimelineNoneV2: Role = {
   },
 };
 
-export const secNotesAllV2: Role = {
+export const secNotesAllV2: CustomRole = {
   name: 'sec_notes_all',
   privileges: {
     elasticsearch: {
@@ -167,7 +167,7 @@ export const secNotesAllV2: Role = {
   },
 };
 
-export const secNotesReadV2: Role = {
+export const secNotesReadV2: CustomRole = {
   name: 'sec_notes_read',
   privileges: {
     elasticsearch: {
@@ -190,7 +190,7 @@ export const secNotesReadV2: Role = {
   },
 };
 
-export const secNotesNoneV2: Role = {
+export const secNotesNoneV2: CustomRole = {
   name: 'sec_notes_none',
   privileges: {
     elasticsearch: {
@@ -213,7 +213,7 @@ export const secNotesNoneV2: Role = {
   },
 };
 
-export const roles: Role[] = [
+export const roles: CustomRole[] = [
   secTimelineAllV2,
   secTimelineReadV2,
   secTimelineNoneV2,
