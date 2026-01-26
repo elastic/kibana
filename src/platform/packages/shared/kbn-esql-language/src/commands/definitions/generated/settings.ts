@@ -47,9 +47,9 @@ const unmappedFields = {
   type: ['keyword'],
   serverlessOnly: false,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are: "FAIL" (default) - fails the query if unmapped fields are present; "NULLIFY" - treats unmapped fields as null values; "LOAD" - attempts to load the fields from the source.',
+    'Defines how unmapped fields are treated. Possible values are: "FAIL" (default) - fails the query if unmapped fields are present; "NULLIFY" - treats unmapped fields as null values. ',
   ignoreAsSuggestion: false,
 };
 
