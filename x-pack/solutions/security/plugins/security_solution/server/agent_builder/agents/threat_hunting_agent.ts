@@ -27,6 +27,7 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.productDocumentation,
   platformCoreTools.generateEsql,
   platformCoreTools.executeEsql,
+  platformCoreTools.loadSkill,
 ];
 
 const SECURITY_TOOL_IDS = [

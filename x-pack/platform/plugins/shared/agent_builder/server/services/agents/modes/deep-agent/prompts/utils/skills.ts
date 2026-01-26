@@ -1,3 +1,4 @@
+import { platformCoreTools } from "@kbn/agent-builder-common/tools";
 import { SkillsService } from "@kbn/agent-builder-server/runner";
 
 export const skillInstructions = (skills: SkillsService): string => {
@@ -13,6 +14,7 @@ export const skillInstructions = (skills: SkillsService): string => {
                 ["Load a skill to get detailed instructions for a specific task.",
                     "Skills provide specialized knowledge and step-by-step guidance.",
                     "Use this when a task matches an available skill's description.",
+                    `To load a skill, use the \`${platformCoreTools.loadSkill}\` tool with the skill's id.`,
                     "Only the skills listed here are available:"].join(" "),
                 "<available_skills>",
                 ...accessibleSkills.flatMap((skill) => [

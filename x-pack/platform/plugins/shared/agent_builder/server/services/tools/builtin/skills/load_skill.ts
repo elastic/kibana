@@ -31,13 +31,17 @@ export const createLoadSkillTool = (): BuiltinToolDefinition<typeof loadSkillSch
 
     if (!skill) {
       const allSkills = context.skillsService.list();
-      
+
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.error,
-            data: { message: `Skill with ID '${skillId}' not found. These are the available skills: ${allSkills.map(skill => skill.id).join(', ')}` },
+            data: {
+              message: `Skill with ID '${skillId}' not found. These are the available skills: ${allSkills
+                .map((s) => s.id)
+                .join(', ')}`,
+            },
           },
         ],
       };
@@ -77,4 +81,3 @@ export const createLoadSkillTool = (): BuiltinToolDefinition<typeof loadSkillSch
     ];
   },
 });
-
