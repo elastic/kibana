@@ -6,7 +6,7 @@
  */
 
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-import type { InternalRuleType } from 'x-pack/platform/packages/shared/response-ops/rules-apis/apis/get_internal_rule_types';
+import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getAvailableSolutions, getRuleTypeIdsForSolution } from './solutions';
 
 const stackRuleType = { id: 'stack-rule-type', solution: 'stack' } as InternalRuleType;

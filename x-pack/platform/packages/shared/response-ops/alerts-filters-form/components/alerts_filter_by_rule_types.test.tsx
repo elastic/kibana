@@ -10,10 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { useGetInternalRuleTypesQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_internal_rule_types_query';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterByRuleTypes } from './alerts_filter_by_rule_types';
-import type { InternalRuleType } from 'x-pack/platform/packages/shared/response-ops/rules-apis/apis/get_internal_rule_types';
+import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { filterMetadata } from './alerts_filter_by_rule_types';
 
 const http = httpServiceMock.createStartContract();

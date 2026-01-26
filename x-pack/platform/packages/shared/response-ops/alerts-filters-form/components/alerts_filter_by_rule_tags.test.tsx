@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { useGetRuleTagsQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterByRuleTags, filterMetadata } from './alerts_filter_by_rule_tags';
 
