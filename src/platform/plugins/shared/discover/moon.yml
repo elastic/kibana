@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/resizable-layout'
   - '@kbn/unsaved-changes-badge'
+  - '@kbn/esql-rule-form'
   - '@kbn/rule-data-utils'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-plugins-server'

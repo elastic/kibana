@@ -51,6 +51,7 @@ import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
+import { getCreateRuleMenuItem } from './app_menu_actions/get_create_rule';
 
 /**
  * Helper function to build the top nav links
@@ -128,7 +129,8 @@ export const useTopNavLinks = ({
       if (
         services.triggersActionsUi &&
         !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.length
+        discoverParams.authorizedRuleTypeIds.length &&
+        !discoverParams.isEsqlMode
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
@@ -136,6 +138,19 @@ export const useTopNavLinks = ({
           stateContainer: state,
         });
         items.push(alertsAppMenuItem);
+      }
+
+      if (
+        services.triggersActionsUi &&
+        !defaultMenu?.alertsItem?.disabled &&
+        discoverParams.isEsqlMode
+      ) {
+        const createRuleV2 = getCreateRuleMenuItem({
+          discoverParams,
+          services,
+          stateContainer: state,
+        });
+        items.push(createRuleV2);
       }
 
       if (
