@@ -79,7 +79,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   return config;
 }
 
-const expandAgentQueue = (queueName: string = 'n2d-4-spot', diskSizeGb?: number) => {
+const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
   const additionalProps =
     {

@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
     label: 'CSPM Agentless Scout E2E Tests'
     agents:
-      machineType: n2d-standard-8
+      machineType: n2-standard-8
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     depends_on:
