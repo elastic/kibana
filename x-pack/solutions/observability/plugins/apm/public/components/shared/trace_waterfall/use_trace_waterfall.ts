@@ -6,10 +6,10 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
-import type { ErrorWithDocIndex } from '../../../../common/waterfall/error_with_doc_index';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { OnErrorClick } from './trace_waterfall_context';
@@ -46,7 +46,7 @@ export function useTraceWaterfall({
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
-  errors?: ErrorWithDocIndex[];
+  errors?: Error[];
   onErrorClick?: OnErrorClick;
 }) {
   const waterfall = useMemo(() => {
@@ -114,7 +114,7 @@ function getWaterfallErrorsMarks({
   rootItem,
   onErrorClick,
 }: {
-  errors: ErrorWithDocIndex[];
+  errors: Error[];
   traceItems: TraceWaterfallItem[];
   rootItem: TraceItem;
   onErrorClick?: OnErrorClick;
@@ -140,7 +140,7 @@ function getWaterfallErrorsMarks({
                 docId,
                 errorCount: 1,
                 errorDocId: error.id,
-                docIndex: error.docIndex,
+                docIndex: error.index,
               });
             }
           : undefined,

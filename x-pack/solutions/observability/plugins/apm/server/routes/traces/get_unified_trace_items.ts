@@ -54,7 +54,6 @@ import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { compactMap } from '../../utils/compact_map';
 import { isRumAgentName } from '../../../common/agent_name';
-import type { ErrorWithDocIndex } from '../../../common/waterfall/error_with_doc_index';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -93,7 +92,7 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      const errorDocIndex = (errorDoc as ErrorWithDocIndex).docIndex;
+      const errorDocIndex = errorDoc.index;
       (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
         errorDocId: errorDoc.id,
         ...(errorDocIndex ? { errorDocIndex } : {}),
@@ -102,7 +101,7 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   });
   unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      const errorDocIndex = (errorDoc as ErrorWithDocIndex).docIndex;
+      const errorDocIndex = errorDoc.index;
       (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
         errorDocId: errorDoc.id,
         ...(errorDocIndex ? { errorDocIndex } : {}),

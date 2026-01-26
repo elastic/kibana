@@ -8,10 +8,10 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
-import type { ErrorWithDocIndex } from '../../../../common/waterfall/error_with_doc_index';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
@@ -102,7 +102,7 @@ interface Props {
   showLegend: boolean;
   serviceName?: string;
   isFiltered?: boolean;
-  errors?: ErrorWithDocIndex[];
+  errors?: Error[];
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
 }
