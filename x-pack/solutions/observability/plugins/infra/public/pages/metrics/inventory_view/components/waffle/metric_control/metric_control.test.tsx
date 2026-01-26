@@ -21,15 +21,15 @@ const renderWithProviders = (children: React.ReactNode) =>
   render(<IntlProvider>{children}</IntlProvider>);
 
 const createMockMetric = () => ({
-  text: faker.hacker.noun(),
-  value: faker.hacker.noun(),
+  text: faker.string.alpha(15),
+  value: faker.string.alpha(15),
 });
 
 const createMockCustomMetric = (): SnapshotCustomMetricInput => ({
   type: 'custom',
-  field: faker.hacker.noun(),
+  field: faker.string.alpha(15),
   aggregation: faker.helpers.arrayElement(SNAPSHOT_CUSTOM_AGGREGATIONS),
-  label: faker.hacker.noun(),
+  label: faker.string.alpha(15),
   id: faker.string.uuid(),
 });
 
