@@ -506,15 +506,13 @@ const PROMQL_PARAMS: PromqlParamDefinition[] = [
   },
   {
     name: 'start',
-    description: 'Range query start time',
+    description: 'Range query start time (requires end)',
     valueType: PromqlParamValueType.DateLiterals,
-    required: true,
   },
   {
     name: 'end',
-    description: 'Range query end time',
+    description: 'Range query end time (requires start)',
     valueType: PromqlParamValueType.DateLiterals,
-    required: true,
   },
 ];
 
@@ -629,6 +627,11 @@ export function isParamValueComplete(
 
   if (definition.valueType === PromqlParamValueType.DateLiterals) {
     return isDateLiteralToken(firstToken);
+  }
+
+  if (definition.valueType === PromqlParamValueType.TimeseriesSources) {
+    const token = firstToken as string;
+    return !token.includes('=') && !token.includes('(');
   }
 
   return true;

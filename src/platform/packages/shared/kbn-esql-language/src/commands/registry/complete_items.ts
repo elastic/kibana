@@ -12,6 +12,7 @@ import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
+import { techPreviewLabel } from '../definitions/utils/shared';
 import { SuggestionCategory } from '../../shared/sorting/types';
 import {
   ESQL_STRING_TYPES,
@@ -19,10 +20,6 @@ import {
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
 import { getPromqlParamDefinitions } from './promql/utils';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
 
 function buildCharCompleteItem(
   label: string,

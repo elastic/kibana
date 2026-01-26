@@ -544,4 +544,17 @@ describe('index= suggestions', () => {
       contextWithSources
     );
   });
+
+  test('suggests indices when cursor is at index= with bare query after (no start/end)', async () => {
+    const query = 'PROMQL step=5m index= avg(bytes_counter)';
+    const cursorPosition = query.indexOf('index=') + 'index='.length;
+
+    await expectPromqlSuggestions(
+      query,
+      { labelsContain: ['metrics'] },
+      mockCallbacks,
+      contextWithSources,
+      cursorPosition
+    );
+  });
 });

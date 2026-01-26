@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
 import type { ISuggestionItem } from '../../registry/types';
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
 import { PromQLFunctionDefinitionTypes, type PromQLFunctionDefinition } from '../types';
@@ -15,10 +14,7 @@ import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { isIdentifier, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
+import { techPreviewLabel } from './shared';
 
 const INDEX_PARAM_REGEX = /\bindex\s*=\s*(\S+)/i;
 

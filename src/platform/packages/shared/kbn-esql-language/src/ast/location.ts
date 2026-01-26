@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstComment, ESQLSingleAstItem } from '../types';
-
-interface NodeWithLocation {
-  location: { min: number; max: number };
-}
+import type { ESQLAstComment, ESQLLocation, ESQLSingleAstItem } from '../types';
 
 export const within = (
-  inner: number | NodeWithLocation,
-  outer: NodeWithLocation | ESQLSingleAstItem | ESQLAstComment | undefined
+  inner: number | { location: ESQLLocation },
+  outer: { location?: ESQLLocation } | ESQLSingleAstItem | ESQLAstComment | undefined
 ) => {
   if (!outer?.location) {
     return false;
