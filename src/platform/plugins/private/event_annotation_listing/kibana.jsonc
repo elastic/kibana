@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/event-annotation-listing-plugin",
-  "owner": ["@elastic/kibana-visualizations"],
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
   "group": "platform",
   "visibility": "private",
   "description": "The listing page for event annotations.",
@@ -21,7 +23,11 @@
       "contentManagement",
       "embeddable"
     ],
-    "optionalPlugins": ["savedObjectsTagging", "lens", "dashboard"],
+    "optionalPlugins": [
+      "savedObjectsTagging",
+      "lens",
+      "dashboard"
+    ],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

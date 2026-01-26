@@ -12,15 +12,14 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
@@ -32,10 +31,9 @@ export interface EventAnnotationListingStartDependencies {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  kql: KqlPluginStart;
-  contentManagement: ContentManagementPublicStart;
-  lens: LensPublicStart;
   embeddable: EmbeddableStart;
+  kql: KqlPluginStart;
+  lens: LensPublicStart;
 }
 
 interface SetupDependencies {
@@ -77,12 +75,12 @@ export class EventAnnotationListingPlugin
         const services: EventAnnotationListingPageServices = {
           core: coreStart,
           LensEmbeddableComponent: pluginsStart.lens.EmbeddableComponent,
+          embeddable: pluginsStart.embeddable,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
-          embeddable: pluginsStart.embeddable,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,
