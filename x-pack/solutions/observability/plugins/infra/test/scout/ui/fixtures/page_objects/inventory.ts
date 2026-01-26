@@ -208,4 +208,16 @@ export class InventoryPage {
     await queryBar.press('Enter');
     await this.waitForNodesToLoad();
   }
+
+  public async selectPalette(
+    palette: 'status' | 'temperature' | 'cool' | 'warm' | 'positive' | 'negative'
+  ) {
+    await this.page.getByTestId('openLegendControlsButton').click();
+    await this.page.getByTestId('legendControlsPalette').selectOption(palette);
+    await this.page.getByTestId('applyLegendControlsButton').click();
+    await this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Legend Options' })
+      .waitFor({ state: 'hidden' });
+  }
 }
