@@ -10,33 +10,35 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
-import { TaskStatus } from '@kbn/streams-schema';
-import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
+import { TaskStatus, type Streams } from '@kbn/streams-schema';
 import type { AIFeatures } from '../../hooks/use_ai_features';
+import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 
 interface FeatureIdentificationControlProps {
+  definition: Streams.all.Definition;
   refreshFeatures: () => void;
   aiFeatures: AIFeatures | null;
-  getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
-  scheduleFeaturesIdentificationTask: (connectorId: string) => Promise<void>;
-  cancelFeaturesIdentificationTask: () => Promise<void>;
   isIdentifyingFeatures: boolean;
   onTaskStart: () => void;
   onTaskEnd: () => void;
 }
 
 export function FeatureIdentificationControl({
+  definition,
   refreshFeatures,
   aiFeatures,
-  getFeaturesIdentificationStatus,
-  scheduleFeaturesIdentificationTask,
-  cancelFeaturesIdentificationTask,
   isIdentifyingFeatures,
   onTaskStart,
   onTaskEnd,
 }: FeatureIdentificationControlProps) {
+  const {
+    getFeaturesIdentificationStatus,
+    scheduleFeaturesIdentificationTask,
+    cancelFeaturesIdentificationTask,
+  } = useStreamFeaturesApi(definition);
+
   const [{ loading: isGettingTask, value: task, error }, getTask] = useAsyncFn(
     getFeaturesIdentificationStatus
   );
@@ -96,25 +98,21 @@ export function FeatureIdentificationControl({
     return null;
   }
 
+  const isLoading = isIdentifyingFeatures || isGettingTask;
+
   switch (task.status) {
     case TaskStatus.NotStarted:
     case TaskStatus.Acknowledged:
     case TaskStatus.Canceled:
-      return (
-        <TriggerButton
-          isLoading={isIdentifyingFeatures || isGettingTask}
-          onClick={handleStartIdentification}
-        />
-      );
+      return <TriggerButton isLoading={isLoading} onClick={handleStartIdentification} />;
 
     case TaskStatus.Completed:
       return (
         <CompletedState
-          featuresCount={task.features.length}
-          isLoading={isIdentifyingFeatures || isGettingTask}
+          isLoading={isLoading}
           onStartIdentification={handleStartIdentification}
-          isNoResultsDismissed={isNoResultsDismissed}
-          onDismiss={dismissNoResults}
+          showNoResultsCallout={task.features.length === 0 && !isNoResultsDismissed}
+          onDismissNoResults={dismissNoResults}
         />
       );
 
@@ -127,7 +125,7 @@ export function FeatureIdentificationControl({
     case TaskStatus.Failed:
       return (
         <StateWithCallout
-          isLoading={isIdentifyingFeatures || isGettingTask}
+          isLoading={isLoading}
           onStartIdentification={handleStartIdentification}
           calloutTitle={TASK_FAILED_TITLE}
           calloutColor="danger"
@@ -140,7 +138,7 @@ export function FeatureIdentificationControl({
     case TaskStatus.Stale:
       return (
         <StateWithCallout
-          isLoading={isIdentifyingFeatures || isGettingTask}
+          isLoading={isLoading}
           onStartIdentification={handleStartIdentification}
           calloutTitle={TASK_STALE_TITLE}
           calloutColor="warning"
@@ -157,6 +155,12 @@ export function FeatureIdentificationControl({
 
 // Sub-components
 
+const COMMON_BUTTON_PROPS = {
+  size: 'm',
+  iconType: 'sparkles',
+  'data-test-subj': 'feature_identification_identify_features_button',
+} as const;
+
 interface TriggerButtonProps {
   isLoading: boolean;
   onClick: () => void;
@@ -166,11 +170,9 @@ function TriggerButton({ isLoading, onClick }: TriggerButtonProps) {
   return (
     <ConnectorListButton
       buttonProps={{
-        size: 'm',
-        iconType: 'sparkles',
+        ...COMMON_BUTTON_PROPS,
         isLoading,
         onClick,
-        'data-test-subj': 'feature_identification_identify_features_button',
         children: IDENTIFY_FEATURES_BUTTON_LABEL,
       }}
     />
@@ -178,21 +180,19 @@ function TriggerButton({ isLoading, onClick }: TriggerButtonProps) {
 }
 
 interface CompletedStateProps {
-  featuresCount: number;
   isLoading: boolean;
   onStartIdentification: () => void;
-  isNoResultsDismissed: boolean;
-  onDismiss: () => void;
+  showNoResultsCallout: boolean;
+  onDismissNoResults: () => void;
 }
 
 function CompletedState({
-  featuresCount,
   isLoading,
   onStartIdentification,
-  isNoResultsDismissed,
-  onDismiss,
+  showNoResultsCallout,
+  onDismissNoResults,
 }: CompletedStateProps) {
-  if (featuresCount === 0 && !isNoResultsDismissed) {
+  if (showNoResultsCallout) {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
@@ -204,7 +204,7 @@ function CompletedState({
             title={NO_FEATURES_IDENTIFIED_TITLE}
             color="primary"
             iconType="search"
-            onDismiss={onDismiss}
+            onDismiss={onDismissNoResults}
           >
             {NO_FEATURES_IDENTIFIED_DESCRIPTION}
           </EuiCallOut>
@@ -227,7 +227,7 @@ function InProgressState({ onCancel }: InProgressStateProps) {
         <EuiButton
           iconType="sparkle"
           iconSide="right"
-          isLoading={true}
+          isLoading
           data-test-subj="feature_identification_identify_features_button"
         >
           {IN_PROGRESS_BUTTON_LABEL}
@@ -249,12 +249,9 @@ function CancellingState() {
   return (
     <ConnectorListButton
       buttonProps={{
-        size: 'm',
-        iconType: 'sparkles',
-        iconSide: 'right',
+        ...COMMON_BUTTON_PROPS,
         isDisabled: true,
         isLoading: true,
-        'data-test-subj': 'feature_identification_identify_features_button',
         children: CANCELLING_BUTTON_LABEL,
       }}
     />

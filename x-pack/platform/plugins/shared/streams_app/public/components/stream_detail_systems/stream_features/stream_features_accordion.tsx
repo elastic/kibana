@@ -12,12 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { StreamFeaturesTable } from './stream_features_table';
 
-const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
+const getUnderlineOnHoverStyle = (textDecoration: 'underline' | 'none') => css`
   &:hover,
   &:focus {
-    text-decoration: ${textDecorationValue};
+    text-decoration: ${textDecoration};
   }
 `;
+
+const underlineOnHoverStyle = getUnderlineOnHoverStyle('underline');
+const noUnderlineOnHoverStyle = getUnderlineOnHoverStyle('none');
 
 interface StreamFeaturesAccordionProps {
   definition: Streams.all.Definition;
@@ -44,19 +47,17 @@ export const StreamFeaturesAccordion = ({
       id="stream-features-accordion"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false} css={getUnderlineOnHoverStyle('underline')}>
-            {i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
-              defaultMessage: 'Stream features',
-            })}
+          <EuiFlexItem grow={false} css={underlineOnHoverStyle}>
+            {BUTTON_LABEL}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
-              {isIdentifyingFeatures ? 'Identifying...' : features.length}
+              {isIdentifyingFeatures ? IDENTIFYING_LABEL : features.length}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      buttonProps={{ css: getUnderlineOnHoverStyle('none') }}
+      buttonProps={{ css: noUnderlineOnHoverStyle }}
     >
       <EuiSpacer size="s" />
       <StreamFeaturesTable
@@ -71,3 +72,11 @@ export const StreamFeaturesAccordion = ({
     </EuiAccordion>
   );
 };
+
+const BUTTON_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
+  defaultMessage: 'Stream features',
+});
+
+const IDENTIFYING_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.identifyingLabel', {
+  defaultMessage: 'Identifying...',
+});

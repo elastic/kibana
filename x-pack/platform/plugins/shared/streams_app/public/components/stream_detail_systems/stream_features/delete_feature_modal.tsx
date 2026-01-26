@@ -43,9 +43,7 @@ export function DeleteFeatureModal({
   const columns = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.streams.deleteFeatureModal.featureColumn', {
-          defaultMessage: 'Feature',
-        }),
+        name: FEATURE_COLUMN_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
           return Object.values(feature.value).join(', ');
@@ -53,9 +51,7 @@ export function DeleteFeatureModal({
       },
       {
         field: 'type',
-        name: i18n.translate('xpack.streams.deleteFeatureModal.typeColumn', {
-          defaultMessage: 'Type',
-        }),
+        name: TYPE_COLUMN_LABEL,
         render: (type: string) => <EuiBadge color="hollow">{upperFirst(type)}</EuiBadge>,
       },
     ],
@@ -63,14 +59,7 @@ export function DeleteFeatureModal({
   );
 
   return (
-    <EuiModal
-      onClose={onCancel}
-      aria-label={i18n.translate(
-        'xpack.streams.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
-        { defaultMessage: 'Delete features modal' }
-      )}
-      maxWidth={600}
-    >
+    <EuiModal onClose={onCancel} aria-label={MODAL_ARIA_LABEL} maxWidth={600}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.deleteFeatureModal.title', {
@@ -89,14 +78,7 @@ export function DeleteFeatureModal({
           })}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiCallOut
-          announceOnMount
-          color="warning"
-          iconType="warning"
-          title={i18n.translate('xpack.streams.deleteFeatureModal.warningMessage', {
-            defaultMessage: 'This action cannot be undone.',
-          })}
-        />
+        <EuiCallOut announceOnMount color="warning" iconType="warning" title={WARNING_MESSAGE} />
         <EuiSpacer size="m" />
         <EuiBasicTable
           css={css`
@@ -110,9 +92,7 @@ export function DeleteFeatureModal({
               z-index: ${euiTheme.levels.content};
             }
           `}
-          tableCaption={i18n.translate('xpack.streams.deleteFeatureModal.tableCaption', {
-            defaultMessage: 'List of features to delete',
-          })}
+          tableCaption={TABLE_CAPTION}
           items={features}
           columns={columns}
           data-test-subj="streamsAppDeleteFeatureModalTable"
@@ -124,9 +104,7 @@ export function DeleteFeatureModal({
           disabled={isLoading}
           data-test-subj="streamsAppDeleteFeatureModalCancelButton"
         >
-          {i18n.translate('xpack.streams.deleteFeatureModal.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
+          {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton
           color="danger"
@@ -144,3 +122,30 @@ export function DeleteFeatureModal({
     </EuiModal>
   );
 }
+
+// i18n labels
+
+const FEATURE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.featureColumn', {
+  defaultMessage: 'Feature',
+});
+
+const TYPE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.typeColumn', {
+  defaultMessage: 'Type',
+});
+
+const MODAL_ARIA_LABEL = i18n.translate(
+  'xpack.streams.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
+  { defaultMessage: 'Delete features modal' }
+);
+
+const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteFeatureModal.warningMessage', {
+  defaultMessage: 'This action cannot be undone.',
+});
+
+const TABLE_CAPTION = i18n.translate('xpack.streams.deleteFeatureModal.tableCaption', {
+  defaultMessage: 'List of features to delete',
+});
+
+const CANCEL_BUTTON_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.cancelButton', {
+  defaultMessage: 'Cancel',
+});

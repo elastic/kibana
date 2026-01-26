@@ -75,6 +75,8 @@ export function StreamFeaturesTable({
     onSelectFeature(null);
   }, [onSelectFeature]);
 
+  const isSelectionActionsDisabled = selectedFeatures.length === 0 || isLoadingFeatures;
+
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
       <EuiFlexGroup alignItems="center">
@@ -91,7 +93,7 @@ export function StreamFeaturesTable({
             iconType="cross"
             size="xs"
             aria-label={CLEAR_SELECTION}
-            isDisabled={selectedFeatures.length === 0 || isLoadingFeatures}
+            isDisabled={isSelectionActionsDisabled}
             onClick={clearSelection}
           >
             {CLEAR_SELECTION}
@@ -104,7 +106,7 @@ export function StreamFeaturesTable({
             iconType="trash"
             color="danger"
             aria-label={DELETE_SELECTED}
-            isDisabled={selectedFeatures.length === 0 || isLoadingFeatures}
+            isDisabled={isSelectionActionsDisabled}
             onClick={showBulkDeleteModal}
           >
             {DELETE_SELECTED}

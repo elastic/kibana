@@ -149,9 +149,7 @@ export function useStreamFeaturesTable({
             data-test-subj="streamsAppFeatureDetailsButton"
             iconType="expand"
             isDisabled={isIdentifyingFeatures}
-            aria-label={i18n.translate('xpack.streams.streamFeaturesTable.detailsButtonAriaLabel', {
-              defaultMessage: 'View details',
-            })}
+            aria-label={VIEW_DETAILS_ARIA_LABEL}
             onClick={() => onSelectFeature(feature)}
           />
         ),
@@ -169,7 +167,7 @@ export function useStreamFeaturesTable({
           const valueStr = Object.values(feature.value).join(', ');
           return (
             <EuiLink
-              onClick={() => !isIdentifyingFeatures && onSelectFeature(feature)}
+              onClick={() => onSelectFeature(feature)}
               disabled={isIdentifyingFeatures}
               data-test-subj="streamsAppFeatureNameLink"
             >
@@ -206,24 +204,14 @@ export function useStreamFeaturesTable({
         width: '12%',
         render: () => (
           // TODO: add created by, all features are currently created by LLM
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.streams.streamFeaturesTable.createdByLLM', {
-              defaultMessage: 'LLM',
-            })}
-          </EuiBadge>
+          <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>
         ),
       },
     ],
     [isIdentifyingFeatures, onSelectFeature]
   );
 
-  const noItemsMessage = isIdentifyingFeatures
-    ? i18n.translate('xpack.streams.streamFeaturesTable.identifyingFeaturesMessage', {
-        defaultMessage: 'Identifying features...',
-      })
-    : i18n.translate('xpack.streams.streamFeaturesTable.noFeaturesMessage', {
-        defaultMessage: 'No features found',
-      });
+  const noItemsMessage = isIdentifyingFeatures ? IDENTIFYING_FEATURES_MESSAGE : NO_FEATURES_MESSAGE;
 
   return {
     // State
@@ -305,3 +293,21 @@ export const DELETE_SELECTED = i18n.translate(
     defaultMessage: 'Delete selected',
   }
 );
+
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.streamFeaturesTable.detailsButtonAriaLabel',
+  { defaultMessage: 'View details' }
+);
+
+const CREATED_BY_LLM = i18n.translate('xpack.streams.streamFeaturesTable.createdByLLM', {
+  defaultMessage: 'LLM',
+});
+
+const IDENTIFYING_FEATURES_MESSAGE = i18n.translate(
+  'xpack.streams.streamFeaturesTable.identifyingFeaturesMessage',
+  { defaultMessage: 'Identifying features...' }
+);
+
+const NO_FEATURES_MESSAGE = i18n.translate('xpack.streams.streamFeaturesTable.noFeaturesMessage', {
+  defaultMessage: 'No features found',
+});

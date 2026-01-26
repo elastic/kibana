@@ -18,7 +18,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { useStreamFeatures } from '../../hooks/use_stream_features';
-import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useStreamSystems } from './stream_systems/hooks/use_stream_systems';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
@@ -36,17 +35,12 @@ export function StreamDiscoveryConfiguration({
   definition,
   aiFeatures,
 }: StreamDiscoveryConfigurationProps) {
-  // Features hooks
+  // Features hook
   const {
     features: existingFeatures,
     refreshFeatures,
     featuresLoading,
   } = useStreamFeatures(definition);
-  const {
-    getFeaturesIdentificationStatus,
-    scheduleFeaturesIdentificationTask,
-    cancelFeaturesIdentificationTask,
-  } = useStreamFeaturesApi(definition);
 
   // Systems hook
   const {
@@ -108,11 +102,9 @@ export function StreamDiscoveryConfiguration({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <FeatureIdentificationControl
+                    definition={definition}
                     refreshFeatures={refreshFeatures}
                     aiFeatures={aiFeatures}
-                    getFeaturesIdentificationStatus={getFeaturesIdentificationStatus}
-                    scheduleFeaturesIdentificationTask={scheduleFeaturesIdentificationTask}
-                    cancelFeaturesIdentificationTask={cancelFeaturesIdentificationTask}
                     isIdentifyingFeatures={isIdentifyingFeatures}
                     onTaskStart={handleFeatureTaskStart}
                     onTaskEnd={handleFeatureTaskEnd}

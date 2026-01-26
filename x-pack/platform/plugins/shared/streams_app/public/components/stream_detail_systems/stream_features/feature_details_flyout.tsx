@@ -66,61 +66,39 @@ export function FeatureDetailsFlyout({
 
   const generalInfoItems = [
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
-        defaultMessage: 'Name',
-      }),
+      title: NAME_LABEL,
       description: <EuiText size="s">{feature.name || noDataPlaceholder}</EuiText>,
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
-        defaultMessage: 'Value',
-      }),
+      title: VALUE_LABEL,
       description: <EuiText size="s">{formattedValue || noDataPlaceholder}</EuiText>,
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
-        defaultMessage: 'Type',
-      }),
+      title: TYPE_LABEL,
       description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
-        defaultMessage: 'Created by',
-      }),
-      description: (
-        <EuiBadge color="hollow">
-          {i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
-            defaultMessage: 'LLM',
-          })}
-        </EuiBadge>
-      ),
+      title: CREATED_BY_LABEL,
+      description: <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>,
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
-        defaultMessage: 'Status',
-      }),
+      title: STATUS_LABEL,
       description: (
         <EuiHealth color={getStatusColor(feature.status)}>{upperFirst(feature.status)}</EuiHealth>
       ),
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
-        defaultMessage: 'Confidence',
-      }),
+      title: CONFIDENCE_LABEL,
       description: (
         <EuiHealth color={getConfidenceColor(feature.confidence)}>{feature.confidence}</EuiHealth>
       ),
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
-        defaultMessage: 'Last seen',
-      }),
+      title: LAST_SEEN_LABEL,
       description: <EuiText size="s">{feature.last_seen || noDataPlaceholder}</EuiText>,
     },
     {
-      title: i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
-        defaultMessage: 'Tags',
-      }),
+      title: TAGS_LABEL,
       description:
         feature.tags.length > 0 ? (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
@@ -161,10 +139,7 @@ export function FeatureDetailsFlyout({
                       <EuiButtonIcon
                         data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
                         iconType="boxesVertical"
-                        aria-label={i18n.translate(
-                          'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
-                          { defaultMessage: 'Actions' }
-                        )}
+                        aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                         onClick={toggleActionsPopover}
                       />
                     }
@@ -185,9 +160,7 @@ export function FeatureDetailsFlyout({
                           onClick={handleDeleteClick}
                           data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
                         >
-                          {i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
-                            defaultMessage: 'Delete',
-                          })}
+                          {DELETE_ACTION_LABEL}
                         </EuiContextMenuItem>,
                       ]}
                     />
@@ -198,10 +171,7 @@ export function FeatureDetailsFlyout({
                 <EuiButtonIcon
                   data-test-subj="streamsAppFeatureDetailsFlyoutCloseButton"
                   iconType="cross"
-                  aria-label={i18n.translate(
-                    'xpack.streams.featureDetailsFlyout.closeButtonAriaLabel',
-                    { defaultMessage: 'Close' }
-                  )}
+                  aria-label={CLOSE_BUTTON_ARIA_LABEL}
                   onClick={onClose}
                 />
               </EuiFlexItem>
@@ -212,11 +182,7 @@ export function FeatureDetailsFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <InfoPanel
-              title={i18n.translate('xpack.streams.featureDetailsFlyout.generalInformationLabel', {
-                defaultMessage: 'General information',
-              })}
-            >
+            <InfoPanel title={GENERAL_INFORMATION_LABEL}>
               {generalInfoItems.map((item, index) => (
                 <React.Fragment key={index}>
                   <EuiDescriptionList
@@ -231,47 +197,28 @@ export function FeatureDetailsFlyout({
             </InfoPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <InfoPanel
-              title={i18n.translate('xpack.streams.featureDetailsFlyout.descriptionLabel', {
-                defaultMessage: 'Description',
-              })}
-            >
-              <EuiText>
-                {feature.description ||
-                  i18n.translate('xpack.streams.featureDetailsFlyout.noDescriptionAvailable', {
-                    defaultMessage: 'No description available',
-                  })}
-              </EuiText>
+            <InfoPanel title={DESCRIPTION_LABEL}>
+              <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
             </InfoPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <InfoPanel
-              title={i18n.translate('xpack.streams.featureDetailsFlyout.evidenceLabel', {
-                defaultMessage: 'Evidence',
-              })}
-            >
+            <InfoPanel title={EVIDENCE_LABEL}>
               {feature.evidence.length > 0 ? (
-                <>
-                  {feature.evidence.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiHealth color="subdued" />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s">{item}</EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
-                    </React.Fragment>
-                  ))}
-                </>
+                feature.evidence.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiHealth color="subdued" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">{item}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                  </React.Fragment>
+                ))
               ) : (
-                <EuiText size="s">
-                  {i18n.translate('xpack.streams.featureDetailsFlyout.noEvidenceAvailable', {
-                    defaultMessage: 'No evidence available',
-                  })}
-                </EuiText>
+                <EuiText size="s">{NO_EVIDENCE_AVAILABLE}</EuiText>
               )}
             </InfoPanel>
           </EuiFlexItem>
@@ -288,3 +235,78 @@ export function FeatureDetailsFlyout({
     </EuiFlyout>
   );
 }
+
+// i18n labels
+
+const NAME_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
+  defaultMessage: 'Name',
+});
+
+const VALUE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
+  defaultMessage: 'Value',
+});
+
+const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
+  defaultMessage: 'Type',
+});
+
+const CREATED_BY_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
+  defaultMessage: 'Created by',
+});
+
+const CREATED_BY_LLM = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
+  defaultMessage: 'LLM',
+});
+
+const STATUS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
+  defaultMessage: 'Status',
+});
+
+const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
+  defaultMessage: 'Confidence',
+});
+
+const LAST_SEEN_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
+  defaultMessage: 'Last seen',
+});
+
+const TAGS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
+  defaultMessage: 'Tags',
+});
+
+const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
+  { defaultMessage: 'Actions' }
+);
+
+const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
+  defaultMessage: 'Delete',
+});
+
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.closeButtonAriaLabel',
+  { defaultMessage: 'Close' }
+);
+
+const GENERAL_INFORMATION_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.generalInformationLabel',
+  { defaultMessage: 'General information' }
+);
+
+const DESCRIPTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.descriptionLabel', {
+  defaultMessage: 'Description',
+});
+
+const NO_DESCRIPTION_AVAILABLE = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.noDescriptionAvailable',
+  { defaultMessage: 'No description available' }
+);
+
+const EVIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.evidenceLabel', {
+  defaultMessage: 'Evidence',
+});
+
+const NO_EVIDENCE_AVAILABLE = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.noEvidenceAvailable',
+  { defaultMessage: 'No evidence available' }
+);
