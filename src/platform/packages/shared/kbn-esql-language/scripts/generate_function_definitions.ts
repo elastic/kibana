@@ -298,7 +298,6 @@ function printGeneratedFunctionsFile(
       description,
       alias,
       signatures,
-      operator,
       customParametersSnippet,
       license,
       observabilityTier,
@@ -313,11 +312,6 @@ function printGeneratedFunctionsFile(
       return newSignature;
     });
 
-    let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (name.toLowerCase() === 'match') {
-      functionName = 'match';
-    }
-
     // Map locationsAvailable to enum names
     const locationsAvailable = functionDefinition.locationsAvailable.map(
       (location) => `Location.${location.toUpperCase()}`
@@ -329,7 +323,7 @@ function printGeneratedFunctionsFile(
     return `${FILE_HEADER}
 const ${getDefinitionName(name)}: FunctionDefinition = {
   type: FunctionDefinitionTypes.${type.toUpperCase()},
-  name: '${functionName}',
+  name: EsqlFunctionNames.${name.toUpperCase()},
     description: i18n.translate('kbn-esql-language.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
@@ -369,6 +363,7 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
 import { i18n } from '@kbn/i18n';
 import { Location } from '../../registry/types';
 import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { EsqlFunctionNames } from './function_names';
 
 
 
@@ -469,6 +464,18 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
   const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
 
   const functionNames = allFunctionDefinitions.map((def) => def.name.toUpperCase());
+
+  const functionsEnum = `export enum EsqlFunctionNames {
+  ${allFunctionDefinitions
+    .map(
+      (func) =>
+        `  ${func.name.toUpperCase()} = '${
+          func.operator?.toLowerCase() ?? func.name.toLowerCase()
+        }',`
+    )
+    .join('\n')}
+  }`;
+
   await writeFile(
     join(__dirname, '../src/commands/definitions/generated/function_names.ts'),
     `/**
@@ -491,6 +498,8 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
  */
 
 export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
+
+${functionsEnum}
 `
   );
 
