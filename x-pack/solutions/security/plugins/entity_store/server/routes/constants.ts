@@ -35,6 +35,7 @@ export const LogExtractionBodyParams = z.object({
   //   .string()
   //   .regex(/[smdh]$/)
   //   .optional(),
+  // TODO: add timeout once we have a way to set it as a task override param
   frequency: z
     .string()
     .regex(/[smdh]$/)
