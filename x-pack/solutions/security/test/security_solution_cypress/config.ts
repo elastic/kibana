@@ -55,9 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'bulkEditAlertSuppressionEnabled',
           'doesNotMatchForIndicatorMatchRuleEnabled',
-          'continueSuppressionWindowAdvancedSettingEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

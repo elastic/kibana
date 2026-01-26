@@ -10,7 +10,8 @@
 import type { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { DataType, DateHistogramParams } from '../../types';
+import type { DataType } from '@kbn/lens-common';
+import type { DateHistogramParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
 import type { DateHistogramColumn } from './types';
 

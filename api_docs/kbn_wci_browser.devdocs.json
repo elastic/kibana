@@ -11,7 +11,7 @@
         "tags": [],
         "label": "IntegrationComponentDescriptor",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,7 +32,7 @@
                 "text": "IntegrationType"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -56,7 +56,7 @@
               },
               ">"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -80,7 +80,7 @@
               },
               ">"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -94,7 +94,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -112,7 +112,7 @@
         "tags": [],
         "label": "IntegrationConfigurationFormProps",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -156,7 +156,7 @@
               "UseFormSetFocus",
               "<any>; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -172,7 +172,7 @@
         "description": [
           "\nProps that will be passed to the tool call component"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,7 +194,7 @@
                 "text": "Integration"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -216,7 +216,7 @@
                 "text": "ToolCall"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -232,7 +232,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-browser/src/integration_ui_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           }

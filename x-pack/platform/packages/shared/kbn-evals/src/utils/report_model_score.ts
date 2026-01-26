@@ -8,244 +8,110 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { sumBy, keyBy, uniq } from 'lodash';
-import { table } from 'table';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
-import { mean, median, deviation, min, max } from 'd3';
+import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import {
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+  parseScoreDocuments,
+} from './score_repository';
+import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
+import type { EvaluationReport } from '../types';
 
-interface DatasetScore {
-  id: string;
-  name: string;
-  numExamples: number;
-  evaluatorScores: Map<string, number[]>;
-  evaluatorStats?: Map<string, EvaluatorStats>;
-}
-
-interface EvaluatorStats {
-  mean: number;
-  median: number;
-  stdDev: number;
-  min: number;
-  max: number;
-  count: number;
-  percentage: number;
-}
-
-export async function reportModelScore({
-  log,
+export async function buildEvaluationReport({
   phoenixClient,
-  model,
   experiments,
+  model,
+  evaluatorModel,
   repetitions,
+  runId,
 }: {
-  log: SomeDevLog;
   phoenixClient: KibanaPhoenixClient;
-  model: Model;
   experiments: RanExperiment[];
+  model: Model;
+  evaluatorModel: Model;
   repetitions: number;
-}): Promise<void> {
-  const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
+  runId?: string;
+}): Promise<EvaluationReport> {
+  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
 
-  const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
-
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
-
-  const datasetScoresMap = new Map<string, DatasetScore>();
-
-  for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
-
-    const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
-
-    // Ensure dataset entry exists
-    if (!datasetScoresMap.has(datasetId)) {
-      datasetScoresMap.set(datasetId, {
-        id: datasetId,
-        name: datasetInfosById[datasetId]?.name ?? datasetId,
-        numExamples: 0,
-        evaluatorScores: new Map<string, number[]>(),
-      });
-    }
-
-    const datasetScore = datasetScoresMap.get(datasetId)!;
-    datasetScore.numExamples += numExamplesForExperiment;
-
-    if (evaluationRuns) {
-      evaluationRuns.forEach((evalRun) => {
-        const score = evalRun.result?.score ?? 0;
-
-        // If evaluatorScores doesn't contain that evaluator by key, create an empty array
-        if (!datasetScore.evaluatorScores.has(evalRun.name)) {
-          datasetScore.evaluatorScores.set(evalRun.name, []);
-        }
-
-        datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
-      });
-    }
-  }
-
-  // Get all unique evaluator names across all datasets
-  const allEvaluatorNames = new Set<string>();
-  Array.from(datasetScoresMap.values()).forEach((dataset) => {
-    dataset.evaluatorScores.forEach((_, evaluatorName) => {
-      allEvaluatorNames.add(evaluatorName);
-    });
-  });
-  const evaluatorNames = Array.from(allEvaluatorNames).sort();
-
-  const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => ({
+  const datasetScoresWithStats = datasetScores.map((dataset) => ({
     ...dataset,
     evaluatorStats: new Map(
-      evaluatorNames.map((evaluatorName) => {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-        if (scores.length === 0) {
-          return [
-            evaluatorName,
-            {
-              mean: 0,
-              median: 0,
-              stdDev: 0,
-              min: 0,
-              max: 0,
-              count: 0,
-              percentage: 0,
-            } as EvaluatorStats,
-          ];
-        }
-        const totalScore = scores.reduce((sum, score) => sum + score, 0);
-        return [
-          evaluatorName,
-          {
-            mean: mean(scores) ?? 0,
-            median: median(scores) ?? 0,
-            stdDev: deviation(scores) ?? 0,
-            min: min(scores) ?? 0,
-            max: max(scores) ?? 0,
-            count: scores.length,
-            percentage: dataset.numExamples > 0 ? totalScore / dataset.numExamples : 0,
-          } as EvaluatorStats,
-        ];
+      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
+        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
+        return [evaluatorName, stats];
       })
     ),
   }));
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+  const currentRunId = runId || process.env.TEST_RUN_ID;
+
+  if (!currentRunId) {
+    throw new Error(
+      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
+    );
+  }
+
+  return {
+    datasetScoresWithStats,
+    model,
+    evaluatorModel,
+    repetitions,
+    runId: currentRunId,
+  };
+}
+
+export async function exportEvaluations(
+  report: EvaluationReport,
+  esClient: EsClient,
+  log: SomeDevLog
+): Promise<void> {
+  if (report.datasetScoresWithStats.length === 0) {
+    log.warning('No dataset scores available to export to Elasticsearch');
     return;
   }
 
-  // Calculate overall statistics for each evaluator
-  const overallEvaluatorStats = new Map<string, EvaluatorStats>();
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  evaluatorNames.forEach((evaluatorName) => {
-    // Get all scores across all datasets for this evaluator
-    const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
+  const exporter = new EvaluationScoreRepository(esClient, log);
 
-    if (allScores.length === 0) {
-      overallEvaluatorStats.set(evaluatorName, {
-        mean: 0,
-        median: 0,
-        stdDev: 0,
-        min: 0,
-        max: 0,
-        count: 0,
-        percentage: 0,
-      });
-      return;
-    }
-
-    // Calculate weighted percentage (total score across all datasets / total examples)
-    const totalScore = sumBy(datasetScores, (d) => {
-      const scores = d.evaluatorScores.get(evaluatorName) || [];
-      return scores.reduce((sum, score) => sum + score, 0);
-    });
-
-    overallEvaluatorStats.set(evaluatorName, {
-      mean: mean(allScores) ?? 0,
-      median: median(allScores) ?? 0,
-      stdDev: deviation(allScores) ?? 0,
-      min: min(allScores) ?? 0,
-      max: max(allScores) ?? 0,
-      count: allScores.length,
-      percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
-    });
+  await exporter.exportScores({
+    datasetScoresWithStats: report.datasetScoresWithStats,
+    model: report.model,
+    evaluatorModel: report.evaluatorModel,
+    runId: report.runId,
+    repetitions: report.repetitions,
   });
 
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
+  const modelId = report.model.id || 'unknown';
 
-  // Create summary table with dataset-level and overall descriptive statistics
-  const createSummaryTable = () => {
-    const repetitionAwareExampleCount = (numExamples: number): string => {
-      return repetitions > 1
-        ? `${repetitions} x ${numExamples / repetitions}`
-        : numExamples.toString();
-    };
+  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${
+        report.runId
+      }"`
+    )
+  );
+}
 
-    const examplesHeader =
-      repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
+  if (scores.length === 0) {
+    throw new Error('No documents to format');
+  }
 
-    const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
+  const scoresWithStats = parseScoreDocuments(scores);
 
-    const datasetRows = datasetScores.map((dataset) => {
-      const row = [dataset.name, repetitionAwareExampleCount(dataset.numExamples)];
+  const repetitions = scores[0].repetitions ?? 1;
 
-      evaluatorNames.forEach((evaluatorName) => {
-        const stats = dataset.evaluatorStats.get(evaluatorName);
-        if (stats && stats.count > 0) {
-          // Combine all statistics in a single cell with multiple lines
-          const cellContent = [
-            chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-            chalk.cyan(`mean: ${stats.mean.toFixed(3)}`),
-            chalk.cyan(`median: ${stats.median.toFixed(3)}`),
-            chalk.cyan(`std: ${stats.stdDev.toFixed(3)}`),
-            chalk.cyan(`min: ${stats.min.toFixed(3)}`),
-            chalk.cyan(`max: ${stats.max.toFixed(3)}`),
-          ].join('\n');
-          row.push(cellContent);
-        } else {
-          row.push(chalk.gray('-'));
-        }
-      });
-
-      return row;
-    });
-
-    // Add overall statistics row
-    const overallRow = [chalk.bold.green('Overall'), repetitionAwareExampleCount(totalExamples)];
-    evaluatorNames.forEach((evaluatorName) => {
-      const stats = overallEvaluatorStats.get(evaluatorName);
-      if (stats && stats.count > 0) {
-        const cellContent = [
-          chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-          chalk.bold.green(`mean: ${stats.mean.toFixed(3)}`),
-          chalk.bold.green(`median: ${stats.median.toFixed(3)}`),
-          chalk.bold.green(`std: ${stats.stdDev.toFixed(3)}`),
-          chalk.bold.green(`min: ${stats.min.toFixed(3)}`),
-          chalk.bold.green(`max: ${stats.max.toFixed(3)}`),
-        ].join('\n');
-        overallRow.push(cellContent);
-      } else {
-        overallRow.push(chalk.bold.green('-'));
-      }
-    });
-
-    // Build column alignment configuration
-    const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
-      0: { alignment: 'left' },
-    };
-    for (let i = 1; i < tableHeaders.length; i++) {
-      columnConfig[i] = { alignment: 'right' };
-    }
-
-    return table([tableHeaders, ...datasetRows, overallRow], {
-      columns: columnConfig,
-    });
+  return {
+    datasetScoresWithStats: scoresWithStats,
+    model: scores[0].model as Model,
+    evaluatorModel: scores[0].evaluator_model as Model,
+    repetitions,
+    runId: scores[0].run_id,
   };
-
-  const summaryTable = createSummaryTable();
-
-  log.info(`\n\n${header[0]}`);
-  log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
 }

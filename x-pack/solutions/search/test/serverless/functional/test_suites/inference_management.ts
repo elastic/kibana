@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'embeddedConsole',
-    'svlSearchInferenceManagementPage',
+    'searchInferenceManagementPage',
     'header',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -31,30 +31,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('endpoint tabular view', () => {
       it('is loaded successfully', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
       });
 
       it('preconfigured endpoints can not be deleted', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });
     });
 
     describe('copy endpoint id action', () => {
       it('can copy an endpoint id', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectToCopyEndpoint();
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectToCopyEndpoint();
       });
     });
 
     describe('create inference flyout', () => {
       it('renders successfully', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
+        await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
       });
     });
 
     describe('edit inference flyout', () => {
       it('renders successfully', async () => {
-        await pageObjects.svlSearchInferenceManagementPage.EditInferenceFlyout.expectEditInferenceEndpointFlyoutToBeVisible();
+        await pageObjects.searchInferenceManagementPage.EditInferenceFlyout.expectEditInferenceEndpointFlyoutToBeVisible();
       });
     });
 

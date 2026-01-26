@@ -66,6 +66,11 @@ const actionNames: {
     completedText: 'migrated',
     cancelledText: 'migration',
   },
+  PRIVILEGE_LEVEL_CHANGE: {
+    inProgressText: 'Changing privilege level of',
+    completedText: 'changed privilege level',
+    cancelledText: 'change privilege level',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
@@ -92,7 +97,9 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
         agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
         inProgressText: getAction(action.type, action.actionId).inProgressText,
         reassignText:
-          action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
+          action.type === 'POLICY_REASSIGN' && action.newPolicyId
+            ? ` to ${action.newPolicyId}`
+            : '',
         upgradeText: action.type === 'UPGRADE' ? ` to version ${action.version}` : '',
         failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
         automaticIcon: isAutomatic ? (

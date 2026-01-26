@@ -16,7 +16,9 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
+  'alerting_rule_template',
   'api_key_pending_invalidation',
+  'api_key_to_invalidate',
   'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
@@ -33,6 +35,7 @@ const previouslyRegisteredTypes = [
   'canvas-workpad',
   'canvas-workpad-template',
   'cloud',
+  'cloud-connect-api-key',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
@@ -50,6 +53,7 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'data_connector',
   'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
@@ -83,6 +87,7 @@ const previouslyRegisteredTypes = [
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
   'fleet-space-settings',
+  'fleet-cloud-connector',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -147,8 +152,10 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'slo',
   'slo-settings',
+  'slo_template',
   'space',
   'spaces-usage-stats',
+  'stream-prompts',
   'synthetics-monitor',
   'synthetics-monitor-multi-space',
   'synthetics-param',
@@ -173,6 +180,8 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
 ].sort();
 
 describe('SO type registrations', () => {

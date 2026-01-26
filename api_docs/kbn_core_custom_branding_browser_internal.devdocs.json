@@ -10,6 +10,8 @@
         "label": "CustomBrandingService",
         "description": [],
         "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,6 +29,8 @@
               "CustomBrandingSetup"
             ],
             "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -41,6 +45,8 @@
                   "CustomBrandingSetupDeps"
                 ],
                 "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+                "lineNumber": 26,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -60,6 +66,8 @@
               "CustomBrandingStart"
             ],
             "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -76,6 +84,8 @@
               "() => void"
             ],
             "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

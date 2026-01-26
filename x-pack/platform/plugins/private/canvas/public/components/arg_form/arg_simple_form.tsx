@@ -67,6 +67,7 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
 };
 
 ArgSimpleForm.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   children: PropTypes.node,
   required: PropTypes.bool,
   valueMissing: PropTypes.bool,

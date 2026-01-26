@@ -7,79 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useMemo } from 'react';
 
-import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
-import type { InitialMenuState } from '../utils/get_initial_active_items';
-import { getInitialActiveItems } from '../utils/get_initial_active_items';
+import type { MenuItem, NavigationStructure } from '../../types';
+import { getActiveItems } from '../utils/get_initial_active_items';
 
 interface NavigationState {
-  activePageId: string | undefined;
-  activeSubpageId: string | undefined;
-  sidePanelContent: MenuItem | null;
+  actualActiveItemId: string | undefined;
+  visuallyActivePageId: string | undefined;
+  visuallyActiveSubpageId: string | undefined;
+  openerNode: MenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
 
+/**
+ * Hook for managing the main navigation state.
+ *
+ * @param isCollapsed - whether the side nav is collapsed.
+ * @param items - the navigation structure including primary, secondary, and footer items.
+ * @param logoId - the logo ID, used for highlighting the logo.
+ * @param activeItemId - the active item ID, used for highlighting the active item.
+ * @returns the navigation state including:
+ * - `actualActiveItemId` - the actual active item ID. There can only be one `aria-current=page` link on the page.
+ * - `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.
+ * - `visuallyActiveSubpageId` - the visually active subpage ID.
+ * - `openerNode` - the primary menu item whose submenu is shown in the side panel.
+ * - `isCollapsed` - whether the side nav is collapsed.
+ * - `isSidePanelOpen` - whether the side panel is open.
+ */
 export const useNavigation = (
   isCollapsed: boolean,
   items: NavigationStructure,
   logoId: string,
   activeItemId?: string
 ) => {
-  const { primaryItem, secondaryItem, isLogoActive } = getInitialActiveItems(
-    items,
-    activeItemId,
-    logoId
+  const { primaryItem, secondaryItem, isLogoActive } = useMemo(
+    () => getActiveItems(items, activeItemId, logoId),
+    [items, activeItemId, logoId]
   );
 
-  const [activePageId, setActivePageId] = useState<string | undefined>(
-    isLogoActive ? logoId : primaryItem?.id
-  );
-  const [activeSubpageId, setActiveSubpageId] = useState<string | undefined>(secondaryItem?.id);
-  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(primaryItem);
-
-  const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
-
-  const navigateTo = useCallback(
-    (primaryMenuItem: MenuItem, secondaryMenuItem?: SecondaryMenuItem) => {
-      setActivePageId(primaryMenuItem.id);
-      setActiveSubpageId(secondaryMenuItem?.id || undefined);
-      setSidePanelContent(primaryMenuItem);
-    },
-    []
-  );
-
-  const resetActiveItems = useCallback(
-    (newActiveItems: InitialMenuState) => {
-      const {
-        primaryItem: newPrimaryItem,
-        secondaryItem: newSecondaryItem,
-        isLogoActive: newIsLogoActive,
-      } = newActiveItems;
-      setActivePageId(newIsLogoActive ? logoId : newPrimaryItem?.id);
-      setActiveSubpageId(newSecondaryItem?.id);
-      setSidePanelContent(newPrimaryItem);
-    },
-    [logoId]
-  );
-
-  // Update active items when `activeItemId` changes
-  useEffect(() => {
-    const newActiveItems = getInitialActiveItems(items, activeItemId, logoId);
-    resetActiveItems(newActiveItems);
-  }, [activeItemId, items, logoId, resetActiveItems]);
+  const actualActiveItemId = activeItemId;
+  const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
+  const visuallyActiveSubpageId = secondaryItem?.id;
+  const openerNode = primaryItem;
+  const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
 
   const state: NavigationState = {
-    activePageId,
-    activeSubpageId,
-    sidePanelContent,
+    actualActiveItemId,
+    visuallyActivePageId,
+    visuallyActiveSubpageId,
+    openerNode,
     isCollapsed,
     isSidePanelOpen,
   };
 
-  return {
-    ...state,
-    navigateTo,
-  };
+  return state;
 };

@@ -13,7 +13,9 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { VIEW_MODE } from './constants';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -66,6 +68,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   searchSessionId?: string;
 
   /**
+   * Optionally set Discover tab state.
+   * Use `new` as value for `id` to indicate that a new tab should be created.
+   * Once created, the new tab will have a unique id which can be referenced too if necessary.
+   * Use `label` to set a fallback tab label if it was not defined before yet.
+   */
+  tab?: { id: typeof NEW_TAB_ID | string; label?: string };
+
+  /**
    * Columns displayed in the table
    */
   columns?: string[];
@@ -102,9 +112,21 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   breakdownField?: string;
   /**
+   * Used to force the chart to be hidden or visible
+   */
+  hideChart?: boolean;
+  /**
+   * Number of rows to sample for Discover grid
+   */
+  sampleSize?: number;
+  /**
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
+  /**
+   * Optionally add some ESQL controls
+   */
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -114,6 +136,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
   isAlertResults?: boolean;
 }
 

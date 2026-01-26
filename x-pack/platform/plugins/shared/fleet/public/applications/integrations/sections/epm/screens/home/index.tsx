@@ -11,10 +11,15 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
-import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
+import {
+  INTEGRATIONS_ROUTING_PATHS,
+  INTEGRATIONS_SEARCH_QUERYPARAM,
+  INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
+} from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
 import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
+import { BrowseIntegrationsPage } from '../browse_integrations';
 import {
   useAuthz,
   useConfig,
@@ -25,7 +30,6 @@ import {
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
-import { InstalledPackages } from './installed_packages';
 import { AvailablePackages } from './available_packages';
 
 export { mapToCard, type IntegrationCardItem } from './card_utils';
@@ -40,7 +44,13 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
+  const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
+  return {
+    selectedCategory,
+    searchParam,
+    selectedSubcategory: subcategory,
+    onlyAgentless: onlyAgentlessParam,
+  };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -60,13 +70,10 @@ export const EPMHomePage: React.FC = () => {
     enabled: isAuthorizedToFetchSettings,
   });
 
-  const installedIntegrationsTabularUI =
-    ExperimentalFeaturesService.get()?.installedIntegrationsTabularUI ?? false;
-
   const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
   const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
+  const { data: allPackages } = useGetPackagesQuery(
     {
       prerelease: prereleaseIntegrationsEnabled,
     },
@@ -112,17 +119,25 @@ export const EPMHomePage: React.FC = () => {
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
-          {installedIntegrationsTabularUI ? (
-            <InstalledIntegrationsPage />
-          ) : (
-            <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
-          )}
+          <InstalledIntegrationsPage
+            prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+          />
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-        </DefaultLayout>
+        {ExperimentalFeaturesService.get().newBrowseIntegrationUx ? (
+          <DefaultLayout
+            section="browse"
+            noSpacerInContent={true}
+            notificationsBySection={notificationsBySection}
+          >
+            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+          </DefaultLayout>
+        ) : (
+          <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
+            <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+          </DefaultLayout>
+        )}
       </Route>
     </Routes>
   );

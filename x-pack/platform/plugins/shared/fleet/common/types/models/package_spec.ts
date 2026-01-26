@@ -60,6 +60,7 @@ export type PackageSpecCategory =
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'
+  | 'asset_inventory'
   | 'auditd'
   | 'authentication'
   | 'aws'
@@ -96,11 +97,13 @@ export type PackageSpecCategory =
   | 'languages'
   | 'load_balancer'
   | 'message_queue'
+  | 'misconfiguration_workflow'
   | 'monitoring'
   | 'native_search'
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'
@@ -118,6 +121,7 @@ export type PackageSpecCategory =
   | 'virtualization'
   | 'vpn_security'
   | 'vulnerability_management'
+  | 'vulnerability_workflow'
   | 'web'
   | 'web_application_firewall'
   | 'websphere'
@@ -131,6 +135,9 @@ export interface PackageSpecConditions {
   elastic?: {
     subscription?: string;
     capabilities?: string[];
+  };
+  agent?: {
+    version?: string;
   };
 }
 

@@ -22,7 +22,7 @@ import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -38,6 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -47,7 +48,7 @@ import {
   defaultGroupTitleRenderers,
 } from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -104,11 +105,9 @@ import {
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
-  hasUserCRUDPermission,
   isBoolean,
 } from '../../../../common/utils/privileges';
 
@@ -128,8 +127,8 @@ import { RuleDetailsContextProvider } from './rule_details_context';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
+import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
@@ -155,6 +154,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -258,20 +258,20 @@ export const RuleDetailsPage = connector(
         isSignalIndexExists,
         isAuthenticated,
         hasEncryptionKey,
-        canUserCRUD,
         hasIndexRead,
         signalIndexName,
         hasIndexWrite,
         hasIndexMaintenance,
       },
     ] = useUserData();
+    const canEditRules = useUserPrivileges().rulesPrivileges.edit;
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
     const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(SourcererScopeName.detections);
+      useSourcererDataView(PageScope.alerts);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+    const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
     const isLoadingIndexPattern = newDataViewPickerEnabled
       ? status !== 'ready'
       : oldIsLoadingIndexPattern;
@@ -549,7 +549,7 @@ export const RuleDetailsPage = connector(
     const renderGroupedAlertTable = useCallback(
       (groupingFilters: Filter[]) => {
         return (
-          <DetectionEngineAlertsTable
+          <AlertsTable
             tableType={TableId.alertsOnRuleDetailsPage}
             inputFilters={[...alertMergedFilters, ...groupingFilters]}
             onRuleChange={refreshRule}
@@ -613,7 +613,7 @@ export const RuleDetailsPage = connector(
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
-        <MissingPrivilegesCallOut />
+        <MissingDetectionsPrivilegesCallOut />
         {upgradeCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
@@ -643,9 +643,10 @@ export const RuleDetailsPage = connector(
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              id={InputsModelId.global}
+              dataView={experimentalDataView}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={oldSourcererDataViewSpec} // Can be removed after migration to new dataview picker
+              id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
           <RuleDetailsContextProvider>
@@ -678,7 +679,7 @@ export const RuleDetailsPage = connector(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
-                            canUserCRUD
+                            canEditRules
                           )}
                         >
                           <EuiFlexGroup>
@@ -688,7 +689,7 @@ export const RuleDetailsPage = connector(
                                 !rule ||
                                 !isExistingRule ||
                                 !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                                !hasUserCRUDPermission(canUserCRUD) ||
+                                !canEditRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               enabled={isRuleEnabled}
@@ -708,23 +709,21 @@ export const RuleDetailsPage = connector(
                               ruleId={ruleId}
                               disabled={
                                 !isExistingRule ||
-                                !hasUserCRUDPermission(canUserCRUD) ||
+                                !canEditRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               disabledReason={explainLackOfPermission(
                                 rule,
                                 hasMlPermissions,
                                 hasActionsPrivileges,
-                                canUserCRUD
+                                canEditRules
                               )}
                             />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <RuleActionsOverflow
                               rule={rule}
-                              userHasPermissions={
-                                isExistingRule && hasUserCRUDPermission(canUserCRUD)
-                              }
+                              isDisabled={!isExistingRule}
                               canDuplicateRuleWithActions={canEditRuleWithActions(
                                 rule,
                                 hasActionsPrivileges

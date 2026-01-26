@@ -7,16 +7,20 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RuleMigrationTaskCreateClientParams } from './types';
-import { RuleMigrationsTaskClient, type MigrationsRunning } from './rule_migrations_task_client';
+import {
+  RuleMigrationsTaskClient,
+  type RuleMigrationsRunning,
+} from './rule_migrations_task_client';
 
 export class RuleMigrationsTaskService {
-  private migrationsRunning: MigrationsRunning;
+  private migrationsRunning: RuleMigrationsRunning;
 
   constructor(private logger: Logger) {
     this.migrationsRunning = new Map();
   }
 
   public createClient({
+    request,
     currentUser,
     dataClient,
     dependencies,
@@ -25,6 +29,7 @@ export class RuleMigrationsTaskService {
       this.migrationsRunning,
       this.logger,
       dataClient,
+      request,
       currentUser,
       dependencies
     );

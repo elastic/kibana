@@ -77,7 +77,15 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type {
+  DiscoverSharedPublicSetup,
+  DiscoverSharedPublicStart,
+} from '@kbn/discover-shared-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -103,6 +111,7 @@ export interface ApmPluginSetupDeps {
   embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -115,6 +124,7 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
+  discoverShared: DiscoverSharedPublicSetup;
 }
 
 export interface ApmServices {
@@ -147,6 +157,7 @@ export interface ApmPluginStartDeps {
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -161,6 +172,10 @@ export interface ApmPluginStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePublicStart;
   notifications: NotificationsStart;
+  discoverShared: DiscoverSharedPublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
+  slo?: SLOPublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -275,6 +290,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const { fetchObservabilityOverviewPageData, getHasData } = await import(
         './services/rest/apm_observability_overview_fetchers'
       );
+      const { fetchSpanLinks } = await import('./services/rest/span_links');
+      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
+      const { fetchRootSpanByTraceId } = await import(
+        './services/rest/fetch_trace_root_span_by_trace_id'
+      );
+      const { fetchSpan } = await import('./services/rest/fetch_span');
+      const { fetchLatencyOverallTransactionDistribution } = await import(
+        './services/rest/fetch_latency_overall_transaction_distribution'
+      );
+      const { fetchLatencyOverallSpanDistribution } = await import(
+        './services/rest/fetch_latency_overall_span_distribution'
+      );
       const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
@@ -286,6 +313,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         fetchObservabilityOverviewPageData,
         getHasData,
         hasFleetApmIntegrations,
+        fetchSpanLinks,
+        fetchErrorsByTraceId,
+        fetchRootSpanByTraceId,
+        fetchSpan,
+        fetchLatencyOverallTransactionDistribution,
+        fetchLatencyOverallSpanDistribution,
       };
     };
 
@@ -342,6 +375,54 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fetchData: async (params: FetchDataParams) => {
         const dataHelper = await getApmDataHelper();
         return await dataHelper.fetchObservabilityOverviewPageData(params);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-span-links',
+      fetchSpanLinks: async (params, signal) => {
+        const { fetchSpanLinks } = await getApmDataHelper();
+        return fetchSpanLinks(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-errors',
+      fetchErrorsByTraceId: async (params, signal) => {
+        const { fetchErrorsByTraceId } = await getApmDataHelper();
+        return fetchErrorsByTraceId(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-root-span-by-trace-id',
+      fetchRootSpanByTraceId: async (params, signal) => {
+        const { fetchRootSpanByTraceId } = await getApmDataHelper();
+        return fetchRootSpanByTraceId(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-span',
+      fetchSpan: async (params, signal) => {
+        const { fetchSpan } = await getApmDataHelper();
+        return fetchSpan(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-latency-overall-transaction-distribution',
+      fetchLatencyOverallTransactionDistribution: async (params, signal) => {
+        const { fetchLatencyOverallTransactionDistribution } = await getApmDataHelper();
+        return fetchLatencyOverallTransactionDistribution(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-latency-overall-span-distribution',
+      fetchLatencyOverallSpanDistribution: async (params, signal) => {
+        const { fetchLatencyOverallSpanDistribution } = await getApmDataHelper();
+        return fetchLatencyOverallSpanDistribution(params, signal);
       },
     });
 

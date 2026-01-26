@@ -9,10 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
-const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
-const SANITIZED_PATH_PARAM = 'entry.1876422621';
-const ML_JOB_TYPE = 'entry.170406579';
+const KIBANA_VERSION_QUERY_PARAM = 'version';
+const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
+const SANITIZED_PATH_PARAM = 'path';
+const ML_JOB_TYPE = 'ml_job_type';
 const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate(
   'xpack.observabilityShared.featureFeedbackButton.defaultText',
   {
@@ -24,12 +24,12 @@ export type NodeType = 'host' | 'pod';
 
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
-    return 'Serverless (fully-managed projects)';
+    return 'Serverless';
   }
   if (isCloudEnv) {
-    return 'Elastic Cloud (we manage)';
+    return 'Elastic Cloud';
   }
-  return 'Self-Managed (you manage)';
+  return 'Self-Managed';
 };
 
 const getMLJobType = (mlJobType: NodeType) =>
@@ -37,7 +37,6 @@ const getMLJobType = (mlJobType: NodeType) =>
 
 export const getSurveyFeedbackURL = ({
   formUrl,
-  formConfig,
   kibanaVersion,
   sanitizedPath,
   isCloudEnv,
@@ -45,7 +44,6 @@ export const getSurveyFeedbackURL = ({
   nodeType,
 }: {
   formUrl: string;
-  formConfig?: FormConfig;
   kibanaVersion?: string;
   deploymentType?: string;
   sanitizedPath?: string;
@@ -63,36 +61,20 @@ export const getSurveyFeedbackURL = ({
 
   const url = new URL(formUrl);
   if (kibanaVersion) {
-    url.searchParams.append(
-      formConfig?.kibanaVersionQueryParam || KIBANA_VERSION_QUERY_PARAM,
-      kibanaVersion
-    );
+    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
   }
   if (deploymentType) {
-    url.searchParams.append(
-      formConfig?.kibanaDeploymentTypeQueryParam || KIBANA_DEPLOYMENT_TYPE_PARAM,
-      deploymentType
-    );
+    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
   }
   if (sanitizedPath) {
-    url.searchParams.append(
-      formConfig?.sanitizedPathQueryParam || SANITIZED_PATH_PARAM,
-      sanitizedPath
-    );
+    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
   }
   if (mlJobType) {
-    url.searchParams.append(formConfig?.mlJobTypeParam || ML_JOB_TYPE, mlJobType);
+    url.searchParams.append(ML_JOB_TYPE, mlJobType);
   }
 
   return url.href;
 };
-
-export interface FormConfig {
-  kibanaVersionQueryParam?: string;
-  kibanaDeploymentTypeQueryParam?: string;
-  sanitizedPathQueryParam?: string;
-  mlJobTypeParam?: string;
-}
 
 interface FeatureFeedbackButtonProps {
   formUrl: string;
@@ -105,12 +87,10 @@ interface FeatureFeedbackButtonProps {
   isServerlessEnv?: boolean;
   sanitizedPath?: string;
   nodeType?: NodeType;
-  formConfig?: FormConfig;
 }
 
 export const FeatureFeedbackButton = ({
   formUrl,
-  formConfig,
   'data-test-subj': dts,
   onClickCapture,
   defaultButton,
@@ -126,7 +106,6 @@ export const FeatureFeedbackButton = ({
       aria-label={surveyButtonText ?? FEEDBACK_BUTTON_DEFAULT_TEXT}
       href={getSurveyFeedbackURL({
         formUrl,
-        formConfig,
         kibanaVersion,
         isCloudEnv,
         nodeType,

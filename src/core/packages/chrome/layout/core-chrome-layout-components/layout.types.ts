@@ -13,7 +13,7 @@ import type React from 'react';
  * Dimensions for each layout section in the Chrome UI.
  *
  * This interface defines the pixel sizes for key layout areas such as banner, footer, header,
- * navigation, and sidebar, including their respective panel widths.
+ * navigation, and sidebar
  */
 export interface LayoutDimensions {
   bannerHeight: number;
@@ -21,9 +21,10 @@ export interface LayoutDimensions {
   headerHeight: number;
   navigationWidth: number;
   sidebarWidth: number;
-  sidebarPanelWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
+  applicationMarginBottom: number;
+  applicationMarginRight: number;
 }
 
 /**
@@ -33,7 +34,6 @@ export interface LayoutState extends LayoutDimensions {
   hasBanner: boolean;
   hasFooter: boolean;
   hasSidebar: boolean;
-  hasSidebarPanel: boolean;
   hasHeader: boolean;
   hasNavigation: boolean;
   hasApplicationTopBar: boolean;
@@ -58,8 +58,16 @@ export interface ChromeLayoutSlots {
   navigation?: Slot | null;
   banner?: Slot | null;
   footer?: Slot | null;
-  sidebarPanel?: Slot | null;
   sidebar?: Slot | null;
   applicationTopBar?: Slot | null;
   applicationBottomBar?: Slot | null;
 }
+
+/**
+ * Chrome style variants.
+ *
+ * @todo - we want to make sure layout code is kibana agnostic, so we need to evaluate if these styles
+ *         are generic enough or if they should be moved to a kibana specific package.
+ *         https://github.com/elastic/kibana-team/issues/2710
+ */
+export type ChromeStyle = 'classic' | 'project';

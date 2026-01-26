@@ -216,8 +216,23 @@ Observability:
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
+#### UI Tests
 
-#### Cypress tests
+We used to write our UI tests with cypress. A new tool `kbn-scout` has been introduced based on playwright that should be used for new tests.
+
+##### Scout tests
+
+We support UI end to end test with `kbn-scout` 
+
+```
+# Run server
+node scripts/scout.js start-server --stateful
+
+# Run tests
+npx playwright test --project local --grep @ess --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
+```
+
+##### Cypress tests
 
 We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](./cypress/README.md) for how to run these tests.
 
@@ -240,6 +255,19 @@ Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-star
 ```sh
 node --inspect scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
+
+#### Observability onboarding nightly tests
+
+We have an e2e test that runs nightly to monitor the elastic agent fleet enrollment flow for ECH and serverless. This test uses [ensemble](https://github.com/elastic/ensemble) to orchestrate spinning up a fresh cluster, running a playwright e2e test, and executing the enrollment code snippet provided from the UI on a machine.
+
+The test can be found in:
+
+```
+x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/stateful/fleet_ea_enrollment.spec.ts
+```
+
+Instructions for running the test can be found in the [observability onboarding playwright e2e README](x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/README.md)
+
 
 ### Storybook
 
@@ -278,7 +306,7 @@ As part of the bundled package update process, we'll likely also need to update 
 
 - `x-pack/platform/test/fleet_api_integration/config.ts`
 - `x-pack/platform/plugins/shared/fleet/server/integration_tests/helpers/docker_registry_helper.ts`
-- `x-pack/test/functional/config.base.js`
+- `x-pack/platform/test/functional/config.base.ts`
 
 To update this registry image, pull the digest SHA from the package storage Jenkins pipeline at https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/activity and update the files above. The digest value should appear in the "publish Docker image" step as part of the `docker push` command in the logs.
 

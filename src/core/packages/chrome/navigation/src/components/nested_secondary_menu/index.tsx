@@ -7,67 +7,79 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState, useCallback, useMemo } from 'react';
 import type { ReactNode, FC } from 'react';
-import React, { useState, useCallback } from 'react';
 
-import { SecondaryMenu } from '../secondary_menu';
-import { NestedMenuContext } from './use_nested_menu';
-import { Panel } from './menu_panel';
 import { Header } from './header';
 import { Item } from './menu_item';
+import { NestedMenuContext } from './use_nested_menu';
+import { Panel } from './menu_panel';
 import { PrimaryMenuItem } from './primary_menu_item';
+import { SecondaryMenu } from '../secondary_menu';
+import { MAIN_PANEL_ID } from '../../constants';
 
 interface NestedSecondaryMenuProps {
   children: ReactNode;
   initialPanel?: string;
 }
 
-const NestedSecondaryMenuRoot: FC<NestedSecondaryMenuProps> = ({
-  children,
-  initialPanel = 'main',
-}) => {
-  const [currentPanel, setCurrentPanel] = useState(initialPanel);
-  const [panelStack, setPanelStack] = useState<string[]>([]);
-
-  const goToPanel = useCallback(
-    (panelId: string) => {
-      setPanelStack((prev) => [...prev, currentPanel]);
-      setCurrentPanel(panelId);
-    },
-    [currentPanel]
-  );
-
-  const goBack = useCallback(() => {
-    const previousPanel = panelStack[panelStack.length - 1];
-    if (previousPanel) {
-      setCurrentPanel(previousPanel);
-      setPanelStack((prev) => prev.slice(0, -1));
-    }
-  }, [panelStack]);
-
-  const contextValue = {
-    currentPanel,
-    goToPanel,
-    goBack,
-    canGoBack: panelStack.length > 0,
-  };
-
-  return <NestedMenuContext.Provider value={contextValue}>{children}</NestedMenuContext.Provider>;
-};
-
 interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
-  Panel: typeof Panel;
   Header: typeof Header;
   Item: typeof Item;
+  Panel: typeof Panel;
   PrimaryMenuItem: typeof PrimaryMenuItem;
   Section: typeof SecondaryMenu.Section;
 }
 
-export const NestedSecondaryMenu: NestedSecondaryMenuComponent =
-  NestedSecondaryMenuRoot as NestedSecondaryMenuComponent;
+export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
+  children,
+  initialPanel = MAIN_PANEL_ID,
+}) => {
+  const [currentPanel, setCurrentPanel] = useState(initialPanel);
+  const [panelStack, setPanelStack] = useState<Array<{ id: string; returnFocusId?: string }>>([]);
+  const [returnFocusId, setReturnFocusId] = useState<string | undefined>();
 
-NestedSecondaryMenu.Panel = Panel;
+  const goToPanel = useCallback(
+    (panelId: string, focusId?: string) => {
+      setPanelStack((prev) => [
+        ...prev,
+        { id: currentPanel, returnFocusId: focusId || returnFocusId },
+      ]);
+      setCurrentPanel(panelId);
+      setReturnFocusId(undefined);
+    },
+    [currentPanel, returnFocusId]
+  );
+
+  const goBack = useCallback(() => {
+    setPanelStack((prev) => {
+      const previousPanel = prev[prev.length - 1];
+      if (!previousPanel) return prev;
+
+      setCurrentPanel(previousPanel.id);
+      setReturnFocusId(previousPanel.returnFocusId);
+
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      canGoBack: panelStack.length > 0,
+      currentPanel,
+      goBack,
+      goToPanel,
+      panelStackDepth: panelStack.length,
+      returnFocusId,
+    }),
+    [currentPanel, goBack, goToPanel, panelStack.length, returnFocusId]
+  );
+
+  return <NestedMenuContext.Provider value={contextValue}>{children}</NestedMenuContext.Provider>;
+};
+
 NestedSecondaryMenu.Header = Header;
 NestedSecondaryMenu.Item = Item;
+NestedSecondaryMenu.Panel = Panel;
 NestedSecondaryMenu.PrimaryMenuItem = PrimaryMenuItem;
 NestedSecondaryMenu.Section = SecondaryMenu.Section;

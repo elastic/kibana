@@ -76,7 +76,26 @@ export const PlaygroundsList = () => {
   }
 
   if (data._meta.total === 0) {
-    return <PlaygroundsListEmptyState onNewPlayground={onNewPlayground} />;
+    return (
+      <PlaygroundsListEmptyState
+        CTAContent={
+          <span>
+            <EuiButton
+              data-test-subj="newPlaygroundButton"
+              fill
+              iconType="plusInCircle"
+              fullWidth={false}
+              onClick={onNewPlayground}
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.playgroundsList.emptyPrompt.cta.text"
+                defaultMessage="New Playground"
+              />
+            </EuiButton>
+          </span>
+        }
+      />
+    );
   }
 
   return (
@@ -95,7 +114,7 @@ export const PlaygroundsList = () => {
           >
             <FormattedMessage
               id="xpack.searchPlayground.playgroundsList.page.cta.text"
-              defaultMessage="New RAG Playground"
+              defaultMessage="New Playground"
             />
           </EuiButton>,
         ]}

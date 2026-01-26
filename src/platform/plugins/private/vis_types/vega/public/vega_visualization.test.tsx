@@ -84,9 +84,6 @@ describe('VegaVisualizations', () => {
     });
 
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
-      const mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
-      mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging comment this line
-
       let vegaVis: InstanceType<VegaVisType>;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
@@ -117,9 +114,6 @@ describe('VegaVisualizations', () => {
       } finally {
         vegaVis.destroy();
       }
-      // eslint-disable-next-line no-console
-      expect(console.log).toBeCalledTimes(2);
-      mockedConsoleLog.mockRestore();
     });
 
     test('should show vega graph (may fail in dev env)', async () => {

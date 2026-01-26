@@ -19,6 +19,7 @@ import {
   useIsWithinBreakpoints,
   EuiHorizontalRule,
   useEuiTheme,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { RuleErrorLogWithApi } from './rule_error_log';
@@ -52,12 +53,16 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
     [activeSpaceId, spaceIds]
   );
 
-  return (
+  const flyout = (
     <EuiFlyout
       type={isFlyoutPush ? 'push' : 'overlay'}
       onClose={onClose}
       size={isFlyoutPush ? 'm' : 'l'}
       data-test-subj="ruleActionErrorLogFlyout"
+      aria-label="ruleActionErrorLogFlyout"
+      closeButtonProps={{
+        autoFocus: true,
+      }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -114,4 +119,9 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
+
+  if (isFlyoutPush) {
+    return <EuiFocusTrap autoFocus>{flyout}</EuiFocusTrap>;
+  }
+  return flyout;
 };

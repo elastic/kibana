@@ -21,6 +21,7 @@ export const createSystemConnectors = (actionTypes: ActionType[]): InMemoryConne
     isDeprecated: false,
     isPreconfigured: false,
     isSystemAction: true,
+    isConnectorTypeDeprecated: systemActionType.isDeprecated ?? false,
   }));
 
   return systemConnectors;

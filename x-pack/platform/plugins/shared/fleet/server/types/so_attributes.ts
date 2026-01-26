@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -27,7 +32,7 @@ import type {
   PackagePolicyPackage,
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { SecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -35,6 +40,11 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
+import type {
+  CloudProvider,
+  CloudConnectorVars,
+  AccountType,
+} from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -68,6 +78,7 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentSOAttributes {
@@ -94,6 +105,7 @@ export interface AgentSOAttributes {
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -117,6 +129,7 @@ export interface FleetServerHostSOAttributes {
     ssl?: {
       key?: { id: string };
       es_key?: { id: string };
+      agent_key?: { id: string };
     };
   };
   ssl?: string | null;
@@ -138,7 +151,7 @@ export interface PackagePolicySOAttributes {
   updated_by: string;
   description?: string;
   is_managed?: boolean;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
   elasticsearch?: {
@@ -150,9 +163,10 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
+  inputs_for_versions?: Record<string, PackagePolicyInput[]>;
 }
 
-interface OutputSoBaseAttributes {
+export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
@@ -168,6 +182,7 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
+  write_to_logs_streams?: boolean | null;
   secrets?: {
     ssl?: {
       key?: { id: string };
@@ -182,7 +197,7 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
 
 export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
   secrets?: {
     service_token?: { id: string };
     ssl?: {
@@ -191,7 +206,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   };
   sync_integrations?: boolean;
   kibana_url?: string;
-  kibana_api_key?: string;
+  kibana_api_key?: string | null;
   sync_uninstalled_integrations?: boolean;
 }
 
@@ -259,12 +274,20 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
   };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
+  };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface SpaceSettingsSOAttributes {
@@ -286,3 +309,13 @@ export interface DownloadSourceSOAttributes {
   };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
+
+export interface CloudConnectorSOAttributes {
+  name: string;
+  namespace?: string;
+  cloudProvider: CloudProvider;
+  accountType?: AccountType;
+  vars: CloudConnectorVars;
+  created_at: string;
+  updated_at: string;
+}

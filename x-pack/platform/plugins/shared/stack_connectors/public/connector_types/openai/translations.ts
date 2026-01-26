@@ -190,3 +190,18 @@ export const CA_DATA_DESC = i18n.translate(
     defaultMessage: 'Raw CA certificate content (PEM) used to verify the server certificate.',
   }
 );
+
+export const USE_NATIVE_FUNCTION_CALLING_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.enableNativeFunctionCallingLabel',
+  {
+    defaultMessage: 'Enable native function calling',
+  }
+);
+
+export const USE_NATIVE_FUNCTION_CALLING_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.enableNativeFunctionCallingDescription',
+  {
+    defaultMessage:
+      'Enable when the model supports native function calling in the chat completions API.',
+  }
+);

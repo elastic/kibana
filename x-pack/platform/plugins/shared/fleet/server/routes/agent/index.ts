@@ -44,6 +44,10 @@ import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 
 import {
+  BulkChangeAgentsPrivilegeLevelRequestSchema,
+  BulkChangeAgentsPrivilegeLevelResponseSchema,
+  ChangeAgentPrivilegeLevelRequestSchema,
+  ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
   DeleteAgentUploadFileResponseSchema,
   GetActionStatusResponseSchema,
@@ -53,7 +57,11 @@ import {
   GetAgentsResponseSchema,
   GetAvailableAgentVersionsResponseSchema,
   ListAgentUploadsResponseSchema,
+  PostAgentRollbackRequestSchema,
+  PostAgentRollbackResponseSchema,
   PostBulkActionResponseSchema,
+  PostBulkAgentRollbackRequestSchema,
+  PostBulkAgentRollbackResponseSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
@@ -94,8 +102,17 @@ import {
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
+import {
+  bulkChangeAgentsPrivilegeLevelHandler,
+  changeAgentPrivilegeLevelHandler,
+} from './change_privilege_level_handlers';
+import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   // Get one
   router.versioned
     .get({
@@ -118,10 +135,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetOneAgentRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentResponseSchema,
             },
             400: {
               body: genericErrorResponse,
+              description: 'A bad request.',
             },
           },
         },
@@ -130,75 +149,77 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Migrate
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-  if (experimentalFeatures.enableAgentMigrations) {
-    // Single agent migration
-    router.versioned
-      .post({
-        path: AGENT_API_ROUTES.MIGRATE_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
-          },
+  // Single agent migration
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
-        summary: `Migrate a single agent`,
-        description: `Migrate a single agent to another cluster.`,
-        options: {
-          tags: ['oas-tag:Elastic Agents'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: MigrateSingleAgentRequestSchema,
-            response: {
-              200: {
-                body: () => MigrateSingleAgentResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+      },
+      summary: `Migrate a single agent`,
+      description: `Migrate a single agent to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: MigrateSingleAgentRequestSchema,
+          response: {
+            200: {
+              body: () => MigrateSingleAgentResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
             },
           },
         },
+      },
 
-        migrateSingleAgentHandler
-      );
+      migrateSingleAgentHandler
+    );
 
-    // Bulk migrate multiple agents
-    router.versioned
-      .post({
-        path: AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
-          },
+  // Bulk migrate multiple agents
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
-        summary: `Migrate multiple agents`,
-        description: `Bulk migrate agents to another cluster.`,
-        options: {
-          tags: ['oas-tag:Elastic Agents'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: BulkMigrateAgentsRequestSchema,
-            response: {
-              200: {
-                body: () => BulkMigrateAgentsResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+      },
+      summary: `Migrate multiple agents`,
+      description: `Bulk migrate agents to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkMigrateAgentsRequestSchema,
+          response: {
+            200: {
+              body: () => BulkMigrateAgentsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
             },
           },
         },
-        bulkMigrateAgentsHandler
-      );
-  }
+      },
+      bulkMigrateAgentsHandler
+    );
+
   // Update
   router.versioned
     .put({
@@ -221,9 +242,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: UpdateAgentRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -253,9 +276,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostBulkUpdateAgentTagsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -286,9 +311,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: DeleteAgentRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteAgentResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -318,9 +345,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetAgentsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -350,9 +379,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetTagsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetTagsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -382,9 +413,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostNewAgentActionRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostNewAgentActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -418,9 +451,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostCancelActionRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostNewAgentActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -455,9 +490,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostRetrieveAgentsByActionsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostRetrieveAgentsByActionsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -507,9 +544,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostAgentReassignRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => schema.object({}),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -538,9 +577,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostRequestDiagnosticsActionRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -569,9 +610,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostBulkRequestDiagnosticsActionRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -600,9 +643,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: ListAgentUploadsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListAgentUploadsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -632,9 +677,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetAgentUploadFileRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => schema.stream(), // Readable
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -664,9 +711,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: DeleteAgentUploadFileRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteAgentUploadFileResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -697,9 +746,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetAgentStatusRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -728,9 +779,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetAgentDataRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentDataResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -760,9 +813,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostAgentUpgradeRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => schema.object({}),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -791,9 +846,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostBulkAgentUpgradeRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -823,9 +880,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetActionStatusRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetActionStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -855,9 +914,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostBulkAgentReassignRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -887,9 +948,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: PostBulkAgentUnenrollRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostBulkActionResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -919,9 +982,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAvailableAgentVersionsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -948,9 +1013,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => schema.string(),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -958,4 +1025,342 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentStatusRuntimeFieldHandler
     );
+
+  // Change agent privilege level
+  if (experimentalFeatures.enableAgentPrivilegeLevelChange) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Change agent privilege level`,
+        description: `Change the privilege level of a single agent to unprivileged.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+          availability: {
+            since: '9.3.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: ChangeAgentPrivilegeLevelRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => ChangeAgentPrivilegeLevelResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      changeAgentPrivilegeLevelRequest: {
+                        value: {
+                          user_info: {
+                            username: 'username',
+                            groupname: 'groupname',
+                            password: 'password',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+
+        changeAgentPrivilegeLevelHandler
+      );
+
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk change agent privilege level`,
+        description: `Change multiple agents' privilege level to unprivileged.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+          availability: {
+            since: '9.3.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: BulkChangeAgentsPrivilegeLevelRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => BulkChangeAgentsPrivilegeLevelResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkChangeAgentPrivilegeLevelRequest: {
+                        value: {
+                          agents: 'agent',
+                          user_info: {
+                            username: 'username',
+                            groupname: 'groupname',
+                            password: 'password',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+
+        bulkChangeAgentsPrivilegeLevelHandler
+      );
+  }
+
+  // Upgrade rollback
+  if (experimentalFeatures.enableAgentRollback) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.ROLLBACK_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Rollback an agent`,
+        description: `Rollback an agent to the previous version.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.4.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: PostAgentRollbackRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostAgentRollbackResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+        rollbackAgentHandler
+      );
+
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk rollback agents`,
+        description: `Rollback multiple agents to the previous version.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.4.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: PostBulkAgentRollbackRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostBulkAgentRollbackResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkRollbackAgentsRequest: {
+                        value: {
+                          agents: ['agent-1', 'agent-2'],
+                          batchSize: 100,
+                          includeInactive: false,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionIds: ['actionId1', 'actionId2'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+        bulkRollbackAgentHandler
+      );
+  }
 };

@@ -6,7 +6,11 @@
  */
 
 import type { Streams } from '../models/streams';
-import type { WiredIngestStreamEffectiveLifecycle } from '../models/ingest/lifecycle';
+import type {
+  IngestStreamEffectiveLifecycle,
+  IngestStreamLifecycleAll,
+  WiredIngestStreamEffectiveLifecycle,
+} from '../models/ingest/lifecycle';
 import { isInheritLifecycle } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
@@ -52,4 +56,14 @@ export function findInheritingStreams(
   }
 
   return inheriting;
+}
+
+export function effectiveToIngestLifecycle(
+  effectiveLifecycle: IngestStreamEffectiveLifecycle
+): IngestStreamLifecycleAll {
+  if ('from' in effectiveLifecycle) {
+    const { from, ...lifecycle } = effectiveLifecycle;
+    return lifecycle;
+  }
+  return effectiveLifecycle;
 }

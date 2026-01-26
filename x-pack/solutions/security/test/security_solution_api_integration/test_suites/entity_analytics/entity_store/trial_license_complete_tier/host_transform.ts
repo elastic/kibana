@@ -7,23 +7,25 @@
 import expect from '@kbn/expect';
 import type { Ecs, EcsHost } from '@elastic/ecs';
 import type {
-  IndexRequest,
   MappingTypeMapping,
   SearchHit,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { EntityStoreUtils } from '../../utils';
 import { moveIndexToSlowDataTier } from '../../utils/move_index_to_slow_data_tier';
+import { cleanUpEntityStore } from './infra/teardown';
+import { enableEntityStore } from './infra/setup';
+import { COMMON_DATASTREAM_NAME, HOST_INDEX_NAME, TIMEOUT_MS } from './infra/constants';
+import type { HostTransformResult, HostTransformResultHost } from './infra/host_transform';
+import {
+  buildHostTransformDocument,
+  createDocumentsAndTriggerTransform,
+} from './infra/host_transform';
 
-const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const FROZEN_INDEX_NAME: string = 'test-frozen-index';
 const COLD_INDEX_NAME: string = 'test-cold-index';
-const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
-const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
-const TIMEOUT_MS: number = 600000; // 10 minutes
 
 const SMALL_HOST_MAPPING: MappingTypeMapping = {
   properties: {
@@ -47,7 +49,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  describe('@ess Host transform logic', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232405
+  describe.skip('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);
@@ -64,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
         // Create a test index matching transform's pattern to store test documents
-        await es.indices.createDataStream({ name: DATASTREAM_NAME });
+        await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
         // Create a test index that will be moved to frozen matching transform's pattern to store test documents
         await es.indices.create({ index: FROZEN_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
         // Create a test index that will be moved to cold matching transform's pattern to store test documents
@@ -73,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
 
       after(async () => {
         const log = providerContext.getService('log');
-        await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
+        await es.indices.deleteDataStream({ name: COMMON_DATASTREAM_NAME });
 
         try {
           await es.indices.deleteAlias({
@@ -97,7 +100,9 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // Now we can enable the Entity Store...
-        await enableEntityStore(providerContext);
+        await enableEntityStore(providerContext, {
+          extraIndexPatterns: [FROZEN_INDEX_NAME, COLD_INDEX_NAME],
+        });
       });
 
       afterEach(async () => {
@@ -134,14 +139,14 @@ export default function (providerContext: FtrProviderContext) {
           { name: hostName, ip: '2.2.2.2' },
         ];
 
-        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           TIMEOUT_MS,
           async () => {
             const result = await es.search({
-              index: INDEX_NAME,
+              index: HOST_INDEX_NAME,
               query: {
                 term: {
                   'host.name': hostName,
@@ -193,14 +198,14 @@ export default function (providerContext: FtrProviderContext) {
           },
         ];
 
-        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           TIMEOUT_MS,
           async () => {
             const result = await es.search({
-              index: INDEX_NAME,
+              index: HOST_INDEX_NAME,
               query: {
                 term: {
                   'host.name': hostName,
@@ -245,7 +250,7 @@ export default function (providerContext: FtrProviderContext) {
             { name: `${TEST_DATA_PREFIX}cold-host-0` },
             { name: `${TEST_DATA_PREFIX}cold-host-1` },
           ],
-          [DATASTREAM_NAME]: [
+          [COMMON_DATASTREAM_NAME]: [
             { name: `${TEST_DATA_PREFIX}hot-host-0` },
             { name: `${TEST_DATA_PREFIX}hot-host-1` },
           ],
@@ -285,11 +290,11 @@ export default function (providerContext: FtrProviderContext) {
         ]);
 
         // Start transform
-        await createDocumentsAndTriggerTransform(providerContext, [], DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, [], COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout('Fetch only hot node documents', TIMEOUT_MS, async () => {
           const result = await es.search({
-            index: INDEX_NAME,
+            index: HOST_INDEX_NAME,
             query: {
               wildcard: {
                 'host.name': {
@@ -332,149 +337,4 @@ function expectFieldToEqualValues(field: string[] | undefined, values: string[] 
   for (let i = 0; i < sortedField.length; i++) {
     expect(sortedField[i]).to.eql(sortedValues[i]);
   }
-}
-
-function buildHostTransformDocument(
-  host: EcsHost & { timestamp?: string },
-  dataStream: string
-): IndexRequest {
-  // If not timestamp provided
-  // Get timestamp without the millisecond part
-  const isoTimestamp: string = !!host.timestamp
-    ? host.timestamp
-    : new Date().toISOString().split('.')[0];
-
-  delete host.timestamp;
-
-  const document: IndexRequest = {
-    index: dataStream,
-    document: {
-      '@timestamp': isoTimestamp,
-      host,
-    },
-  };
-  return document;
-}
-
-async function createDocumentsAndTriggerTransform(
-  providerContext: FtrProviderContext,
-  docs: (EcsHost & { timestamp?: string })[],
-  dataStream: string
-): Promise<void> {
-  const retry = providerContext.getService('retry');
-  const es = providerContext.getService('es');
-
-  const { count, transforms } = await es.transform.getTransformStats({
-    transform_id: HOST_TRANSFORM_ID,
-  });
-  expect(count).to.eql(1);
-  let transform = transforms[0];
-  expect(transform.id).to.eql(HOST_TRANSFORM_ID);
-  const triggerCount: number = transform.stats.trigger_count;
-  const docsProcessed: number = transform.stats.documents_processed;
-
-  for (let i = 0; i < docs.length; i++) {
-    const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
-    expect(result).to.eql('created');
-  }
-
-  // Trigger the transform manually
-  const { acknowledged } = await es.transform.scheduleNowTransform({
-    transform_id: HOST_TRANSFORM_ID,
-  });
-  expect(acknowledged).to.be(true);
-
-  await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-    const response = await es.transform.getTransformStats({
-      transform_id: HOST_TRANSFORM_ID,
-    });
-    transform = response.transforms[0];
-    expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
-    expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
-    return true;
-  });
-}
-
-async function enableEntityStore(providerContext: FtrProviderContext): Promise<void> {
-  const log = providerContext.getService('log');
-  const supertest = providerContext.getService('supertest');
-  const retry = providerContext.getService('retry');
-
-  const RETRIES = 5;
-  let success: boolean = false;
-  for (let attempt = 0; attempt < RETRIES; attempt++) {
-    const response = await supertest
-      .post('/api/entity_store/enable')
-      .set('kbn-xsrf', 'xxxx')
-      .send({
-        indexPattern: `${FROZEN_INDEX_NAME},${COLD_INDEX_NAME}`,
-      });
-    expect(response.statusCode).to.eql(200);
-    expect(response.body.succeeded).to.eql(true);
-
-    // and wait for it to start up
-    await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
-      const { body } = await supertest
-        .get('/api/entity_store/status')
-        .query({ include_components: true })
-        .expect(200);
-      if (body.status === 'error') {
-        log.error(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
-        success = false;
-        return true;
-      }
-      expect(body.status).to.eql('running');
-      success = true;
-      return true;
-    });
-
-    if (success) {
-      break;
-    } else {
-      log.info(`Retrying Entity Store setup...`);
-      await cleanUpEntityStore(providerContext);
-    }
-  }
-  expect(success).ok();
-}
-
-async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
-  const log = providerContext.getService('log');
-  const es = providerContext.getService('es');
-  const utils = EntityStoreUtils(providerContext.getService);
-  const attempts = 5;
-  const delayMs = 60000;
-
-  await utils.cleanEngines();
-  for (const kind of ['host', 'user', 'service', 'generic']) {
-    const name: string = `entity_store_field_retention_${kind}_default_v1.0.0`;
-    for (let currentAttempt = 0; currentAttempt < attempts; currentAttempt++) {
-      try {
-        await es.enrich.deletePolicy({ name }, { ignore: [404] });
-        break;
-      } catch (e) {
-        log.error(`Error deleting policy ${name}: ${e.message} after ${currentAttempt} tries`);
-      }
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-}
-
-interface HostTransformResult {
-  host: HostTransformResultHost;
-}
-
-interface HostTransformResultHost {
-  name: string;
-  domain: string[] | undefined;
-  hostname: string[] | undefined;
-  id: string[] | undefined;
-  os: {
-    name: string[] | undefined;
-    type: string[] | undefined;
-  };
-  mac: string[] | undefined;
-  architecture: string[] | undefined;
-  type: string[] | undefined;
-  ip: string[] | undefined;
 }

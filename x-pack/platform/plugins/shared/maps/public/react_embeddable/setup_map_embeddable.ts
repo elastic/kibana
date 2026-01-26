@@ -7,10 +7,9 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import type { MapSerializedState } from './types';
+import type { MapEmbeddableState } from '../../common';
 
 export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
@@ -23,24 +22,18 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     return mapEmbeddableFactory;
   });
 
-  embeddableSetup.registerAddFromLibraryType<MapAttributes>({
+  embeddableSetup.registerAddFromLibraryType({
     onAdd: async (container, savedObject) => {
-      const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-      container.addNewPanel<MapSerializedState>(
+      container.addNewPanel<MapEmbeddableState>(
         {
           panelType: MAP_SAVED_OBJECT_TYPE,
           serializedState: {
-            rawState: {},
-            references: [
-              {
-                name: SAVED_OBJECT_REF_NAME,
-                type: MAP_SAVED_OBJECT_TYPE,
-                id: savedObject.id,
-              },
-            ],
+            savedObjectId: savedObject.id,
           },
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
@@ -48,5 +41,10 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
       defaultMessage: 'Map',
     }),
     getIconForSavedObject: () => APP_ICON,
+  });
+
+  embeddableSetup.registerLegacyURLTransform(MAP_SAVED_OBJECT_TYPE, async () => {
+    const { getTransformOut } = await import('./embeddable_module');
+    return getTransformOut(embeddableSetup.transformEnhancementsOut);
   });
 }

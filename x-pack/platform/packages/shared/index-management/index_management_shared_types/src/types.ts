@@ -46,6 +46,9 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'create_template';
+      }
+    | {
         page: 'component_template';
         componentTemplate: string;
       }
@@ -82,6 +85,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface IndexManagementPluginStart {
+  apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
@@ -108,6 +112,7 @@ export interface Index {
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
+  mode?: string;
 
   // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
   isRollupIndex?: boolean;
@@ -144,7 +149,6 @@ export interface DatastreamFlyoutProps {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
-  hasUpdateMappingsPrivilege?: boolean;
 }
 export interface IndexSettingProps {
   indexName: string;

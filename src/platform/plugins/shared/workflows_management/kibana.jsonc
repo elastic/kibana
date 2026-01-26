@@ -10,20 +10,29 @@
     "configPath": ["workflowsManagement"],
     "browser": true,
     "server": true,
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "data"],
     "requiredPlugins": [
-      "kibanaReact",
       "navigation",
       "taskManager",
       "actions",
       "workflowsExecutionEngine",
+      "workflowsExtensions",
       "features",
       "security",
       "triggersActionsUi",
       "spaces",
-      "embeddable"
+      "esUiShared",
+      "stackConnectors",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
+      "embeddable",
+      "licensing"
     ],
     "optionalPlugins": [
-      "alerting"
+      "alerting",
+      "serverless"
     ]
   }
 }

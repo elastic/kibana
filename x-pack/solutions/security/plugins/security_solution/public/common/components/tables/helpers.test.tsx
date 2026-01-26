@@ -84,12 +84,12 @@ describe('Table Helpers', () => {
     test('it returns 2 items then overflows when displayCount is 2', () => {
       const rowItems = getRowItemsWithActions({
         values: items,
-        fieldName: 'attrName',
+        fieldName: 'user.name',
         idPrefix: 'idPrefix',
         displayCount: 2,
       });
       const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
-      expect(queryAllByTestId('cellActions-renderContent-attrName').length).toBe(2);
+      expect(queryAllByTestId('cellActions-renderContent-user.name').length).toBe(2);
       expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
   });

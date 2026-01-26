@@ -24,11 +24,6 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
   let expiry: X509Expiry | null = null;
   if (tls?.server?.x509) {
     expiry = tls.server.x509;
-  } else if (tls?.certificate_not_valid_after && tls?.certificate_not_valid_before) {
-    expiry = {
-      not_after: tls.certificate_not_valid_after,
-      not_before: tls.certificate_not_valid_before,
-    };
   }
 
   if (!expiry) {

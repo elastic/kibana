@@ -149,9 +149,11 @@ function getClusterStyleDescriptor(
                 ),
               }
             : undefined;
+
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.DYNAMIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: {
             ...options,
             field,
@@ -161,7 +163,8 @@ function getClusterStyleDescriptor(
         // copy static styles to cluster style
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.STATIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: { ...styleProperty.getOptions() },
         };
       }
@@ -182,7 +185,10 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     options: Partial<VectorLayerDescriptor>,
     mapColors: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(options, mapColors);
+    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
+      options,
+      mapColors
+    ) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type = LAYER_TYPE.BLENDED_VECTOR;
     return layerDescriptor;
   }
@@ -249,7 +255,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     if (clones.length === 0) {
       return [];
     }
-    const clonedDescriptor = clones[0];
+    const clonedDescriptor = clones[0] as Writable<VectorLayerDescriptor>;
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
     const displayName = await super.getDisplayName();

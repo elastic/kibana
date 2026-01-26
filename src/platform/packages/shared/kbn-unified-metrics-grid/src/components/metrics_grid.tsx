@@ -7,121 +7,379 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { MetricChart } from './metric_chart';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import type { EuiFlexGridProps } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import type { MetricField, Dimension } from '../types';
+import type { ChartSize } from './chart';
+import { Chart } from './chart';
+import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
+import { EmptyState } from './empty_state/empty_state';
+import { useGridNavigation } from '../hooks/use_grid_navigation';
+import { FieldsMetadataProvider } from '../context/fields_metadata';
+import { createESQLQuery } from '../common/utils';
+import { ACTION_OPEN_IN_DISCOVER } from '../common/constants';
+import { useChartLayers } from './chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../types';
 
-interface MetricField {
-  name: string;
-  index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
-  type: string;
-  timeSeriesMetric?: string;
-  unit?: string;
-  brief?: string;
-  stability?: string;
-}
+export type MetricsGridProps = Pick<
+  UnifiedMetricsGridProps,
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+> & {
+  dimensions: Dimension[];
+  searchTerm?: string;
+  columns: NonNullable<EuiFlexGridProps['columns']>;
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+  fields: MetricField[];
+  whereStatements?: string[];
+};
 
-type MetricsGridProps = {
-  timeRange: { from?: string; to?: string };
-  loading: boolean;
-  searchTerm: string;
-  filters?: Array<{ field: string; value: string }>;
-  dimensions: string[];
-  displayDensity?: 'normal' | 'compact' | 'row';
-  headerActions?: {
-    hasExploreAction?: boolean;
-    hasMetricsInsightsAction?: boolean;
-  };
-} & (
-  | {
-      pivotOn: 'metric';
-      fields: MetricField[];
-    }
-  | {
-      pivotOn: 'dimension';
-      fields: MetricField;
-    }
-);
-
+const getItemKey = (metric: MetricField, index: number) => {
+  return `${metric.name}-${index}`;
+};
 export const MetricsGrid = ({
   fields,
-  timeRange,
-  loading,
-  searchTerm,
+  onBrushEnd,
+  onFilter,
+  actions,
   dimensions,
-  pivotOn,
-  filters = [],
-  displayDensity = 'normal',
-  headerActions,
+  whereStatements,
+  services,
+  columns,
+  fetchParams,
+  discoverFetch$,
+  searchTerm,
 }: MetricsGridProps) => {
-  const getColumns = (): 1 | 2 | 3 | 4 => {
-    return Array.isArray(fields)
-      ? ((fields?.length >= 4 ? 4 : fields?.length) as 1 | 2 | 3 | 4)
-      : 1;
-  };
+  const gridRef = useRef<HTMLDivElement>(null);
+  const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { euiTheme } = useEuiTheme();
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        data-test-subj="loading-metrics-charts"
-        justifyContent="center"
-        alignItems="center"
-        style={{ minHeight: '400px' }}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingChart size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const [expandedMetric, setExpandedMetric] = useState<
+    | {
+        index: number;
+        metric: MetricField;
+        esqlQuery: string;
+      }
+    | undefined
+  >();
 
-  if (pivotOn === 'metric' && fields.length === 0) {
-    return (
-      <EuiText textAlign="center" color="subdued">
-        No metrics found matching &quot;{searchTerm}&quot;
-      </EuiText>
-    );
+  const gridColumns = columns || 1;
+  const gridRows = Math.ceil(fields.length / gridColumns);
+
+  const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
+    useGridNavigation({
+      gridColumns,
+      gridRows,
+      totalRows: fields.length,
+      gridRef,
+    });
+
+  const setChartRef = useCallback((id: string, element: HTMLDivElement | null) => {
+    if (element) {
+      chartRefs.current.set(id, element);
+    } else {
+      chartRefs.current.delete(id);
+    }
+  }, []);
+
+  const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
+    setExpandedMetric({ index, metric, esqlQuery });
+  }, []);
+
+  const handleCloseFlyout = useCallback(() => {
+    if (!expandedMetric) {
+      return;
+    }
+
+    const { rowIndex, colIndex } = getRowColFromIndex(expandedMetric.index);
+    setExpandedMetric(undefined);
+    // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+    requestAnimationFrame(() => {
+      focusCell(rowIndex, colIndex);
+    });
+  }, [expandedMetric, focusCell, getRowColFromIndex]);
+
+  const getChartRefForFocus = useCallback(() => {
+    if (expandedMetric !== undefined) {
+      const chartId = getItemKey(expandedMetric.metric, expandedMetric.index);
+      const chartElement = chartRefs.current.get(chartId);
+      if (chartElement) {
+        return { current: chartElement };
+      }
+    }
+    return { current: null };
+  }, [expandedMetric]);
+
+  if (fields.length === 0) {
+    return <EmptyState />;
   }
 
   return (
-    <EuiFlexGrid
-      data-test-subj="metrics-grid"
-      columns={getColumns()}
-      gutterSize="l"
-      style={{ margin: '16px' }}
-    >
-      {pivotOn === 'metric'
-        ? fields.map((field, index) => (
-            <EuiFlexItem
-              key={`${field.name}-${displayDensity}`}
-              data-test-subj={`metric-chart-${field.name}`}
-            >
-              <MetricChart
-                metric={field}
-                timeRange={timeRange}
-                dimensions={dimensions}
-                filters={filters}
-                colorIndex={index}
-                displayDensity={displayDensity}
-                data-test-subj={`metric-chart-${field.name}`}
-                headerActions={headerActions}
-              />
-            </EuiFlexItem>
-          ))
-        : dimensions.map((dimension, index) => (
-            <EuiFlexItem key={`${dimension}-${displayDensity}`}>
-              <MetricChart
-                metric={fields}
-                timeRange={timeRange}
-                byDimension={dimension}
-                dimensions={[dimension]}
-                filters={filters}
-                colorIndex={index}
-                displayDensity={displayDensity}
-              />
-            </EuiFlexItem>
-          ))}
-    </EuiFlexGrid>
+    <FieldsMetadataProvider fields={fields} services={services}>
+      <A11yGridWrapper
+        ref={gridRef}
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        gridRows={gridRows}
+        gridColumns={gridColumns}
+        onKeyDown={handleKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+      >
+        <EuiFlexGrid
+          gutterSize="s"
+          css={css`
+            grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
+            @container (max-width: ${euiTheme.breakpoint.xl}px) {
+              grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.l}px) {
+              grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.s}px) {
+              grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
+            }
+          `}
+        >
+          {fields.map((metric, index) => {
+            const id = getItemKey(metric, index);
+            const { rowIndex, colIndex } = getRowColFromIndex(index);
+            const isFocused =
+              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+
+            return (
+              <EuiFlexItem key={index}>
+                <ChartItem
+                  id={id}
+                  index={index}
+                  ref={(element) => setChartRef(id, element)}
+                  metric={metric}
+                  size="s"
+                  dimensions={dimensions}
+                  services={services}
+                  onBrushEnd={onBrushEnd}
+                  onFilter={onFilter}
+                  actions={actions}
+                  fetchParams={fetchParams}
+                  discoverFetch$={discoverFetch$}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  isFocused={isFocused}
+                  onFocusCell={handleFocusCell}
+                  onViewDetails={handleViewDetails}
+                  searchTerm={searchTerm}
+                  whereStatements={whereStatements}
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
+      </A11yGridWrapper>
+      {expandedMetric && (
+        <MetricInsightsFlyout
+          chartRef={getChartRefForFocus()}
+          metric={expandedMetric.metric}
+          esqlQuery={expandedMetric.esqlQuery}
+          onClose={handleCloseFlyout}
+        />
+      )}
+    </FieldsMetadataProvider>
   );
 };
+
+interface ChartItemProps
+  extends Pick<
+    UnifiedMetricsGridProps,
+    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  > {
+  id: string;
+  metric: MetricField;
+  index: number;
+  size: ChartSize;
+  dimensions: Dimension[];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+  rowIndex: number;
+  colIndex: number;
+  isFocused: boolean;
+  searchTerm?: string;
+  onFocusCell: (rowIndex: number, colIndex: number) => void;
+  onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+  whereStatements?: string[];
+}
+
+const ChartItem = React.memo(
+  React.forwardRef<HTMLDivElement, ChartItemProps>(
+    (
+      {
+        id,
+        metric,
+        index,
+        size,
+        dimensions,
+        services,
+        onBrushEnd,
+        onFilter,
+        actions,
+        fetchParams,
+        discoverFetch$,
+        rowIndex,
+        colIndex,
+        isFocused,
+        searchTerm,
+        whereStatements,
+        onFocusCell,
+        onViewDetails,
+      }: ChartItemProps,
+      ref
+    ) => {
+      const { euiTheme } = useEuiTheme();
+      const colorPalette = useMemo(
+        () => Object.values(euiTheme.colors.vis).slice(0, 10),
+        [euiTheme.colors.vis]
+      );
+
+      const esqlQuery = useMemo(() => {
+        const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+        return isSupported
+          ? createESQLQuery({
+              metric,
+              dimensions,
+              whereStatements,
+            })
+          : '';
+      }, [metric, dimensions, whereStatements]);
+
+      const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
+      const chartLayers = useChartLayers({ dimensions, metric, color });
+      const handleViewDetailsCallback = useCallback(
+        () => onViewDetails(index, esqlQuery, metric),
+        [index, esqlQuery, metric, onViewDetails]
+      );
+
+      return (
+        <A11yGridCell
+          id={id}
+          ref={ref}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          index={index}
+          isFocused={isFocused}
+          onFocus={onFocusCell}
+        >
+          <Chart
+            esqlQuery={esqlQuery}
+            size={size}
+            discoverFetch$={discoverFetch$}
+            fetchParams={fetchParams}
+            services={services}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            onExploreInDiscoverTab={actions.openInNewTab}
+            onViewDetails={handleViewDetailsCallback}
+            title={metric.name}
+            chartLayers={chartLayers}
+            titleHighlight={searchTerm}
+            extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          />
+        </A11yGridCell>
+      );
+    }
+  )
+);
+
+ChartItem.displayName = 'ChartItem';
+
+const A11yGridWrapper = React.forwardRef(
+  (
+    {
+      children,
+      gridRows,
+      gridColumns,
+      onKeyDown,
+    }: React.PropsWithChildren<{
+      gridRows: number;
+      gridColumns: number;
+      onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+    }>,
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    return (
+      <div
+        ref={ref}
+        role="grid"
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        aria-rowcount={gridRows}
+        aria-colcount={gridColumns}
+        onKeyDown={onKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+        tabIndex={0}
+        css={css`
+          outline: none;
+          container-type: inline-size;
+        `}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+const A11yGridCell = React.forwardRef(
+  (
+    {
+      id,
+      children,
+      rowIndex,
+      colIndex,
+      index,
+      isFocused,
+      onFocus,
+    }: React.PropsWithChildren<{
+      id: string;
+      rowIndex: number;
+      colIndex: number;
+      index: number;
+      isFocused: boolean;
+      onFocus: (rowIndex: number, colIndex: number) => void;
+    }>,
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    const { euiTheme } = useEuiTheme();
+
+    const handleFocusCell = useCallback(
+      () => onFocus(rowIndex, colIndex),
+      [onFocus, rowIndex, colIndex]
+    );
+
+    return (
+      <div
+        id={id}
+        ref={ref}
+        role="gridcell"
+        aria-rowindex={rowIndex + 1}
+        aria-colindex={colIndex + 1}
+        data-grid-cell={`${rowIndex}-${colIndex}`}
+        data-chart-index={index}
+        tabIndex={isFocused ? 0 : -1}
+        onFocus={handleFocusCell}
+        css={css`
+          outline: none,
+          cursor: pointer,
+          ${
+            isFocused && {
+              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+              borderRadius: euiTheme.border.radius.medium,
+            }
+          }
+
+        `}
+      >
+        {children}
+      </div>
+    );
+  }
+);

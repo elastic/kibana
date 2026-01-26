@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -20,19 +21,18 @@ import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import {
+  type EntityRiskScore,
   EntityType,
   type HostRiskScore,
   type UserRiskScore,
-  type EntityRiskScore,
 } from '../../../../common/search_strategy';
-import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { useUserData } from '../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
@@ -54,11 +54,9 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
 
-  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(PageScope.alerts);
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -96,7 +94,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <DetectionEngineAlertsTable
+        <AlertsTable
           tableType={TableId.alertsRiskInputs}
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
         />

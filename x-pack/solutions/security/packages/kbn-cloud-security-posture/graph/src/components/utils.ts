@@ -10,6 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { Node, Edge } from '@xyflow/react';
 import { Position } from '@xyflow/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
@@ -65,9 +70,15 @@ export const getNodeDocumentMode = (
   }
 
   // Single alert contains both event's document data and alert's document data.
-  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length <= 2) {
+  if (
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) &&
+    node.documentsData.length <= 1
+  ) {
     return 'single-alert';
-  } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
+  } else if (
+    node.documentsData.length === 1 &&
+    node.documentsData[0].type === DOCUMENT_TYPE_EVENT
+  ) {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
     return 'single-entity';
@@ -81,6 +92,26 @@ export const getNodeDocumentMode = (
 };
 
 /**
+ * Checks if a node has entity store enrichment.
+ * Only relevant for single-entity mode - returns false for all other modes.
+ * For single-entity nodes, checks if at least one document has entity.availableInEntityStore === true.
+ */
+export const isEntityNodeEnriched = (node: NodeViewModel): boolean => {
+  const docMode = getNodeDocumentMode(node);
+
+  if (docMode !== 'single-entity') {
+    return false;
+  }
+
+  return (
+    'documentsData' in node &&
+    Array.isArray(node.documentsData) &&
+    node.documentsData.length > 0 &&
+    node.documentsData.some((doc) => doc.entity?.availableInEntityStore === true)
+  );
+};
+
+/**
  * Returns the single document data for a node if it is in single-* mode.
  * If the node is not in one of these modes, or if it has no documentsData, it returns undefined.
  */
@@ -88,14 +119,22 @@ export const getSingleDocumentData = (
   node: NodeViewModel
 ): NodeDocumentDataViewModel | undefined => {
   const mode = getNodeDocumentMode(node);
-  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event')) {
+  if (
+    !hasNodeDocumentsData(node) ||
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')
+  ) {
     return undefined;
   }
 
-  // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
+  // For single-entity mode, prioritize finding the entity document
+  if (mode === 'single-entity') {
+    return node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ENTITY);
+  }
+
+  // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
-    node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event');
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) ??
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_EVENT);
 
   return documentData;
 };
@@ -107,6 +146,13 @@ const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
   }
 );
 
+const FETCH_GROUP_DETAILS_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGroupDetails',
+  {
+    defaultMessage: 'Error fetching group details',
+  }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
@@ -115,6 +161,17 @@ export const showErrorToast = (
     toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
   } else {
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};
+
+export const showDetailsErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GROUP_DETAILS_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GROUP_DETAILS_FAILED_TEXT));
   }
 };
 
@@ -191,3 +248,5 @@ export const buildGraphFromViewModels = (
 
   return { nodes, edges };
 };
+
+export const showStackedShape = (count?: number) => !!count && count > 1;

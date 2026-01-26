@@ -8,6 +8,7 @@
 import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
 
@@ -30,6 +31,10 @@ import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
+import { searchUnifiedAlertsRoute } from '../lib/detection_engine/routes/unified_alerts/search_route';
+import { setUnifiedAlertsWorkflowStatusRoute } from '../lib/detection_engine/routes/unified_alerts/set_workflow_status_route';
+import { setUnifiedAlertsTagsRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_tags_route';
+import { setUnifiedAlertsAssigneesRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_assignees_route';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
@@ -51,6 +56,8 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
+import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -68,7 +75,8 @@ export const initRoutes = (
   previewTelemetryReceiver: ITelemetryReceiver,
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  trialCompanionDeps: TrialCompanionRoutesDeps
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -106,6 +114,12 @@ export const initRoutes = (
   deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
 
+  // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
+  searchUnifiedAlertsRoute(router, ruleDataClient);
+  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
+  setUnifiedAlertsTagsRoute(router, ruleDataClient);
+  setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
+
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
@@ -127,7 +141,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger, telemetrySender, ml });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
@@ -136,4 +150,8 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
+
+  registerSiemReadinessRoutes({ router, logger });
+
+  registerTrialCompanionRoutes(trialCompanionDeps);
 };

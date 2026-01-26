@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { DisableAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE } from '@kbn/elastic-assistant-common';
 

@@ -1,0 +1,149 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { JsonModelSchemaType, LegacyWorkflowInput, StepContext } from '@kbn/workflows';
+import { StepContextSchema } from '@kbn/workflows';
+import {
+  extractSchemaPropertyPaths,
+  findInputsInGraph,
+  parseJsPropertyAccess,
+} from '@kbn/workflows/common/utils';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
+import { z } from '@kbn/zod/v4';
+
+export interface ContextOverrideData {
+  stepContext: Partial<StepContext>;
+  schema: z.ZodType;
+}
+
+export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {
+  /**
+   * Workflow inputs definition with their default values.
+   * Used to pre-populate input fields in the test step modal.
+   * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
+   */
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
+}
+
+const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
+
+function buildStepContextSchemaFromObject(obj: any): z.ZodType {
+  if (Array.isArray(obj)) {
+    return z.array(buildStepContextSchemaFromObject(obj[0]));
+  } else if (typeof obj === 'object' && obj !== null) {
+    const config: Record<string, any> = {};
+
+    Object.keys(obj).forEach((key) => {
+      config[key] = buildStepContextSchemaFromObject(obj[key]);
+    });
+
+    return z.object(config).strict();
+  }
+
+  return z.any();
+}
+
+function readPropertyRecursive(
+  propertyPath: string[],
+  object: Record<string, unknown> | null | undefined
+): unknown {
+  if (typeof object === 'object' && object !== null && propertyPath.length) {
+    const currentProp = propertyPath[0] as string;
+    return readPropertyRecursive(
+      propertyPath.slice(1),
+      object[currentProp] as Record<string, unknown>
+    );
+  }
+
+  return object;
+}
+
+/**
+ * Build inputs object from workflow input definitions with their default values.
+ * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
+ */
+function buildInputsFromDefinition(
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
+): Record<string, unknown> | undefined {
+  if (!inputsDefinition) {
+    return undefined;
+  }
+
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
+
+  if (!normalizedInputs) {
+    return undefined;
+  }
+
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
+}
+
+export function buildContextOverride(
+  workflowGraph: WorkflowGraph,
+  staticData: StaticContextData
+): ContextOverrideData {
+  const contextOverride = {} as Record<string, any>;
+  const inputsInGraph = findInputsInGraph(workflowGraph);
+  const allInputs = Object.values(inputsInGraph).flat();
+  const allInputsFiltered = allInputs.filter((input) =>
+    StepContextSchemaPropertyPaths.some((schemaPropertyPath) =>
+      input.startsWith(schemaPropertyPath.path)
+    )
+  );
+  const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
+
+  // Build the static data with inputs defaults for lookup
+  const staticDataWithInputs = {
+    ...staticData,
+    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
+  };
+
+  inputsParsed.forEach((pathParts) => {
+    let current = contextOverride;
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      const isLastPart = i === pathParts.length - 1;
+
+      if (isLastPart) {
+        // Set a default value for the final property
+        current[part] =
+          current[part] ||
+          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
+          'replace with your data';
+      } else {
+        // Create nested object if it doesn't exist
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+    }
+  });
+
+  const schema = buildStepContextSchemaFromObject(contextOverride);
+
+  return {
+    stepContext: contextOverride,
+    schema,
+  };
+}

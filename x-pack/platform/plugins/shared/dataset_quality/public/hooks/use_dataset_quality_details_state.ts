@@ -7,8 +7,7 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import type { OnRefreshProps } from '@elastic/eui';
-import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
+import type { FailureStore } from '@kbn/streams-schema';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import type { BasicDataStream } from '../../common/types';
@@ -28,6 +27,9 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedQualityIssue,
+    view,
+    streamDefinition,
+    streamsUrls,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -103,6 +105,11 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -147,21 +154,46 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const updateTimeRange = useCallback(
-    ({ start, end, refreshInterval }: OnRefreshProps) => {
+    ({ start, end }: { start: string; end: string }) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {
+          ...timeRange,
           from: start,
           to: end,
-          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: refreshInterval },
         },
       });
     },
-    [service]
+    [service, timeRange]
+  );
+
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreDataQualityConfig,
+      failureStoreStreamConfig,
+    }: {
+      failureStoreDataQualityConfig?: {
+        failureStoreEnabled: boolean;
+        customRetentionPeriod?: string;
+      };
+      failureStoreStreamConfig?: FailureStore;
+    }) => {
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        data: {
+          ...dataStreamDetails,
+          failureStoreDataQualityConfig,
+          failureStoreStreamConfig,
+        },
+      });
+    },
+    [dataStreamDetails, service]
   );
 
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+  const defaultRetentionPeriod = dataStreamDetails?.defaultRetentionPeriod;
+  const customRetentionPeriod = dataStreamDetails?.customRetentionPeriod;
 
   return {
     service,
@@ -180,6 +212,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     loadingState,
     updateTimeRange,
+    updateFailureStore,
     dataStreamSettings,
     integrationDetails,
     canUserAccessDashboards,
@@ -189,5 +222,11 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    view,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    canUserManageFailureStore,
+    streamDefinition,
+    streamsUrls,
   };
 };

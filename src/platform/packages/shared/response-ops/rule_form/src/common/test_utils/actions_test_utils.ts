@@ -30,6 +30,7 @@ export const getConnector = (
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: false,
+    isConnectorTypeDeprecated: false,
     ...overwrites,
   };
 };
@@ -68,6 +69,7 @@ export const getActionType = (id: string, overwrites?: Partial<ActionType>): Act
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['stackAlerts'],
     isSystemActionType: false,
+    isDeprecated: false,
     ...overwrites,
   };
 };

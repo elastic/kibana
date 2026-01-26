@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 
 import { EuiPageTemplate, EuiTitle, EuiBreadcrumbs } from '@elastic/eui';
@@ -45,7 +46,13 @@ export const Page: React.FC<PageProps> = (props) => {
         <EuiTitle size="l">
           <h1>{title}</h1>
         </EuiTitle>
-        <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
+        <EuiBreadcrumbs
+          responsive={false}
+          breadcrumbs={breadcrumbs}
+          aria-label={i18n.translate('Page.breadcrumbs.ariaLabel', {
+            defaultMessage: 'Breadcrumbs',
+          })}
+        />
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section paddingSize="none">{children}</EuiPageTemplate.Section>
     </EuiPageTemplate>

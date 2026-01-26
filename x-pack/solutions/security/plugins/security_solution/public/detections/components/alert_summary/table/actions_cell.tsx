@@ -24,7 +24,7 @@ export type ActionsCellProps = Pick<
 >;
 
 /**
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  * It is passed to the renderActionsCell property of the EuiDataGrid.
  * It renders all the icons in the row action icons:
  * - open flyout

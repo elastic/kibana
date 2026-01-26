@@ -12,9 +12,9 @@ import { setup as followerIndexListSetup } from './follower_index_list.helpers';
 import { setup as followerIndexAddSetup } from './follower_index_add.helpers';
 import { setup as followerIndexEditSetup } from './follower_index_edit.helpers';
 import { setup as homeSetup } from './home.helpers';
+import { getRandomString } from '@kbn/test-jest-helpers';
 
-export { nextTick, getRandomString, findTestSubject, delay } from '@kbn/test-jest-helpers';
-
+export { getRandomString };
 export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {

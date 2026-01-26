@@ -244,13 +244,15 @@ export class ResourceInstaller {
       ...technicalComponentNames,
     ];
 
+    const ilmPolicyName = await this.getIlmPolicyName(indexInfo);
+
     // Install / update the index template
     await createOrUpdateIndexTemplate({
       logger: this.options.logger,
       esClient: clusterClient,
       template: getIndexTemplate({
         componentTemplateRefs,
-        ilmPolicyName: DEFAULT_ALERTS_ILM_POLICY_NAME,
+        ilmPolicyName: ilmPolicyName ? ilmPolicyName : DEFAULT_ALERTS_ILM_POLICY_NAME,
         indexPatterns,
         kibanaVersion: indexInfo.kibanaVersion,
         namespace,
@@ -266,5 +268,27 @@ export class ResourceInstaller {
       indexPatterns,
       dataStreamAdapter: this.options.dataStreamAdapter,
     });
+  }
+
+  private async getIlmPolicyName(indexInfo: IndexInfo): Promise<string | undefined> {
+    const ilmPolicyName = indexInfo.getIlmPolicyName();
+    const isCustomIlmPolicyName = ilmPolicyName !== DEFAULT_ALERTS_ILM_POLICY_NAME;
+
+    if (!isCustomIlmPolicyName) {
+      return undefined;
+    }
+
+    // If it is a custom, ensure that it exists
+    try {
+      const clusterClient = await this.options.getClusterClient();
+      await clusterClient.ilm.getLifecycle({ name: ilmPolicyName });
+
+      return ilmPolicyName;
+    } catch (err) {
+      this.options.logger.error(
+        `ILM policy ${ilmPolicyName} not found, using default ${DEFAULT_ALERTS_ILM_POLICY_NAME} policy instead`
+      );
+      return undefined;
+    }
   }
 }

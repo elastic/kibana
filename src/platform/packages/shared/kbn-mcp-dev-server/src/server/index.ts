@@ -16,6 +16,9 @@ import { listKibanaPackagesTool } from '../tools/list_packages';
 import { generateKibanaPackageTool } from '../tools/generate_package';
 import { listKibanaTeamsTool } from '../tools/list_teams';
 import { runUnitTestsTool } from '../tools/run_unit_tests';
+import { runCiChecksTool } from '../tools/run_ci_checks';
+import { searchByCodeownerTool } from '../tools/search_by_codeowner';
+import { findDependencyReferencesTool } from '../tools/find_dependency_references';
 
 run(async () => {
   const server = new McpServer({ name: 'mcp-dev-server', version: '1.0.0' });
@@ -24,6 +27,9 @@ run(async () => {
   addTool(server, generateKibanaPackageTool);
   addTool(server, listKibanaTeamsTool);
   addTool(server, runUnitTestsTool);
+  addTool(server, runCiChecksTool);
+  addTool(server, searchByCodeownerTool);
+  addTool(server, findDependencyReferencesTool);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

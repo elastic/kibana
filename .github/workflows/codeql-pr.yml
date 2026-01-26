@@ -1,0 +1,80 @@
+name: "CodeQL PR"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [ opened, ready_for_review, synchronize ]
+
+jobs:
+
+  test:
+    name: Test CodeQL queries
+    runs-on: ubuntu-latest
+    if: |
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+        && toJSON(github.event.pull_request.labels) != '[]'
+        && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
+      )
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      with:
+        languages: javascript
+
+    - name: Run CodeQL unit tests
+      run: |
+        set -euo pipefail
+        CODEQL_VERSION=$(ls ${{ runner.tool_cache }}/CodeQL | grep -E '^[0-9]' | head -1)
+        export PATH="${{ runner.tool_cache }}/CodeQL/$CODEQL_VERSION/x64/codeql:$PATH"
+        # Find all unique test directories containing .qlref files
+        mapfile -t TEST_DIRS < <(find .github/codeql/custom-queries -name "*.qlref" -exec dirname {} \; | sort -u)
+        if [ "${#TEST_DIRS[@]}" -eq 0 ]; then
+          echo "No test directories with .qlref files found. Failing the workflow."
+          exit 1
+        fi
+        for testdir in "${TEST_DIRS[@]}"; do
+          echo "Running CodeQL tests in $testdir"
+          codeql test run "$testdir" --additional-packs .github/codeql/custom-queries
+        done
+
+  analyze:
+    name: Analyze javascript
+    runs-on: kibana
+    if: |
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+        && toJSON(github.event.pull_request.labels) != '[]'
+        && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
+      )
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      with:
+        languages: ${{ matrix.language }}
+        config-file: ./.github/codeql/codeql-config.yml
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      env:
+        CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
+      with:
+        category: "/language:${{matrix.language}}"

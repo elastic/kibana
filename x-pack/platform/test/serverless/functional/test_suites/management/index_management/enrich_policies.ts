@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const es = getService('es');
 
   const ENRICH_INDEX_NAME = 'test-policy-1';
@@ -52,21 +53,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.loginAsAdmin();
-      await pageObjects.common.navigateToApp('indexManagement');
-
-      // Navigate to the enrich policies tab
-      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
     });
 
     after(async () => {
       log.debug('Cleaning up created index and policy');
 
       try {
+        await es.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
+      } catch (e) {
+        log.debug(`[Teardown error] Error deleting test policy: ${e.message}`);
+      }
+      try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
       } catch (e) {
-        log.debug('[Teardown error] Error deleting test policy');
-        throw e;
+        log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
       }
     });
 
@@ -84,7 +85,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Assert that flyout is opened
       expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
       // Close flyout
-      await testSubjects.click('closeFlyoutButton');
+      await flyout.closeFlyout();
     });
   });
 };

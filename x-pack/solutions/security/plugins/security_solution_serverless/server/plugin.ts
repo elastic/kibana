@@ -14,12 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { isSupportedConnector } from '@kbn/inference-common';
-import {
-  getDefaultAIConnectorSetting,
-  getDefaultValueReportSettings,
-} from '@kbn/security-solution-plugin/server/ui_settings';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -85,37 +80,21 @@ export class SecuritySolutionServerlessPlugin
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
-    registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
+    registerProductFeatures(pluginsSetup, enabledProductFeatures);
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
-    // Setup project uiSettings whitelisting
-    pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+    const projectSettings = [...SECURITY_PROJECT_SETTINGS];
 
-    // use metering check which verifies AI4SOC is enabled
-    if (ai4SocMeteringService.shouldMeter(this.config)) {
-      // Serverless Advanced Settings setup
-      coreSetup
-        .getStartServices()
-        .then(async ([_, depsStart]) => {
-          try {
-            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-              (connector: Connector) => isSupportedConnector(connector)
-            );
-            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
-            coreSetup.uiSettings.register({
-              ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
-              ...getDefaultValueReportSettings(),
-            });
-          } catch (error) {
-            this.logger.error(`Error registering default AI connector: ${error}`);
-          }
-        })
-        .catch(() => {}); // it shouldn't reject, but just in case
+    // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
+    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    if (this.config.productTypes.some((productType) => productType.product_tier !== 'essentials')) {
+      projectSettings.push(WORKFLOWS_UI_SETTING_ID);
     }
+
+    // Setup project uiSettings whitelisting
+    pluginsSetup.serverless.setupProjectSettings(projectSettings);
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({

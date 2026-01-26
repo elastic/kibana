@@ -42,7 +42,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
     logsSearch?: string;
     profilingSearch?: string;
     alertStatus?: AlertStatus | 'all';
-    schema?: DataSchemaFormat | null;
+    preferredSchema?: DataSchemaFormat;
   };
 }
 

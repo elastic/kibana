@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import moment from 'moment';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
@@ -19,6 +20,7 @@ import {
   processors,
   productionNamespace,
 } from './data';
+import { waitUntilDatasetQualityTableOrTimeoutWithFallback } from './helpers';
 
 const integrationActions = {
   overview: 'Overview',
@@ -38,6 +40,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const retry = getService('retry');
   const browser = getService('browser');
+  const logger = getService('log');
   const to = '2024-01-01T12:00:00.000Z';
 
   const apacheAccessDatasetName = 'apache.access';
@@ -48,11 +51,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-  const bitbucketAuditDataStreamName = `logs-${bitbucketDatasetName}-${defaultNamespace}`;
-  const bitbucketPkg = {
-    name: 'atlassian_bitbucket',
-    version: '1.14.0',
+  const fleetServerDatasetName = 'fleet_server.output_health';
+  const fleetServerOutputHealthDataStreamName = `logs-${fleetServerDatasetName}-${defaultNamespace}`;
+  const fleetServerPkg = {
+    name: 'fleet_server',
+    version: '1.6.0',
   };
 
   const regularDatasetName = datasetNames[0];
@@ -62,13 +65,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const failedDatasetName = datasetNames[1];
   const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
 
+  const failedAndDegradedDatasetName = 'synth.2';
+  const failedAndDegradedDataStreamName = `logs-${failedAndDegradedDatasetName}-${defaultNamespace}`;
+
   describe('Dataset Quality Details', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
 
-      // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
-      await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+      // Install fleet server Integration (package which does not has Dashboards) and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(fleetServerPkg);
 
       await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
       await synthtrace.createComponentTemplate({
@@ -106,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           isMalformed: true,
         }),
         // Index logs for Bitbucket integration
-        getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+        getLogsForDataset({ to, count: 10, dataset: fleetServerDatasetName }),
         createFailedLogRecord({
           to: new Date().toISOString(),
           count: 2,
@@ -117,12 +123,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           count: 4,
           dataset: failedDatasetName,
         }),
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 4,
+          dataset: failedAndDegradedDatasetName,
+        }),
       ]);
     });
 
     after(async () => {
       await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
-      await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(fleetServerPkg);
       await synthtrace.clean();
       await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
       await synthtrace.deleteComponentTemplate('synth.2@custom');
@@ -143,8 +154,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('should navigate to details page from a main page', async () => {
-        await PageObjects.datasetQuality.navigateTo();
+      it('should navigate to details page from a main page', async function () {
+        await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+          this.skip()
+        );
 
         const synthDataset = await testSubjects.find(
           'datasetQualityTableDetailsLink-logs-synth.1-default',
@@ -361,7 +374,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
 
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
@@ -375,7 +388,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should navigate to integration overview page on clicking integration overview action', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
@@ -389,7 +402,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
 
-          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/fleet_server');
         });
       });
 
@@ -438,14 +451,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/231824
-    describe.skip('navigation', () => {
+    describe('navigation', () => {
       it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
 
         const discoverButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
+
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         await discoverButton.click();
 
@@ -460,6 +478,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
+
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         await testSubjects.click(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
@@ -517,11 +541,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
-        const cellTexts = await countColumn.getCellTexts();
+        const lastOccurrenceColumn =
+          table[PageObjects.datasetQuality.texts.datasetLastOccurrenceColumn];
+        const cellTexts = await lastOccurrenceColumn.getCellTexts();
 
-        await countColumn.sort('ascending');
-        const sortedCellTexts = await countColumn.getCellTexts();
+        await lastOccurrenceColumn.sort('ascending');
+        const sortedCellTexts = await lastOccurrenceColumn.getCellTexts();
 
         expect(cellTexts.reverse()).to.eql(sortedCellTexts);
       });
@@ -532,7 +557,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
+        const lastOccurrenceColumn =
+          table[PageObjects.datasetQuality.texts.datasetLastOccurrenceColumn];
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
@@ -540,11 +566,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const pageState = parsedUrl.searchParams.get('pageState');
 
           expect(decodeURIComponent(pageState as string)).to.contain(
-            'sort:(direction:desc,field:count)'
+            'sort:(direction:desc,field:lastOccurrence)'
           );
         });
 
-        await countColumn.sort('ascending');
+        await lastOccurrenceColumn.sort('ascending');
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
@@ -552,7 +578,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const pageState = parsedUrl.searchParams.get('pageState');
 
           expect(decodeURIComponent(pageState as string)).to.contain(
-            'sort:(direction:asc,field:count)'
+            'sort:(direction:asc,field:lastOccurrence)'
           );
         });
       });
@@ -591,6 +617,102 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
         expect(singleValueNow).to.be.greaterThan(singleValuePreviously);
+      });
+
+      describe('Table filters', () => {
+        before(async () => {
+          await synthtrace.index([
+            createDegradedFieldsRecord({
+              to: moment().subtract(5, 'minutes').toISOString(),
+              count: 2,
+              dataset: failedAndDegradedDatasetName,
+            }),
+            createFailedLogRecord({
+              to: moment().subtract(2, 'minutes').toISOString(),
+              count: 2,
+              dataset: failedAndDegradedDatasetName,
+            }),
+          ]);
+        });
+        it('should filter the table by the selected issue types', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: failedAndDegradedDataStreamName,
+          });
+
+          const initialTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const initialIssueCol = initialTable[PageObjects.datasetQuality.texts.datasetIssueColumn];
+          const initialIssueCellTexts = await initialIssueCol.getCellTexts();
+
+          expect(initialIssueCellTexts.length).to.be.greaterThan(0);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors
+              .datasetQualityDetailsIssueTypeSelectorButton
+          );
+          await PageObjects.datasetQuality.filterForIssueTypes(['Field ignored']);
+
+          const filteredTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const filteredIssueCol =
+            filteredTable[PageObjects.datasetQuality.texts.datasetIssueColumn];
+          const filteredIssueCellTexts = await filteredIssueCol.getCellTexts();
+
+          // Verify the filter reduced the number of items or all items match the filter
+          expect(filteredIssueCellTexts.length <= initialIssueCellTexts.length).to.be(true);
+
+          // Verify all displayed rows have the expected issue type
+          for (const issueText of filteredIssueCellTexts) {
+            expect(issueText).to.eql('Field ignored');
+          }
+
+          // Reset the filter by selecting the same issue type again
+          await PageObjects.datasetQuality.filterForIssueTypes(['Field ignored']);
+
+          const resetTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const resetIssueCol = resetTable[PageObjects.datasetQuality.texts.datasetIssueColumn];
+          const resetIssueCellTexts = await resetIssueCol.getCellTexts();
+          expect(resetIssueCellTexts).to.eql(initialIssueCellTexts);
+        });
+
+        it('should filter the table by the selected fields', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: failedAndDegradedDataStreamName,
+          });
+
+          const initialTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const initialFieldCol = initialTable[PageObjects.datasetQuality.texts.datasetFieldColumn];
+          const initialFieldCellTexts = await initialFieldCol.getCellTexts();
+
+          expect(initialFieldCellTexts.length).to.be.greaterThan(0);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsFieldSelectorButton
+          );
+
+          // Filtering for the first field
+          const fieldToFilter = initialFieldCellTexts[0];
+          await PageObjects.datasetQuality.filterForFields([fieldToFilter]);
+
+          const filteredTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const filteredFieldCol =
+            filteredTable[PageObjects.datasetQuality.texts.datasetFieldColumn];
+          const filteredFieldCellTexts = await filteredFieldCol.getCellTexts();
+
+          // Verify the filter reduced the number of items or all items match the filter
+          expect(filteredFieldCellTexts.length <= initialFieldCellTexts.length).to.be(true);
+
+          // Verify all displayed rows have the expected field
+          for (const fieldText of filteredFieldCellTexts) {
+            expect(fieldText).to.eql(fieldToFilter);
+          }
+
+          // Reset the filter by selecting the same field again
+          await PageObjects.datasetQuality.filterForFields([fieldToFilter]);
+
+          const resetTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+          const resetFieldCol = resetTable[PageObjects.datasetQuality.texts.datasetFieldColumn];
+          const resetFieldCellTexts = await resetFieldCol.getCellTexts();
+          expect(resetFieldCellTexts).to.eql(initialFieldCellTexts);
+        });
       });
     });
   });

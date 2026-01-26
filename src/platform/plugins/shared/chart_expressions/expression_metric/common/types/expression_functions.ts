@@ -8,7 +8,12 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import type { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
+import type {
+  LayoutDirection,
+  MetricStyle,
+  MetricWTrend,
+  SecondaryMetricProps,
+} from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type {
   Datatable,
@@ -18,14 +23,12 @@ import type {
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import type {
-  ExpressionValueVisDimension,
-  prepareLogTable,
-} from '@kbn/visualizations-plugin/common';
-import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { prepareLogTable } from '@kbn/visualizations-common';
 import type { VisParams, visType } from './expression_renderers';
 import type {
   EXPRESSION_METRIC_NAME,
@@ -42,22 +45,27 @@ export interface MetricArguments {
   breakdownBy?: ExpressionValueVisDimension | string;
   trendline?: TrendlineResult;
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
   secondaryTrendPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
-  valuesTextAlign: MetricStyle['valuesTextAlign'];
+  primaryAlign: MetricStyle['valueTextAlign'];
+  secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
+  titleWeight: MetricStyle['titleWeight'];
+  primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
+  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
+  applyColorTo: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;

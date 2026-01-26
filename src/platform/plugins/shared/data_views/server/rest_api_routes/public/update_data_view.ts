@@ -28,6 +28,7 @@ import {
   INITIAL_REST_VERSION,
   UPDATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
+import { toApiSpec } from './util/to_api_spec';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -198,10 +199,7 @@ const updateDataViewRouteFactory =
             );
             const id = req.params.id;
 
-            const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              refresh_fields = true,
-            } = req.body;
+            const { refresh_fields = true } = req.body;
 
             const spec = req.body[serviceKey] as DataViewSpec;
 
@@ -215,7 +213,7 @@ const updateDataViewRouteFactory =
             });
 
             const body: Record<string, DataViewSpecRestResponse> = {
-              [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
+              [serviceKey]: toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
             };
 
             return res.ok({

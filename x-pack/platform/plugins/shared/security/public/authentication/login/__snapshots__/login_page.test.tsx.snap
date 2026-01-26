@@ -185,6 +185,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   loginAssistanceMessage=""
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -195,6 +198,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -224,6 +230,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -234,6 +243,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -264,6 +276,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
   loginHelp="**some-help**"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -274,6 +289,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -295,13 +313,14 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 exports[`LoginPage page renders as expected 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
+    class="css-1pqcqfr-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
     <header
-      class="loginWelcome__header"
+      class="css-1uhsdzt-LoginPage"
     >
       <div
-        class="loginWelcome__content eui-textCenter"
+        class="css-das9jl-LoginPage"
       >
         <span
           class="loginWelcome__logo"
@@ -319,7 +338,7 @@ exports[`LoginPage page renders as expected 1`] = `
       </div>
     </header>
     <div
-      class="loginWelcome__content loginWelcome-body"
+      class="css-das9jl-LoginPage"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -341,7 +360,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 >
                   <label
                     aria-invalid="false"
-                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
                     for="generated-id"
                     id="generated-id-label"
                   >
@@ -442,7 +461,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
@@ -475,13 +494,14 @@ exports[`LoginPage page renders as expected 1`] = `
 exports[`LoginPage page renders with custom branding 1`] = `
 <div>
   <div
-    class="loginWelcome login-form css-vvcdom-kbnFullScreenBgCss"
+    class="css-1pqcqfr-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
     <header
-      class="loginWelcome__header"
+      class="css-1uhsdzt-LoginPage"
     >
       <div
-        class="loginWelcome__content eui-textCenter"
+        class="css-das9jl-LoginPage"
       >
         <span
           class="loginWelcome__logo"
@@ -507,7 +527,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
       </div>
     </header>
     <div
-      class="loginWelcome__content loginWelcome-body"
+      class="css-das9jl-LoginPage"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -529,7 +549,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 >
                   <label
                     aria-invalid="false"
-                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel-focused"
+                    class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
                     for="generated-id"
                     id="generated-id-label"
                   >
@@ -630,7 +650,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"

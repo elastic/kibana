@@ -6,6 +6,12 @@
  */
 import * as essSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
+import {
+  APP_MANAGE_PATH,
+  APP_PATH,
+  RULES_FEATURE_ID,
+  SECURITY_FEATURE_ID,
+} from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
 describe(
@@ -24,20 +30,45 @@ describe(
 
   () => {
     describe('ESS', { tags: ['@ess'] }, () => {
-      it('should display Endpoint Exceptions in Administration page', () => {
-        login(ROLE.t1_analyst);
+      const loginWithReadAccess = () => {
+        login.withCustomKibanaPrivileges({
+          [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_read'],
+          [RULES_FEATURE_ID]: ['read'],
+        });
+      };
 
-        cy.visit('app/security/manage');
+      it('should display Endpoint Exceptions in Administration page', () => {
+        loginWithReadAccess();
+
+        cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions');
       });
 
-      it('should display Endpoint Exceptions in Manage side panel', () => {
-        login(ROLE.t1_analyst);
+      it('should be able to navigate to Endpoint Exceptions from Administration page', () => {
+        loginWithReadAccess();
+        cy.visit(APP_MANAGE_PATH);
+        cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
 
-        cy.visit('app/security');
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
+      });
+
+      it('should display Endpoint Exceptions in Manage side panel', () => {
+        loginWithReadAccess();
+
+        cy.visit(APP_PATH);
 
         essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
         cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).should('exist');
+      });
+
+      it('should be able to navigate to Endpoint Exceptions from Manage side panel', () => {
+        loginWithReadAccess();
+        cy.visit(APP_PATH);
+
+        essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
+        cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).click();
+
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
       // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
@@ -45,10 +76,12 @@ describe(
 
     describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
       it('should display Endpoint Exceptions in Assets side panel ', () => {
-        login(ROLE.t1_analyst);
+        // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
+        login(ROLE.t3_analyst);
 
-        cy.visit('app/security');
+        cy.visit(APP_PATH);
 
+        serverlessSecurityHeaders.showMoreItems();
         serverlessSecurityHeaders.openNavigationPanelFor(
           serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
         );

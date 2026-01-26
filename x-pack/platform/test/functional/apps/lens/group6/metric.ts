@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,12 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   const inspectorTrendlineData = [
-    ['2015-09-19 06:00', '-'],
-    ['2015-09-19 09:00', '-'],
-    ['2015-09-19 12:00', '-'],
-    ['2015-09-19 15:00', '-'],
-    ['2015-09-19 18:00', '-'],
-    ['2015-09-19 21:00', '-'],
+    ['2015-09-19 06:00', NULL_LABEL],
+    ['2015-09-19 09:00', NULL_LABEL],
+    ['2015-09-19 12:00', NULL_LABEL],
+    ['2015-09-19 15:00', NULL_LABEL],
+    ['2015-09-19 18:00', NULL_LABEL],
+    ['2015-09-19 21:00', NULL_LABEL],
     ['2015-09-20 00:00', '6,011.351'],
     ['2015-09-20 03:00', '5,849.901'],
     ['2015-09-20 06:00', '5,722.622'],
@@ -42,26 +42,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ];
 
   const inspectorExpectedTrenlineDataWithBreakdown = [
-    ['97.220.3.248', '2015-09-19 06:00', '-'],
-    ['97.220.3.248', '2015-09-19 09:00', '-'],
-    ['97.220.3.248', '2015-09-19 12:00', '-'],
-    ['97.220.3.248', '2015-09-19 15:00', '-'],
-    ['97.220.3.248', '2015-09-19 18:00', '-'],
-    ['97.220.3.248', '2015-09-19 21:00', '-'],
-    ['97.220.3.248', '2015-09-20 00:00', '-'],
-    ['97.220.3.248', '2015-09-20 03:00', '-'],
-    ['97.220.3.248', '2015-09-20 06:00', '-'],
-    ['97.220.3.248', '2015-09-20 09:00', '-'],
-    ['97.220.3.248', '2015-09-20 12:00', '-'],
-    ['97.220.3.248', '2015-09-20 15:00', '-'],
-    ['97.220.3.248', '2015-09-20 18:00', '-'],
-    ['97.220.3.248', '2015-09-20 21:00', '-'],
-    ['97.220.3.248', '2015-09-21 00:00', '-'],
-    ['97.220.3.248', '2015-09-21 03:00', '-'],
-    ['97.220.3.248', '2015-09-21 06:00', '-'],
+    ['97.220.3.248', '2015-09-19 06:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 09:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 15:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 18:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 21:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 00:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 03:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 06:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 09:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 15:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 18:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 21:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 00:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 03:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 06:00', NULL_LABEL],
     ['97.220.3.248', '2015-09-21 09:00', '19,755'],
-    ['97.220.3.248', '2015-09-21 12:00', '-'],
-    ['97.220.3.248', '2015-09-21 15:00', '-'],
+    ['97.220.3.248', '2015-09-21 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 15:00', NULL_LABEL],
   ];
 
   const clickMetric = async (title: string) => {
@@ -76,10 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens metric', () => {
-    const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge"]`;
-    // get a reference to the badge element
-    const getBadge = async () => await find.byCssSelector(BADGE_SELECTOR);
-
     it('should render a metric', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -106,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
       await lens.closeDimensionEditor();
 
       await inspector.open('lnsApp_inspectButton');
@@ -122,7 +118,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5); // Default is 9
+      await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
@@ -199,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_none');
+      await testSubjects.click('lnsMetric_background_chart_none');
       await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
@@ -221,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
 
       await lens.waitForVisualization('mtrVis');
 
@@ -240,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_none');
+      await testSubjects.click('lnsMetric_background_chart_none');
 
       await lens.waitForVisualization('mtrVis');
 
@@ -384,26 +383,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a badge for the secondary metric', async () => {
       const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';
 
-      async function getBackgroundColorForBadge(el: WebElementWrapper | null) {
-        if (!el) {
-          throw new Error('Element not found');
-        }
-        const style = await el.getAttribute('style');
-        if (!style) {
-          throw new Error('Element has no style attribute');
-        }
-
-        const backgroundColor = style
-          .split(';')
-          .find((styleProp: string) => styleProp.includes('--euiBadgeBackgroundColor'))
-          ?.split(':')[1]
-          .trim();
-
-        if (!backgroundColor) {
-          throw new Error('Element has no background color');
-        }
-        return backgroundColor;
-      }
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('lnsMetric', 'Metric');
@@ -426,7 +405,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.info('Checking badge in various configurations');
 
       // make sure there's no badge
-      expect(await find.existsByCssSelector(BADGE_SELECTOR)).to.be(false);
+      expect(await lens.hasSecondaryMetricBadge()).to.be(false);
 
       /**
        * Perform a smoke testing of the badge features
@@ -441,27 +420,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await colorPicker.type(CUSTOM_STATIC_COLOR_HEX);
       await lens.waitForVisualization('mtrVis');
 
-      expect(await getBackgroundColorForBadge(await getBadge())).to.be(CUSTOM_STATIC_COLOR_HEX);
+      expect(await lens.getSecondaryMetricBadgeColor()).to.be(CUSTOM_STATIC_COLOR_HEX);
 
       // now change to dynamic badge color
       await testSubjects.click('lnsMetric_color_mode_dynamic');
 
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be(`5,727.322\n↑`);
 
       // now show icon only
       await testSubjects.click('lnsMetric_secondary_trend_display_icon');
       // badge is there but value is not there any more
-      expect(await (await getBadge()).getVisibleText()).to.be(`↑`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('↑');
 
       // now show value only
       await testSubjects.click('lnsMetric_secondary_trend_display_value');
       // badge is there but icon is not there any more
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322');
 
       // enable the Primary metric baseline
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // and that the badge is still there
-      expect(await (await getBadge()).getVisibleText()).to.be(`0`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('0');
 
       /**
        * Now check if the static and dynamic previous mode are correctly cached
@@ -473,12 +452,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and back to static
       await testSubjects.click('lnsMetric_color_mode_static');
       // and check again the color is the previously custom one
-      expect(await getBackgroundColorForBadge(await getBadge())).to.be(CUSTOM_STATIC_COLOR_HEX);
+      expect(await lens.getSecondaryMetricBadgeColor()).to.be(CUSTOM_STATIC_COLOR_HEX);
 
       // now switch to dynamic
       await testSubjects.click('lnsMetric_color_mode_dynamic');
       // and check the content is still based on primary value-only
-      expect(await (await getBadge()).getVisibleText()).to.be(`0`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('0');
     });
 
     it('should disable collapse by when the primary metric is not numeric', async () => {
@@ -524,7 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getMetricTiles()).to.have.length(N_TILES);
     });
 
-    it('should replace secondary metric prefix and badge when changing primary metric type to non-numeric', async () => {
+    it('should replace secondary metric label and badge when changing primary metric type to non-numeric', async () => {
       // Create new metric lens vis
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -547,17 +526,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Set Dynamic color trend with compare to Primary metric
       await testSubjects.click('lnsMetric_color_mode_dynamic');
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
-      // Check the Prefix and the Badge text
-      expect(await (await getBadge()).getVisibleText()).to.be(`+8,277.678 ↑`);
-      const secondaryElement = await testSubjects.find('metric-secondary-element');
-      expect(await secondaryElement.getVisibleText()).to.contain('Difference');
+      // Check the label and the badge text
+      expect(await lens.getSecondaryMetricLabel()).to.be('Difference');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
       // Save the visualization
-      await lens.save('Metric prefix badge test', false, true);
+      await lens.save('Metric label badge test', false, true);
 
       // Open in edit mode and change primary metric to last value of ip
       await visualize.gotoVisualizationLandingPage();
-      await visualize.openSavedVisualization('Metric prefix badge test');
+      await visualize.openSavedVisualization('Metric label badge test');
 
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
@@ -569,10 +547,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         isPreviousIncompatible: true,
       });
 
-      // The badge text should change and the prefix should be "Average of bytes"
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
-      const newSecondaryElement = await testSubjects.find('metric-secondary-element');
-      expect(await newSecondaryElement.getVisibleText()).to.contain('Average of bytes');
+      // The badge text should change and the label should be "Average of bytes"
+      expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322\n↑');
 
       // Open secondary metric editor
       await lens.openDimensionEditor(

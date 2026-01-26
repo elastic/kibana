@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RawConfigService } from '@kbn/config';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type RawConfigServiceMock = jest.Mocked<PublicMethodsOf<RawConfigService>>;
 
@@ -18,12 +19,12 @@ const createRawConfigServiceMock = ({
   rawConfig = {},
   rawConfig$ = undefined,
 }: { rawConfig?: Record<string, any>; rawConfig$?: Observable<Record<string, any>> } = {}) => {
-  const mocked: RawConfigServiceMock = {
+  const mocked: RawConfigServiceMock = lazyObject({
     loadConfig: jest.fn(),
     stop: jest.fn(),
     reloadConfig: jest.fn(),
     getConfig$: jest.fn().mockReturnValue(rawConfig$ || of(rawConfig)),
-  };
+  });
 
   return mocked;
 };

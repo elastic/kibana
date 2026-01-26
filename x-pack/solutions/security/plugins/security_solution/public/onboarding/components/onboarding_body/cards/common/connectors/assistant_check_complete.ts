@@ -19,14 +19,14 @@ const completeBadgeText = (count: number) =>
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
-> = async ({ http, application }) => {
+> = async ({ http, application, settings }) => {
   const authz = getConnectorsAuthz(application.capabilities);
 
   if (!authz.canReadConnectors) {
     return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors(http);
+  const aiConnectors = await loadAiConnectors({ http, settings });
 
   return {
     isComplete: aiConnectors.length > 0,

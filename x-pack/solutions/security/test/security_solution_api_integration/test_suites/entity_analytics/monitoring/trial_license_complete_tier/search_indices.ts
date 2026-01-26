@@ -9,13 +9,11 @@ import expect from '@kbn/expect';
 
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/engine/elasticsearch/mappings';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const logWhenNot200 = (res: any) => {
     if (res.status !== 200) {
@@ -32,8 +30,6 @@ export default ({ getService }: FtrProviderContext) => {
         index: indexName,
         mappings: { properties: PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING },
       });
-
-      await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
@@ -42,7 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('search_indices API', () => {
       it('should return an empty array if no indices match the search query', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: 'test_1235678' } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: 'test_1235678' },
+        });
 
         logWhenNot200(res);
 
@@ -51,7 +49,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return all indices when no searchQuery is given', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: undefined } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: undefined },
+        });
 
         logWhenNot200(res);
 
@@ -60,7 +60,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return index when searchQuery matches', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: indexName } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: indexName },
+        });
 
         logWhenNot200(res);
 

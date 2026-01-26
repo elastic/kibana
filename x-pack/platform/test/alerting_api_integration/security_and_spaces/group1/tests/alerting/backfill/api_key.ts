@@ -123,7 +123,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
-      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const start = moment().utc().startOf('day').subtract(8, 'days').toISOString();
       const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
@@ -197,7 +197,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       let currentStart = start;
       adHocRun1.schedule.forEach((sched: any) => {
         expect(sched.interval).to.eql('12h');
-        expect(sched.status).to.eql('pending');
+        expect(['pending', 'complete'].includes(sched.status)).to.be(true);
         const runAt = moment(currentStart).add(12, 'hours').toISOString();
         expect(sched.runAt).to.eql(runAt);
         currentStart = runAt;

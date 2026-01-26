@@ -8,7 +8,11 @@
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import type { DataStreamDetails } from '../../../../common/api_types';
-import { FAILURE_STORE_PRIVILEGE, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
+import {
+  FAILURE_STORE_PRIVILEGE,
+  MANAGE_FAILURE_STORE_PRIVILEGE,
+  MAX_HOSTS_METRIC_VALUE,
+} from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -40,7 +44,7 @@ export async function getDataStreamDetails({
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor', FAILURE_STORE_PRIVILEGE]
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
     )
   )[dataStream];
 
@@ -91,7 +95,10 @@ export async function getDataStreamDetails({
       userPrivileges: {
         canMonitor: dataStreamPrivileges.monitor,
         canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
+        canManageFailureStore: dataStreamPrivileges[MANAGE_FAILURE_STORE_PRIVILEGE],
       },
+      customRetentionPeriod: esDataStream?.customRetentionPeriod,
+      defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist
@@ -121,11 +128,17 @@ const entityFields = [
   'aws.sqs.queue.name',
 ];
 
-// Gather host terms like 'host', 'pod', 'container'
-const hostsAgg: TermAggregation = entityFields.reduce(
-  (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
-  {} as TermAggregation
-);
+function isFieldAggregatable(
+  fieldCapsResponse: Awaited<ReturnType<ElasticsearchClient['fieldCaps']>>,
+  fieldName: string
+): boolean {
+  const fieldCaps = fieldCapsResponse.fields[fieldName];
+  if (!fieldCaps) {
+    return false;
+  }
+
+  return Object.values(fieldCaps).every((caps) => caps.aggregatable === true);
+}
 
 async function getDataStreamSummaryStats(
   esClient: ElasticsearchClient,
@@ -139,6 +152,22 @@ async function getDataStreamSummaryStats(
   hosts: Record<string, string[]>;
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+  const fieldCapsResponse = await esClient.fieldCaps({
+    index: dataStream,
+    fields: ['*'],
+    include_unmapped: false,
+  });
+
+  const aggregatableFields = entityFields.filter((field) =>
+    isFieldAggregatable(fieldCapsResponse, field)
+  );
+
+  // Gather host terms like 'host', 'pod', 'container'
+  const hostsAgg = aggregatableFields.reduce(
+    (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
+    {} as TermAggregation
+  );
 
   const response = await datasetQualityESClient.search({
     index: dataStream,

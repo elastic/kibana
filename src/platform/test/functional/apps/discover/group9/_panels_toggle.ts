@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover panels toggle', function () {
@@ -234,7 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: true, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: true, totalHits: '1,000' });
     });
 
     describe('ES|QL with aggs chart', function () {
@@ -271,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: false, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: false, totalHits: '1,000' });
     });
   });
 }

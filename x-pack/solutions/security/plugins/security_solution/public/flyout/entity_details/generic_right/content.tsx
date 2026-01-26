@@ -6,10 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
+import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
@@ -87,13 +93,19 @@ export const GenericEntityFlyoutContent = ({
     <FlyoutBody>
       <AssetCriticalityAccordion
         entity={{ name: insightsValue, type: EntityType.generic }}
-        onChange={onAssetCriticalityChange}
+        onChange={() => {
+          uiMetricService.trackUiMetric(
+            METRIC_TYPE.CLICK,
+            ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL,
+            ASSET_INVENTORY_APP_NAME
+          );
+          onAssetCriticalityChange();
+        }}
       />
       <EntityInsight
         field={insightsField}
         value={insightsValue}
         isPreviewMode={false}
-        isLinkEnabled={true}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />
       <ExpandableSection

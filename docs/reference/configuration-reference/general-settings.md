@@ -45,6 +45,9 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `csp.img_src`
 :   Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
 
+`csp.object_src` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
+
 `csp.frame_ancestors`
 :   Add sources for the [Content Security Policy `frame-ancestors` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors).
 
@@ -58,6 +61,11 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 
 `csp.report_only.object_src`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src) in reporting mode.
+
+    :::{note}
+    :applies_to: stack: deprecated 9.3
+    This setting is deprecated in favor of `csp.object_src`.
+    :::
 
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
@@ -268,6 +276,9 @@ $$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2
 `migrations.retryAttempts`
 :   The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. **Default: `15`**
 
+`migrations.useCumulativeLogger` {applies_to}`stack: ga 9.2`
+:   Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown. **Default: `true`**
+
 `newsfeed.enabled`
 :   Controls whether to enable the newsfeed system for the {{kib}} UI notification center. Set to `false` to disable the newsfeed system. **Default: `true`**
 
@@ -305,10 +316,6 @@ $$$savedObjects-maxImportPayloadBytes$$$ `savedObjects.maxImportPayloadBytes`
 $$$server-basePath$$$ `server.basePath`
 :   Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
-% TBD: Applicable only to Elastic Cloud?
-
 $$$server-publicBaseUrl$$$ `server.publicBaseUrl`
 :   The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
@@ -321,8 +328,8 @@ $$$server-compression$$$ `server.compression.enabled`
 `server.cors.allowCredentials`
 :   Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-`server.cors.allowOrigin`
-:   experimental::[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
+`server.cors.allowOrigin` {applies_to}`stack: preview`
+:   List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
 
 `server.compression.referrerWhitelist`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**
@@ -520,11 +527,14 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
     To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide.
     ::::
 
+`vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+
+`vis_type_vega.enable` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
+
 `vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` to allow Vega vizualizations to use data from sources other than the linked Elasticsearch cluster. In version 8.0 and later, the `vega.enableExternalUrls` is not supported. Use `vis_type_vega.enableExternalUrls` instead.
-
-`vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   For 7.x versions version 7.11 and later, a new version of the datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
 
 `vis_type_vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set this value to true to allow Vega to use any URL to access external data sources and images. When false, Vega can only get data from {{es}}. **Default: `false`**

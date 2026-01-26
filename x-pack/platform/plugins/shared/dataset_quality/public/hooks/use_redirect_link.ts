@@ -24,6 +24,7 @@ export const useRedirectLink = <T extends BasicDataStream | string>({
   breakdownField,
   sendTelemetry,
   selector,
+  external = false,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
@@ -31,6 +32,7 @@ export const useRedirectLink = <T extends BasicDataStream | string>({
   breakdownField?: string;
   sendTelemetry: SendTelemetryFn;
   selector?: DataStreamSelector;
+  external?: boolean;
 }) => {
   const {
     services: { share },
@@ -55,7 +57,8 @@ export const useRedirectLink = <T extends BasicDataStream | string>({
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
       sendTelemetry();
-      if (config.routerLinkProps.onClick) {
+      // If the link is external, we don't want to use router link props handler because it would prevent the default behavior of the event and a new tab wouldn't be opened.
+      if (config.routerLinkProps.onClick && !external) {
         config.routerLinkProps.onClick(event);
       }
     };
@@ -82,6 +85,7 @@ export const useRedirectLink = <T extends BasicDataStream | string>({
     breakdownField,
     selector,
     sendTelemetry,
+    external,
   ]);
 };
 
@@ -163,14 +167,15 @@ const getDataView = <T extends BasicDataStream | string>({
   dataStreamStat: T;
   selector?: DataStreamSelector;
 }): { dataViewId: string; dataViewTitle: string } => {
+  const dataViewSelector = selector ? `${selector}` : '';
   if (dataStreamStat && typeof dataStreamStat === 'string') {
-    return { dataViewId: dataStreamStat, dataViewTitle: dataStreamStat };
+    const dataViewId = `${dataStreamStat}${dataViewSelector}`;
+    return { dataViewId, dataViewTitle: dataViewId };
   }
 
   const { name, namespace, type, integration } = dataStreamStat as BasicDataStream;
 
   const dataViewNamespace = `${namespace || '*'}`;
-  const dataViewSelector = selector ? `${selector}` : '';
   const dataViewId = `${type}-${name}-${dataViewNamespace}${dataViewSelector}`;
   const dataViewTitle = integration
     ? `[${integration.title}] ${name}-${dataViewNamespace}${dataViewSelector}`

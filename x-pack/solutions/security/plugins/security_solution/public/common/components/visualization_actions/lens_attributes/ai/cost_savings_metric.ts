@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 export type MyGetLensAttributes = (params: {
@@ -16,6 +17,7 @@ export type MyGetLensAttributes = (params: {
   backgroundColor: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
+  signalIndexName: string;
 }) => LensAttributes;
 
 export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
@@ -23,6 +25,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
   backgroundColor,
   extraOptions,
   minutesPerAlert,
+  signalIndexName,
 }) => {
   return {
     description: '',
@@ -97,7 +100,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
           },
         },
       },
-      filters: extraOptions?.filters ?? [],
+      filters: [getAlertIndexFilter(signalIndexName), ...(extraOptions?.filters ?? [])],
       internalReferences: [],
       query: { language: 'kuery', query: '' },
       visualization: {
@@ -120,8 +123,5 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
   } as LensAttributes;
 };

@@ -25,15 +25,12 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
+  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import {
-  INITIAL_ORACLE_RECORD_COUNTER,
-  MAX_CONCURRENT_ES_REQUEST,
-  MAX_OPEN_CASES,
-} from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
   CasesConnectorRunParams,
@@ -252,11 +249,12 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
-    if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
+    const groupSize = groupedAlerts.length;
+    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
       const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
 
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases ${maxCasesCircuitBreaker}. Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 
@@ -801,7 +799,10 @@ export class CasesConnectorExecutor {
       /**
        * TODO: Turn on for Security solution
        */
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts: false },
+      settings: caseFieldsFromTemplate?.settings ?? {
+        syncAlerts: false,
+        extractObservables: false,
+      },
       ...(caseFieldsFromTemplate?.assignees
         ? { assignees: caseFieldsFromTemplate?.assignees }
         : {}),

@@ -209,7 +209,7 @@ export const bulkActionConversationsRoute = (
             documentsToUpdate: body.update?.map((c) => transformToUpdateScheme(changedAt, c)),
             authenticatedUser,
             getUpdateScript: (document: UpdateConversationSchema) =>
-              getUpdateScript({ conversation: document, isPatch: true }),
+              getUpdateScript({ conversation: document }),
           });
           const created =
             docsCreated.length > 0

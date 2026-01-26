@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
@@ -17,6 +18,8 @@ export class ESQLService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
   public async expectEsqlStatement(statement: string) {
@@ -151,8 +154,140 @@ export class ESQLService extends FtrService {
     await this.monacoEditor.setCodeEditorValue(query);
   }
 
+  public async submitEsqlEditorQuery() {
+    await this.testSubjects.click('querySubmitButton');
+  }
+
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
+  }
+
+  public async openEsqlControlFlyout(query: string) {
+    await this.retry.waitFor('control flyout to open', async () => {
+      await this.typeEsqlEditorQuery(query);
+      // Wait until suggestions are loaded
+      await this.common.sleep(1000);
+      await this.selectEsqlSuggestionByLabel('Create control');
+
+      return await this.testSubjects.exists('create_esql_control_flyout');
+    });
+  }
+
+  public async createEsqlControl(query: string) {
+    await this.waitESQLEditorLoaded();
+    await this.openEsqlControlFlyout(query);
+
+    // create the control
+    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.waitESQLEditorLoaded();
+  }
+
+  public async focusEditor(editorSubjId = 'ESQLEditor') {
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      await editor.click();
+    });
+  }
+
+  public async isQuickSearchVisorVisible() {
+    const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
+    const visorWrapper = await visorContainer.findByCssSelector(':scope > div');
+    const opacity = await visorWrapper.getComputedStyle('opacity');
+
+    return opacity === '1';
+  }
+
+  public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      const textarea = await editor.findByCssSelector('textarea');
+      await textarea.type([Key.CONTROL, Key.SPACE]);
+      const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+      expect(await suggestionWidget.isDisplayed()).to.be(true);
+    });
+  }
+
+  public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
+    await this.retry.try(
+      async () => {
+        await this.triggerSuggestions(editorSubjId);
+
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        const suggestions = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
+
+        if (!suggestions.length) {
+          throw new Error('No suggestions found');
+        }
+
+        let suggestionToSelect;
+        for (const suggestion of suggestions) {
+          if ((await suggestion.getVisibleText()).includes(label)) {
+            suggestionToSelect = suggestion;
+            break;
+          }
+        }
+
+        if (!suggestionToSelect) {
+          throw new Error(`Suggestion with label "${label}" not found.`);
+        }
+
+        await suggestionToSelect.click();
+
+        await this.testSubjects.waitForDeleted(suggestionToSelect);
+      },
+      // we need to hit escape to close the widget before we try again.
+      async () => {
+        const editor = await this.testSubjects.find(editorSubjId);
+        const textarea = await editor.findByCssSelector('textarea');
+        await textarea.type([Key.ESCAPE]);
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        expect(await suggestionWidget.isDisplayed()).to.be(false);
+      }
+    );
+  }
+
+  public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
+    await this.retry.try(async () => {
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      let optionToSelect;
+      for (const option of options) {
+        if ((await option.getVisibleText()).includes(optionText)) {
+          optionToSelect = option;
+          break;
+        }
+      }
+
+      if (!optionToSelect) {
+        throw new Error(`Option with text "${optionText}" not found in badge hover.`);
+      }
+
+      await optionToSelect.click();
+      return true;
+    });
+  }
+
+  public async toggleQuickSearchVisor(open: boolean) {
+    await this.testSubjects.click('ESQLEditor-toggle-quick-search-visor');
+    await this.retry.try(async () => {
+      expect(await this.isQuickSearchVisorVisible()).to.be(open);
+    });
+  }
+
+  public async toggleDatasourceDropdown(open: boolean) {
+    if (open) {
+      await this.testSubjects.click('visorSourcesDropdownButton');
+    } else {
+      await this.browser.pressKeys(Key.ESCAPE);
+    }
+
+    await this.retry.try(async () => {
+      const exists = await this.testSubjects.exists('esqlEditor-visor-datasourcesList-switcher');
+      expect(exists).to.be(open);
+    });
   }
 }

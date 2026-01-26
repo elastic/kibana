@@ -11,12 +11,13 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { History } from '.';
-import { ATTACK_DISCOVERY_PATH } from '../../../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { mockHistory } from '../../../../common/utils/route/mocks';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
 import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery_generations';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -40,6 +41,8 @@ jest.mock('../../../../common/lib/kibana', () => ({
         capabilities: {
           siemV2: { crud_alerts: true, read_alerts: true },
           siemV3: { configurations: true },
+          siemV4: { configurations: true },
+          siemV5: { configurations: true },
         },
         navigateToUrl: jest.fn(),
       },
@@ -63,9 +66,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
         },
         ui: { getCasesContext: mockCasesContext },
       },
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
       theme: {
         getTheme: jest.fn().mockReturnValue({ darkMode: false }),
       },
@@ -79,6 +79,40 @@ jest.mock('../../../../common/lib/kibana', () => ({
     remove: jest.fn(),
   })),
 }));
+
+(mockUseKibana as jest.Mock).mockReturnValue({
+  services: {
+    application: {
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },
+      },
+      navigateToUrl: jest.fn(),
+    },
+    cases: {
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          connectors: true,
+          create: true,
+          delete: true,
+          push: true,
+          read: true,
+          settings: true,
+          update: true,
+        }),
+      },
+      hooks: {
+        useCasesAddToExistingCase: jest.fn(),
+        useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+        useCasesAddToNewCaseFlyout: jest.fn(),
+      },
+      ui: { getCasesContext: mockCasesContext },
+    },
+    theme: {
+      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+    },
+  },
+});
 
 jest.mock('../../use_dismiss_attack_discovery_generations', () => ({
   useDismissAttackDiscoveryGeneration: jest.fn().mockReturnValue({

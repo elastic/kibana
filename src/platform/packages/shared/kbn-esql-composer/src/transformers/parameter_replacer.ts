@@ -13,9 +13,9 @@ import type {
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
-} from '@kbn/esql-ast';
-import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-ast';
-import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-language';
+import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-language/src/types';
 import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;
@@ -115,7 +115,7 @@ export class ParameterReplacer {
 
     const value = this.resolveParamValue(node);
 
-    if (!value) {
+    if (value === null || value === undefined) {
       return node;
     }
 
@@ -131,6 +131,12 @@ export class ParameterReplacer {
       isFunctionExpression(parent) &&
       parent.subtype === 'variadic-call'
     ) {
+      if (parent.name === 'bucket' && node.type === 'literal') {
+        return Builder.expression.literal.string(String(value), {
+          unquoted: String(value).match(/^now\(\)/i) !== null,
+        });
+      }
+
       return Builder.identifier(String(value));
     }
 

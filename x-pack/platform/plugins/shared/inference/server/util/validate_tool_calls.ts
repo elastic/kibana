@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Ajv from 'ajv';
-import type { ToolCallsOf, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
+
+import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+
+import { z } from '@kbn/zod';
+import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
+import type { ToolCallOfToolOptions } from '@kbn/inference-common';
 import {
   createToolNotFoundError,
   createToolValidationError,
@@ -16,9 +20,13 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallsOf<TToolOptions>['toolCalls'] {
-  const validator = new Ajv();
+}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
 
+export function validateToolCalls({
+  toolCalls,
+  toolChoice,
+  tools,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
       `tool_choice was "none" but ${toolCalls
@@ -32,12 +40,15 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      throw createToolNotFoundError(toolCall.function.name);
+      throw createToolNotFoundError({
+        name: toolCall.function.name,
+        args: toolCall.function.arguments,
+      });
     }
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
 
-    let serializedArguments: ToolCallsOf<TToolOptions>['toolCalls'][0]['function']['arguments'];
+    let serializedArguments: Record<string, unknown>;
 
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);
@@ -49,14 +60,24 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
       });
     }
 
-    const valid = validator.validate(toolSchema, serializedArguments);
+    try {
+      // ToolSchema is compatible with JsonSchema but TypeScript can't infer
+      // the recursive type compatibility, so we assert it as JsonSchema
+      const zodSchema = jsonSchemaToZod(toolSchema as any) as z.ZodTypeAny;
+      zodSchema.parse(serializedArguments);
+    } catch (error) {
+      const errorMessage =
+        error instanceof z.ZodError
+          ? error?.errors?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          : error instanceof Error
+          ? error.message
+          : 'Unknown validation error';
 
-    if (!valid) {
       throw createToolValidationError(
         `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,
         {
           name: toolCall.function.name,
-          errorsText: validator.errorsText(),
+          errorsText: errorMessage,
           arguments: toolCall.function.arguments,
           toolCalls,
         }

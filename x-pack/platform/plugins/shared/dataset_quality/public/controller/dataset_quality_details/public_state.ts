@@ -26,6 +26,11 @@ export const getPublicStateFromContext = (
     integration: context.integration,
     expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
+    view: context.view,
+    selectedIssueTypes: context.selectedIssueTypes,
+    selectedFields: context.selectedFields,
+    streamDefinition: context.streamDefinition,
+    streamsUrls: context.streamsUrls,
   };
 };
 
@@ -59,4 +64,9 @@ export const getContextFromPublicState = (
   expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
+  view: publicState.view ?? DEFAULT_CONTEXT.view,
+  selectedIssueTypes: publicState.selectedIssueTypes ?? DEFAULT_CONTEXT.selectedIssueTypes,
+  selectedFields: publicState.selectedFields ?? DEFAULT_CONTEXT.selectedFields,
+  streamDefinition: publicState.streamDefinition,
+  streamsUrls: publicState.streamsUrls,
 });

@@ -17,12 +17,8 @@ import {
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
-import {
-  RELATED_ALERTS_TABLE_ID,
-  SLO_ALERTS_TABLE_ID,
-} from '@kbn/observability-shared-plugin/common';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -32,16 +28,19 @@ import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
 
-export function AlertActions({
-  observabilityRuleTypeRegistry,
-  alert,
-  tableId,
-  refresh,
-  openAlertInFlyout,
-  parentAlert,
-  services,
-  ...rest
-}: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>) {
+export function AlertActions(
+  props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
+) {
+  const {
+    observabilityRuleTypeRegistry,
+    alert,
+    tableId,
+    refresh,
+    parentAlert,
+    rowIndex,
+    onExpandedAlertIndexChange,
+    services,
+  } = props;
   const {
     http: {
       basePath: { prepend },
@@ -84,12 +83,15 @@ export function AlertActions({
 
   const onAddToCase = useCallback(
     ({ isNewCase }: { isNewCase: boolean }) => {
-      if (tableId === RELATED_ALERTS_TABLE_ID) {
-        telemetryClient.reportRelatedAlertAddedToCase(isNewCase);
-      }
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+
       refresh?.();
     },
-    [refresh, telemetryClient, tableId]
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
   );
 
   const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
@@ -137,7 +139,7 @@ export function AlertActions({
     useMemo(
       () => (
         <DefaultAlertActions<ObservabilityAlertsTableContext>
-          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+          {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}
@@ -149,24 +151,9 @@ export function AlertActions({
               ? paths.observability.alertDetails(alertId)
               : null
           }
-          tableId={tableId}
-          refresh={refresh}
-          alert={alert}
-          openAlertInFlyout={openAlertInFlyout}
-          services={services}
-          {...rest}
         />
       ),
-      [
-        alert,
-        closeActionsPopover,
-        observabilityRuleTypeRegistry,
-        openAlertInFlyout,
-        refresh,
-        services,
-        rest,
-        tableId,
-      ]
+      [closeActionsPopover, props]
     ),
   ];
 
@@ -180,8 +167,7 @@ export function AlertActions({
         });
 
   const onExpandEvent = () => {
-    const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-    openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
+    onExpandedAlertIndexChange(rowIndex);
   };
 
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
@@ -190,13 +176,18 @@ export function AlertActions({
     <>
       {!parentAlert && (
         <EuiFlexItem>
-          <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
+          <EuiToolTip
+            data-test-subj="expand-event-tool-tip"
+            content={VIEW_DETAILS}
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               data-test-subj="expand-event"
               iconType="expand"
               onClick={onExpandEvent}
               size="s"
               color="text"
+              aria-label={VIEW_DETAILS}
             />
           </EuiToolTip>
         </EuiFlexItem>

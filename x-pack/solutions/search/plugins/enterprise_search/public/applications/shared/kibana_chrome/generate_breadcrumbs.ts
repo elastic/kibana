@@ -13,7 +13,6 @@ import {
   ANALYTICS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
-  SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE_URL,
   APPLICATIONS_PLUGIN,
@@ -127,9 +126,6 @@ export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
-
-export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: APPLICATIONS_PLUGIN.NAV_TITLE }, ...breadcrumbs]);

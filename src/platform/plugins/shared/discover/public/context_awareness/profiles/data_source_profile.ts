@@ -20,6 +20,7 @@ import type { RootContext } from './root_profile';
  */
 export enum DataSourceCategory {
   Traces = 'traces',
+  Metrics = 'metrics',
   Logs = 'logs',
   Default = 'default',
 }

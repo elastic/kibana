@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   createBackingIndexNameWithoutVersion,
   getDataStreamSettingsOfEarliestIndex,
@@ -43,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           canRead: true,
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
       },
       canViewIntegrations: true,

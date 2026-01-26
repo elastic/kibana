@@ -241,7 +241,20 @@ export const useHostsTable = () => {
     return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
   }, [items, pagination, sorting]);
 
-  const metricColumnsWidth = displayAlerts ? '12%' : '16%';
+  const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
+  const metricColumnsWidth = useMemo(() => {
+    if (displayAlerts) {
+      return showNetworkColumns ? '12%' : '16%';
+    }
+    return showNetworkColumns ? '16%' : '20%';
+  }, [displayAlerts, showNetworkColumns]);
+
+  const titleColumnWidth = useMemo(() => {
+    if (displayAlerts) {
+      return showNetworkColumns ? '15%' : '20%';
+    }
+    return showNetworkColumns ? '20%' : '25%';
+  }, [displayAlerts, showNetworkColumns]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -274,7 +287,7 @@ export const useHostsTable = () => {
                   showDocumentationLink={false}
                 />
               ),
-              width: '95px',
+              width: '80px',
               field: 'alertsCount',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-alertsCount',
@@ -371,7 +384,7 @@ export const useHostsTable = () => {
         render: (title: HostNodeRow['title']) => (
           <EntryTitle title={title} onClick={() => reportHostEntryClick(title)} />
         ),
-        width: displayAlerts ? '15%' : '20%',
+        width: titleColumnWidth,
       },
       {
         name: (
@@ -513,6 +526,7 @@ export const useHostsTable = () => {
       showApmHostTroubleshooting,
       formulas,
       metricColumnsWidth,
+      titleColumnWidth,
       searchCriteria.preferredSchema,
       detailsItemId,
       setProperties,

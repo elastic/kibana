@@ -7,36 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-
-import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import type { ReindexWorker } from '../lib';
-import { reindexActionsFactory } from '../lib/reindex_actions';
-import { sortAndOrderReindexOperations } from '../lib/op_utils';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from '../lib/reindex_handler';
-import type { GetBatchQueueResponse, PostBatchResponse } from './types';
+import { reindexSchema } from './reindex_indices';
 
-export function registerBatchReindexIndicesRoutes(
-  {
-    credentialStore,
-    router,
-    licensing,
-    log,
-    getSecurityPlugin,
-    lib: { handleEsError },
-    version,
-  }: RouteDependencies,
-  getWorker: () => ReindexWorker
-) {
-  const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
-
+export function registerBatchReindexIndicesRoutes({
+  router,
+  getReindexService,
+}: RouteDependencies) {
   // Get the current batch queue
   router.get(
     {
-      path: `${BASE_PATH}/batch/queue`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/batch/queue`,
       security: {
         authz: {
           enabled: false,
@@ -45,25 +29,17 @@ export function registerBatchReindexIndicesRoutes(
       },
       validate: {},
     },
-    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+    async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
-        savedObjects,
       } = await core;
-      const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser,
-        log,
-        version
-      );
+
       try {
-        const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
-        const { queue } = sortAndOrderReindexOperations(inProgressOps);
-        const result: GetBatchQueueResponse = {
-          queue: queue.map((savedObject) => savedObject.attributes),
-        };
+        const reindexService = (await getReindexService()).getScopedClient({
+          dataClient: esClient,
+          request,
+        });
+        const result = await reindexService.getBatchQueueResponse();
         return response.ok({
           body: result,
         });
@@ -73,13 +49,13 @@ export function registerBatchReindexIndicesRoutes(
         }
         return mapAnyErrorToKibanaHttpResponse(error);
       }
-    })
+    }
   );
 
   // Add indices for reindexing to the worker's batch
   router.post(
     {
-      path: `${BASE_PATH}/batch`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/batch`,
       security: {
         authz: {
           enabled: false,
@@ -88,51 +64,23 @@ export function registerBatchReindexIndicesRoutes(
       },
       validate: {
         body: schema.object({
-          indexNames: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(reindexSchema),
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+    async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexNames } = request.body;
-      const results: PostBatchResponse = {
-        enqueued: [],
-        errors: [],
-      };
-      for (const indexName of indexNames) {
-        try {
-          const result = await reindexHandler({
-            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-            dataClient: esClient,
-            indexName,
-            log,
-            licensing,
-            request,
-            credentialStore,
-            reindexOptions: {
-              enqueue: true,
-            },
-            security: getSecurityPlugin(),
-            version,
-          });
-          results.enqueued.push(result);
-        } catch (e) {
-          results.errors.push({
-            indexName,
-            message: e.message,
-          });
-        }
-      }
+      const { indices } = request.body;
 
-      if (results.errors.length < indexNames.length) {
-        // Kick the worker on this node to immediately pickup the batch.
-        getWorker().forceRefresh();
-      }
+      const reindexService = (await getReindexService()).getScopedClient({
+        dataClient: esClient,
+        request,
+      });
+      const results = await reindexService.addToBatch(indices);
 
       return response.ok({ body: results });
-    })
+    }
   );
 }

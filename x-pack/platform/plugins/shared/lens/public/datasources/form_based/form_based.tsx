@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import type {
@@ -42,7 +42,18 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
-} from '../../types';
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  FormBasedPrivateState,
+  FormBasedPersistedState,
+  Datasource,
+  VisualizeEditorContext,
+  DateRange,
+  LastValueIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -62,7 +73,6 @@ import {
   getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsForVisualizeCharts,
 } from './form_based_suggestions';
-
 import {
   getFiltersInLayer,
   getSearchWarningMessages,
@@ -71,20 +81,18 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  getPrecisionErrorWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import type {
-  DateHistogramIndexPatternColumn,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from './operations';
 import {
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
+  deleteColumn,
+  isReferenced,
 } from './operations';
 import {
   copyColumn,
@@ -92,26 +100,17 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import type {
-  FormBasedPrivateState,
-  FormBasedPersistedState,
-  DataViewDragDropOperation,
-} from './types';
+import type { DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import type { Datasource, VisualizeEditorContext } from '../../types';
-import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { isColumnOfType } from './operations/definitions/helpers';
+import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';
-export type { OperationType, GenericIndexPatternColumn } from './operations';
-export { deleteColumn } from './operations';
+export type { OperationType } from './operations';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -219,6 +218,7 @@ export function getFormBasedDatasource({
   data,
   unifiedSearch,
   share,
+  kql,
   dataViews,
   fieldFormats,
   charts,
@@ -229,6 +229,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -251,7 +252,8 @@ export function getFormBasedDatasource({
       references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>
+      indexPatterns?: Record<string, IndexPattern>,
+      dateRange?: DateRange
     ) {
       return loadInitialState({
         persistedState,
@@ -261,11 +263,14 @@ export function getFormBasedDatasource({
         initialContext,
         indexPatternRefs,
         indexPatterns,
+        dateRange,
       });
     },
 
     getPersistableState(state: FormBasedPrivateState) {
-      return extractReferences(state);
+      const { references, state: persistableState } = extractReferences(state);
+      const newPersistableState = cleanupFormulaColumns(persistableState);
+      return { references, state: newPersistableState };
     },
 
     insertLayer(
@@ -562,6 +567,7 @@ export function getFormBasedDatasource({
           http={core.http}
           data={data}
           unifiedSearch={unifiedSearch}
+          kql={kql}
           dataViews={dataViews}
           uniqueLabel={columnLabelMap[props.columnId]}
           notifications={core.notifications}

@@ -7,12 +7,18 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { schema } from '@kbn/config-schema';
 import { registerServerRoutes } from './routes/register_routes';
 import type {
   GenAiSettingsPluginSetupDependencies,
   GenAiSettingsPluginStartDependencies,
 } from './types';
 import type { GenAiSettingsRouteHandlerResources } from './routes/types';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 
 export type GenAiSettingsPluginSetup = Record<string, never>;
 export type GenAiSettingsPluginStart = Record<string, never>;
@@ -65,6 +71,24 @@ export class GenAiSettingsPlugin
         plugins: withCore,
       },
       isDev: false,
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: false,
+      },
     });
 
     return {};

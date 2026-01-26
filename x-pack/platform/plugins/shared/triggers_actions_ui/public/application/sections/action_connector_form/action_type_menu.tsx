@@ -35,6 +35,7 @@ interface RegisteredActionType {
   actionType: ActionType;
   name: string;
   isExperimental: boolean | undefined;
+  isDeprecated: boolean;
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -106,12 +107,14 @@ export const ActionTypeMenu = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(
-      ([id, details]) =>
-        actionTypeRegistry.has(id) &&
-        details.enabledInConfig === true &&
-        !actionTypeRegistry.get(id).hideInUi
-    )
+    .filter(([id, details]) => {
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
+        actionTypesIndex ? Object.values(actionTypesIndex) : []
+      );
+
+      return details.enabledInConfig === true && !shouldHideInUi;
+    })
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -120,6 +123,7 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionType.isDeprecated,
       };
     });
 
@@ -174,6 +178,7 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
+
       <EuiFlexGrid
         gutterSize="xl"
         columns={3}

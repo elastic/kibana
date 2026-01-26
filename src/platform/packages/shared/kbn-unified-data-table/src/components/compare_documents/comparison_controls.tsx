@@ -27,6 +27,7 @@ import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
+import { styles as toolbarStyles } from '../custom_toolbar/render_custom_toolbar';
 
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
@@ -102,7 +103,7 @@ export const ComparisonControls = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <div className="unifiedDataTableToolbarControlButton">
+        <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
             iconType="exit"
             onClick={() => {
@@ -156,7 +157,7 @@ const ComparisonSettings = ({
   return (
     <EuiPopover
       button={
-        <div className="unifiedDataTableToolbarControlButton">
+        <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
             iconType="gear"
             onClick={() => {

@@ -15,17 +15,19 @@ import * as useNavigationModule from '@kbn/security-solution-navigation/src/navi
 import * as useGetIntegrationsModule from '../service/hooks/use_get_integrations';
 import * as useGetMigrationRulesModule from '../logic/use_get_migration_rules';
 import * as useGetMigrationTranslationStatsModule from '../logic/use_get_migration_translation_stats';
-import * as useMissingPrivilegesModule from '../../../detections/components/callouts/missing_privileges_callout/use_missing_privileges';
+import * as useMissingPrivilegesModule from '../../../common/hooks/use_missing_privileges';
 import * as useGetMigrationMissingPrivilegesModule from '../logic/use_get_migration_privileges';
 import * as useCallOutStorageModule from '../../../common/components/callouts/use_callout_storage';
 import { TestProviders } from '../../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import {
   mockedLatestStats,
   mockedLatestStatsEmpty,
   mockedMigrationResultsObj,
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
-import * as useGetMissingResourcesModule from '../service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
+import type { SiemMigrationsService } from '../../service';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -102,6 +104,24 @@ const mockHiddenCallStorageResult = {
   getVisibleMessageIds: jest.fn(() => []),
 };
 
+const defaultStartServicesMock = createStartServicesMock();
+
+const startServicesMock = {
+  ...defaultStartServicesMock,
+  siemMigrations: {
+    ...defaultStartServicesMock.siemMigrations,
+    rules: {
+      ...defaultStartServicesMock.siemMigrations.rules,
+      hasMissingCapabilities: jest.fn().mockReturnValue(false),
+      getMissingCapabilities: jest.fn().mockReturnValue([]),
+    },
+  } as unknown as SiemMigrationsService,
+};
+
+const TestProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+);
+
 function renderTestComponent(args?: { migrationId?: string; wrapper?: React.ComponentType }) {
   const finalProps = {
     ...defaultProps,
@@ -112,9 +132,14 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
       },
     },
   };
-  return render(<MigrationRulesPage {...finalProps} />, {
-    wrapper: args?.wrapper,
-  });
+  return render(
+    <TestProviderWrapper>
+      <MigrationRulesPage {...finalProps} />
+    </TestProviderWrapper>,
+    {
+      wrapper: args?.wrapper,
+    }
+  );
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =
@@ -174,7 +199,7 @@ describe('Migrations: Translated Rules Page', () => {
   describe('With No MigrationId', () => {
     test('should render empty page when no translated rules are available', () => {
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(screen.getByTestId('siemMigrationsTranslatedRulesEmptyPageHeader')).toBeVisible();
@@ -211,7 +236,7 @@ describe('Migrations: Translated Rules Page', () => {
       const missingPrivilegesHash = hash(mockMissingPrivileges);
 
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(useCalloutStorageSpy).toHaveBeenCalled();
@@ -237,7 +262,7 @@ describe('Migrations: Translated Rules Page', () => {
       useLatestStatsSpy.mockReturnValue(mockedLatestStats);
       renderTestComponent({
         migrationId: '1',
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       await waitFor(() => {

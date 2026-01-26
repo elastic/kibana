@@ -1,0 +1,244 @@
+{
+  "id": "@kbn/dashboards-selector",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dashboards-selector",
+        "id": "def-public.DashboardsSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardsSelector",
+        "description": [],
+        "signature": [
+          "({\n  uiActions,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}: { uiActions: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
+          },
+          "; dashboardsFormData: { id: string; }[]; onChange: (selectedOptions: ",
+          "EuiComboBoxOptionOption",
+          "<string>[]) => void; placeholder?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboards-selector",
+            "id": "def-public.DashboardsSelector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  uiActions,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+            "lineNumber": 68,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.uiActions",
+                "type": "Object",
+                "tags": [],
+                "label": "uiActions",
+                "description": [],
+                "signature": [
+                  "{ readonly registerTrigger: (trigger: ",
+                  {
+                    "pluginId": "@kbn/ui-actions-browser",
+                    "scope": "common",
+                    "docId": "kibKbnUiActionsBrowserPluginApi",
+                    "section": "def-common.Trigger",
+                    "text": "Trigger"
+                  },
+                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
+                  "TriggerContract",
+                  "<object>; readonly registerAction: <Context extends object>(definition: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context, {}>) => ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.FrequentCompatibilityChangeAction",
+                    "text": "FrequentCompatibilityChangeAction"
+                  },
+                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "UiActionsService",
+                  "; }"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 69,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.dashboardsFormData",
+                "type": "Array",
+                "tags": [],
+                "label": "dashboardsFormData",
+                "description": [],
+                "signature": [
+                  "{ id: string; }[]"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 70,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(selectedOptions: ",
+                  "EuiComboBoxOptionOption",
+                  "<string>[]) => void"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 71,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/dashboards-selector",
+                    "id": "def-public.DashboardsSelector.$1.onChange.$1",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "selectedOptions",
+                    "description": [],
+                    "signature": [
+                      "EuiComboBoxOptionOption",
+                      "<string>[]"
+                    ],
+                    "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                    "lineNumber": 71,
+                    "columnNumber": 14,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.placeholder",
+                "type": "string",
+                "tags": [],
+                "label": "placeholder",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "lineNumber": 72,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

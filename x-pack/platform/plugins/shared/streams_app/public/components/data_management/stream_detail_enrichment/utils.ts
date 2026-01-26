@@ -5,37 +5,82 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import type { GrokProcessor, ProcessorType, StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { ALWAYS_CONDITION, streamlangProcessorSchema } from '@kbn/streamlang';
-import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type {
-  DissectFormState,
-  GrokFormState,
-  ProcessorFormState,
-  DateFormState,
-  ManualIngestPipelineFormState,
-  EnrichmentDataSourceWithUIAttributes,
-  SetFormState,
-} from './types';
-import { configDrivenProcessors } from './processors/config_driven';
+  ConcatProcessor,
+  ConvertProcessor,
+  GrokProcessor,
+  JoinProcessor,
+  LowercaseProcessor,
+  MathProcessor,
+  ProcessorType,
+  ReplaceProcessor,
+  StreamlangConditionBlockWithUIAttributes,
+  StreamlangDSL,
+  StreamlangProcessorDefinition,
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangStepWithUIAttributes,
+  TrimProcessor,
+} from '@kbn/streamlang';
+import {
+  ALWAYS_CONDITION,
+  conditionSchema,
+  convertStepToUIDefinition,
+  streamlangProcessorSchema,
+  stripCustomIdentifiers,
+} from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ProcessorResources } from './state_management/steps_state_machine';
+import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
+import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
-} from './processors/config_driven/types';
-import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import type { ProcessorResources } from './state_management/processor_state_machine';
+} from './steps/blocks/action/config_driven/types';
+import type {
+  ConcatFormState,
+  ConditionBlockFormState,
+  ConvertFormState,
+  DateFormState,
+  DissectFormState,
+  DropFormState,
+  EnrichmentDataSourceWithUIAttributes,
+  GrokFormState,
+  JoinFormState,
+  LowercaseFormState,
+  ManualIngestPipelineFormState,
+  MathFormState,
+  ProcessorFormState,
+  ReplaceFormState,
+  SetFormState,
+  TrimFormState,
+  UppercaseFormState,
+} from './types';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
+export const SPECIALISED_TYPES = [
+  'convert',
+  'date',
+  'dissect',
+  'grok',
+  'math',
+  'set',
+  'replace',
+  'drop_document',
+  'uppercase',
+  'lowercase',
+  'trim',
+  'join',
+  'concat',
+];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -47,7 +92,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -62,9 +107,11 @@ const PRIORITIZED_DATE_FIELDS = [
   'date',
   'event.time.received',
   'event.ingested',
+  'custom.timestamp',
+  'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
@@ -85,6 +132,37 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   return mostCommonField ? mostCommonField[0] : '';
 };
 
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
+};
+
+const defaultConvertProcessorFormState = (): ConvertFormState => ({
+  action: 'convert' as const,
+  from: '',
+  to: '',
+  type: 'string',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   action: 'date',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
@@ -102,6 +180,12 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
+});
+
+const defaultDropProcessorFormState = (): DropFormState => ({
+  action: 'drop_document',
+  where: ALWAYS_CONDITION,
+  ignore_failure: true,
 });
 
 const defaultGrokProcessorFormState: (
@@ -135,6 +219,68 @@ const defaultSetProcessorFormState = (): SetFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
+  action: 'replace' as const,
+  from: '',
+  pattern: '',
+  replacement: '',
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
+  action: 'uppercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
+  action: 'lowercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultTrimProcessorFormState = (): TrimFormState => ({
+  action: 'trim' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultJoinProcessorFormState = (): JoinFormState => ({
+  action: 'join' as const,
+  from: [],
+  to: '',
+  delimiter: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultMathProcessorFormState = (): MathFormState => ({
+  action: 'math' as const,
+  expression: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultConcatProcessorFormState = (): ConcatFormState => ({
+  action: 'concat' as const,
+  from: [],
+  to: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -146,11 +292,20 @@ const defaultProcessorFormStateByType: Record<
   ProcessorType,
   (sampleDocs: FlattenRecord[], formStateDependencies: FormStateDependencies) => ProcessorFormState
 > = {
+  convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
+  drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  math: defaultMathProcessorFormState,
+  replace: defaultReplaceProcessorFormState,
+  uppercase: defaultUppercaseProcessorFormState,
+  lowercase: defaultLowercaseProcessorFormState,
+  trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
+  join: defaultJoinProcessorFormState,
+  concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -160,20 +315,22 @@ export const getDefaultFormStateByType = (
   formStateDependencies: FormStateDependencies
 ) => defaultProcessorFormStateByType[type](sampleDocuments, formStateDependencies);
 
-export const getFormStateFrom = (
+export const getFormStateFromActionStep = (
   sampleDocuments: FlattenRecord[],
   formStateDependencies: FormStateDependencies,
-  processor?: StreamlangProcessorDefinition
+  step?: StreamlangProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
+  if (!step) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
 
-  if (processor.action === 'grok') {
+  if (step.action === 'grok') {
+    const { customIdentifier, parentId, ...restStep } = step;
+
     const clone: GrokFormState = structuredClone({
-      ...omit(processor, 'patterns'),
+      ...omit(restStep, 'patterns'),
       patterns: [],
     });
 
-    clone.patterns = processor.patterns.map(
+    clone.patterns = step.patterns.map(
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
 
@@ -181,23 +338,54 @@ export const getFormStateFrom = (
   }
 
   if (
-    processor.action === 'dissect' ||
-    processor.action === 'manual_ingest_pipeline' ||
-    processor.action === 'date' ||
-    processor.action === 'set'
+    step.action === 'dissect' ||
+    step.action === 'manual_ingest_pipeline' ||
+    step.action === 'date' ||
+    step.action === 'drop_document' ||
+    step.action === 'set' ||
+    step.action === 'convert' ||
+    step.action === 'replace' ||
+    step.action === 'math' ||
+    step.action === 'uppercase' ||
+    step.action === 'lowercase' ||
+    step.action === 'trim' ||
+    step.action === 'join' ||
+    step.action === 'concat'
   ) {
+    const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
-      ...processor,
+      ...restStep,
     });
   }
 
-  if (processor.action in configDrivenProcessors) {
+  if (step.action in configDrivenProcessors) {
+    const { customIdentifier, parentId, ...restStep } = step;
     return configDrivenProcessors[
-      processor.action as ConfigDrivenProcessorType
-    ].convertProcessorToFormState(processor as any);
+      step.action as ConfigDrivenProcessorType
+    ].convertProcessorToFormState(restStep as any);
   }
 
-  throw new Error(`Form state for processor type "${processor.action}" is not implemented.`);
+  throw new Error(`Form state for processor type "${step.action}" is not implemented.`);
+};
+
+export const getFormStateFromConditionStep = (
+  step: StreamlangConditionBlockWithUIAttributes
+): ConditionBlockFormState => {
+  return structuredClone({
+    ...step,
+  });
+};
+
+export const convertConditionBlockFormStateToConfiguration = (
+  formState: ConditionBlockFormState
+): {
+  conditionBlockDefinition: StreamlangConditionBlockWithUIAttributes;
+} => {
+  return {
+    conditionBlockDefinition: {
+      ...formState,
+    },
+  };
 };
 
 export const convertFormStateToProcessor = (
@@ -206,102 +394,253 @@ export const convertFormStateToProcessor = (
   processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
-  if (formState.action === 'grok') {
-    const { patterns, from, ignore_failure, ignore_missing } = formState;
+  const description = 'description' in formState ? formState.description : undefined;
 
-    return {
-      processorDefinition: {
-        action: 'grok',
-        where: formState.where,
-        patterns: patterns
-          .map((pattern) => pattern.getExpression().trim())
-          .filter((pattern) => !isEmpty(pattern)),
-        from,
-        ignore_failure,
-        ignore_missing,
-      },
-      processorResources: {
-        grokExpressions: patterns,
-      },
-    };
-  }
+  if ('action' in formState) {
+    if (formState.action === 'grok') {
+      const { patterns, pattern_definitions, from, ignore_failure, ignore_missing } = formState;
 
-  if (formState.action === 'dissect') {
-    const { from, pattern, append_separator, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'grok',
+          where: formState.where,
+          description,
+          patterns: patterns
+            .map((pattern) => pattern.getExpression().trim())
+            .filter((pattern) => !isEmpty(pattern)),
+          pattern_definitions,
+          from,
+          ignore_failure,
+          ignore_missing,
+        },
+        processorResources: {
+          grokExpressions: patterns,
+        },
+      };
+    }
 
-    return {
-      processorDefinition: {
-        action: 'dissect',
-        where: formState.where,
-        from,
-        pattern,
-        append_separator: isEmpty(append_separator) ? undefined : append_separator,
-        ignore_failure,
-        ignore_missing,
-      },
-    };
-  }
+    if (formState.action === 'dissect') {
+      const { from, pattern, append_separator, ignore_failure, ignore_missing } = formState;
 
-  if (formState.action === 'manual_ingest_pipeline') {
-    const { processors, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'dissect',
+          where: formState.where,
+          description,
+          from,
+          pattern,
+          append_separator: isEmpty(append_separator) ? undefined : append_separator,
+          ignore_failure,
+          ignore_missing,
+        },
+      };
+    }
 
-    return {
-      processorDefinition: {
-        action: 'manual_ingest_pipeline',
-        where: formState.where,
-        processors,
-        ignore_failure,
-      },
-    };
-  }
+    if (formState.action === 'manual_ingest_pipeline') {
+      const { processors, ignore_failure } = formState;
 
-  if (formState.action === 'date') {
-    const { from, formats, ignore_failure, to, output_format } = formState;
+      return {
+        processorDefinition: {
+          action: 'manual_ingest_pipeline',
+          where: formState.where,
+          description,
+          processors,
+          ignore_failure,
+        },
+      };
+    }
 
-    return {
-      processorDefinition: {
-        action: 'date',
-        where: formState.where,
-        from,
-        formats,
-        ignore_failure,
-        to: isEmpty(to) ? undefined : to,
-        output_format: isEmpty(output_format) ? undefined : output_format,
-      },
-    };
-  }
+    if (formState.action === 'date') {
+      const { from, formats, ignore_failure, to, output_format, timezone, locale } = formState;
 
-  if (formState.action === 'set') {
-    const { to, value, copy_from, ignore_failure, override } = formState;
+      return {
+        processorDefinition: {
+          action: 'date',
+          where: formState.where,
+          description,
+          from,
+          formats,
+          ignore_failure,
+          to: isEmpty(to) ? undefined : to,
+          output_format: isEmpty(output_format) ? undefined : output_format,
+          timezone: isEmpty(timezone) ? undefined : timezone,
+          locale: isEmpty(locale) ? undefined : locale,
+        },
+      };
+    }
 
-    const getValueOrCopyFrom = () => {
-      if (typeof copy_from === 'string' && !isEmpty(copy_from)) {
-        return { copy_from };
-      }
-      if (typeof value === 'string' && !isEmpty(value)) {
-        return { value };
-      }
-      return { value: '' };
-    };
+    if (formState.action === 'drop_document') {
+      const { where, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'drop_document',
+          where,
+          ignore_failure,
+          description,
+        },
+      };
+    }
 
-    return {
-      processorDefinition: {
-        action: 'set',
-        where: formState.where,
-        to,
-        ...getValueOrCopyFrom(),
-        override,
-        ignore_failure,
-      },
-    };
-  }
+    if (formState.action === 'set') {
+      const { to, value, copy_from, ignore_failure, override } = formState;
 
-  if (configDrivenProcessors[formState.action]) {
-    return {
-      processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-        formState as any
-      ),
-    };
+      const getValueOrCopyFrom = () => {
+        if (typeof copy_from === 'string' && !isEmpty(copy_from)) {
+          return { copy_from };
+        }
+        if (typeof value === 'string' && !isEmpty(value)) {
+          return { value };
+        }
+        return { value: '' };
+      };
+
+      return {
+        processorDefinition: {
+          action: 'set',
+          where: formState.where,
+          description,
+          to,
+          ...getValueOrCopyFrom(),
+          override,
+          ignore_failure,
+        },
+      };
+    }
+
+    if (formState.action === 'convert') {
+      const { from, type, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'convert',
+          from,
+          type,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConvertProcessor,
+      };
+    }
+
+    if (formState.action === 'replace') {
+      const { from, pattern, replacement, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'replace',
+          from,
+          pattern: isEmpty(pattern) ? '' : pattern,
+          replacement: isEmpty(replacement) ? '' : replacement,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ReplaceProcessor,
+      };
+    }
+
+    if (formState.action === 'math') {
+      const { expression, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'math',
+          expression,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as MathProcessor,
+      };
+    }
+
+    if (formState.action === 'uppercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'uppercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        },
+      };
+    }
+
+    if (formState.action === 'lowercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'lowercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as LowercaseProcessor,
+      };
+    }
+
+    if (formState.action === 'trim') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'trim',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as TrimProcessor,
+      };
+    }
+
+    if (formState.action === 'join') {
+      const { from, to, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'join',
+          from,
+          to,
+          ignore_failure,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JoinProcessor,
+      };
+    }
+
+    if (formState.action === 'concat') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'concat',
+          from,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConcatProcessor,
+      };
+    }
+
+    if (configDrivenProcessors[formState.action]) {
+      return {
+        processorDefinition: {
+          ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
+          description,
+        },
+      };
+    }
   }
 
   throw new Error('Cannot convert form state to processing: unknown type.');
@@ -323,31 +662,8 @@ export const isSetProcessor = createProcessorGuardByType('set');
 
 const createId = htmlIdGenerator();
 
-const processorToUIDefinition = <TProcessorDefinition extends StreamlangProcessorDefinition>(
-  processor: TProcessorDefinition
-): StreamlangProcessorDefinition => ({
-  customIdentifier: createId(),
-  ...processor,
-});
-
-const processorToAPIDefinition = (
-  processor: StreamlangProcessorDefinition
-): StreamlangProcessorDefinition => {
-  // Remove customIdentifier, as we only use this for simulation tracing.
-  const { customIdentifier, ...rest } = processor;
-  return rest;
-};
-
-const processorToSimulateDefinition = (
-  processor: StreamlangProcessorDefinition
-): StreamlangProcessorDefinition => {
-  return processor;
-};
-
-export const processorConverter = {
-  toAPIDefinition: processorToAPIDefinition,
-  toSimulateDefinition: processorToSimulateDefinition,
-  toUIDefinition: processorToUIDefinition,
+export const stepConverter = {
+  toUIDefinition: convertStepToUIDefinition,
 };
 
 const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
@@ -403,5 +719,97 @@ export const recalcColumnWidths = ({
   return next;
 };
 
-export const isValidProcessor = (processor: StreamlangProcessorDefinition) =>
-  isSchema(streamlangProcessorSchema, processorConverter.toAPIDefinition(processor));
+// Get valid steps for simulation
+// This will return valid action blocks, and valid where blocks, where
+// where blocks are invalid all their children are also skipped.
+export const getValidSteps = (
+  steps: StreamlangStepWithUIAttributes[]
+): StreamlangStepWithUIAttributes[] => {
+  const validSteps: StreamlangStepWithUIAttributes[] = [];
+
+  // Helper to recursively skip invalid where blocks and their children
+  function processStep(step: StreamlangStepWithUIAttributes): boolean {
+    if (isConditionBlock(step)) {
+      // If the where block is invalid, skip it and all its children
+      if (!isSchema(conditionSchema, step.condition)) {
+        return false;
+      }
+
+      // Valid but has no children (compilation of this step would be pointless)
+      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
+      if (!hasChildren) {
+        return false;
+      }
+
+      // Valid where block with children
+      validSteps.push(step);
+      return true;
+    } else {
+      // Action step: check schema validity
+      if (!isSchema(streamlangProcessorSchema, step)) {
+        return false;
+      }
+
+      validSteps.push(step);
+      return true;
+    }
+  }
+
+  // We assume steps is a flat array, so we need to skip children of invalid where blocks
+  const skipParentIds = new Set<string>();
+
+  for (const step of steps) {
+    // If this step's parent is in skipParentIds, skip it (and its children)
+    if (step.parentId && skipParentIds.has(step.parentId)) {
+      skipParentIds.add(step.customIdentifier);
+      continue;
+    }
+
+    const isValid = processStep(step);
+
+    // If this is an invalid where block, add its id to skipParentIds
+    if (isConditionBlock(step) && !isValid) {
+      skipParentIds.add(step.customIdentifier);
+    }
+  }
+  return validSteps;
+};
+
+export const getStepPanelColour = (stepIndex: number) => {
+  const isEven = stepIndex % 2 === 0;
+  return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  dsl: StreamlangDSL,
+  fields?: FieldDefinition
+): { ingest: IngestUpsertRequest } => {
+  const dslWithStrippedIds = stripCustomIdentifiers(dsl);
+
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
+};

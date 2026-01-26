@@ -72,6 +72,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('settings');
         expect(body.settings).to.eql({
           syncAlerts: true,
+          extractObservables: false,
         });
       });
 
@@ -119,16 +120,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           owner: 'securitySolution',
           settings: {
             syncAlerts: true,
+            extractObservables: false,
           },
           severity: 'low',
           status: 'open',
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalAlerts: 0,
+          totalEvents: 0,
           totalComment: 1,
           updated_at: null,
           updated_by: null,
           observables: [],
+          total_observables: 0,
         });
       });
     });

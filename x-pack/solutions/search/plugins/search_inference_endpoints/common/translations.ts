@@ -26,6 +26,13 @@ export const VIEW_YOUR_MODELS_LINK = i18n.translate(
   }
 );
 
+export const EIS_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.eisDocumentationLink',
+  {
+    defaultMessage: 'Elastic Inference Service',
+  }
+);
+
 export const API_DOCUMENTATION_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.apiDocumentationLink',
   {
@@ -142,5 +149,12 @@ export const ENDPOINT_VIEW_ACTION_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.viewEndpooint',
   {
     defaultMessage: 'View endpoint',
+  }
+);
+
+export const INFERENCE_ENDPOINTS_TABLE_CAPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.table.caption',
+  {
+    defaultMessage: 'Inference endpoints table',
   }
 );

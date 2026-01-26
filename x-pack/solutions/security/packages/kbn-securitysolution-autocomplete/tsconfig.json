@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node"]
@@ -15,8 +15,8 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils",
-    "@kbn/doc-links",
     "@kbn/securitysolution-utils",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": [
     "target/**/*",

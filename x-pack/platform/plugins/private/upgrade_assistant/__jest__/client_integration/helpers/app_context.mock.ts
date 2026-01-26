@@ -25,15 +25,19 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };
 const findDataView = (id: string) =>
-  Promise.resolve([
-    {
-      id,
-      title: id,
-      getFieldByName: jest.fn((name: string) => ({
-        name,
-      })),
-    },
-  ]);
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id,
+          title: id,
+          getFieldByName: jest.fn((name: string) => ({
+            name,
+          })),
+        },
+      ]);
+    }, 0);
+  });
 
 const servicesMock = {
   api: apiService,
@@ -87,6 +91,8 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
     currentMajor: kibanaVersion.major,
     prevMajor: kibanaVersion.major - 1,
     nextMajor: kibanaVersion.major + 1,
+    currentMinor: kibanaVersion.minor,
+    currentPatch: kibanaVersion.patch,
   },
   services: {
     ...servicesMock,

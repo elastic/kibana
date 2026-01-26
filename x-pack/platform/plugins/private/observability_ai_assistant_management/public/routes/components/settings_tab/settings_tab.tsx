@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
+import { useInferenceEndpoints } from '@kbn/ai-assistant/src/hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 import { ProductDocSetting } from './product_doc_setting';
@@ -18,27 +19,35 @@ export function SettingsTab() {
   const { productDocBase } = useKibana().services;
 
   const knowledgeBase = useKnowledgeBase();
+  const { inferenceEndpoints } = useInferenceEndpoints();
+
   const currentlyDeployedInferenceId = getMappedInferenceId(
-    knowledgeBase.status.value?.currentInferenceId
+    knowledgeBase.status.value?.currentInferenceId,
+    inferenceEndpoints
   );
 
   const connectors = useGenAIConnectors();
 
+  const kbEnabled = Boolean(knowledgeBase.status.value?.enabled);
+  const hasConnectors = (connectors.connectors?.length ?? 0) > 0;
+
   return (
     <EuiPanel hasBorder grow={false}>
-      {productDocBase ? (
-        <ProductDocSetting
-          knowledgeBase={knowledgeBase}
-          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
-        />
-      ) : undefined}
+      {kbEnabled && hasConnectors && (
+        <>
+          <ChangeKbModel
+            knowledgeBase={knowledgeBase}
+            currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+          />
 
-      {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-        <ChangeKbModel
-          knowledgeBase={knowledgeBase}
-          currentlyDeployedInferenceId={currentlyDeployedInferenceId}
-        />
-      ) : undefined}
+          {productDocBase && (
+            <ProductDocSetting
+              knowledgeBase={knowledgeBase}
+              currentlyDeployedInferenceId={currentlyDeployedInferenceId}
+            />
+          )}
+        </>
+      )}
 
       <UISettings knowledgeBase={knowledgeBase} />
     </EuiPanel>

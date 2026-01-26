@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -24,10 +24,26 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
+} from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+import type {
+  UpdateCascadeGroupingActionPayload,
+  UpdateESQLQueryActionPayload,
+} from '../application/main/state_management/redux/types';
+
+export type UpdateESQLQueryFn = (
+  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
+
+export type UpdateCascadeGroupingFn = (
+  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
+) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -50,6 +66,19 @@ export interface PaginationConfigExtension {
    * @returns paginationMode - which mode to use for loading Pagination toolbar
    */
   paginationMode: DataGridPaginationMode;
+}
+
+/**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: Array<DataViewField['name']>;
 }
 
 /**
@@ -85,6 +114,69 @@ export interface AppMenuExtensionParams {
 }
 
 /**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+}
+
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: UpdateESQLQueryFn;
+  };
+}
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The render function for the chart section
+       */
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+    }
+  | {
+      replaceDefaultChart: false;
+    };
+
+/**
  * Supports customizing the Discover document viewer flyout
  */
 export interface DocViewerExtension {
@@ -104,6 +196,20 @@ export interface DocViewerExtension {
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
+  /**
+   * Available actions for the doc viewer extension
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: UpdateESQLQueryFn;
+  };
   /**
    * The record being displayed in the doc viewer
    */
@@ -217,7 +323,7 @@ export interface RowControlsExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
     /**
      * Sets the expanded document, which is displayed in a flyout
      * @param record - The record to display in the flyout
@@ -363,6 +469,15 @@ export interface Profile {
   ) => TypedLensByValueInput['attributes'];
 
   /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * This allows modifying the chart section with a custom component
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: (
+    params: ChartSectionConfigurationExtensionParams
+  ) => ChartSectionConfiguration;
+
+  /**
    * Data grid
    */
 
@@ -406,12 +521,32 @@ export interface Profile {
   getPaginationConfig: () => PaginationConfigExtension;
 
   /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
+
+  /**
    * Document viewer flyout
    */
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */
@@ -432,10 +567,4 @@ export interface Profile {
    * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
-
-  /**
-   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
-   * Example use case is to overwrite the column header display name or to add icons to the column headers.
-   */
-  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
 }

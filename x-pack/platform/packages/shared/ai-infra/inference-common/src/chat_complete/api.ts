@@ -7,10 +7,11 @@
 
 import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { ToolCallsOf, ToolChoiceType, ToolOptions } from './tools';
+import type { ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -138,6 +139,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -197,13 +202,21 @@ export interface ChatCompleteResponse<
    */
   content: string;
   /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
-  toolCalls: ToolCallsOf<TOptions>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TOptions>[];
   /**
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
 }
 
 /**

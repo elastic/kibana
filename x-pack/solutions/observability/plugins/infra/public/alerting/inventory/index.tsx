@@ -20,6 +20,7 @@ import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerti
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
 import type { ExpressionsProps } from './components/expression';
+import { getDescriptionFields } from '../common/get_description_fields/get_description_fields';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
@@ -62,7 +63,6 @@ const LazyRuleParamsExpression = React.lazy(() => import('./components/expressio
 export function createInventoryMetricRuleType({
   assetDetailsLocator,
   inventoryLocator,
-  config,
 }: {
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
@@ -81,10 +81,7 @@ export function createInventoryMetricRuleType({
     },
     ruleParamsExpression: (props: ExpressionsProps) => (
       <React.Suspense fallback={null}>
-        <LazyRuleParamsExpression
-          {...props}
-          metadata={{ ...props.metadata, hostOtelEnabled: config?.featureFlags.hostOtelEnabled }}
-        />
+        <LazyRuleParamsExpression {...props} />
       </React.Suspense>
     ),
     validate: validateMetricThreshold,
@@ -93,5 +90,6 @@ export function createInventoryMetricRuleType({
     requiresAppContext: false,
     format,
     priority: 20,
+    getDescriptionFields,
   };
 }

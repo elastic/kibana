@@ -225,7 +225,7 @@ describe('axes_configuration', () => {
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],
-    splitAccessor: 'd',
+    splitAccessors: ['d'],
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
     isHistogram: false,

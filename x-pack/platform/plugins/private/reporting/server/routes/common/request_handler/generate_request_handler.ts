@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ScheduleType } from '@kbn/reporting-server';
 import { getCounters } from '..';
 import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
@@ -78,7 +79,8 @@ export class GenerateRequestHandler extends RequestHandler<
     // Schedule the report with Task Manager
     const task = await reporting.scheduleTask(req, report.toReportTaskJSON());
     logger.info(
-      `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
+      `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`,
+      { tags: [report._id] }
     );
 
     // Log the action with event log
@@ -96,10 +98,7 @@ export class GenerateRequestHandler extends RequestHandler<
       reporting.getUsageCounter()
     );
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
     }
@@ -120,6 +119,7 @@ export class GenerateRequestHandler extends RequestHandler<
       eventTracker?.createReport({
         isDeprecated: Boolean(report.payload.isDeprecated),
         isPublicApi: path.match(/internal/) === null,
+        scheduleType: ScheduleType.SINGLE,
       });
 
       return res.ok<ReportingJobResponse>({

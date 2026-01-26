@@ -19,9 +19,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage } from '@kbn/shared-ux-page-no-data';
 
 const chance = new Chance();
 
@@ -196,12 +196,8 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('prefers custom no data prompt', () => {
-    const pageTitle = chance.sentence();
-    const solution = chance.sentence();
     const docsLink = chance.sentence();
-    const noDataRenderer = () => (
-      <NoDataPage pageTitle={pageTitle} solution={solution} docsLink={docsLink} actions={{}} />
-    );
+    const noDataRenderer = () => <NoDataPage action={{ elasticAgent: { docsLink } }} />;
 
     const query = createReactQueryResponse({
       status: 'success',
@@ -215,8 +211,6 @@ describe('<CloudPosturePage />', () => {
       noDataRenderer,
     });
 
-    expect(screen.getByText(pageTitle)).toBeInTheDocument();
-    expect(screen.getAllByText(solution, { exact: false })[0]).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
