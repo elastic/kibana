@@ -30,7 +30,7 @@ export const getUpdatesEntityIndexTemplateConfig = (
       'Index template for data streams managed by the Elastic Entity Store ' +
       'used as for internal asynchronous entity store updates and ensuring that all ' +
       'necessary mappings are available to be queried by the ESQL query',
-    ecs_version: '8.0.0',
+    ecs_version: '9.2.0',
     managed: true,
     managed_by: 'security_context_core_analysis',
   },

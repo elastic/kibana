@@ -23,7 +23,12 @@ export class AssetManager {
     private apiKeyManager: ApiKeyManager
   ) {}
 
-  public async init(type: EntityType, logExtractionFrequency?: string) {
+  public async initStore() {
+    // Generate API key if dependencies are available
+    await this.generateApiKey();
+  }
+
+  public async initEntityType(type: EntityType, logExtractionFrequency?: string) {
     await this.install(type); // TODO: async
     await this.start(type, logExtractionFrequency);
   }
@@ -54,9 +59,6 @@ export class AssetManager {
     // TODO: return early if already installed
     this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
 
-    // Generate API key if dependencies are available
-    await this.generateApiKey(type);
-
     const definition = getEntityDefinition(type, this.namespace);
 
     await installElasticsearchAssets({
@@ -83,18 +85,18 @@ export class AssetManager {
     this.logger.get(type).debug(`Uninstalled definition: ${type}`);
   }
 
-  private async generateApiKey(type: EntityType): Promise<void> {
+  private async generateApiKey(): Promise<void> {
     try {
       // Check if API key already exists
       const existingApiKey = await this.apiKeyManager.getApiKey();
       if (existingApiKey) {
-        this.logger.get(type).debug('API key already exists, skipping generation');
+        this.logger.debug('API key already exists, skipping generation');
         return;
       }
 
       // Generate new API key
       this.logger.info('Generating API key');
-      await this.apiKeyManager.generate(type);
+      await this.apiKeyManager.generate();
       this.logger.info('Successfully generated API key');
     } catch (error) {
       this.logger.error(`Failed to generate API key: ${error.message}`, error);

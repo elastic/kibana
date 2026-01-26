@@ -13,7 +13,6 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SO_ENTITY_STORE_API_KEY_TYPE } from './saved_object';
-import type { EntityType } from '../../domain/definitions/entity_schema';
 
 /**
  * Entity Store API key saved object.
@@ -22,21 +21,15 @@ export interface EntityStoreAPIKey {
   id: string;
   name: string;
   apiKey: string;
-  type: EntityType;
-  namespace: string;
 }
 
 const ENTITY_STORE_API_KEY_SO_ID = 'entity-store-api-key';
-
-export const getSpaceAwareEntityStoreSavedObjectId = (namespace: string): string => {
-  return `${ENTITY_STORE_API_KEY_SO_ID}-${namespace}`;
-};
 
 export interface ApiKeyManager {
   /**
    * Generates a new API key and stores in a encrypted saved object.
    */
-  generate: (type: EntityType) => Promise<void>;
+  generate: () => Promise<void>;
 
   /**
    * Retrieves the API key from the encrypted saved object.
@@ -63,19 +56,15 @@ const generateEntityStoreAPIKey = async ({
   logger,
   security,
   request,
-  type,
-  namespace,
 }: {
   logger: Logger;
   security: SecurityPluginStart;
   request: KibanaRequest;
-  type: EntityType;
-  namespace: string;
 }): Promise<EntityStoreAPIKey> => {
   logger.info('Generating Entity Store API key');
 
   const apiKey = await security.authc.apiKeys.grantAsInternalUser(request, {
-    name: `Entity Store API key ${type}-${namespace}`,
+    name: `Entity Store API key`,
     role_descriptors: {},
     metadata: {
       description: 'API key used to manage the resources in the entity store framework',
@@ -91,8 +80,6 @@ const generateEntityStoreAPIKey = async ({
     id: apiKey.id,
     name: apiKey.name,
     apiKey: apiKey.api_key,
-    type,
-    namespace,
   };
 };
 
@@ -111,7 +98,7 @@ export const getApiKeyManager = ({
   request?: KibanaRequest;
   namespace: string;
 }): ApiKeyManager => ({
-  generate: async (type: EntityType) => {
+  generate: async () => {
     if (!request) {
       throw new Error('Unable to create API key due to invalid request');
     }
@@ -120,8 +107,6 @@ export const getApiKeyManager = ({
       logger,
       security,
       request,
-      type,
-      namespace,
     });
 
     const soClient = core.savedObjects.getScopedClient(request, {
@@ -129,7 +114,7 @@ export const getApiKeyManager = ({
     });
 
     await soClient.create(SO_ENTITY_STORE_API_KEY_TYPE, apiKey, {
-      id: getSpaceAwareEntityStoreSavedObjectId(namespace),
+      id: ENTITY_STORE_API_KEY_SO_ID,
       overwrite: true,
       managed: true,
     });
@@ -139,7 +124,7 @@ export const getApiKeyManager = ({
       const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
         includedHiddenTypes: [SO_ENTITY_STORE_API_KEY_TYPE],
       });
-      const savedObjectId = getSpaceAwareEntityStoreSavedObjectId(namespace);
+      const savedObjectId = ENTITY_STORE_API_KEY_SO_ID;
       return (
         await encryptedSavedObjectsClient.getDecryptedAsInternalUser<EntityStoreAPIKey>(
           SO_ENTITY_STORE_API_KEY_TYPE,

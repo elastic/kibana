@@ -127,6 +127,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "api_key_pending_invalidation|1",
         "cloud-connect-api-key|1",
         "connector_token|1",
+        "entity-store-api-key|1",
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",

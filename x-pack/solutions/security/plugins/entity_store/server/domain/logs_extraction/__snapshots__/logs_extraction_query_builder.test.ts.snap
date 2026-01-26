@@ -184,7 +184,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.id = entity.id,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
-    entity.hashedId = HASH(\\"SHA256\\", entity.id)
+    entity.hashedId = HASH(\\"MD5\\", entity.id)
   | KEEP entity.name,
  entity.source,
  entity.type,
@@ -383,7 +383,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.id = host.name,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
-    entity.hashedId = HASH(\\"SHA256\\", entity.id)
+    entity.hashedId = HASH(\\"MD5\\", entity.id)
   | KEEP host.domain,
  host.hostname,
  host.id,
@@ -543,7 +543,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.id = service.name,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
-    entity.hashedId = HASH(\\"SHA256\\", entity.id)
+    entity.hashedId = HASH(\\"MD5\\", entity.id)
   | KEEP service.address,
  service.environment,
  service.ephemeral_id,
@@ -696,7 +696,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.id = user.name,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
-    entity.hashedId = HASH(\\"SHA256\\", entity.id)
+    entity.hashedId = HASH(\\"MD5\\", entity.id)
   | KEEP user.domain,
  user.email,
  user.full_name,

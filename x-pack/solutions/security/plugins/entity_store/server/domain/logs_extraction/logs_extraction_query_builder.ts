@@ -12,7 +12,7 @@ import type {
 } from '../definitions/entity_schema';
 
 export const HASHED_ID = 'entity.hashedId';
-const HASH_ALG = 'SHA256';
+const HASH_ALG = 'MD5';
 
 const MAIN_ENTITY_ID = 'entity.id';
 const DEFAULT_FIELDS_TO_KEEP = ['@timestamp', MAIN_ENTITY_ID, HASHED_ID];

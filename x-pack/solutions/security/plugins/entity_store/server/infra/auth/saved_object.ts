@@ -13,8 +13,6 @@ export const SO_ENTITY_STORE_API_KEY_TYPE = 'entity-store-api-key';
 
 const savedObjectSchema = schema.object({
   apiKey: schema.string(),
-  type: schema.string(),
-  namespace: schema.string(),
   id: schema.string(),
   name: schema.string(),
 });
@@ -27,8 +25,6 @@ export const EntityStoreApiKeyType: SavedObjectsType = {
     dynamic: false,
     properties: {
       apiKey: { type: 'binary' },
-      type: { type: 'keyword' },
-      namespace: { type: 'keyword' },
       id: { type: 'keyword' },
       name: { type: 'keyword' },
     },
@@ -51,6 +47,6 @@ export const EntityStoreApiKeyType: SavedObjectsType = {
 export const EntityStoreApiKeyEncryptedTypeRegistration: EncryptedSavedObjectTypeRegistration = {
   type: SO_ENTITY_STORE_API_KEY_TYPE,
   attributesToEncrypt: new Set(['apiKey']),
-  attributesToIncludeInAAD: new Set(['type', 'namespace']),
+  attributesToIncludeInAAD: new Set([]),
   enforceRandomId: false,
 };
