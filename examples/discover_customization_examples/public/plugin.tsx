@@ -74,6 +74,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       }}
                       scopedHistory={appMountParams.history}
                       customizationCallbacks={[this.customizationCallback]}
+                      customizationContext={{ displayMode: 'standalone' }}
                     />
                   </Route>
                 </Routes>
@@ -161,7 +162,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       title: 'Saved logs views',
                       items: savedSearches.map((savedSearch) => ({
                         name: savedSearch.attributes.title,
-                        onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
+                        onClick: () =>
+                          stateContainer.internalState.dispatch(
+                            stateContainer.internalActions.openDiscoverSession({
+                              discoverSessionId: savedSearch.id,
+                            })
+                          ),
                         icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
@@ -204,7 +210,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
             const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
               (newFilters = []) => {
-                stateContainer.actions.fetchData();
+                stateContainer.internalState.dispatch(
+                  stateContainer.injectCurrentTab(stateContainer.internalActions.fetchData)({})
+                );
               }
             );
 
