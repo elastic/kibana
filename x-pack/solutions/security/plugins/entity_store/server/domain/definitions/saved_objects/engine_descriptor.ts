@@ -45,7 +45,7 @@ export class EngineDescriptorClient {
     const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 0) {
-      this.logger.error(`Found existing engine descriptor for entity type ${entityType}`);
+      this.logger.debug(`Found existing engine descriptor for entity type ${entityType}`);
       return;
     }
 
@@ -74,6 +74,6 @@ export class EngineDescriptorClient {
 
     const id = this.getSavedObjectId(entityType);
     this.logger.debug(`Deleting engine descriptor with id ${id}`);
-    this.soClient.delete(EngineDescriptorTypeName, id);
+    await this.soClient.delete(EngineDescriptorTypeName, id);
   }
 }
