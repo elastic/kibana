@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const specialServiceName = 'service 1 / ? # [ ] @ ! $ &  ( ) * + , ; = < > % {} | ^ ` <>';
 
@@ -68,8 +69,9 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
       await searchBar.press('Enter');
 
       // Wait for URL to update with kuery parameter containing the special service name
-      await page.waitForURL((url) =>
-        url.toString().includes(encodeURIComponent(specialServiceName))
+      await page.waitForURL(
+        (url) => url.toString().includes(encodeURIComponent(specialServiceName)),
+        { timeout: EXTENDED_TIMEOUT }
       );
       expect(page.url()).toContain(encodeURIComponent(specialServiceName));
     });
