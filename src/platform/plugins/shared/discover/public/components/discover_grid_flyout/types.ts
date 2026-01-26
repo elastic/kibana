@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { IconType } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
 
-export interface DataTableCustomization {
-  id: 'data_table';
-  logsEnabled: boolean; // TODO / NOTE: Just temporary until Discover's data type contextual awareness lands.
-  rowAdditionalLeadingControls?: UnifiedDataTableProps['rowAdditionalLeadingControls'];
+export interface FlyoutActionItem {
+  id: string;
+  enabled: boolean;
+  label: string;
+  helpText?: string;
+  iconType: IconType;
+  onClick: (() => void) | MouseEventHandler;
+  href?: string;
+  dataTestSubj?: string;
 }
