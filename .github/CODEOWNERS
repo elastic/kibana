@@ -1625,9 +1625,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/platform/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/platform/test/api_integration_basic/apis/aiops @elastic/ml-ui
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
 /x-pack/platform/test/functional/apps/aiops @elastic/ml-ui
