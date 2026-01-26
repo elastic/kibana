@@ -36,7 +36,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d-standard-16-lssd
+      machineType: n2-standard-8
       preemptible: true
       spotZones: us-central1-c,us-central1-b,us-central1-a
     key: build
@@ -52,8 +52,9 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d-standard-8-lssd
+      machineType: n2-highcpu-8
       preemptible: true
+      diskSizeGb: 105
       spotZones: us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     retry:
@@ -67,7 +68,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d-standard-8
+      machineType: n2-standard-2
       preemptible: true
       spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
@@ -83,7 +84,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d‑standard‑30-lssd
+      machineType: n2-standard-16
       preemptible: true
       spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
@@ -99,7 +100,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d‑standard‑30-lssd
+      machineType: n2-standard-32
       preemptible: true
       spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
@@ -115,7 +116,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-highcpu-4
+      machineType: c4-standard-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-b,us-central1-a
