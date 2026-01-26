@@ -15,7 +15,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
@@ -40,7 +40,8 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
       },
     }),
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
+     * `registerCustomPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -50,48 +51,44 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
       const prevValue = prev(params);
 
       // Check `params` for the available deps
-
       return {
         appMenuRegistry: (registry) => {
           // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
           // Register a custom submenu action
-          registry.registerCustomAction({
+          registry.registerCustomItem({
             id: 'example-custom-root-submenu',
-            type: AppMenuActionType.custom,
+            order: 1,
             label: 'Custom Submenu',
             testId: 'example-custom-root-submenu',
-            actions: [
+            iconType: 'logoElasticsearch',
+            items: [
               {
                 id: 'example-custom-root-action11',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom action 11 (from Root profile)',
-                  testId: 'example-custom-root-action11',
-                  onClick: ({ onFinishAction }) => {
-                    alert('Example Root Custom action 11 clicked');
-                    onFinishAction(); // This allows to close the popover and return focus back to the app menu DOM node
-                  },
+                order: 1,
+                label: 'Custom action 11 (from Root profile)',
+                testId: 'example-custom-root-action11',
+                run: ({ context: { onFinishAction } }) => {
+                  alert('Example Root Custom action 11 clicked');
+                  onFinishAction(); // This allows to return focus back to the app menu DOM node
                 },
               },
               {
                 id: 'example-custom-root-action12',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom action 12 (from Root profile)',
-                  testId: 'example-custom-root-action12',
-                  onClick: ({ onFinishAction }) => {
-                    // This is an example of a custom action that opens a flyout or any other custom modal.
-                    // To do so, simply return a React element and call onFinishAction when you're done.
-                    return (
-                      <EuiFlyout
-                        onClose={onFinishAction}
-                        data-test-subj="example-custom-root-action12-flyout"
-                      >
-                        <div>Example custom action clicked</div>
-                      </EuiFlyout>
-                    );
-                  },
+                order: 2,
+                label: 'Custom action 12 (from Root profile)',
+                testId: 'example-custom-root-action12',
+                run: ({ context: { onFinishAction } }) => {
+                  // This is an example of a custom action that opens a flyout or any other custom modal.
+                  // To do so, simply return a React element and call onFinishAction when you're done.
+                  return (
+                    <EuiFlyout
+                      onClose={onFinishAction}
+                      data-test-subj="example-custom-root-action12-flyout"
+                    >
+                      <div>Example custom action clicked</div>
+                    </EuiFlyout>
+                  );
                 },
               },
             ],
