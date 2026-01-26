@@ -117,6 +117,11 @@ export {
 } from './src/models/ingest/settings';
 
 export {
+  type IngestStreamIndexMode,
+  ingestStreamIndexModeSchema,
+} from './src/models/ingest/index_mode';
+
+export {
   type FailureStore,
   type EffectiveFailureStore,
   type WiredIngestStreamEffectiveFailureStore,

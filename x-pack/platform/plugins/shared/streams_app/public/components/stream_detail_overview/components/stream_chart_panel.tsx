@@ -25,6 +25,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { executeEsqlQuery } from '../../../hooks/use_execute_esql_query';
+import { getEsqlSourceCommand } from '../../../util/esql_source_command';
 
 interface StreamChartPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -59,7 +60,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       return undefined;
     }
 
-    const baseQuery = `FROM ${indexPatterns.join(', ')}`;
+    const sourceCommand = getEsqlSourceCommand(definition.index_mode);
+    const baseQuery = `${sourceCommand} ${indexPatterns.join(', ')}`;
 
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize})`;
 
@@ -67,7 +69,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       baseQuery,
       histogramQuery,
     };
-  }, [bucketSize, indexPatterns]);
+  }, [bucketSize, definition.index_mode, indexPatterns]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {

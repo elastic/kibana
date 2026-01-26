@@ -24,7 +24,7 @@ export function ChildStreamList({ definition }: { definition?: Streams.ingest.al
     if (!definition) {
       return [];
     }
-    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
+    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.stream.name));
   }, [definition, wiredStreams]);
 
   if (definition && childrenStreams?.length === 0) {

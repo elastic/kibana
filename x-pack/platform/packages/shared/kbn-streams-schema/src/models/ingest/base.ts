@@ -19,6 +19,8 @@ import { failureStoreSchema } from './failure_store';
 import type { IngestStreamProcessing } from './processing';
 import { ingestStreamProcessingSchema } from './processing';
 import type { StrictOmit } from '../core';
+import type { IngestStreamIndexMode } from './index_mode';
+import { ingestStreamIndexModeSchema } from './index_mode';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -127,6 +129,7 @@ export namespace IngestBaseStream {
     TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
+    index_mode?: IngestStreamIndexMode;
   }
 
   export type UpsertRequest<
@@ -148,6 +151,7 @@ const IngestBaseStreamSchema = {
   }),
   GetResponse: z.object({
     privileges: ingestStreamPrivilegesSchema,
+    index_mode: z.optional(ingestStreamIndexModeSchema),
   }),
   UpsertRequest: z.object({}),
 };

@@ -13,6 +13,8 @@ import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
 import { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
+export type { IngestStreamIndexMode } from './index_mode';
+export { ingestStreamIndexModeSchema } from './index_mode';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestStream {

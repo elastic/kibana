@@ -107,6 +107,7 @@ export async function readStream({
       effective_failure_store: getFailureStore({
         dataStream: dataStream as DataStreamWithFailureStore,
       }),
+      index_mode: dataStream?.index_mode,
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -134,6 +135,7 @@ export async function readStream({
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
     effective_failure_store: effectiveFailureStore,
+    index_mode: dataStream?.index_mode,
   };
   return body;
 }

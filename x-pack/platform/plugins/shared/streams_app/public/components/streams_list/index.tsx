@@ -26,25 +26,30 @@ import {
   getSegments,
   isDescendantOf,
   isRootStreamDefinition,
+  type IngestStreamIndexMode,
 } from '@kbn/streams-schema';
+import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
+import { getEsqlSourceCommand } from '../../util/esql_source_command';
 
 export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
   stream: Streams.all.Definition;
+  indexMode?: IngestStreamIndexMode;
   children: StreamTree[];
 }
 
-export function asTrees(streams: Streams.all.Definition[]) {
+export function asTrees(streams: ListStreamDetail[]) {
   const trees: StreamTree[] = [];
   const sortedStreams = streams
     .slice()
-    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
+    .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
 
-  sortedStreams.forEach((stream) => {
+  sortedStreams.forEach((streamDetail) => {
+    const stream = streamDetail.stream;
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
     // traverse the tree following the prefix of the current name.
@@ -58,6 +63,7 @@ export function asTrees(streams: Streams.all.Definition[]) {
         name: stream.name,
         children: [],
         stream,
+        indexMode: streamDetail.index_mode,
         type: Streams.ClassicStream.Definition.is(stream)
           ? 'classic'
           : isRootStreamDefinition(stream)
@@ -76,7 +82,7 @@ export function StreamsList({
   query,
   showControls,
 }: {
-  streams: Streams.all.Definition[] | undefined;
+  streams: ListStreamDetail[] | undefined;
   query?: string;
   showControls: boolean;
 }) {
@@ -88,8 +94,8 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item))
-      .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
+      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item.stream))
+      .filter((item) => !query || item.stream.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const treeView = useMemo(() => asTrees(filteredItems), [filteredItems]);
@@ -113,7 +119,7 @@ export function StreamsList({
                   iconType="fold"
                   size="s"
                   onClick={() =>
-                    setCollapsed(Object.fromEntries(items.map((item) => [item.name, true])))
+                    setCollapsed(Object.fromEntries(items.map((item) => [item.stream.name, true])))
                   }
                 >
                   {i18n.translate('xpack.streams.streamsTable.collapseAll', {
@@ -185,9 +191,10 @@ function StreamNode({
       return undefined;
     }
 
+    const sourceCommand = getEsqlSourceCommand(node.indexMode);
     return discoverLocator.getRedirectUrl({
       query: {
-        esql: `FROM ${indexPatterns.join(', ')}`,
+        esql: `${sourceCommand} ${indexPatterns.join(', ')}`,
       },
     });
   }, [discoverLocator, node]);

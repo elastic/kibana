@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
 import { truncateText } from '../../util/truncate_text';
+import { getEsqlSourceCommand } from '../../util/esql_source_command';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -179,8 +180,9 @@ export function DiscoverBadgeButton({
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
   const indexPatterns = getIndexPatternsForStream(definition.stream);
+  const sourceCommand = getEsqlSourceCommand(definition.index_mode);
   const esqlQuery = indexPatterns
-    ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
+    ? `${sourceCommand} ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
     : undefined;
   const useUrl = share.url.locators.useUrl;
 

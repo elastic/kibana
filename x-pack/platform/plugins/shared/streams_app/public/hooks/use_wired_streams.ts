@@ -6,6 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
+import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
@@ -19,12 +20,14 @@ export const useWiredStreams = () => {
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }) => streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal }),
+    async ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams', { signal }),
     [streamsRepositoryClient]
   );
 
   return {
-    wiredStreams: result.value?.streams.filter(Streams.WiredStream.Definition.is),
+    wiredStreams: result.value?.streams.filter((s): s is ListStreamDetail =>
+      Streams.WiredStream.Definition.is(s.stream)
+    ),
     isLoading: result.loading,
   };
 };

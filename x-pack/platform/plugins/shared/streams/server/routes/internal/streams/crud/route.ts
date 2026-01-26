@@ -8,7 +8,10 @@
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  IngestStreamIndexMode,
+} from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -19,6 +22,7 @@ export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
+  index_mode?: IngestStreamIndexMode;
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -65,6 +69,7 @@ export const listStreamsRoute = createServerRoute({
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
+        index_mode: match?.index_mode as IngestStreamIndexMode | undefined,
       });
       return acc;
     }, []);
