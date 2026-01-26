@@ -21,7 +21,10 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve(this.workflowExecutions.get(workflowExecutionId) || null);
   }
 
-  public createWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): Promise<void> {
+  public createWorkflowExecution(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    _options: { refresh?: boolean | 'wait_for' } = {}
+  ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
@@ -95,6 +98,26 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       _id: exec.id,
       _index: 'workflows-executions',
     }));
+  }
+
+  public async hasRunningExecution(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
+  ): Promise<boolean> {
+    let results = Array.from(this.workflowExecutions.values()).filter(
+      (exec) =>
+        exec.workflowId === workflowId &&
+        exec.spaceId === spaceId &&
+        !TerminalExecutionStatuses.includes(exec.status)
+    );
+
+    if (triggeredBy) {
+      results = results.filter((exec) => exec.triggeredBy === triggeredBy);
+    }
+
+    // Return true if there's at least one running execution
+    return results.length > 0;
   }
 
   public async getRunningExecutionsByWorkflowId(
