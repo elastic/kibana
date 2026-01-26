@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { WorkflowRegistry, RegistryWorkflow } from './workflow_registry';
-
 /**
  * EXAMPLE: Mock Workflow Registry Implementation
  *
  * This is an example implementation of the WorkflowRegistry interface.
  * Use this as a reference when implementing your own registry client.
  */
+
+// eslint-disable-next-line max-classes-per-file
+import type { RegistryWorkflow, WorkflowRegistry } from './workflow_registry';
 
 /**
  * In-memory workflow registry for testing and development.
@@ -76,7 +77,7 @@ export class HttpWorkflowRegistry implements WorkflowRegistry {
       const data = await response.json();
       return this.mapToRegistryWorkflow(data);
     } catch (error) {
-      console.error(`Error fetching workflow ${workflowId}:`, error);
+      // console.error(`Error fetching workflow ${workflowId}:`, error);
       return undefined;
     }
   }
@@ -97,7 +98,7 @@ export class HttpWorkflowRegistry implements WorkflowRegistry {
       const data = await response.json();
       return data.workflows.map((wf: any) => this.mapToRegistryWorkflow(wf));
     } catch (error) {
-      console.error('Error fetching workflows:', error);
+      // console.error('Error fetching workflows:', error);
       // Fall back to individual requests
       return this.getWorkflowsIndividually(workflowIds);
     }
@@ -213,6 +214,8 @@ steps:
 /**
  * Example usage with HTTP registry
  */
-export function createHttpRegistry(baseUrl: string = 'https://workflows.elastic.co/api'): HttpWorkflowRegistry {
+export function createHttpRegistry(
+  baseUrl: string = 'https://workflows.elastic.co/api'
+): HttpWorkflowRegistry {
   return new HttpWorkflowRegistry(baseUrl);
 }

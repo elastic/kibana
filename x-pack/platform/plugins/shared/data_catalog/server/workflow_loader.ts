@@ -6,8 +6,8 @@
  */
 
 import { promises as fs } from 'fs';
-import { join, extname, basename } from 'path';
-import type { WorkflowInfo, WorkflowReference, WorkflowsConfig } from './data_type';
+import { join, extname } from 'path';
+import type { WorkflowInfo, WorkflowReference, WorkflowsConfig } from '../common/data_source_spec';
 import type { WorkflowRegistry } from './workflow_registry';
 import { loadWorkflowsFromRegistry } from './workflow_registry';
 

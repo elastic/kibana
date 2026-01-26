@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowInfo, WorkflowReference } from './data_type';
+import type { WorkflowInfo, WorkflowReference } from '../common/data_source_spec';
 
 /**
  * Represents a workflow definition from a registry

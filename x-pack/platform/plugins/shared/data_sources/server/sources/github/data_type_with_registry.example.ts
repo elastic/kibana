@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { DataSource } from '@kbn/data-catalog-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 import { i18n } from '@kbn/i18n';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 
 /**
  * EXAMPLE 1: Using Registry Workflows Only
@@ -15,12 +15,14 @@ import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/se
  * This example shows how to configure a data source to use workflows
  * from a third-party workflow registry instead of local files.
  */
-export const githubDataSourceWithRegistry: DataTypeDefinition = {
+export const githubDataSourceWithRegistry: DataSource = {
   id: 'github',
   name: 'Github',
   description: i18n.translate('xpack.dataConnectors.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
+
+  iconType: '.github',
 
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.GITHUB,
@@ -59,12 +61,14 @@ export const githubDataSourceWithRegistry: DataTypeDefinition = {
  * Use registry workflows for common operations and local workflows
  * for Github-specific features.
  */
-export const githubDataSourceMixed: DataTypeDefinition = {
+export const githubDataSourceMixed: DataSource = {
   id: 'github',
   name: 'Github',
   description: i18n.translate('xpack.dataConnectors.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
+
+  iconType: '.github',
 
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.GITHUB,
@@ -84,10 +88,7 @@ export const githubDataSourceMixed: DataTypeDefinition = {
     directory: __dirname + '/workflows',
 
     // Common workflows from registry
-    registry: [
-      { id: 'common-search-v1' },
-      { id: 'common-analytics-v1' },
-    ],
+    registry: [{ id: 'common-search-v1' }, { id: 'common-analytics-v1' }],
   },
 };
 
@@ -96,12 +97,14 @@ export const githubDataSourceMixed: DataTypeDefinition = {
  *
  * This is the simplest and most common approach.
  */
-export const githubDataSourceLocal: DataTypeDefinition = {
+export const githubDataSourceLocal: DataSource = {
   id: 'github',
   name: 'Github',
   description: i18n.translate('xpack.dataConnectors.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
+
+  iconType: '.github',
 
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.GITHUB,

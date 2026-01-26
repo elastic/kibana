@@ -127,7 +127,9 @@ export interface DataSource {
    * 3. Object (mixed): { directory: '/path', registry: [...] }
    *    - Combines both local files and registry workflows
    */
-  workflows: string | WorkflowReference[] | WorkflowsConfig;
+  workflows?: string | WorkflowReference[] | WorkflowsConfig;
+
+  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
 
   /**
    * Stack connector configuration.
