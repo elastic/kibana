@@ -29,7 +29,7 @@ export const registerGetFollowerInfoRoute = ({
 
       try {
         const body = await client.asCurrentUser.ccr.followInfo({
-          index: '*',
+          index: '_all',
         });
 
         return response.ok({

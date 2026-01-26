@@ -22,10 +22,8 @@ export function registerIndicesStats({ router, lib: { handleEsError } }: RouteDe
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        // await new Promise((resolve) => setTimeout(resolve, 10000));
         const resp = await client.asCurrentUser.indices.stats({
-          // todo does this need to be *,.*
-          index: '*', // indexNamesString,
+          index: '*',
           expand_wildcards: ['hidden', 'all'],
           forbid_closed_indices: false,
           metric: ['docs', 'store'],

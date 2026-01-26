@@ -27,7 +27,7 @@ export const registerExplainRoute = ({
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await client.asCurrentUser.ilm.explainLifecycle({ index: '*,.*' });
+        const body = await client.asCurrentUser.ilm.explainLifecycle({ index: '_all' });
         return response.ok({ body });
       } catch (error) {
         return handleEsError({ error, response });
