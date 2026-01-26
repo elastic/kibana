@@ -27,7 +27,6 @@ const addByValueLensPanel = async (pageObjects: PageObjects) => {
   await pageObjects.dashboard.openNewLensPanel();
   await pageObjects.lens.configureXYDimensions();
   await pageObjects.lens.saveAndReturn();
-  await pageObjects.dashboard.waitForRenderComplete();
 };
 
 const applyCustomTimeRange = async (pageObjects: PageObjects, panelTitle?: string) => {
@@ -36,14 +35,12 @@ const applyCustomTimeRange = async (pageObjects: PageObjects, panelTitle?: strin
   await pageObjects.dashboard.openDatePickerQuickMenu();
   await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
   await pageObjects.dashboard.saveCustomizePanel();
-  await pageObjects.dashboard.waitForRenderComplete();
 };
 
 const removeCustomTimeRange = async (pageObjects: PageObjects) => {
   await pageObjects.dashboard.clickTimeRangeBadge();
   await pageObjects.dashboard.disableCustomTimeRange();
   await pageObjects.dashboard.saveCustomizePanel();
-  await pageObjects.dashboard.waitForRenderComplete();
 };
 
 spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () => {
