@@ -13,9 +13,6 @@ const SOURCE = i18n.translate('xpack.rollupJobs.rollupDataEnricher.source', {
   defaultMessage: 'rollup',
 });
 
-// todo
-// look at x-pack/platform/plugins/private/rollup/server/rollup_data_enricher.ts
-// account for aliases
 export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
     .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices')
@@ -40,25 +37,3 @@ export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherRes
         source: SOURCE,
       };
     });
-
-/*
-  try {
-    const rollupJobData = await client.asCurrentUser.rollup.getRollupIndexCaps({
-      index: '_all',
-    });
-
-    return indicesList.map((index) => {
-      let isRollupIndex = !!rollupJobData[index.name];
-      if (!isRollupIndex && isArray(index.aliases)) {
-        isRollupIndex = index.aliases.some((alias) => !!rollupJobData[alias]);
-      }
-      return {
-        ...index,
-        isRollupIndex,
-      };
-    });
-  } catch (e) {
-    // swallow exceptions and return original list
-    return indicesList;
-  }
-*/
