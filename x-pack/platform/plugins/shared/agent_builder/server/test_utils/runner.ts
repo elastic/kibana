@@ -22,6 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
+import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import type { ConversationStateManager, PromptManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentServiceStart } from '../services/attachments';
@@ -40,6 +41,7 @@ export type AttachmentsServiceMock = jest.Mocked<AttachmentsService>;
 export type AttachmentStateManagerMock = jest.Mocked<AttachmentStateManager>;
 export type PromptManagerMock = jest.Mocked<PromptManager>;
 export type StateManagerMock = jest.Mocked<ConversationStateManager>;
+export type FileSystemStoreMock = jest.Mocked<IFileSystemStore>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -111,6 +113,15 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
   };
 };
 
+export const createFileSystemStoreMock = (): FileSystemStoreMock => {
+  return {
+    read: jest.fn(),
+    ls: jest.fn(),
+    glob: jest.fn(),
+    grep: jest.fn(),
+  };
+};
+
 export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   security: ReturnType<typeof securityServiceMock.createStart>;
@@ -135,6 +146,7 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   toolProvider: ToolProviderMock;
   resultStore: ToolResultStoreMock;
   attachments: AttachmentsServiceMock;
+  filesystem: FileSystemStoreMock;
 }
 
 export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
@@ -154,6 +166,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     logger: loggerMock.create(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    filesystem: createFileSystemStoreMock(),
   };
 };
 
@@ -181,6 +194,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    filesystem: createFileSystemStoreMock(),
   };
 };
 
