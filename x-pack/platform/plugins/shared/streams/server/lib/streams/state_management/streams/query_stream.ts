@@ -86,6 +86,13 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
+      {
+        type: 'upsert_esql_view',
+        request: {
+          name: this._definition.name,
+          query: this._definition.query.esql,
+        },
+      },
     ];
   }
 
@@ -94,16 +101,28 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     startingState: State,
     startingStateStream: QueryStream
   ): Promise<ElasticsearchAction[]> {
+    const actions: ElasticsearchAction[] = [];
     const definitionChanged = !isEqual(startingStateStream.definition, this._definition);
+
     if (definitionChanged) {
-      return [
-        {
-          type: 'upsert_dot_streams_document',
-          request: this._definition,
-        },
-      ];
+      actions.push({
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      });
     }
-    return [];
+
+    const queryChanged = startingStateStream.definition.query.esql !== this._definition.query.esql;
+    if (queryChanged) {
+      actions.push({
+        type: 'upsert_esql_view',
+        request: {
+          name: this._definition.name,
+          query: this._definition.query.esql,
+        },
+      });
+    }
+
+    return actions;
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
@@ -122,6 +141,12 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       },
       {
         type: 'unlink_features',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'delete_esql_view',
         request: {
           name: this._definition.name,
         },
