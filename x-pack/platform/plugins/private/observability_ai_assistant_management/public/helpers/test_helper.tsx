@@ -17,6 +17,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { AppContextValue } from '../context/app_context';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
@@ -25,6 +26,7 @@ import type { CoreStartWithStartDeps } from '../hooks/use_kibana';
 
 export const coreStartMock = coreMock.createStart();
 
+export const cloudStartMock = cloudMock.createStart();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -80,7 +82,7 @@ export const render = (
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     // @ts-ignore
     <IntlProvider locale="en-US">
-      <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
+      <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock} cloud={cloudStartMock}>
         <KibanaContextProvider services={{ ...mergedCoreStartMock, ...startDeps }}>
           <AppContextProvider value={appContextValue}>
             <QueryClientProvider client={queryClient}>
