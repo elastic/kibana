@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { sum } from 'lodash';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
