@@ -92,6 +92,15 @@ export const getTacticMetadata = (attackDiscovery: AttackDiscovery): TacticMetad
     index: i,
   }));
 
+export const getAttackTacticMetadata = (
+  mitreAttackTactics: AttackDiscovery['mitreAttackTactics']
+): TacticMetadata[] =>
+  MITRE_ATTACK_TACTICS_SUBSET.map((tactic, i) => ({
+    detected: mitreAttackTactics === undefined ? false : mitreAttackTactics.includes(tactic),
+    name: getTacticLabel(tactic),
+    index: i,
+  }));
+
 /**
  * The LLM sometimes returns a string with newline literals.
  * This function replaces them with actual newlines
