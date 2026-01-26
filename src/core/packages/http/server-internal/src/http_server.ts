@@ -583,19 +583,25 @@ export class HttpServer {
     });
 
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      // TODO: is it ok to pull the values like this or should we
+      // look for an alternative?
       const credentials = request?.auth?.credentials as {
         username?: string;
         email?: string;
         roles: string[];
         profile_uid: string;
       };
+
       userActivity?.setInjectedContext({
         user: {
           ip: request.raw.req.socket?.remoteAddress,
-          id: credentials.profile_uid,
-          username: credentials.username,
-          email: credentials.email,
-          roles: credentials.roles,
+          id: credentials?.profile_uid,
+          username: credentials?.username,
+          email: credentials?.email,
+          roles: credentials?.roles,
+        },
+        session: {
+          id: request.state?.sid?.sid,
         },
       });
 
