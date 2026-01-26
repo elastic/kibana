@@ -6,22 +6,32 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
-import type { ESQLCommand, ESQLCommandOption } from '../../../types';
+import { isAssignment, isColumn, isOptionNode, isWhereExpression } from '../../../ast/is';
+import type { ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 
 const getColumnNames = (
-  command: ESQLCommand | ESQLCommandOption,
+  ast: ESQLCommand | ESQLCommandOption | ESQLFunction,
   query: string,
   isInByClause = false
 ): string[] => {
   const names: string[] = [];
 
-  for (const expression of command.args) {
+  for (const expression of ast.args) {
     if (isAssignment(expression) && isColumn(expression.args[0])) {
       // Assignment: name = expression (always creates a new column)
       const name = expression.args[0].parts.join('.');
       names.push(name);
+      continue;
+    }
+
+    if (isWhereExpression(expression)) {
+      // We only look for columns in the left side of the where binary expression
+      const whereExpressionWithoutCondition = {
+        ...expression,
+        args: [expression.args[0]],
+      };
+      names.push(...getColumnNames(whereExpressionWithoutCondition, query, false));
       continue;
     }
 

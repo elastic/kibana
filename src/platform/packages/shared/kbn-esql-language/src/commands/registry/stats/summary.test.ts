@@ -52,4 +52,28 @@ describe('STATS summary', () => {
 
     expect(result.newColumns).toEqual(new Set(['avg', 'buckets']));
   });
+
+  it('returns correct column name when using WHERE clause', () => {
+    const queryString = `FROM a | STATS avg=AVG(field2) WHERE field1 > 100`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = summary(command, queryString);
+
+    expect(result.newColumns).toEqual(new Set(['avg']));
+  });
+
+  it('returns correct column name when using WHERE clause - with no assignment', () => {
+    const queryString = `FROM a | STATS AVG(field2) WHERE field1 > 100`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = summary(command, queryString);
+
+    expect(result.newColumns).toEqual(new Set(['AVG(field2)']));
+  });
 });

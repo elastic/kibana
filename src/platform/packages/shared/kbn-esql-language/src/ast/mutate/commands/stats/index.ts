@@ -75,7 +75,7 @@ export interface StatsFieldSummary {
   /**
    * STATS command argument AST node (as was parsed).
    */
-  // arg: ESQLProperNode; //HD can be cleaned
+  arg: ESQLProperNode; // HD can be cleaned
 
   /**
    * The field name, correctly formatted, extracted from the AST.
@@ -108,7 +108,7 @@ export interface StatsFieldSummary {
    * STATS foo = agg(x) BY y, bar = x
    * ```
    */
-  // usedFields: Set<string>; // HD can be cleaned
+  usedFields: Set<string>; // HD can be cleaned
 }
 
 const summarizeArgParts = (
