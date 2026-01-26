@@ -8,8 +8,7 @@
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { TypeOf } from '@kbn/config-schema';
 import type { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
@@ -17,23 +16,27 @@ import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { TopAlert } from '../../../../../typings/alerts';
 
 const apmErrorCountParamsToKqlQuery = (params: TypeOf<typeof errorCountParamsSchema>): string => {
-  const filters: KueryNode[] = [];
+  const filters = [];
 
   if (params.serviceName) {
-    filters.push(nodeBuilder.is(SERVICE_NAME, params.serviceName));
+    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(params.serviceName)}"`);
   }
 
   if (params.errorGroupingKey) {
-    filters.push(nodeBuilder.is(ERROR_GROUP_ID, params.errorGroupingKey));
+    filters.push(`${escapeKuery(ERROR_GROUP_ID)}:"${escapeQuotes(params.errorGroupingKey)}"`);
   }
 
   if (params.environment && params.environment !== 'ENVIRONMENT_ALL') {
-    filters.push(nodeBuilder.is(SERVICE_ENVIRONMENT, params.environment));
+    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(params.environment)}"`);
   }
 
-  filters.push(nodeBuilder.is(PROCESSOR_EVENT, ProcessorEvent.error));
+  filters.push(`${escapeKuery(PROCESSOR_EVENT)}:"${escapeQuotes(ProcessorEvent.error)}"`);
 
-  return toKqlExpression(nodeBuilder.and(filters));
+  if (filters.length === 1) {
+    return filters[0];
+  }
+
+  return `(${filters.join(' AND ')})`;
 };
 
 type ApmErrorCountRuleDataResult = {

@@ -57,7 +57,7 @@ describe('getApmErrorCountRuleData', () => {
           query: {
             language: 'kuery',
             query:
-              '(service.name: checkout-service AND error.grouping_key: abc123 AND service.environment: production AND processor.event: error)',
+              '(service.name:"checkout-service" AND error.grouping_key:"abc123" AND service.environment:"production" AND processor.event:"error")',
           },
         },
       });
@@ -76,7 +76,7 @@ describe('getApmErrorCountRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(error.grouping_key: abc123 AND service.environment: production AND processor.event: error)'
+        '(error.grouping_key:"abc123" AND service.environment:"production" AND processor.event:"error")'
       );
     });
 
@@ -93,7 +93,7 @@ describe('getApmErrorCountRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND service.environment: production AND processor.event: error)'
+        '(service.name:"checkout-service" AND service.environment:"production" AND processor.event:"error")'
       );
     });
 
@@ -111,7 +111,7 @@ describe('getApmErrorCountRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND error.grouping_key: abc123 AND processor.event: error)'
+        '(service.name:"checkout-service" AND error.grouping_key:"abc123" AND processor.event:"error")'
       );
     });
 
@@ -124,32 +124,32 @@ describe('getApmErrorCountRuleData', () => {
       const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe('processor.event: error');
+      expect(result.discoverAppLocatorParams?.query?.query).toBe('processor.event:"error"');
     });
 
     it('handles all combinations of optional params', () => {
       const testCases = [
         {
           params: { serviceName: 'service-a' },
-          expectedQuery: '(service.name: service-a AND processor.event: error)',
+          expectedQuery: '(service.name:"service-a" AND processor.event:"error")',
         },
         {
           params: { errorGroupingKey: 'xyz789' },
-          expectedQuery: '(error.grouping_key: xyz789 AND processor.event: error)',
+          expectedQuery: '(error.grouping_key:"xyz789" AND processor.event:"error")',
         },
         {
           params: { environment: 'staging' },
-          expectedQuery: '(service.environment: staging AND processor.event: error)',
+          expectedQuery: '(service.environment:"staging" AND processor.event:"error")',
         },
         {
           params: { serviceName: 'service-b', environment: 'development' },
           expectedQuery:
-            '(service.name: service-b AND service.environment: development AND processor.event: error)',
+            '(service.name:"service-b" AND service.environment:"development" AND processor.event:"error")',
         },
         {
           params: { errorGroupingKey: 'def456', environment: 'qa' },
           expectedQuery:
-            '(error.grouping_key: def456 AND service.environment: qa AND processor.event: error)',
+            '(error.grouping_key:"def456" AND service.environment:"qa" AND processor.event:"error")',
         },
       ];
 
@@ -264,7 +264,7 @@ describe('getApmErrorCountRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND error.grouping_key: abc123 AND processor.event: error)'
+        '(service.name:"checkout-service" AND error.grouping_key:"abc123" AND processor.event:"error")'
       );
     });
 
@@ -284,7 +284,7 @@ describe('getApmErrorCountRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name: checkout-service AND service.environment: production AND processor.event: error)'
+        '(service.name:"checkout-service" AND service.environment:"production" AND processor.event:"error")'
       );
     });
   });
