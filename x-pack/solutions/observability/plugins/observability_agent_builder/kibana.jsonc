@@ -21,7 +21,7 @@
       "discoverShared",
       "licensing"
     ],
-    "optionalPlugins": ["ml", "spaces"],
+    "optionalPlugins": ["ml", "spaces", "llmTasks"],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": []
   }

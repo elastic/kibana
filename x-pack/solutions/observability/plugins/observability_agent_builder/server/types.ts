@@ -27,6 +27,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
@@ -57,6 +58,7 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   inference: InferenceServerStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
+  llmTasks?: LlmTasksPluginStart;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<

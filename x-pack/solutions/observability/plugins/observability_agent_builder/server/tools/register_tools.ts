@@ -53,6 +53,7 @@ import {
   createGetTraceChangePointsTool,
 } from './get_trace_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
+import { OBSERVABILITY_ELASTICSEARCH_TOOL_ID, createElasticsearchTool } from './elasticsearch/tool';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
@@ -75,6 +76,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_ELASTICSEARCH_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -104,6 +106,7 @@ export async function registerTools({
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
+    createElasticsearchTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
