@@ -380,6 +380,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   setDimension: (
     props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
   ) => T;
+
+  reorderDimension?: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; targetColumnId: string }
+  ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
    * look at its internal state to determine which dimension is being affected.
