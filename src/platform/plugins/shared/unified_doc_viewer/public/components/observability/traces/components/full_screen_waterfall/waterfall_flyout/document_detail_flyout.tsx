@@ -72,6 +72,7 @@ export function DocumentDetailFlyout({
 
   return (
     <WaterfallFlyout
+      flyoutId={type}
       onCloseFlyout={onCloseFlyout}
       dataView={dataView}
       hit={hit}
