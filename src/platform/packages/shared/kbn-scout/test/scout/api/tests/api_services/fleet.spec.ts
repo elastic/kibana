@@ -78,15 +78,14 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const paramsPolicyNamespace = 'default';
     const paramsPolicyName = `${policyName}-params`;
 
-    const response = await apiServices.fleet.agent_policies.create(
-      paramsPolicyName,
-      paramsPolicyNamespace,
-      undefined,
-      {
+    const response = await apiServices.fleet.agent_policies.create({
+      policyName: paramsPolicyName,
+      policyNamespace: paramsPolicyNamespace,
+      params: {
         description: 'Test policy with parameters',
         monitoring_enabled: ['logs', 'metrics'],
-      }
-    );
+      },
+    });
 
     expect(response.status).toBe(200);
     expect(response.data.item.name).toBe(paramsPolicyName);
@@ -99,22 +98,22 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const policyNamespace = 'default';
 
     // First create a policy
-    const createResponse = await apiServices.fleet.agent_policies.create(
+    const createResponse = await apiServices.fleet.agent_policies.create({
       policyName,
-      policyNamespace
-    );
+      policyNamespace,
+    });
     policyId = createResponse.data.item.id;
 
     // Then update it
     const updatedName = `${policyName}-updated`;
-    const updateResponse = await apiServices.fleet.agent_policies.update(
-      updatedName,
+    const updateResponse = await apiServices.fleet.agent_policies.update({
+      policyName: updatedName,
       policyNamespace,
-      policyId,
-      {
+      agentPolicyId: policyId,
+      params: {
         description: 'Updated policy description',
-      }
-    );
+      },
+    });
 
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.data.item.name).toBe(updatedName);
@@ -125,8 +124,14 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const policy1Name = `bulk-test-1-${Date.now()}`;
     const policy2Name = `bulk-test-2-${Date.now()}`;
 
-    const policy1Response = await apiServices.fleet.agent_policies.create(policy1Name, 'default');
-    const policy2Response = await apiServices.fleet.agent_policies.create(policy2Name, 'default');
+    const policy1Response = await apiServices.fleet.agent_policies.create({
+      policyName: policy1Name,
+      policyNamespace: 'default',
+    });
+    const policy2Response = await apiServices.fleet.agent_policies.create({
+      policyName: policy2Name,
+      policyNamespace: 'default',
+    });
 
     const policyIds = [policy1Response.data.item.id, policy2Response.data.item.id];
     // Bulk get the policies
@@ -142,7 +147,10 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
 
   apiTest('should delete an agent policy', async ({ apiServices }) => {
     // First create a policy
-    const createResponse = await apiServices.fleet.agent_policies.create(policyName, 'default');
+    const createResponse = await apiServices.fleet.agent_policies.create({
+      policyName,
+      policyNamespace: 'default',
+    });
     const agentPolicyId = createResponse.data.item.id;
 
     // Then delete it
@@ -153,7 +161,10 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
 
   apiTest('should delete an agent policy with force flag', async ({ apiServices }) => {
     // First create a policy
-    const createResponse = await apiServices.fleet.agent_policies.create(policyName, 'default');
+    const createResponse = await apiServices.fleet.agent_policies.create({
+      policyName,
+      policyNamespace: 'default',
+    });
     const agentPolicyId = createResponse.data.item.id;
 
     // Then delete it with force
