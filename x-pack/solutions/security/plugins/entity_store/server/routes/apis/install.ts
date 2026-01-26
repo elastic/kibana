@@ -8,7 +8,11 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS, LogExtractionBodyParams } from '../constants';
+import {
+  API_VERSIONS,
+  DEFAULT_ENTITY_STORE_PERMISSIONS,
+  LogExtractionBodyParams,
+} from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_schema';
@@ -43,9 +47,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         const { entityTypes, logExtraction } = req.body;
         logger.debug('Install api called');
 
-        await Promise.all(
-          entityTypes.map((type) => assetManager.init(type, logExtraction))
-        );
+        await Promise.all(entityTypes.map((type) => assetManager.init(type, logExtraction)));
 
         return res.ok({
           body: {

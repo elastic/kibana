@@ -111,7 +111,7 @@ export async function scheduleExtractEntityTask({
   taskManager,
   type,
   namespace,
-  frequency
+  frequency,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;

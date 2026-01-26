@@ -42,7 +42,11 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,
-      engineDescriptorClient: new EngineDescriptorClient(core.savedObjects.client, namespace, logger),
+      engineDescriptorClient: new EngineDescriptorClient(
+        core.savedObjects.client,
+        namespace,
+        logger
+      ),
       namespace,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
