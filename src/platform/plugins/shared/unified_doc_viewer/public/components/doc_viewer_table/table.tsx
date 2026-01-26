@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -59,9 +58,11 @@ export interface DocViewerTableRestorableState {
   showOnlySelectedFields: boolean;
   // Array of pinned field names
   pinnedFields: string[];
+  // Current rows per page selection
+  rowsPerPage: number;
 }
 
-const { withRestorableState, useRestorableState, useRestorableLocalStorage } =
+const { withRestorableState, useRestorableLocalStorage } =
   createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
@@ -78,14 +79,6 @@ export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const getPinnedFieldsStorageKey = (dataViewId: string) => `${PINNED_FIELDS_KEY}:${dataViewId}`;
-
-const getPageSize = (storage: Storage): number => {
-  const pageSize = Number(storage.get(PAGE_SIZE));
-  return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
-};
-const updatePageSize = (newPageSize: number, storage: Storage) => {
-  storage.set(PAGE_SIZE, newPageSize);
-};
 
 const InternalDocViewerTable = ({
   columns,
@@ -300,13 +293,23 @@ const InternalDocViewerTable = ({
 
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
-  const initialPageSize = getPageSize(storage);
+  const [initialPageSizeRaw, setInitialPageSizeRaw] = useRestorableLocalStorage(
+    'rowsPerPage',
+    PAGE_SIZE,
+    DEFAULT_PAGE_SIZE
+  );
+
+  // Ensure initialPageSize is always a valid option
+  const initialPageSize = useMemo(
+    () => (PAGE_SIZE_OPTIONS.includes(initialPageSizeRaw) ? initialPageSizeRaw : DEFAULT_PAGE_SIZE),
+    [initialPageSizeRaw]
+  );
 
   const onChangePageSize = useCallback(
     (newPageSize: number) => {
-      updatePageSize(newPageSize, storage);
+      setInitialPageSizeRaw(newPageSize);
     },
-    [storage]
+    [setInitialPageSizeRaw]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
