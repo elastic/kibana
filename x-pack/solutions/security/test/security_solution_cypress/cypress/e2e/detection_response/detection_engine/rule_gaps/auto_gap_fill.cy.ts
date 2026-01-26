@@ -77,16 +77,6 @@ describe(
   'Rule gaps auto fill status',
   {
     tags: ['@ess'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'gapAutoFillSchedulerEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('Platinum user flows', () => {

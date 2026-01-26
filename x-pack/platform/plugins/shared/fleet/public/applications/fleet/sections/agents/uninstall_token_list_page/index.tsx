@@ -15,6 +15,7 @@ import { EuiBasicTable, EuiText, EuiIconTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import { EmptyPolicyNameHint } from '../../../../../components/uninstall_command_flyout/empty_policy_name_hint';
 
@@ -200,6 +201,9 @@ export const UninstallTokenListPage = () => {
 
       <EuiBasicTable<UninstallTokenMetadata>
         data-test-subj="uninstallTokenListTable"
+        tableCaption={i18n.translate('xpack.fleet.uninstallTokenList.tableCaption', {
+          defaultMessage: 'List of uninstall tokens',
+        })}
         items={tokens}
         columns={columns}
         itemId="id"
