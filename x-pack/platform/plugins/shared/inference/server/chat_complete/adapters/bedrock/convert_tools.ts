@@ -94,7 +94,7 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
       description: schemaPart.description
         ? `${schemaPart.description}. Must be provided as a JSON array`
         : 'Must be provided as a JSON array',
-      items: schemaPart.items ? fixSchemaArrayProperties(schemaPart.items) : undefined,
+      items: schemaPart.items ? fixSchemaArrayProperties(schemaPart.items) : {},
     };
   }
 
