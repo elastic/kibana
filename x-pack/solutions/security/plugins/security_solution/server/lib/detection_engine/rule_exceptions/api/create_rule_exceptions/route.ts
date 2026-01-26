@@ -253,13 +253,11 @@ export const createExceptionList = async ({
 export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
-  detectionRulesClient,
   removeOldAssociation,
   alertingRulesClient,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  detectionRulesClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
   alertingRulesClient: RulesClient;
 }): Promise<ExceptionList> => {
@@ -277,7 +275,6 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  // if patchRule fails, delete the exception list created above
   await alertingRulesClient.bulkEditRuleParamsWithReadAuth({
     ids: [rule.id],
     operations: [

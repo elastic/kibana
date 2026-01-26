@@ -84,7 +84,7 @@ export const getRulesV2BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
-        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects,
       },
       alerting: {
         rule: { all: alertingFeatures },
@@ -93,7 +93,7 @@ export const getRulesV2BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ, RULES_UI_EDIT],
+      ui: [RULES_UI_READ, RULES_UI_EDIT, EXCEPTIONS_UI_READ],
       api: [
         RULES_API_ALL,
         RULES_API_READ,
@@ -102,6 +102,7 @@ export const getRulesV2BaseKibanaFeature = (
         LISTS_API_ALL,
         LISTS_API_READ,
         LISTS_API_SUMMARY,
+        EXCEPTIONS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
         'rac',
