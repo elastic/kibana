@@ -46,21 +46,27 @@ interface MountComponentProps {
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
   isTransformationalESQL?: boolean;
+  mockEditVisualization?: jest.Mock | undefined;
 }
 
-const mountComponent = async ({
-  customToggle,
-  noChart,
-  noHits,
-  noBreakdown,
-  chartHidden = false,
-  dataView = dataViewWithTimefieldMock,
-  allSuggestions,
-  isPlainRecord,
-  hasDashboardPermissions,
-  isChartLoading,
-  isTransformationalESQL,
-}: MountComponentProps = {}) => {
+const mountComponent = async (mountProps: MountComponentProps = {}) => {
+  const {
+    customToggle,
+    noChart,
+    noHits,
+    noBreakdown,
+    chartHidden = false,
+    dataView = dataViewWithTimefieldMock,
+    allSuggestions,
+    isPlainRecord,
+    hasDashboardPermissions,
+    isChartLoading,
+    isTransformationalESQL,
+  } = mountProps;
+
+  // Handle mockEditVisualization separately to distinguish between "not passed" and "passed as undefined"
+  mockUseEditVisualization =
+    'mockEditVisualization' in mountProps ? mountProps.mockEditVisualization : jest.fn();
   mockedSearchSourceInstanceMockFetch$.mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
   );
@@ -148,13 +154,11 @@ const mountComponent = async ({
       lensVisServiceState: props.lensVisServiceState,
     });
   });
+
+  return { mockOnEditVisualization: mockUseEditVisualization };
 };
 
 describe('Chart', () => {
-  beforeEach(() => {
-    mockUseEditVisualization = jest.fn();
-  });
-
   test('render when chart is undefined', async () => {
     await mountComponent({ noChart: true });
 
@@ -181,8 +185,7 @@ describe('Chart', () => {
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
-    mockUseEditVisualization = undefined;
-    await mountComponent();
+    await mountComponent({ mockEditVisualization: undefined });
 
     expect(screen.getByText('Hide chart')).toBeVisible();
     expect(screen.queryByText('Edit visualization')).not.toBeInTheDocument();
@@ -306,14 +309,13 @@ describe('Chart', () => {
 
   test('triggers onEditVisualization on click', async () => {
     const user = userEvent.setup();
+    const { mockOnEditVisualization } = await mountComponent();
 
-    expect(mockUseEditVisualization).not.toHaveBeenCalled();
-
-    await mountComponent();
+    expect(mockOnEditVisualization).not.toHaveBeenCalled();
 
     await user.click(screen.getByText('Edit visualization'));
 
-    expect(mockUseEditVisualization).toHaveBeenCalled();
+    expect(mockOnEditVisualization).toHaveBeenCalled();
   });
 
   it('should not render chart if data view is not time based', async () => {

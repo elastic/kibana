@@ -113,7 +113,7 @@ describe('Layout', () => {
       );
     };
 
-    const utils = renderWithI18n(<Wrapper />);
+    const { rerender } = renderWithI18n(<Wrapper />);
 
     await waitFor(() => {
       expect(screen.getByTestId('unifiedHistogramMainPanel')).toBeVisible();
@@ -122,14 +122,14 @@ describe('Layout', () => {
     const setBreakpoint = async (breakpoint: string) => {
       mockBreakpoint = breakpoint;
 
-      utils.rerender(<Wrapper />);
+      rerender(<Wrapper />);
 
       await waitFor(() => {
         expect(screen.getByTestId('unifiedHistogramMainPanel')).toBeVisible();
       });
     };
 
-    return { ...utils, setBreakpoint };
+    return { setBreakpoint };
   };
 
   beforeEach(() => {
