@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DrilldownTransforms } from './drilldowns/types';
+import type { getTransformDrilldownsIn } from './transform_drilldowns_in';
+import type { getTransformDrilldownsOut } from './transform_drilldowns_out';
 
-export type { EmbeddableTransforms } from '../server';
-
-export type {
-  EmbeddableRegistryDefinition,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '../server';
-
-export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from './constants';
+export type DrilldownTransforms = {
+  transformIn: ReturnType<typeof getTransformDrilldownsIn>;
+  transformOut: ReturnType<typeof getTransformDrilldownsOut>;
+};

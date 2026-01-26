@@ -28,8 +28,8 @@ import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
 import type { DrilldownSetup } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
-import type { EmbeddableTransformsSetup } from './transforms_registry';
-import { getTranformsRegistry } from './transforms_registry';
+import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
+import { getTranformsRegistry } from './embeddable_transforms/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
