@@ -12,8 +12,8 @@ import { getEntityDefinition } from './definitions/registry';
 import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
-import { LogExtractionBodyParams } from '../routes/constants';
+import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
+import type { LogExtractionBodyParams } from '../routes/constants';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -65,7 +65,10 @@ export class AssetManager {
     });
   }
 
-  public async install(type: EntityType, logExtractionParams?: LogExtractionBodyParams): Promise<ManagedEntityDefinition> {
+  public async install(
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<ManagedEntityDefinition> {
     // TODO: return early if already installed
     try {
       this.logger.debug(`Installing assets for entity type: ${type}`);
@@ -113,7 +116,9 @@ export class AssetManager {
     }
   }
 
-  private calculateInitialState(logExtractionParams?: LogExtractionBodyParams): Partial<LogExtractionState> {
+  private calculateInitialState(
+    logExtractionParams?: LogExtractionBodyParams
+  ): Partial<LogExtractionState> {
     if (!logExtractionParams) {
       return {};
     }
