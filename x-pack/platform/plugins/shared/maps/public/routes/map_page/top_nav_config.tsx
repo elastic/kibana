@@ -98,7 +98,7 @@ export function getTopNavConfig({
     }
   );
 
-  if (savedMap.hasOriginatingApp()) {
+  if (savedMap.hasSaveAndReturnConfig()) {
     topNavConfigs.push({
       label: i18n.translate('xpack.maps.topNav.cancel', {
         defaultMessage: 'Cancel',
@@ -215,7 +215,9 @@ export function getTopNavConfig({
 
         let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-        if (savedMap.hasOriginatingApp()) {
+        // Show simplified modal only when editing embedded panel (has both originatingApp and isByValue)
+        // Dashboard Viz tab has originatingApp but is not by-value, so shows full modal
+        if (savedMap.hasOriginatingApp() && savedMap.isByValue()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -224,14 +226,10 @@ export function getTopNavConfig({
               }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
-              returnToOriginSwitchLabel={
-                savedMap.isByValue()
-                  ? i18n.translate('xpack.maps.topNav.updatePanel', {
-                      defaultMessage: 'Update panel on {originatingAppName}',
-                      values: { originatingAppName: savedMap.getOriginatingAppName() },
-                    })
-                  : undefined
-              }
+              returnToOriginSwitchLabel={i18n.translate('xpack.maps.topNav.updatePanel', {
+                defaultMessage: 'Update panel on {originatingAppName}',
+                values: { originatingAppName: savedMap.getOriginatingAppName() },
+              })}
               options={tagSelector}
             />
           );

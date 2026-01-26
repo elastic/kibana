@@ -584,7 +584,7 @@ export const LensTopNavMenu = ({
     const isComingFromDashboardView =
       incomingState?.originatingApp &&
       incomingState?.originatingPath &&
-      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
+      // Exclude library lists (/list/*) - no "Save and Return" from Dashboards Visualizations tab
       !incomingState.originatingPath.includes('/list/');
 
     const showSaveAndReturn =

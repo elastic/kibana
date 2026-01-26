@@ -17,6 +17,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -78,8 +79,17 @@ export async function renderApp(
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput, originatingPath } =
-      stateTransfer.getIncomingEditorState(APP_ID) || {};
+    const {
+      embeddableId,
+      originatingApp: incomingOriginatingApp,
+      valueInput,
+      originatingPath: incomingOriginatingPath,
+    } = stateTransfer.getIncomingEditorState(APP_ID) || {};
+    const queryParams = getQueryParams(routeProps.location);
+    const originatingApp =
+      incomingOriginatingApp ?? (queryParams.originatingApp as string | undefined);
+    const originatingPath =
+      incomingOriginatingPath ?? (queryParams.originatingPath as string | undefined);
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
     if (routeProps.match.params.savedMapId) {

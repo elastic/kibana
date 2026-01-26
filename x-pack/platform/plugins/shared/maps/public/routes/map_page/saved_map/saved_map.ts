@@ -303,6 +303,10 @@ export class SavedMap {
     }
   }
 
+  private _isOriginatingFromDashboardListing() {
+    return this._originatingApp === 'dashboards' && this._originatingPath?.includes('/list/');
+  }
+
   setBreadcrumbs(history: ScopedHistory) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
@@ -362,8 +366,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = this.hasOriginatingApp();
-    return hasOriginatingApp;
+    return this.hasOriginatingApp() && !this._isOriginatingFromDashboardListing();
   }
 
   public getTitle(): string {
@@ -501,8 +504,10 @@ export class SavedMap {
     }
 
     this._mapEmbeddableState = mapEmbeddableState;
-    // break connection to originating application
-    this._originatingApp = undefined;
+    // break connection to originating application (keep for dashboard listing breadcrumbs)
+    if (!this._isOriginatingFromDashboardListing()) {
+      this._originatingApp = undefined;
+    }
 
     // remove editor state so the connection is still broken after reload
     this._getStateTransfer().clearEditorState(APP_ID);
@@ -516,7 +521,18 @@ export class SavedMap {
 
     getCoreChrome().docTitle.change(newTitle);
     this.setBreadcrumbs(history);
-    history.push(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
+    const shouldPreserveOriginQuery = this._isOriginatingFromDashboardListing();
+    const search =
+      shouldPreserveOriginQuery && this._originatingApp
+        ? `?originatingApp=${encodeURIComponent(
+            this._originatingApp
+          )}&originatingPath=${encodeURIComponent(this._originatingPath ?? '')}`
+        : '';
+    history.push({
+      pathname: `/${MAP_PATH}/${this.getSavedObjectId()}`,
+      search,
+      hash: window.location.hash,
+    });
 
     if (this._onSaveCallback) {
       this._onSaveCallback();

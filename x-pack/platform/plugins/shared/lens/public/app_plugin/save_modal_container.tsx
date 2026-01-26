@@ -182,8 +182,7 @@ export function SaveModalContainer({
     isSaveable && application.capabilities.visualize_v2.save
   );
 
-  const isEmbedded =
-    initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+  const isEmbedded = isLegacyEditorEmbeddable(initialContext);
 
   return (
     <SaveModal

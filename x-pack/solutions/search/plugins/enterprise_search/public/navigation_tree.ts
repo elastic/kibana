@@ -7,6 +7,7 @@
 
 import { lazy } from 'react';
 
+import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
@@ -35,6 +36,24 @@ const title = i18n.translate(
 );
 const icon = 'logoElasticsearch';
 
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboards' Visualizations tab. This keeps the Dashboards nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
@@ -62,9 +81,9 @@ export const getNavigationTreeDefinition = ({
               link: 'discover',
             },
             {
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
+              getIsActive: ({ pathNameSerialized, prepend, location }) =>
+                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+                isEditingFromDashboard(location, pathNameSerialized, prepend),
               link: 'dashboards',
             },
             {

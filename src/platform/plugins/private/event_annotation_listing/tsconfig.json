@@ -41,7 +41,6 @@
     "@kbn/test-eui-helpers",
     "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin"
-    "@kbn/kql"
   ],
   "exclude": [
     "target/**/*",

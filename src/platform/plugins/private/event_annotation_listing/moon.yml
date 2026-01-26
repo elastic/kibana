@@ -50,7 +50,6 @@ dependsOn:
   - '@kbn/test-eui-helpers'
   - '@kbn/dashboard-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/kql'
 tags:
   - plugin
   - prod

@@ -23,7 +23,6 @@ import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/pu
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { KqlPluginStart } from '@kbn/kql/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationListingStartDependencies {

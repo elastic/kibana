@@ -126,6 +126,9 @@ export const getTopNavConfig = (
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
+  const isOriginatingFromDashboardList =
+    originatingApp === 'dashboards' && Boolean(originatingPath?.includes('/list/'));
+  const hasOriginatingAppForSaveFlow = Boolean(originatingApp && !isOriginatingFromDashboardList);
 
   /**
    * Called when the user clicks "Save" button.
@@ -168,7 +171,10 @@ export const getTopNavConfig = (
 
         chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
 
-        if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
+        if (
+          (hasOriginatingAppForSaveFlow && saveOptions.returnToOrigin) ||
+          saveOptions.dashboardId
+        ) {
           if (!embeddableId) {
             const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
 
@@ -177,7 +183,7 @@ export const getTopNavConfig = (
             setActiveUrl(appPath);
           }
 
-          const app = originatingApp || 'dashboards';
+          const app = hasOriginatingAppForSaveFlow ? originatingApp! : 'dashboards';
 
           let path;
           if (saveOptions.dashboardId) {
@@ -214,7 +220,20 @@ export const getTopNavConfig = (
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
           } else {
-            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+            const originatingAppName = originatingApp
+              ? stateTransfer.getAppNameFromId(originatingApp)
+              : undefined;
+            chrome.setBreadcrumbs(
+              getEditBreadcrumbs(
+                {
+                  ...(originatingAppName && {
+                    originatingAppName,
+                    redirectToOrigin: navigateToOriginatingApp,
+                  }),
+                },
+                savedVis.lastSavedTitle
+              )
+            );
           }
 
           if (id !== visualizationIdFromUrl) {
@@ -274,11 +293,11 @@ export const getTopNavConfig = (
   };
 
   const saveButtonLabel =
-    !savedVis.id && originatingApp
+    !savedVis.id && hasOriginatingAppForSaveFlow
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && savedVis.id
+      : hasOriginatingAppForSaveFlow && savedVis.id
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
@@ -287,7 +306,8 @@ export const getTopNavConfig = (
         });
 
   const showSaveButton =
-    visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
+    visualizeCapabilities.save ||
+    (!hasOriginatingAppForSaveFlow && dashboardCapabilities.showWriteControls);
 
   const showShareOptions = async (anchorElement: HTMLElement, asExport?: boolean) => {
     if (share) {
@@ -476,7 +496,7 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified and fot byValue visualizations
       disableButton: !share || Boolean(!savedVis.id && originatingApp),
     },
-    ...(originatingApp
+    ...(hasOriginatingAppForSaveFlow
       ? [
           {
             id: 'cancel',
@@ -505,9 +525,9 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: originatingApp ? undefined : 'save',
+            iconType: hasOriginatingAppForSaveFlow ? undefined : 'save',
             label: saveButtonLabel,
-            emphasize: !originatingApp,
+            emphasize: !hasOriginatingAppForSaveFlow,
             description: i18n.translate(
               'visualizations.topNavMenu.saveVisualizationButtonAriaLabel',
               {
@@ -616,7 +636,9 @@ export const getTopNavConfig = (
 
               let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-              if (originatingApp) {
+              // Show simplified modal only when editing embedded panel (has both originatingApp and embeddableId)
+              // Dashboard Viz tab has originatingApp but no embeddableId, so shows full modal
+              if (hasOriginatingAppForSaveFlow && embeddableId) {
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
@@ -632,11 +654,11 @@ export const getTopNavConfig = (
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
-                      originatingApp && embeddableId
+                      hasOriginatingAppForSaveFlow && embeddableId
                         ? i18n.translate('visualizations.topNavMenu.updatePanel', {
                             defaultMessage: 'Update panel on {originatingAppName}',
                             values: {
-                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp!),
                             },
                           })
                         : undefined
@@ -678,7 +700,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(originatingApp && embeddableId
+    ...(hasOriginatingAppForSaveFlow && embeddableId
       ? [
           {
             id: 'saveAndReturn',
