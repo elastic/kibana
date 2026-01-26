@@ -238,7 +238,10 @@ const PatternField = ({ index, onRemove, canRemove }: PatternFieldProps) => {
           data-test-subj={`streamsAppRedactPatternInput-${index}`}
           customOptionText={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactCustomOptionText',
-            { defaultMessage: 'Use custom pattern: {searchValue}', ignoreTag: true }
+            {
+              defaultMessage: 'Use custom pattern: {searchValue}',
+              values: { searchValue: '{searchValue}' },
+            }
           )}
         />
         {fieldState.error && (
