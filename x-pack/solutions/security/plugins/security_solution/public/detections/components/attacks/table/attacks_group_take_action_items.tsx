@@ -53,8 +53,8 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
     return [
       {
         attackId: attack.id,
-        relatedAlertIds: attack?.alertIds ?? [],
-        workflowStatus: attack?.alertWorkflowStatus,
+        relatedAlertIds: attack.alertIds,
+        workflowStatus: attack.alertWorkflowStatus,
       },
     ] as AttackWithWorkflowStatus[];
   }, [attack]);
