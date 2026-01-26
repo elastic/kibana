@@ -61,7 +61,7 @@ export interface DocViewerTableRestorableState {
   pinnedFields: string[];
 }
 
-const { withRestorableState, useRestorableLocalStorage } =
+const { withRestorableState, useRestorableState, useRestorableLocalStorage } =
   createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
@@ -76,6 +76,8 @@ const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
+
+const getPinnedFieldsStorageKey = (dataViewId: string) => `${PINNED_FIELDS_KEY}:${dataViewId}`;
 
 const getPageSize = (storage: Storage): number => {
   const pageSize = Number(storage.get(PAGE_SIZE));
@@ -103,6 +105,7 @@ const InternalDocViewerTable = ({
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
+  const currentDataViewId = dataView.id ?? 'unknown';
 
   const [searchTerm, setSearchTerm] = useRestorableLocalStorage(
     'searchTerm',
@@ -133,7 +136,7 @@ const InternalDocViewerTable = ({
 
   const [pinnedFieldsRaw, setPinnedFieldsRaw] = useRestorableLocalStorage(
     'pinnedFields',
-    PINNED_FIELDS_KEY,
+    getPinnedFieldsStorageKey(currentDataViewId),
     []
   );
 
