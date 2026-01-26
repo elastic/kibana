@@ -1500,7 +1500,17 @@ export default ({ getService }: FtrProviderContext) => {
         );
         // Clean up UI setting
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'data_stream.namespace': [],
+                  },
+                },
+              },
+            },
+          }),
         });
       });
 
@@ -1559,7 +1569,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Set UI setting to include only namespace1 and namespace2
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'data_stream.namespace': ['namespace1', 'namespace2'],
+                  },
+                },
+              },
+            },
+          }),
         });
 
         const rule: NewTermsRuleCreateProps = {
@@ -1588,6 +1608,50 @@ export default ({ getService }: FtrProviderContext) => {
         expect(namespaces).toContain('namespace1');
         expect(namespaces).toContain('namespace2');
         expect(namespaces).not.toContain('namespace3');
+      });
+
+      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          host: { name: 'host-new-1' },
+        };
+
+        await indexEnhancedDocuments({
+          id,
+          documents: [docNamespace1],
+        });
+
+        // Set UI setting with invalid JSON
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          query: `id: "${id}"`,
+          index: ['new_terms'],
+          new_terms_fields: ['host.name'],
+          from: 'now-2d',
+          interval: '1h',
+        };
+
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].errors).toEqual(
+          expect.arrayContaining([
+            expect.stringContaining(
+              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
+            ),
+          ])
+        );
       });
     });
   });

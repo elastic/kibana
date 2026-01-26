@@ -50,6 +50,7 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -481,12 +482,22 @@ export const initUiSettings = (
         {
           defaultMessage: `
           When configured, only events from the specified data stream namespaces are searched during rule execution.
-          <br/>If you specify multiple namespaces, separate values with commas. For example: namespace1,namespace2`,
+          <br/>Expected JSON format: { "meta": { "negate": false }, "query": { "bool": { "filter": { "terms": { "data_stream.namespace": ["namespace1", "namespace2"] } } } } }`,
         }
       ),
-      type: 'array',
-      schema: schema.arrayOf(schema.string()),
-      value: [],
+      type: 'json',
+      schema: schema.object({
+        query: schema.object({
+          bool: schema.object({
+            filter: schema.object({
+              terms: schema.object({
+                'data_stream.namespace': schema.arrayOf(schema.string()),
+              }),
+            }),
+          }),
+        }),
+      }),
+      value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
       category: [APP_ID],
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],

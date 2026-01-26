@@ -7,38 +7,47 @@
 
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 
 import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '../../../../../common/constants';
 
 /**
  * reads Kibana advanced settings for filtering data stream namespaces during rule executions
  * returns {@link Filter} array that includes only the specified namespaces
+ * @throws {Error} If the advanced setting filter is incorrectly formatted
  */
 export const getDataStreamNamespaceFilter = async ({
   uiSettingsClient,
 }: {
   uiSettingsClient: IUiSettingsClient;
 }): Promise<Filter[]> => {
-  const includedNamespaces = await uiSettingsClient.get<Array<string>>(
+  const filterConfig = await uiSettingsClient.get<string | Filter>(
     INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION
   );
 
-  if (!includedNamespaces?.length) {
+  if (!filterConfig) {
     return [];
   }
 
-  return [
-    {
-      meta: { negate: false },
-      query: {
-        bool: {
-          filter: {
-            terms: {
-              'data_stream.namespace': includedNamespaces,
-            },
-          },
-        },
-      },
-    },
-  ];
+  try {
+    const parsed = typeof filterConfig === 'string' ? JSON.parse(filterConfig) : filterConfig;
+
+    // Check if the parsed config has the expected structure and non-empty terms array
+    const termsArray = parsed?.query?.bool?.filter?.terms?.['data_stream.namespace'];
+    if (isEmpty(termsArray)) {
+      return [];
+    } else if (!Array.isArray(termsArray)) {
+      throw Error(`values need to be in array format, received ${termsArray}`);
+    }
+
+    // Return the parsed filter as a Filter array
+    return [parsed as Filter];
+  } catch (error) {
+    // If JSON parsing fails, throw an error that will be caught by rule executors
+    throw new Error(
+      `The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted. ` +
+        `Expected JSON format: { "meta": { "negate": false }, "query": { "bool": { "filter": { "terms": { "data_stream.namespace": ["namespace1", "namespace2"] } } } } }. ` +
+        `Error: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 };

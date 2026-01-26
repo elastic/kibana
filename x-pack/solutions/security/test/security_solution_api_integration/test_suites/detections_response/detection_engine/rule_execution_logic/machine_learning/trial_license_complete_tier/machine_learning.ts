@@ -386,21 +386,51 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         // Clean up UI setting before test
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'data_stream.namespace': [],
+                  },
+                },
+              },
+            },
+          }),
         });
       });
 
       after(async () => {
         // Clean up UI setting
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'data_stream.namespace': [],
+                  },
+                },
+              },
+            },
+          }),
         });
       });
 
       it('should include namespace filter in ML anomaly query when filter is configured', async () => {
         // Set UI setting to include only namespace1 and namespace2
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'data_stream.namespace': ['namespace1', 'namespace2'],
+                  },
+                },
+              },
+            },
+          }),
         });
 
         const { logs } = await previewRule({
@@ -419,6 +449,26 @@ export default ({ getService }: FtrProviderContext) => {
         // Note: This test verifies the filter is included in the query structure
         // Actual filtering depends on whether anomaly records contain the data_stream.namespace field
         expect(requestString).toBeTruthy();
+      });
+
+      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
+        // Set UI setting with invalid JSON
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
+        });
+
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].errors).toEqual(
+          expect.arrayContaining([
+            expect.stringContaining(
+              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
+            ),
+          ])
+        );
       });
     });
   });
