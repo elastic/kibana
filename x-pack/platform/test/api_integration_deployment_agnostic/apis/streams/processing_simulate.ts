@@ -608,5 +608,109 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(value).to.have.property('destination.geo.location.lon', -0.125);
       });
     });
+
+    describe('Temporary field handling', () => {
+      it('should not surface temporary fields in top-level detected_fields when created and then removed', async () => {
+        // This test verifies that fields created by one processor and removed by another
+        // do not appear in the top-level detected_fields (used by the UI "Modified fields" tab)
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                // First processor: create a temporary field
+                customIdentifier: 'set-temp',
+                action: 'set' as const,
+                to: 'attributes.temp_helper_field',
+                value: 'temporary_value',
+                where: { always: {} },
+              },
+              {
+                // Second processor: create a permanent field
+                customIdentifier: 'set-permanent',
+                action: 'set' as const,
+                to: 'attributes.permanent_field',
+                value: 'permanent_value',
+                where: { always: {} },
+              },
+              {
+                // Third processor: remove the temporary field
+                customIdentifier: 'remove-temp',
+                action: 'remove' as const,
+                from: 'attributes.temp_helper_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        // The top-level detected_fields should NOT include the temporary field
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).to.contain('attributes.permanent_field');
+        expect(topLevelFieldNames).not.to.contain('attributes.temp_helper_field');
+
+        // But per-processor metrics should still track the temporary field
+        const setTempMetrics = response.body.processors_metrics['set-temp'];
+        expect(setTempMetrics.detected_fields).to.contain('attributes.temp_helper_field');
+
+        // The final document value should not have the temporary field
+        const { value } = response.body.documents[0];
+        expect(value).to.have.property('attributes.permanent_field', 'permanent_value');
+        expect(value).not.to.have.property('attributes.temp_helper_field');
+      });
+
+      it('should not auto-configure ECS fields that only exist as temporary fields', async () => {
+        // This test verifies that known ECS-like fields that are only temporary
+        // are not included in detected_fields (which would trigger auto-mapping)
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                // Create a temporary ECS-like field (e.g., source.ip)
+                customIdentifier: 'set-ecs-temp',
+                action: 'set' as const,
+                to: 'attributes.source_ip',
+                value: '192.168.1.1',
+                where: { always: {} },
+              },
+              {
+                // Create a permanent non-ECS field
+                customIdentifier: 'set-custom',
+                action: 'set' as const,
+                to: 'attributes.custom_field',
+                value: 'custom_value',
+                where: { always: {} },
+              },
+              {
+                // Remove the temporary field
+                customIdentifier: 'remove-ecs',
+                action: 'remove' as const,
+                from: 'attributes.source_ip',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // The temporary field should NOT be in top-level detected_fields
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).to.contain('attributes.custom_field');
+        expect(topLevelFieldNames).not.to.contain('attributes.source_ip');
+
+        // Per-processor metrics should still track it was created
+        const setEcsMetrics = response.body.processors_metrics['set-ecs-temp'];
+        expect(setEcsMetrics.detected_fields).to.contain('attributes.source_ip');
+      });
+    });
   });
 }

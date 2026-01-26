@@ -173,7 +173,7 @@ export const simulateProcessing = async ({
   const otelStream = isOtelStream(stream);
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
-  const { docReports, processorsMetrics } = computePipelineSimulationResult(
+  const { docReports, processorsMetrics, finalDetectedFieldNames } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
@@ -189,7 +189,8 @@ export const simulateProcessing = async ({
     params,
     streamFields,
     streamIndexFieldCaps,
-    fieldsMetadataClient
+    fieldsMetadataClient,
+    finalDetectedFieldNames
   );
 
   /* 6. Derive general insights and process final response body */
@@ -493,6 +494,37 @@ const executeIngestSimulation = async (
 };
 
 /**
+ * Computes the set of field names that are actually present in the final output documents
+ * by comparing the initial input with the final output. This filters out temporary fields
+ * that were created by one processor but removed by a subsequent processor.
+ */
+const computeFinalDetectedFields = (
+  sampleDocs: Array<{ _source: FlattenRecord }>,
+  docReports: SimulationDocReport[]
+): Set<string> => {
+  const finalFieldNames = new Set<string>();
+
+  for (let i = 0; i < sampleDocs.length; i++) {
+    const initialDoc = flattenObjectNestedLast(sampleDocs[i]._source);
+    const finalDoc = docReports[i].value;
+
+    const { added, updated } = calculateObjectDiff(initialDoc, finalDoc);
+
+    const addedFields = Object.keys(flattenObjectNestedLast(added));
+    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
+
+    for (const field of addedFields) {
+      finalFieldNames.add(field);
+    }
+    for (const field of updatedFields) {
+      finalFieldNames.add(field);
+    }
+  }
+
+  return finalFieldNames;
+};
+
+/**
  * Computing simulation insights for each document and processor takes a few steps:
  * 1. Extract the last document source and the status of the simulation.
  * 2. Compute the diff between the sample document and the simulation document to detect fields changes.
@@ -512,6 +544,7 @@ const computePipelineSimulationResult = (
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
+  finalDetectedFieldNames: Set<string>;
 } => {
   const transpiledProcessors = transpileIngestPipeline(processing, {
     ignoreMalformed: true,
@@ -583,7 +616,11 @@ const computePipelineSimulationResult = (
     sampleSize: docReports.length,
   });
 
-  return { docReports, processorsMetrics };
+  // Compute the final detected fields by comparing initial input with final output
+  // This filters out temporary fields that were created and then removed
+  const finalDetectedFieldNames = computeFinalDetectedFields(sampleDocs, docReports);
+
+  return { docReports, processorsMetrics, finalDetectedFieldNames };
 };
 
 const initProcessorMetricsMap = (
@@ -916,17 +953,19 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * Only includes fields that exist in the final output document (filters out temporary fields).
  */
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
-  fieldsMetadataClient: IFieldsMetadataClient
+  fieldsMetadataClient: IFieldsMetadataClient,
+  finalDetectedFieldNames: Set<string>
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
-
-  const uniqueFields = uniq(fields);
+  // Filter to only include fields that exist in the final output document
+  // This excludes temporary fields that were created and then removed
+  const uniqueFields = Array.from(finalDetectedFieldNames);
 
   // Short-circuit to avoid fetching streams fields if none is detected
   if (isEmpty(uniqueFields)) {
