@@ -13,6 +13,7 @@ import {
   DATE_WITH_HOSTS_DATA,
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
+  HOST1_NAME,
   HOSTS,
   POD_COUNT,
   POD_NAMES,
@@ -55,6 +56,16 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.nodesOverviewTable).toBeVisible();
     });
+  });
+
+  test('Filter nodes by query bar', async ({ pageObjects: { inventoryPage } }) => {
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
+    await inventoryPage.filterByQueryBar(`host.name: "${HOST1_NAME}"`);
+
+    await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(1);
+
+    const host1Node = await inventoryPage.getWaffleNode(HOST1_NAME);
+    await expect(host1Node.container).toBeVisible();
   });
 
   test('Render empty data prompt for dates with no data', async ({

@@ -200,4 +200,12 @@ export class InventoryPage {
   public async clickNoDataPageAddDataButton() {
     await this.noDataPageActionButton.click();
   }
+
+  public async filterByQueryBar(query: string) {
+    const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.clear();
+    await queryBar.fill(query);
+    await queryBar.press('Enter');
+    await this.waitForNodesToLoad();
+  }
 }
