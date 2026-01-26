@@ -5,26 +5,52 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { getTacticMetadata } from '../../../../../../../helpers';
 import { AttackChain } from '.';
+import { getAttackTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers';
 
-import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
+jest.mock('@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers', () => ({
+  getAttackTacticMetadata: jest.fn(),
+}));
+
+const mockedGetAttackTacticMetadata = getAttackTacticMetadata as jest.Mock;
 
 describe('AttackChain', () => {
-  it('renders the expected tactics', () => {
-    // get detected tactics from the attack discovery:
-    const tacticMetadata = getTacticMetadata(mockAttackDiscovery).filter(
-      (tactic) => tactic.detected
-    );
-    expect(tacticMetadata.length).toBeGreaterThan(0); // test pre-condition
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    render(<AttackChain attackDiscovery={mockAttackDiscovery} />);
+  it('renders tactics horizontally by default', () => {
+    mockedGetAttackTacticMetadata.mockReturnValue([
+      { name: 'Initial Access', detected: true, index: 0 },
+      { name: 'Execution', detected: false, index: 1 },
+    ]);
 
-    tacticMetadata?.forEach((tactic) => {
-      expect(screen.getByText(tactic.name)).toBeInTheDocument();
-    });
+    render(<AttackChain attackTactics={undefined} />);
+
+    expect(screen.getByTestId('attackChain')).toBeInTheDocument();
+    expect(screen.getByText('Initial Access')).toBeInTheDocument();
+    expect(screen.getByText('Execution')).toBeInTheDocument();
+  });
+
+  it('renders vertical layout without scroll container when isVertical is true', () => {
+    mockedGetAttackTacticMetadata.mockReturnValue([
+      { name: 'Initial Access', detected: true, index: 0 },
+    ]);
+
+    render(<AttackChain attackTactics={undefined} isVertical />);
+
+    expect(screen.queryByTestId('attackChain')).not.toBeInTheDocument();
+    expect(screen.getByText('Initial Access')).toBeInTheDocument();
+  });
+
+  it('renders nothing when metadata is empty', () => {
+    mockedGetAttackTacticMetadata.mockReturnValue([]);
+
+    const { container } = render(<AttackChain attackTactics={undefined} />);
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

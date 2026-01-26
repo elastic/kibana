@@ -8,9 +8,11 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiIcon } from '@elastic/eui';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { SectionPanel } from './section_panel';
 
 const KEY = 'insights';
 
@@ -38,10 +40,9 @@ export const InsightsSection = memo(() => {
       gutterSize="s"
       data-test-subj={KEY}
     >
-      {
-        // TODO: Add InsightsSection content here
-        'InsightsSection'
-      }
+      <SectionPanel title={'Insights'} highlightTitle icon={<EuiIcon type="grid" />}>
+        <div>{'este es una section'}</div>
+      </SectionPanel>
     </ExpandableSection>
   );
 });

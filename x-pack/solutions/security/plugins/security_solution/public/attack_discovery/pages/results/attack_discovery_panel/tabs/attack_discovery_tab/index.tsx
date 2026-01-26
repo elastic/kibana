@@ -120,7 +120,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AttackChain attackDiscovery={attackDiscovery} />
+          <AttackChain attackTactics={attackDiscovery.mitreAttackTactics} />
           <EuiSpacer size="l" />
         </>
       )}
