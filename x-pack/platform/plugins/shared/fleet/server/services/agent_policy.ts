@@ -1843,13 +1843,15 @@ class AgentPolicyService {
     );
     t.end();
 
-    const versionSpecificAgentPolicyIds = fleetServerPolicies
-      .map((fsp) => fsp.policy_id)
-      .filter((id) => hasVersionSuffix(id));
-    await scheduleReassignAgentsToVersionSpecificPoliciesTask(
-      appContextService.getTaskManagerStart()!,
-      versionSpecificAgentPolicyIds
-    );
+    if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      const versionSpecificAgentPolicyIds = fleetServerPolicies
+        .map((fsp) => fsp.policy_id)
+        .filter((id) => hasVersionSuffix(id));
+      await scheduleReassignAgentsToVersionSpecificPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        versionSpecificAgentPolicyIds
+      );
+    }
   }
 
   public async deleteFleetServerPoliciesForPolicyId(
