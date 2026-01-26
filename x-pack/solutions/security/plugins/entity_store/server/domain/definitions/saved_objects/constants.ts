@@ -14,7 +14,7 @@ export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updatin
 export type LogExtractionState = z.infer<typeof LogExtractionState>;
 export const LogExtractionState = z.object({
   filter: z.string().default(''),
-  additionalIndexPattern: z.string().default(''),
+  v: z.string().default(''),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()

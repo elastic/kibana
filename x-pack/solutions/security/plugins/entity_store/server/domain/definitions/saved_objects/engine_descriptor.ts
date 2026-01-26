@@ -71,6 +71,6 @@ export class EngineDescriptorClient {
 
         const id = this.getSavedObjectId(entityType);
         this.logger.debug(`Deleting engine descriptor with id ${id}`);
-        this.soClient.delete(EngineDescriptorTypeName, id);
+        await this.soClient.delete(EngineDescriptorTypeName, id);
     }
 }
