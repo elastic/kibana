@@ -283,6 +283,52 @@ describe('SharepointOnline', () => {
     });
   });
 
+  describe('getSitePageContents action', () => {
+    it('should get page contents with canvas layout', async () => {
+      const mockResponse = {
+        data: {
+          id: 'page-123',
+          title: 'Home',
+          canvasLayout: {
+            horizontalSections: [],
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+        siteId: 'site-123',
+        pageId: 'page-123',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages/page-123/microsoft.graph.sitePage',
+        {
+          params: {
+            $expand: 'canvasLayout',
+            $select:
+              'id,title,description,webUrl,createdDateTime,lastModifiedDateTime,canvasLayout',
+          },
+        }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint getting page contents from https://graph.microsoft.com/v1.0/sites/site-123/pages/page-123/microsoft.graph.sitePage'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Page not found'));
+
+      await expect(
+        SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+          siteId: 'site-123',
+          pageId: 'missing-page',
+        })
+      ).rejects.toThrow('Page not found');
+    });
+  });
+
   describe('getSiteDrives action', () => {
     it('should list all drives for a given site', async () => {
       const mockResponse = {

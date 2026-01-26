@@ -102,6 +102,32 @@ export const SharepointOnline: ConnectorSpec = {
       },
     },
 
+    getSitePageContents: {
+      isTool: true,
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+        pageId: z.string().describe('Page ID'),
+      }),
+      output: z.any(),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          siteId: string;
+          pageId: string;
+        };
+        const url = `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/${typedInput.pageId}/microsoft.graph.sitePage`;
+
+        ctx.log.debug(`SharePoint getting page contents from ${url}`);
+        const response = await ctx.client.get(url, {
+          params: {
+            $expand: 'canvasLayout',
+            $select:
+              'id,title,description,webUrl,createdDateTime,lastModifiedDateTime,canvasLayout',
+          },
+        });
+        return response.data;
+      },
+    },
+
     getSite: {
       isTool: true,
       input: z.union([
@@ -238,6 +264,11 @@ export const SharepointOnline: ConnectorSpec = {
         driveId: z.string().describe('Drive ID'),
         itemId: z.string().describe('Drive item ID'),
       }),
+      output: z.object({
+        contentType: z.string().optional().describe('Content-Type header'),
+        contentLength: z.string().optional().describe('Content-Length header'),
+        text: z.string().describe('File content as UTF-8 text'),
+      }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           driveId: string;
@@ -261,6 +292,11 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       input: z.object({
         downloadUrl: z.string().url().describe('Pre-authenticated download URL'),
+      }),
+      output: z.object({
+        contentType: z.string().optional().describe('Content-Type header'),
+        contentLength: z.string().optional().describe('Content-Length header'),
+        text: z.string().describe('File content as UTF-8 text'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -339,6 +375,7 @@ export const SharepointOnline: ConnectorSpec = {
         from: z.number().optional().describe('Offset for pagination'),
         size: z.number().optional().describe('Number of results to return'),
       }),
+      output: z.any(),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;
