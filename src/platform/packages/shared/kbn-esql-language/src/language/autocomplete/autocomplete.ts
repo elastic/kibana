@@ -212,32 +212,6 @@ export async function suggest(
       hasMinimumLicenseRequired
     );
 
-    // Determine if we're suggesting indices or fields based on the command context
-    // Indices are suggested in FROM/TS commands, fields are suggested in other commands
-    const commandName = astContext.command.name.toLowerCase();
-    const isSourceCommand = commandName === 'from' || commandName === 'ts';
-    // STATS and inline stats don't primarily suggest field names, they suggest aggregation functions
-    const isStatsCommand = commandName === 'stats' || commandName === 'inline stats';
-
-    // Check if we have field suggestions (kind 'Variable' indicates fields)
-    const hasFieldSuggestions = commandsSpecificSuggestions.some((s) => s.kind === 'Variable');
-
-    // Add prepended resource browser suggestion if enabled
-    // Show indices browser when in FROM/TS commands (where indices are suggested)
-    if (isSourceCommand && resourceRetriever?.isResourceBrowserEnabled) {
-      return [createIndicesBrowserSuggestion(), ...commandsSpecificSuggestions];
-    }
-
-    // Show fields browser when we have field suggestions and we're not in a source command or stats command
-    if (
-      !isSourceCommand &&
-      !isStatsCommand &&
-      hasFieldSuggestions &&
-      resourceRetriever?.isResourceBrowserEnabled
-    ) {
-      return [createFieldsBrowserSuggestion(), ...commandsSpecificSuggestions];
-    }
-
     return commandsSpecificSuggestions;
   }
   return [];
@@ -326,6 +300,33 @@ async function getSuggestionsWithinCommandExpression(
     context,
     offset
   );
+
+  // Determine if we're suggesting indices or fields based on the command context
+  // Indices are suggested in FROM/TS commands, fields are suggested in other commands
+  const commandName = astContext.command.name.toLowerCase();
+  const sourceCommands = new Set(esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase()));
+  const isSourceCommand = sourceCommands.has(commandName);
+  // STATS and inline stats don't primarily suggest field names, they suggest aggregation functions
+  const isStatsCommand = commandName === 'stats' || commandName === 'inline stats';
+
+  // Check if we have field suggestions (kind 'Variable' indicates fields)
+  const hasFieldSuggestions = suggestions.some((suggestion) => suggestion.kind === 'Variable');
+
+  // Add prepended resource browser suggestion if enabled
+  // Show indices browser when in FROM/TS commands (where indices are suggested)
+  if (isSourceCommand && callbacks?.isResourceBrowserEnabled) {
+    suggestions.unshift(createIndicesBrowserSuggestion());
+  }
+
+  // Show fields browser when we have field suggestions and we're not in a source command or stats command
+  if (
+    !isSourceCommand &&
+    !isStatsCommand &&
+    hasFieldSuggestions &&
+    callbacks?.isResourceBrowserEnabled
+  ) {
+    suggestions.unshift(createFieldsBrowserSuggestion());
+  }
 
   // Apply context-aware ordering
   const orderedSuggestions = orderingEngine.sort(suggestions, {

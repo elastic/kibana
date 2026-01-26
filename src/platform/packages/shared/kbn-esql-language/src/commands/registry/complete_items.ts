@@ -581,7 +581,7 @@ export function createResourceBrowserSuggestion(
       title: label,
       id: commandId,
     },
-    sortText: '0', // Sort to top
+    category: SuggestionCategory.CUSTOM_ACTION,
   };
 }
 
