@@ -121,7 +121,7 @@ describe(
         );
       });
 
-      it.only('View gap fill scheduler logs and filter by status', () => {
+      it('View gap fill scheduler logs and filter by status', () => {
         ensureAutoGapFillEnabledViaUi();
 
         openRuleSettingsModalViaBadge();
