@@ -8,26 +8,25 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFocusTrap,
-  EuiOverlayMask,
-  EuiPanel,
-  EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
-import { Global, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useRef, useState } from 'react';
-import { ExitFullScreenButton } from './exit_full_screen_button';
+import React, { useCallback, useState } from 'react';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
 import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
 import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
 import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
+
+export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -46,127 +45,133 @@ export const FullScreenWaterfall = ({
   serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
+  const { euiTheme } = useEuiTheme();
   const [docId, setDocId] = useState<string | null>(null);
+  const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
   const [activeFlyoutId, setActiveFlyoutId] = useState<
     typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
   >(null);
   const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
-  const overlayMaskRef = useRef<HTMLDivElement>(null);
-  const { euiTheme } = useEuiTheme();
+  const [scrollElement, setScrollElement] = useState<Element | null>(null);
 
-  const getParentApi = useCallback(
-    () => ({
+  const traceWaterfallTitleId = useGeneratedHtmlId({
+    prefix: 'traceWaterfallTitle',
+  });
+
+  const traceWaterfallTitle = i18n.translate(
+    'unifiedDocViewer.observability.traces.fullScreenWaterfall.title',
+    {
+      defaultMessage: 'Trace timeline',
+    }
+  );
+
+  const minWidth = euiTheme.base * 30;
+
+  /**
+   * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
+   *
+   * This pattern is necessary because:
+   * - Embeddables are constructed once with immutable initial state
+   * - EUI components don't expose refs, requiring a wrapper div with closest()
+   * - scrollElement must be available before the embeddable initializes (conditional render below)
+   *
+   *
+   * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
+   * we can replace this workaround with a direct ref usage.
+   */
+  const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
+    }
+  }, []);
+
+  const getParentApi = useCallback(() => {
+    return {
       getSerializedStateForChild: () => ({
         traceId,
         rangeFrom,
         rangeTo,
         serviceName,
-        scrollElement: overlayMaskRef.current,
+        scrollElement,
         onErrorClick: (params: {
           traceId: string;
           docId: string;
           errorCount: number;
           errorDocId?: string;
+          docIndex?: string;
         }) => {
           if (params.errorCount > 1) {
             setActiveFlyoutId(spanFlyoutId);
             setActiveSection('errors-table');
             setDocId(params.docId);
+            setDocIndex(undefined);
           } else if (params.errorDocId) {
             setActiveFlyoutId(logsFlyoutId);
             setDocId(params.errorDocId);
+            setDocIndex(params.docIndex);
           }
         },
         onNodeClick: (nodeSpanId: string) => {
           setActiveSection(undefined);
           setDocId(nodeSpanId);
+          setDocIndex(undefined);
           setActiveFlyoutId(spanFlyoutId);
         },
         mode: 'full',
       }),
-    }),
-    [traceId, rangeFrom, rangeTo, serviceName]
-  );
+    };
+  }, [traceId, rangeFrom, rangeTo, serviceName, scrollElement]);
 
   function handleCloseFlyout() {
     setActiveFlyoutId(null);
     setActiveSection(undefined);
     setDocId(null);
+    setDocIndex(undefined);
   }
 
   return (
-    <>
-      {/** This global style is a temporary fix until we migrate to the
-       * new flyout system (with child) instead of full screen */}
-      <Global
-        styles={css`
-          .euiDataGridRowCell__popover {
-            z-index: ${euiTheme.levels.modal} !important;
-          }
-        `}
-      />
-      <EuiOverlayMask
-        maskRef={overlayMaskRef}
-        css={{
-          paddingBlockEnd: '0 !important',
-          overflowY: 'scroll',
-          backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
-        }}
-      >
-        <EuiFocusTrap css={{ height: '100%', width: '100%' }}>
-          <EuiPanel hasShadow={false} css={{ minHeight: '100%', width: '100%' }}>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={1}>
-                <EuiTitle size="l">
-                  <h2>
-                    {i18n.translate(
-                      'unifiedDocViewer.observability.traces.fullScreenWaterfall.title',
-                      {
-                        defaultMessage: 'Trace timeline',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} css={{ alignItems: 'end' }}>
-                <ExitFullScreenButton
-                  onExitFullScreen={onExitFullScreen}
-                  dataTestSubj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
-                  ariaLabel={i18n.translate(
-                    'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
-                    {
-                      defaultMessage: 'Exit expanded trace timeline',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-                The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-                This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-                */}
-                <div
-                  css={css`
-                    width: 100%;
-                    & .embPanel__content {
-                      display: block;
-                    }
-                  `}
-                >
-                  <EmbeddableRenderer
-                    type="APM_TRACE_WATERFALL_EMBEDDABLE"
-                    getParentApi={getParentApi}
-                    hidePanelChrome
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFocusTrap>
-      </EuiOverlayMask>
+    <EuiFlyout
+      session="start"
+      size="m"
+      onClose={onExitFullScreen}
+      ownFocus={false}
+      aria-labelledby={traceWaterfallTitleId}
+      flyoutMenuProps={{
+        title: traceWaterfallTitle,
+      }}
+      resizable={true}
+      minWidth={minWidth}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="l">
+          <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
+          The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
+          This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
+          Issue: https://github.com/elastic/kibana/issues/248307
+          */}
+        <div
+          ref={embeddableContainerRef}
+          css={css`
+            width: 100%;
+            & .embPanel__content {
+              display: block;
+            }
+          `}
+        >
+          {scrollElement ? (
+            <EmbeddableRenderer
+              type="APM_TRACE_WATERFALL_EMBEDDABLE"
+              getParentApi={getParentApi}
+              hidePanelChrome
+            />
+          ) : null}
+        </div>
+      </EuiFlyoutBody>
+
       {docId && activeFlyoutId ? (
         activeFlyoutId === spanFlyoutId ? (
           <SpanFlyout
@@ -177,9 +182,14 @@ export const FullScreenWaterfall = ({
             activeSection={activeSection}
           />
         ) : (
-          <LogsFlyout onCloseFlyout={handleCloseFlyout} id={docId} dataView={dataView} />
+          <LogsFlyout
+            onCloseFlyout={handleCloseFlyout}
+            id={docId}
+            index={docIndex}
+            dataView={dataView}
+          />
         )
       ) : null}
-    </>
+    </EuiFlyout>
   );
 };
