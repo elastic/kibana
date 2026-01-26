@@ -23,12 +23,15 @@ import {
   getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
+  getCasesTemplatesPath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
+import { AllTemplatesPage } from '../templates/all_templates_page';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
@@ -46,6 +49,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
+  const { isTemplatesEnabled } = useCasesFeatures();
+
   useReadonlyHeader();
 
   const onCreateCaseSuccess: CreateCaseFormProps['onSuccess'] = useCallback(
@@ -81,6 +86,11 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           )}
         </Route>
 
+        {isTemplatesEnabled && (
+          <Route path={getCasesTemplatesPath(basePath)}>
+            <AllTemplatesPage props={{ test: 'test' }} />
+          </Route>
+        )}
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>

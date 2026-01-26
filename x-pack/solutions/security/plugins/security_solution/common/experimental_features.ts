@@ -209,7 +209,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
-  linuxDnsEvents: true,
+  linuxDnsEvents: false,
+
+  /**
+   * Enables the Cases Templates Page feature.
+   */
+  templates: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

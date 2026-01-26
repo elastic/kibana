@@ -185,6 +185,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },
+  templates: { enabled: false },
 });
 
 /**
