@@ -62,6 +62,7 @@ export const CloudConnectedAppMain: React.FC = () => {
   const extendedContext: CloudConnectedAppContextValue = {
     ...appContext,
     clusterConfig: config!,
+    organizationId: clusterDetails?.metadata?.organization_id,
     hasConfigurePermission: appContext.application.capabilities.cloudConnect?.configure === true,
   };
 

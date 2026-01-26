@@ -38,7 +38,7 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService } =
+  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService, organizationId } =
     useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,9 +48,10 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
   const signupParams = clusterParams ? `&${clusterParams}` : '';
 
   // Build the full redirect URL and encode it for the login link
-  const redirectUrl = clusterParams
-    ? `/connect-cluster-services?${clusterParams}`
-    : '/connect-cluster-services';
+  const redirectUrl =
+    clusterParams || organizationId
+      ? `/connect-cluster-services?${buildClusterQueryParams({ ...clusterConfig, organizationId })}`
+      : '/connect-cluster-services';
   const encodedRedirectUrl = encodeURIComponent(redirectUrl);
 
   const handleConnect = async () => {
@@ -179,6 +180,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               title="Authentication failed"
               color="danger"
               iconType="error"

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { CloudConnectedAppContextValue } from '../../../app_context';
+import type { CloudConnectApiConfig } from '../../../../types';
+
+interface ClusterQueryParams extends Partial<CloudConnectApiConfig> {
+  organizationId?: string;
+}
 
 /**
  * Builds query parameters from cluster configuration for Cloud signup/login links
  */
-export const buildClusterQueryParams = (
-  clusterConfig?: CloudConnectedAppContextValue['clusterConfig']
-): string => {
+export const buildClusterQueryParams = (clusterConfig?: ClusterQueryParams): string => {
   if (!clusterConfig) return '';
 
   const params = new URLSearchParams();
@@ -32,6 +34,7 @@ export const buildClusterQueryParams = (
   if (clusterConfig.license?.uid) {
     params.append('license_uid', clusterConfig.license.uid);
   }
+  params.append('organization_id', clusterConfig.organizationId || '');
 
   return params.toString();
 };
