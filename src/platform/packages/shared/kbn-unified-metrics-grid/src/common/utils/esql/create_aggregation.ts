@@ -103,14 +103,13 @@ function getAggregationTemplate({
  * Creates the metric aggregation part of an ES|QL query.
  * It returns:
  * - For `histogram` instrument:
- *   - `PERCENTILE(..., 95)` if type is `exponential_histogram`
- *   - `PERCENTILE(TO_TDIGEST(...), 95)` for other histogram types
+ *   - `PERCENTILE(..., 95)` if type is `exponential_histogram or tdigest`
  * - `SUM(RATE(...))` for counter instruments
  * - `AVG(...)` for other metric types
  *
  * If a metric name is provided, it will be properly escaped and substituted.
  *
- * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram').
+ * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram', 'tdigest').
  * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
