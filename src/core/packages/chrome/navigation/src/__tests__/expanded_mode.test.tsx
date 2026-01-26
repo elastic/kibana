@@ -324,7 +324,7 @@ describe('Expanded mode', () => {
        * GIVEN the side navigation is in expanded mode
        * AND a primary menu item is new
        * WHEN I hover over that item
-       * THEN a tooltip shows up with a beta badge reading "New"
+       * THEN a tooltip shows up with a badge reading "New"
        */
       it('should show tooltip with new badge on hover', async () => {
         render(
@@ -344,7 +344,7 @@ describe('Expanded mode', () => {
 
         expect(tooltip).toBeInTheDocument();
 
-        const badge = tooltip.querySelector('.euiBetaBadge');
+        const badge = tooltip.querySelector('.euiBadge');
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiBetaBadge, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiBetaBadge, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -37,12 +37,12 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
 
-  // TODO: use a proper EuiBetaBadge color variant once available https://github.com/elastic/eui/issues/9268
-  const newBetaBadgeStyles = css`
-    background-color: ${euiTheme.colors.backgroundFilledPrimary};
-    color: ${euiTheme.colors.textInverse};
-    text-transform: uppercase;
+  // TODO: use a proper EuiBetaBadge variant once available https://github.com/elastic/eui/issues/9268
+  const newBadgeStyles = css`
+    border-radius: 50px;
     border: none;
+    font-size: ${euiTheme.size.m};
+    line-height: calc(${euiTheme.size.base} * 1.25);
   `;
 
   const config: Record<BadgeType, BadgeConfig> = {
@@ -67,12 +67,16 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
 
   return (
     <EuiThemeProvider colorMode={isInverted ? 'dark' : undefined}>
-      <EuiBetaBadge
-        css={[betaBadgeStyles, isNew && newBetaBadgeStyles]}
-        iconType={config[type].iconType}
-        label={config[type].label}
-        size="s"
-      />
+      {isNew ? (
+        <EuiBadge css={newBadgeStyles} children={config[type].label} color="primary" />
+      ) : (
+        <EuiBetaBadge
+          css={betaBadgeStyles}
+          iconType={config[type].iconType}
+          label={config[type].label}
+          size="s"
+        />
+      )}
     </EuiThemeProvider>
   );
 };

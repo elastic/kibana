@@ -990,7 +990,7 @@ describe('Both modes', () => {
        * GIVEN a footer item is new
        * WHEN I hover over that item
        * THEN a tooltip shows up with the item label
-       * AND a beta badge reading "New"
+       * AND a badge reading "New"
        */
       it('should render a tooltip with the item label and a beta badge reading "New"', async () => {
         render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
@@ -1005,7 +1005,7 @@ describe('Both modes', () => {
         expect(tooltip).toBeInTheDocument();
         expect(tooltip).toHaveTextContent("What's new");
 
-        const badge = tooltip.querySelector('.euiBetaBadge');
+        const badge = tooltip.querySelector('.euiBadge');
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });

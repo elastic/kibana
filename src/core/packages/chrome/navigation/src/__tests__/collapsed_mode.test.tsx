@@ -357,7 +357,7 @@ describe('Collapsed mode', () => {
        * AND a primary menu item is new
        * WHEN I hover over that item
        * THEN a tooltip shows up with the item label
-       * AND a beta badge reading "New"
+       * AND a badge reading "New"
        */
       it('should show tooltip with label and new badge on hover', async () => {
         render(
@@ -378,7 +378,7 @@ describe('Collapsed mode', () => {
         expect(tooltip).toBeInTheDocument();
         expect(tooltip).toHaveTextContent('Alerts');
 
-        const badge = tooltip.querySelector('.euiBetaBadge');
+        const badge = tooltip.querySelector('.euiBadge');
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });

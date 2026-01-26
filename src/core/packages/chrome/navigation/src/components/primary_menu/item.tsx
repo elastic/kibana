@@ -59,8 +59,6 @@ export const PrimaryMenuItem = forwardRef<
     const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();
 
-    const isIconOnlyBadge = badgeType && badgeType !== 'new';
-
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
@@ -76,7 +74,7 @@ export const PrimaryMenuItem = forwardRef<
     const getBadgeContent = (label?: ReactNode) => (
       <div css={betaContentStyles}>
         {label && <span>{label}</span>}
-        {badgeType && <BetaBadge type={badgeType} isInverted={isIconOnlyBadge} />}
+        {badgeType && <BetaBadge type={badgeType} isInverted />}
       </div>
     );
 

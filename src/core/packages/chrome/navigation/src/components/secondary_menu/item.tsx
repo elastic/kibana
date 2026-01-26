@@ -99,9 +99,9 @@ export const SecondaryMenuItemComponent = ({
     <div css={labelAndBadgeStyles}>
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
-        {/* Always show non-new badges, only show new ones if isNew check allows it */}
-        {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
       </span>
+      {/* Always show non-new badges, only show new ones if isNew check allows it */}
+      {badgeType && (badgeType !== 'new' || isNew) && <BetaBadge type={badgeType} />}
     </div>
   );
 
