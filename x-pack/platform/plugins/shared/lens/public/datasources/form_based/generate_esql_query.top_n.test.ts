@@ -106,7 +106,9 @@ describe('to_esql top N', () => {
       mockNowInstant
     );
 
-    expect(result.success).toBe(false);
-    expect(!result.success && result.reason).toEqual('function_not_supported');
+    expect(result).toEqual({
+      success: false,
+      reason: 'terms_not_supported',
+    });
   });
 });

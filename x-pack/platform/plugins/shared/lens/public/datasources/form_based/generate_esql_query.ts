@@ -25,6 +25,7 @@ import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
 import { resolveTimeShift } from './time_shift_utils';
+import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -33,28 +34,9 @@ export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 interface EsqlConversionResult {
   esql: string;
 }
-interface EsqlConversionError {
-  error: EsqlConversionFailureReason;
-  operationType?: string;
-}
-type EsqlConversion = EsqlConversionResult | EsqlConversionError;
+type EsqlConversion = EsqlConversionResult | EsqlQueryFailure;
 const isValidEsqlConversionItems = (metrics: EsqlConversion[]): metrics is EsqlConversionResult[] =>
   metrics.every((m) => typeof m === 'object' && 'esql' in m);
-
-/**
- * Specific reasons why ES|QL conversion failed.
- * These are used to provide granular user feedback.
- */
-export type EsqlConversionFailureReason =
-  | 'non_utc_timezone'
-  | 'formula_not_supported'
-  | 'time_shift_not_supported'
-  | 'runtime_field_not_supported'
-  | 'reduced_time_range_not_supported'
-  | 'function_not_supported'
-  | 'drop_partials_not_supported'
-  | 'include_empty_rows_not_supported'
-  | 'unknown';
 
 /**
  * Result type for generateEsqlQuery.
@@ -76,8 +58,17 @@ interface EsqlQueryFailure {
 
 export type EsqlQueryResult = EsqlQuerySuccess | EsqlQueryFailure;
 
-export const isEsqlQuerySuccess = (result: EsqlQueryResult): result is EsqlQuerySuccess =>
-  result.success;
+/**
+ * Type guard to check if the result is a successful ES|QL query.
+ */
+export const isEsqlQuerySuccess = (result: unknown): result is EsqlQuerySuccess =>
+  result !== null && typeof result === 'object' && 'success' in result && result.success === true;
+
+/**
+ * Type guard to check if the result is a failed ES|QL query.
+ */
+export const isEsqlQueryFailure = (result: unknown): result is EsqlQueryFailure =>
+  result !== null && typeof result === 'object' && 'success' in result && result.success === false;
 
 /**
  * Helper function to create a consistent failure result for ES|QL query generation.
@@ -85,7 +76,7 @@ export const isEsqlQuerySuccess = (result: EsqlQueryResult): result is EsqlQuery
 function getEsqlQueryFailedResult(
   reason: EsqlConversionFailureReason,
   operationType?: string
-): EsqlQueryResult {
+): EsqlQueryFailure {
   if (operationType) {
     return { success: false, reason, operationType };
   }
@@ -161,11 +152,21 @@ export function generateEsqlQuery(
     ([_, col]) => !col.isBucketed
   );
 
-  const metrics: EsqlConversion[] = metricEsAggsEntries.map(([colId, col], index) => {
+  // Collect all params from metrics and buckets
+  const allParamObjects: Array<Record<string, string | number>> = [];
+
+  // Process metrics
+  const metricsResult: EsqlConversion[] = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL)
-      return { error: 'function_not_supported' as const, operationType: col.operationType };
+    // Check for specific unsupported operations before general toESQL check
+    if (col.operationType === 'formula') {
+      return getEsqlQueryFailedResult('formula_not_supported');
+    }
+
+    if (!def.toESQL) {
+      return getEsqlQueryFailedResult('function_not_supported', col.operationType);
+    }
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -176,7 +177,7 @@ export function generateEsqlQuery(
       indexPattern.timeFieldName;
 
     if (wrapInTimeFilter) {
-      return { error: 'reduced_time_range_not_supported' as const };
+      return getEsqlQueryFailedResult('reduced_time_range_not_supported');
     }
 
     const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
@@ -219,7 +220,7 @@ export function generateEsqlQuery(
       },
     ];
 
-    let esql = def.toESQL(
+    const rawResult = def.toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -236,41 +237,53 @@ export function generateEsqlQuery(
       dateRange
     );
 
-    if (!esql)
-      return { error: 'function_not_supported' as const, operationType: col.operationType };
+    if (!rawResult) {
+      return getEsqlQueryFailedResult('function_not_supported', col.operationType);
+    }
 
-    esql = `${esAggsId} = ${esql}`;
+    if (rawResult.params) {
+      allParamObjects.push(rawResult.params);
+    }
+
+    let metricESQL = `${esAggsId} = ${rawResult.template}`;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
-        esql += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
+        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
       } else if (col.filter?.language === 'lucene') {
-        esql += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
+        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
       } else {
-        return { error: 'function_not_supported' as const, operationType: col.operationType };
+        return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
     }
 
-    return { esql };
+    return { esql: metricESQL } as EsqlConversionResult;
   });
 
   // Check for metric conversion errors with a type guard
-  if (!isValidEsqlConversionItems(metrics)) {
-    const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
-    if (metricError && typeof metricError === 'object' && 'error' in metricError) {
+  if (!isValidEsqlConversionItems(metricsResult)) {
+    const metricError = metricsResult.find(isEsqlQueryFailure);
+    if (isEsqlQueryFailure(metricError)) {
       return getEsqlQueryFailedResult(
-        metricError.error,
+        metricError.reason,
         'operationType' in metricError ? metricError.operationType : undefined
       );
     }
     return getEsqlQueryFailedResult('function_not_supported');
   }
 
-  const buckets: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
+  // Process buckets
+  const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL)
-      return { error: 'function_not_supported' as const, operationType: col.operationType };
+    // Check for specific unsupported operations before general toESQL check
+    if (col.operationType === 'terms') {
+      return getEsqlQueryFailedResult('terms_not_supported');
+    }
+
+    if (!def.toESQL) {
+      return getEsqlQueryFailedResult('function_not_supported', col.operationType);
+    }
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -349,21 +362,21 @@ export function generateEsqlQuery(
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
-      // Check for includeEmptyRows
-      if (column.params?.includeEmptyRows) {
-        return { error: 'include_empty_rows_not_supported' as const };
-      }
       if (
         column.params?.dropPartials &&
         // set to false when detached from time picker
         (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
           !column.params?.ignoreTimeRange)
       ) {
-        return { error: 'drop_partials_not_supported' as const };
+        return getEsqlQueryFailedResult('drop_partials_not_supported');
+      }
+
+      if (column.params?.includeEmptyRows) {
+        return getEsqlQueryFailedResult('include_empty_rows_not_supported');
       }
     }
 
-    const esql = def.toESQL(
+    const rawResult = def.toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -380,19 +393,23 @@ export function generateEsqlQuery(
       dateRange
     );
 
-    if (!esql) {
-      return { error: 'function_not_supported' as const, operationType: col.operationType };
+    if (!rawResult) {
+      return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    return { esql: `${esAggsId} = ${esql}` };
+    if (rawResult.params) {
+      allParamObjects.push(rawResult.params);
+    }
+
+    return { esql: `${esAggsId} = ${rawResult.template}` };
   });
 
   // Check for bucket conversion errors with type guard
-  if (!isValidEsqlConversionItems(buckets)) {
-    const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
-    if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
+  if (!isValidEsqlConversionItems(bucketsResult)) {
+    const bucketError = bucketsResult.find(isEsqlQueryFailure);
+    if (isEsqlQueryFailure(bucketError)) {
       return getEsqlQueryFailedResult(
-        bucketError.error,
+        bucketError.reason,
         'operationType' in bucketError ? bucketError.operationType : undefined
       );
     }
@@ -400,13 +417,15 @@ export function generateEsqlQuery(
   }
 
   // Type assertion after error checks - we know these are all strings now
-  const validMetrics = metrics.map((m) => m.esql);
-  const validBuckets = buckets.map((b) => b.esql);
+  const validMetrics = metricsResult.map((m) => m.esql);
+  const validBuckets = bucketsResult.map((b) => b.esql);
 
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
+      const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
+      const allParams = Object.assign({}, ...allParamObjects);
       esqlCompose = esqlCompose.pipe(
-        stats(`${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`)
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
       );
     }
 
@@ -426,7 +445,11 @@ export function generateEsqlQuery(
     esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
     if (validMetrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(validMetrics.join(', ')));
+      const statsBody = validMetrics.join(', ');
+      const allParams = Object.assign({}, ...allParamObjects);
+      esqlCompose = esqlCompose.pipe(
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
+      );
     }
   }
 

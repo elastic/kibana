@@ -81,12 +81,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(true);
-    expect(result.success && result.esql).toEqual(
-      `FROM myIndexPattern
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -125,8 +127,10 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(false);
-    expect(!result.success && result.reason).toEqual('include_empty_rows_not_supported');
+    expect(result).toEqual({
+      success: false,
+      reason: 'include_empty_rows_not_supported',
+    });
   });
 
   it('should return failure with formula_not_supported reason if lens formula is used', () => {
@@ -153,8 +157,10 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(false);
-    expect(!result.success && result.reason).toEqual('formula_not_supported');
+    expect(result).toEqual({
+      success: false,
+      reason: 'formula_not_supported',
+    });
   });
 
   test('it should add a where condition to esql if timeField is set', () => {
@@ -192,12 +198,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(true);
-    expect(result.success && result.esql).toEqual(
-      `FROM myIndexPattern
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -243,11 +251,13 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(true);
-    expect(result.success && result.esql).toEqual(
-      `FROM myIndexPattern
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -291,8 +301,10 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(false);
-    expect(!result.success && result.reason).toEqual('non_utc_timezone');
+    expect(result).toEqual({
+      success: false,
+      reason: 'non_utc_timezone',
+    });
   });
 
   it('should work with iana timezones that fall under UTC+0', () => {
@@ -336,12 +348,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(true);
-    expect(result.success && result.esql).toEqual(
-      `FROM myIndexPattern
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -509,12 +523,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(result.success).toBe(true);
-    expect(result.success && result.esql).toEqual(
-      `FROM myIndexPattern
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"") BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`
+  | SORT order_date ASC`,
+      })
     );
   });
 });

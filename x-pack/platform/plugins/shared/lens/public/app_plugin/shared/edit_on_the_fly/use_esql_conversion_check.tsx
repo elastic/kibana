@@ -20,66 +20,17 @@ import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
-  type EsqlConversionFailureReason,
+  isEsqlQuerySuccess,
 } from '../../../datasources/form_based/generate_esql_query';
+import {
+  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
+} from '../../../datasources/form_based/to_esql_failure_reasons';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector } from '../../../state_management';
-
-const cannotConvertToEsqlTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
-  defaultMessage: 'This visualization cannot be converted to ES|QL',
-});
-
-/**
- * Maps failure reasons to user-friendly i18n messages.
- */
-const failureReasonMessages: Record<EsqlConversionFailureReason, string> = {
-  non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezone', {
-    defaultMessage: 'Cannot convert to ES|QL: UTC timezone is required.',
-  }),
-  formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormula', {
-    defaultMessage: 'Cannot convert to ES|QL: Formula operations are not yet supported.',
-  }),
-  time_shift_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTimeShift', {
-    defaultMessage: 'Cannot convert to ES|QL: Time shift is not yet supported.',
-  }),
-  runtime_field_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlRuntimeField', {
-    defaultMessage: 'Cannot convert to ES|QL: Runtime fields are not yet supported.',
-  }),
-  reduced_time_range_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlReducedTimeRange',
-    {
-      defaultMessage: 'Cannot convert to ES|QL: Reduced time range is not yet supported.',
-    }
-  ),
-  function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperation', {
-    defaultMessage: 'Cannot convert to ES|QL: One or more functions are not yet supported.',
-  }),
-  drop_partials_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlDropPartials', {
-    defaultMessage: 'Cannot convert to ES|QL: "Drop partial buckets" option is not yet supported.',
-  }),
-  include_empty_rows_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRows',
-    {
-      defaultMessage: 'Cannot convert to ES|QL: "Include empty rows" option is not yet supported.',
-    }
-  ),
-  unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknown', {
-    defaultMessage: 'Cannot convert to ES|QL: This visualization has unsupported settings.',
-  }),
-};
-
-/**
- * Gets the appropriate tooltip message for a failure reason.
- */
-const getFailureTooltip = (reason: EsqlConversionFailureReason | undefined): string => {
-  if (!reason) {
-    return cannotConvertToEsqlTooltip;
-  }
-  return failureReasonMessages[reason] ?? failureReasonMessages.unknown;
-};
 
 interface EsqlConversionSettings {
   isConvertToEsqlButtonDisabled: boolean;
@@ -88,7 +39,7 @@ interface EsqlConversionSettings {
 }
 
 const getEsqlConversionDisabledSettings = (
-  tooltip: string = cannotConvertToEsqlTooltip
+  tooltip: string = esqlConversionFailureReasonMessages.unknown
 ): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
@@ -137,18 +88,14 @@ export const useEsqlConversionCheck = (
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
-          defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
-        })
+        esqlConversionFailureReasonMessages.trend_line_not_supported
       );
     }
 
     // Guard: layer count
     if (layerIds.length > 1) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
-          defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
-        })
+        esqlConversionFailureReasonMessages.multi_layer_not_supported
       );
     }
 
@@ -180,9 +127,9 @@ export const useEsqlConversionCheck = (
         operationDefinitionMap[col.operationType]?.input === 'managedReference'
     );
 
-    let esqlResult;
+    let esqlLayer;
     try {
-      esqlResult = generateEsqlQuery(
+      esqlLayer = generateEsqlQuery(
         esAggEntries,
         singleLayer,
         framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
@@ -193,11 +140,11 @@ export const useEsqlConversionCheck = (
     } catch (e) {
       // Layer remains non-convertible
       // This prevents conversion errors from breaking the visualization
-      return getEsqlConversionDisabledSettings(failureReasonMessages.unknown);
+      return getEsqlConversionDisabledSettings(esqlConversionFailureReasonMessages.unknown);
     }
 
-    if (!esqlResult || !esqlResult.success) {
-      const reason = esqlResult?.reason;
+    if (!isEsqlQuerySuccess(esqlLayer)) {
+      const reason = esqlLayer?.reason;
       const tooltipMessage = getFailureTooltip(reason);
       return getEsqlConversionDisabledSettings(tooltipMessage);
     }
@@ -213,11 +160,11 @@ export const useEsqlConversionCheck = (
           icon: 'layers',
           name: '',
           type: layerTypes.DATA,
-          query: esqlResult.esql,
+          query: esqlLayer.esql,
           isConvertibleToEsql: true,
           conversionData: {
-            esAggsIdMap: esqlResult.esAggsIdMap,
-            partialRows: esqlResult.partialRows,
+            esAggsIdMap: esqlLayer.esAggsIdMap,
+            partialRows: esqlLayer.partialRows,
           },
         },
       ],

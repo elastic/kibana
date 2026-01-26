@@ -11,7 +11,13 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { getCreateRuleRoute, getEditRuleRoute } from '@kbn/rule-data-utils';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  getCreateRuleRoute,
+  getEditRuleRoute,
+  getRulesAppDetailsRoute,
+  rulesAppDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,10 +36,11 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp, getUrlForApp, isAppRegistered },
+    application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const currentAppId = useObservable(currentAppId$, undefined);
 
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
@@ -82,33 +89,34 @@ const RulesPage = () => {
   const navigateToEditRuleForm = useCallback(
     (ruleId: string) => {
       const { pathname, search, hash } = locationRef.current;
-      const returnPath = `${pathname}${search}${hash}`;
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
+      const returnPath = `${pathname}${search}${hash}` || '/';
+
+      history.push({
+        pathname: getEditRuleRoute(ruleId),
+        search,
+        hash,
         state: {
-          returnApp,
           returnPath,
         },
       });
     },
-    [navigateToApp]
+    [history]
   );
 
   const navigateToCreateRuleForm = useCallback(
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+
+      navigateToApp(currentAppId || 'management', {
+        path: getCreateRuleRoute(ruleTypeId),
         state: {
-          returnApp,
+          returnApp: currentAppId || 'management',
           returnPath,
         },
       });
     },
-    [navigateToApp]
+    [navigateToApp, currentAppId]
   );
 
   const renderRulesList = useCallback(() => {
@@ -121,6 +129,7 @@ const RulesPage = () => {
           setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
           navigateToCreateRuleForm={navigateToCreateRuleForm}
+          ruleDetailsRoute={rulesAppDetailsRoute}
         />
       </KibanaPageTemplate.Section>
     );
@@ -134,6 +143,7 @@ const RulesPage = () => {
           'xl'
         )({
           setHeaderActions,
+          getRuleDetailsRoute: getRulesAppDetailsRoute,
         })}
       </KibanaPageTemplate.Section>
     );

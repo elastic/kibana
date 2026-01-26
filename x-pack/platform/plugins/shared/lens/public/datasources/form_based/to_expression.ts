@@ -186,8 +186,9 @@ function getExpressionForLayer(
       dateRange,
       nowInstant
     );
+    const isFormBasedEsqlMode = canUseESQL && isEsqlQuerySuccess(esqlLayer);
 
-    if (!(canUseESQL && isEsqlQuerySuccess(esqlLayer))) {
+    if (!isFormBasedEsqlMode) {
       esAggEntries.forEach(([colId, col], index) => {
         const def = operationDefinitionMap[col.operationType];
         if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -488,28 +489,27 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
-    const dataAST =
-      canUseESQL && isEsqlQuerySuccess(esqlLayer)
-        ? buildExpressionFunction('esql', {
-            query: esqlLayer.esql,
-            timeField: allDateHistogramFields[0],
-            ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
-          }).toAst()
-        : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-            index: buildExpression([
-              buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
-                'indexPatternLoad',
-                { id: indexPattern.id, includeFields: false }
-              ),
-            ]),
-            aggs,
-            metricsAtAllLevels: false,
-            partialRows: false,
-            timeFields: allDateHistogramFields,
-            probability: getSamplingValue(layer),
-            samplerSeed: seedrandom(searchSessionId).int32(),
-            ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
-          }).toAst();
+    const dataAST = isFormBasedEsqlMode
+      ? buildExpressionFunction('esql', {
+          query: esqlLayer.esql,
+          timeField: allDateHistogramFields[0],
+          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
+        }).toAst()
+      : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+          index: buildExpression([
+            buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+              'indexPatternLoad',
+              { id: indexPattern.id, includeFields: false }
+            ),
+          ]),
+          aggs,
+          metricsAtAllLevels: false,
+          partialRows: false,
+          timeFields: allDateHistogramFields,
+          probability: getSamplingValue(layer),
+          samplerSeed: seedrandom(searchSessionId).int32(),
+          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
+        }).toAst();
 
     return {
       type: 'expression',
@@ -521,7 +521,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(esAggsIdMap)],
-            isTextBased: [canUseESQL && isEsqlQuerySuccess(esqlLayer)],
+            isTextBased: [isFormBasedEsqlMode],
           },
         },
         ...expressions,
