@@ -67,15 +67,16 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
-    {
-      label: UnmappedFieldsStrategy.LOAD,
-      text: UnmappedFieldsStrategy.LOAD,
-      kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
-        defaultMessage: 'Attempts to load the fields from the source',
-      }),
-      category: SuggestionCategory.CONSTANT_VALUE,
-    },
+    // Hiding LOAD option as it's partially supported at the moment.
+    // {
+    //   label: UnmappedFieldsStrategy.LOAD,
+    //   text: UnmappedFieldsStrategy.LOAD,
+    //   kind: 'Value',
+    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+    //     defaultMessage: 'Attempts to load the fields from the source',
+    //   }),
+    //  category: SuggestionCategory.CONSTANT_VALUE,
+    // },
   ];
 };
 
