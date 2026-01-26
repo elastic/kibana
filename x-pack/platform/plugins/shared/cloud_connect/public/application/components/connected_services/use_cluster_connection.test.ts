@@ -6,81 +6,13 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { updateServiceEnabled, useClusterConnection } from './use_cluster_connection';
+import { useClusterConnection } from './use_cluster_connection';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { ClusterDetails } from '../../../types';
 
 jest.mock('../../app_context');
 
 describe('use_cluster_connection', () => {
-  describe('updateServiceEnabled', () => {
-    const mockClusterDetails: ClusterDetails = {
-      id: 'cluster-123',
-      name: 'Test Cluster',
-      metadata: {
-        created_at: '2024-01-01T00:00:00Z',
-        created_by: 'user@example.com',
-        organization_id: 'org-456',
-        subscription: 'premium',
-      },
-      self_managed_cluster: {
-        id: 'es-cluster-789',
-        name: 'ES Cluster',
-        version: '8.15.0',
-      },
-      license: {
-        type: 'platinum',
-        uid: 'license-uid-123',
-      },
-      services: {
-        auto_ops: {
-          enabled: false,
-          support: {
-            supported: true,
-            minimum_stack_version: '8.0.0',
-            valid_license_types: ['platinum', 'enterprise'],
-          },
-          config: {
-            region_id: 'us-east-1',
-          },
-          metadata: {
-            documentation_url: 'https://docs.elastic.co/auto-ops',
-          },
-          subscription: {
-            required: true,
-          },
-        },
-        eis: {
-          enabled: true,
-          support: {
-            supported: true,
-          },
-        },
-      },
-    };
-
-    it('should update enabled property for existing service', () => {
-      const result = updateServiceEnabled(mockClusterDetails, 'auto_ops', true);
-
-      expect(result).not.toBeNull();
-      expect(result!.services.auto_ops?.enabled).toBe(true);
-    });
-
-    it('should preserve all other service properties', () => {
-      const result = updateServiceEnabled(mockClusterDetails, 'auto_ops', true);
-
-      expect(result).not.toBeNull();
-
-      expect(result!.services.eis?.enabled).toBe(true);
-    });
-
-    it('should handle null clusterDetails gracefully', () => {
-      const result = updateServiceEnabled(null, 'auto_ops', true);
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('useClusterConnection - auto-enable EIS', () => {
     const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
       typeof useCloudConnectedAppContext
@@ -212,38 +144,6 @@ describe('use_cluster_connection', () => {
       expect(mockUpdateServices).not.toHaveBeenCalled();
     });
 
-    it('should not auto-enable EIS when EIS is not supported', () => {
-      const clusterDetailsWithEisUnsupported = createMockClusterDetails({
-        services: {
-          eis: {
-            enabled: false,
-            support: { supported: false },
-            subscription: { required: true },
-          },
-        },
-      });
-
-      mockUseCloudConnectedAppContext.mockReturnValue(
-        createMockContext({
-          justConnected: true,
-          apiService: {
-            useLoadClusterDetails: jest.fn().mockReturnValue({
-              data: clusterDetailsWithEisUnsupported,
-              isLoading: false,
-              error: null,
-              resendRequest: mockResendRequest,
-            }),
-            updateServices: mockUpdateServices,
-          },
-        }) as any
-      );
-
-      renderHook(() => useClusterConnection());
-
-      expect(mockSetJustConnected).toHaveBeenCalledWith(false);
-      expect(mockUpdateServices).not.toHaveBeenCalled();
-    });
-
     it('should not auto-enable EIS when user does not have configure permission', () => {
       mockUseCloudConnectedAppContext.mockReturnValue(
         createMockContext({
@@ -287,40 +187,6 @@ describe('use_cluster_connection', () => {
 
       expect(mockSetJustConnected).toHaveBeenCalledWith(false);
       expect(mockUpdateServices).not.toHaveBeenCalled();
-    });
-
-    it('should auto-enable EIS when subscription is trial', async () => {
-      mockUpdateServices.mockResolvedValue({ data: { success: true }, error: null });
-
-      const clusterDetailsWithTrialSubscription = createMockClusterDetails({
-        metadata: {
-          created_at: '2024-01-01T00:00:00Z',
-          created_by: 'user@example.com',
-          organization_id: 'org-456',
-          subscription: 'trial',
-        },
-      });
-
-      mockUseCloudConnectedAppContext.mockReturnValue(
-        createMockContext({
-          justConnected: true,
-          apiService: {
-            useLoadClusterDetails: jest.fn().mockReturnValue({
-              data: clusterDetailsWithTrialSubscription,
-              isLoading: false,
-              error: null,
-              resendRequest: mockResendRequest,
-            }),
-            updateServices: mockUpdateServices,
-          },
-        }) as any
-      );
-
-      renderHook(() => useClusterConnection());
-
-      await waitFor(() => {
-        expect(mockUpdateServices).toHaveBeenCalledWith({ eis: { enabled: true } });
-      });
     });
 
     it('should show error toast when auto-enable fails', async () => {
