@@ -68,6 +68,10 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'lookup_join',
   },
+  mmr: {
+    type: 'command',
+    name: 'mmr',
+  },
   mv_expand: {
     type: 'command',
     name: 'mv_expand',
