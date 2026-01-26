@@ -59,6 +59,8 @@ export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
   type: typeof EXPRESSION_HEATMAP_LEGEND_NAME;
 };
 
+export type HeatmapSortPredicate = 'asc' | 'desc' | 'none';
+
 export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;
@@ -69,13 +71,13 @@ export interface HeatmapGridConfig {
   isYAxisLabelVisible: boolean;
   isYAxisTitleVisible: boolean;
   yTitle?: string;
-  ySortPredicate?: 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | 'dataIndex';
+  ySortPredicate?: HeatmapSortPredicate;
   // X-axis
   isXAxisLabelVisible: boolean;
   xAxisLabelRotation?: number;
   isXAxisTitleVisible: boolean;
   xTitle?: string;
-  xSortPredicate?: 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | 'dataIndex';
+  xSortPredicate?: HeatmapSortPredicate;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {

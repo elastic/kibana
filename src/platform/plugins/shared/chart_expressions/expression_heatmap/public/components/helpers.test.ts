@@ -151,7 +151,7 @@ describe('getDataMinMax', () => {
 });
 
 describe('getSortPredicate', () => {
-  it('should return dataIndex if otherbucker it enabled', () => {
+  it('should return dataIndex if none preticate was configured', () => {
     const column = {
       id: '0c4cfb78-3c2f-4eaf-82b3-4b2c1c6abe5a',
       name: 'Top values of Carrier',
@@ -173,7 +173,7 @@ describe('getSortPredicate', () => {
         },
       },
     } as DatatableColumn;
-    expect(getSortPredicate(column)).toEqual('dataIndex');
+    expect(getSortPredicate(column, 'none')).toEqual('dataIndex');
   });
 
   it('should return numDesc for descending metric sorting', () => {
@@ -181,11 +181,11 @@ describe('getSortPredicate', () => {
       id: 'col-0-2',
       name: 'Dest: Descending',
       meta: {
-        type: 'string',
+        type: 'number',
         source: 'esaggs',
         sourceParams: {
           params: {
-            field: 'Dest',
+            field: 'bytes',
             orderBy: '1',
             order: 'desc',
             size: 5,
@@ -198,7 +198,7 @@ describe('getSortPredicate', () => {
         },
       },
     } as DatatableColumn;
-    expect(getSortPredicate(column)).toEqual('numDesc');
+    expect(getSortPredicate(column, 'desc')).toEqual('numDesc');
   });
 
   it('should return alphaAsc for ascending alphabetical sorting', () => {
@@ -223,6 +223,6 @@ describe('getSortPredicate', () => {
         },
       },
     } as DatatableColumn;
-    expect(getSortPredicate(column)).toEqual('alphaAsc');
+    expect(getSortPredicate(column, 'asc')).toEqual('alphaAsc');
   });
 });
