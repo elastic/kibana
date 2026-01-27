@@ -356,6 +356,29 @@ describe('SloOverviewFlyout', () => {
     });
   });
 
+  it('displays tooltip with SLO name on hover', async () => {
+    const sloName = 'My Very Long SLO Name That Might Get Truncated';
+    const mockSlos = [createMockSlo({ id: 'slo-1', name: sloName })];
+
+    mockHttpFetch.mockResolvedValue({
+      results: mockSlos,
+      total: 1,
+    });
+
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
+    });
+
+    const sloLink = screen.getByTestId('apmSloNameLink');
+    fireEvent.mouseOver(sloLink);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(sloName);
+    });
+  });
+
   it('handles API error gracefully', async () => {
     mockHttpFetch.mockRejectedValue(new Error('API Error'));
 

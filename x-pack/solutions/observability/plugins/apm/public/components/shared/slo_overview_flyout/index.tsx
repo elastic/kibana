@@ -466,16 +466,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         }),
         truncateText: true,
         render: (name: string, sloItem: SLOWithSummaryResponse) => (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="expand" size="s" color="subdued" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="apmSloNameLink" onClick={() => handleSloClick(sloItem.id)}>
-                {name}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
+            <EuiLink
+              data-test-subj="apmSloNameLink"
+              onClick={() => handleSloClick(sloItem.id)}
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: euiTheme.size.s,
+                fontWeight: euiTheme.font.weight.regular,
+              }}
+            >
+              <EuiIcon type="expand" color="subdued" />
+              {name}
+            </EuiLink>
+          </EuiToolTip>
         ),
       },
       {
@@ -500,13 +505,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (target: number) => numeral(target).format(percentFormat),
       },
     ],
-    [getActiveAlertsForSlo, handleActiveAlertsClick, handleSloClick, percentFormat]
+    [euiTheme, getActiveAlertsForSlo, handleActiveAlertsClick, handleSloClick, percentFormat]
   );
 
   const activeFiltersCount = selectedStatuses.length;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size="m" ownFocus session="start">
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      // we need this hardcoded size as S is too small and M is too large
+      size="550px"
+      ownFocus
+      session="start"
+      resizable
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
@@ -711,7 +724,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         <sloPlugin.getSLODetailsFlyout
           sloId={selectedSloId}
           onClose={handleCloseSloDetails}
-          size="s"
+          size="m"
           hideFooter
           session="inherit"
           initialTabId={selectedSloTabId}

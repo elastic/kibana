@@ -175,7 +175,13 @@ export default function SLODetailsFlyout({
   }, [isError, isNotFound, isLoading, slo, onClose]);
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size={size} session={session}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      size={size}
+      session={session}
+      resizable
+    >
       <EuiFlyoutHeader hasBorder={!slo}>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>{title}</h2>
