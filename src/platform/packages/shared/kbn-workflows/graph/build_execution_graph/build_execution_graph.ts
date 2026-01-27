@@ -25,6 +25,7 @@ import type {
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowOnFailure,
+  WorkflowOutputStep,
   WorkflowRetry,
   WorkflowSettings,
   WorkflowYaml,
@@ -58,6 +59,7 @@ import type {
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraphType,
+  WorkflowOutputGraphNode,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
@@ -164,6 +166,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as WorkflowExecuteAsyncStep).type === 'workflow.executeAsync') {
     return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
+  }
+
+  if (currentStep.type === 'workflow.output') {
+    return visitWorkflowOutputStep(currentStep, context);
   }
 
   return visitAtomicStep(currentStep, context);
@@ -302,6 +308,23 @@ export function visitWorkflowExecuteAsyncStep(
     },
   };
   graph.setNode(workflowExecuteAsyncNode.id, workflowExecuteAsyncNode);
+  return graph;
+}
+
+export function visitWorkflowOutputStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowOutputNode: WorkflowOutputGraphNode = {
+    id: stepId,
+    type: 'workflow.output',
+    stepId,
+    stepType: 'workflow.output',
+    configuration: currentStep as WorkflowOutputStep,
+  };
+  graph.setNode(workflowOutputNode.id, workflowOutputNode);
   return graph;
 }
 

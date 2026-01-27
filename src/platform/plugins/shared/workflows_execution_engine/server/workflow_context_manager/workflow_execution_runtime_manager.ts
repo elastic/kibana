@@ -212,6 +212,15 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    const currentContext = (this.workflowExecution.context as Record<string, unknown>) || {};
+    currentContext.output = outputs;
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: currentContext,
+    });
+  }
+
   public markWorkflowTimeouted(): void {
     const finishedAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({

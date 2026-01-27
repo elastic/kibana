@@ -22,6 +22,7 @@ import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
+import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
@@ -102,7 +103,8 @@ async function handleMatchTypeSuggestions(
         return getConnectorTypeSuggestions(
           lineParseResult.fullKey,
           adjustedRange,
-          autocompleteContext.dynamicConnectorTypes
+          autocompleteContext.dynamicConnectorTypes,
+          autocompleteContext.workflowDefinition?.outputs
         );
       }
       return null;
@@ -136,6 +138,12 @@ export async function getSuggestions(
   const matchTypeSuggestions = await handleMatchTypeSuggestions(autocompleteContext);
   if (matchTypeSuggestions !== null) {
     return matchTypeSuggestions;
+  }
+
+  // Check for workflow.output outputs suggestions (not based on line parsing, but on context)
+  const workflowOutputsSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);
+  if (workflowOutputsSuggestions.length > 0) {
+    return workflowOutputsSuggestions;
   }
 
   // JSON Schema autocompletion for inputs.properties
