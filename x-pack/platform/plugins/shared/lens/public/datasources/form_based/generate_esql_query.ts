@@ -228,7 +228,7 @@ export function generateEsqlQuery(
           hasDateHistogram
         ),
       },
-      wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+      wrapInFilter || wrapInTimeFilter ? `${colId}-metric` : colId,
       indexPattern,
       layer,
       uiSettings,
@@ -384,7 +384,7 @@ export function generateEsqlQuery(
           hasDateHistogram
         ),
       },
-      wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+      wrapInFilter || wrapInTimeFilter ? `${colId}-metric` : colId,
       indexPattern,
       layer,
       uiSettings,

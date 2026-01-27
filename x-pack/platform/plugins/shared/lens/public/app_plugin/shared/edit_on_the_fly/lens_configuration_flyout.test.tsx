@@ -326,8 +326,8 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
-  it('should display the ES|QL results table if query is ES|QL', async () => {
-    await renderConfigFlyout({}, { esql: 'from index1 | limit 10' });
+  it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
+    await renderConfigFlyout({ hideTextBasedEditor: false }, { esql: 'from index1 | limit 10' });
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
 
