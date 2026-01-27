@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/reporting-test-routes",
+  "owner": "@elastic/response-ops",
+  "visibility": "private",
+  "plugin": {
+    "id": "reportingTestRoutes",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "reporting",
+    ],
+    "optionalPlugins": [
+    ]
+  }
+}

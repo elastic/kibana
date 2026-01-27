@@ -6,14 +6,33 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiButton,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   onClose: () => void;
+  isSaving: boolean;
+  isSaved: boolean;
+  showButtons: boolean;
+  disabled: boolean;
+  onClickSave: () => void;
 }
 
-const FlyoutFooterComponent: React.FC<Props> = ({ onClose }) => {
+const FlyoutFooterComponent: React.FC<Props> = ({
+  onClose,
+  isSaving,
+  isSaved,
+  showButtons,
+  disabled,
+  onClickSave,
+}) => {
   return (
     <EuiFlyoutFooter data-test-subj="edit-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -24,7 +43,31 @@ const FlyoutFooterComponent: React.FC<Props> = ({ onClose }) => {
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} />
+        <EuiFlexItem grow={false}>
+          {showButtons && (
+            <EuiButton
+              fill
+              iconType={isSaved ? 'check' : undefined}
+              color="primary"
+              data-test-subj="edit-connector-flyout-save-btn"
+              isLoading={isSaving}
+              onClick={onClickSave}
+              disabled={disabled}
+            >
+              {isSaved ? (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
+                  defaultMessage="Changes Saved"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              )}
+            </EuiButton>
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );

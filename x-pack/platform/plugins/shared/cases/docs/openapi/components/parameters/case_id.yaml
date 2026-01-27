@@ -1,6 +1,6 @@
 in: path
 name: caseId
-description: The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
+description: The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.
 required: true
 schema:
   type: string

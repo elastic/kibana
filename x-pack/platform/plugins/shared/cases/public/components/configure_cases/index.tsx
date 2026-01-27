@@ -115,7 +115,7 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
-  const { triggersActionsUi } = useKibana().services;
+  const { triggersActionsUi, docLinks } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
@@ -635,6 +635,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 <>
                   <div css={sectionWrapperCss}>
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.WARNING_NO_CONNECTOR_TITLE}
                       color="warning"
                       iconType="question"
@@ -645,7 +646,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                         id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
                         values={{
                           appropriateLicense: (
-                            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            <EuiLink href={docLinks.links.subscriptions} target="_blank">
                               {i18n.LINK_APPROPRIATE_LICENSE}
                             </EuiLink>
                           ),

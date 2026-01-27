@@ -12,6 +12,7 @@ import {
   FindListItemsRequestQuery,
   FindListItemsResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { decodeCursor } from '../../services/utils';
@@ -24,7 +25,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
       path: `${LIST_ITEM_URL}/_find`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

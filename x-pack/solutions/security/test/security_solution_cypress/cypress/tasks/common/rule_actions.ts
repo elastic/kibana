@@ -6,33 +6,32 @@
  */
 
 import {
-  SLACK_ACTION_BTN,
-  SLACK_ACTION_MESSAGE_TEXTAREA,
-  EMAIL_ACTION_BTN,
-  CREATE_ACTION_CONNECTOR_BTN,
-  SAVE_ACTION_CONNECTOR_BTN,
-  EMAIL_ACTION_TO_INPUT,
-  EMAIL_ACTION_SUBJECT_INPUT,
-  CONNECTOR_NAME_INPUT,
-  EMAIL_CONNECTOR_SERVICE_SELECTOR,
-  EMAIL_CONNECTOR_FROM_INPUT,
-  EMAIL_CONNECTOR_HOST_INPUT,
-  EMAIL_CONNECTOR_PORT_INPUT,
-  EMAIL_CONNECTOR_USER_INPUT,
-  EMAIL_CONNECTOR_PASSWORD_INPUT,
-  FORM_VALIDATION_ERROR,
-  JSON_EDITOR,
-  ACTIONS_SUMMARY_BUTTON,
+  actionFormSelector,
+  ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON,
+  ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
   ACTIONS_NOTIFY_WHEN_BUTTON,
+  ACTIONS_SUMMARY_ALERT_BUTTON,
+  ACTIONS_SUMMARY_BUTTON,
   ACTIONS_THROTTLE_INPUT,
   ACTIONS_THROTTLE_UNIT_INPUT,
-  ACTIONS_SUMMARY_ALERT_BUTTON,
-  ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON,
-  ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON,
-  actionFormSelector,
-  ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
-  INDEX_CONNECTOR_COMBO_BOX_INPUT,
+  CONNECTOR_NAME_INPUT,
+  CREATE_ACTION_CONNECTOR_BTN,
   CREATE_NEW_EMAIL_CONNECTOR,
+  EMAIL_ACTION_BTN,
+  EMAIL_ACTION_SUBJECT_INPUT,
+  EMAIL_ACTION_TO_INPUT,
+  EMAIL_CONNECTOR_FROM_INPUT,
+  EMAIL_CONNECTOR_HOST_INPUT,
+  EMAIL_CONNECTOR_PASSWORD_INPUT,
+  EMAIL_CONNECTOR_PORT_INPUT,
+  EMAIL_CONNECTOR_SERVICE_SELECTOR,
+  EMAIL_CONNECTOR_USER_INPUT,
+  FORM_VALIDATION_ERROR,
+  INDEX_CONNECTOR_COMBO_BOX_INPUT,
+  JSON_EDITOR,
+  SAVE_ACTION_CONNECTOR_BTN,
+  SLACK_ACTION_BTN,
+  SLACK_ACTION_MESSAGE_TEXTAREA,
 } from '../../screens/common/rule_actions';
 import { COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
@@ -111,10 +110,6 @@ export const pickSummaryOfAlertsOption = (index = 0) => {
   cy.get(actionFormSelector(index)).find(ACTIONS_SUMMARY_BUTTON).click();
   cy.get(ACTIONS_SUMMARY_ALERT_BUTTON).click();
 };
-export const pickForEachAlertOption = (index = 0) => {
-  cy.get(actionFormSelector(index)).find(ACTIONS_SUMMARY_BUTTON).click();
-  cy.get(ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON).click();
-};
 
 export const pickCustomFrequencyOption = (
   { throttle = 1, throttleUnit = 'h' }: RuleActionCustomFrequency,
@@ -137,12 +132,6 @@ export const assertSelectedSummaryOfAlertsOption = (index = 0) => {
   cy.get(actionFormSelector(index))
     .find(ACTIONS_SUMMARY_BUTTON)
     .should('have.text', 'Summary of alerts');
-};
-
-export const assertSelectedForEachAlertOption = (index = 0) => {
-  cy.get(actionFormSelector(index))
-    .find(ACTIONS_SUMMARY_BUTTON)
-    .should('have.text', 'For each alert');
 };
 
 export const assertSelectedCustomFrequencyOption = (

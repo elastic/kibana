@@ -162,7 +162,7 @@ describe('Document view mode toggle component', () => {
       useDataViewWithTextFields: false,
       setDiscoverViewMode,
     });
-    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL, true);
     expect(component.find(EuiTab).length).toBe(2);
   });
 });

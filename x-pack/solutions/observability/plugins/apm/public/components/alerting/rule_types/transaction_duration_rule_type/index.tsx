@@ -223,6 +223,12 @@ export function TransactionDurationRuleType(props: Props) {
       })}
     >
       <EuiSelect
+        aria-label={i18n.translate(
+          'xpack.apm.transactionDurationRuleType.aggregationTypeSelect.ariaLabel',
+          {
+            defaultMessage: 'Aggregation type',
+          }
+        )}
         data-test-subj="apmTransactionDurationRuleTypeSelect"
         value={params.aggregationType}
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {

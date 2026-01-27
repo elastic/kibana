@@ -7,11 +7,11 @@
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import type { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { meanBy, sumBy } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 

@@ -13,9 +13,9 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_MODEL, SUB_ACTION } from '@kbn/connector-schemas/gemini/constants';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
-import { DEFAULT_GEMINI_MODEL, SUB_ACTION } from '../../../common/gemini/constants';
 import type { GeminiActionParams } from './types';
 
 const GeminiParamsFields: React.FunctionComponent<ActionParamsProps<GeminiActionParams>> = ({
@@ -108,7 +108,7 @@ const GeminiParamsFields: React.FunctionComponent<ActionParamsProps<GeminiAction
       >
         <EuiFieldText
           data-test-subj="gemini-model"
-          placeholder={DEFAULT_GEMINI_MODEL}
+          placeholder={DEFAULT_MODEL}
           value={model}
           onChange={(ev) => {
             editSubActionParams({ model: ev.target.value });

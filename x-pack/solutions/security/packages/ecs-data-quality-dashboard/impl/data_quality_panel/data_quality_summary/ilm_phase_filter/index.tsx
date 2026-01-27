@@ -29,7 +29,7 @@ const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
 ): React.ReactNode => (
   <EuiToolTip content={`${option.label}: ${getIlmPhaseDescription(option.label)}`}>
-    <div css={optionCss}>
+    <div css={optionCss} tabIndex={0}>
       <span css={optionLabelCss}>{`${option.label}`}</span>
       {': '}
       <span>{getIlmPhaseDescription(option.label)}</span>

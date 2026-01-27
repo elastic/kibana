@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -31,7 +31,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/coloring",
     "@kbn/ui-actions-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/core-http-browser",
     "@kbn/share-plugin",
     "@kbn/charts-plugin",
@@ -46,6 +45,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/config-schema",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": ["target/**/*"]
 }

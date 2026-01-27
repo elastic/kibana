@@ -9,5 +9,6 @@
 
 export { activateWorktree } from './src/activate_worktree';
 export { getWorkspaceFromSourceRepo } from './src/get_workspace_from_source_repo';
+export { activateWorktreeOrUseSourceRepo } from './src/activate_worktree_or_use_source_repo';
 
 export type { IWorkspace } from './src/types';

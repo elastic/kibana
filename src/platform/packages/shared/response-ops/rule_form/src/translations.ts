@@ -38,6 +38,13 @@ export const SCHEDULE_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
+export const SCHEDULE_UNIT_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.scheduleUnitLabel',
+  {
+    defaultMessage: 'Time unit',
+  }
+);
+
 export const SCHEDULE_TOOLTIP_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.scheduleTooltipText',
   {
@@ -189,6 +196,12 @@ export const FEATURE_NAME_MAP: Record<string, string> = {
     'responseOpsRuleForm.ruleForm.ruleFormConsumerSelection.stackAlerts',
     {
       defaultMessage: 'Stack Rules',
+    }
+  ),
+  [AlertConsumers.ALERTS]: i18n.translate(
+    'responseOpsRuleForm.ruleForm.ruleFormConsumerSelection.alerts',
+    {
+      defaultMessage: 'All',
     }
   ),
 };

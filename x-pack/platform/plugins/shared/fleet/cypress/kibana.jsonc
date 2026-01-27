@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/fleet-plugin-cypress",
+  "owner": "@elastic/fleet",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

@@ -282,6 +282,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           closePopover={this._closePopover}
           panelPaddingSize="none"
           anchorPosition="leftUp"
+          hasArrow={true}
         >
           <EuiContextMenu
             initialPanelId={0}

@@ -128,10 +128,9 @@ export class CanvasPlugin
 
         srcPlugin.start(coreStart, startPlugins);
 
-        const { expressions, presentationUtil } = startPlugins;
-        await presentationUtil.registerExpressionsLanguage(
-          Object.values(expressions.getFunctions())
-        );
+        const { expressions } = startPlugins;
+        const languages = await import('./components/expression_input/language');
+        languages.registerExpressionsLanguage(Object.values(expressions.getFunctions()));
 
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');

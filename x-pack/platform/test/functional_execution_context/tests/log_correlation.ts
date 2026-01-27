@@ -8,20 +8,44 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { readLogFile, assertLogContains } from '../test_utils';
 
+function isPrWithLabel(match: string): boolean {
+  const labelsEnv = process.env.GITHUB_PR_LABELS ?? '';
+  const labels = labelsEnv
+    .split(',')
+    .map((label) => label.trim())
+    .filter(Boolean);
+
+  for (const label of labels) {
+    if (label === match) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('Log Correlation', () => {
     it('Emits "trace.id" into the logs', async () => {
-      const response1 = await supertest.get('/emit_log_with_trace_id');
+      if (isPrWithLabel('"ci:collect-apm"')) {
+        log.warning(`Skipping test as APM is enabled in FTR, which breaks this test`);
+        return;
+      }
+
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response1 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
+      expect(response1.body.traceId).to.be.a('string');
       expect(response1.status).to.be(200);
-      expect(response1.body.traceId).to.be.a('string');
 
-      const response2 = await supertest.get('/emit_log_with_trace_id');
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response2 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
+      expect(response2.body.traceId).to.be.a('string');
       expect(response2.status).to.be(200);
-      expect(response1.body.traceId).to.be.a('string');
 
-      expect(response2.body.traceId).not.to.be(response1.body.traceId);
+      expect(response1.body.traceId).not.to.be(response2.body.traceId);
 
       const logs = await readLogFile();
 
@@ -54,7 +78,6 @@ export default function ({ getService }: FtrProviderContext) {
               // esClient.ping() request
               record.message?.includes('HEAD /')
           ),
-
         logs,
       });
     });

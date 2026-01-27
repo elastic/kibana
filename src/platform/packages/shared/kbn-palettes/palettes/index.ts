@@ -8,7 +8,7 @@
  */
 
 import { KbnPalettes } from '../classes/palettes';
-import { elasticPalette, getNeutralPalette } from './categorical';
+import { elasticPalette, getNeutralPalette, severityPalette } from './categorical';
 import { elasticClassicPalette, kibana4Palette, kibana7Palette } from './legacy/categorical';
 import {
   compareToPalette,
@@ -26,6 +26,7 @@ export { logLevelPalette } from './semantic';
 const darkKbnPalettes = new KbnPalettes(
   [
     elasticPalette,
+    severityPalette,
     kibana7Palette,
     kibana4Palette,
     getNeutralPalette(true),
@@ -46,6 +47,7 @@ const darkKbnPalettes = new KbnPalettes(
 const lightKbnPalettes = new KbnPalettes(
   [
     elasticPalette,
+    severityPalette,
     kibana7Palette,
     kibana4Palette,
     getNeutralPalette(false),

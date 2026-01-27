@@ -243,6 +243,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.jobsTableCaption', {
+            defaultMessage: 'Analytics jobs available for selection',
+          })}
         />
       ),
     },
@@ -263,6 +266,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.modelsTableCaption', {
+            defaultMessage: 'Trained models available for selection',
+          })}
         />
       ),
     });

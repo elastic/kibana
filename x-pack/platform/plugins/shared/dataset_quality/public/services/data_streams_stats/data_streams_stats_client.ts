@@ -14,6 +14,7 @@ import type {
   DataStreamTotalDocsResponse,
   IntegrationsResponse,
   NonAggregatableDatasets,
+  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import {
   getDataStreamDegradedDocsResponseRt,
@@ -23,6 +24,7 @@ import {
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
+  updateFailureStoreResponseRt,
 } from '../../../common/api_types';
 import { KNOWN_TYPES } from '../../../common/constants';
 import type {
@@ -39,9 +41,13 @@ import type {
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { DatasetQualityError } from '../../../common/errors';
 import type { IDataStreamsStatsClient } from './types';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient?: ITelemetryClient
+  ) {}
 
   public async getDataStreamsTypesPrivileges(
     params: GetDataStreamsTypesPrivilegesQuery
@@ -210,5 +216,41 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return integrations.map(Integration.create);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    this.telemetryClient?.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
   }
 }

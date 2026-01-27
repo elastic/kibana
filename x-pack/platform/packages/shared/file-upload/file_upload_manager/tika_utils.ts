@@ -19,7 +19,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.word', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.word', {
           defaultMessage: 'Microsoft Office Word document',
         }),
       };
@@ -31,7 +31,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.excel', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.excel', {
           defaultMessage: 'Microsoft Office Excel document',
         }),
       };
@@ -43,7 +43,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.powerPoint', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.powerPoint', {
           defaultMessage: 'Microsoft Office Power Point document',
         }),
       };
@@ -53,7 +53,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/vnd.oasis.opendocument.text':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.openDoc', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.openDoc', {
           defaultMessage: 'Open Document Format',
         }),
       };
@@ -62,7 +62,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/rtf':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.richText', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.richText', {
           defaultMessage: 'Rich Text Format',
         }),
       };
@@ -70,7 +70,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'application/pdf':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.pdf', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.pdf', {
           defaultMessage: 'PDF',
         }),
       };
@@ -79,7 +79,7 @@ export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: 
     case 'text/plain; charset=UTF-8':
       return {
         isTikaType: true,
-        label: i18n.translate('xpack.dataVisualizer.file.tikaTypes.plainText', {
+        label: i18n.translate('xpack.fileUpload.tikaTypes.plainText', {
           defaultMessage: 'Plain text',
         }),
       };

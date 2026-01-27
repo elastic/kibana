@@ -30,7 +30,7 @@ describe('ExceptionListHeader', () => {
     });
   });
 
-  it('should render the List Header with name, default description and disabled actions because of the ReadOnly mode', () => {
+  it('should render the List Header with name, default description and enabled actions because of the ReadOnly mode', () => {
     const wrapper = render(
       <ExceptionListHeader
         listId="List_Id"
@@ -47,7 +47,7 @@ describe('ExceptionListHeader', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsItems'));
-    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEnabled();
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_DESCRIPTION
     );

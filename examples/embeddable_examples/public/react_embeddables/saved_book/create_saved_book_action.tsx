@@ -45,11 +45,9 @@ export const createSavedBookAction = (core: CoreStart) => {
             onSubmit: async ({ savedObjectId }) => {
               embeddable.addNewPanel<BookEmbeddableState>({
                 panelType: BOOK_EMBEDDABLE_TYPE,
-                serializedState: {
-                  rawState: savedObjectId
-                    ? { savedObjectId }
-                    : newBookStateManager.getLatestState(),
-                },
+                serializedState: savedObjectId
+                  ? { savedObjectId }
+                  : newBookStateManager.getLatestState(),
               });
             },
           });

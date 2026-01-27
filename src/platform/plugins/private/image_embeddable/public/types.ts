@@ -7,26 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface ImageConfig {
-  src: ImageFileSrc | ImageUrlSrc;
-  altText?: string;
-  sizing: {
-    objectFit: `fill` | `contain` | `cover` | `none`;
-  };
-  backgroundColor?: string;
-}
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { HasEditCapabilities, HasSupportedTriggers } from '@kbn/presentation-publishing';
+import type { ImageEmbeddableState } from '../server';
 
-export interface ImageFileSrc {
-  type: 'file';
-  fileId: string;
-  fileImageMeta: {
-    blurHash?: string;
-    width: number;
-    height: number;
-  };
-}
+export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableState> &
+  HasEditCapabilities &
+  HasSupportedTriggers &
+  HasDynamicActions;
 
-export interface ImageUrlSrc {
-  type: 'url';
-  url: string;
-}
+export type { ImageConfig } from '../server';

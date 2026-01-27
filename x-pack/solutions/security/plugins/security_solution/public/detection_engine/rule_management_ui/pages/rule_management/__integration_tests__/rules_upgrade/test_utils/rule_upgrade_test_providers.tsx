@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';

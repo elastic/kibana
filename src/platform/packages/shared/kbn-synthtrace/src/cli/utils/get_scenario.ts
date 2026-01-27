@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Fields } from '@kbn/synthtrace-client';
+import type { Logger } from '../../lib/utils/create_logger';
+import type { Scenario } from '../scenario';
+
+export function getScenario({ file, logger }: { file: string; logger: Logger }) {
+  logger.debug(`Loading scenario from ${file}`);
+
+  return import(file).then((m) => {
+    if (m && m.default) {
+      return m.default;
+    }
+    throw new Error(`Could not import scenario at ${file}`);
+  }) as Promise<Scenario<Fields>>;
+}

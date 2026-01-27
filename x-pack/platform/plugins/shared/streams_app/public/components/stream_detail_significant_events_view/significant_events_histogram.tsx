@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -17,26 +18,38 @@ import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_fr
 interface Props {
   id: string;
   occurrences: Array<{ x: number; y: number }>;
-  change?: FormattedChangePoint;
+  changes: FormattedChangePoint[];
   xFormatter: TickFormatter;
+  height?: number;
+  compressed?: boolean;
+  maxYValue?: number;
 }
 
-export function SignificantEventsHistogramChart({ id, occurrences, change, xFormatter }: Props) {
+export function SignificantEventsHistogramChart({
+  id,
+  occurrences,
+  changes,
+  xFormatter,
+  compressed = true,
+  height,
+  maxYValue,
+}: Props) {
   const theme = useEuiTheme().euiTheme;
 
   const annotations = useMemo((): SparkPlotAnnotation[] => {
-    if (!change) {
+    if (!changes.length) {
       return [];
     }
-    return [
+
+    return Object.entries(groupBy(changes, 'time')).map(([time, groupedByTimestamp]) =>
       getAnnotationFromFormattedChangePoint({
-        query: { id },
-        change,
+        time: Number(time),
+        changes: groupedByTimestamp,
         theme,
         xFormatter,
-      }),
-    ];
-  }, [change, id, theme, xFormatter]);
+      })
+    );
+  }, [changes, theme, xFormatter]);
 
   return (
     <SparkPlot
@@ -48,7 +61,9 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
       type="bar"
       annotations={annotations}
       xFormatter={xFormatter}
-      compressed
+      compressed={compressed}
+      height={height}
+      maxYValue={maxYValue}
     />
   );
 }

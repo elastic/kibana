@@ -22,7 +22,7 @@ export function Metrics() {
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
-  const { dataView } = useAdHocApmDataView();
+  const { dataView, apmIndices } = useAdHocApmDataView();
 
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
@@ -33,6 +33,7 @@ export function Metrics() {
   if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.apm.metrics.emptyState.title', {
           defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
         })}
@@ -51,6 +52,7 @@ export function Metrics() {
         runtimeName={runtimeName}
         serverlessType={serverlessType}
         dataView={dataView}
+        apmIndices={apmIndices}
       />
     );
   }

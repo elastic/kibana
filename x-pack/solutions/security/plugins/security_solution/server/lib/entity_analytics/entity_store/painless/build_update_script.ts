@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import type { FieldDescription } from '../installation/types';
+import { isFieldMissingOrEmpty } from './is_field_missing_or_empty';
+
 const immutableFields = [`entity.id`];
 
-export const buildUpdateEntityPainlessScript = (props: Record<string, unknown>) => {
+export const buildUpdateEntityPainlessScript = (
+  fieldDescriptions: Record<string, FieldDescription & { value: unknown }>
+) => {
   let script = ``;
 
   const initializedProperties: Record<string, boolean> = {};
+  let collectMapHasBeenInitialized = false;
 
-  for (const path of Object.keys(props)) {
-    if (immutableFields.indexOf(path) >= 0) {
+  for (const [path, field] of Object.entries(fieldDescriptions)) {
+    if (immutableFields.includes(path)) {
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    const value = props[path];
     const splitPath = path.split('.');
-    const fullPathAccess = convertToPainlessObjectAccess(splitPath);
+    const painlessObjectAccess = convertToPainlessObjectAccess(splitPath);
 
     // init objects in painless
     for (let sliceSize = 1; sliceSize < splitPath.length; sliceSize++) {
@@ -32,11 +37,47 @@ export const buildUpdateEntityPainlessScript = (props: Record<string, unknown>) 
       }
     }
 
-    script += `ctx._source${fullPathAccess} = ${convertToPainlessValue(value)};`;
+    if (field.retention.operation === 'collect_values' && !collectMapHasBeenInitialized) {
+      script += 'def collectMap = [:];';
+      collectMapHasBeenInitialized = true;
+    }
+
+    script += getAssignmentStatement(painlessObjectAccess, path, field);
   }
 
   return script;
 };
+
+function getAssignmentStatement(
+  painlessObjectAccess: string,
+  path: string,
+  { value, retention }: FieldDescription & { value: unknown }
+) {
+  let script = '';
+  if (retention.operation === 'collect_values') {
+    const ctxField = `ctx._source${painlessObjectAccess}`;
+    const setOperation = Array.isArray(value) ? 'addAll' : 'add';
+    const tmpSet = `collectMap['${path}']`;
+    const maxLength = retention.maxLength;
+
+    // We are not using a big string template to avoid adding line breaks
+    // (for consistency with the rest of script);
+    script += `${tmpSet} = new HashSet();`;
+    script += `${tmpSet}.${setOperation}(${convertToPainlessValue(value)});`;
+    script += `if (!(${isFieldMissingOrEmpty(ctxField)})) {`;
+    script += `  if(${ctxField} instanceof Collection) {`;
+    script += `    ${tmpSet}.addAll(${ctxField});`;
+    script += `  } else {`;
+    script += `    ${tmpSet}.add(${ctxField});`;
+    script += `  }`;
+    script += `}`;
+    script += `${ctxField} = new ArrayList(${tmpSet}).subList(0, (int) Math.min(${maxLength}, ${tmpSet}.size()));`;
+  } else {
+    script = `ctx._source${painlessObjectAccess} = ${convertToPainlessValue(value)};`;
+  }
+
+  return script;
+}
 
 function convertToPainlessObjectAccess(path: string[]) {
   return path.map((s) => `['${s}']`).join('');

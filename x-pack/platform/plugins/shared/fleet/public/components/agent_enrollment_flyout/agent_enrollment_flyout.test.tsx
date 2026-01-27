@@ -191,4 +191,61 @@ describe('<AgentEnrollmentFlyout />', () => {
       });
     });
   });
+
+  describe('Fleet Server policy', () => {
+    const fleetServerPolicy: AgentPolicy = {
+      id: 'fleet-server-test',
+      is_managed: false,
+      namespace: 'test',
+      package_policies: [
+        {
+          id: 'fleet-server-pkg-policy',
+          name: 'fleet_server-1',
+          package: {
+            name: 'fleet_server',
+            title: 'Fleet Server',
+            version: '1.0.0',
+          },
+          inputs: [],
+        },
+      ] as any,
+      revision: 1,
+      status: 'active',
+      updated_at: 'test',
+      updated_by: 'test',
+      name: 'Fleet Server Policy',
+      is_protected: false,
+    };
+
+    beforeEach(async () => {
+      (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
+        data: { item: fleetServerPolicy },
+      });
+      results = render({
+        isIntegrationFlow: true,
+        agentPolicy: fleetServerPolicy,
+      });
+      await waitFor(() => {
+        expect(sendGetOneAgentPolicy).toBeCalled();
+      });
+    });
+
+    it('should disable standalone tab for Fleet Server policy', async () => {
+      await waitFor(() => {
+        const standaloneTab = results.getByTestId('standaloneTab');
+        expect(standaloneTab).toBeInTheDocument();
+        expect(standaloneTab).toHaveAttribute('disabled');
+      });
+    });
+
+    it('should not allow switching to standalone mode for Fleet Server policy', async () => {
+      await waitFor(() => {
+        const standaloneTab = results.getByTestId('standaloneTab');
+        expect(standaloneTab).toHaveAttribute('disabled');
+        // Verify clicking disabled tab doesn't change mode
+        fireEvent.click(standaloneTab);
+        expect(results.queryByTestId('configure-standalone-step')).toBeNull();
+      });
+    });
+  });
 });

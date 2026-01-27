@@ -29,6 +29,7 @@ export enum Aggregators {
   MIN = 'min',
   MAX = 'max',
   CARDINALITY = 'cardinality',
+  MED = 'median',
   RATE = 'rate',
   P95 = 'p95',
   P99 = 'p99',

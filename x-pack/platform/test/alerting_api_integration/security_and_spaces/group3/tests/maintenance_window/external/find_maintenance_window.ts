@@ -260,6 +260,50 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
       expect(findUpcomingResponse.body.maintenanceWindows[0].status).to.eql('upcoming');
     });
 
+    it('should find maintenance windows by disabled status', async () => {
+      const { body: disabledMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({ ...createRequestBody, enabled: false, title: 'test-disabled-maintenance-window' });
+
+      if (disabledMaintenanceWindow.id) {
+        objectRemover.add(
+          'space1',
+          disabledMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+      }
+
+      const { body: enabledMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send(createRequestBody);
+
+      if (enabledMaintenanceWindow.id) {
+        objectRemover.add(
+          'space1',
+          enabledMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+      }
+
+      const findDisabledResponse = await supertest
+        .get(`${getUrlPrefix('space1')}/api/maintenance_window/_find?status=disabled`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      expect(findDisabledResponse.statusCode).to.eql(200);
+      expect(findDisabledResponse.body.maintenanceWindows.length).to.eql(1);
+      expect(findDisabledResponse.body.maintenanceWindows[0].title).to.eql(
+        'test-disabled-maintenance-window'
+      );
+      expect(findDisabledResponse.body.maintenanceWindows[0].status).to.eql('disabled');
+    });
+
     it('should find maintenance window with pagination', async () => {
       const { body: createdMaintenanceWindow1 } = await supertest
         .post(`${getUrlPrefix('space1')}/api/maintenance_window`)

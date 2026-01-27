@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import {
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
@@ -31,7 +32,7 @@ export const overviewLinks: LinkItem = {
   }),
 
   path: OVERVIEW_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
@@ -48,7 +49,7 @@ export const detectionResponseLinks: LinkItem = {
       'Information about your Alerts and Cases within the Security Solution, including Hosts and Users with Alerts.',
   }),
   path: DETECTION_RESPONSE_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
@@ -83,7 +84,7 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
     }
   ),
   path: DATA_QUALITY_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.ecsDataQualityDashboard', {
       defaultMessage: 'Data Quality',

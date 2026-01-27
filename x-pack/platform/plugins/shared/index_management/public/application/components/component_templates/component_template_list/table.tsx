@@ -141,6 +141,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
+    tableCaption: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.tableCaption', {
+      defaultMessage: 'Component templates list',
+    }),
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
     sorting,

@@ -21,6 +21,7 @@ export const taskPollingLifecycleMock = {
       capacityConfiguration$: opts.capacityConfiguration$ ?? of(),
       attemptToRun: jest.fn(),
       stop: jest.fn(),
+      getCurrentTasksInPool: jest.fn(),
       get isStarted() {
         return opts.isStarted ?? true;
       },

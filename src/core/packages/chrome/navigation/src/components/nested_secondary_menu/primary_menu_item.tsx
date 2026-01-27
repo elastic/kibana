@@ -7,43 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 
-import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
+import { SecondaryMenu } from '../secondary_menu';
 
 export interface PrimaryMenuItemProps
-  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isHighlighted'> {
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
   children: ReactNode;
   hasSubmenu?: boolean;
-  isHighlighted?: boolean;
   isCurrent?: boolean;
-  isCollapsed: boolean;
+  isHighlighted?: boolean;
   onClick?: () => void;
-  submenuPanelId?: string;
 }
 
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   children,
   hasSubmenu = false,
-  isHighlighted = false,
+  id,
   isCurrent,
+  isHighlighted = false,
   onClick,
-  submenuPanelId,
   ...props
 }) => {
   const { goToPanel } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
 
   const handleClick = useCallback(() => {
-    onClick?.();
-    if (hasSubmenu && submenuPanelId) {
-      goToPanel(submenuPanelId);
+    if (hasSubmenu) {
+      goToPanel(id, id);
+    } else {
+      onClick?.();
     }
-  }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
+  }, [hasSubmenu, id, goToPanel, onClick]);
 
   const arrowStyle = css`
     opacity: 0.6;
@@ -61,25 +60,17 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   return (
     <div css={wrapperStyle}>
-      <SideNav.PrimaryMenuItem
-        isHorizontal
+      <SecondaryMenu.Item
+        id={id}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         onClick={handleClick}
+        hasSubmenu={hasSubmenu}
         {...props}
       >
         {children}
-      </SideNav.PrimaryMenuItem>
-      {hasSubmenu && (
-        <EuiButtonIcon
-          aria-label={`${children} has submenu`}
-          color="text"
-          css={arrowStyle}
-          display="empty"
-          iconType="arrowRight"
-          size="xs"
-        />
-      )}
+        {hasSubmenu && <EuiIcon color="textDisabled" css={arrowStyle} type="arrowRight" size="m" />}
+      </SecondaryMenu.Item>
     </div>
   );
 };

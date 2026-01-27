@@ -72,6 +72,9 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           compressed={true}
           items={samples}
           columns={columns}
+          tableCaption={i18n.translate('indexPatternFieldEditor.samples.tableCaption', {
+            defaultMessage: 'Sample input and output values',
+          })}
         />
       </EuiFormRow>
     ) : null;

@@ -1,0 +1,251 @@
+{
+  "id": "@kbn/workplaceai-api-keys-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-server",
+        "id": "def-server.registerWorkplaceAIApiKeysRoutes",
+        "type": "Function",
+        "tags": [],
+        "label": "registerWorkplaceAIApiKeysRoutes",
+        "description": [],
+        "signature": [
+          "(router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContext",
+          ">, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.registerWorkplaceAIApiKeysRoutes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "router",
+            "description": [],
+            "signature": [
+              "IRouter",
+              "<",
+              "RequestHandlerContext",
+              ">"
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.registerWorkplaceAIApiKeysRoutes.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/src/routes/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-server",
+        "id": "def-server.APIKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "APIKey",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKey.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKey.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKey.expiration",
+            "type": "number",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKey.invalidated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "invalidated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-server",
+        "id": "def-server.APIKeyCreationResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "APIKeyCreationResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workplaceai-api-keys-server",
+            "scope": "server",
+            "docId": "kibKbnWorkplaceaiApiKeysServerPluginApi",
+            "section": "def-server.APIKeyCreationResponse",
+            "text": "APIKeyCreationResponse"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/workplaceai-api-keys-server",
+            "scope": "server",
+            "docId": "kibKbnWorkplaceaiApiKeysServerPluginApi",
+            "section": "def-server.APIKey",
+            "text": "APIKey"
+          },
+          ", \"id\" | \"name\" | \"expiration\">"
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKeyCreationResponse.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workplaceai-api-keys-server",
+            "id": "def-server.APIKeyCreationResponse.encoded",
+            "type": "string",
+            "tags": [],
+            "label": "encoded",
+            "description": [],
+            "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-server",
+        "id": "def-server.APIRoutes",
+        "type": "Enum",
+        "tags": [],
+        "label": "APIRoutes",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/workplaceai-api-keys-server",
+        "id": "def-server.GetApiKeyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetApiKeyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workplaceai-api-keys-server",
+            "scope": "server",
+            "docId": "kibKbnWorkplaceaiApiKeysServerPluginApi",
+            "section": "def-server.APIKey",
+            "text": "APIKey"
+          }
+        ],
+        "path": "x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

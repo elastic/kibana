@@ -12,7 +12,7 @@ export interface SplunkRow<T extends object = object> {
   result: T;
 }
 
-export type OnFileParsed = (content: SplunkRow[]) => void;
+export type OnFileParsed = (content: string) => void;
 
 export const useParseFileInput = (onFileParsed: OnFileParsed) => {
   const [isParsing, setIsParsing] = useState<boolean>(false);
@@ -49,8 +49,7 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
         }
 
         try {
-          const parsedData = parseContent(fileContent);
-          onFileParsed(parsedData);
+          onFileParsed(fileContent);
         } catch (err) {
           setError(err.message);
         }
@@ -76,7 +75,7 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
   return { parseFile, isParsing, error };
 };
 
-const parseContent = (fileContent: string): SplunkRow[] => {
+export const parseContent = (fileContent: string): SplunkRow[] => {
   const trimmedContent = fileContent.trim();
   let arrayContent: SplunkRow[];
   if (trimmedContent.startsWith('[')) {

@@ -27,5 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_edit_params'));
     loadTestFile(require.resolve('./private_location_apis'));
     loadTestFile(require.resolve('./list_monitors'));
+    loadTestFile(require.resolve('./sync_maintenance_windows'));
   });
 }

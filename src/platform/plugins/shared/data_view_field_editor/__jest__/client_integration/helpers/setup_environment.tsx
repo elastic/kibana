@@ -22,6 +22,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
 import type { Context } from '../../../public/components/field_editor_context';
 import { FieldEditorProvider } from '../../../public/components/field_editor_context';
@@ -85,7 +86,10 @@ class MockCustomFieldFormat extends FieldFormat {
   static id = 'upper';
   static title = 'UpperCaseString';
 
-  htmlConvert = (value: string) => `<span>${value.toUpperCase()}</span>`;
+  // we need to catch possible null values and block them before running the transformation
+  // like in the real formatter.
+  htmlConvert = (value: unknown) =>
+    `<span>${value == null ? NULL_LABEL : String(value).toUpperCase()}</span>`;
 }
 
 // The format options available in the dropdown select for our tests.

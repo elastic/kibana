@@ -259,7 +259,6 @@ const waitForHasAgentPolicyChanged = (
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         }).then((response) => {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { status, policy_revision, policy_id } = response.body.item;
 
           logger.debug('Checking policy data:', { status, policy_revision, policy_id });

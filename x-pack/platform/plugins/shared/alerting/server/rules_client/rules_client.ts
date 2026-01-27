@@ -8,7 +8,7 @@
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
-import type { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
+import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
@@ -67,7 +67,10 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
-import { runSoon } from './methods/run_soon';
+import { bulkMuteUnmuteInstances } from '../application/rule/methods/bulk_mute_unmute_alerts/bulk_mute_unmute_instances';
+import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
+import type { RunSoonParams } from '../application/rule/methods/run_soon';
+import { runSoon } from '../application/rule/methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
@@ -80,26 +83,38 @@ import { deleteBackfill } from '../application/backfill/methods/delete';
 import type { FindBackfillParams } from '../application/backfill/methods/find/types';
 import type { DisableRuleParams } from '../application/rule/methods/disable';
 import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
-import { findGaps } from '../application/rule/methods/find_gaps';
-import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import type { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
-import type { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
-
-import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
-import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
-import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import type { FindGapsParams } from '../lib/rule_gaps/types';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
-import { bulkFillGapsByRuleIds } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids';
-import type {
-  BulkFillGapsByRuleIdsOptions,
-  BulkFillGapsByRuleIdsParams,
-} from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
+import type { FindRuleTemplatesParams } from '../application/rule_template/methods/find/types';
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+import { findRuleTemplates } from '../application/rule_template/methods/find/find_rule_templates';
+import { createGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
+import type { CreateGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/create/types';
+import { getGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
+import type { GetGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/types';
+import { deleteGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/delete/delete_gap_auto_fill_scheduler';
+import { updateGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/update/update_gap_auto_fill_scheduler';
+import type { UpdateGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/update/types';
+
+// Gap methods
+import { findGaps } from '../application/gaps/methods/find_gaps';
+import { fillGapById } from '../application/gaps/methods/fill_gap_by_id';
+import type { FillGapByIdParams } from '../application/gaps/methods/fill_gap_by_id/types';
+import type { GetRuleIdsWithGapsParams } from '../application/gaps/methods/get_rule_ids_with_gaps/types';
+import { getRuleIdsWithGaps } from '../application/gaps/methods/get_rule_ids_with_gaps';
+import { getGapsSummaryByRuleIds } from '../application/gaps/methods/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsParams } from '../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
+import type { FindGapsParams } from '../application/gaps/types';
+import { bulkFillGapsByRuleIds } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids';
+import type {
+  BulkFillGapsByRuleIdsOptions,
+  BulkFillGapsByRuleIdsParams,
+} from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
+import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -205,12 +220,17 @@ export class RulesClient {
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
-  public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
+  public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
+    muteInstance(this.context, options);
+  public bulkMuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
+    bulkMuteUnmuteInstances(this.context, { params: options, mute: true });
+  public bulkUnmuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
+    bulkMuteUnmuteInstances(this.context, { params: options, mute: false });
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
-  public runSoon = (options: { id: string }) => runSoon(this.context, options);
+  public runSoon = (options: RunSoonParams) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 
@@ -239,6 +259,9 @@ export class RulesClient {
 
   public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
 
+  public findTemplates = (params: FindRuleTemplatesParams) =>
+    findRuleTemplates(this.context, params);
+
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
@@ -258,4 +281,23 @@ export class RulesClient {
 
   public getRuleTypesByQuery = (params: GetRuleTypesByQueryParams) =>
     getRuleTypesByQuery(this.context, params);
+
+  public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
+    createGapAutoFillScheduler(this.context, params);
+
+  public getGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    getGapAutoFillScheduler(this.context, params);
+
+  public updateGapAutoFillScheduler = (params: UpdateGapAutoFillSchedulerParams) =>
+    updateGapAutoFillScheduler(this.context, params);
+
+  public deleteGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    deleteGapAutoFillScheduler(this.context, params);
+
+  public findGapAutoFillSchedulerLogs = (params: FindGapAutoFillSchedulerLogsParams) =>
+    findGapAutoFillSchedulerLogs(this.context, params);
+
+  public getContext() {
+    return this.context;
+  }
 }

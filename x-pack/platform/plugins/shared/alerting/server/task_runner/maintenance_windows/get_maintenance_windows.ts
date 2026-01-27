@@ -6,13 +6,13 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { MaintenanceWindow } from '../../application/maintenance_window/types';
-import type { MaintenanceWindowClientApi } from '../../types';
+import type { MaintenanceWindowClient } from '@kbn/maintenance-windows-plugin/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { withAlertingSpan } from '../lib';
 
 interface GetMaintenanceWindowsOpts {
   fakeRequest: KibanaRequest;
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClient;
   logger: Logger;
   ruleId: string;
   ruleTypeId: string;

@@ -93,6 +93,12 @@ const i18nTexts = {
       defaultMessage: 'Status',
     }
   ),
+  tableCaption: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.featuresTableCaption',
+    {
+      defaultMessage: 'System indices migration status',
+    }
+  ),
   errorTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.errorTooltipLabel',
     {
@@ -257,6 +263,7 @@ export const SystemIndicesFlyout = ({
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         {migrationStatus === 'NO_MIGRATION_NEEDED' && (
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.migrationNotNeeded}
             iconType="cheer"
             color="success"
@@ -278,6 +285,7 @@ export const SystemIndicesFlyout = ({
               itemIdToExpandedRowMap={expandedRows}
               pagination={true}
               sorting={true}
+              tableCaption={i18nTexts.tableCaption}
             />
           </>
         )}

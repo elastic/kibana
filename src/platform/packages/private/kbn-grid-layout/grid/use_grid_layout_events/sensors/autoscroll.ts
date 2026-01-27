@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  getViewportHeight,
+  getScrollDimensions,
+  scrollBy,
+  type ScrollContainer,
+} from '@kbn/core-chrome-layout-utils';
 import type { UserMouseEvent } from './mouse';
 
 const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll.
@@ -21,7 +27,7 @@ export const stopAutoScroll = () => {
   shouldAutoScroll = false;
 };
 
-export const startAutoScroll = () => {
+export const startAutoScroll = (container: ScrollContainer) => {
   if (shouldAutoScroll) return;
   shouldAutoScroll = true;
 
@@ -34,9 +40,10 @@ export const startAutoScroll = () => {
 
     if (latestMouseEvent) {
       // Scroll faster depending on how far the user's drag is from the center of the screen.
-      const distanceFromCenterOfScreen = window.innerHeight / 2 - latestMouseEvent.clientY;
+      const clientHeight = getViewportHeight(container);
+      const distanceFromCenterOfScreen = clientHeight / 2 - latestMouseEvent.clientY;
       const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
-      const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / window.innerHeight;
+      const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / clientHeight;
 
       const dragDistanceSpeedMultiplier = Math.min(
         1,
@@ -47,11 +54,10 @@ export const startAutoScroll = () => {
       );
 
       // scroll slower as we approach the bottom or the top of the page.
-      const distanceToTop = scrollDirection === 'up' ? window.scrollY : Number.MAX_VALUE;
+      const { scrollTop, scrollHeight } = getScrollDimensions(container);
+      const distanceToTop = scrollDirection === 'up' ? scrollTop : Number.MAX_VALUE;
       const distanceToBottom =
-        scrollDirection === 'down'
-          ? document.body.scrollHeight - window.innerHeight - window.scrollY
-          : Number.MAX_VALUE;
+        scrollDirection === 'down' ? scrollHeight - clientHeight - scrollTop : Number.MAX_VALUE;
       const nearestScrollEdgeDistance = Math.min(distanceToTop, distanceToBottom);
       const edgeSlowdownMultiplier = Math.min(
         1,
@@ -63,7 +69,7 @@ export const startAutoScroll = () => {
         PIXELS_PER_SECOND * (dragDistanceSpeedMultiplier * edgeSlowdownMultiplier) * deltaTime;
 
       if (pixelsToScroll > 0) {
-        window.scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll });
+        scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll }, container);
       }
     }
 

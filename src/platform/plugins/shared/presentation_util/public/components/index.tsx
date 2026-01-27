@@ -51,27 +51,4 @@ export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/da
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
 
-const LazyDashboardDrilldownOptionsComponent = React.lazy(() =>
-  import('./dashboard_drilldown_options/dashboard_drilldown_options').then(
-    ({ DashboardDrilldownOptionsComponent }) => ({
-      default: DashboardDrilldownOptionsComponent,
-    })
-  )
-);
-
-export const DashboardDrilldownOptionsComponent = withSuspense(
-  LazyDashboardDrilldownOptionsComponent,
-  null
-);
-
-export {
-  type DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from './dashboard_drilldown_options/types';
-
-/**
- * A lazily-loaded ExpressionInput component.
- */
-export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
-
 export type * from './types';

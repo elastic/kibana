@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useBulkDisable } from './use_bulk_disable';
 import { bulkDisableScheduledReports } from '../apis/bulk_disable_scheduled_reports';

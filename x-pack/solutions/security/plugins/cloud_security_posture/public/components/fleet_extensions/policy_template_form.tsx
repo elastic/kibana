@@ -194,6 +194,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {isEditPage && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
                 defaultMessage: 'Modifying Integration Details',
               })}
@@ -239,7 +240,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             input={input}
           />
         )}
-
         <EuiSpacer />
       </>
     );

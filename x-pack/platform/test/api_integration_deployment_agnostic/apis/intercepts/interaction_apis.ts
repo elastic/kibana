@@ -12,7 +12,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe('Intercept User Interaction APIs', () => {
+  describe('Intercept User Interaction APIs', function () {
     describe(`GET ${TRIGGER_USER_INTERACTION_METADATA_API_ROUTE}`, () => {
       it('should return 200 with empty object when no interaction exists', async () => {
         const supertest = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {

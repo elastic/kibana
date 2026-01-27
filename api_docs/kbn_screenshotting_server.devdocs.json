@@ -18,6 +18,8 @@
         "label": "ChromiumArchivePaths",
         "description": [],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "(CustomPackageInfo | ChromeForTestingPackageInfo)[]"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -43,6 +47,8 @@
             "label": "archivesPath",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,6 +79,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -87,6 +95,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -102,6 +112,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +136,8 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,6 +164,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -170,6 +186,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 112,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -188,6 +206,8 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -212,6 +232,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -232,6 +254,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 121,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,6 +282,8 @@
               ", chromiumPath: string) => string"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -278,6 +304,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 133,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -293,6 +321,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 133,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -316,6 +346,8 @@
           "({ userDataDir, disableSandbox, windowSize, proxy: proxyConfig, }: LaunchArgs) => string[]"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/args.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,6 +362,8 @@
               "LaunchArgs"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/args.ts",
+            "lineNumber": 27,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -357,6 +391,8 @@
           ", config: Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>) => Promise<Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>>"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -377,6 +413,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -392,6 +430,8 @@
               "Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -413,6 +453,8 @@
           "(value: number | moment.Duration) => number"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -427,6 +469,8 @@
               "number | moment.Duration"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -453,6 +497,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/get_chromium_package.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -469,6 +515,8 @@
         "label": "PackageInfo",
         "description": [],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -483,6 +531,8 @@
               "\"linux\" | \"darwin\" | \"win32\""
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,6 +547,8 @@
               "\"arm64\" | \"x64\""
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,6 +560,8 @@
             "label": "archiveFilename",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -519,6 +573,8 @@
             "label": "archiveChecksum",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,6 +586,8 @@
             "label": "binaryChecksum",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -541,6 +599,8 @@
             "label": "binaryRelativePath",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -552,6 +612,8 @@
             "label": "isPreInstalled",
             "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,6 +628,8 @@
               "\"custom\" | \"chromeForTesting\""
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -586,6 +650,8 @@
           "{ readonly enabled: boolean; readonly capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; readonly browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; readonly networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; readonly poolSize: number; }"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -770,6 +836,8 @@
           "<number>; }>"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

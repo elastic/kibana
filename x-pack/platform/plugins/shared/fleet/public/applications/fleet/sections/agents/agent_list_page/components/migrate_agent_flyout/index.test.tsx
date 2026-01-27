@@ -150,4 +150,58 @@ describe('MigrateAgentFlyout', () => {
     const alertPanel = component.queryByTestId('migrateAgentFlyoutAlertPanel');
     expect(alertPanel).not.toBeInTheDocument();
   });
+
+  it('should show containerized agents warning message', () => {
+    component.rerender(
+      <AgentMigrateFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        agents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+            id: 'containerized-agent',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+        agentCount={1}
+        unsupportedMigrateAgents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+            id: 'containerized-agent',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+      />
+    );
+
+    const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
+    expect(alertPanel).toBeInTheDocument();
+
+    // Check that the warning message includes containerized agents
+    expect(alertPanel).toHaveTextContent(
+      'tamper-protected agents, Fleet Server agents, containerized agents, or agents on an unsupported version'
+    );
+  });
 });

@@ -3,7 +3,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'

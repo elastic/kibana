@@ -94,7 +94,12 @@ describe('EditOutputFlyout', () => {
         },
       },
       docLinks: {
-        links: { fleet: {}, logstash: {}, kibana: {} },
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
       },
       cloud: {
         isServerlessEnabled,

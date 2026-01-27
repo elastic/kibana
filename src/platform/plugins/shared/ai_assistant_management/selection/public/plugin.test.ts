@@ -24,21 +24,26 @@ describe('AI Assistant Management Selection Plugin', () => {
     } as unknown as PluginInitializerContext);
 
     const coreStart = {
-      uiSettings: {
-        get: jest.fn((key: string) => {
-          if (key === PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY) {
-            return AIAssistantType.Default;
-          }
-        }),
+      settings: {
+        client: {
+          get: jest.fn((key: string) => {
+            if (key === PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY) {
+              return AIAssistantType.Default;
+            }
+          }),
+          get$: jest.fn(() =>
+            new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+          ),
+          isDefault: jest.fn(() => false),
+        },
       },
       application: {
         capabilities: {
-          management: {
-            ai: {
-              aiAssistantManagementSelection: true,
-              securityAiAssistantManagement: true,
-              observabilityAiAssistantManagement: false,
-            },
+          securitySolutionAssistant: {
+            'ai-assistant': true,
+          },
+          observabilityAIAssistant: {
+            show: false,
           },
         },
       },
@@ -52,8 +57,10 @@ describe('AI Assistant Management Selection Plugin', () => {
     });
     subscription.unsubscribe();
 
-    const allCalls = (coreStart.uiSettings.get as jest.Mock).mock.calls;
-    expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
+    expect(coreStart.settings.client.get).toHaveBeenCalledWith(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Default
+    );
     expect(collected).toEqual([AIAssistantType.Default]);
   });
 
@@ -104,12 +111,11 @@ describe('AI Assistant Management Selection Plugin', () => {
 
     const applicationCapabilities = {
       capabilities: {
-        management: {
-          ai: {
-            aiAssistantManagementSelection: true,
-            securityAiAssistantManagement: true,
-            observabilityAiAssistantManagement: false,
-          },
+        securitySolutionAssistant: {
+          'ai-assistant': true,
+        },
+        observabilityAIAssistant: {
+          show: true,
         },
       },
     };
@@ -134,7 +140,15 @@ describe('AI Assistant Management Selection Plugin', () => {
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          settings: {
+            client: {
+              get: jest.fn(() => AIAssistantType.Default),
+              get$: jest.fn(() =>
+                new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+              ),
+              isDefault: jest.fn(() => false),
+            },
+          },
           application: applicationCapabilities,
         } as any,
         {
@@ -171,7 +185,15 @@ describe('AI Assistant Management Selection Plugin', () => {
       const license$ = new BehaviorSubject<any>(makeLicense('platinum'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          settings: {
+            client: {
+              get: jest.fn(() => AIAssistantType.Default),
+              get$: jest.fn(() =>
+                new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+              ),
+              isDefault: jest.fn(() => false),
+            },
+          },
           application: applicationCapabilities,
         } as any,
         {
@@ -182,7 +204,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       expect(app.enabled).toBe(false);
     });
 
-    it('remains disabled for enterprise license when aiAssistantManagementSelection capability is false', async () => {
+    it('remains disabled for enterprise license when user has no assistant privileges', async () => {
       const plugin = new AIAssistantManagementPlugin({
         config: { get: jest.fn() },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
@@ -197,19 +219,26 @@ describe('AI Assistant Management Selection Plugin', () => {
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
-      // Start with non-enterprise, then move to enterprise; aiAssistantManagementSelection capability stays false
+      // Start with non-enterprise, user has no assistant privileges
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          settings: {
+            client: {
+              get: jest.fn(() => AIAssistantType.Default),
+              get$: jest.fn(() =>
+                new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+              ),
+              isDefault: jest.fn(() => false),
+            },
+          },
           application: {
             capabilities: {
-              management: {
-                ai: {
-                  aiAssistantManagementSelection: false,
-                  securityAiAssistantManagement: true,
-                  observabilityAiAssistantManagement: true,
-                },
+              securitySolutionAssistant: {
+                'ai-assistant': false,
+              },
+              observabilityAIAssistant: {
+                show: false,
               },
             },
           },
@@ -220,7 +249,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       );
       expect(app.enabled).toBe(false);
 
-      // Upgrade to enterprise; still should remain disabled because capability is false
+      // Upgrade to enterprise; still should remain disabled because user has no assistant access
       license$.next(makeLicense('enterprise'));
       expect(app.enabled).toBe(false);
     });

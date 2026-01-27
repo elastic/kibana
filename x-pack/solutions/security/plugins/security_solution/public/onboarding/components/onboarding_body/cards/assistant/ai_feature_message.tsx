@@ -11,7 +11,7 @@ import {
   ELASTIC_LLM_AI_FEATURES,
   ELASTIC_LLM_THIRD_PARTY,
   ELASTIC_LLM_USAGE_COSTS,
-} from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
+} from '@kbn/elastic-assistant/impl/tour/common/translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 export const ElasticAIFeatureMessage = React.memo(() => {

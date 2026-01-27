@@ -28,7 +28,8 @@ const policyFormFields = [
   },
 ];
 
-describe('when navigating to integration page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/250295
+describe.skip('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 

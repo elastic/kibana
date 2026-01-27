@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
@@ -51,6 +52,7 @@ export interface CreateRuleFormProps {
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleTypeMetaData;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -220,6 +222,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         onCancel={onCancel}
         onSave={onSave}
         onChangeMetaData={onChangeMetaData}
+        focusTrapProps={props.focusTrapProps}
       />
     </RuleFormStateProvider>
   );

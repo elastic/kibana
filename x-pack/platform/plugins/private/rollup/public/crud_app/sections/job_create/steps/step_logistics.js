@@ -25,14 +25,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-view-validation';
 import { CronEditor } from '@kbn/es-ui-shared-plugin/public';
-import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { indices } from '../../../../shared_imports';
 import { documentationLinks } from '../../../services/documentation_links';
 import { StepError } from './components';
 
-const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexPatternIllegalCharacters = ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 export class StepLogistics extends Component {

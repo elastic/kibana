@@ -46,7 +46,7 @@ export function createMonitorsOverviewPanelAction(
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
-          serializedState: { rawState: initialState },
+          serializedState: initialState,
         });
       } catch (e) {
         return Promise.reject();

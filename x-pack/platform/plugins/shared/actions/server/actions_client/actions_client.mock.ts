@@ -29,6 +29,7 @@ const createActionsClientMock = () => {
     isSystemAction: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
     getGlobalExecutionLogWithAuth: jest.fn(),
+    getAxiosInstance: jest.fn(),
   };
   return mocked;
 };

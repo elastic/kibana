@@ -33,13 +33,6 @@ describe(
   'Trusted Devices',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
-        ],
-      },
-    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;

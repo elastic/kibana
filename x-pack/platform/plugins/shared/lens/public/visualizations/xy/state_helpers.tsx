@@ -15,8 +15,12 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
-import type { DataViewsState } from '../../state_management';
-import type { FramePublicAPI, DatasourcePublicAPI, UserMessage } from '../../types';
+import type {
+  DataViewsState,
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  UserMessage,
+} from '@kbn/lens-common';
 import type {
   XYLayerConfig,
   XYDataLayerConfig,
@@ -134,7 +138,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
+  if (isDataLayer(layer) && (layer.splitAccessors ?? []).length > 0 && !layer.collapseFn) {
     return null;
   }
   return (
@@ -148,7 +152,7 @@ export const getColumnToLabelMap = (
 ) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
-    .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
+    .concat(isDataLayer(layer) && layer.splitAccessors ? layer.splitAccessors : [])
     .forEach((accessor) => {
       const operation = datasource?.getOperationForColumnId(accessor);
       if (operation?.label) {

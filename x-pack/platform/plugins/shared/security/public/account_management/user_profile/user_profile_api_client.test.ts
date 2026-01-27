@@ -30,6 +30,17 @@ describe('UserProfileAPIClient', () => {
     expect(enabled).toBe(true);
   });
 
+  it('should not enable the user profile for anonymous paths', async () => {
+    coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+    const promiseEnabled = firstValueFrom(apiClient.enabled$);
+    apiClient.start();
+
+    const enabled = await promiseEnabled;
+    expect(enabled).toBe(false);
+    // Ensure that the user profile was not fetched
+    expect(coreStart.http.get).not.toHaveBeenCalled();
+  });
+
   it('should not enable the user profile if we get a 404 from fetching the profile', async () => {
     const err = new Error('Awwww');
     (err as any).response = kibanaResponseFactory.notFound();

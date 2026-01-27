@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import {
   EntityPanelKeyByType,
@@ -31,7 +32,6 @@ import { Loader } from '../../../common/components/loader';
 import { Panel } from '../../../common/components/panel';
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
-import { ChartContent } from './chart_content';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../common/lib/kibana';
@@ -43,6 +43,7 @@ import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_eng
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
 import { RiskScoreHeaderTitle } from '../risk_score_header_title';
+import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
@@ -220,14 +221,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <ChartContent
-                dataExists={data && data.length > 0}
-                kpiQueryId={entity.kpiQueryId ?? ''}
-                riskEntity={riskEntity}
-                severityCount={severityCount}
-                timerange={timerange}
-                selectedSeverity={selectedSeverity}
-              />
+              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable

@@ -44,7 +44,7 @@ export const MapButton: FC<MapButtonProps> = ({ item }) => {
 
     return (
       <EuiToolTip position="top" content={toolTipContent}>
-        <>{mapActionButtonText}</>
+        <span tabIndex={0}>{mapActionButtonText}</span>
       </EuiToolTip>
     );
   }

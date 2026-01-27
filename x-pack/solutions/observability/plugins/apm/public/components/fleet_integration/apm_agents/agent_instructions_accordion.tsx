@@ -12,28 +12,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiCodeBlock,
-  EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ComponentType } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { AgentIcon } from '@kbn/custom-icons';
-import type {
-  AgentRuntimeAttachmentProps,
-  CreateAgentInstructions,
-} from './agent_instructions_mappings';
+import type { CreateAgentInstructions } from './agent_instructions_mappings';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type {
-  NewPackagePolicy,
-  PackagePolicy,
-  PackagePolicyEditExtensionComponentProps,
-} from '../apm_policy_form/typings';
 import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_config_instructions';
 import { renderMustache } from './render_mustache';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 function AccordionButtonContent({ agentName, title }: { agentName: AgentName; title: string }) {
   return (
@@ -73,14 +62,12 @@ function InstructionsContent({ markdown }: { markdown: string }) {
 }
 
 interface Props {
-  policy: PackagePolicy;
-  newPolicy: NewPackagePolicy;
-  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
   agentName: AgentName;
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
-  AgentRuntimeAttachment?: ComponentType<AgentRuntimeAttachmentProps>;
+  apmServerUrl?: string;
+  secretToken?: string;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -92,19 +79,14 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 export function AgentInstructionsAccordion({
-  policy,
-  newPolicy,
-  onChange,
   agentName,
   title,
   createAgentInstructions,
   variantId,
-  AgentRuntimeAttachment,
+  apmServerUrl,
+  secretToken,
 }: Props) {
   const docLinks = useKibana().services.docLinks;
-  const vars = newPolicy?.inputs?.[0]?.vars;
-  const apmServerUrl = vars?.url.value;
-  const secretToken = vars?.secret_token.value;
   const steps = createAgentInstructions(apmServerUrl, secretToken);
   const stepsElements = steps.map(
     ({ title: stepTitle, textPre, textPost, customComponentName, commands }, index) => {
@@ -160,63 +142,13 @@ export function AgentInstructionsAccordion({
     }
   );
 
-  const manualInstrumentationContent = (
-    <>
-      <EuiSpacer />
-      {stepsElements}
-    </>
-  );
-
   return (
     <StyledEuiAccordion
       id={agentName}
       buttonContent={<AccordionButtonContent agentName={agentName} title={title} />}
     >
-      {AgentRuntimeAttachment ? (
-        <>
-          <EuiSpacer />
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'manual-instrumentation',
-                name: i18n.translate(
-                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.manualInstrumentation',
-                  { defaultMessage: 'Manual instrumentation' }
-                ),
-                content: manualInstrumentationContent,
-              },
-              {
-                id: 'auto-attachment',
-                name: (
-                  <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      {i18n.translate(
-                        'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment',
-                        { defaultMessage: 'Auto-Attachment' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TechnicalPreviewBadge />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-                content: (
-                  <>
-                    <EuiSpacer />
-                    <AgentRuntimeAttachment
-                      policy={policy}
-                      newPolicy={newPolicy}
-                      onChange={onChange}
-                    />
-                  </>
-                ),
-              },
-            ]}
-          />
-        </>
-      ) : (
-        manualInstrumentationContent
-      )}
+      <EuiSpacer />
+      {stepsElements}
     </StyledEuiAccordion>
   );
 }

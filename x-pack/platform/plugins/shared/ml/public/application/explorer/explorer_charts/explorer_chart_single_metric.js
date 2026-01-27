@@ -32,6 +32,8 @@ import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalie
 
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../components/anomalies_table/build_alert_params_from_anomaly';
 import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -78,7 +80,13 @@ export class ExplorerChartSingleMetric extends React.Component {
   constructor(props) {
     super(props);
     this.chartScales = undefined;
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
   }
 
   componentDidMount() {
@@ -686,6 +694,14 @@ export class ExplorerChartSingleMetric extends React.Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
     const { seriesConfig } = this.props;
 
@@ -703,6 +719,12 @@ export class ExplorerChartSingleMetric extends React.Component {
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -728,6 +750,7 @@ export class ExplorerChartSingleMetric extends React.Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />

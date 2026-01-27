@@ -21,12 +21,15 @@ import { useInstalledIntegrationsActions } from './hooks/use_installed_integrati
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
 
-const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
+const InstalledIntegrationsPageContent: React.FunctionComponent<{
+  prereleaseIntegrationsEnabled: boolean;
+}> = ({ prereleaseIntegrationsEnabled }) => {
   // State management
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
   const pagination = useUrlPagination();
-  const { upgradingIntegrations, uninstallingIntegrations } = useInstalledIntegrationsActions();
+  const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
+    useInstalledIntegrationsActions();
   const {
     installedPackages,
     countPerStatus,
@@ -38,7 +41,9 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
     filters,
     pagination.pagination,
     upgradingIntegrations,
-    uninstallingIntegrations
+    uninstallingIntegrations,
+    rollingbackIntegrations,
+    prereleaseIntegrationsEnabled
   );
 
   const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
@@ -85,10 +90,14 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   );
 };
 
-export const InstalledIntegrationsPage: React.FunctionComponent = () => {
+export const InstalledIntegrationsPage: React.FunctionComponent<{
+  prereleaseIntegrationsEnabled: boolean;
+}> = ({ prereleaseIntegrationsEnabled }) => {
   return (
     <BulkActionContextProvider>
-      <InstalledIntegrationsPageContent />
+      <InstalledIntegrationsPageContent
+        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+      />
     </BulkActionContextProvider>
   );
 };

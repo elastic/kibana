@@ -18,10 +18,9 @@ import type {
   SearchQuery,
   DeleteResult,
 } from '@kbn/content-management-plugin/common';
-import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
+import type { MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import type {
-  MapsSavedObjectAttributes,
   MapsGetOut,
   MapsSearchOptions,
   MapsCreateOptions,
@@ -29,8 +28,11 @@ import type {
   MapsUpdateOptions,
   MapsUpdateOut,
 } from './schema/v1/types';
-import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
+import type { MapAttributes } from './schema/v1/map_attributes_schema';
+import { savedObjectToItem } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
+import type { StoredMapAttributes } from '../saved_objects/types';
+import { transformMapAttributesIn } from '../../common/content_management/transform_map_attributes_in';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -90,7 +92,7 @@ export class MapsStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<MapsSavedObjectAttributes>(MAP_SAVED_OBJECT_TYPE, id);
+    } = await soClient.resolve<StoredMapAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
     const item = savedObjectToItem(savedObject, false);
     const response = {
@@ -150,10 +152,11 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
+    const { attributes: soAttributes, references: soReferences } =
+      transformMapAttributesIn(dataToLatest);
 
     // Save data in DB
-    const savedObject = await soClient.create<MapsSavedObjectAttributes>(
+    const savedObject = await soClient.create<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       soAttributes,
       {
@@ -217,10 +220,11 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
+    const { attributes: soAttributes, references: soReferences } =
+      transformMapAttributesIn(dataToLatest);
 
     // Save data in DB
-    const partialSavedObject = await soClient.update<MapsSavedObjectAttributes>(
+    const partialSavedObject = await soClient.update<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
@@ -292,7 +296,7 @@ export class MapsStorage {
     }
 
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
-    const soResponse = await soClient.find<MapsSavedObjectAttributes>(soQuery);
+    const soResponse = await soClient.find<StoredMapAttributes>(soQuery);
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
@@ -330,10 +334,7 @@ export class MapsStorage {
 
   mSearch = {
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObject<MapsSavedObjectAttributes>
-    ): MapItem => {
+    toItemResult: (ctx: StorageContext, savedObject: SavedObject<StoredMapAttributes>): MapItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
       const contentItem = savedObjectToItem(savedObject, false);

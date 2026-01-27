@@ -40,4 +40,28 @@ describe('getStartDateValidator', () => {
     const result = validatorNY({ value } as any);
     expect(result).toEqual({ message: SCHEDULED_REPORT_FORM_START_DATE_TOO_EARLY_MESSAGE });
   });
+
+  it('handles previous start date correctly', () => {
+    const prevStartDate = '2025-07-10T00:00:00Z';
+    const validatorWithPrev = getStartDateValidator(today, timezone, prevStartDate);
+    const value = moment.tz('2025-07-10T00:00:00Z', timezone);
+    const result = validatorWithPrev({ value } as any);
+    expect(result).toBeUndefined();
+  });
+
+  it('throws error if value is different than previous start date and before today', () => {
+    const prevStartDate = '2025-07-10T00:00:00Z';
+    const validatorWithPrev = getStartDateValidator(today, timezone, prevStartDate);
+    const value = moment.tz('2025-07-10T23:59:59Z', timezone);
+    const result = validatorWithPrev({ value } as any);
+    expect(result).toEqual({ message: SCHEDULED_REPORT_FORM_START_DATE_TOO_EARLY_MESSAGE });
+  });
+
+  it('does not throw error if value is different than previous start date but after today', () => {
+    const prevStartDate = '2025-07-10T00:00:00Z';
+    const validatorWithPrev = getStartDateValidator(today, timezone, prevStartDate);
+    const value = moment.tz('2025-07-11T23:59:59Z', timezone);
+    const result = validatorWithPrev({ value } as any);
+    expect(result).toBeUndefined();
+  });
 });

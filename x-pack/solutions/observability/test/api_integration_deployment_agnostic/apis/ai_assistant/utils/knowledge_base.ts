@@ -296,3 +296,16 @@ export function getKnowledgeBaseEntriesFromApi({
     params: { query: { query, sortBy, sortDirection } },
   });
 }
+
+export async function clearIntegrationKnowledgeIndex(es: Client) {
+  await es
+    .deleteByQuery({
+      index: '.integration_knowledge*',
+      query: { match_all: {} },
+      refresh: true,
+      conflicts: 'proceed',
+    })
+    .catch(() => {
+      // ignore if index doesn't exist
+    });
+}

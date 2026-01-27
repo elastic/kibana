@@ -10,16 +10,21 @@ import { i18n } from '@kbn/i18n';
 import type { UpsertDashboardMigrationResourcesRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
-
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 export const DASHBOARDS_DATA_INPUT_UPSERT_MIGRATION_RESOURCES_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.service.upsertDashboardMigrationResourcesError',
   { defaultMessage: 'Failed to upload dashboard migration resources' }
 );
 
-export type UpsertResources = (
-  migrationId: string,
-  data: UpsertDashboardMigrationResourcesRequestBody
-) => void;
+export type UpsertResources = ({
+  migrationId,
+  vendor,
+  data,
+}: {
+  migrationId: string;
+  vendor?: SiemMigrationVendor;
+  data: UpsertDashboardMigrationResourcesRequestBody;
+}) => void;
 export type OnSuccess = (data: UpsertDashboardMigrationResourcesRequestBody) => void;
 
 export const useUpsertResources = (onSuccess: OnSuccess) => {
@@ -27,11 +32,15 @@ export const useUpsertResources = (onSuccess: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const upsertResources = useCallback<UpsertResources>(
-    (migrationId, data) => {
+    ({ migrationId, vendor, data }) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          await siemMigrations.dashboards.upsertMigrationResources(migrationId, data);
+          await siemMigrations.dashboards.upsertMigrationResources({
+            migrationId,
+            vendor,
+            body: data,
+          });
 
           onSuccess(data);
           dispatch({ type: 'success' });

@@ -249,6 +249,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.poller.stop();
   }
 
+  public getCurrentTasksInPool(): string[] {
+    return this.pool.getCurrentTasksInPool();
+  }
+
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
   };

@@ -9,16 +9,14 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { waitFor } from '@testing-library/react';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { Filter } from '@kbn/es-query';
 import type { QueryBarMenuProps } from './query_bar_menu';
 import { QueryBarMenu } from './query_bar_menu';
-import { EuiPopover } from '@elastic/eui';
 
 describe('Querybar Menu component', () => {
   const createMockWebStorage = () => ({
@@ -37,6 +35,7 @@ describe('Querybar Menu component', () => {
     remove: jest.fn(),
     clear: jest.fn(),
   });
+
   const getStorage = (v: string) => {
     const storage = createMockStorage();
     storage.get.mockReturnValue(v);
@@ -69,6 +68,7 @@ describe('Querybar Menu component', () => {
 
   const startMock = coreMock.createStart();
   let dataMock = dataPluginMock.createStartContract();
+
   function wrapQueryBarMenuComponentInContext(testProps: QueryBarMenuProps, storageValue: string) {
     dataMock = {
       ...dataMock,
@@ -101,7 +101,9 @@ describe('Querybar Menu component', () => {
       </I18nProvider>
     );
   }
+
   let props: QueryBarMenuProps;
+
   beforeEach(() => {
     props = {
       language: 'kuery',
@@ -135,22 +137,35 @@ describe('Querybar Menu component', () => {
       queryBarMenuRef: React.createRef(),
     };
   });
-  it('should not render the popover if the openQueryBarMenu prop is false', async () => {
-    await act(async () => {
-      const component = mount(wrapQueryBarMenuComponentInContext(props, 'kuery'));
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(false);
-    });
-  });
 
-  it('should render the popover if the openQueryBarMenu prop is true', async () => {
+  it.each([
+    {
+      openQueryBarMenu: false,
+      shouldRender: false,
+      description: 'should not render the popover if the openQueryBarMenu prop is false',
+    },
+    {
+      openQueryBarMenu: true,
+      shouldRender: true,
+      description: 'should render the popover if the openQueryBarMenu prop is true',
+    },
+  ])('$description', async ({ openQueryBarMenu, shouldRender }) => {
     const newProps = {
       ...props,
-      openQueryBarMenu: true,
+      openQueryBarMenu,
     };
-    await act(async () => {
-      const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    });
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+    expect(screen.getByTestId('queryBarMenuPopover')).toBeInTheDocument();
+    if (shouldRender) {
+      await waitFor(() => {
+        expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      });
+    } else {
+      await waitFor(() => {
+        expect(screen.queryByTestId('queryBarMenuPanel')).not.toBeInTheDocument();
+      });
+    }
   });
 
   it('should render the context menu by default', async () => {
@@ -158,8 +173,12 @@ describe('Querybar Menu component', () => {
       ...props,
       openQueryBarMenu: true,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    expect(component.find('[data-test-subj="queryBarMenuPanel"]')).toBeTruthy();
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+    });
   });
 
   it('should render the saved saved queries panels if the showQueryInput prop is true but disabled', async () => {
@@ -169,17 +188,16 @@ describe('Querybar Menu component', () => {
       showQueryInput: true,
       showFilterBar: true,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const saveFilterSetButton = component.find(
-      '[data-test-subj="saved-query-management-save-button"]'
-    );
-    const loadFilterSetButton = component.find(
-      '[data-test-subj="saved-query-management-load-button"]'
-    );
-    expect(saveFilterSetButton.length).toBeTruthy();
-    expect(saveFilterSetButton.first().prop('disabled')).toBe(true);
-    expect(loadFilterSetButton.length).toBeTruthy();
-    expect(loadFilterSetButton.first().prop('disabled')).toBe(true);
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const saveFilterSetButton = screen.getByTestId('saved-query-management-save-button');
+    const loadFilterSetButton = screen.getByTestId('saved-query-management-load-button');
+
+    expect(saveFilterSetButton).toBeInTheDocument();
+    expect(saveFilterSetButton).toBeDisabled();
+    expect(loadFilterSetButton).toBeInTheDocument();
+    expect(loadFilterSetButton).toBeDisabled();
   });
 
   it('should render the saved queries panels if the showFilterBar is true but disabled', async () => {
@@ -188,17 +206,14 @@ describe('Querybar Menu component', () => {
       openQueryBarMenu: true,
       showFilterBar: true,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const applyToAllFiltersButton = component.find(
-      '[data-test-subj="filter-sets-applyToAllFilters"]'
-    );
-    const removeAllFiltersButton = component.find(
-      '[data-test-subj="filter-sets-removeAllFilters"]'
-    );
-    expect(applyToAllFiltersButton.length).toBeTruthy();
-    expect(applyToAllFiltersButton.first().prop('disabled')).toBe(true);
-    expect(removeAllFiltersButton.length).toBeTruthy();
-    expect(removeAllFiltersButton.first().prop('disabled')).toBe(true);
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
+    const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
+
+    expect(applyToAllFiltersButton).toBeDisabled();
+    expect(removeAllFiltersButton).toBeDisabled();
   });
 
   it('should enable the clear all button if query is given', async () => {
@@ -211,11 +226,11 @@ describe('Querybar Menu component', () => {
         language: 'kuery',
       },
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const removeAllFiltersButton = component.find(
-      '[data-test-subj="filter-sets-removeAllFilters"]'
-    );
-    expect(removeAllFiltersButton.first().prop('disabled')).toBe(false);
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
+    expect(removeAllFiltersButton).not.toBeDisabled();
   });
 
   it('should enable the apply to all button if filter is given', async () => {
@@ -225,11 +240,11 @@ describe('Querybar Menu component', () => {
       showFilterBar: true,
       filters: filtersMock,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const applyToAllFiltersButton = component.find(
-      '[data-test-subj="filter-sets-applyToAllFilters"]'
-    );
-    expect(applyToAllFiltersButton.first().prop('disabled')).toBe(false);
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
+    expect(applyToAllFiltersButton).not.toBeDisabled();
   });
 
   it('should render the language switcher panel', async () => {
@@ -239,9 +254,11 @@ describe('Querybar Menu component', () => {
       showFilterBar: true,
       showQueryInput: true,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const languageSwitcher = component.find('[data-test-subj="switchQueryLanguageButton"]');
-    expect(languageSwitcher.length).toBeTruthy();
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const languageSwitcher = screen.getByTestId('switchQueryLanguageButton');
+    expect(languageSwitcher).toBeInTheDocument();
   });
 
   it('should render the save query quick button', async () => {
@@ -264,14 +281,15 @@ describe('Querybar Menu component', () => {
         namespaces: ['default'],
       },
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-    const saveChangesButton = component.find(
-      '[data-test-subj="saved-query-management-save-changes-button"]'
-    );
-    expect(saveChangesButton.length).toBeTruthy();
+
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    const saveChangesButton = screen.getByTestId('saved-query-management-save-changes-button');
+    expect(saveChangesButton).toBeInTheDocument();
   });
 
   it('should render all filter panel options by default', async () => {
+    const user = userEvent.setup();
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
@@ -279,24 +297,26 @@ describe('Querybar Menu component', () => {
       filters: filtersMock,
       hiddenPanelOptions: undefined,
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeTruthy();
-    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-sets-removeAllFilters')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      component.update();
-      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-pinAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-unpinAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-invertAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-disableAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-enableAllFilters')).toBeInTheDocument();
     });
-
-    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeTruthy();
   });
 
   it('should hide pinning filter panel options', async () => {
+    const user = userEvent.setup();
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
@@ -304,24 +324,24 @@ describe('Querybar Menu component', () => {
       filters: filtersMock,
       hiddenPanelOptions: ['pinFilter'],
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      component.update();
-      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-pinAllFilters')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-unpinAllFilters')).not.toBeInTheDocument();
+
+      expect(screen.getByTestId('filter-sets-invertAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-disableAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-enableAllFilters')).toBeInTheDocument();
     });
-
-    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeFalsy();
-    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeFalsy();
-
-    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeTruthy();
   });
 
   it('should hide negating and enabling filter panel options', async () => {
+    const user = userEvent.setup();
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
@@ -329,20 +349,19 @@ describe('Querybar Menu component', () => {
       filters: filtersMock,
       hiddenPanelOptions: ['negateFilter', 'disableFilter'],
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    component.find('[data-test-subj="filter-sets-applyToAllFilters"]').first().simulate('click');
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      component.update();
-      expect(component.find('[data-test-subj="contextMenuPanelTitleButton"]').length).toBeTruthy();
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-pinAllFilters')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-sets-unpinAllFilters')).toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-invertAllFilters')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-disableAllFilters')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-enableAllFilters')).not.toBeInTheDocument();
     });
-
-    expect(component.find('[data-test-subj="filter-sets-pinAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-unpinAllFilters"]').length).toBeTruthy();
-    expect(component.find('[data-test-subj="filter-sets-invertAllFilters"]').length).toBeFalsy();
-    expect(component.find('[data-test-subj="filter-sets-disableAllFilters"]').length).toBeFalsy();
-    expect(component.find('[data-test-subj="filter-sets-enableAllFilters"]').length).toBeFalsy();
   });
 
   it('should hide deleting filter panel options', async () => {
@@ -353,9 +372,13 @@ describe('Querybar Menu component', () => {
       filters: filtersMock,
       hiddenPanelOptions: ['deleteFilter'],
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      expect(screen.queryByTestId('filter-sets-removeAllFilters')).not.toBeInTheDocument();
+    });
   });
 
   it('should render additional menu items', async () => {
@@ -372,12 +395,16 @@ describe('Querybar Menu component', () => {
         ],
       },
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(component.find('[data-test-subj="additional-query-bar-menu-item"]').length).toBeTruthy();
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('additional-query-bar-menu-item')).toBeInTheDocument();
+    });
   });
 
   it('should render additional menu panels', async () => {
+    const user = userEvent.setup();
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
@@ -404,18 +431,13 @@ describe('Querybar Menu component', () => {
         ],
       },
     };
-    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    component
-      .find('[data-test-subj="additional-query-bar-menu-panel-link"]')
-      .first()
-      .simulate('click');
+    render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    await user.click(screen.getByTestId('additional-query-bar-menu-panel-link'));
 
     await waitFor(() => {
-      component.update();
-      expect(
-        component.find('[data-test-subj="additional-query-bar-nested-menu-item"]').length
-      ).toBeTruthy();
+      expect(screen.getByTestId('additional-query-bar-nested-menu-item')).toBeInTheDocument();
     });
   });
 });

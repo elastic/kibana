@@ -7,10 +7,18 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { JobType } from '../../../../../common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  CombinedJob,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import type { Filter } from '../../../../../common/types/filters';
+import type { DatafeedValidationResponse } from '../../../../../common/types/job_validation';
+import type { MlApi } from '../../../services/ml_api_service';
 
 export interface ImportedAdJob {
   job: Job;
@@ -29,14 +37,31 @@ export interface JobIdObject {
   originalDestIndex?: string;
   destIndexValid: boolean;
   destIndexInvalidMessage: string;
-
   destIndexValidated: boolean;
+
+  datafeedInvalid?: boolean;
+  datafeedWarningMessage?: string;
+}
+
+type IndexValidationResult =
+  | { valid: true; index: string }
+  | { valid: false; index: string; error: string };
+
+export interface SourceIndexError {
+  index: string | undefined;
+  error: string;
 }
 
 export interface SkippedJobs {
   jobId: string;
-  missingIndices: string[];
-  missingFilters: string[];
+  missingFilters?: string[];
+  sourceIndicesErrors?: SourceIndexError[];
+}
+
+export interface DatafeedValidationResult {
+  jobId: string;
+  hasWarning: boolean;
+  warningMessage?: string;
 }
 
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
@@ -48,6 +73,12 @@ function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[
 }
 
 export class JobImportService {
+  constructor(
+    private readonly esSearch: MlApi['esSearch'],
+    private readonly validateDatafeedPreview: MlApi['validateDatafeedPreview'],
+    private readonly getFilters: () => Promise<Filter[]>
+  ) {}
+
   private _readFile(file: File) {
     return new Promise((resolve, reject) => {
       if (file && file.size) {
@@ -111,6 +142,69 @@ export class JobImportService {
     });
   }
 
+  private async validateJobSourceIndices(indices: string[]): Promise<SourceIndexError[]> {
+    if (!indices || indices.length === 0) {
+      return [
+        {
+          index: undefined,
+          error: i18n.translate(
+            'xpack.ml.importExport.importFlyout.validation.sourceIndicesArrayEmpty',
+            {
+              defaultMessage: 'Source indices array is empty',
+            }
+          ),
+        },
+      ];
+    }
+
+    const indexValidations = await Promise.all(
+      indices.map((index) => this.validateSingleIndex(index))
+    );
+
+    const invalidIndices: SourceIndexError[] = [];
+    for (const result of indexValidations) {
+      if (!result.valid) {
+        invalidIndices.push({
+          index: result.index,
+          error: result.error,
+        });
+      }
+    }
+
+    return invalidIndices;
+  }
+
+  private async validateSingleIndex(index: string): Promise<IndexValidationResult> {
+    try {
+      const resp = await this.esSearch({
+        index: [index],
+        size: 0,
+        body: {
+          query: { match_all: {} },
+        },
+      });
+
+      // Check if the index pattern matched any indices
+      if (resp._shards?.total === 0) {
+        return {
+          valid: false,
+          index,
+          error: i18n.translate(
+            'xpack.ml.importExport.importFlyout.validation.indexPatternMatchesNoIndices',
+            {
+              defaultMessage: 'Index pattern matches no indices',
+            }
+          ),
+        };
+      }
+
+      return { valid: true, index };
+    } catch (error) {
+      const errorMessage = extractErrorMessage(error);
+      return { valid: false, index, error: errorMessage };
+    }
+  }
+
   public renameDfaJobs(jobIds: JobIdObject[], jobs: DataFrameAnalyticsConfig[]) {
     if (jobs.length !== jobs.length) {
       return jobs;
@@ -126,16 +220,12 @@ export class JobImportService {
     });
   }
 
-  public async validateJobs(
-    jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
-    type: JobType,
-    getDataViewTitles: (refresh?: boolean) => Promise<string[]>,
-    getFilters: () => Promise<Filter[]>
-  ) {
-    const existingDataViews = new Set(await getDataViewTitles());
-    const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
+  public async validateJobs(jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[], type: JobType) {
+    const existingFilters = new Set((await this.getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
     const skippedJobs: SkippedJobs[] = [];
+    const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
+    const datafeedValidations = new Map<string, DatafeedValidationResult>();
 
     const commonJobs: Array<{
       jobId: string;
@@ -155,11 +245,35 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
-    commonJobs.forEach(({ jobId, indices, filters = [], destIndex }) => {
-      const missingIndices = indices.filter((i) => existingDataViews.has(i) === false);
-      const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
+    if (type === 'data-frame-analytics') {
+      const sourceIndexErrors = await Promise.all(
+        commonJobs.map(({ indices }) => this.validateJobSourceIndices(indices))
+      );
 
-      if (missingIndices.length === 0 && missingFilters.length === 0) {
+      sourceIndexErrors.forEach((errors, i) => {
+        if (errors.length > 0) {
+          sourceIndicesErrors.set(commonJobs[i].jobId, errors);
+        }
+      });
+    }
+
+    if (type === 'anomaly-detector') {
+      // exclude jobs with missing filters
+      const validJobsForDatafeedCheck = (jobs as ImportedAdJob[]).filter(
+        (j) => !commonJobs.find((cj) => cj.jobId === j.job.job_id)?.filters?.length
+      );
+
+      const datafeedResults = await this.validateDatafeeds(validJobsForDatafeedCheck);
+      datafeedResults.forEach((result) => {
+        datafeedValidations.set(result.jobId, result);
+      });
+    }
+
+    commonJobs.forEach(({ jobId, filters = [], destIndex }) => {
+      const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
+      const indicesErrors = sourceIndicesErrors.get(jobId);
+
+      if (missingFilters.length === 0 && !indicesErrors) {
         tempJobs.push({
           jobId,
           ...(type === 'data-frame-analytics' ? { destIndex } : {}),
@@ -167,8 +281,8 @@ export class JobImportService {
       } else {
         skippedJobs.push({
           jobId,
-          missingIndices,
-          missingFilters,
+          ...(missingFilters.length > 0 ? { missingFilters } : {}),
+          ...(indicesErrors ? { sourceIndicesErrors: indicesErrors } : {}),
         });
       }
     });
@@ -176,7 +290,77 @@ export class JobImportService {
     return {
       jobs: tempJobs,
       skippedJobs,
+      datafeedValidations,
     };
+  }
+
+  private async validateDatafeeds(jobs: ImportedAdJob[]): Promise<DatafeedValidationResult[]> {
+    const results = await Promise.all(
+      jobs.map(async ({ job, datafeed }) => {
+        try {
+          const combinedJob: CombinedJob = {
+            ...job,
+            datafeed_config: datafeed,
+          };
+
+          const response: DatafeedValidationResponse = await this.validateDatafeedPreview({
+            job: combinedJob,
+          });
+
+          if (response.error) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewValidationFailed', {
+                defaultMessage: `Unable to validate datafeed preview. Reason: {reason}`,
+                values: {
+                  reason: extractErrorMessage(response.error),
+                },
+              }),
+            };
+          }
+
+          if (!response.valid) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewFailed', {
+                defaultMessage: 'Datafeed preview failed. This job may not run correctly.',
+              }),
+            };
+          }
+
+          if (!response.documentsFound) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewNoData', {
+                defaultMessage:
+                  'Datafeed preview returned no data. This job may not run correctly.',
+              }),
+            };
+          }
+
+          return {
+            jobId: job.job_id,
+            hasWarning: false,
+          };
+        } catch (error) {
+          return {
+            jobId: job.job_id,
+            hasWarning: true,
+            warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewValidationFailed', {
+              defaultMessage: `Unable to validate datafeed preview. Reason: {reason}`,
+              values: {
+                reason: extractErrorMessage(error),
+              },
+            }),
+          };
+        }
+      })
+    );
+
+    return results;
   }
 }
 

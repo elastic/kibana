@@ -10,8 +10,9 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
-import { DocumentationMainContent, DocumentationNavigation } from '../shared';
+import { DocumentationMainContent, DocumentationNavigation, SEARCH_DEBOUNCE_TIME } from '../shared';
 import type { LanguageDocumentationSections } from '../../types';
 import { getESQLDocsSections } from '../../sections';
 
@@ -27,6 +28,15 @@ function DocumentationInline({ searchInDescription, height }: DocumentationInlin
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchText(searchText);
+    },
+    SEARCH_DEBOUNCE_TIME,
+    [searchText]
+  );
 
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -41,8 +51,8 @@ function DocumentationInline({ searchInDescription, height }: DocumentationInlin
   }, [documentationSections]);
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
-  }, [documentationSections, searchText, searchInDescription]);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, documentationSections, 1);
+  }, [documentationSections, debouncedSearchText, searchInDescription]);
 
   const onNavigationChange = useCallback<
     NonNullable<ComponentProps<typeof DocumentationNavigation>>['onNavigationChange']
@@ -73,7 +83,7 @@ function DocumentationInline({ searchInDescription, height }: DocumentationInlin
       />
       <EuiSpacer size="s" />
       <DocumentationMainContent
-        searchText={searchText}
+        searchText={debouncedSearchText}
         scrollTargets={scrollTargets}
         filteredGroups={filteredGroups}
         sections={documentationSections}

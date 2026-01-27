@@ -7,6 +7,7 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -72,6 +73,7 @@ describe('Lens inline editing helpers', () => {
     const mockStartDependencies =
       createMockStartDependencies() as unknown as LensPluginStartDependencies;
     const dataViews = dataViewPluginMocks.createStartContract();
+    const httpMock = coreMock.createStart().http;
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
     const uiSettingsMock = {
@@ -100,6 +102,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -117,6 +120,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -134,6 +138,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -170,6 +175,7 @@ describe('Lens inline editing helpers', () => {
     const startDependencies = {
       ...mockStartDependencies,
       dataViews,
+      http: coreMock.createStart().http,
     };
 
     const uiSettingsMock = {
@@ -189,6 +195,7 @@ describe('Lens inline editing helpers', () => {
         query,
         dataviewSpecArr,
         startDependencies.data,
+        startDependencies.http,
         uiSettingsMock
       );
       expect(gridAttributes.columns).toStrictEqual(queryResponseColumns);
@@ -218,6 +225,7 @@ describe('Lens inline editing helpers', () => {
         query,
         dataviewSpecArr,
         startDependencies.data,
+        startDependencies.http,
         uiSettingsMock
       );
       expect(gridAttributes.columns).toStrictEqual(emptyColumns);

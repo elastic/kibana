@@ -17,10 +17,23 @@ import { renderWithReduxStore } from '../../../mocks';
 import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
+const createAddContextMock = () => {
+  return jest
+    .fn()
+    .mockImplementation((element) => (
+      <CoreEnvContextProvider value={coreContextMock.create().env}>
+        {element}
+      </CoreEnvContextProvider>
+    ));
+};
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -136,20 +149,24 @@ describe('LensEditConfigurationFlyout', () => {
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery
   ) {
+    const mockCoreStart = coreMock.createStart();
+    mockCoreStart.rendering.addContext = createAddContextMock();
     const { container, ...rest } = renderWithReduxStore(
-      <LensEditConfigurationFlyout
-        attributes={lensAttributes}
-        updatePanelState={jest.fn()}
-        coreStart={coreMock.createStart()}
-        startDependencies={startDependencies}
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        closeFlyout={jest.fn()}
-        datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
-        onApply={jest.fn()}
-        onCancel={jest.fn()}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        {mockCoreStart.rendering.addContext(
+          <LensEditConfigurationFlyout
+            attributes={lensAttributes}
+            updatePanelState={jest.fn()}
+            coreStart={mockCoreStart}
+            startDependencies={startDependencies}
+            closeFlyout={jest.fn()}
+            datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
+            onApply={jest.fn()}
+            onCancel={jest.fn()}
+            {...propsOverrides}
+          />
+        )}
+      </EditorFrameServiceProvider>,
       {},
       {
         preloadedState: {
@@ -161,6 +178,11 @@ describe('LensEditConfigurationFlyout', () => {
           },
           activeDatasourceId: 'testDatasource',
           query: query as Query,
+          visualization: {
+            state: {},
+            activeId: 'testVis',
+            selectedLayerId: 'layer1',
+          },
         },
       }
     );

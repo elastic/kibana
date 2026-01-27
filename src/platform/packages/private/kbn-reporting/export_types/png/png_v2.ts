@@ -79,7 +79,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPNGV2>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
@@ -139,7 +139,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
               }, [] as string[]),
             })),
             tap(({ buffer }) => {
-              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`, { tags: [jobId] });
               apmTrans.setLabel('byte-length', buffer.byteLength, false);
             }),
             finalize(() => {
@@ -154,7 +154,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         metrics: { png: metrics },
         warnings,
       })),
-      tap({ error: (error) => logger.error(error) }),
+      tap({ error: (error) => logger.error(error, { tags: [jobId] }) }),
       finalize(() => apmGeneratePng?.end())
     );
 

@@ -517,3 +517,17 @@ export const STATUS_IN_PROGRESS = i18n.translate(
     defaultMessage: 'In progress',
   }
 );
+
+export const CASE_STATUS_ARIA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.statusFilter.optionsAriaLabel',
+  {
+    defaultMessage: 'Case status',
+  }
+);
+
+export const CASE_SEVERITY_ARIA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.severityFilter.optionsAriaLabel',
+  {
+    defaultMessage: 'Case severity',
+  }
+);

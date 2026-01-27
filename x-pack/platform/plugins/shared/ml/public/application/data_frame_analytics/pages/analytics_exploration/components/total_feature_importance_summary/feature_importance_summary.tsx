@@ -221,6 +221,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         ) {
           return (
             <EuiCallOut
+              announceOnMount
               data-test-subj="mlTotalFeatureImportanceNotCalculatedCallout"
               size="s"
               title={
@@ -235,6 +236,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           // or is it because the data is uniform
           return (
             <EuiCallOut
+              announceOnMount
               data-test-subj="mlNoTotalFeatureImportanceCallout"
               size="s"
               title={

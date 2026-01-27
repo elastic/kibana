@@ -113,6 +113,10 @@ export class SiemMigrationFakeLLM extends FakeLLM {
     return this.defaultResponse;
   }
 
+  async bindTools(): Promise<typeof this> {
+    return this;
+  }
+
   getNodeCallCount(nodeId: string): number {
     return this.callCount.get(nodeId) || 0;
   }

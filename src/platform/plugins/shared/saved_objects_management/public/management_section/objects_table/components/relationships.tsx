@@ -228,6 +228,9 @@ export class RelationshipsClass extends Component<
       },
     ];
 
+    const { savedObject } = this.props;
+    const savedObjectTitle = savedObject.meta.title || getDefaultTitle(savedObject);
+
     return (
       <>
         <EuiCallOut
@@ -248,6 +251,13 @@ export class RelationshipsClass extends Component<
           rowProps={() => ({
             'data-test-subj': `invalidRelationshipsTableRow`,
           })}
+          tableCaption={i18n.translate(
+            'savedObjectsManagement.objectsTable.relationships.invalidRelationshipsTableCaption',
+            {
+              defaultMessage: 'Invalid relationships for {title}',
+              values: { title: savedObjectTitle },
+            }
+          )}
         />
         <EuiSpacer />
       </>
@@ -409,6 +419,8 @@ export class RelationshipsClass extends Component<
       ] as SearchFilterConfig[],
     };
 
+    const savedObjectTitle = savedObject.meta.title || getDefaultTitle(savedObject);
+
     return (
       <>
         <EuiCallOut>
@@ -437,6 +449,13 @@ export class RelationshipsClass extends Component<
           rowProps={() => ({
             'data-test-subj': `relationshipsTableRow`,
           })}
+          tableCaption={i18n.translate(
+            'savedObjectsManagement.objectsTable.relationships.relationshipsTableCaption',
+            {
+              defaultMessage: 'Saved objects related to {title}',
+              values: { title: savedObjectTitle },
+            }
+          )}
         />
       </>
     );

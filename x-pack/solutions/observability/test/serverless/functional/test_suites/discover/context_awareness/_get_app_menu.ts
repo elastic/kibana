@@ -49,6 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display a "Add data" link to navigate to the onboarding page', async () => {
+        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
+        await appMenuOverflowButton.click();
+
         const link = await testSubjects.find('discoverAppMenuDatasetQualityLink');
         await link.click();
 
@@ -59,6 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display a "Create custom threshold rule" action under the Alerts menu to create an o11y alert', async () => {
+        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
+        await appMenuOverflowButton.click();
+
         const alertsButton = await testSubjects.find('discoverAlertsButton');
         await alertsButton.click();
 
@@ -73,6 +79,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display a "Create SLO" action under the Alerts menu to create an o11y alert', async () => {
+        const appMenuOverflowButton = await testSubjects.find('app-menu-overflow-button');
+        await appMenuOverflowButton.click();
+
         const alertsButton = await testSubjects.find('discoverAlertsButton');
         await alertsButton.click();
 

@@ -73,6 +73,8 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: true,
     mutedInstanceIds: [],
@@ -88,4 +90,12 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
     updateAttributes,
     updateOptions
   );
+
+  if (indices && indices.length > 0) {
+    await context.alertsService?.muteAllAlerts({
+      ruleId: id,
+      indices,
+      logger: context.logger,
+    });
+  }
 }

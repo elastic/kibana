@@ -12,6 +12,7 @@ import { useSetInitialValue } from './use_set_initial_value';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { useEditorActionContext } from '../../../contexts';
 
 jest.mock('lz-string', () => ({
   decompressFromEncodedURIComponent: jest.fn(),
@@ -21,13 +22,23 @@ jest.mock('./use_set_initial_value', () => ({
   ...jest.requireActual('./use_set_initial_value'),
 }));
 
+jest.mock('../../../contexts', () => ({
+  useEditorActionContext: jest.fn(),
+}));
+
+const mockUseEditorActionContext = useEditorActionContext as jest.MockedFunction<
+  typeof useEditorActionContext
+>;
+
 describe('useSetInitialValue', () => {
   const setValueMock = jest.fn();
   const addWarningMock = jest.fn();
+  const editorDispatchMock = jest.fn();
   const toastsMock: IToasts = { addWarning: addWarningMock } as any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
+    mockUseEditorActionContext.mockReturnValue(editorDispatchMock);
   });
 
   it('should set the initial value only once', async () => {
@@ -78,7 +89,7 @@ describe('useSetInitialValue', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        hash: '?load_from=https://www.elastic.co/some-data',
+        hash: '?load_from=https://www.elastic.co/docs/some-data',
       },
     });
 
@@ -99,16 +110,33 @@ describe('useSetInitialValue', () => {
       );
     });
 
-    expect(fetch).toHaveBeenCalledWith(new URL('https://www.elastic.co/some-data'));
-    // The remote data should be appended to the initial value in the editor
-    expect(setValueMock).toHaveBeenCalledWith('initial value\n\nremote data');
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    // Verify fetch was called with the correct URL
+    expect(fetch).toHaveBeenCalled();
+    const fetchCall = (fetch as jest.Mock).mock.calls[0];
+    expect(fetchCall[0].href).toBe('https://www.elastic.co/docs/some-data');
+
+    // The initial value should still be set
+    expect(setValueMock).toHaveBeenCalledWith('initial value');
+    // The dispatch should be called with the remote data
+    expect(editorDispatchMock).toHaveBeenCalledWith({
+      type: 'setRequestToRestore',
+      payload: { request: 'remote data' },
+    });
   });
 
   it('should show a warning if the load_from param is not an Elastic domain', async () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        hash: '?load_from=https://not.elastic.com/some-data',
+        hash: '?load_from=https://not.elastic.com/docs/some-data',
       },
     });
 
@@ -120,6 +148,14 @@ describe('useSetInitialValue', () => {
           toasts: toastsMock,
         })
       );
+    });
+
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
     });
 
     expect(fetch).not.toHaveBeenCalled();
@@ -147,9 +183,22 @@ describe('useSetInitialValue', () => {
       );
     });
 
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
     expect(decompressFromEncodedURIComponent).toHaveBeenCalledWith('compressed-data');
-    // The initial value in the editor should be replaces with the decompressed data
-    expect(setValueMock).toHaveBeenCalledWith('decompressed data');
+    // The initial value should still be set
+    expect(setValueMock).toHaveBeenCalledWith('initial value');
+    // The dispatch should be called with the remote data
+    expect(editorDispatchMock).toHaveBeenCalledWith({
+      type: 'setRequestToRestore',
+      payload: { request: 'decompressed data' },
+    });
   });
 
   it('should show a warning if decompressing a data URI fails', async () => {
@@ -169,6 +218,14 @@ describe('useSetInitialValue', () => {
           toasts: toastsMock,
         })
       );
+    });
+
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
     });
 
     expect(addWarningMock).toHaveBeenCalledWith(

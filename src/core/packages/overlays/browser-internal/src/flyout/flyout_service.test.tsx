@@ -8,8 +8,7 @@
  */
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
-
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -57,8 +56,8 @@ describe('FlyoutService', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       flyouts.open(mountText('Flyout content'));
       expect(JSON.stringify(mockReactDomRender.mock.calls)).toMatchSnapshot();
-      const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      const { container } = render(mockReactDomRender.mock.calls[0][0]);
+      expect(container.innerHTML).toMatchSnapshot();
     });
     describe('with a currently active flyout', () => {
       let ref1: OverlayRef;
@@ -69,8 +68,8 @@ describe('FlyoutService', () => {
         flyouts.open(mountText('Flyout content 2'));
         expect(JSON.stringify(mockReactDomRender.mock.calls)).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
-        expect(modalContent.html()).toMatchSnapshot();
+        const { container } = render(mockReactDomRender.mock.calls[1][0]);
+        expect(container.innerHTML).toMatchSnapshot();
         expect(() => ref1.close()).not.toThrowError();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });

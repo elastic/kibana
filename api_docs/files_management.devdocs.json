@@ -33,6 +33,8 @@
           "{ text: string; href: string; }[]"
         ],
         "path": "src/platform/plugins/private/files_management/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"filesManagement\""
         ],
         "path": "src/platform/plugins/private/files_management/common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -60,6 +64,8 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "path": "src/platform/plugins/private/files_management/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

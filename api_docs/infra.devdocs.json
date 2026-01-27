@@ -15,6 +15,8 @@
       "label": "InfraClientStartExports",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+      "lineNumber": 62,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,6 +31,8 @@
             "InventoryViewsServiceStart"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 63,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -44,6 +48,8 @@
             " | undefined"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 64,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -58,6 +64,8 @@
             "ITelemetryClient"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 65,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -78,6 +86,8 @@
         "label": "InfraConfig",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,6 +102,8 @@
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,6 +115,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,6 +131,8 @@
               "{ compositeSize: number; }"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,6 +147,8 @@
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +163,8 @@
               "{ customThresholdAlertsEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -159,6 +179,8 @@
         "label": "InfraRequestHandlerContext",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,6 +203,8 @@
               "[]; }>; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,6 +227,8 @@
               ">>>; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,6 +240,8 @@
             "label": "spaceId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -228,6 +256,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -242,6 +272,8 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,6 +288,8 @@
               "() => Promise<string>"
             ],
             "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -276,6 +310,8 @@
       "label": "InfraPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+      "lineNumber": 31,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -290,6 +326,8 @@
             "void"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -304,6 +342,8 @@
             "void | undefined"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -319,6 +359,8 @@
       "label": "InfraPluginStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -333,6 +375,8 @@
             "InventoryViewsServiceStart"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -348,6 +392,8 @@
             " | undefined"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

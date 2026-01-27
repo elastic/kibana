@@ -1,0 +1,22 @@
+{
+  "project.tags": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_project/tags"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags",
+    "availability": {
+      "stack": false,
+      "serverless": true
+    }
+  }
+}

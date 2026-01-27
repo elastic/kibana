@@ -15,7 +15,7 @@ import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
 import type { NavigationLink } from '../../../links/types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
-import { CATEGORIES } from './categories';
+import { getNavCategories } from './categories';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
@@ -103,7 +103,7 @@ describe('SecuritySideNav', () => {
           position: 'top',
         },
       ],
-      categories: CATEGORIES,
+      categories: getNavCategories(),
       tracker: track,
     });
   });

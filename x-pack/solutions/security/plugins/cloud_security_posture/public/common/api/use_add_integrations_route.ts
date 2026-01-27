@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useCisKubernetesIntegration } from './use_cis_kubernetes_integration';
 
 export const useAddIntegrationRoute = (
   category: 'misconfiguration_workflow' | 'vulnerability_workflow'
 ) => {
-  const { application } = useKibana().services;
-  const integrationsPath = application.getUrlForApp(INTEGRATIONS_PLUGIN_ID);
+  const cisIntegration = useCisKubernetesIntegration();
 
-  const addIntegrationPath = `${integrationsPath}/browse/security/${category}`;
+  if (!cisIntegration.isSuccess) return;
+
+  const addIntegrationPath = pagePathGetters
+    .integrations_all({ category: 'security', subCategory: `${category}` })
+    .join('');
 
   return addIntegrationPath;
 };

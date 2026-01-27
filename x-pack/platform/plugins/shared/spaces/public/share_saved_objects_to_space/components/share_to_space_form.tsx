@@ -47,6 +47,7 @@ export const ShareToSpaceForm = (props: Props) => {
   const createCopyCallout = showCreateCopyCallout ? (
     <EuiFlexItem grow={false}>
       <EuiCallOut
+        announceOnMount
         size="s"
         title={
           <FormattedMessage

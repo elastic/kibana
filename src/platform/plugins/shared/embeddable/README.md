@@ -1,11 +1,18 @@
-### Table of Contents
+## Table of Contents
 
-- [Guiding principles](#guiding-principles)
-- [Embeddable overview](#embeddable-overview)
-- [Publishing packages](#publishing-packages)
-- [Embeddable panel](#embeddable-panel)
-- [Best practices](#best-practices)
-- [Examples](#examples)
+  - [Public](#public)
+    - [Guiding principles](#guiding-principles)
+    - [Embeddable overview](#embeddable-overview)
+    - [Publishing packages](#publishing-packages)
+    - [Embeddable panel](#embeddable-panel)
+    - [Best practices](#best-practices)
+    - [Examples](#examples)
+  - [Server](#server)
+    - [REST APIs](#rest-apis-considerations)
+    - [Transforms](#transforms)
+
+
+## Public
 
 ### Guiding principles
 
@@ -25,7 +32,7 @@ Embeddables are React components that manage their own state, can be serialized 
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+embeddablePublicSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
@@ -33,9 +40,10 @@ embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
 
 Embeddables are rendered with `EmbeddableRenderer` React component.
 
-### Common publishing packages
+### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
+#### Common publishing packages
 The table below lists interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
 
 | Interface | Description |
@@ -75,7 +83,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
-### Custom publishing packages
+#### Custom publishing packages
 Embeddables can expose interfaces unique to a single embeddable implemenation.
 The table below lists interfaces that only apply to single embeddable types.
 These interfaces may be used by actions to imperatively interact with specific embeddable types.
@@ -103,26 +111,26 @@ The table below lists the UiActions registered to embeddable panel triggers.
 
 | UiAction | Description | Trigger | Optional interfaces required by action |
 | ---------| ----------- | ---------- | ---------- |
-| ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
-| ACTION_CLONE_PANEL | Clones panel in page | CONTEXT_MENU_TRIGGER | |
-| ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
+| saveToLibrary | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| clonePanel | Clones panel in page | CONTEXT_MENU_TRIGGER | |
+| copyToDashboard | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
-| ACTION_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
+| ACTION_INPUT_CONTROL_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
-| ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
-| ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
+| editPanel | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
+| togglePanel | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
 | ACTION_EXPLORE_DATA | Explore underlying data | CONTEXT_MENU_TRIGGER | PublishesDataViews |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
-| ACTION_INSPECT_PANEL | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
+| openInspector | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
 | ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
+| deletePanel | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
-| ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| unlinkFromLibrary | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
 | ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
-| ADD_TO_EXISTING_CASE_ACTION_ID | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| ALERT_RULE_TRIGGER | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
-| BADGE_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
-| CONVERT_LEGACY_MARKDOWN_ACTION_ID | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
+| embeddable_addToExistingCase | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
+| alertRule | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
+| ACTION_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
+| CONVERT_LEGACY_MARKDOWN | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
 | create-ml-ad-job-action | Detect anomalies | CONTEXT_MENU_TRIGGER |  |
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
 | generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
@@ -168,3 +176,56 @@ Use the following examples to render embeddables in your application. To run emb
 - [Render a single embeddable](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/search/search_embeddable_renderer.tsx)
 - [Embeddable state management](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/app/state_management_example/state_management_example.tsx)
 - [Create a dashboard like application that renders many embeddables and allows users to add and remove embeddables](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/app/presentation_container_example/components/presentation_container_example.tsx)
+
+
+## Server
+Containers, such as Dashboard, incorporate embeddable state in REST APIs and store embeddable state in saved objects.
+
+### REST APIs considerations
+Embeddable serialized state requires additional restrictions and planning since it is incorporated into public REST APIs.
+
+#### No breaking changes
+Embeddable serialized state can not be modified with breaking changes. Fields can not be deleted or change type. Optional fields can not be changed to required. Optional additive changes are allowed.
+
+#### snake_case
+Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
+
+#### Minimize required fields
+Avoid unnecessary information to keep public REST APIs concise. Do not require fields that have can have a default behavior. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
+
+#### Do not apply defaults in server
+POST, PUT, and GET requests should return symmetrical data. Do not apply defaults in server transforms. Instead, spread defaults into embeddable state in public when initializing an embeddable.
+
+Defaults can change over time. Changing defaults only effects dashboards created from REST APIs. Dashboards saved from the UI contain embeddable seralized state - which includes spread defaults - thus preserving the exact user configuration at the time the dashboard is last saved.
+
+### Transforms
+Transforms decouple REST API state from stored state, allowing embeddables to have one shape for REST APIs and another for storage.
+- On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+- On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+
+**Note:** Transforms are optional and only required when an embeddable has references or a container has stored legacy embeddable state that needs to converted into new schema defined shape.
+
+Containers use schemas to
+- Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
+- Validate embeddable state, failing REST API requests when schema validation fails.
+
+```
+embeddableServerSetup.registerTransforms(
+  'myEmbeddableType',
+  {
+    transformIn: (state: EmbeddableState) => {
+      return {
+        state: convertToStoredState(state),
+        references: extractReferences(state)
+      };
+    },
+    transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
+      return convertAndInjectReferences(state, references);
+    },
+    schema: schema.object({
+      required_field: schema.string(),
+      optional_field: schema.maybe(schema.string()),
+    })
+  }
+});
+```

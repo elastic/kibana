@@ -11,6 +11,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const reindexServiceSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  rollupsEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor<ReindexConfig> = {

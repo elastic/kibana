@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-data-sources",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -8,7 +8,7 @@
 // embedded map v2
 
 import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled from '@emotion/styled';
@@ -17,6 +17,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
@@ -30,7 +31,6 @@ import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
@@ -116,10 +116,11 @@ export const EmbeddedMapComponent = ({
   const { addError } = useAppToasts();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.explore);
+  const { dataView: experimentalDataView } = useDataView(PageScope.explore);
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const selectedPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.default);
   });
 
   const isFieldInIndexPattern = useIsFieldInIndexPattern();
@@ -140,6 +141,7 @@ export const EmbeddedMapComponent = ({
     [euiTheme, experimentalDataView]
   );
 
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
     if (newDataViewPickerEnabled) return;
 
@@ -171,6 +173,7 @@ export const EmbeddedMapComponent = ({
     };
   }, [addError, availableDataViews, euiTheme, isFieldInIndexPattern, newDataViewPickerEnabled]);
 
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
     if (newDataViewPickerEnabled) return;
 

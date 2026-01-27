@@ -9,7 +9,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -17,7 +16,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PresentationUtilPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
-export let contentManagementService: ContentManagementPublicStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let uiActionsService: UiActionsPublicStart;
 
@@ -25,7 +23,6 @@ const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: PresentationUtilPluginStartDeps) => {
   coreServices = kibanaCore;
-  contentManagementService = deps.contentManagement;
   dataViewsService = deps.dataViews;
   uiActionsService = deps.uiActions;
 

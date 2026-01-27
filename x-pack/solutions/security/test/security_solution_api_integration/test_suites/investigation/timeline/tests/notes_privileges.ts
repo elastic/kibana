@@ -5,53 +5,37 @@
  * 2.0.
  */
 
+import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { createNote, deleteNote, getNote } from '../../utils/notes';
-import * as users from '../../../../config/privileges/users';
-import { roles } from '../../../../config/privileges/roles';
+import * as roles from '../../../../config/privileges/roles';
 
-const canOnlyReadUsers = [users.secReadV1User, users.secNotesReadUser];
-const canWriteUsers = [users.secAllV1User, users.secNotesAllUser];
-const canWriteOrReadUsers = [...canOnlyReadUsers, ...canWriteUsers];
-const cannotAccessUsers = [users.secNoneV1User, users.secNotesNoneUser];
-const cannotWriteUsers = [...canOnlyReadUsers, ...cannotAccessUsers];
+const canOnlyReadRoles = [roles.secReadV1, roles.secNotesReadV2];
+const canWriteRoles = [roles.secAllV1, roles.secNotesAllV2];
+const canWriteOrReadRoles = [...canOnlyReadRoles, ...canWriteRoles];
+const cannotAccessRoles = [roles.secNoneV1, roles.secNotesNoneV2];
+const cannotWriteRoles = [...canOnlyReadRoles, ...cannotAccessRoles];
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
-  const config = getService('config');
-  const isServerless = config.get('serverless');
-  const isEss = !isServerless;
+  const supertestCache = new Map<(typeof roles.roles)[number]['name'], TestAgent>();
 
   describe('Notes privileges', () => {
     before(async () => {
-      if (isEss) {
-        await Promise.all(
-          roles.map((role) => {
-            return utils.createRole(role.name, role);
-          })
-        );
-        await Promise.all(
-          users.allUsers.map((user) => {
-            return utils.createUser(user);
-          })
-        );
+      for (const role of roles.roles) {
+        supertestCache.set(role.name, await utils.createSuperTestWithCustomRole(role));
       }
     });
+
     after(async () => {
-      if (isEss) {
-        await utils.deleteUsers(users.allUsers.map((user) => user.username));
-        await utils.deleteRoles(roles.map((role) => role.name));
-      }
-    });
-    afterEach(async () => {
-      await utils.cleanUpCustomRole();
+      await utils.cleanUpCustomRoles();
     });
 
     describe('read notes', () => {
       let getNoteId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithUser(users.secNotesAllUser);
+        const superTest = supertestCache.get(roles.secNotesAllV2.name)!;
         const {
           body: {
             note: { noteId },
@@ -60,17 +44,17 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         getNoteId = () => noteId;
       });
 
-      canWriteOrReadUsers.forEach((user) => {
-        it(`user "${user.username}" can read notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      canWriteOrReadRoles.forEach((role) => {
+        it(`role "${role.name}" can read notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const getNoteResponse = await getNote(superTest, getNoteId());
           expect(getNoteResponse.status).to.be(200);
         });
       });
 
-      cannotAccessUsers.forEach((user) => {
-        it(`user "${user.username}" cannot read notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      cannotAccessRoles.forEach((role) => {
+        it(`role "${role.name}" cannot read notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const getNoteResponse = await getNote(superTest, getNoteId());
           expect(getNoteResponse.status).to.be(403);
         });
@@ -78,17 +62,17 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('create notes', () => {
-      canWriteUsers.forEach((user) => {
-        it(`user "${user.username}" can create notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      canWriteRoles.forEach((role) => {
+        it(`role "${role.name}" can create notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const { status } = await createNote(superTest, { text: 'test', documentId: '123' });
           expect(status).to.be(200);
         });
       });
 
-      cannotWriteUsers.forEach((user) => {
-        it(`user "${user.username}" cannot create notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      cannotWriteRoles.forEach((role) => {
+        it(`role "${role.name}" cannot create notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const { status } = await createNote(superTest, { text: 'test', documentId: '123' });
           expect(status).to.be(403);
         });
@@ -98,7 +82,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('delete notes', () => {
       let getNoteId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithUser(users.secNotesAllUser);
+        const superTest = supertestCache.get(roles.secNotesAllV2.name)!;
         const {
           body: {
             note: { noteId },
@@ -107,17 +91,17 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         getNoteId = () => noteId;
       });
 
-      canWriteUsers.forEach((user) => {
-        it(`user "${user.username}" can delete notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      canWriteRoles.forEach((role) => {
+        it(`role "${role.name}" can delete notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const deleteNoteRequest = await deleteNote(superTest, getNoteId());
           expect(deleteNoteRequest.status).to.be(200);
         });
       });
 
-      cannotWriteUsers.forEach((user) => {
-        it(`user "${user.username}" cannot delete notes`, async () => {
-          const superTest = await utils.createSuperTestWithUser(user);
+      cannotWriteRoles.forEach((role) => {
+        it(`role "${role.name}" cannot delete notes`, async () => {
+          const superTest = supertestCache.get(role.name)!;
           const deleteNoteRequest = await deleteNote(superTest, getNoteId());
           expect(deleteNoteRequest.status).to.be(403);
         });

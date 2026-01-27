@@ -10,7 +10,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+} from '../../../../common/burn_rate_rule/field_names';
 
 export const sloRuleFieldMap = {
   [SLO_ID_FIELD]: {

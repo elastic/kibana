@@ -40,7 +40,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 }));
 
 const mockUseQuery = jest.fn();
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
 }));
 

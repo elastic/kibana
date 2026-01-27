@@ -225,7 +225,7 @@ describe('getCerts', () => {
                       "should": Array [
                         Object {
                           "range": Object {
-                            "tls.certificate_not_valid_after": Object {
+                            "tls.server.x509.not_after": Object {
                               "lte": 10000,
                             },
                           },

@@ -16,8 +16,6 @@
  */
 import {
   mockDashboardBackupService,
-  mockDashboardContentManagementCache,
-  mockDashboardContentManagementService,
   setStubKibanaServices,
   setStubLogger,
 } from './public/services/mocks';
@@ -25,14 +23,6 @@ import {
 setStubLogger();
 // Start the kibana services with stubs
 setStubKibanaServices();
-
-// Mock the dashboard services
-jest.mock('./public/services/dashboard_content_management_service', () => {
-  return {
-    getDashboardContentManagementCache: () => mockDashboardContentManagementCache,
-    getDashboardContentManagementService: () => mockDashboardContentManagementService,
-  };
-});
 
 jest.mock('./public/services/dashboard_backup_service', () => {
   return {

@@ -7,24 +7,24 @@
 
  {{> disclaimer}}
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 {{#each operations}}
-import type { 
+import type {
   {{operationId}}RequestQueryInput,
   {{operationId}}RequestParamsInput,
   {{operationId}}RequestBodyInput
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
 {{/each}}
 
-import { FtrProviderContext } from 'x-pack/solutions/security/test/api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
   {{#each operations}}
     {{#if description}}
     /**
@@ -40,8 +40,23 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         {{~#if requestBody}}.send(props.body as object){{/if}}
         {{~#if requestQuery}}.query(props.query){{/if}}
       },
-  {{/each}} 
-  }
+  {{/each}}
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
+    },
+  };
 }
 
 {{#each operations}}

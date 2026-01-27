@@ -45,9 +45,8 @@ import { useKibanaEnvironmentContext } from '../../hooks/use_kibana';
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
-const HOSTS_FEEDBACK_LINK =
-  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
-const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer?usp=pp_url';
+const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
+const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer';
 
 const MetricsExplorerPage = dynamic(() =>
   import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
@@ -240,6 +239,7 @@ const HeaderLinkFeedbackButtonRoute = ({
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={path}
         />
       )}
     />

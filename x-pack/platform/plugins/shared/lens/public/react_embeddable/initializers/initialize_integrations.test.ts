@@ -7,18 +7,13 @@
 
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
-import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
-import type { LensRuntimeState } from '../types';
+import { getLensRuntimeStateMock } from '../mocks';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
-  const services = makeEmbeddableServices(undefined, undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'formBased' },
-  });
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const serializeDynamicActions = undefined;
-  const { api } = initializeIntegrations(() => runtimeState, serializeDynamicActions, services);
+  const { api } = initializeIntegrations(() => runtimeState);
   return api;
 }
 
@@ -34,14 +29,12 @@ describe('Dashboard services API', () => {
     it('should work for a by-value panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({ attributes });
-      const { rawState, references } = api.serializeState();
+      const serializedState = api.serializeState();
       // make sure of 3 things:
       // * attributes are sent back
-      expect(rawState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
+      expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
       // * savedObjectId is cleaned up
-      expect(rawState).not.toHaveProperty('savedObjectId');
-      // * references should be at root level
-      expect(references).toEqual(attributes.references);
+      expect(serializedState).not.toHaveProperty('savedObjectId');
     });
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
@@ -49,18 +42,11 @@ describe('Dashboard services API', () => {
         savedObjectId: '123',
         attributes,
       });
-      const { rawState, references } = api.serializeState();
+      const serializedState = api.serializeState();
       // check the same 3 things as above
-      expect(rawState).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
-      // * references should be at root level
-      expect(references).toEqual([
-        ...attributes.references,
-        {
-          id: '123',
-          name: 'savedObjectRef',
-          type: 'lens',
-        },
-      ]);
+      expect(serializedState).not.toEqual(
+        expect.objectContaining({ attributes: expect.anything() })
+      );
     });
 
     it('should remove the searchSessionId from the serializedState', async () => {
@@ -69,8 +55,8 @@ describe('Dashboard services API', () => {
         attributes,
         searchSessionId: faker.string.uuid(),
       });
-      const { rawState } = api.serializeState();
-      expect('searchSessionId' in rawState).toBeFalsy();
+      const serializedState = api.serializeState();
+      expect('searchSessionId' in serializedState).toBeFalsy();
     });
   });
 });

@@ -17,7 +17,7 @@ export const TextField = ({ fieldConfiguration }: { fieldConfiguration: FieldCon
 
   return (
     <EuiFormRow label={label} helpText={helpText} fullWidth>
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText {...inputProps} inputRef={ref} compressed={true} />
     </EuiFormRow>
   );
 };

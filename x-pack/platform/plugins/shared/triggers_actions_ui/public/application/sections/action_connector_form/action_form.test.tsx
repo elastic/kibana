@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { act } from 'react-dom/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import type { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
-import ActionForm from './action_form';
-import { useKibana } from '../../../common/lib/kibana';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React, { lazy } from 'react';
+import { act } from 'react-dom/test-utils';
+import { useKibana } from '../../../common/lib/kibana';
+import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import ActionForm from './action_form';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -119,6 +119,19 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
     actionTypeTitle: 'system-action-type-title',
+  };
+
+  const workflowsSystemActionType = {
+    id: '.workflows',
+    iconClass: 'test',
+    selectMessage: 'workflows system action',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+    actionTypeTitle: 'workflows-system-action-title',
   };
 
   const allActions = [
@@ -242,6 +255,7 @@ describe('action_form', () => {
       disabledByActionType,
       preconfiguredOnly,
       systemActionType,
+      workflowsSystemActionType,
     ]);
 
     actionTypeRegistry.has.mockReturnValue(true);
@@ -310,6 +324,15 @@ describe('action_form', () => {
         supportedFeatureIds: ['alerting'],
       },
       {
+        id: 'hidden-in-ui',
+        name: 'Hidden in UI',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
         id: 'disabled-by-license',
         name: 'Disabled by license',
         enabled: false,
@@ -336,6 +359,17 @@ describe('action_form', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
+      },
+      {
+        id: '.workflows',
+        name: 'Workflows',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        allowMultipleSystemActions: true,
       },
     ]);
 
@@ -447,6 +481,14 @@ describe('action_form', () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
+      );
+      expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('does not render action types hidden in ui', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        '[data-test-subj="hidden-in-ui-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
@@ -755,6 +797,18 @@ describe('action_form', () => {
       );
 
       expect(actionOption.at(1).prop('disabled')).toBe(true);
+    });
+
+    it('allows multiple instances of workflows system action', async () => {
+      const wrapper = await setup([
+        { id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} },
+      ]);
+
+      const actionOption = wrapper.find(
+        `[data-test-subj=".workflows-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.at(1).prop('disabled')).toBe(false);
     });
   });
 });

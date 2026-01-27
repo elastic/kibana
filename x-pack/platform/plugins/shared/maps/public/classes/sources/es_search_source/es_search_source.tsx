@@ -334,7 +334,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
     };
 
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
 
     if (topHitsGroupByTimeseries) {
@@ -397,6 +397,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const allHits: any[] = [];
@@ -461,7 +462,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       ));
 
     const maxResultWindow = await this.getMaxResultWindow();
-    const searchSource = await this.makeSearchSource(
+    const { searchSource, fetchOptions } = await this.makeSearchSource(
       useRequestMetaWithoutTimeslice ? requestMetaWithoutTimeslice : requestMeta,
       maxResultWindow,
       initialSearchContext
@@ -492,6 +493,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const isTimeExtentForTimeslice =
@@ -905,7 +907,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
 
-    const searchSource = await this.makeSearchSource(requestMeta, indexSettings.maxResultWindow);
+    const { searchSource } = await this.makeSearchSource(
+      requestMeta,
+      indexSettings.maxResultWindow
+    );
     // searchSource calls dataView.getComputedFields to seed docvalueFields
     // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
     // we don't need these as they request unneeded fields and bloat responses
@@ -1012,7 +1017,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     onWarning: (warning: SearchResponseWarning) => void
   ) {
     const maxResultWindow = await this.getMaxResultWindow();
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
     const resp = await this._runEsQuery({
       requestId: this._getFeaturesCountRequestId(),
@@ -1029,6 +1034,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       ),
       requestsAdapter: inspectorAdapters.requests,
       onWarning,
+      fetchOptions,
     });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }

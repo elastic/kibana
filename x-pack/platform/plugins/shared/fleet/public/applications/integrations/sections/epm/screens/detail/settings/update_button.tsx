@@ -265,6 +265,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         {conflictCount && conflictCount > 0 ? (
           <>
             <EuiCallOut
+              announceOnMount
               color="warning"
               iconType="warning"
               title={i18n.translate(

@@ -54,6 +54,7 @@ describe('GET privileges', () => {
         enableMappingsSourceFieldSection: true,
         enableTogglingDataRetention: true,
         enableProjectLevelRetentionChecks: false,
+        enableFailureStoreRetentionDisabling: true,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -127,6 +128,7 @@ describe('GET privileges', () => {
           enableMappingsSourceFieldSection: true,
           enableTogglingDataRetention: true,
           enableProjectLevelRetentionChecks: false,
+          enableFailureStoreRetentionDisabling: true,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {

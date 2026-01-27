@@ -10,10 +10,6 @@ import type { SNProductsConfig } from './types';
 export const serviceNowITSMTable = 'incident';
 export const serviceNowSIRTable = 'sn_si_incident';
 
-export const ServiceNowITSMConnectorTypeId = '.servicenow';
-export const ServiceNowSIRConnectorTypeId = '.servicenow-sir';
-export const ServiceNowITOMConnectorTypeId = '.servicenow-itom';
-
 const SN_ITSM_APP_ID = '7148dbc91bf1f450ced060a7234bcb88';
 const SN_SIR_APP_ID = '2f0746801baeb01019ae54e4604bcb0f';
 
@@ -44,4 +40,3 @@ export const snExternalServiceConfig: SNProductsConfig = {
 };
 
 export const FIELD_PREFIX = 'u_';
-export const DEFAULT_ALERTS_GROUPING_KEY = '{{rule.id}}:{{alert.id}}';

@@ -29,7 +29,7 @@ export const getUrlValueFromState = (
 ): datasetQualityDetailsUrlSchemaV2.UrlSchema =>
   deepCompactObject<datasetQualityDetailsUrlSchemaV2.UrlSchema>({
     dataStream: state.dataStream,
-    view: state.view === 'streams' ? state.view : undefined,
+    view: state.view === 'classic' || state.view === 'wired' ? state.view : undefined,
     timeRange: state.timeRange,
     qualityIssues: state.qualityIssues,
     breakdownField: state.breakdownField,

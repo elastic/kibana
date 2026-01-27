@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Interval, StringInterval } from '../types';
+import type { Interval, StringInterval } from '../../../application/gaps/types/intervals';
 
 /**
  * Finds the overlapping portion of two intervals, if any.

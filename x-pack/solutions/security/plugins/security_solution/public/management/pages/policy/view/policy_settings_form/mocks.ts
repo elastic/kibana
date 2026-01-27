@@ -120,6 +120,7 @@ export const getPolicySettingsFormTestSubjects = (
       card: linuxEventsTestSubj(),
       osValueContainer: linuxEventsTestSubj('osValueContainer'),
       optionsContainer: linuxEventsTestSubj('options'),
+      dnsCheckbox: linuxEventsTestSubj('dns'),
       fileCheckbox: linuxEventsTestSubj('file'),
       networkCheckbox: linuxEventsTestSubj('network'),
       processCheckbox: linuxEventsTestSubj('process'),

@@ -18,13 +18,13 @@ export class AutoDeploy {
   private inferFinished: boolean = false;
   constructor(private readonly http: HttpSetup, private readonly inferenceId: string) {}
 
-  public async deploy() {
+  public async deploy(signal?: AbortSignal) {
     this.inferError = null;
     if (await this.isDeployed()) {
       return;
     }
 
-    this.infer()
+    this.infer(signal)
       .then(() => {
         this.inferFinished = true;
       })
@@ -39,16 +39,17 @@ export class AutoDeploy {
         }
         this.inferError = e;
       });
-    await this.pollIsDeployed();
+    await this.pollIsDeployed(signal);
   }
 
-  private async infer() {
+  private async infer(signal?: AbortSignal) {
     return this.http.fetch<InferenceInferenceResponse>(
       `/internal/data_visualizer/inference/${this.inferenceId}`,
       {
         method: 'POST',
         version: '1',
         body: JSON.stringify({ input: '' }),
+        signal,
       }
     );
   }
@@ -75,8 +76,8 @@ export class AutoDeploy {
     });
   }
 
-  private async pollIsDeployed() {
-    while (true) {
+  private async pollIsDeployed(signal?: AbortSignal) {
+    while (true && signal?.aborted !== true) {
       if (this.inferError !== null) {
         throw this.inferError;
       }

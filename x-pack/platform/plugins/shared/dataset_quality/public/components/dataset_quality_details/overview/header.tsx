@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import { useDatasetQualityDetailsState } from '../../../hooks';
+import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 import { overviewHeaderTitle } from '../../../../common/translations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function OverviewHeader({
-  handleRefresh,
+  handleTimeChange,
 }: {
-  handleRefresh: (refreshProps: OnRefreshProps) => void;
+  handleTimeChange: (dateRange: TimeRange) => void;
 }) {
-  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
+  const { timeRange } = useDatasetQualityDetailsState();
+  const { unifiedSearch } = useKibanaContextForPlugin().services;
 
   const onTimeChange = useCallback(
-    ({ isInvalid, ...timeRangeProps }: OnTimeChangeProps) => {
-      if (!isInvalid) {
-        updateTimeRange({ refreshInterval: timeRange.refresh.value, ...timeRangeProps });
-      }
+    ({ ...timeRangeProps }: TimeRange) => {
+      handleTimeChange({ ...timeRangeProps });
     },
-    [updateTimeRange, timeRange.refresh]
+    [handleTimeChange]
   );
 
   return (
@@ -40,7 +40,7 @@ export default function OverviewHeader({
         alignItems="center"
         gutterSize="xs"
       >
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <span>{overviewHeaderTitle}</span>
         </EuiTitle>
       </EuiFlexGroup>
@@ -50,17 +50,20 @@ export default function OverviewHeader({
           flex-grow: 0;
         `}
       >
-        <EuiSuperDatePicker
-          width="auto"
-          compressed={true}
-          isLoading={false}
-          start={timeRange.from}
-          end={timeRange.to}
-          onTimeChange={onTimeChange}
-          onRefresh={handleRefresh}
-          isQuickSelectOnly={false}
-          showUpdateButton="iconOnly"
-          updateButtonProps={{ fill: false }}
+        <unifiedSearch.ui.SearchBar
+          appName="datasetQualityDetails"
+          showDatePicker={true}
+          showFilterBar={false}
+          showQueryMenu={false}
+          showQueryInput={false}
+          submitButtonStyle="iconOnly"
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
+          query={undefined}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          onQuerySubmit={(payload) => onTimeChange(payload.dateRange)}
+          isAutoRefreshDisabled={true}
         />
       </EuiFlexGroup>
     </EuiFlexGroup>

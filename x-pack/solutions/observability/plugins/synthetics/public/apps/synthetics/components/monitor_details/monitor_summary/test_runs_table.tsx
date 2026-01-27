@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { type MouseEvent, useMemo, useState } from 'react';
-import dedent from 'dedent';
+import type { MouseEvent } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +51,6 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
-import { useScreenContext } from '../../../hooks/use_screen_context';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -90,29 +89,6 @@ export const TestRunsTable = ({
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
-
-  const isLast10 = paginable === false && page.size === 10;
-  const timeRangeContext = `between ${from} and ${to} UTC`;
-
-  const screenContext = dedent`
-    This table shows ${isLast10 ? 'the last ' : ''}${page.size} test runs for the monitor${
-    isLast10 ? '' : ` ${timeRangeContext}`
-  }.
-
-    ${pings
-      .map((ping, i) => {
-        return `${i + 1}. Executed at ${ping['@timestamp']} from ${
-          ping.observer.geo.name
-        } with status ${ping.monitor.status} and duration ${formatTestDuration(
-          ping.monitor.duration?.us
-        )}.\n ${ping.error?.message ? `Error: ${ping.error.message}` : ''}\n`;
-      })
-      .join('\n')}
-  `;
-
-  useScreenContext({
-    screenDescription: screenContext,
-  });
 
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();

@@ -14,6 +14,7 @@ export type {
   PackageService,
   PackageClient,
   AgentPolicyServiceInterface,
+  AgentlessPoliciesService,
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,

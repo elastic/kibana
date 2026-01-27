@@ -9,7 +9,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonText,
   EuiSkeletonTitle,
+  EuiSpacer,
   EuiTextColor,
   EuiTitle,
   useEuiShadow,
@@ -49,11 +51,15 @@ export function Header() {
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
 
   return !loadingState.integrationDetailsLoaded ? (
-    <EuiSkeletonTitle
-      size="s"
-      data-test-subj="datasetQualityDetailsIntegrationLoading"
-      className="datasetQualityDetailsIntegrationLoading"
-    />
+    <>
+      <EuiSkeletonTitle
+        size="l"
+        data-test-subj="datasetQualityDetailsIntegrationLoading"
+        className="datasetQualityDetailsIntegrationLoading"
+      />
+      <EuiSpacer size="s" />
+      <EuiSkeletonText lines={1} />
+    </>
   ) : (
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow>

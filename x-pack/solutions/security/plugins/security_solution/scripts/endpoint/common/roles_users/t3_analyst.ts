@@ -7,7 +7,6 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getT3Analyst: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
@@ -18,10 +17,8 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: [
+          siemV5: [
             'all',
-            'read_alerts',
-            'crud_alerts',
             'endpoint_list_all',
             'global_artifact_management_all',
             'trusted_applications_all',
@@ -29,6 +26,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'event_filters_all',
             'host_isolation_exceptions_all',
             'blocklist_all',
+            'endpoint_exceptions_all',
             'policy_management_read',
             'host_isolation_all',
             'process_operations_all',
@@ -37,6 +35,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'scan_operations_all',
             'workflow_insights_all',
           ],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

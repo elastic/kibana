@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/es-snapshot-loader",
+  "owner": "@elastic/obs-ai-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

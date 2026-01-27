@@ -40,6 +40,7 @@ export class UiActionsExecutionService {
     },
     alwaysShowPopup?: boolean
   ): Promise<void> {
+    // @ts-expect-error upgrade typescript v5.9.3
     const shouldBatch = !(await action.shouldAutoExecute?.({ ...context, trigger })) ?? false;
     const task: ExecuteActionTask = {
       action,

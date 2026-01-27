@@ -18,7 +18,6 @@ import {
   setOverviewPageStateAction,
   trendStatsBatch,
 } from '../../synthetics/state';
-import type { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';
@@ -28,6 +27,7 @@ import type { FlyoutParamProps } from '../../synthetics/components/monitors_page
 import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
+import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
 
 export const StatusGridComponent = ({
   reload$,

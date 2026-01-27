@@ -7,7 +7,6 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getHunter: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
@@ -18,7 +17,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: [
+          siemV5: [
             'all',
 
             'policy_management_read',
@@ -28,11 +27,13 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
             'event_filters_read',
             'host_isolation_exceptions_read',
             'blocklist_all',
+            'endpoint_exceptions_read',
 
             'host_isolation_all',
             'process_operations_all',
             'actions_log_management_all',
           ],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

@@ -203,6 +203,12 @@ export const useReindex = ({
 
     const { data, error } = await api.getReindexStatus(indexName);
 
+    // The request can resolve after unmount; avoid setting state (and scheduling poll timers)
+    // when the hook is no longer mounted.
+    if (!isMounted.current) {
+      return;
+    }
+
     if (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
@@ -219,17 +225,25 @@ export const useReindex = ({
       return;
     }
 
+    data.meta.reindexName = generateNewIndexName(indexName, kibanaVersion);
+
     setReindexState((prevValue: ReindexState) => {
       return getReindexState(prevValue, data);
     });
 
     if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
       // Only keep polling if it exists and is in progress.
-      pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
+      pollIntervalIdRef.current = setTimeout(() => {
+        if (!isMounted.current) {
+          return;
+        }
+
+        void updateStatus();
+      }, POLL_INTERVAL);
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
       simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
+  }, [clearPollInterval, api, indexName, simulateExtraSteps, kibanaVersion]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {

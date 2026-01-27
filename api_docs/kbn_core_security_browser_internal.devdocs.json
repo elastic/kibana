@@ -20,6 +20,8 @@
           ">"
         ],
         "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "any"
             ],
             "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -48,6 +52,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -67,6 +73,8 @@
               "SecurityServiceSetup"
             ],
             "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -84,6 +92,8 @@
               "SecurityServiceStart"
             ],
             "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -100,6 +110,8 @@
               "() => void"
             ],
             "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -124,6 +136,8 @@
           "SecurityServiceSetup"
         ],
         "path": "src/core/packages/security/browser-internal/src/internal_contracts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -139,6 +153,8 @@
           "SecurityServiceStart"
         ],
         "path": "src/core/packages/security/browser-internal/src/internal_contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

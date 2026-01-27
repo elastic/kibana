@@ -21,7 +21,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import type { ExportType } from '@kbn/reporting-server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ReportingCore } from '../../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
@@ -36,6 +35,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { EventTracker } from '../../../usage';
 import { registerJobInfoRoutesPublic } from '../jobs';
+import { getExportType } from '../../test_utils';
 
 describe(`Reporting Job Management Routes: Public`, () => {
   const reportingSymbol = Symbol('reporting');
@@ -116,13 +116,15 @@ describe(`Reporting Job Management Routes: Public`, () => {
     eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    exportTypesRegistry = new ExportTypesRegistry();
-    exportTypesRegistry.register({
-      id: 'unencoded',
-      jobType: 'unencodedJobType',
-      jobContentExtension: 'csv',
-      validLicenses: ['basic', 'gold'],
-    } as ExportType);
+    exportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
+    exportTypesRegistry.register(
+      getExportType({
+        id: 'unencoded',
+        jobType: 'unencodedJobType',
+        jobContentExtension: 'csv',
+        validLicenses: ['basic', 'gold'],
+      })
+    );
     reportingCore.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await reportingCore.getEsClient()).asInternalUser as typeof mockEsClient;

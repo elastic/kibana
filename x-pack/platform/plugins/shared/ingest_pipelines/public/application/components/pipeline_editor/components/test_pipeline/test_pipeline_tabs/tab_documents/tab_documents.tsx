@@ -175,7 +175,7 @@ export const TabDocuments: FunctionComponent<Props> = ({
     <Form
       form={form}
       data-test-subj="testPipelineForm"
-      isInvalid={form.isSubmitted && !form.isValid}
+      isInvalid={form.isSubmitted && form.isValid === false}
       onSubmit={validateAndTestPipeline}
       error={form.getErrors()}
     >

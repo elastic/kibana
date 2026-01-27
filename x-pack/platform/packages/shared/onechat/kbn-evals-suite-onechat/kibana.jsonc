@@ -1,7 +1,0 @@
-{
-  "type": "functional-tests",
-  "id": "@kbn/evals-suite-onechat",
-  "owner": "@elastic/workchat-eng",
-  "group": "platform",
-  "visibility": "private"
-}

@@ -14,13 +14,13 @@ import type {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
-import type { Config } from './types';
+import type { DashboardDrilldownConfig } from './types';
 export interface Params {
   start: StartServicesGetter<{
     uiActionsEnhanced: AdvancedUiActionsStart;
@@ -31,7 +31,7 @@ export interface Params {
 }
 
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
-  implements Drilldown<Config, Context>
+  implements Drilldown<DashboardDrilldownConfig, Context>
 {
   constructor(protected readonly params: Params) {
     this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
@@ -43,7 +43,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   public abstract readonly supportedTriggers: () => string[];
 
   protected abstract getLocation(
-    config: Config,
+    config: DashboardDrilldownConfig,
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation>;
@@ -55,22 +55,29 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   public readonly euiIcon = 'dashboardApp';
 
   private readonly ReactCollectConfig: React.FC<
-    CollectConfigProps<Config, BaseActionFactoryContext>
+    CollectConfigProps<DashboardDrilldownConfig, BaseActionFactoryContext>
   >;
 
-  public readonly CollectConfig: React.FC<CollectConfigProps<Config, BaseActionFactoryContext>>;
+  public readonly CollectConfig: React.FC<
+    CollectConfigProps<DashboardDrilldownConfig, BaseActionFactoryContext>
+  >;
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   });
 
-  public readonly isConfigValid = (config: Config): config is Config => {
+  public readonly isConfigValid = (
+    config: DashboardDrilldownConfig
+  ): config is DashboardDrilldownConfig => {
     if (!config.dashboardId) return false;
     return true;
   };
 
-  public readonly getHref = async (config: Config, context: Context): Promise<string> => {
+  public readonly getHref = async (
+    config: DashboardDrilldownConfig,
+    context: Context
+  ): Promise<string> => {
     const { app, path } = await this.getLocation(config, context, true);
     const url = await this.params.start().core.application.getUrlForApp(app, {
       path,
@@ -79,8 +86,8 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     return url;
   };
 
-  public readonly execute = async (config: Config, context: Context) => {
-    if (config.openInNewTab) {
+  public readonly execute = async (config: DashboardDrilldownConfig, context: Context) => {
+    if (config.open_in_new_tab) {
       window.open(await this.getHref(config, context), '_blank');
     } else {
       const { app, path, state } = await this.getLocation(config, context, false);

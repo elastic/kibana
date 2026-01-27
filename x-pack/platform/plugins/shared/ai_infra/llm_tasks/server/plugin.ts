@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
 import type { LlmTasksConfig } from './config';
 import type {
   LlmTasksPluginSetup,
@@ -40,7 +41,17 @@ export class LlmTasksPlugin
   start(core: CoreStart, startDependencies: PluginStartDependencies): LlmTasksPluginStart {
     const { inference, productDocBase } = startDependencies;
     return {
-      retrieveDocumentationAvailable: async (options: { inferenceId: string }) => {
+      retrieveDocumentationAvailable: async (options: {
+        inferenceId: string;
+        resourceType?: ResourceType;
+      }) => {
+        const resourceType = options.resourceType ?? ResourceTypes.productDoc;
+        if (resourceType === ResourceTypes.securityLabs) {
+          const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
+            inferenceId: options.inferenceId,
+          });
+          return status.status === 'installed';
+        }
         const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
           inferenceId: options.inferenceId,
         });

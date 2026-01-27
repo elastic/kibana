@@ -25,11 +25,11 @@ import type {
   EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualRangeEventAnnotationRow,
+  PointEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';

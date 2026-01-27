@@ -1,0 +1,68 @@
+{
+  "id": "@kbn/response-ops-form-generator",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-form-generator",
+        "id": "def-public.generateFormFields",
+        "type": "Function",
+        "tags": [],
+        "label": "generateFormFields",
+        "description": [],
+        "signature": [
+          "({\n  schema,\n  formConfig = {},\n}: ",
+          "GenerateFormFieldsParams",
+          "<TSchema>) => React.JSX.Element[]"
+        ],
+        "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-form-generator",
+            "id": "def-public.generateFormFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  schema,\n  formConfig = {},\n}",
+            "description": [],
+            "signature": [
+              "GenerateFormFieldsParams",
+              "<TSchema>"
+            ],
+            "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+            "lineNumber": 36,
+            "columnNumber": 80,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -32,6 +32,8 @@
           "(argument: T | null | undefined) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/is_defined/src/is_defined.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "T | null | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/is_defined/src/is_defined.ts",
+            "lineNumber": 14,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

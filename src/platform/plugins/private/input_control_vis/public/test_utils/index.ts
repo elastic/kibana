@@ -11,4 +11,3 @@ export { getDepsMock } from './get_deps_mock';
 export { getIndexPatternMock } from './get_index_pattern_mock';
 export { getIndexPatternsMock } from './get_index_patterns_mock';
 export { getSearchSourceMock } from './get_search_service_mock';
-export { updateComponent } from './update_component';

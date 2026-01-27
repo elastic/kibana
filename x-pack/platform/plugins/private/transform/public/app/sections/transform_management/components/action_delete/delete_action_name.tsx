@@ -90,7 +90,7 @@ export const DeleteActionName: FC<DeleteActionNameProps> = ({
   if (content) {
     return (
       <EuiToolTip position="top" content={content}>
-        <>{deleteActionNameText}</>
+        <span tabIndex={0}>{deleteActionNameText}</span>
       </EuiToolTip>
     );
   }

@@ -14,7 +14,7 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import type { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 

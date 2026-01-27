@@ -17,10 +17,7 @@ import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
 import { v4 } from 'uuid';
-import type {
-  LogRateAnalysisEmbeddableApi,
-  LogRateAnalysisEmbeddableInitialState,
-} from '../embeddables/log_rate_analysis/types';
+import type { LogRateAnalysisEmbeddableApi } from '../embeddables/log_rate_analysis/types';
 import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
@@ -65,16 +62,12 @@ export function createAddLogRateAnalysisEmbeddableAction(
           'aria-labelledby': 'logRateAnalysisConfig',
         },
         loadContent: async ({ closeFlyout }) => {
-          const initialState: LogRateAnalysisEmbeddableInitialState = {
-            dataViewId: undefined,
-          };
-
           const embeddable = await presentationContainerParent.addNewPanel<
             object,
             LogRateAnalysisEmbeddableApi
           >({
             panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-            serializedState: { rawState: initialState },
+            serializedState: {},
             maybePanelId: uuid,
           });
 

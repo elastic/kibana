@@ -7,7 +7,7 @@
 
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -24,10 +24,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getErrorName } from '../../../lib/helpers/get_error_name';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { getErrorName } from '../../../lib/helpers/get_error_name';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -166,28 +166,27 @@ export async function getErrorGroupMainStatistics({
           ? bucket.sample.hits.hits[0]._source
           : undefined;
 
-      const event = unflattenKnownApmEventFields(bucket.sample.hits.hits[0].fields, requiredFields);
+      const event = accessKnownApmEventFields(bucket.sample.hits.hits[0].fields).requireFields(
+        requiredFields
+      );
 
-      const mergedEvent = {
-        ...event,
-        error: {
-          ...(event.error ?? {}),
-          exception:
-            (errorSource?.error.exception?.length ?? 0) > 0
-              ? errorSource?.error.exception
-              : event?.error.exception && [event.error.exception],
-        },
+      const exception = errorSource?.error.exception?.[0] ?? {
+        message: event[ERROR_EXC_MESSAGE],
+        handled: event[ERROR_EXC_HANDLED],
+        type: event[ERROR_EXC_TYPE],
       };
+
+      const errorName = getErrorName(event, exception);
 
       return {
         groupId: bucket.key as string,
-        name: getErrorName(mergedEvent),
-        lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
+        name: errorName,
+        lastSeen: new Date(event[AT_TIMESTAMP]).getTime(),
         occurrences: bucket.doc_count,
-        culprit: mergedEvent.error.culprit,
-        handled: mergedEvent.error.exception?.[0].handled,
-        type: mergedEvent.error.exception?.[0].type,
-        traceId: mergedEvent.trace?.id,
+        culprit: event[ERROR_CULPRIT],
+        handled: exception.handled,
+        type: exception.type,
+        traceId: event[TRACE_ID],
       };
     }) ?? [];
 

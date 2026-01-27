@@ -101,7 +101,7 @@ export function JSErrors() {
                 totalErrors
               ) : (
                 <EuiToolTip content={totalErrors}>
-                  <>{numeral(totalErrors).format('0 a')}</>
+                  <span tabIndex={0}>{numeral(totalErrors).format('0 a')}</span>
                 </EuiToolTip>
               )
             }

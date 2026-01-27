@@ -43,11 +43,9 @@ describe('UnifiedHistogramStateService', () => {
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
     lensAdapters: lensAdaptersMock,
-    timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    currentSuggestionContext: undefined,
   };
 
   it('should initialize state with default values', () => {
@@ -57,11 +55,9 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual({
       chartHidden: false,
       lensRequestAdapter: undefined,
-      timeInterval: 'auto',
       topPanelHeight: undefined,
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
-      currentSuggestionContext: undefined,
     });
   });
 
@@ -115,9 +111,6 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(newState);
     stateService.setTopPanelHeight(200);
     newState = { ...newState, topPanelHeight: 200 };
-    expect(state).toEqual(newState);
-    stateService.setTimeInterval('test');
-    newState = { ...newState, timeInterval: 'test' };
     expect(state).toEqual(newState);
     stateService.setLensRequestAdapter(undefined);
     newState = { ...newState, lensRequestAdapter: undefined };

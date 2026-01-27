@@ -86,10 +86,7 @@ export const getExceptionsPreSummaryHandler = (
       isEndpointArtifact = true;
     }
 
-    if (
-      isEndpointArtifact &&
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!request) {
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }

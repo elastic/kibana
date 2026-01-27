@@ -10,7 +10,7 @@ import type { MigrationComments } from '../../../../../../../../common/siem_migr
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
-import type { ValidationErrors } from './types';
+import type { EsqlColumn, ValidationErrors } from './types';
 
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
@@ -19,12 +19,14 @@ export const translateDashboardPanelState = Annotation.Root({
   resources: Annotation<MigrationResources>(),
   elastic_panel: Annotation<object | undefined>(), // The visualization panel object
   index_pattern: Annotation<string | undefined>(),
+  index_mapping: Annotation<Record<string, object> | undefined>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
   inline_query: Annotation<string | undefined>(),
   esql_query: Annotation<string | undefined>(),
+  esql_query_columns: Annotation<EsqlColumn[] | undefined>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
     default: () => ({ retries_left: 3 }), // Max self-healing ES|QL validation retries

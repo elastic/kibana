@@ -17,7 +17,7 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import { Builder } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 
@@ -76,7 +76,7 @@ export const LimitCommand: React.FC = () => {
           position: 'relative',
         }}
       >
-        <EuiTitle size="xxs">
+        <EuiTitle size="xxs" css={{ color: focusedNode === limit ? 'rgb(7, 16, 31)' : 'inherit' }}>
           <h3>Limit</h3>
         </EuiTitle>
         <div

@@ -32,6 +32,8 @@ const defaultFetchContext: FetchContext = {
   searchSessionId: 'id',
   timeRange: { from: 'now-30m', to: 'now', mode: 'relative' },
   timeslice: undefined,
+  esqlVariables: undefined,
+  projectRouting: undefined,
 };
 
 describe('updateSearchSource', () => {

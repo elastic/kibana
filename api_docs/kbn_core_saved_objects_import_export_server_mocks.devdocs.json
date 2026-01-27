@@ -23,6 +23,8 @@
         "label": "savedObjectsExporterMock",
         "description": [],
         "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
         "label": "savedObjectsImporterMock",
         "description": [],
         "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +77,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

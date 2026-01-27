@@ -1,0 +1,169 @@
+title: "Auth0 logs"
+type: logs
+streams:
+  - input: http_endpoint
+    title: Auth0 log events via Webhooks
+    description: Receives log events from Auth0 via Webhooks
+    enabled: false
+    template_path: http_endpoint.yml.hbs
+    vars:
+      - name: listen_address
+        type: text
+        title: Listen Address
+        description: Bind address for the listener. Use 0.0.0.0 to listen on all interfaces.
+        multi: false
+        required: true
+        show_user: true
+        default: localhost
+      - name: listen_port
+        type: integer
+        title: Listen Port
+        multi: false
+        required: true
+        show_user: true
+        default: 8383
+      - name: url
+        type: text
+        title: Webhook Path
+        description: URL path where the webhook will accept requests. It must include a leading slash.
+        multi: false
+        required: true
+        show_user: true
+        default: /auth0/logs
+      - name: secret_value
+        title: Authorization Token
+        type: password
+        description: A token that incoming requests must include in an Authorization header.
+        multi: false
+        required: false
+        show_user: true
+        secret: true
+      - name: ssl
+        type: yaml
+        title: SSL Configuration
+        description: SSL configuration options. See [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-ssl.html#ssl-common-config) for details.
+        multi: false
+        required: false
+        show_user: false
+        default: |
+          enabled: false
+          certificate: "/etc/pki/client/cert.pem"
+          key: "/etc/pki/client/cert.key"
+      - name: tags
+        type: text
+        title: Tags
+        multi: true
+        required: true
+        show_user: false
+        default:
+          - forwarded
+          - auth0-logstream
+      - name: preserve_original_event
+        required: true
+        show_user: true
+        title: Preserve original event
+        description: Preserves a raw copy of the original event, added to the field `event.original`
+        type: bool
+        multi: false
+        default: false
+      - name: processors
+        type: yaml
+        title: Processors
+        multi: false
+        required: false
+        show_user: false
+        description: >
+          Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the logs are parsed. See [Processors](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) for details.
+
+  - input: cel
+    title: Auth0 log events via API requests
+    description: Collects log events from Auth0 via API requests.
+    enabled: false
+    template_path: cel.yml.hbs
+    vars:
+      - name: url
+        type: text
+        title: URL
+        description: Base URL of the Auth0 API.
+        default: https://tenant.us.auth0.com
+        required: true
+        show_user: true
+      - name: client_id
+        type: text
+        title: Client ID
+        description: Client ID for the Auth0 API.
+        multi: false
+        required: true
+        show_user: true
+      - name: client_secret
+        type: password
+        title: Client Secret
+        description: Client Secret for the Auth0 API.
+        multi: false
+        required: true
+        show_user: true
+        secret: true
+      - name: initial_interval
+        type: text
+        title: Initial Interval
+        description: How far back to pull logs from the Auth0 API. Supported units for this parameter are h/m/s.
+        multi: false
+        required: true
+        show_user: true
+        default: 24h
+      - name: interval
+        type: text
+        title: Interval
+        description: Duration between requests to the Auth0 API. Supported units for this parameter are h/m/s.
+        default: 5m
+        multi: false
+        required: true
+        show_user: true
+      - name: batch_size
+        type: integer
+        title: Batch Size
+        description: Batch size for the response of the Auth0 API.
+        default: 100
+        multi: false
+        required: true
+        show_user: false
+      - name: http_client_timeout
+        type: text
+        title: HTTP Client Timeout
+        description: Duration before declaring that the HTTP client connection has timed out. Valid time units are ns, us, ms, s, m, h.
+        multi: false
+        required: true
+        show_user: false
+        default: 30s
+      - name: enable_request_tracer
+        type: bool
+        title: Enable request tracing
+        multi: false
+        required: false
+        show_user: false
+        description: The request tracer logs requests and responses to the agent's local file-system for debugging configurations. Enabling this request tracing compromises security and should only be used for debugging. See [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html#_resource_tracer_filename) for details.
+      - name: tags
+        type: text
+        title: Tags
+        multi: true
+        required: true
+        show_user: false
+        default:
+          - forwarded
+          - auth0-logstream
+      - name: preserve_original_event
+        required: true
+        show_user: true
+        title: Preserve original event
+        description: Preserves a raw copy of the original event, added to the field `event.original`.
+        type: bool
+        multi: false
+        default: false
+      - name: processors
+        type: yaml
+        title: Processors
+        multi: false
+        required: false
+        show_user: false
+        description: >-
+          Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the logs are parsed. See [Processors](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) for details.

@@ -14,7 +14,13 @@
         ],
         "signature": [
           "React.FC<",
-          "KibanaPageTemplateProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-template-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaTemplateTypesPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
           "> & { Sidebar: React.FunctionComponent<",
           "EuiPageSidebarProps",
           ">; Header: React.FunctionComponent<",
@@ -28,6 +34,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/page_template.tsx",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -43,6 +51,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -57,6 +67,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -73,11 +85,11 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
-          "NoDataCardKibanaDependencies",
-          ">) => React.JSX.Element"
+          "({ children, ...dependencies }: React.PropsWithChildren<KibanaDependencies>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,11 +101,11 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "NoDataCardKibanaDependencies",
-              ">"
+              "React.PropsWithChildren<KibanaDependencies>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+            "lineNumber": 38,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,10 +125,18 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "NoDataCardServices",
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,10 +149,18 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "NoDataCardServices",
+              {
+                "pluginId": "@kbn/shared-ux-card-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+                "section": "def-public.Services",
+                "text": "Services"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+            "lineNumber": 26,
+            "columnNumber": 95,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -153,11 +181,11 @@
         "label": "KibanaPageTemplateKibanaDependencies",
         "description": [],
         "signature": [
-          "KibanaDependencies",
-          " & ",
-          "RedirectAppLinksKibanaDependencies"
+          "KibanaDependencies"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -192,14 +220,22 @@
             "text": "SolutionNavProps"
           },
           " | undefined; noDataConfig?: ",
-          "NoDataPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
           " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,11 +248,17 @@
         "label": "KibanaPageTemplateServices",
         "description": [],
         "signature": [
-          "Services",
-          " & ",
-          "RedirectAppLinksServices"
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          }
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -229,9 +271,17 @@
         "label": "NoDataConfig",
         "description": [],
         "signature": [
-          "NoDataPageProps"
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          }
         ],
-        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

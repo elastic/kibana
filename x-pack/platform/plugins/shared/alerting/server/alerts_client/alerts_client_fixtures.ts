@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type {
-  GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
+  GetSummarizedAlertsParams,
   UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import type { AlertRuleData } from '.';
 import type { AlertsFilter } from '../types';
 
@@ -26,6 +25,8 @@ export const alertRuleData: AlertRuleData = {
   spaceId: 'default',
   tags: ['rule-', '-tags'],
   alertDelay: 0,
+  muteAll: false,
+  mutedInstanceIds: [],
 };
 
 export const mockAAD = {
@@ -135,7 +136,12 @@ export const getExpectedQueryByExecutionUuid = ({
         { term: { 'kibana.alert.rule.execution.uuid': uuid } },
         { term: { 'kibana.alert.rule.uuid': ruleId } },
         {
-          bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
+          bool: {
+            must_not: [
+              { exists: { field: 'kibana.alert.maintenance_window_ids' } },
+              { term: { 'kibana.alert.status': 'delayed' } },
+            ],
+          },
         },
         ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
         ...(!!excludedAlertInstanceIds?.length
@@ -253,7 +259,10 @@ export const getExpectedQueryByTimeRange = ({
         },
       },
     },
-    { term: { 'kibana.alert.rule.uuid': ruleId } }
+    { term: { 'kibana.alert.rule.uuid': ruleId } },
+    {
+      bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
+    }
   );
   if (excludedAlertInstanceIds?.length) {
     filter.push({

@@ -13,7 +13,7 @@
         "false",
         "wait_for"
       ],
-      "routing": "",
+      "routing": [],
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],

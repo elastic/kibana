@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { AgentActionEvent } from '../services/action_sender';
 import type { PackageUpdateEvent } from '../services/upgrade_sender';
 
 export interface FleetTelemetryChannelEvents {
   // channel name => event type
   'fleet-upgrades': PackageUpdateEvent;
+  'fleet-actions': AgentActionEvent;
 }
 
 export type FleetTelemetryChannel = keyof FleetTelemetryChannelEvents;

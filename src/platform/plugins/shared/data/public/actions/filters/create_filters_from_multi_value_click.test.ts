@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromMultiValueClickAction } from './create_filters_from_multi_value_click';
@@ -91,18 +91,17 @@ describe('createFiltersFromMultiValueClickAction', () => {
     ];
 
     const dataStart = dataPluginMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.get = jest.fn().mockResolvedValue({
+      id: 'logstash-*',
+      fields: {
+        getByName: () => mockField,
+        filter: () => [mockField],
+      },
+      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+    });
     setSearchService(dataStart.search);
-    setIndexPatterns({
-      ...dataStart.indexPatterns,
-      get: async () => ({
-        id: 'logstash-*',
-        fields: {
-          getByName: () => mockField,
-          filter: () => [mockField],
-        },
-        getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
-      }),
-    } as unknown as DataViewsContract);
+    setIndexPatterns(dataViews);
   });
 
   test('ignores event when value for rows is not provided', async () => {

@@ -139,9 +139,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/EndpointListItem'
-                type: array
+                $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -530,7 +528,30 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: The exception list's human readable string identifier, `endpoint_list`.
+      description: >
+        The exception list's human-readable string identifier.
+
+
+        For endpoint artifacts, use one of the following values:
+
+
+        * `endpoint_list`: [Elastic Endpoint exception
+        list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+
+        * `endpoint_trusted_apps`: [Trusted applications
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+
+        * `endpoint_trusted_devices`: [Trusted devices
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+
+        * `endpoint_event_filters`: [Event filters
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+
+        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+
+        * `endpoint_blocklists`: [Blocklists
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: simple_list
       format: nonempty
       minLength: 1
@@ -884,6 +905,11 @@ components:
         - `single`: Only available in the Kibana space in which it is created.
 
         - `agnostic`: Available in all Kibana spaces.
+
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`.
+        Space awareness for endpoint artifacts is enforced based on Elastic
+        Defend policy assignments.
       enum:
         - agnostic
         - single

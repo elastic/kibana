@@ -89,7 +89,7 @@ describe('AttachmentService getter', () => {
         mockFinder(soFindRes);
 
         await expect(
-          attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' })
+          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' })
         ).resolves.not.toThrow();
       });
 
@@ -100,7 +100,7 @@ describe('AttachmentService getter', () => {
 
         mockFinder(soFindRes);
 
-        const res = await attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' });
+        const res = await attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' });
         expect(res).toStrictEqual([{ ...createAlertAttachment(), score: 0 }]);
       });
 
@@ -112,7 +112,7 @@ describe('AttachmentService getter', () => {
         mockFinder(soFindRes);
 
         await expect(
-          attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' })
+          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"alertId\\""`
         );

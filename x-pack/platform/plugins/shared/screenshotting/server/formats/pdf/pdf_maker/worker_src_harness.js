@@ -11,6 +11,6 @@
  */
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-require('../../../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 // eslint-disable-next-line @kbn/imports/uniform_imports
 require('./worker.ts');

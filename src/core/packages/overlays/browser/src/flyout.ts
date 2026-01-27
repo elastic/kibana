@@ -17,8 +17,8 @@ import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
  */
 export interface OverlayFlyoutStart {
   /**
-   * Opens a flyout panel with the given mount point inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
+   * Opens a flyout panel with the given mount point inside. Calling `open` for multiple flyouts replaces the current flyout.
+   * You can use `close()` on the returned FlyoutRef to close the flyout.
    *
    * @param mount {@link MountPoint} - Mounts the children inside a flyout panel
    * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout
@@ -32,12 +32,20 @@ export interface OverlayFlyoutStart {
  */
 export type OverlayFlyoutOpenOptions = Omit<
   EuiFlyoutProps | EuiFlyoutResizableProps,
-  'onClose' | 'onResize'
+  'onClose' | 'onResize' | 'session'
 > & {
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
    */
   onClose?: (flyout: OverlayRef) => void;
+  /**
+   * If the `session` field is provided in options, it must be set to 'never'. If you need a session-based flyout,
+   * use overlays.openSystemFlyout instead.
+   */
+  session?: 'never';
+  /**
+   * @deprecated Use `resizable` instead.
+   */
   isResizable?: boolean;
 };

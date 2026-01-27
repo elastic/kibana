@@ -132,4 +132,32 @@ describe('AgentDetailsIntegrationInputs', () => {
     await userEvent.click(component.container.querySelector('#endpoint')!);
     expect(component.getByText('Endpoint')).toBeInTheDocument();
   });
+
+  it('should render input type using input id for otelcol inputs', async () => {
+    packageMock.inputs.push({
+      type: 'otelcol',
+      enabled: true,
+      streams: [],
+      id: 'otelcol/my-otelcol-input',
+    });
+
+    const component = renderComponent();
+    await userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
+    await userEvent.click(component.container.querySelector('#otelcol')!);
+    expect(component.getByText('otelcol/my-otelcol-input')).toBeInTheDocument();
+  });
+
+  it('should render input type using input type for non-otelcol inputs', async () => {
+    packageMock.inputs.push({
+      type: 'logfile',
+      enabled: true,
+      streams: [],
+      id: 'logfile/my-logfile-input',
+    });
+
+    const component = renderComponent();
+    await userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
+    await userEvent.click(component.container.querySelector('#logfile')!);
+    expect(component.getByText('Logs')).toBeInTheDocument();
+  });
 });

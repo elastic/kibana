@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import type { Document } from 'yaml';
+import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
-import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
-import { getMonacoRangeFromYamlNode } from '../utils';
-import { getIndentLevelFromLineNumber } from '../get_indent_level';
-import { prependIndentToLines } from '../prepend_indent_to_lines';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
 import { generateConnectorSnippet } from './generate_connector_snippet';
+import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml';
+import { getIndentLevelFromLineNumber } from '../get_indent_level';
+import { prependIndentToLines } from '../prepend_indent_to_lines';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 // Algorithm:
 // 1. If no cursor position is provided, find the next line after the last step node in root range

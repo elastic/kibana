@@ -43,12 +43,12 @@ import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
   pollForSignalIndex?: () => void;
-  sourcererDataView: DataViewSpec | DataView | undefined; // TODO remove DataViewSpec type when we remove the newDataViewPickerEnabled feature flag
+  sourcererDataViewSpec?: DataViewSpec | undefined; // TODO remove when we remove the newDataViewPickerEnabled feature flag
+  dataView: DataView;
   timelineId?: string;
   dataTestSubj?: string;
   hideFilterBar?: boolean;
@@ -61,6 +61,7 @@ interface SiemSearchBarProps {
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
+    dataView,
     end,
     filterQuery,
     fromStr,
@@ -74,7 +75,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
-    sourcererDataView,
+    sourcererDataViewSpec,
     start,
     toStr,
     updateSearch,
@@ -99,9 +100,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView } = useDataView();
 
     useSyncSearchBarUrlParams();
     useSyncTimerangeUrlParam();
@@ -306,24 +304,20 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const dataViews: DataView[] | null = useMemo(() => {
       if (newDataViewPickerEnabled) {
-        if (experimentalDataView) {
-          return [experimentalDataView];
+        if (dataView != null) {
+          return [dataView];
         }
         return null;
       }
 
-      if (sourcererDataView != null) {
-        if (sourcererDataView instanceof DataView) {
-          return [sourcererDataView];
-        }
-
-        return [new DataView({ spec: sourcererDataView, fieldFormats })];
-      } else {
-        return null;
+      if (sourcererDataViewSpec != null) {
+        return [new DataView({ spec: sourcererDataViewSpec, fieldFormats })];
       }
-    }, [sourcererDataView, fieldFormats, newDataViewPickerEnabled, experimentalDataView]);
+      return null;
+    }, [newDataViewPickerEnabled, sourcererDataViewSpec, dataView, fieldFormats]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {
@@ -369,7 +363,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.end === nextProps.end &&
     prevProps.filterQuery === nextProps.filterQuery &&
     prevProps.fromStr === nextProps.fromStr &&
-    deepEqual(prevProps.sourcererDataView, nextProps.sourcererDataView) &&
+    deepEqual(prevProps.sourcererDataViewSpec, nextProps.sourcererDataViewSpec) &&
     prevProps.id === nextProps.id &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.savedQuery === nextProps.savedQuery &&

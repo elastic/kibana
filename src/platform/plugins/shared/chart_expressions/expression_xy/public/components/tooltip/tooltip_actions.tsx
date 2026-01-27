@@ -8,10 +8,7 @@
  */
 
 import type { Datum, TooltipAction, TooltipValue, XYChartSeriesIdentifier } from '@elastic/charts';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';

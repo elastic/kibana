@@ -17,12 +17,16 @@ export interface EnabledFeatures {
   showSpacesIntegration: boolean;
   isPermissionsBased: boolean;
   showAiBreadcrumb: boolean;
+  showAiAssistantsVisibilitySetting: boolean;
+  showChatExperienceSetting: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showSpacesIntegration: true,
   isPermissionsBased: false,
   showAiBreadcrumb: true,
+  showAiAssistantsVisibilitySetting: true,
+  showChatExperienceSetting: true,
 });
 
 interface Props {
@@ -33,8 +37,12 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   children,
   config,
 }) => {
-  const { services } = useKibana();
-  const spaces = services?.spaces ?? undefined;
+  const {
+    services: {
+      spaces,
+      application: { capabilities },
+    },
+  } = useKibana();
 
   const activeSpace$ = React.useMemo(
     () => spaces?.getActiveSpace$?.() ?? of<Space | undefined>(undefined),
@@ -44,12 +52,26 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
 
   const contextFeatures = useMemo(() => {
     const isSolutionView = Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
+
+    const showAiAssistantsVisibilitySetting =
+      config.showAiAssistantsVisibilitySetting === false ? false : !isSolutionView;
+
+    const hasObservabilityAssistant = capabilities.observabilityAIAssistant?.show === true;
+    const hasSecurityAssistant = capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+    const hasAgent = capabilities.agentBuilder?.manageAgents === true;
+    const hasAgentAndAnyAssistant = (hasObservabilityAssistant || hasSecurityAssistant) && hasAgent;
+
+    const showChatExperienceSetting =
+      config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
+      showAiAssistantsVisibilitySetting,
+      showChatExperienceSetting,
     };
-  }, [config, activeSpace]);
+  }, [config, activeSpace, capabilities]);
 
   return (
     <EnabledFeaturesContext.Provider value={contextFeatures}>

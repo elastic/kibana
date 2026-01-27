@@ -26,8 +26,11 @@ import type {
 import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { useTagsAction } from '../components/tags/use_tags_action';
+
+jest.mock('../components/tags/use_tags_action');
 
 const columns = [
   {
@@ -59,6 +62,21 @@ afterAll(() => {
 });
 
 describe('AlertsDataGrid bulk actions', () => {
+  const mockUseTagsAction = jest.mocked(useTagsAction);
+
+  beforeEach(() => {
+    // Reset and set up the mock for tags action
+    mockUseTagsAction.mockReset();
+    mockUseTagsAction.mockImplementation(() => ({
+      isFlyoutOpen: false,
+      selectedAlerts: [],
+      openFlyout: jest.fn(),
+      onClose: jest.fn(),
+      onSaveTags: jest.fn(),
+      getAction: jest.fn(),
+    }));
+  });
+
   const alerts: Alert[] = [
     {
       _id: 'alert0',
@@ -154,7 +172,7 @@ describe('AlertsDataGrid bulk actions', () => {
       bulkActionsReducer,
       initialBulkActionsState || createDefaultBulkActionsState()
     );
-    const renderContext = useMemo(
+    const renderContext: RenderContext<AdditionalContext> = useMemo(
       () => ({
         ...baseRenderContext,
         bulkActionsStore,
@@ -179,9 +197,18 @@ describe('AlertsDataGrid bulk actions', () => {
       jest.clearAllMocks();
     });
 
-    it('should not show the bulk actions column', () => {
+    it('should show the bulk actions column with mute/unmute actions', async () => {
       render(<TestComponent {...dataGridProps} />);
-      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
+      expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
+
+      // Select all alerts and open bulk actions menu
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      // Verify mute/unmute actions are available
+      expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
     });
   });
 
@@ -206,27 +233,58 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
-    it('should not show the bulk actions column when the case service is defined and the user does not have write access', () => {
+    it('should show only mute/unmute actions when user does not have case write access', async () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 
       render(<TestComponent {...dataGridProps} />);
+      expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
 
-      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
+      // Select all alerts and open bulk actions menu
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      // Verify mute/unmute actions are available but case actions are not
+      expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
+      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
     });
 
-    it('should not show the bulk actions column when the case service is defined and the user does not have read access', () => {
+    it('should show only mute/unmute actions when user does not have case read access', async () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: true, read: false });
 
       render(<TestComponent {...dataGridProps} />);
+      expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
 
-      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
+      // Select all alerts and open bulk actions menu
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      // Verify mute/unmute actions are available but case actions are not
+      expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
+      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
     });
 
-    it('should not show the bulk actions when the cases context is missing', () => {
+    it('should show only mute/unmute actions when the cases context is missing', async () => {
       mockCaseService.ui.getCasesContext.mockReturnValue(() => null);
 
       render(<TestComponent {...dataGridProps} />);
-      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
+      expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
+
+      // Select all alerts and open bulk actions menu
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      // Verify mute/unmute actions are available but case actions are not
+      expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
+      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
     });
 
     it('should pass the case ids when selecting alerts', async () => {
@@ -282,14 +340,6 @@ describe('AlertsDataGrid bulk actions', () => {
           _index: 'idx0',
           data: [
             {
-              field: 'kibana.alert.rule.name',
-              value: ['one'],
-            },
-            {
-              field: 'kibana.alert.rule.uuid',
-              value: ['uuidone'],
-            },
-            {
               field: 'kibana.alert.case_ids',
               value: ['test-case'],
             },
@@ -300,6 +350,26 @@ describe('AlertsDataGrid bulk actions', () => {
             {
               field: 'kibana.alert.workflow_assignee_ids',
               value: [],
+            },
+            {
+              field: '_id',
+              value: 'alert0',
+            },
+            {
+              field: '_index',
+              value: 'idx0',
+            },
+            {
+              field: 'kibana.alert.rule.name',
+              value: ['one'],
+            },
+            {
+              field: 'kibana.alert.reason',
+              value: ['two'],
+            },
+            {
+              field: 'kibana.alert.rule.uuid',
+              value: ['uuidone'],
             },
           ],
           ecs: {
@@ -527,14 +597,6 @@ describe('AlertsDataGrid bulk actions', () => {
               _index: 'idx1',
               data: [
                 {
-                  field: 'kibana.alert.rule.name',
-                  value: ['three'],
-                },
-                {
-                  field: 'kibana.alert.rule.uuid',
-                  value: ['uuidtwo'],
-                },
-                {
                   field: 'kibana.alert.case_ids',
                   value: [],
                 },
@@ -545,6 +607,20 @@ describe('AlertsDataGrid bulk actions', () => {
                 {
                   field: 'kibana.alert.workflow_assignee_ids',
                   value: [],
+                },
+                { field: '_id', value: 'alert1' },
+                { field: '_index', value: 'idx1' },
+                {
+                  field: 'kibana.alert.rule.name',
+                  value: ['three'],
+                },
+                {
+                  field: 'kibana.alert.reason',
+                  value: ['four'],
+                },
+                {
+                  field: 'kibana.alert.rule.uuid',
+                  value: ['uuidtwo'],
                 },
               ],
               ecs: {
@@ -741,14 +817,6 @@ describe('AlertsDataGrid bulk actions', () => {
                 _index: 'idx0',
                 data: [
                   {
-                    field: 'kibana.alert.rule.name',
-                    value: ['one'],
-                  },
-                  {
-                    field: 'kibana.alert.rule.uuid',
-                    value: ['uuidone'],
-                  },
-                  {
                     field: 'kibana.alert.case_ids',
                     value: [],
                   },
@@ -759,6 +827,26 @@ describe('AlertsDataGrid bulk actions', () => {
                   {
                     field: 'kibana.alert.workflow_assignee_ids',
                     value: [],
+                  },
+                  {
+                    field: '_id',
+                    value: 'alert0',
+                  },
+                  {
+                    field: '_index',
+                    value: 'idx0',
+                  },
+                  {
+                    field: 'kibana.alert.rule.name',
+                    value: ['one'],
+                  },
+                  {
+                    field: 'kibana.alert.reason',
+                    value: ['two'],
+                  },
+                  {
+                    field: 'kibana.alert.rule.uuid',
+                    value: ['uuidone'],
                   },
                 ],
                 ecs: {
@@ -771,14 +859,6 @@ describe('AlertsDataGrid bulk actions', () => {
                 _index: 'idx1',
                 data: [
                   {
-                    field: 'kibana.alert.rule.name',
-                    value: ['three'],
-                  },
-                  {
-                    field: 'kibana.alert.rule.uuid',
-                    value: ['uuidtwo'],
-                  },
-                  {
                     field: 'kibana.alert.case_ids',
                     value: [],
                   },
@@ -789,6 +869,20 @@ describe('AlertsDataGrid bulk actions', () => {
                   {
                     field: 'kibana.alert.workflow_assignee_ids',
                     value: [],
+                  },
+                  { field: '_id', value: 'alert1' },
+                  { field: '_index', value: 'idx1' },
+                  {
+                    field: 'kibana.alert.rule.name',
+                    value: ['three'],
+                  },
+                  {
+                    field: 'kibana.alert.reason',
+                    value: ['four'],
+                  },
+                  {
+                    field: 'kibana.alert.rule.uuid',
+                    value: ['uuidtwo'],
                   },
                 ],
                 ecs: {

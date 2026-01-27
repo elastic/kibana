@@ -92,6 +92,7 @@ export const FieldPreview = () => {
 
           {showWarningPreviewNotAvailable ? (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.notAvailableWarningCallout.title',
                 {

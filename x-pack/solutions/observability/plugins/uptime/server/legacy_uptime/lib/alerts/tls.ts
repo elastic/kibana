@@ -61,7 +61,7 @@ const mapCertsToSummaryString = (
 ): TLSContent => certLimitMessage(cert);
 
 const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  if (!date) return { summary: 'Error, missing `not_after` date.' };
   const relativeDate = moment().diff(date, 'days');
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -76,7 +76,7 @@ const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
 };
 
 const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  if (!date) return { summary: 'Error, missing `not_before` date.' };
   const relativeDate = moment().diff(date, 'days');
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0

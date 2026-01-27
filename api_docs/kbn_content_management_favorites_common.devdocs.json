@@ -33,6 +33,8 @@
           "100"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

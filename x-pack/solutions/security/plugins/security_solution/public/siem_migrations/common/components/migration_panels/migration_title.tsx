@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { PanelText } from '../../../../common/components/panel_text';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
@@ -31,6 +32,8 @@ import { useUpdateSiemMigration } from '../../hooks/use_update_siem_migration';
 import * as i18n from './translations';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
+import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
 export interface MigrationPanelTitleProps {
   migrationStats: MigrationTaskStats;
@@ -94,9 +97,9 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   );
 
   const confirmDelete = useCallback(() => {
-    deleteMigration(migrationStats.id);
+    deleteMigration(migrationStats);
     closeDeleteModal();
-  }, [deleteMigration, migrationStats.id, closeDeleteModal]);
+  }, [deleteMigration, migrationStats, closeDeleteModal]);
 
   const stopPropagation = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
@@ -109,6 +112,21 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
       gutterSize="xs"
       data-test-subj="migrationPanelTitle"
     >
+      {migrationStats.vendor && (
+        <EuiFlexItem
+          grow={false}
+          css={{
+            marginRight: euiTheme.size.xs,
+          }}
+        >
+          <EuiBadge
+            color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
+            data-test-subj="migrationVendorBadge"
+          >
+            {MIGRATION_VENDOR_DISPLAY_NAME[migrationStats.vendor]}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       {isEditing ? (
         <EuiFlexItem grow={false} onClick={stopPropagation}>
           <EuiInlineEditText
@@ -159,7 +177,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
                   data-test-subj="deleteMigrationItem"
                 >
                   <EuiToolTip content={isDeletable ? undefined : i18n.NOT_DELETABLE_MIGRATION_TEXT}>
-                    <span>{i18n.DELETE_BUTTON_TEXT}</span>
+                    <span tabIndex={0}>{i18n.DELETE_BUTTON_TEXT}</span>
                   </EuiToolTip>
                 </EuiContextMenuItem>
               </EuiContextMenuPanel>

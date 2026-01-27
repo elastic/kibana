@@ -21,6 +21,7 @@ import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
 import { createInternalHttpService } from '../../utilities';
 
@@ -52,7 +53,10 @@ describe('GET /api/status', () => {
     const contextService = new ContextService(coreContext);
 
     server = createInternalHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

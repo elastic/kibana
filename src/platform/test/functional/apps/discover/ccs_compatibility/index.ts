@@ -29,6 +29,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_data_view_editor'));
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_search_errors'));
-    if (isCcsTest) loadTestFile(require.resolve('./_timeout_results'));
+    if (isCcsTest) {
+      loadTestFile(require.resolve('./_timeout_results'));
+      loadTestFile(require.resolve('./_cancel_results'));
+    }
   });
 }

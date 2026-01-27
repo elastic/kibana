@@ -109,7 +109,7 @@ describe('DataViewFieldEditorPlugin', () => {
       ...pluginStart,
       data: pluginStart.data,
       dataViews: {
-        ...pluginStart.data.indexPatterns,
+        ...pluginStart.dataViews,
         updateSavedObject: jest.fn(),
       },
     };

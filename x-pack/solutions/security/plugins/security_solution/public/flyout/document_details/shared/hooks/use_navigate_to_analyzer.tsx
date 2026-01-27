@@ -14,7 +14,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface UseNavigateToAnalyzerParams {
   /**
@@ -60,10 +59,6 @@ export const useNavigateToAnalyzer = ({
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
 
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
-
   const right: FlyoutPanelProps = useMemo(
     () => ({
       id: DocumentDetailsRightPanelKey,
@@ -104,7 +99,7 @@ export const useNavigateToAnalyzer = ({
     }
     // if flyout is not currently open, open flyout with right, left and preview panel
     // if new navigation is enabled and in preview mode, open flyout with right, left and preview panel
-    else if (!isFlyoutOpen || (isNewNavigationEnabled && isPreviewMode)) {
+    else {
       openFlyout({
         right,
         left,
@@ -114,17 +109,7 @@ export const useNavigateToAnalyzer = ({
         panel: 'left',
       });
     }
-  }, [
-    openFlyout,
-    openLeftPanel,
-    right,
-    left,
-    scopeId,
-    telemetry,
-    isFlyoutOpen,
-    isNewNavigationEnabled,
-    isPreviewMode,
-  ]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isFlyoutOpen, isPreviewMode]);
 
   return useMemo(() => ({ navigateToAnalyzer }), [navigateToAnalyzer]);
 };

@@ -8,6 +8,8 @@
 import type { RulesClientContext } from '../../../../rules_client';
 import { unmuteAll } from './unmute_all';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../lib/retry_if_conflicts', () => ({
   retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
@@ -20,16 +22,18 @@ jest.mock('../../../../rules_client/lib', () => ({
 }));
 
 jest.mock('../../../../saved_objects', () => ({
-  partiallyUpdateRule: async () => {},
+  partiallyUpdateRule: jest.fn(),
 }));
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
+const unmuteAllAlertsMock = jest.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
 savedObjectsMock.get = jest.fn().mockReturnValue({
   attributes: {
     actions: [],
+    alertTypeId: 'test-type',
   },
   version: '9.0.0',
 });
@@ -47,20 +51,31 @@ const context = {
     ensureRuleTypeEnabled: () => {},
   },
   getUserName: async () => {},
+  alertsService: {
+    unmuteAllAlerts: unmuteAllAlertsMock,
+  },
+  getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+  spaceId: 'default',
 } as unknown as RulesClientContext;
 
-describe('validate unmuteAll parameters', () => {
+describe('unmuteAll', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should not throw an error for valid params', () => {
+  it('should unmute all alerts for a rule', async () => {
     const validParams = {
-      id: 'ble',
+      id: 'rule-123',
     };
 
-    expect(() => unmuteAll(context, validParams)).not.toThrow();
-    expect(savedObjectsMock.get).toHaveBeenCalled();
+    await unmuteAll(context, validParams);
+
+    expect(savedObjectsMock.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-123');
+    expect(unmuteAllAlertsMock).toHaveBeenCalledWith({
+      ruleId: 'rule-123',
+      indices: ['.alerts-default'],
+      logger: context.logger,
+    });
   });
 
   it('should throw Boom.badRequest for invalid params', async () => {
@@ -72,5 +87,40 @@ describe('validate unmuteAll parameters', () => {
     await expect(unmuteAll(context, invalidParams)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating unmute all parameters - [id]: expected value of type [string] but got [number]"`
     );
+  });
+
+  it('should not call alertsService when no alert indices exist', async () => {
+    (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+    const validParams = {
+      id: 'rule-123',
+    };
+
+    await unmuteAll(context, validParams);
+
+    expect(unmuteAllAlertsMock).not.toHaveBeenCalled();
+  });
+
+  it('throws error but still updates rule when alertsService fails', async () => {
+    const loggerMock = loggingSystemMock.create().get();
+    const unmuteAllAlertsErrorMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('ES connection failed'));
+    const { partiallyUpdateRule: partiallyUpdateRuleMock } = jest.requireMock(
+      '../../../../saved_objects'
+    );
+    const contextWithLogger = {
+      ...context,
+      logger: loggerMock,
+      getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+      alertsService: {
+        unmuteAllAlerts: unmuteAllAlertsErrorMock,
+      },
+    } as unknown as RulesClientContext;
+    const validParams = {
+      id: 'rule-123',
+    };
+
+    await expect(unmuteAll(contextWithLogger, validParams)).rejects.toThrow('ES connection failed');
+    expect(partiallyUpdateRuleMock).toHaveBeenCalled();
   });
 });

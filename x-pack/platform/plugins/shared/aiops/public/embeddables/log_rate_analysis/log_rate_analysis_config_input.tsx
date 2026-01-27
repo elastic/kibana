@@ -8,7 +8,8 @@
 import React from 'react';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogRateAnalysisEmbeddableInitializer } from './log_rate_analysis_embeddable_initializer';
-import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from './types';
+import type { LogRateAnalysisComponentApi } from './types';
+import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
 export function EmbeddableLogRateAnalysisUserInput({
   pluginStart,

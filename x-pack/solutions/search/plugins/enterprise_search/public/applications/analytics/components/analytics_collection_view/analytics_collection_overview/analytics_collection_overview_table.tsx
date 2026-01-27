@@ -324,27 +324,42 @@ export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverv
 
       {useMemo(() => {
         const table = selectedTable !== null && (tableSettings[selectedTable] as TableSetting);
+        if (!table) {
+          return null;
+        }
+        const selectedTab = tabs?.find((tab) => tab.id === selectedTable);
+        const tableCaption = selectedTab?.name
+          ? i18n.translate(
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.tableCaption',
+              {
+                defaultMessage: '{tableName} table',
+                values: { tableName: selectedTab.name },
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.genericTableCaption',
+              { defaultMessage: 'Analytics explore table' }
+            );
 
         return (
-          table && (
-            <EuiBasicTable
-              columns={
-                table.columns.map((column) => ({
-                  ...column,
-                  render: column.render?.(euiTheme),
-                })) as TableSetting['columns']
-              }
-              itemId={selectedTable}
-              items={items}
-              loading={isLoading}
-              sorting={table.sorting}
-              onChange={({ sort }) => {
-                onTableChange({ sort });
-              }}
-            />
-          )
+          <EuiBasicTable
+            tableCaption={tableCaption}
+            columns={
+              table.columns.map((column) => ({
+                ...column,
+                render: column.render?.(euiTheme),
+              })) as TableSetting['columns']
+            }
+            itemId={selectedTable}
+            items={items}
+            loading={isLoading}
+            sorting={table.sorting}
+            onChange={({ sort }) => {
+              onTableChange({ sort });
+            }}
+          />
         );
-      }, [selectedTable, sorting, items, isLoading])}
+      }, [selectedTable, sorting, items, isLoading, tabs])}
 
       <EuiFlexGroup>
         <EuiButton

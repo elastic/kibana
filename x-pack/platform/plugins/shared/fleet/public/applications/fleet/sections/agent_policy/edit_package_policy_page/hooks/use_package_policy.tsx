@@ -241,13 +241,11 @@ export function usePackagePolicyWithRelatedData(
             revision,
             inputs,
             vars,
-            /* eslint-disable @typescript-eslint/naming-convention */
             created_by,
             created_at,
             updated_by,
             updated_at,
             secret_references,
-            /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
           } = basePolicy;
 
@@ -285,7 +283,6 @@ export function usePackagePolicyWithRelatedData(
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),

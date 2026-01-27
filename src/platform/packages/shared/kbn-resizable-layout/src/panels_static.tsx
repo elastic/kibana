@@ -26,6 +26,8 @@ export const PanelsStatic = ({
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
 }) => {
+  const mode = hideFixedPanel ? 'Single' : 'Static';
+
   // By default a flex item has overflow: visible, min-height: auto, and min-width: auto.
   // This can cause the item to overflow the flexbox parent when its content is too large.
   // Setting the overflow to something other than visible (e.g. auto) resets the min-height
@@ -45,6 +47,7 @@ export const PanelsStatic = ({
       css={css`
         height: 100%;
       `}
+      data-test-subj={`resizableLayout${mode}Container`}
     >
       {!hideFixedPanel && <EuiFlexItem grow={false}>{fixedPanel}</EuiFlexItem>}
       <EuiFlexItem css={flexPanelCss}>{flexPanel}</EuiFlexItem>

@@ -11,7 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/servicenow_itsm/constants';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow/constants';
 import type { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
 import type { ServiceNowITSMActionParams } from './types';
 import {
@@ -28,23 +29,16 @@ export const SERVICENOW_ITSM_DESC = i18n.translate(
   }
 );
 
-export const SERVICENOW_ITSM_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowITSM.connectorTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITSM',
-  }
-);
-
 export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
   ServiceNowITSMActionParams
 > {
   return {
-    id: '.servicenow',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: SERVICENOW_ITSM_DESC,
-    actionTypeTitle: SERVICENOW_ITSM_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors')),
     validateParams: async (
       actionParams: ServiceNowITSMActionParams

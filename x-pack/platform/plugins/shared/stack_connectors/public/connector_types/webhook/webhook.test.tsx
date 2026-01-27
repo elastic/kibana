@@ -10,6 +10,7 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 
 const CONNECTOR_TYPE_ID = '.webhook';
 let connectorTypeModel: ConnectorTypeModel;
@@ -25,32 +26,50 @@ beforeAll(() => {
 });
 
 describe('connectorTypeRegistry.get() works', () => {
-  test('connector type static data is as expected', () => {
+  it('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
     expect(connectorTypeModel.iconClass).toEqual('logoWebhook');
   });
 });
 
 describe('webhook action params validation', () => {
-  test('action params validation succeeds when action params is valid', async () => {
+  it('action params validation succeeds when action params is valid and config is missing', async () => {
     const actionParams = {
       body: 'message {test}',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });
 
-  test('params validation fails when body is not valid', async () => {
-    const actionParams = {
-      body: '',
-    };
+  it.each([WebhookMethods.GET, WebhookMethods.DELETE])(
+    'params validation ignores missing body if config method is %s',
+    async (method) => {
+      const actionParams = {
+        body: '',
+      };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        body: ['Body is required.'],
-      },
-    });
-  });
+      expect(await connectorTypeModel.validateParams(actionParams, { method })).toEqual({
+        errors: {
+          body: [],
+        },
+      });
+    }
+  );
+
+  it.each([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])(
+    'params validation fails when body is missing and config method is %s',
+    async (method) => {
+      const actionParams = {
+        body: '',
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, { method })).toEqual({
+        errors: {
+          body: ['Body is required.'],
+        },
+      });
+    }
+  );
 });

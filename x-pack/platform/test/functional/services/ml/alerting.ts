@@ -174,6 +174,27 @@ export function MachineLearningAlertingProvider(
       await this.assertTopNBuckets(numberOfBuckets, isInvalid);
     },
 
+    async setIncludeInterim(includeInterim: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const attr = await testSubjects.getAttribute(
+          'mlAnomalyAlertIncludeInterimSwitch',
+          'aria-checked'
+        );
+        const isChecked = attr === 'true';
+        if (isChecked !== includeInterim) {
+          await testSubjects.click('mlAnomalyAlertIncludeInterimSwitch');
+        }
+        const after = await testSubjects.getAttribute(
+          'mlAnomalyAlertIncludeInterimSwitch',
+          'aria-checked'
+        );
+        expect(after).to.eql(
+          String(includeInterim),
+          `Expected includeInterim to be '${includeInterim}' but got '${after}'`
+        );
+      });
+    },
+
     async isAdvancedSectionOpened() {
       return await find.existsByDisplayedByCssSelector('#mlAnomalyAlertAdvancedSettings');
     },

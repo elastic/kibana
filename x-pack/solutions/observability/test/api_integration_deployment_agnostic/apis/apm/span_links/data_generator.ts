@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import type { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { v4 as uuidv4 } from 'uuid';
 import type { Moment } from 'moment';

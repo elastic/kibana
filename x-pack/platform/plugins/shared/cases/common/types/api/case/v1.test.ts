@@ -99,6 +99,7 @@ const basicCase: Case = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -135,6 +136,7 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  total_observables: 1,
   incremental_id: 123,
 };
 
@@ -151,6 +153,7 @@ describe('CasePostRequestRt', () => {
     },
     settings: {
       syncAlerts: true,
+      extractObservables: undefined,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,
@@ -412,7 +415,7 @@ describe('CasesFindRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',
@@ -534,7 +537,16 @@ describe('CasesSearchRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: [
+      'cases.title',
+      'cases.description',
+      'cases.incremental_id.text',
+      'cases.observables.value',
+      'cases.customFields.value',
+      'cases-comments.comment',
+      'cases-comments.alertId',
+      'cases-comments.eventId',
+    ],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',

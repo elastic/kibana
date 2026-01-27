@@ -5,74 +5,98 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
-import {
-  createForceMergeActions,
-  createShrinkActions,
-  createReadonlyActions,
-  createIndexPriorityActions,
-  createSearchableSnapshotActions,
-  createMinAgeActions,
-  createNodeAllocationActions,
-  createReplicasAction,
-  createSnapshotPolicyActions,
-  createDownsampleActions,
-} from '.';
+import { screen, fireEvent } from '@testing-library/react';
+import { createForceMergeActions } from './forcemerge_actions';
+import { createShrinkActions } from './shrink_actions';
+import { createReadonlyActions } from './readonly_actions';
+import { createSearchableSnapshotActions } from './searchable_snapshot_actions';
+import { createMinAgeActions } from './min_age_actions';
+import { createNodeAllocationActions } from './node_allocation_actions';
+import { createDownsampleActions } from './downsample_actions';
+import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
+import type { Phase } from '../../../common/types';
 
-export const createHotPhaseActions = (testBed: TestBed) => {
+const setSnapshotPolicy = (snapshotPolicyName: string) => {
+  const input = screen.getByTestId('snapshotPolicyCombobox') as HTMLInputElement;
+  fireEvent.change(input, { target: { value: snapshotPolicyName } });
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
+};
+
+export const createHotPhaseActions = () => {
+  const phase: Phase = 'hot';
+  const toggleSelector = `${phase}-indexPrioritySwitch`;
   return {
     hot: {
-      ...createForceMergeActions(testBed, 'hot'),
-      ...createShrinkActions(testBed, 'hot'),
-      ...createReadonlyActions(testBed, 'hot'),
-      ...createIndexPriorityActions(testBed, 'hot'),
-      ...createSearchableSnapshotActions(testBed, 'hot'),
-      ...createDownsampleActions(testBed, 'hot'),
+      ...createForceMergeActions('hot'),
+      ...createShrinkActions('hot'),
+      ...createReadonlyActions('hot'),
+      indexPriorityExists: () => Boolean(screen.queryByTestId(toggleSelector)),
+      toggleIndexPriority: () => fireEvent.click(screen.getByTestId(toggleSelector)),
+      setIndexPriority: createFormToggleAndSetValueAction(toggleSelector, `${phase}-indexPriority`),
+      ...createSearchableSnapshotActions('hot'),
+      ...createDownsampleActions('hot'),
     },
   };
 };
-export const createWarmPhaseActions = (testBed: TestBed) => {
+export const createWarmPhaseActions = () => {
+  const phase: Phase = 'warm';
+  const toggleSelector = `${phase}-indexPrioritySwitch`;
   return {
     warm: {
-      ...createMinAgeActions(testBed, 'warm'),
-      ...createForceMergeActions(testBed, 'warm'),
-      ...createShrinkActions(testBed, 'warm'),
-      ...createReadonlyActions(testBed, 'warm'),
-      ...createIndexPriorityActions(testBed, 'warm'),
-      ...createNodeAllocationActions(testBed, 'warm'),
-      ...createReplicasAction(testBed, 'warm'),
-      ...createDownsampleActions(testBed, 'warm'),
+      ...createMinAgeActions('warm'),
+      ...createForceMergeActions('warm'),
+      ...createShrinkActions('warm'),
+      ...createReadonlyActions('warm'),
+      indexPriorityExists: () => Boolean(screen.queryByTestId(toggleSelector)),
+      toggleIndexPriority: () => fireEvent.click(screen.getByTestId(toggleSelector)),
+      setIndexPriority: createFormToggleAndSetValueAction(toggleSelector, `${phase}-indexPriority`),
+      ...createNodeAllocationActions('warm'),
+      setReplicas: createFormToggleAndSetValueAction(
+        `${phase}-setReplicasSwitch`,
+        `${phase}-selectedReplicaCount`
+      ),
+      ...createDownsampleActions('warm'),
     },
   };
 };
-export const createColdPhaseActions = (testBed: TestBed) => {
+export const createColdPhaseActions = () => {
+  const phase: Phase = 'cold';
+  const toggleSelector = `${phase}-indexPrioritySwitch`;
   return {
     cold: {
-      ...createMinAgeActions(testBed, 'cold'),
-      ...createReplicasAction(testBed, 'cold'),
-      ...createReadonlyActions(testBed, 'cold'),
-      ...createIndexPriorityActions(testBed, 'cold'),
-      ...createNodeAllocationActions(testBed, 'cold'),
-      ...createSearchableSnapshotActions(testBed, 'cold'),
-      ...createDownsampleActions(testBed, 'cold'),
+      ...createMinAgeActions('cold'),
+      setReplicas: createFormToggleAndSetValueAction(
+        `${phase}-setReplicasSwitch`,
+        `${phase}-selectedReplicaCount`
+      ),
+      ...createReadonlyActions('cold'),
+      indexPriorityExists: () => Boolean(screen.queryByTestId(toggleSelector)),
+      toggleIndexPriority: () => fireEvent.click(screen.getByTestId(toggleSelector)),
+      setIndexPriority: createFormToggleAndSetValueAction(toggleSelector, `${phase}-indexPriority`),
+      ...createNodeAllocationActions('cold'),
+      ...createSearchableSnapshotActions('cold'),
+      ...createDownsampleActions('cold'),
     },
   };
 };
 
-export const createFrozenPhaseActions = (testBed: TestBed) => {
+export const createFrozenPhaseActions = () => {
   return {
     frozen: {
-      ...createMinAgeActions(testBed, 'frozen'),
-      ...createSearchableSnapshotActions(testBed, 'frozen'),
+      ...createMinAgeActions('frozen'),
+      ...createSearchableSnapshotActions('frozen'),
     },
   };
 };
 
-export const createDeletePhaseActions = (testBed: TestBed) => {
+export const createDeletePhaseActions = () => {
   return {
     delete: {
-      ...createMinAgeActions(testBed, 'delete'),
-      ...createSnapshotPolicyActions(testBed),
+      ...createMinAgeActions('delete'),
+      setSnapshotPolicy,
+      hasCustomPolicyCallout: () => Boolean(screen.queryByTestId('customPolicyCallout')),
+      hasPolicyErrorCallout: () => Boolean(screen.queryByTestId('policiesErrorCallout')),
+      hasNoPoliciesCallout: () => Boolean(screen.queryByTestId('noPoliciesCallout')),
     },
   };
 };

@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
-import type { RowControlColumn } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { useExampleContext } from '../example_context';
+import { ChartWithCustomButtons } from './components';
+import { CustomDocView } from './components/custom_doc_view';
+import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -78,8 +79,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     getDocViewer:
       (prev, { context }) =>
       (params) => {
+        const { openInNewTab, updateESQLQuery } = params.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
@@ -87,14 +90,20 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
-                <EuiPanel color="transparent" hasShadow={false}>
-                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
-                    {context.formatRecord(params.record.flattened)}
-                  </pre>
-                </EuiPanel>
+              render: () => (
+                <CustomDocView
+                  formattedRecord={context.formatRecord(params.record.flattened)}
+                  openInNewTab={openInNewTab}
+                  updateESQLQuery={updateESQLQuery}
+                />
               ),
+            });
+
+            registry.add({
+              id: 'doc_view_restorable_state_example',
+              title: 'Restorable State Example',
+              order: 1,
+              render: (props) => <RestorableStateDocView {...props} />,
             });
 
             return prevValue.docViewsRegistry(registry);
@@ -102,7 +111,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         };
       },
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
+     * `registerCustomPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -119,17 +129,17 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
           // Can be a on-click action, link or a submenu with an array of actions and horizontal rules
-          registry.registerCustomAction({
+          registry.registerCustomItem({
             id: 'example-custom-action',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action',
-              testId: 'example-custom-action',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Custom action clicked');
-                onFinishAction(); // This allows to return focus back to the app menu DOM node
-              },
+            order: 1,
+            label: 'Custom action',
+            testId: 'example-custom-action',
+            iconType: 'logoElasticsearch',
+            run: ({ context: { onFinishAction } }) => {
+              alert('Example Custom action clicked');
+              onFinishAction(); // This allows to return focus back to the app menu DOM node
             },
+
             // In case of a submenu, you can add actions to it under `actions`
             // actions: [
             //   {
@@ -152,39 +162,34 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           });
 
           // This example shows how to add a custom action under the Alerts submenu
-          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+          registry.registerCustomPopoverItem(AppMenuActionId.alerts, {
             // It's also possible to override the submenu actions by using the same id
             // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
             id: 'example-custom-action4',
-            type: AppMenuActionType.custom,
             order: 101,
-            controlProps: {
-              label: 'Create SLO (Custom action)',
-              iconType: 'visGauge',
-              testId: 'example-custom-action-under-alerts',
-              onClick: ({ onFinishAction }) => {
-                // This is an example of a custom action that opens a flyout or any other custom modal.
-                // To do so, simply return a React element and call onFinishAction when you're done.
-                return (
-                  <EuiFlyout onClose={onFinishAction}>
-                    <div>Example custom action clicked</div>
-                  </EuiFlyout>
-                );
-              },
+            label: 'Create SLO (Custom action)',
+            iconType: 'visGauge',
+            testId: 'example-custom-action-under-alerts',
+            run: ({ context: { onFinishAction } }) => {
+              // This is an example of a custom action that opens a flyout or any other custom modal.
+              // To do so, simply return a React element and call onFinishAction when you're done.
+              return (
+                <EuiFlyout onClose={onFinishAction}>
+                  <div>Example custom action clicked</div>
+                </EuiFlyout>
+              );
             },
           });
 
           // This submenu was defined in the root profile example_root_pofile/profile.tsx
           // And we can still add actions to it from the data source profile here.
-          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu', {
+          registry.registerCustomPopoverItem('example-custom-root-submenu', {
             id: 'example-custom-action5',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action (from Data Source profile)',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Data source action under root submenu clicked');
-                onFinishAction();
-              },
+            order: 1,
+            label: 'Custom action (from Data Source profile)',
+            run: ({ context: { onFinishAction } }) => {
+              alert('Example Data source action under root submenu clicked');
+              onFinishAction();
             },
           });
 
@@ -266,8 +271,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
      * @param prev
      */
     getRecommendedFields: (prev) => () => {
-      const prevValue = prev ? prev() : {};
-
       // Define example recommended field names for the example logs data source
       const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
         'log.level',
@@ -277,23 +280,23 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
 
       return {
-        ...prevValue,
+        ...prev(),
         recommendedFields: exampleRecommendedFieldNames,
+      };
+    },
+    getChartSectionConfiguration: (prev) => (params) => {
+      return {
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
       };
     },
   },
   resolve: (params) => {
-    let indexPattern: string | undefined;
-
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
+    const indexPattern = extractIndexPatternFrom(params);
 
     if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return { isMatch: false };

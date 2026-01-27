@@ -32,6 +32,8 @@
           "[]"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +55,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
               "FindParams"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,6 +95,8 @@
           ") => React.JSX.Element | null>"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -104,6 +112,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -123,6 +133,8 @@
           "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +151,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -156,6 +170,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -177,6 +193,8 @@
       "label": "CustomIntegrationsSetup",
       "description": [],
       "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -199,6 +217,8 @@
             "[]>"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+          "lineNumber": 14,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -223,6 +243,8 @@
             "[]>"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -240,6 +262,8 @@
       "label": "CustomIntegrationsStart",
       "description": [],
       "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -254,6 +278,8 @@
             "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+          "lineNumber": 19,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -269,6 +295,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -283,6 +311,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -299,6 +329,8 @@
             "{ [x: string]: React.FC<{}>; }"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -321,6 +353,8 @@
           "\nA definition of a dataintegration, which can be registered with Kibana."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 158,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -332,6 +366,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -343,6 +379,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -354,6 +392,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,6 +408,8 @@
               "\"ui_link\""
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,6 +421,8 @@
             "label": "uiInternalPath",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,6 +437,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,6 +450,8 @@
             "label": "isBeta",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,6 +473,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -439,6 +489,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -453,6 +505,8 @@
               "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,6 +521,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -489,6 +545,8 @@
           "string"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -503,6 +561,8 @@
       "label": "CustomIntegrationsPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -525,6 +585,8 @@
             ", \"type\">) => void"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -547,6 +609,8 @@
                 ", \"type\">"
               ],
               "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+              "lineNumber": 13,
+              "columnNumber": 29,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -573,6 +637,8 @@
             "[]"
           ],
           "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+          "lineNumber": 14,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -590,6 +656,8 @@
       "label": "CustomIntegrationsPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -611,6 +679,8 @@
           "\nA definition of a dataintegration, which can be registered with Kibana."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 158,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -622,6 +692,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,6 +705,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -644,6 +718,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +734,8 @@
               "\"ui_link\""
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,6 +747,8 @@
             "label": "uiInternalPath",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -683,6 +763,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,6 +776,8 @@
             "label": "isBeta",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,6 +799,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -729,6 +815,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -743,6 +831,8 @@
               "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -757,6 +847,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -773,6 +865,8 @@
           "\nAn icon representing an Integration."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 150,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,6 +878,8 @@
             "label": "src",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -798,6 +894,8 @@
               "\"svg\" | \"eui\""
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -814,6 +912,8 @@
           "\nAn object containing the id of an `IntegrationCategory` and the count of all Integrations in that category."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 115,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -825,6 +925,8 @@
             "label": "count",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -836,6 +938,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -858,6 +962,8 @@
           "string[]"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 113,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -875,6 +981,8 @@
           "string"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -890,6 +998,8 @@
           "\"customIntegrations\""
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -905,6 +1015,8 @@
           "\"customIntegrations\""
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -917,6 +1029,8 @@
         "label": "ROUTES_APPEND_CUSTOM_INTEGRATIONS",
         "description": [],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 175,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -929,6 +1043,8 @@
         "label": "ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS",
         "description": [],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 176,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -946,6 +1062,8 @@
           "(\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 148,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -963,6 +1081,8 @@
           "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -977,6 +1097,8 @@
         "label": "FEATURED_INTEGRATIONS_BY_CATEGORY",
         "description": [],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -991,6 +1113,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1005,6 +1129,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1021,6 +1147,8 @@
           "\nA map of category names and their corresponding titles."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1032,6 +1160,8 @@
             "label": "advanced_analytics_ueba",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1043,6 +1173,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 20,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1054,6 +1186,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 20,
+                "columnNumber": 66,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1067,6 +1201,8 @@
             "label": "analytics_engine",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1078,6 +1214,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 21,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1089,6 +1227,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 21,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1102,6 +1242,8 @@
             "label": "application_observability",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1113,6 +1255,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 22,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1124,6 +1268,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 22,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1137,6 +1283,8 @@
             "label": "asset_inventory",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1148,6 +1296,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1159,6 +1309,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1172,6 +1324,8 @@
             "label": "auditd",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1183,6 +1337,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 24,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1194,6 +1350,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 24,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1207,6 +1365,8 @@
             "label": "authentication",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1218,6 +1378,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 25,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1229,6 +1391,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 25,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1242,6 +1406,8 @@
             "label": "aws",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1253,6 +1419,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 26,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1267,6 +1435,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 26,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1280,6 +1450,8 @@
             "label": "azure",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1291,6 +1463,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 27,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1305,6 +1479,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 27,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1318,6 +1494,8 @@
             "label": "big_data",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1329,6 +1507,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 28,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1340,6 +1520,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 28,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1353,6 +1535,8 @@
             "label": "cdn_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1364,6 +1548,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 29,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1375,6 +1561,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 29,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1388,6 +1576,8 @@
             "label": "cloud",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1399,6 +1589,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 30,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1413,6 +1605,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 30,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1426,6 +1620,8 @@
             "label": "config_management",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1437,6 +1633,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 31,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1451,6 +1649,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 31,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1464,6 +1664,8 @@
             "label": "connector",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1475,6 +1677,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 32,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1486,6 +1690,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 32,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1499,6 +1705,8 @@
             "label": "connector_client",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1510,6 +1718,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 33,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1521,6 +1731,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 33,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1534,6 +1746,8 @@
             "label": "containers",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1545,6 +1759,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 34,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1559,6 +1775,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 34,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1572,6 +1790,8 @@
             "label": "crawler",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1583,6 +1803,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 35,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1594,6 +1816,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 35,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1607,6 +1831,8 @@
             "label": "credential_management",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1618,6 +1844,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 36,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1629,6 +1857,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 36,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1642,6 +1872,8 @@
             "label": "crm",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1653,6 +1885,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1667,6 +1901,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 37,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1680,6 +1916,8 @@
             "label": "custom",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1691,6 +1929,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 38,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1705,6 +1945,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 38,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1718,6 +1960,8 @@
             "label": "custom_logs",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1729,6 +1973,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 39,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1740,6 +1986,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 39,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1753,6 +2001,8 @@
             "label": "database_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1764,6 +2014,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 40,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1775,6 +2027,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 40,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1788,6 +2042,8 @@
             "label": "datastore",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1799,6 +2055,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 41,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1813,6 +2071,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 41,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1826,6 +2086,8 @@
             "label": "dns_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1837,6 +2099,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 42,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1848,6 +2112,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 42,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1861,6 +2127,8 @@
             "label": "edr_xdr",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1872,6 +2140,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 43,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1883,6 +2153,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 43,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1896,6 +2168,8 @@
             "label": "cloudsecurity_cdr",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1907,6 +2181,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1918,6 +2194,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1931,6 +2209,8 @@
             "label": "elasticsearch_sdk",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1942,6 +2222,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1956,6 +2238,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1969,6 +2253,8 @@
             "label": "elastic_stack",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1980,6 +2266,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 46,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1994,6 +2282,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 46,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2007,6 +2297,8 @@
             "label": "email_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2018,6 +2310,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 47,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2029,6 +2323,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 47,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2042,6 +2338,8 @@
             "label": "firewall_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2053,6 +2351,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 48,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2064,6 +2364,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 48,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2077,6 +2379,8 @@
             "label": "google_cloud",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2088,6 +2392,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 49,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2102,6 +2408,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 49,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2115,6 +2423,8 @@
             "label": "iam",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2126,6 +2436,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 50,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2137,6 +2449,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 50,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2150,6 +2464,8 @@
             "label": "ids_ips",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2161,6 +2477,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 51,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2172,6 +2490,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 51,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2185,6 +2505,8 @@
             "label": "infrastructure",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2196,6 +2518,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 52,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2210,6 +2534,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 52,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2223,6 +2549,8 @@
             "label": "java_observability",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2234,6 +2562,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 53,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2245,6 +2575,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 53,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2258,6 +2590,8 @@
             "label": "kubernetes",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2269,6 +2603,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 54,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2280,6 +2616,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 54,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2293,6 +2631,8 @@
             "label": "language_client",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2304,6 +2644,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2315,6 +2657,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2328,6 +2672,8 @@
             "label": "languages",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2339,6 +2685,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2353,6 +2701,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2366,6 +2716,8 @@
             "label": "load_balancer",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2377,6 +2729,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 57,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2388,6 +2742,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 57,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2401,6 +2757,8 @@
             "label": "message_queue",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2412,6 +2770,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 58,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2423,6 +2783,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 58,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2436,6 +2798,8 @@
             "label": "misconfiguration_workflow",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2447,6 +2811,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 59,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2458,6 +2824,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 59,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2471,6 +2839,8 @@
             "label": "monitoring",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2482,6 +2852,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 60,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2493,6 +2865,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 60,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2506,6 +2880,8 @@
             "label": "native_search",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2517,6 +2893,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 61,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2528,6 +2906,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 61,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2541,6 +2921,8 @@
             "label": "network",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2552,6 +2934,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 62,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2566,6 +2950,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 62,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2579,6 +2965,8 @@
             "label": "network_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2590,6 +2978,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 63,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2601,6 +2991,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 63,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2614,6 +3006,8 @@
             "label": "notification",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2625,6 +3019,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 64,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2636,6 +3032,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 64,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2649,6 +3047,8 @@
             "label": "opentelemetry",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2660,6 +3060,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 65,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2674,6 +3076,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 65,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2687,6 +3091,8 @@
             "label": "observability",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2698,6 +3104,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 66,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2712,6 +3120,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 66,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2725,6 +3135,8 @@
             "label": "os_system",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2736,6 +3148,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 67,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2750,6 +3164,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 67,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2763,6 +3179,8 @@
             "label": "process_manager",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2774,6 +3192,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 68,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2785,6 +3205,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 68,
+                "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2798,6 +3220,8 @@
             "label": "productivity",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2809,6 +3233,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 69,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2823,6 +3249,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 69,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2836,6 +3264,8 @@
             "label": "productivity_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2847,6 +3277,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 70,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2858,6 +3290,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 70,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2871,6 +3305,8 @@
             "label": "proxy_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2882,6 +3318,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 71,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2893,6 +3331,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 71,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2906,6 +3346,8 @@
             "label": "sdk_search",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2917,6 +3359,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 72,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2928,6 +3372,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 72,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2941,6 +3387,8 @@
             "label": "search",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2952,6 +3400,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 73,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2966,6 +3416,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 73,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2979,6 +3431,8 @@
             "label": "security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2990,6 +3444,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 74,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3004,6 +3460,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 74,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3017,6 +3475,8 @@
             "label": "siem",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3028,6 +3488,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 75,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3039,6 +3501,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 75,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3052,6 +3516,8 @@
             "label": "stream_processing",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3063,6 +3529,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 76,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3074,6 +3542,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 76,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3087,6 +3557,8 @@
             "label": "support",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3098,6 +3570,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 77,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3112,6 +3586,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 77,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3125,6 +3601,8 @@
             "label": "threat_intel",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3136,6 +3614,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 78,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3147,6 +3627,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 78,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3160,6 +3642,8 @@
             "label": "ticketing",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3171,6 +3655,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 79,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3185,6 +3671,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 79,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3198,6 +3686,8 @@
             "label": "version_control",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3209,6 +3699,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 80,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3223,6 +3715,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 80,
+                "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3236,6 +3730,8 @@
             "label": "virtualization",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3247,6 +3743,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 81,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3258,6 +3756,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 81,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3271,6 +3771,8 @@
             "label": "vpn_security",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3282,6 +3784,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 82,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3293,6 +3797,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 82,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3306,6 +3812,8 @@
             "label": "vulnerability_management",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3317,6 +3825,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 83,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3328,6 +3838,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 83,
+                "columnNumber": 66,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3341,6 +3853,8 @@
             "label": "vulnerability_workflow",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3352,6 +3866,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 84,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3363,6 +3879,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 84,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3376,6 +3894,8 @@
             "label": "web",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3387,6 +3907,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 85,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3398,6 +3920,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 85,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3411,6 +3935,8 @@
             "label": "web_application_firewall",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3422,6 +3948,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 86,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3433,6 +3961,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 86,
+                "columnNumber": 66,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3446,6 +3976,8 @@
             "label": "websphere",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3457,6 +3989,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 87,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3468,6 +4002,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 87,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3481,6 +4017,8 @@
             "label": "workplace_search_content_source",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3492,6 +4030,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 89,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3503,6 +4043,8 @@
                 "label": "parent_id",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 90,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3518,6 +4060,8 @@
               "// Kibana added"
             ],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3529,6 +4073,8 @@
                 "label": "title",
                 "description": [],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 93,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3543,6 +4089,8 @@
                   "undefined"
                 ],
                 "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+                "lineNumber": 93,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3561,6 +4109,8 @@
           "\nA map of shipper names and their corresponding titles."
         ],
         "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+        "lineNumber": 127,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3572,6 +4122,8 @@
             "label": "beats",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3583,6 +4135,8 @@
             "label": "search",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3594,6 +4148,8 @@
             "label": "language_clients",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3605,6 +4161,8 @@
             "label": "other",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3616,6 +4174,8 @@
             "label": "sample_data",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3627,6 +4187,8 @@
             "label": "tests",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3638,6 +4200,8 @@
             "label": "tutorial",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3649,6 +4213,8 @@
             "label": "placeholders",
             "description": [],
             "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

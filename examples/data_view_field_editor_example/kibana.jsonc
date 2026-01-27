@@ -3,10 +3,16 @@
   "id": "@kbn/data-view-field-editor-example-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "description": "Data view field editor example app",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dataViewFieldEditorExample",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["data", "dataViewFieldEditor", "developerExamples"]
+    "requiredPlugins": [
+      "data",
+      "dataViewFieldEditor",
+      "developerExamples"
+    ]
   }
 }

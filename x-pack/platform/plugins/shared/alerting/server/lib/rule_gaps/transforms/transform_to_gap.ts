@@ -5,8 +5,9 @@
  * 2.0.
  */
 import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { isNumber } from 'lodash';
 import { Gap } from '../gap';
-import type { StringInterval } from '../types';
+import type { StringInterval } from '../../../application/gaps/types/intervals';
 
 type PotentialInterval = { lte?: string; gte?: string } | undefined;
 
@@ -49,18 +50,24 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
       const filledIntervals = validateIntervals(gap?.filled_intervals);
       const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
 
+      const failedAutoFillAttempts = isNumber(gap?.failed_auto_fill_attempts)
+        ? gap!.failed_auto_fill_attempts
+        : 0;
+
       return new Gap({
         ruleId,
         timestamp: doc['@timestamp'],
         range,
         filledIntervals,
         inProgressIntervals,
+        updatedAt: gap?.updated_at,
         internalFields: {
           _id: doc._id,
           _index: doc._index,
           _seq_no: doc._seq_no,
           _primary_term: doc._primary_term,
         },
+        failedAutoFillAttempts,
       });
     })
     .filter((gap): gap is Gap => gap !== null);

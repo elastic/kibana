@@ -35,7 +35,8 @@ export async function getIgnoreThrottled(
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  isServerless: boolean = false
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
@@ -48,13 +49,14 @@ export async function getDefaultAsyncSubmitParams(
     | 'ignore_unavailable'
     | 'track_total_hits'
     | 'keep_on_completion'
-  >
+  > & { project_routing?: string }
 > {
   return {
     // TODO: adjust for partial results
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
-    // Decreases delays due to network when using CCS
-    ccs_minimize_roundtrips: true,
+    // Decreases delays due to network when using CCS, only if not serverless.
+    // In case of serverless, this setting is ignored or errors out (in case of CPS)
+    ...(isServerless ? {} : { ccs_minimize_roundtrips: true }),
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),

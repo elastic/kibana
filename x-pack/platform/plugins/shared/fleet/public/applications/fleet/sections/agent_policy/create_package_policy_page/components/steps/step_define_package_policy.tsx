@@ -141,6 +141,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         {isManaged && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"

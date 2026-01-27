@@ -32,8 +32,9 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
     (snapshot) => snapshot.context.dataSource as KqlSamplesDataSourceWithUIAttributes
   );
 
-  const isDisabled = useDataSourceSelector(dataSourceRef, (snapshot) =>
-    snapshot.matches('disabled')
+  const isDisabled = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => !snapshot.can({ type: 'dataSource.change', dataSource })
   );
 
   const { value: streamDataView } = useAsync(() =>
@@ -67,11 +68,13 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
       title={DATA_SOURCES_I18N.kqlDataSource.defaultName}
       subtitle={DATA_SOURCES_I18N.kqlDataSource.subtitle}
       isPreviewVisible
+      data-test-subj="streamsAppKqlSamplesDataSourceCard"
     >
       <NameField
         onChange={(event) => handleChange({ name: event.target.value })}
         value={dataSource.name}
         disabled={isDisabled}
+        data-test-subj="streamsAppKqlSamplesDataSourceNameField"
       />
       <EuiSpacer />
       {streamDataView && (
@@ -85,6 +88,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
             query={dataSource.query}
             showFilterBar
             showQueryInput
+            dataTestSubj="streamsAppKqlSamplesSearchBar"
             {...dateFilterProps}
           />
           <EuiSpacer size="s" />

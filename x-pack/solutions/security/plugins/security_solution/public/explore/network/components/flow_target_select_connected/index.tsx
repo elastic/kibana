@@ -14,7 +14,7 @@ import styled from '@emotion/styled';
 import * as i18nIp from '../details/translations';
 
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
-import { IpOverviewId } from '../../../../timelines/components/field_renderers/field_renderers';
+import { IpOverviewId } from '../field_renderers/field_renderers';
 import type { FlowTarget, FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { FlowDirection } from '../../../../../common/search_strategy';
 

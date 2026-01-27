@@ -13,8 +13,8 @@ import type {
   Datatable,
   Render,
 } from '@kbn/expressions-plugin/public';
-import type { Dimension } from '@kbn/visualizations-plugin/public';
-import { prepareLogTable } from '@kbn/visualizations-plugin/public';
+import type { Dimension } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import type { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';

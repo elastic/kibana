@@ -25,7 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         svlCommonApi.getInternalRequestHeader()
       );
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
     });
 
@@ -34,7 +33,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         svlCommonApi.getInternalRequestHeader()
       );
       await ml.testResources.resetKibanaTimeZone();
-      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./stack_connectors'));

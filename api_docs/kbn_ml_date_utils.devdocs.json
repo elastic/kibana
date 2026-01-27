@@ -32,6 +32,8 @@
           "(ts: number) => string"
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+            "lineNumber": 21,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
           "(ts: number) => string"
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+            "lineNumber": 31,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
           "(ts: number) => string"
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+            "lineNumber": 41,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +155,8 @@
           "(value: number) => string"
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +173,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+            "lineNumber": 83,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +204,8 @@
           " | undefined) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +229,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
+            "lineNumber": 53,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -236,6 +256,8 @@
           "\"YYYY-MM-DD HH:mm:ss\""
         ],
         "path": "x-pack/platform/packages/private/ml/date_utils/src/time_format.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

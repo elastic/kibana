@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { createServer } from '@mswjs/http-middleware';
-
-import type { StrictResponse } from 'msw';
-import { http, HttpResponse } from 'msw';
+import * as http from 'http';
 
 export const setupMockServer = () => {
-  const server = createServer(deploymentHandler);
+  const server = http.createServer((req, res) => {
+    // Handle POST /api/v1/serverless/deployments
+    if (req.method === 'POST' && req.url === '/api/v1/serverless/deployments') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 200 }));
+      return;
+    }
+
+    // Default 404 response
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Not found' }));
+  });
+
   return server;
 };
-
-interface AgentlessApiResponse {
-  status: number;
-}
-
-const deploymentHandler = http.post(
-  'api/v1/serverless/deployments',
-  async ({ request }): Promise<StrictResponse<AgentlessApiResponse>> => {
-    return HttpResponse.json({
-      status: 200,
-    });
-  }
-);

@@ -50,5 +50,6 @@ export const Tag: FunctionComponent<Props> = ({
 Tag.propTypes = {
   name: PropTypes.string.isRequired,
   color: PropTypes.string,
+  // @ts-expect-error upgrade typescript v5.9.3
   type: PropTypes.string,
 };

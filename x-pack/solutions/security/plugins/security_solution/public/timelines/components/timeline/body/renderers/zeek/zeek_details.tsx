@@ -22,15 +22,15 @@ Details.displayName = 'Details';
 
 interface ZeekDetailsProps {
   data: Ecs;
-  timelineId: string;
+  scopeId: string;
 }
 
-export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, timelineId }) =>
+export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, scopeId }) =>
   data.zeek != null ? (
     <Details>
-      <ZeekSignature data={data} timelineId={timelineId} />
+      <ZeekSignature data={data} scopeId={scopeId} />
       <EuiSpacer size="s" />
-      <NetflowRenderer data={data} timelineId={timelineId} />
+      <NetflowRenderer data={data} timelineId={scopeId} />
     </Details>
   ) : null
 );

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TableVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { DatatableVisualizationState as TableVisConfiguration } from '@kbn/lens-common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';

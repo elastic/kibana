@@ -23,7 +23,7 @@ export const referenceSchema = schema.object(
     type: schema.string(),
     id: schema.string(),
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'kbn-content-management-utils-referenceSchema' } }
 );
 
 export const referencesSchema = schema.arrayOf(referenceSchema);

@@ -10,6 +10,33 @@
 import { Sha256 } from '@kbn/crypto-browser';
 import stringify from 'json-stable-stringify';
 
-export async function createRequestHash(keys: Record<string, any>) {
-  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
+/**
+ * Generate the hash for this request.
+ *
+ * Ignores the `preference` parameter since it generally won't
+ * match from one request to another identical request.
+ *
+ * (Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference)
+ */
+function createRequestHash(keys: Record<string, any>) {
+  const { preference, ...rest } = keys;
+  const hash = new Sha256().update(stringify(rest), 'utf8').digest('hex');
+  return hash;
 }
+
+/**
+ * Generates the hash used as a key in the client-side request cache.
+ */
+export const createRequestHashForClientCache = createRequestHash;
+
+/**
+ * Generates the hash for associating requests with background searches stored on the server.
+ *
+ * Ignores sessionId for compatibility with background searches created before https://github.com/elastic/kibana/pull/237191
+ */
+export const createRequestHashForBackgroundSearches = (keys: Record<string, any>) => {
+  // exclude additional parameters that are not relevant for server-side caching
+  const { sessionId, ...rest } = keys;
+  return createRequestHash(rest);
+};

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
-import type { Decorator } from '@storybook/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { action } from '@storybook/addon-actions';
+import type { Decorator } from '@storybook/react';
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import { CommonGlobalAppStyles } from '@kbn/core-chrome-layout/layouts/common/global_app_styles';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockUiSettingsService } from '../public/shared/mocks/mock_ui_settings_service';
 
 const createMockWebStorage = () => ({
@@ -42,6 +42,17 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
       <KibanaContextProvider
         services={
           {
+            application: {
+              capabilities: {
+                workflowsManagement: {
+                  readWorkflow: true,
+                  deleteWorkflow: true,
+                  createWorkflow: true,
+                  updateWorkflow: true,
+                  executeWorkflow: true,
+                },
+              },
+            },
             settings: {
               client: mockUiSettingsService(),
             },

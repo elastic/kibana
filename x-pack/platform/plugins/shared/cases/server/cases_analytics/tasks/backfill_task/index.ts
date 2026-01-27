@@ -70,7 +70,7 @@ export async function scheduleCAIBackfillTask({
       id: taskId,
       taskType: ANALYTICS_BACKFILL_TASK_TYPE,
       params: { sourceIndex, destIndex, sourceQuery },
-      runAt: new Date(Date.now() + BACKFILL_RUN_AT), // todo, value is short for testing but should run after 5 minutes
+      runAt: new Date(Date.now() + BACKFILL_RUN_AT),
       state: {},
     });
   } catch (e) {

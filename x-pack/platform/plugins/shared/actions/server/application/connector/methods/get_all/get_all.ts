@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
@@ -30,6 +31,7 @@ interface GetAllHelperOpts {
   logger: Logger;
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
+  connectorTypeRegistry: ActionTypeRegistry;
 }
 
 export async function getAll({
@@ -57,6 +59,7 @@ export async function getAll({
     kibanaIndices: context.kibanaIndices,
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
+    connectorTypeRegistry: context.actionTypeRegistry,
   });
 }
 
@@ -67,6 +70,7 @@ export async function getAllUnsecured({
   kibanaIndices,
   logger,
   spaceId,
+  connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
 
@@ -78,6 +82,7 @@ export async function getAllUnsecured({
     logger,
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
+    connectorTypeRegistry,
   });
 }
 
@@ -89,13 +94,15 @@ async function getAllHelper({
   logger,
   namespace,
   savedObjectsClient,
+  connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
     const connector = connectorFromSavedObject(
       rawAction,
-      isConnectorDeprecated(rawAction.attributes)
+      isConnectorDeprecated(rawAction.attributes),
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });
@@ -121,6 +128,7 @@ async function getAllHelper({
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,
+        isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),
@@ -178,6 +186,9 @@ export async function getAllSystemConnectors({
       isPreconfigured: systemConnector.isPreconfigured,
       isDeprecated: isConnectorDeprecated(systemConnector),
       isSystemAction: systemConnector.isSystemAction,
+      isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
+        systemConnector.actionTypeId
+      ),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

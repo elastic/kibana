@@ -14,15 +14,36 @@ export interface OriginEventId {
   isAlert: boolean;
 }
 
+// Constants for non-enriched entity types
+export const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
+export const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
+
 export interface GraphEdge {
-  badge: number;
-  docs: string[] | string;
-  actorIds: string[] | string;
+  // event/alert attributes
   action: string;
-  targetIds: Array<string | null> | string;
+  docs: string[] | string;
+  isAlert: boolean;
   isOrigin: boolean;
   isOriginAlert: boolean;
-  isAlert: boolean;
+  badge: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
+  sourceIps?: string[] | string;
+  sourceCountryCodes?: string[] | string;
+  // actor attributes
+  actorNodeId: string;
+  actorIdsCount: number;
   actorsDocData?: Array<string | null> | string;
+  actorEntityType?: string | null;
+  actorEntitySubType?: string | null;
+  actorEntityName?: string | string[] | null;
+  actorHostIps?: string[] | string;
+  // target attributes
+  targetNodeId: string | null;
+  targetIdsCount: number;
   targetsDocData?: Array<string | null> | string;
+  targetEntityType?: string | null;
+  targetEntitySubType?: string | null;
+  targetEntityName?: string | string[] | null;
+  targetHostIps?: string[] | string;
 }

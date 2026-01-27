@@ -80,6 +80,8 @@
         "<string | undefined>; }; }"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant_shared_state/public/plugin.tsx",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

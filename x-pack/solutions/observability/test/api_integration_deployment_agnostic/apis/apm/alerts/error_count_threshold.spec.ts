@@ -7,10 +7,10 @@
 
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/register_error_count_rule_type';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ApmAlertFields } from './helpers/alerting_helper';
@@ -21,6 +21,13 @@ import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
 } from './helpers/alerting_helper';
+
+const sortServices = (a: ApmAlertFields, b: ApmAlertFields) => {
+  const serviceA = a['service.name'] ?? '';
+  const serviceB = b['service.name'] ?? '';
+
+  return serviceB.localeCompare(serviceA);
+};
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -143,12 +150,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         ruleId = createdRule.id;
         alerts = (
-          await alertingApi.waitForDocumentInIndex({
-            indexName: APM_ALERTS_INDEX,
-            ruleId,
-            docCountTarget: 2,
-          })
-        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+          (
+            await alertingApi.waitForDocumentInIndex({
+              indexName: APM_ALERTS_INDEX,
+              ruleId,
+              docCountTarget: 2,
+            })
+          ).hits.hits.map((hit) => hit._source) as ApmAlertFields[]
+        ).toSorted(sortServices);
       });
 
       after(() =>
@@ -350,11 +359,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('produces one alert for the opbeans-php service', async () => {
         const alerts = (
-          await alertingApi.waitForDocumentInIndex({
-            indexName: APM_ALERTS_INDEX,
-            ruleId,
-          })
-        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+          (
+            await alertingApi.waitForDocumentInIndex({
+              indexName: APM_ALERTS_INDEX,
+              ruleId,
+            })
+          ).hits.hits.map((hit) => hit._source) as ApmAlertFields[]
+        ).toSorted(sortServices);
 
         expect(alerts[0]['kibana.alert.reason']).to.be(
           'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.'

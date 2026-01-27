@@ -32,6 +32,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-crypto/src/sha256.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "string | Buffer"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/sha256.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
               "BinaryToTextEncoding"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/sha256.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,6 +97,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,6 +115,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 45,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +134,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 45,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -147,6 +159,8 @@
           "(path: string, password?: string | undefined) => string[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -163,6 +177,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 71,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -180,6 +196,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 71,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -200,6 +218,8 @@
         "label": "Pkcs12ReadResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -214,6 +234,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -228,6 +250,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -242,6 +266,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-crypto/src/pkcs12.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

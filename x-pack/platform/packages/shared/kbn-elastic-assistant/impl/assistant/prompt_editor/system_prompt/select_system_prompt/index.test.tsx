@@ -16,7 +16,7 @@ import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core/public';
 import { useFetchPrompts } from '../../../api';
 import { mockSystemPrompts } from '../../../../mock/system_prompt';
-import type { DefinedUseQueryResult } from '@tanstack/react-query';
+import type { DefinedUseQueryResult } from '@kbn/react-query';
 
 jest.mock('../../../api/prompts/use_fetch_prompts');
 const http = {

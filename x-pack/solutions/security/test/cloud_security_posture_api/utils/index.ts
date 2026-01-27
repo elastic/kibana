@@ -7,3 +7,13 @@
 export { dataViewRouteHelpersFactory } from './data_view';
 export { EsIndexDataProvider } from './es_index_data_provider';
 export { waitForPluginInitialized, result } from './helpers';
+export {
+  cleanupEntityStore,
+  waitForEntityDataIndexed,
+  enableAssetInventory,
+  waitForEnrichPolicyCreated,
+  executeEnrichPolicy,
+  installCloudAssetInventoryPackage,
+  initEntityEnginesWithRetry,
+} from './entity_store';
+export type { EntityStoreHelpersDeps, EntityType } from './entity_store';

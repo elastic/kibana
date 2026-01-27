@@ -5,51 +5,30 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../../helpers';
-import type { CloudNodeAllocationTestBed } from './cloud_aware_behavior.helpers';
-import { setupCloudNodeAllocation } from './cloud_aware_behavior.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../../helpers/setup_environment';
+import { renderEditPolicy } from '../../../helpers/render_edit_policy';
+import { createTogglePhaseAction } from '../../../helpers/actions/toggle_phase_action';
+import { createNodeAllocationActions } from '../../../helpers/actions/node_allocation_actions';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
-  let testBed: CloudNodeAllocationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  const setup = async (isOnCloud?: boolean) => {
-    await act(async () => {
-      if (Boolean(isOnCloud)) {
-        testBed = await setupCloudNodeAllocation(httpSetup, {
-          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
-        });
-      } else {
-        testBed = await setupCloudNodeAllocation(httpSetup);
-      }
-    });
-  };
-
-  beforeEach(async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     httpRequestsMockHelpers.setLoadPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: { data: ['node1'] },
-      nodesByAttributes: { 'attribute:true': ['node1'] },
-      isUsingDeprecatedDataRoleConfig: true,
-    });
     httpRequestsMockHelpers.setNodesDetails('attribute:true', [
       { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
     ]);
-
-    await setup();
-
-    const { component } = testBed;
-    component.update();
   });
 
   describe('when not on cloud', () => {
@@ -60,18 +39,23 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
         isUsingDeprecatedDataRoleConfig: true,
       });
 
-      await setup();
-      const { actions, component, exists } = testBed;
+      renderEditPolicy(httpSetup);
+      await screen.findByTestId('savePolicyButton');
 
-      component.update();
-      await actions.togglePhase('warm');
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      const togglePhase = createTogglePhaseAction();
+      await togglePhase('warm');
+
+      await screen.findByTestId('warm-phase');
+
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
 
       // Assert that default, custom and 'none' options exist
-      await actions.warm.openNodeAttributesSection();
-      expect(exists('defaultDataAllocationOption')).toBeTruthy();
-      expect(exists('customDataAllocationOption')).toBeTruthy();
-      expect(exists('noneDataAllocationOption')).toBeTruthy();
+      const actions = createNodeAllocationActions('warm');
+      await actions.openNodeAttributesSection();
+
+      expect(screen.getByTestId('defaultDataAllocationOption')).toBeInTheDocument();
+      expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+      expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
     });
   });
 
@@ -84,20 +68,27 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           nodesByRoles: { data: ['test'] },
           isUsingDeprecatedDataRoleConfig: true,
         });
-        await setup(true);
-        const { actions, component, exists, find } = testBed;
 
-        component.update();
-        await actions.togglePhase('warm');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        renderEditPolicy(httpSetup, {
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
+        });
+        await screen.findByTestId('savePolicyButton');
 
-        // Assert that custom and 'none' options exist
-        await actions.warm.openNodeAttributesSection();
-        expect(exists('defaultDataAllocationOption')).toBeFalsy();
-        expect(exists('customDataAllocationOption')).toBeTruthy();
-        expect(exists('noneDataAllocationOption')).toBeTruthy();
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+
+        const actions = createNodeAllocationActions('warm');
+        await actions.openNodeAttributesSection();
+
+        expect(screen.queryByTestId('defaultDataAllocationOption')).not.toBeInTheDocument();
+        expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
         // Show the call-to-action for users to migrate their cluster to use node roles
-        expect(find('cloudDataTierCallout').exists()).toBeTruthy();
+        expect(screen.getByTestId('cloudDataTierCallout')).toBeInTheDocument();
       });
     });
 
@@ -108,19 +99,27 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
           isUsingDeprecatedDataRoleConfig: false,
         });
-        await setup(true);
-        testBed.component.update();
 
-        const { actions, component, exists, find } = testBed;
-        await actions.togglePhase('warm');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        renderEditPolicy(httpSetup, {
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
+        });
+        await screen.findByTestId('savePolicyButton');
 
-        await actions.warm.openNodeAttributesSection();
-        expect(exists('defaultDataAllocationOption')).toBeTruthy();
-        expect(exists('customDataAllocationOption')).toBeTruthy();
-        expect(exists('noneDataAllocationOption')).toBeTruthy();
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+
+        const actions = createNodeAllocationActions('warm');
+        await actions.openNodeAttributesSection();
+
+        expect(screen.getByTestId('defaultDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('customDataAllocationOption')).toBeInTheDocument();
+        expect(screen.getByTestId('noneDataAllocationOption')).toBeInTheDocument();
         // Do not show the call-to-action for users to migrate their cluster to use node roles
-        expect(find('cloudDataTierCallout').exists()).toBeFalsy();
+        expect(screen.queryByTestId('cloudDataTierCallout')).not.toBeInTheDocument();
       });
 
       test('do not show node allocation specific warnings on cloud', async () => {
@@ -130,20 +129,30 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
           nodesByRoles: {},
           isUsingDeprecatedDataRoleConfig: false,
         });
-        await setup(true);
-        testBed.component.update();
 
-        const { actions, component, exists } = testBed;
-        await actions.togglePhase('warm');
-        await actions.togglePhase('cold');
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        renderEditPolicy(httpSetup, {
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
+        });
+        await screen.findByTestId('savePolicyButton');
 
-        expect(exists('cloudDataTierCallout')).toBeFalsy();
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        await togglePhase('cold');
+
+        await screen.findByTestId('cold-phase');
+
+        const warmActions = createNodeAllocationActions('warm');
+        const coldActions = createNodeAllocationActions('cold');
+
+        expect(screen.queryByTestId('cloudDataTierCallout')).not.toBeInTheDocument();
         expect(
-          actions.warm.hasWillUseFallbackTierNotice() || actions.cold.hasWillUseFallbackTierNotice()
+          warmActions.hasWillUseFallbackTierNotice() || coldActions.hasWillUseFallbackTierNotice()
         ).toBeFalsy();
         expect(
-          actions.warm.hasNoTiersAvailableNotice() || actions.cold.hasNoTiersAvailableNotice()
+          warmActions.hasNoTiersAvailableNotice() || coldActions.hasNoTiersAvailableNotice()
         ).toBeFalsy();
       });
     });

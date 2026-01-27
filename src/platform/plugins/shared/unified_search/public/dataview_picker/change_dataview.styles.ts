@@ -27,10 +27,6 @@ export const changeDataViewStyles = ({
   return {
     trigger: {
       maxWidth: fullWidth ? undefined : DEFAULT_WIDTH,
-      backgroundColor: theme.colors.backgroundBasePlain,
-      border: `${theme.border.width.thin} solid ${theme.colors.borderBasePlain}`,
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
     },
     popoverContent: {
       width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], {

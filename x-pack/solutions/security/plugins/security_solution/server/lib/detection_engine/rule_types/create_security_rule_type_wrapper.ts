@@ -9,7 +9,7 @@ import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -435,6 +435,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const exceptionItems = await getExceptions({
               client: exceptionsClient,
               lists: params.exceptionsList,
+              shouldFilterOutEndpointExceptions:
+                experimentalFeatures.endpointExceptionsMovedUnderManagement,
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;

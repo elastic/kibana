@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';

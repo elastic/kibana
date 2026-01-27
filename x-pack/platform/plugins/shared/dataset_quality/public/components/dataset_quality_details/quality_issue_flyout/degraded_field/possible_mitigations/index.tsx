@@ -11,10 +11,18 @@ import { FieldMappingLimit } from './field_limit/field_mapping_limit';
 import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../hooks';
 import { ManualMitigations } from './manual';
 import { PossibleMitigationTitle } from './title';
+import { FieldCharacterLimit } from './field_character_limit/field_character_limit';
+import { FieldMalformed } from './field_malformed/field_malformed';
 
 export function PossibleDegradedFieldMitigations() {
-  const { degradedFieldAnalysis, isAnalysisInProgress } = useQualityIssues();
-  const { integrationDetails } = useDatasetQualityDetailsState();
+  const { degradedFieldAnalysisFormattedResult, isAnalysisInProgress } = useQualityIssues();
+
+  const isFieldLimitIssue = degradedFieldAnalysisFormattedResult?.isFieldLimitIssue ?? false;
+  const isFieldCharacterLimitIssue =
+    degradedFieldAnalysisFormattedResult?.isFieldCharacterLimitIssue ?? false;
+  const isFieldMalformedIssue =
+    degradedFieldAnalysisFormattedResult?.isFieldMalformedIssue ?? false;
+  const { integrationDetails, view } = useDatasetQualityDetailsState();
   const areIntegrationAssetsAvailable = Boolean(
     integrationDetails?.integration?.areAssetsAvailable
   );
@@ -25,13 +33,23 @@ export function PossibleDegradedFieldMitigations() {
         <EuiHorizontalRule margin="m" />
         <PossibleMitigationTitle />
         <EuiSpacer size="m" />
-        {degradedFieldAnalysis?.isFieldLimitIssue && (
+        {isFieldLimitIssue && (
           <>
             <FieldMappingLimit areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
             <EuiSpacer size="m" />
           </>
         )}
-        <ManualMitigations />
+        {view !== 'dataQuality' && isFieldCharacterLimitIssue && (
+          <>
+            <FieldCharacterLimit />
+          </>
+        )}
+        {view !== 'dataQuality' && isFieldMalformedIssue && (
+          <>
+            <FieldMalformed />
+          </>
+        )}
+        {view !== 'wired' && <ManualMitigations />}
       </div>
     )
   );

@@ -6,7 +6,7 @@
  */
 
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import { sumBy } from 'lodash';
 import { config, expectedValues, generateData } from './generate_data';

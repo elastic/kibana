@@ -32,6 +32,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "Stats"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 32,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 168,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +99,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 168,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -112,6 +120,8 @@
           "(module: any) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 151,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,6 +136,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 151,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -145,6 +157,8 @@
           "(module: any) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +173,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 164,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -178,6 +194,8 @@
           "(module: any) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -192,6 +210,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 138,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -213,6 +233,8 @@
           ") => boolean | undefined"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,6 +249,8 @@
               "Stats"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 12,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -246,6 +270,8 @@
           "(module: any) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -260,6 +286,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 124,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -279,6 +307,8 @@
           "(module: any) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,6 +323,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 111,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -313,6 +345,8 @@
           "module replacing imports for webpack externals"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 142,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -324,6 +358,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -335,6 +371,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -349,6 +387,8 @@
               "Dependency[]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,6 +403,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -377,6 +419,8 @@
               "unknown[]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -393,6 +437,8 @@
           "module replacing imports for DLL referenced"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 155,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -404,6 +450,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -415,6 +463,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,6 +479,8 @@
               "unknown[]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,6 +494,8 @@
               "The ID of the module in the DLL manifest"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -458,6 +512,8 @@
           "module replacing imports for webpack externals"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -469,6 +525,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,6 +538,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,6 +553,8 @@
               "JS used to get instance of External"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,6 +568,8 @@
               "module name that is handled by externals"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -522,6 +586,8 @@
           "module used for ignored code"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 115,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,6 +599,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,6 +614,8 @@
               "unique string to identify this module with (starts with `ignored`)"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,6 +629,8 @@
               "human readable identifier"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -575,6 +647,8 @@
           "used for standard js/ts modules"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -586,6 +660,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,6 +675,8 @@
               "absolute path to file on disk"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +691,8 @@
               "{ cacheable: boolean; buildDependencies: Set<string>; }"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -627,6 +707,8 @@
               "Dependency[]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -641,6 +723,8 @@
         "label": "WebpackResolveData",
         "description": [],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -654,6 +738,8 @@
               "compilation context"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,6 +753,8 @@
               "full request (with loaders)"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -681,6 +769,8 @@
               "[{ module: unknown; weak: boolean; optional: boolean; loc: unknown; request: string; userRequest: string; }]"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,6 +784,8 @@
               "absolute path, but probably includes loaders in some cases"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +799,8 @@
               "string from source code"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -721,6 +815,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -734,6 +830,8 @@
               "absolute path to file, but probablt includes loaders in some cases"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -747,6 +845,8 @@
               "module type"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -761,6 +861,8 @@
               "{ context: { issuer: string; }; path: string; }"
             ],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -779,6 +881,8 @@
         "label": "STATS_OPTIONS_DEFAULT_USEFUL_FILTER",
         "description": [],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -790,6 +894,8 @@
             "label": "all",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -801,6 +907,8 @@
             "label": "hash",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,6 +920,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -823,6 +933,8 @@
             "label": "timings",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -834,6 +946,8 @@
             "label": "assets",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -845,6 +959,8 @@
             "label": "modules",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -856,6 +972,8 @@
             "label": "reasons",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -867,6 +985,8 @@
             "label": "chunks",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -878,6 +998,8 @@
             "label": "chunkModules",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -889,6 +1011,8 @@
             "label": "errorDetails",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -900,6 +1024,8 @@
             "label": "entrypoints",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -911,6 +1037,8 @@
             "label": "ids",
             "description": [],
             "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -928,6 +1056,8 @@
           "RegExp"
         ],
         "path": "src/platform/packages/private/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

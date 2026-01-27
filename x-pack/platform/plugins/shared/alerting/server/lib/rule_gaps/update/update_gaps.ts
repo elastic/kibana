@@ -9,6 +9,7 @@ import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { chunk, groupBy } from 'lodash';
+import type { BackfillInitiator } from '../../../../common/constants';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
@@ -29,6 +30,7 @@ interface UpdateGapsParams {
   backfillClient: BackfillClient;
   actionsClient: ActionsClient;
   gaps?: Gap[];
+  initiator: BackfillInitiator | undefined;
 }
 
 /**
@@ -52,6 +54,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     backfillClient,
     actionsClient,
     gaps,
+    initiator,
   } = params;
 
   if (!eventLogger) {
@@ -75,6 +78,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
           logger,
           ruleId,
           eventLogClient,
+          initiator,
         });
 
         if (!success) {

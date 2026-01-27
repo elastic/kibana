@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(1);
@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(1);
@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText1 = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
@@ -163,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);

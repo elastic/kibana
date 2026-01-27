@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
+  ChromeSetup,
   ChromeStart,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
@@ -19,8 +21,11 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InternalChromeSetup extends ChromeSetup {}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -29,49 +34,32 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    *
    * @remarks
-   * LegacyHeader is a fixed layout header component that is used in the legacy fixed layout.
-   * Apart from the header, it also includes the navigations, banner and the chromeless header state.
-   * It decides which header - classic or project based on the chromeStyle$ observable.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getLegacyHeaderComponentForFixedLayout(opts?: {
-    projectSideNavVersion: 'v1' | 'v2';
-  }): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used in the grid layout with the "classic" navigation.
+   * Header that is used with the "classic" navigation.
    * It includes the header and the overlay classic navigation.
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getClassicHeaderComponentForGridLayout(): JSX.Element;
+  getClassicHeaderComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header UI
    * @internal
    *
    * @remarks
-   * Header that is used in the grid layout with the "project" navigation (solution and serverless)
+   * Header that is used with the "project" navigation (solution and serverless)
    * It includes the header.
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectHeaderComponentForGridLayout(opts: {
-    includeSideNav: 'v1' | 'v2' | false;
-  }): JSX.Element;
+  getProjectHeaderComponent(): JSX.Element;
 
   /**
-   * Used only by the rendering service to render the new project side navigation UI
+   * Used only by the rendering service to render the project side navigation UI
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectSideNavV2ComponentForGridLayout(): JSX.Element;
+  getProjectSideNavComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
@@ -111,6 +99,12 @@ export interface InternalChromeStart extends ChromeStart {
   getBodyClasses$(): Observable<string[]>;
 
   /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
+  getGlobalFooter$(): Observable<ReactNode>;
+
+  /**
    * Used only by the serverless plugin to customize project-style chrome.
    * @internal
    */
@@ -130,10 +124,16 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
-     * Sets the project name.
-     * @param projectName
+     * Sets the feedback URL parameters.
+     * @param feedbackUrlParams
      */
-    setProjectName(projectName: string): void;
+    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
+
+    /**
+     * Sets the Kibana name - project name for serverless, deployment name for ECH.
+     * @param kibanaName
+     */
+    setKibanaName(kibanaName: string): void;
 
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -183,10 +183,5 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
-
-    /**
-     * Used to manage the navigation tour state and start/stop the tour.
-     */
-    navigationTourManager: NavigationTourManager;
   };
 }

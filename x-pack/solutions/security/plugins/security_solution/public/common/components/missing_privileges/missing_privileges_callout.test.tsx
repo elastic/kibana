@@ -9,9 +9,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
+import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
 import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
 
 jest.mock('../../hooks/use_missing_privileges');
+
+const missingPrivileges: MissingPrivileges = {
+  featurePrivileges: [['feature', ['read', 'write']]],
+  indexPrivileges: [['index', ['read', 'write']]],
+};
 
 describe('MissingPrivilegesCallOut', () => {
   it('should show callout', () => {
@@ -22,7 +28,7 @@ describe('MissingPrivilegesCallOut', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <MissingPrivilegesCallOut />
+        <MissingPrivilegesCallOut namespace="detections" missingPrivileges={missingPrivileges} />
       </TestProviders>
     );
 

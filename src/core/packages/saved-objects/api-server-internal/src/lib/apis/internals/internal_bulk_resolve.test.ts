@@ -195,14 +195,7 @@ describe('internalBulkResolve', () => {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'exactMatch' };
   }
 
-  function expectAliasMatchResult({
-    id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    alias_purpose,
-  }: {
-    id: string;
-    alias_purpose?: string;
-  }) {
+  function expectAliasMatchResult({ id, alias_purpose }: { id: string; alias_purpose?: string }) {
     return {
       saved_object: `mock-obj-for-${id}`,
       outcome: 'aliasMatch',
@@ -213,9 +206,9 @@ describe('internalBulkResolve', () => {
 
   function expectConflictResult({
     id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_target_id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_purpose,
   }: {
     id: string;

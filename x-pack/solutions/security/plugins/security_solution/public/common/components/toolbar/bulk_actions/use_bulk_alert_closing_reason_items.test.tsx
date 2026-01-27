@@ -23,7 +23,6 @@ jest.mock(
 );
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
-  useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 (useAppToasts as jest.Mock).mockReturnValue({
   addSuccess: jest.fn(),

@@ -26,6 +26,8 @@
         "label": "RepoPath",
         "description": [],
         "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+                "lineNumber": 14,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -69,6 +75,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+                "lineNumber": 16,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -86,6 +94,8 @@
               "\nabsolute path to the file\n(lazy and cached getter)"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,6 +109,8 @@
               "\nextension to the filename\n(lazy and cached getter)"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,6 +124,8 @@
               "\nbasename of the path (including extension)\n(lazy and cached getter)"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -125,6 +139,8 @@
               "\nrepoRelDir of the path\n(lazy and cached getter)"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -139,6 +155,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -155,6 +173,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -171,6 +191,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -187,6 +209,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -203,6 +227,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-repo-path/repo_path.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

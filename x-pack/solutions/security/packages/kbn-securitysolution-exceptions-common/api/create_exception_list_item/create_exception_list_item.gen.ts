@@ -18,17 +18,29 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
+  ExceptionListItem,
   ExceptionListItemHumanId,
-  ExceptionListHumanId,
   ExceptionListItemType,
   ExceptionListItemName,
   ExceptionListItemDescription,
   ExceptionNamespaceType,
-  ExceptionListItemOsTypeArray,
-  ExceptionListItemTags,
   ExceptionListItemMeta,
   ExceptionListItemExpireTime,
-  ExceptionListItem,
+  ExceptionListHumanId,
+  ExceptionListItemOsTypeArray,
+  ExceptionListItemTags,
+  EndpointListProperties,
+  TrustedAppsWindowsProperties,
+  TrustedAppsMacProperties,
+  TrustedAppsLinuxProperties,
+  TrustedDevicesWindowsProperties,
+  TrustedDevicesMacProperties,
+  TrustedDevicesWindowsMacProperties,
+  EventFiltersProperties,
+  HostIsolationProperties,
+  BlocklistWindowsProperties,
+  BlocklistLinuxProperties,
+  BlocklistMacProperties,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
@@ -42,21 +54,122 @@ export type CreateExceptionListItemCommentArray = z.infer<
 >;
 export const CreateExceptionListItemCommentArray = z.array(CreateExceptionListItemComment);
 
-export type CreateExceptionListItemRequestBody = z.infer<typeof CreateExceptionListItemRequestBody>;
-export const CreateExceptionListItemRequestBody = z.object({
+export type CreateExceptionListItemBase = z.infer<typeof CreateExceptionListItemBase>;
+export const CreateExceptionListItemBase = z.object({
   item_id: ExceptionListItemHumanId.optional(),
-  list_id: ExceptionListHumanId,
   type: ExceptionListItemType,
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
   namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
   meta: ExceptionListItemMeta.optional(),
   expire_time: ExceptionListItemExpireTime.optional(),
   comments: CreateExceptionListItemCommentArray.optional().default([]),
 });
+
+export type CreateExceptionListItemGeneric = z.infer<typeof CreateExceptionListItemGeneric>;
+export const CreateExceptionListItemGeneric = CreateExceptionListItemBase.merge(
+  z.object({
+    list_id: ExceptionListHumanId,
+    entries: ExceptionListItemEntryArray,
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: ExceptionListItemTags.optional().default([]),
+  })
+);
+
+export type CreateExceptionListItemEndpointList = z.infer<
+  typeof CreateExceptionListItemEndpointList
+>;
+export const CreateExceptionListItemEndpointList =
+  CreateExceptionListItemBase.merge(EndpointListProperties);
+
+export type CreateExceptionListItemTrustedAppsWindows = z.infer<
+  typeof CreateExceptionListItemTrustedAppsWindows
+>;
+export const CreateExceptionListItemTrustedAppsWindows = CreateExceptionListItemBase.merge(
+  TrustedAppsWindowsProperties
+);
+
+export type CreateExceptionListItemTrustedAppsMac = z.infer<
+  typeof CreateExceptionListItemTrustedAppsMac
+>;
+export const CreateExceptionListItemTrustedAppsMac =
+  CreateExceptionListItemBase.merge(TrustedAppsMacProperties);
+
+export type CreateExceptionListItemTrustedAppsLinux = z.infer<
+  typeof CreateExceptionListItemTrustedAppsLinux
+>;
+export const CreateExceptionListItemTrustedAppsLinux = CreateExceptionListItemBase.merge(
+  TrustedAppsLinuxProperties
+);
+
+export type CreateExceptionListItemTrustedDevicesWindows = z.infer<
+  typeof CreateExceptionListItemTrustedDevicesWindows
+>;
+export const CreateExceptionListItemTrustedDevicesWindows = CreateExceptionListItemBase.merge(
+  TrustedDevicesWindowsProperties
+);
+
+export type CreateExceptionListItemTrustedDevicesMac = z.infer<
+  typeof CreateExceptionListItemTrustedDevicesMac
+>;
+export const CreateExceptionListItemTrustedDevicesMac = CreateExceptionListItemBase.merge(
+  TrustedDevicesMacProperties
+);
+
+export type CreateExceptionListItemTrustedDevicesWindowsMac = z.infer<
+  typeof CreateExceptionListItemTrustedDevicesWindowsMac
+>;
+export const CreateExceptionListItemTrustedDevicesWindowsMac = CreateExceptionListItemBase.merge(
+  TrustedDevicesWindowsMacProperties
+);
+
+export type CreateExceptionListItemEventFilters = z.infer<
+  typeof CreateExceptionListItemEventFilters
+>;
+export const CreateExceptionListItemEventFilters =
+  CreateExceptionListItemBase.merge(EventFiltersProperties);
+
+export type CreateExceptionListItemHostIsolation = z.infer<
+  typeof CreateExceptionListItemHostIsolation
+>;
+export const CreateExceptionListItemHostIsolation =
+  CreateExceptionListItemBase.merge(HostIsolationProperties);
+
+export type CreateExceptionListItemBlocklistWindows = z.infer<
+  typeof CreateExceptionListItemBlocklistWindows
+>;
+export const CreateExceptionListItemBlocklistWindows = CreateExceptionListItemBase.merge(
+  BlocklistWindowsProperties
+);
+
+export type CreateExceptionListItemBlocklistLinux = z.infer<
+  typeof CreateExceptionListItemBlocklistLinux
+>;
+export const CreateExceptionListItemBlocklistLinux =
+  CreateExceptionListItemBase.merge(BlocklistLinuxProperties);
+
+export type CreateExceptionListItemBlocklistMac = z.infer<
+  typeof CreateExceptionListItemBlocklistMac
+>;
+export const CreateExceptionListItemBlocklistMac =
+  CreateExceptionListItemBase.merge(BlocklistMacProperties);
+
+export type CreateExceptionListItemRequestBody = z.infer<typeof CreateExceptionListItemRequestBody>;
+export const CreateExceptionListItemRequestBody = z.union([
+  CreateExceptionListItemGeneric,
+  CreateExceptionListItemEndpointList,
+  CreateExceptionListItemTrustedAppsWindows,
+  CreateExceptionListItemTrustedAppsMac,
+  CreateExceptionListItemTrustedAppsLinux,
+  CreateExceptionListItemTrustedDevicesWindows,
+  CreateExceptionListItemTrustedDevicesMac,
+  CreateExceptionListItemTrustedDevicesWindowsMac,
+  CreateExceptionListItemEventFilters,
+  CreateExceptionListItemHostIsolation,
+  CreateExceptionListItemBlocklistWindows,
+  CreateExceptionListItemBlocklistLinux,
+  CreateExceptionListItemBlocklistMac,
+]);
 export type CreateExceptionListItemRequestBodyInput = z.input<
   typeof CreateExceptionListItemRequestBody
 >;

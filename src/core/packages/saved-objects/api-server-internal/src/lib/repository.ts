@@ -51,7 +51,14 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
   ISavedObjectsRepository,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -62,6 +69,7 @@ import {
   SavedObjectsSerializer,
   type IndexMapping,
   type IKibanaMigrator,
+  type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
@@ -86,8 +94,11 @@ import {
   performResolve,
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
+  performSearch,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
+import { performChangeOwnership } from './apis/change_ownership';
+import { performChangeAccessMode } from './apis/change_access_mode';
 
 /**
  * Constructor options for {@link SavedObjectsRepository}
@@ -134,7 +145,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   public static createRepository(
     migrator: IKibanaMigrator,
-    typeRegistry: ISavedObjectTypeRegistry,
+    typeRegistry: ISavedObjectTypeRegistryInternal,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
@@ -328,6 +339,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
       this.apiExecutionContext
     );
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.search}
+   */
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
+    return performSearch({ options }, this.apiExecutionContext);
   }
 
   /**
@@ -576,5 +596,25 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         spacesExtension: this.extensions.spacesExtension?.asScopedToNamespace(namespace),
       },
     });
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeOwnership}
+   */
+  async changeOwnership(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeOwnershipOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeAccessMode}
+   */
+  async changeAccessMode(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
   }
 }

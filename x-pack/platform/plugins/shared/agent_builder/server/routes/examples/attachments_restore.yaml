@@ -1,0 +1,22 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          restoreAttachmentResponseExample:
+            description: "Example response returning the restored attachment"
+            value:
+              success: true
+              attachment:
+                id: att-abc123
+                type: text
+                current_version: 1
+                versions:
+                  - version: 1
+                    data: "Restored content"
+                    created_at: "2025-01-06T10:00:00.000Z"
+                    content_hash: "sha256-xyz"
+                    estimated_tokens: 10
+                description: "Restored attachment"
+                active: true

@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 const commonDashboardSchema = {
   id: z.string(),
   title: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   tags: z.array(z.string()).optional(),
 };
 

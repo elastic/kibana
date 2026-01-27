@@ -36,6 +36,8 @@
           "<P>>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -67,6 +69,8 @@
           "<T>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +85,8 @@
               "React.ComponentType<{}> | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +101,8 @@
               "any"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -109,6 +117,8 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "lineNumber": 52,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -144,6 +154,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -166,6 +178,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "lineNumber": 60,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -194,6 +208,8 @@
               ") => string"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,6 +232,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "lineNumber": 66,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,6 +283,8 @@
           "<string>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -281,6 +301,8 @@
               "string"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -298,6 +320,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -322,6 +346,8 @@
               "<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -345,6 +371,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -362,6 +390,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -385,6 +415,8 @@
           "(obj: { hi: string; }, { fn1, fn2 }: { fn1: (foo: { param: string; }) => number; fn2: () => void; }, { str }: { str: string; }) => () => () => number"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -396,6 +428,8 @@
             "label": "obj",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 66,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -407,6 +441,8 @@
                 "label": "hi",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 66,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -420,6 +456,8 @@
             "label": "{ fn1, fn2 }",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 67,
+            "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -434,6 +472,8 @@
                   "(foo: { param: string; }) => number"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 67,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -445,6 +485,8 @@
                     "label": "foo",
                     "description": [],
                     "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                    "lineNumber": 67,
+                    "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -456,6 +498,8 @@
                         "label": "param",
                         "description": [],
                         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                        "lineNumber": 67,
+                        "columnNumber": 34,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -475,6 +519,8 @@
                   "() => void"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 67,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -490,6 +536,8 @@
             "label": "{ str }",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 68,
+            "columnNumber": 14,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -501,6 +549,8 @@
                 "label": "str",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 68,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -526,6 +576,8 @@
           "ImNotExportedFromIndex"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -540,6 +592,8 @@
               "ImNotExportedFromIndex"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 74,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -585,6 +639,8 @@
           "<string>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -601,6 +657,8 @@
               "string"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -618,6 +676,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -642,6 +702,8 @@
               "<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -665,6 +727,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -682,6 +746,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -716,6 +782,8 @@
           "<T>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": true,
         "removeBy": "8.0",
         "trackAdoption": false,
@@ -741,6 +809,8 @@
               "T"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -755,6 +825,8 @@
         "label": "ClassConstructorWithStaticProperties",
         "description": [],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -766,6 +838,8 @@
             "label": "staticProperty1",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,6 +854,8 @@
               "any"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -791,6 +867,8 @@
                 "label": "config",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+                "lineNumber": 30,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -802,6 +880,8 @@
                     "label": "foo",
                     "description": [],
                     "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+                    "lineNumber": 30,
+                    "columnNumber": 18,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -841,6 +921,8 @@
           "<string>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -857,6 +939,8 @@
               "() => Promise<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -875,6 +959,8 @@
               "<T>(t: T) => void"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -891,6 +977,8 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "lineNumber": 89,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -913,6 +1001,8 @@
               "((foo: string) => string) | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -927,6 +1017,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+                "lineNumber": 94,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -947,6 +1039,8 @@
               "() => void"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -981,6 +1075,8 @@
               "<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -996,6 +1092,8 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1016,6 +1114,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1041,6 +1141,8 @@
               "<string> | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1055,6 +1157,8 @@
         "label": "ImAnObject",
         "description": [],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1077,6 +1181,8 @@
               "<T>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1092,6 +1198,8 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1108,6 +1216,8 @@
         "label": "InterfaceWithIndexSignature",
         "description": [],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1122,6 +1232,8 @@
               "[key: string]:  { foo: string; }"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1138,6 +1250,8 @@
           "\nAn interface that has a react component."
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1152,6 +1266,8 @@
               "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1166,6 +1282,8 @@
         "label": "MyProps",
         "description": [],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1177,6 +1295,8 @@
             "label": "foo",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1199,6 +1319,8 @@
               "<T>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1214,6 +1336,8 @@
                   "T"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1232,6 +1356,8 @@
           "\nThe SearchSpec interface contains settings for creating a new SearchService, like\nusername and password."
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1245,6 +1371,8 @@
               "\nStores the username. Duh,"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1258,6 +1386,8 @@
               "\nStores the password. I hope it's encrypted!"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1284,6 +1414,8 @@
           "<T>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1298,6 +1430,8 @@
               "T"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1316,6 +1450,8 @@
           "\nComments on enums."
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1335,6 +1471,8 @@
           "10"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1352,6 +1490,8 @@
           "number[]"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1375,6 +1515,8 @@
           ", string | React.JSXElementConstructor<any>>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1391,6 +1533,8 @@
           "\nA string that says hi to you!"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1408,6 +1552,8 @@
           "string[]"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1433,6 +1579,8 @@
           "<any>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1468,6 +1616,8 @@
           "<T>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -1487,6 +1637,8 @@
               "T"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1507,6 +1659,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1534,6 +1688,8 @@
           "<T>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1551,6 +1707,8 @@
               "T"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1568,6 +1726,8 @@
           "any"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1583,6 +1743,8 @@
           "unknown"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1621,6 +1783,8 @@
           }
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1637,6 +1801,8 @@
           " | { zed: \"hi\"; }"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1654,6 +1820,8 @@
           "\"HI\""
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 84,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1679,6 +1847,8 @@
           "[]"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1718,6 +1888,8 @@
           "<string>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1730,6 +1902,8 @@
             "label": "a",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1744,6 +1918,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,6 +1934,8 @@
               "string[]"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1795,6 +1973,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1809,6 +1989,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1828,6 +2010,8 @@
           "string | undefined"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1843,6 +2027,8 @@
           "T[]"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1859,6 +2045,8 @@
           "\nSome of the plugins wrap static exports in an object to create\na namespace like this."
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1899,6 +2087,8 @@
               "<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1911,6 +2101,8 @@
                 "label": "a",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1925,6 +2117,8 @@
                   "number | undefined"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1939,6 +2133,8 @@
                   "string[]"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1976,6 +2172,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1990,6 +2188,8 @@
                   "string | undefined"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2032,6 +2232,8 @@
               "<string>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2044,6 +2246,8 @@
                 "label": "a",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2058,6 +2262,8 @@
                   "number | undefined"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2072,6 +2278,8 @@
                   "string[]"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2109,6 +2317,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2123,6 +2333,8 @@
                   "string | undefined"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2156,6 +2368,8 @@
               }
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2176,6 +2390,8 @@
                   }
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+                "lineNumber": 32,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2193,6 +2409,8 @@
               "/**\n   * The only way for this to have a comment is to grab this.\n   */"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2206,6 +2424,8 @@
               "/**\n   * Will this nested object have it's children extracted appropriately?\n   */"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2217,6 +2437,8 @@
                 "label": "foo",
                 "description": [],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2236,6 +2458,8 @@
         "\nAccess setup functionality from your plugin's setup function by adding the example\nplugin as a dependency.\n\n```ts\nClass MyPlugin {\n  setup(core: CoreDependencies, { example }: PluginDependencies) {\n    // Here you can access this functionality.\n    example.getSearchService();\n  }\n}\n```"
       ],
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "lineNumber": 77,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2262,6 +2486,8 @@
             ") => string"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 91,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2284,6 +2510,8 @@
                 }
               ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 102,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2306,6 +2534,8 @@
             "(searchSpec: { username: string; password: string; }) => string"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 104,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2317,6 +2547,8 @@
               "label": "searchSpec",
               "description": [],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 110,
+              "columnNumber": 35,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -2328,6 +2560,8 @@
                   "label": "username",
                   "description": [],
                   "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "lineNumber": 110,
+                  "columnNumber": 37,
                   "deprecated": false,
                   "trackAdoption": false
                 },
@@ -2339,6 +2573,8 @@
                   "label": "password",
                   "description": [],
                   "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "lineNumber": 110,
+                  "columnNumber": 55,
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -2362,6 +2598,8 @@
             "(thingOne: number, thingTwo: string, thingThree: { nestedVar: number; }) => void"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 112,
+          "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
           "references": [],
@@ -2379,6 +2617,8 @@
                 "number"
               ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 123,
+              "columnNumber": 16,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2396,6 +2636,8 @@
                 "string"
               ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 123,
+              "columnNumber": 34,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2408,6 +2650,8 @@
               "label": "thingThree",
               "description": [],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 123,
+              "columnNumber": 64,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -2419,6 +2663,8 @@
                   "label": "nestedVar",
                   "description": [],
                   "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "lineNumber": 123,
+                  "columnNumber": 66,
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -2440,6 +2686,8 @@
             "(obj: { fn: (foo: { param: string; }) => number; }) => () => { retFoo: () => string; }"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 125,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2451,6 +2699,8 @@
               "label": "obj",
               "description": [],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 134,
+              "columnNumber": 29,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -2465,6 +2715,8 @@
                     "(foo: { param: string; }) => number"
                   ],
                   "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                  "lineNumber": 135,
+                  "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false,
                   "children": [
@@ -2476,6 +2728,8 @@
                       "label": "foo",
                       "description": [],
                       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                      "lineNumber": 135,
+                      "columnNumber": 15,
                       "deprecated": false,
                       "trackAdoption": false,
                       "children": [
@@ -2487,6 +2741,8 @@
                           "label": "param",
                           "description": [],
                           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+                          "lineNumber": 135,
+                          "columnNumber": 17,
                           "deprecated": false,
                           "trackAdoption": false
                         }
@@ -2512,6 +2768,8 @@
             "\nHi, I'm a comment for an id string!"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 138,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2529,6 +2787,8 @@
         "\nAccess start functionality from your plugin's start function by adding the example\nplugin as a dependency.\n\n```ts\nClass MyPlugin {\n  start(core: CoreDependencies, { example }: PluginDependencies) {\n    // Here you can access this functionality.\n    example.getSearchLanguage();\n  }\n}\n```"
       ],
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "lineNumber": 52,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2544,6 +2804,8 @@
             "SearchLanguage"
           ],
           "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 66,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2576,6 +2838,8 @@
         "label": "ImACommonType",
         "description": [],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2587,6 +2851,8 @@
             "label": "goo",
             "description": [],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -29,7 +29,7 @@ describe('LabelNodeDetails', () => {
     // Check that the IPs text is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument();
 
     // If there are multiple IPs, there should be a "+1" indicator
     if (ips.length > 1) {
@@ -64,7 +64,7 @@ describe('LabelNodeDetails', () => {
     // Check that the IPs text is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument(); // Only first IP is shown by default
 
     // Check that the country flags badge is shown
     const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);

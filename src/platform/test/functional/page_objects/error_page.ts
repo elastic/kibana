@@ -12,10 +12,13 @@ import { FtrService } from '../ftr_provider_context';
 
 export class ErrorPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
+  private readonly retry = this.ctx.getService('retry');
 
   public async expectForbidden() {
-    const messageText = await this.common.getBodyText();
-    expect(messageText).to.contain('You do not have permission to access the requested page');
+    await this.retry.tryForTime(10000, async () => {
+      const messageText = await this.common.getBodyText();
+      expect(messageText).to.contain('You do not have permission to access the requested page');
+    });
   }
 
   public async expectNotFound() {

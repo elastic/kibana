@@ -107,6 +107,29 @@ describe('TableActions', () => {
       ).toMatchSnapshot();
     });
 
+    it('should render correctly for hideFilteringOnComputedColumns set to true', () => {
+      const rowsWithComputedColumn = getRows();
+      // Mock the dataViewField to have isComputedColumn set to true
+      Object.defineProperty(rowsWithComputedColumn[0], 'dataViewField', {
+        value: {
+          ...rowsWithComputedColumn[0].dataViewField!,
+          isComputedColumn: true,
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      expect(
+        getFieldValueCellActions({
+          rows: rowsWithComputedColumn,
+          isEsqlMode: false,
+          onFilter: jest.fn(),
+          toasts: toastsMock,
+          hideFilteringOnComputedColumns: true,
+        }).map((item) => item(EuiCellParams))
+      ).toMatchSnapshot();
+    });
+
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
         getFieldValueCellActions({

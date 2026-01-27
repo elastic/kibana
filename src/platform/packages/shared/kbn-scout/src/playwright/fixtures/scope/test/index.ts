@@ -14,6 +14,7 @@ export type { ScoutPage } from './scout_page';
 export { validateTagsFixture } from './validate_tags';
 export { pageObjectsFixture, pageObjectsParallelFixture } from './page_objects';
 export type { PageObjects } from './page_objects';
-export { persistentContext } from './context';
+export { persistentContextFixture } from './context/persistent_context';
+export { pageContextFixture } from './context/page_context';
 export { perfTrackerFixture } from './performance';
 export type { PerfTrackerFixture } from './performance';

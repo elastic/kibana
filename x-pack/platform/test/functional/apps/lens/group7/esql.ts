@@ -9,7 +9,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Maximum number of initial ESQL columns loaded
 // This is a temporary limit to avoid overwhelming the UI with too many columns
-const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 5;
+// Should be syncronized with MAX_NUM_OF_COLUMNS
+const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common, timePicker, lens } = getPageObjects([
@@ -119,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.removePanel(panel);
       await header.waitUntilLoadingHasFinished();
 
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await header.waitUntilLoadingHasFinished();
 

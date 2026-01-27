@@ -24,8 +24,8 @@ import {
 } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
@@ -39,35 +39,44 @@ export function PreviewDataSparkPlot({
   isQueryValid,
   showTitle = true,
   compressed = false,
-  hideXAxis = false,
+  hideAxis = false,
   height,
+  noOfBuckets,
+  timeRange,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
-  hideXAxis?: boolean;
+  hideAxis?: boolean;
   height?: number;
+  noOfBuckets?: number;
+  timeRange?: AbsoluteTimeRange;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
+  const effectiveTimeRange = timeRange ?? timeState.asAbsoluteTimeRange;
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    system: query.system,
+    feature: query.feature,
     kqlQuery: query.kql.query,
-    timeState,
+    timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
+    noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
+    return niceTimeFormatter([
+      new Date(effectiveTimeRange.from).getTime(),
+      new Date(effectiveTimeRange.to).getTime(),
+    ]);
+  }, [effectiveTimeRange.from, effectiveTimeRange.to]);
 
   const sparkPlotData = useSparkplotDataFromSigEvents({
     previewFetch,
-    queryValues: query,
+    query,
     xFormatter,
   });
 
@@ -114,6 +123,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (previewFetch.error) {
+      if (compressed) {
+        return <EuiIcon type="cross" color="danger" size="l" />;
+      }
+
       return (
         <>
           <EuiIcon type="cross" color="danger" size="xl" />
@@ -130,6 +143,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (noOccurrencesFound) {
+      if (compressed) {
+        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+      }
+
       return (
         <>
           <AssetImage type="barChart" size="xs" />
@@ -159,7 +176,10 @@ export function PreviewDataSparkPlot({
                 {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
                   {
-                    defaultMessage: 'Detected event occurrences',
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+                    },
                   }
                 )}
               </EuiText>
@@ -170,6 +190,7 @@ export function PreviewDataSparkPlot({
                 iconType="discoverApp"
                 href={discoverLink}
                 target="_blank"
+                data-test-subj="significant_events_preview_open_in_discover_button"
               >
                 {openInDiscoverLabel}
               </EuiButtonEmpty>
@@ -187,7 +208,7 @@ export function PreviewDataSparkPlot({
           annotations={sparkPlotData.annotations}
           xFormatter={xFormatter}
           compressed={compressed}
-          hideXAxis={hideXAxis}
+          hideAxis={hideAxis}
           height={height}
         />
       </>
@@ -195,7 +216,12 @@ export function PreviewDataSparkPlot({
   }
 
   return (
-    <EuiPanel hasBorder={true} css={{ height: height ? height : '200px' }}>
+    <EuiPanel
+      hasBorder={!compressed}
+      hasShadow={false}
+      css={{ height: height ? height : '200px' }}
+      paddingSize={compressed ? 'none' : 'm'}
+    >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"

@@ -24,9 +24,7 @@ export function AlertSearchBar({
 }) {
   const {
     data: { query },
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useKibana<ClientPluginsStart>().services;
 
   const dataView = useSyntheticsDataView();

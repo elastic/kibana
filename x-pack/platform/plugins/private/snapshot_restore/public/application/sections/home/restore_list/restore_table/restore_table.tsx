@@ -185,6 +185,9 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.snapshotRestore.restoreList.table.caption', {
+        defaultMessage: 'Snapshot restore list',
+      })}
       items={getRestores()}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}

@@ -34,6 +34,8 @@
           "[], infoText: string, json: string | undefined) => string"
         ],
         "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "[]"
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "lineNumber": 168,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
               "string"
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "lineNumber": 168,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +91,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "lineNumber": 168,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -108,6 +116,8 @@
           "{ name: string; content: string; }[]"
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -126,6 +136,8 @@
           "[]"
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -9,7 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { UsePerformEvaluationParams } from './use_perform_evaluation';
 import { usePerformEvaluation } from './use_perform_evaluation';
 import { postEvaluation as _postEvaluation } from './evaluate';
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { useMutation as _useMutation } from '@kbn/react-query';
 import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
@@ -24,7 +24,7 @@ jest.mock('./evaluate', () => {
   };
 });
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn();

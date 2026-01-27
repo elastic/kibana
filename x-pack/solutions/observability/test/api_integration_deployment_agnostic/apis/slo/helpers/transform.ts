@@ -15,6 +15,7 @@ export function createTransformHelper(
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
+  const esClient = getService('es');
 
   return {
     assertNotFound: async (transformId: string) => {
@@ -53,6 +54,38 @@ export function createTransformHelper(
           return response.body;
         },
         { retryCount: 10, retryDelay: 3000 }
+      );
+    },
+
+    assertTransformIsStarted: async (transformId: string) => {
+      return await retry.tryWithRetries(
+        `Wait for transform ${transformId} to be started`,
+        async () => {
+          const response = await esClient.transform.getTransformStats({
+            transform_id: transformId,
+          });
+          if (response.transforms[0]?.state !== 'started') {
+            throw new Error(`Transform ${transformId} is not started`);
+          }
+          return response;
+        },
+        { retryCount: 20, retryDelay: 3000 }
+      );
+    },
+
+    assertTransformIsStopped: async (transformId: string) => {
+      return await retry.tryWithRetries(
+        `Wait for transform ${transformId} to be stopped`,
+        async () => {
+          const response = await esClient.transform.getTransformStats({
+            transform_id: transformId,
+          });
+          if (response.transforms[0]?.state !== 'stopped') {
+            throw new Error(`Transform ${transformId} is not stopped`);
+          }
+          return response;
+        },
+        { retryCount: 20, retryDelay: 3000 }
       );
     },
   };

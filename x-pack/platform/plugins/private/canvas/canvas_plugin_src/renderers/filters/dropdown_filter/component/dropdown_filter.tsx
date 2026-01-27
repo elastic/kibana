@@ -81,6 +81,9 @@ export const DropdownFilter: FunctionComponent<Props> = ({
         options={dropdownOptions}
         fullWidth
         compressed
+        aria-label={i18n.translate('xpack.canvas.renderer.dropdownFilter.selectAriaLabel', {
+          defaultMessage: 'Dropdown filter',
+        })}
       />
     </div>
   );

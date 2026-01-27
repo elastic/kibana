@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { composeStories } from '@storybook/react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
 
 const { GraphLargeStackedEdgeCases } = composeStories(stories);
@@ -57,6 +57,12 @@ describe('GraphLargeStackedEdgeCases story', () => {
     const { getAllByText, container } = render(<GraphLargeStackedEdgeCases />);
 
     const labels = GraphLargeStackedEdgeCases.args?.nodes?.filter((node) => node.shape === 'label');
+
+    // Wait for nodes to be rendered
+    await waitFor(() => {
+      const nodeElements = container.querySelectorAll('.react-flow__node');
+      expect(nodeElements.length).toBeGreaterThan(0);
+    });
 
     // With JSDOM toBeVisible can't check if elements are visually obscured by other overlapping elements
     // This is a workaround which gives a rough estimation of a label's bounding rectangle and check for intersections

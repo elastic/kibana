@@ -7,7 +7,7 @@
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { SecuritySubPlugin } from '../app/types';
-import { DETECTIONS_TABLE_IDS } from '../detections';
+import { DETECTIONS_TABLE_IDS } from '../detections/constants';
 import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 

@@ -11,7 +11,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, formatDate, EuiHorizontalRule } from '@elastic/eui';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { css } from '@emotion/react';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../constants';
 

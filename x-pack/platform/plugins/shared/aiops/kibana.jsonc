@@ -31,7 +31,6 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",

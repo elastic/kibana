@@ -12,4 +12,5 @@ export type {
   DocViewFilterFn,
   DocViewRenderProps,
   DocViewerComponent,
+  DocViewerRestorableState,
 } from './services/types';

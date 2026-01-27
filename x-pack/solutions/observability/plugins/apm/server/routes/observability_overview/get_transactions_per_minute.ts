@@ -6,13 +6,13 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { isDefaultTransactionType } from '../../../common/transaction_types';
-import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   getBackwardCompatibleDocumentTypeFilter,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { isDefaultTransactionType } from '../../../common/transaction_types';
+import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionsPerMinute({

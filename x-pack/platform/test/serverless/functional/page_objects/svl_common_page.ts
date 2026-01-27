@@ -60,6 +60,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     log.debug(`browser: clearing session & local storages`);
     await browser.clearSessionStorage();
     await browser.clearLocalStorage();
+
     await pageObjects.common.sleep(700);
   };
 

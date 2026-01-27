@@ -91,11 +91,9 @@ export const formSerializer = (formData: GenericObject) => {
 export const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
-    /* eslint-disable @typescript-eslint/naming-convention */
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    /* eslint-enable @typescript-eslint/naming-convention */
     _source: { enabled, mode, includes, excludes } = {} as SerializedSourceField,
     _meta,
     _routing,

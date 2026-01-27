@@ -1,0 +1,156 @@
+{
+  "id": "@kbn/content-management-access-control-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-access-control-server",
+        "id": "def-common.registerAccessControl",
+        "type": "Function",
+        "tags": [],
+        "label": "registerAccessControl",
+        "description": [],
+        "signature": [
+          "({ http, isAccessControlEnabled, getStartServices, }: ",
+          {
+            "pluginId": "@kbn/content-management-access-control-server",
+            "scope": "common",
+            "docId": "kibKbnContentManagementAccessControlServerPluginApi",
+            "section": "def-common.CheckGlobalAccessControlPrivilegeDependencies",
+            "text": "CheckGlobalAccessControlPrivilegeDependencies"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-access-control-server",
+            "id": "def-common.registerAccessControl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  isAccessControlEnabled,\n  getStartServices,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-access-control-server",
+                "scope": "common",
+                "docId": "kibKbnContentManagementAccessControlServerPluginApi",
+                "section": "def-common.CheckGlobalAccessControlPrivilegeDependencies",
+                "text": "CheckGlobalAccessControlPrivilegeDependencies"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+            "lineNumber": 14,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-access-control-server",
+        "id": "def-common.CheckGlobalAccessControlPrivilegeDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "CheckGlobalAccessControlPrivilegeDependencies",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-access-control-server",
+            "id": "def-common.CheckGlobalAccessControlPrivilegeDependencies.http",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpServiceSetup",
+              "<",
+              "RequestHandlerContext",
+              "> & { resources: ",
+              "HttpResources",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-access-control-server",
+            "id": "def-common.CheckGlobalAccessControlPrivilegeDependencies.isAccessControlEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAccessControlEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-access-control-server",
+            "id": "def-common.CheckGlobalAccessControlPrivilegeDependencies.getStartServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getStartServices",
+            "description": [],
+            "signature": [
+              "() => Promise<{ security?: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              },
+              " | undefined; }>"
+            ],
+            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

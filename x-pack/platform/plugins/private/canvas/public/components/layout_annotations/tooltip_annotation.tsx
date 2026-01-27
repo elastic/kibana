@@ -28,6 +28,7 @@ export const TooltipAnnotation: FC<Props> = ({ transformMatrix, text }) => {
 };
 
 TooltipAnnotation.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   text: PropTypes.string.isRequired,
 };

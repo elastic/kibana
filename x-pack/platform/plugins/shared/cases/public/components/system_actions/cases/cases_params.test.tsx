@@ -20,6 +20,7 @@ import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__moc
 import { templatesConfigurationMock } from '../../../containers/mock';
 import * as utils from '../../../containers/configure/utils';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -40,14 +41,12 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
+const connector: ActionConnector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: true as const,
-};
+});
+
 const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,
@@ -114,6 +113,8 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+    expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('maximum-case-to-open-input')).toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
@@ -168,6 +169,22 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByText('error')).toBeInTheDocument();
   });
 
+  it('renders the default maximum amount of cases correctly', async () => {
+    render(<CasesParamsFields {...defaultProps} />);
+
+    const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
+    expect(maximumCasesInput).toHaveValue(5);
+
+    // set to the maximum
+    fireEvent.change(maximumCasesInput, { target: { value: '20' } });
+    expect(editAction.mock.calls[0][1].maximumCasesToOpen).toEqual(20);
+    expect(maximumCasesInput).toBeValid();
+
+    // set to an invalid value
+    fireEvent.change(maximumCasesInput, { target: { value: '22' } });
+    expect(maximumCasesInput).toBeInvalid();
+  });
+
   describe('UI updates', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
@@ -179,6 +196,39 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
       expect(screen.queryByText('host.geo.location')).not.toBeInTheDocument();
+    });
+
+    it('renders the auto push case option correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const props = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[3].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...props} />);
+
+      const autoPushCase = await screen.findByTestId('auto-push-case');
+      expect(autoPushCase).not.toBeChecked();
+
+      // click and observe update
+      await user.click(autoPushCase);
+      expect(editAction.mock.calls[0][1].autoPushCase).toEqual(true);
     });
 
     it('updates grouping by field', async () => {

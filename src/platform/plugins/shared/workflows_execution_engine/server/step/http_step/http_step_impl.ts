@@ -7,17 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import https from 'https';
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import { ExecutionError } from '@kbn/workflows/server';
+import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
-import { parseDuration } from '../../utils/parse-duration/parse-duration';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
 
 type HttpHeaders = Record<string, string | number | boolean>;
+
+/**
+ * Fetcher configuration options for customizing HTTP requests
+ * Derived from the Zod schema to ensure type safety and avoid duplication
+ */
+type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
+  // Allow additional options to be passed through
+  [key: string]: any;
+};
 
 // Extend BaseStep for HTTP-specific properties
 export interface HttpStep extends BaseStep {
@@ -26,14 +41,14 @@ export interface HttpStep extends BaseStep {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: HttpHeaders;
     body?: any;
-    timeout?: string;
+    fetcher?: FetcherOptions;
   };
 }
 
 export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   constructor(
     node: HttpGraphNode,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger,
     private urlValidator: UrlValidator,
     workflowRuntime: WorkflowExecutionRuntimeManager
@@ -46,74 +61,34 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
     super(
       httpStep,
-      contextManager,
+      stepExecutionRuntime,
       undefined, // no connector executor needed for HTTP
       workflowRuntime
     );
   }
 
   public getInput() {
-    const context = this.contextManager.getContext();
-    const { url, method = 'GET', headers = {}, body, timeout = '30s' } = this.step.with;
+    const { url, method = 'GET', headers = {}, body, fetcher } = this.step.with;
 
-    return {
-      url: typeof url === 'string' ? this.templatingEngine.render(url, context) : url,
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
+      url,
       method,
-      headers: this.renderHeaders(headers, context),
-      body: this.renderBody(body, context),
-      timeout: parseDuration(timeout),
-    };
-  }
-
-  private renderHeaders(headers: HttpHeaders, context: any): HttpHeaders {
-    return Object.entries(headers).reduce((acc, [key, value]) => {
-      acc[key] = typeof value === 'string' ? this.templatingEngine.render(value, context) : value;
-      return acc;
-    }, {} as HttpHeaders);
-  }
-
-  private renderBody(body: any, context: any): any {
-    if (typeof body === 'string') {
-      return this.templatingEngine.render(body, context);
-    }
-    if (body && typeof body === 'object') {
-      return this.renderObjectTemplate(body, context);
-    }
-    return body;
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
+      headers,
+      body,
+      fetcher,
+    });
   }
 
   protected async _run(input: any): Promise<RunStepResult> {
     try {
       return await this.executeHttpRequest(input);
     } catch (error) {
-      return await this.handleFailure(input, error);
+      return this.handleFailure(input, error);
     }
   }
 
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
-    const { url, method, headers, body, timeout } = input;
+    const { url, method, headers, body, fetcher: fetcherOptions } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
@@ -141,11 +116,33 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       url,
       method,
       headers,
-      timeout,
+      signal: this.stepExecutionRuntime.abortController.signal,
+      ...(body && { data: body }),
     };
 
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
-      config.data = body;
+    // Apply fetcher options if provided
+    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+      const { skip_ssl_verification, follow_redirects, max_redirects, keep_alive } = fetcherOptions;
+
+      // Configure HTTPS agent for SSL and keep-alive options
+      const httpsAgentOptions: https.AgentOptions = {};
+
+      if (skip_ssl_verification) {
+        httpsAgentOptions.rejectUnauthorized = false;
+      }
+
+      if (keep_alive !== undefined) {
+        httpsAgentOptions.keepAlive = keep_alive;
+      }
+
+      config.httpsAgent = new https.Agent(httpsAgentOptions);
+
+      // Configure redirect behavior
+      if (follow_redirects === false) {
+        config.maxRedirects = 0;
+      } else if (max_redirects !== undefined) {
+        config.maxRedirects = max_redirects;
+      }
     }
 
     const response: AxiosResponse = await axios(config);
@@ -168,29 +165,71 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
   }
 
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    const errorMessage = axios.isAxiosError(error)
-      ? error.response
-        ? `HTTP Error: ${error.response.status} ${error.response.statusText}`
-        : `HTTP Error: ${error.message ? error.message : error.name}`
-      : error instanceof Error
-      ? error.message
-      : String(error);
+  protected handleFailure(input: any, error: any): RunStepResult {
+    let executionError: ExecutionError;
 
-    this.workflowLogger.logError(
-      `HTTP request failed: ${errorMessage}`,
-      error instanceof Error ? error : new Error(errorMessage),
-      {
-        workflow: { step_id: this.step.name },
-        event: { action: 'http_request', outcome: 'failure' },
-        tags: ['http', 'error'],
-      }
-    );
+    if (axios.isAxiosError(error)) {
+      executionError = this.mapAxiosError(error);
+    } else if (error instanceof Error) {
+      executionError = new ExecutionError({
+        type: error.name,
+        message: error.message,
+      });
+    } else {
+      executionError = new ExecutionError({
+        type: 'UnknownError',
+        message: String(error),
+      });
+    }
+
+    this.workflowLogger.logError(`HTTP request failed: ${executionError.message}`, executionError, {
+      workflow: { step_id: this.step.name },
+      event: { action: 'http_request', outcome: 'failure' },
+      tags: ['http', 'error', executionError.type],
+    });
 
     return {
       input,
       output: undefined,
-      error: errorMessage,
+      error: executionError,
     };
+  }
+
+  private mapAxiosError(error: AxiosError): ExecutionError {
+    if (error.code === 'ECONNREFUSED') {
+      const url = new URL(this.step.with.url);
+      return new ExecutionError({
+        type: 'ConnectionRefused',
+        message: `Connection refused to ${url.origin}`,
+      });
+    }
+
+    if (error.code === 'ERR_CANCELED') {
+      return new ExecutionError({
+        type: 'HttpRequestCancelledError',
+        message: 'HTTP request was cancelled',
+      });
+    }
+
+    if (error.response) {
+      return new ExecutionError({
+        type: 'HttpRequestError',
+        message: error.message,
+        details: {
+          headers: error.response.headers,
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        },
+      });
+    }
+
+    return new ExecutionError({
+      type: error.code || 'UnknownHttpRequestError',
+      message: error.message,
+      details: error.config && {
+        config: error.config,
+      },
+    });
   }
 }

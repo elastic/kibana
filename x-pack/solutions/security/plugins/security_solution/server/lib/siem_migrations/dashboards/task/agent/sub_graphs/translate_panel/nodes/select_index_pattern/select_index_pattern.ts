@@ -4,51 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
-import { getSelectIndexPatternGraph } from '../../../../../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern';
-import type { ChatModel } from '../../../../../../../common/task/util/actions_client_chat';
-import type { DashboardMigrationTelemetryClient } from '../../../../../dashboard_migrations_telemetry_client';
-import type { GraphNode } from '../../types';
-import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
+import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
+import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
 
-interface GetSelectIndexPatternParams {
-  model: ChatModel;
-  esScopedClient: IScopedClusterClient;
-  telemetryClient: DashboardMigrationTelemetryClient;
-  logger: Logger;
-}
-
-export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): GraphNode => {
-  const selectIndexPatternGraphPromise = getSelectIndexPatternGraph({
-    // Using the `asInternalUser` so we can access all indices to find the best index pattern
-    // we can change it to `asCurrentUser`, but we would be restricted to the indices the user (who started the migration task) has access to.
-    esClient: params.esScopedClient.asInternalUser,
-    createLlmInstance: async () => params.model,
-  });
-
+export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): GraphNode => {
   return async (state, config) => {
     if (!state.esql_query) {
       return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
 
-    const description = `Dashboard description: "${state.dashboard_description}"
-Specific Panel description: "${state.description}"`;
-
-    const question = await SELECT_INDEX_PATTERN_PROMPT.format({
-      query: state.esql_query,
+    const nlQuery = await SELECT_INDEX_PATTERN_PROMPT.format({
       title: state.parsed_panel.title,
-      description,
+      description: state.description,
+      dashboard_description: state.dashboard_description,
+      query: state.esql_query,
     });
 
-    const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed
-    const { selectedIndexPattern } = await selectIndexPatternGraph.invoke(
-      { input: { question } },
-      config
-    );
+    const response = await indexExplorer({
+      nlQuery,
+      limit: 1,
+      esClient: params.esScopedClient.asInternalUser,
+      model: {
+        chatModel: params.model,
+        connector: await params.inference.getConnectorById(params.connectorId, params.request),
+        inferenceClient: params.inference.getClient({
+          request: params.request,
+          bindTo: { connectorId: params.connectorId },
+        }),
+      },
+    });
 
-    const indexPattern = selectedIndexPattern ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
+    const indexPattern = response?.resources[0]?.name ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
 
     const esqlQuery = state.esql_query.replace(
       `FROM ${TRANSLATION_INDEX_PATTERN}`, // Will always be at the beginning of the query

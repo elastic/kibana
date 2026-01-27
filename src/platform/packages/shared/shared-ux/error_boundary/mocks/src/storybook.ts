@@ -10,6 +10,7 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { KibanaErrorService } from '../../src/services/error_service';
+import { createAnalyticsMock } from './analytics_mock';
 import type { KibanaErrorBoundaryServices } from '../../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -27,7 +28,8 @@ export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<
 
   getServices(params: Params = {}): KibanaErrorBoundaryServices {
     const onClickRefresh = action('Reload window');
-    const analytics = { reportEvent: action('Report telemetry event') };
+    const mock = createAnalyticsMock();
+    const analytics = mock.analytics;
 
     return {
       ...params,

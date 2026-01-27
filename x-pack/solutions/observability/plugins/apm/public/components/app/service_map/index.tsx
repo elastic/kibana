@@ -6,17 +6,11 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import { Subscription } from 'rxjs';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -38,6 +32,8 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
+import { ReactFlowServiceMap } from './react_flow_service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -108,6 +104,7 @@ export function ServiceMap({
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
+  const showReactFlowServiceMap = useApmFeatureFlag(ApmFeatureFlagName.ServiceMapUseReactFlow);
 
   const subscriptions = useRef<Subscription>(new Subscription());
 
@@ -187,10 +184,22 @@ export function ServiceMap({
     });
   }
 
+  if (showReactFlowServiceMap) {
+    return (
+      <>
+        <SearchBar showTimeComparison />
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+            <ReactFlowServiceMap height={heightWithPadding} />
+          </div>
+        </EuiPanel>
+      </>
+    );
+  }
+
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiSpacer size="s" />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape

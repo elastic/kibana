@@ -67,6 +67,10 @@ describe('TaskPollingLifecycle', () => {
         interval: 10000,
       },
       kibanas_per_partition: 2,
+      invalidate_api_key_task: {
+        interval: '5m',
+        removalDelay: '1h',
+      },
       enabled: true,
       index: 'foo',
       max_attempts: 9,

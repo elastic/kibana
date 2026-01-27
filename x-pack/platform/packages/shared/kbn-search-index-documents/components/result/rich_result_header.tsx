@@ -23,12 +23,14 @@ import {
   EuiTitle,
   useEuiTheme,
   EuiToolTip,
+  copyToClipboard,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MetaDataProps } from './result_types';
+import { definitionStyle } from './styles';
 
 interface Props {
   metaData: MetaDataProps;
@@ -52,9 +54,58 @@ const Term: React.FC<TermDef> = ({ label }) => (
 
 const Definition: React.FC<TermDef> = ({ label }) => (
   <EuiFlexItem>
-    <EuiTextColor color="subdued">{label}</EuiTextColor>
+    <EuiToolTip position="top" content={label}>
+      <EuiTextColor component="div" css={definitionStyle} color="subdued">
+        {label}
+      </EuiTextColor>
+    </EuiToolTip>
   </EuiFlexItem>
 );
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+  const [isTextCopied, setTextCopied] = useState(false);
+
+  const onClick = () => {
+    copyToClipboard(textToCopy);
+    setTextCopied(true);
+  };
+  const onBlur = () => {
+    setTextCopied(false);
+  };
+  return (
+    <EuiToolTip
+      content={
+        isTextCopied
+          ? i18n.translate(
+              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
+              {
+                defaultMessage: 'Copied to clipboard',
+              }
+            )
+          : i18n.translate(
+              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+              {
+                defaultMessage: 'Copy text to clipboard',
+              }
+            )
+      }
+      data-test-subj="copyTextToClipboardButtonTooltip"
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate(
+          'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+          {
+            defaultMessage: 'Copy text to clipboard',
+          }
+        )}
+        data-test-subj="copyTextToClipboardButton"
+        color="text"
+        iconType="copy"
+        onClick={onClick}
+        onBlur={onBlur}
+      />
+    </EuiToolTip>
+  );
+};
 const MetadataPopover: React.FC<MetaDataProps> = ({
   id,
   onDocumentDelete,
@@ -102,9 +153,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
         `}
       >
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
             <Term label="ID" />
             <Definition label={id} />
+            <CopyButton textToCopy={id} />
           </EuiFlexGroup>
         </EuiFlexItem>
 

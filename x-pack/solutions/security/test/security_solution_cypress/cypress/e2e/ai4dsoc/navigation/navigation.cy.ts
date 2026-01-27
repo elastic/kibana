@@ -115,12 +115,13 @@ const linkedPagesAssertions: Record<string, () => void> = {
   discover: () => {
     cy.getByTestSubjContains('discoverSavedSearchTitle').should(
       'contain',
-      'Discover - Search not yet saved'
+      'Discover - Session not yet saved'
     );
   },
 };
 
-describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/242988
+describe.skip('AI4dSoC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
     visit(GET_STARTED_URL);

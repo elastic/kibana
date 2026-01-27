@@ -12,12 +12,14 @@ import type { FindSecurityAIPromptsRequestQuery } from '@kbn/elastic-assistant-c
 import { DATA_QUALITY_SUGGESTED_USER_PROMPT } from '@kbn/ecs-data-quality-dashboard';
 import { EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS } from '../../../detection_engine/common/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../prompts/user/translations';
+import { ASSET_INVENTORY_ENTITY_PROMPT } from '../../../flyout/entity_details/shared/translations';
 import {
   DATA_QUALITY_DASHBOARD_CATEGORY,
   getPromptContexts,
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
+  PROMPT_CONTEXT_ASSET_CATEGORY,
 } from '.';
 export interface UseFindPromptContextsParams {
   context: {
@@ -47,6 +49,9 @@ export const useFindPromptContexts = (payload: UseFindPromptContextsParams) => {
     [PROMPT_CONTEXT_DETECTION_RULES_CATEGORY]:
       prompts.find(({ promptId }) => promptId === 'ruleAnalysis')?.prompt ??
       EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    [PROMPT_CONTEXT_ASSET_CATEGORY]:
+      prompts.find(({ promptId }) => promptId === 'assetAnalysis')?.prompt ??
+      ASSET_INVENTORY_ENTITY_PROMPT,
   });
   return PROMPT_CONTEXTS;
 };

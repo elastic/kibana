@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ResizableLayoutMode, ResizableLayoutDirection } from './types';
+export { ResizableLayoutMode, ResizableLayoutDirection, ResizableLayoutOrder } from './types';
 export type { ResizableLayoutProps } from './src/resizable_layout';
 export { ResizableLayout } from './src/resizable_layout';

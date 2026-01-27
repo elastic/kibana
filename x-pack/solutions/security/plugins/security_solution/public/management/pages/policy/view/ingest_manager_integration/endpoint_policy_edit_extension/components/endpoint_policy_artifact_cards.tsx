@@ -15,6 +15,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_LABELS,
   TRUSTED_APPS_LABELS,
   TRUSTED_DEVICES_LABELS,
+  ENDPOINT_EXCEPTIONS_LABELS,
 } from '../translations';
 import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
 import { BlocklistsApiClient } from '../../../../../blocklist/services';
@@ -22,6 +23,7 @@ import { TrustedDevicesApiClient } from '../../../../../trusted_devices/service/
 import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
+import { EndpointExceptionsApiClient } from '../../../../../endpoint_exceptions/service/api_client';
 import {
   getBlocklistsListPath,
   getEventFiltersListPath,
@@ -31,8 +33,10 @@ import {
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
   getPolicyTrustedDevicesPath,
+  getPolicyEndpointExceptionsPath,
   getTrustedAppsListPath,
   getTrustedDevicesListPath,
+  getEndpointExceptionsListPath,
 } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
 import type { FleetIntegrationArtifactCardProps } from './fleet_integration_artifacts_card';
@@ -41,6 +45,7 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../.
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../../../trusted_devices/constants';
+import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../endpoint_exceptions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useHttp } from '../../../../../../../common/lib/kibana';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
@@ -169,6 +174,36 @@ const HostIsolationExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ polic
 });
 HostIsolationExceptionsPolicyCard.displayName = 'HostIsolationExceptionsPolicyCard';
 
+const EndpointExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
+  const http = useHttp();
+  const endpointExceptionsApiClientInstance = useMemo(
+    () => EndpointExceptionsApiClient.getInstance(http),
+    [http]
+  );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyEndpointExceptionsPath(policyId);
+      }
+
+      return getEndpointExceptionsListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
+
+  return (
+    <FleetIntegrationArtifactsCard
+      policyId={policyId}
+      artifactApiClientInstance={endpointExceptionsApiClientInstance}
+      getArtifactsPath={getArtifactPathHandler}
+      searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
+      labels={ENDPOINT_EXCEPTIONS_LABELS}
+      data-test-subj="endpointExceptions"
+    />
+  );
+});
+EndpointExceptionsPolicyCard.displayName = 'EndpointExceptionsPolicyCard';
+
 const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
@@ -212,12 +247,17 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
       canReadTrustedDevices,
+      canReadEndpointExceptions,
     } = useUserPrivileges().endpointPrivileges;
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
     const isEnterprise = useLicense().isEnterprise();
 
     const trustedDevicesVisible =
       useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
+
+    const endpointExceptionsVisible =
+      useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') &&
+      canReadEndpointExceptions;
 
     if (loading) {
       return <EuiSkeletonText lines={4} />;
@@ -257,6 +297,13 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
           {canReadEventFilters && (
             <>
               <EventFiltersPolicyCard policyId={policyId} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+
+          {endpointExceptionsVisible && (
+            <>
+              <EndpointExceptionsPolicyCard policyId={policyId} />
               <EuiSpacer size="s" />
             </>
           )}

@@ -24,6 +24,7 @@ import {
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -72,7 +73,7 @@ export interface ManifestManagerMockOptions
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   productFeaturesService: ProductFeaturesService;
-  experimentalFeatures?: string[];
+  experimentalFeatures?: (keyof ExperimentalFeatures)[];
 }
 
 export const buildManifestManagerMockOptions = (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';

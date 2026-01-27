@@ -84,3 +84,44 @@ export async function createRule<Params = ThresholdParams>({
   logger.debug(`Created rule id: ${body.id}`);
   return body;
 }
+
+export async function updateRule<Params = ThresholdParams>({
+  supertest,
+  ruleId,
+  name,
+  params,
+  actions = [],
+  tags = [],
+  schedule,
+  logger,
+  esClient,
+}: {
+  supertest: SuperTestAgent;
+  ruleId: string;
+  name: string;
+  params: Params;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  logger: ToolingLog;
+  esClient: Client;
+}) {
+  const { body, status } = await supertest
+    .put(`/api/alerting/rule/${ruleId}`)
+    .set('kbn-xsrf', 'foo')
+    .send({
+      params,
+      schedule: schedule || {
+        interval: '5m',
+      },
+      tags,
+      name,
+      actions,
+    });
+
+  expect(status).to.eql(200, JSON.stringify(body));
+
+  await refreshSavedObjectIndices(esClient);
+  logger.debug(`Updated rule id: ${body.id}`);
+  return body;
+}

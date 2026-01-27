@@ -10,13 +10,23 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
 import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
+
+import { saveSettings } from '../../../settings';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 jest.mock('../../fields/field', () => ({
   ...jest.requireActual('../../fields/field'),
   loadDatastreamsFieldsFromYaml: jest.fn(),
+}));
+
+jest.mock('../../../settings', () => ({
+  getSettingsOrUndefined: jest.fn().mockResolvedValue({
+    ilm_migration_status: {},
+  }),
+  saveSettings: jest.fn(),
 }));
 
 const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as jest.MockedFunction<
@@ -28,7 +38,11 @@ const packageInstallContext = {
 
 describe('EPM index template install', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    appContextService.start(
+      createAppContextStartContractMock({}, undefined, undefined, {
+        enableOtelIntegrations: true,
+      } as ExperimentalFeatures)
+    );
 
     mockedLoadFieldsFromYaml.mockReturnValue([
       {
@@ -59,6 +73,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixUnset,
+        ilmMigrationStatusMap: new Map(),
       });
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
       expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
@@ -84,6 +99,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixFalse,
+        ilmMigrationStatusMap: new Map(),
       });
 
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
@@ -110,6 +126,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
       });
 
       expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
@@ -135,6 +152,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -166,6 +184,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -206,6 +225,7 @@ describe('EPM index template install', () => {
             doc_value_only_other: false,
           },
         },
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -245,6 +265,7 @@ describe('EPM index template install', () => {
             doc_value_only_other: false,
           },
         },
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
@@ -275,6 +296,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream: dataStreamDatasetIsPrefixTrue,
+        ilmMigrationStatusMap: new Map(),
       });
 
       expect(indexTemplate.indexTemplate.template.settings).toEqual({
@@ -306,6 +328,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         dataStream,
         fieldAssetsMap: new Map(),
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -334,6 +357,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         dataStream,
         fieldAssetsMap: new Map(),
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -373,6 +397,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -412,6 +437,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -453,6 +479,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -498,6 +525,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -534,6 +562,7 @@ describe('EPM index template install', () => {
         packageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -562,9 +591,14 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock({
-          internal: { disableILMPolicies: false },
-        } as any)
+        createAppContextStartContractMock(
+          {
+            internal: { disableILMPolicies: false },
+          } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
       );
 
       const dataStream = {
@@ -600,9 +634,22 @@ describe('EPM index template install', () => {
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       expect(componentTemplates).toStrictEqual({
+        'logs-otel@custom': {
+          _meta: {
+            managed: true,
+            managed_by: 'fleet',
+            package: {
+              name: 'otel-input-package',
+            },
+          },
+          template: {
+            settings: {},
+          },
+        },
         'logs-package.dataset@custom': {
           _meta: {
             managed: true,
@@ -636,7 +683,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'logs-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'logs',
+                  name: 'logs@lifecycle',
                 },
                 mapping: {
                   total_fields: {
@@ -695,9 +742,14 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock({
-          internal: { disableILMPolicies: false },
-        } as any)
+        createAppContextStartContractMock(
+          {
+            internal: { disableILMPolicies: false },
+          } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
       );
 
       const dataStream = {
@@ -733,9 +785,22 @@ describe('EPM index template install', () => {
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
+        ilmMigrationStatusMap: new Map(),
       });
 
       expect(componentTemplates).toStrictEqual({
+        'metrics-otel@custom': {
+          _meta: {
+            managed: true,
+            managed_by: 'fleet',
+            package: {
+              name: 'otel-input-package',
+            },
+          },
+          template: {
+            settings: {},
+          },
+        },
         'metrics-package.dataset@custom': {
           _meta: {
             managed: true,
@@ -769,7 +834,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'metrics-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'metrics',
+                  name: 'metrics@lifecycle',
                 },
                 mapping: {
                   total_fields: {
@@ -809,6 +874,19 @@ describe('EPM index template install', () => {
   });
 
   describe('prepareToInstallTemplates', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      const esClientMock = {
+        ilm: {
+          getLifecycle: jest.fn().mockImplementation(async (name: string) => ({
+            [name]: {
+              version: 1,
+            },
+          })),
+        },
+      } as any;
+      jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
+    });
     it('should not include stack component templates in tracked assets', async () => {
       const dataStreamDatasetIsPrefixUnset = {
         type: 'logs',
@@ -834,6 +912,66 @@ describe('EPM index template install', () => {
       );
 
       expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
+    });
+
+    it('should not include shared otel component templates in tracked assets', async () => {
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        lifecycle: {
+          data_retention: '3d',
+        },
+        streams: [
+          {
+            input: 'otelcol',
+            vars: [
+              {
+                name: 'period',
+                type: 'text',
+                title: 'Collection Interval',
+                multi: false,
+                required: true,
+                show_user: true,
+                default: '1m',
+              },
+            ],
+          },
+        ],
+      } as RegistryDataStream;
+      const otelInputPackageInfo = {
+        packageInfo: {
+          name: 'otel-input-package',
+          version: '0.0.1',
+          type: 'input',
+          policy_templates: [
+            {
+              name: 'template1',
+              title: 'HTTP Check',
+              input: 'otelcol',
+              type: 'metrics',
+              template_path: 'input.yml.hbs',
+              vars: [],
+            },
+          ],
+          data_streams: [dataStream],
+        },
+        paths: ['path1'],
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+      } as any as PackageInstallContext;
+
+      const { assetsToAdd } = await prepareToInstallTemplates(otelInputPackageInfo, [], []);
+
+      expect(assetsToAdd).not.toContainEqual({
+        id: 'metrics-otel@mappings',
+        type: 'component_template',
+      });
+      // otel templates use new ILMs, doesn't affect migrations
+      expect(saveSettings as jest.Mock).not.toHaveBeenCalled();
     });
   });
 });

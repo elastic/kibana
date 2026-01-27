@@ -427,12 +427,13 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client,
         lists: getListArrayMock(),
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ['list_id_single', 'endpoint_list'],
-          namespaceType: ['single', 'agnostic'],
+          listId: ['list_id_single'],
+          namespaceType: ['single'],
           perPage: 1_000,
           filter: [],
           maxSize: undefined,
@@ -454,6 +455,7 @@ describe('utils', () => {
         getExceptions({
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
+          shouldFilterOutEndpointExceptions: true,
         })
       ).rejects.toThrowError(
         'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
@@ -469,6 +471,7 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
         lists: [],
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(exceptions).toEqual([]);

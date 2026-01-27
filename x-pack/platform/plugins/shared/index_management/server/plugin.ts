@@ -31,10 +31,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.config = initContext.config.get();
   }
 
-  setup(
-    { http, getStartServices }: CoreSetup,
-    { features, security }: Dependencies
-  ): IndexManagementPluginSetup {
+  setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       privileges: [
@@ -70,6 +67,8 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         isDataStreamStatsEnabled: this.config.enableDataStreamStats,
         enableMappingsSourceFieldSection: this.config.enableMappingsSourceFieldSection,
         enableTogglingDataRetention: this.config.enableTogglingDataRetention,
+        enableFailureStoreRetentionDisabling:
+          this.config.enableFailureStoreRetentionDisabling ?? true,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {

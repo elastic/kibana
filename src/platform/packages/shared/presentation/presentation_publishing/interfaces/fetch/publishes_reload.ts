@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 
 export interface PublishesReload {
-  reload$: Omit<Observable<void>, 'next'>;
+  reload$: Observable<void>;
 }
 
 export const apiPublishesReload = (unknownApi: null | unknown): unknownApi is PublishesReload => {

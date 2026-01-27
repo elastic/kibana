@@ -7,20 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { DataGridDensity } from '@kbn/unified-data-table';
-import type { FormatFactory, RowHeightMode } from '../../../types';
+import type { DataGridDensity, PagingState, RowHeightMode, SortingState } from '@kbn/lens-common';
+import type { FormatFactory } from '../../../types';
 import type { DatatableColumnResult } from '../../impl/datatable/datatable_column';
 import type { DatatableExpressionFunction } from './types';
-
-export interface SortingState {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
-
-export interface PagingState {
-  size: number;
-  enabled: boolean;
-}
 
 export interface DatatableArgs {
   title: string;
@@ -34,6 +24,7 @@ export interface DatatableArgs {
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
   density?: DataGridDensity;
+  showRowNumbers?: boolean;
 }
 
 /**
@@ -99,6 +90,10 @@ export const getDatatable = (
     },
     density: {
       types: ['string'],
+      help: '',
+    },
+    showRowNumbers: {
+      types: ['boolean'],
       help: '',
     },
   },

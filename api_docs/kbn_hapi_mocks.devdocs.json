@@ -31,6 +31,8 @@
         "label": "hapiMocks",
         "description": [],
         "path": "src/platform/packages/private/kbn-hapi-mocks/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +63,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-hapi-mocks/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -520,6 +524,8 @@
                   "<(name: string) => boolean> | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-hapi-mocks/src/request.ts",
+                "lineNumber": 15,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }

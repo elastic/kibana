@@ -11,7 +11,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import { DefaultAlertService } from './default_alert_service';
+import { DefaultRuleService } from './default_alert_service';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../constants/settings';
 
 describe('DefaultAlertService', () => {
@@ -24,7 +24,7 @@ describe('DefaultAlertService', () => {
     const soResponse = { attributes: { ...expectedSettings } };
     it('returns settings if already set', async () => {
       const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
+      const service = new DefaultRuleService({} as any, {} as any, soClient);
       service.settings = expectedSettings;
       const settings = await service.getSettings();
       expect(settings).toEqual(expectedSettings);
@@ -33,7 +33,7 @@ describe('DefaultAlertService', () => {
 
     it('fetches settings if not set', async () => {
       const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
+      const service = new DefaultRuleService({} as any, {} as any, soClient);
       soClient.get.mockResolvedValueOnce(soResponse);
       const settings = await service.getSettings();
       expect(settings).toEqual({
@@ -51,7 +51,7 @@ describe('DefaultAlertService', () => {
 
     it('sets up status and tls rules', async () => {
       const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
+      const service = new DefaultRuleService({} as any, {} as any, soClient);
       service.getSettings = jest.fn().mockResolvedValue({
         certAgeThreshold: 50,
         certExpirationThreshold: 10,
@@ -66,7 +66,7 @@ describe('DefaultAlertService', () => {
       service.setupTlsRule = setupTlsRule;
       setupStatusRule.mockResolvedValueOnce({ status: 'fulfilled', value: {} });
       setupTlsRule.mockResolvedValueOnce({ status: 'fulfilled', value: {} });
-      const result = await service.setupDefaultAlerts();
+      const result = await service.setupDefaultRules();
       expect(setupStatusRule).toHaveBeenCalledTimes(1);
       expect(setupTlsRule).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -76,7 +76,7 @@ describe('DefaultAlertService', () => {
     });
     it('returns null rules if value is falsy', async () => {
       const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
+      const service = new DefaultRuleService({} as any, {} as any, soClient);
       service.getSettings = jest.fn().mockResolvedValue({
         certAgeThreshold: 50,
         certExpirationThreshold: 10,
@@ -91,7 +91,7 @@ describe('DefaultAlertService', () => {
       service.setupTlsRule = setupTlsRule;
       setupStatusRule.mockResolvedValueOnce(undefined);
       setupTlsRule.mockResolvedValueOnce(undefined);
-      const result = await service.setupDefaultAlerts();
+      const result = await service.setupDefaultRules();
       expect(setupStatusRule).toHaveBeenCalledTimes(1);
       expect(setupTlsRule).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -106,7 +106,7 @@ describe('DefaultAlertService', () => {
       const server = {
         alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '30s' } }) },
       } as any;
-      const service = new DefaultAlertService({} as any, server, {} as any);
+      const service = new DefaultRuleService({} as any, server, {} as any);
       expect(service.getMinimumRuleInterval()).toBe('1m');
     });
 
@@ -114,14 +114,14 @@ describe('DefaultAlertService', () => {
       const server = {
         alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '5m' } }) },
       } as any;
-      const service = new DefaultAlertService({} as any, server, {} as any);
+      const service = new DefaultRuleService({} as any, server, {} as any);
       expect(service.getMinimumRuleInterval()).toBe('5m');
     });
   });
 
   describe('setupStatusRule', () => {
     it('creates status rule if enabled', async () => {
-      const service = new DefaultAlertService({} as any, {} as any, {} as any);
+      const service = new DefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultStatusRuleEnabled: true } as any;
@@ -137,7 +137,7 @@ describe('DefaultAlertService', () => {
     });
 
     it('does not create status rule if disabled', async () => {
-      const service = new DefaultAlertService({} as any, {} as any, {} as any);
+      const service = new DefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultStatusRuleEnabled: false } as any;
@@ -149,7 +149,7 @@ describe('DefaultAlertService', () => {
 
   describe('setupTlsRule', () => {
     it('creates tls rule if enabled', async () => {
-      const service = new DefaultAlertService({} as any, {} as any, {} as any);
+      const service = new DefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultTlsRuleEnabled: true } as any;
@@ -165,7 +165,7 @@ describe('DefaultAlertService', () => {
     });
 
     it('does not create tls rule if disabled', async () => {
-      const service = new DefaultAlertService({} as any, {} as any, {} as any);
+      const service = new DefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultTLSRuleEnabled: false } as any;
@@ -209,7 +209,7 @@ describe('DefaultAlertService', () => {
     describe('getExistingAlert', () => {
       it('returns rule if exists', async () => {
         const { getRulesClient, mockRule } = setUpExistingRules();
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
@@ -222,7 +222,7 @@ describe('DefaultAlertService', () => {
         const find = jest.fn().mockResolvedValue({ data: [] });
         const getRulesClient = jest.fn();
         getRulesClient.mockReturnValue({ find });
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
@@ -234,7 +234,7 @@ describe('DefaultAlertService', () => {
     describe('createDefaultAlertIfNotExist', () => {
       it('returns rule if exists', async () => {
         const { getRulesClient, mockRule } = setUpExistingRules();
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
@@ -265,7 +265,7 @@ describe('DefaultAlertService', () => {
         });
         const getRulesClient = jest.fn();
         getRulesClient.mockReturnValue({ find, create });
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { actions: { getActionsClient }, alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
@@ -330,7 +330,7 @@ describe('DefaultAlertService', () => {
           schedule: { interval: '1m' },
           params: { param: 'value' },
         });
-        const service = new DefaultAlertService(context as any, server as any, {} as any);
+        const service = new DefaultRuleService(context as any, server as any, {} as any);
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
         const result = await service.updateStatusRule(true);
         expect(result).toEqual({
@@ -364,7 +364,7 @@ describe('DefaultAlertService', () => {
         } as any;
         const bulkDeleteRules = jest.fn();
         const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
           server as any,
           {} as any
@@ -381,7 +381,7 @@ describe('DefaultAlertService', () => {
     describe('updateTlsRule', () => {
       it('updates the rule if it is enabled', async () => {
         const { context, server } = setUpUpdateTest();
-        const service = new DefaultAlertService(context as any, server as any, {} as any);
+        const service = new DefaultRuleService(context as any, server as any, {} as any);
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
         const result = await service.updateTlsRule(true);
         expect(result).toEqual({
@@ -397,7 +397,7 @@ describe('DefaultAlertService', () => {
 
       it('creates the rule if it does not exist', async () => {
         const { context, server } = setUpUpdateTest();
-        const service = new DefaultAlertService(context as any, server as any, {} as any);
+        const service = new DefaultRuleService(context as any, server as any, {} as any);
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
         const getExistingAlertMock = jest.fn().mockResolvedValue(undefined);
         service.getExistingAlert = getExistingAlertMock;
@@ -423,7 +423,7 @@ describe('DefaultAlertService', () => {
         } as any;
         const bulkDeleteRules = jest.fn();
         const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
-        const service = new DefaultAlertService(
+        const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
           server as any,
           {} as any
@@ -445,7 +445,7 @@ describe('DefaultAlertService', () => {
       getActionsClient.mockReturnValue({
         getAll,
       });
-      const service = new DefaultAlertService(
+      const service = new DefaultRuleService(
         { actions: { getActionsClient } } as any,
         {} as any,
         { get: jest.fn() } as any

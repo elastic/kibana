@@ -8,6 +8,29 @@
  */
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
+import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
+
+const createBaseTraceContextFilters = ({
+  traceId,
+  spanId,
+  transactionId,
+}: {
+  traceId: string;
+  spanId?: string;
+  transactionId?: string;
+}) => {
+  let queryString = `${TRACE_ID_FIELD} == ?traceId`;
+
+  if (transactionId && spanId) {
+    queryString += ` AND (${TRANSACTION_ID_FIELD} == ?transactionId OR ${SPAN_ID_FIELD} == ?spanId)`;
+  } else if (transactionId) {
+    queryString += ` AND ${TRANSACTION_ID_FIELD} == ?transactionId`;
+  } else if (spanId) {
+    queryString += ` AND ${SPAN_ID_FIELD} == ?spanId`;
+  }
+
+  return queryString;
+};
 
 export const createTraceContextWhereClause = ({
   traceId,
@@ -18,19 +41,33 @@ export const createTraceContextWhereClause = ({
   spanId?: string;
   transactionId?: string;
 }) => {
-  const queryStrings: string[] = [];
-
-  queryStrings.push(`${TRACE_ID_FIELD} == ?traceId`);
-
-  if (transactionId) {
-    queryStrings.push(`${TRANSACTION_ID_FIELD} == ?transactionId`);
-  }
-  if (spanId) {
-    queryStrings.push(`${SPAN_ID_FIELD} == ?spanId`);
-  }
-
-  const filters = queryStrings.join(' AND ');
+  const queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
   const params = [{ traceId }, { transactionId }, { spanId }];
 
-  return where(filters, params);
+  return where(queryString, params);
+};
+
+export const createTraceContextWhereClauseForErrors = ({
+  traceId,
+  spanId,
+  transactionId,
+}: {
+  traceId: string;
+  spanId?: string;
+  transactionId?: string;
+}) => {
+  let queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
+
+  const conditions = [
+    `${PROCESSOR_EVENT}: "error"`,
+    `${ERROR_LOG_LEVEL}: "error"`,
+    `${OTEL_EVENT_NAME}: "exception"`,
+    `${OTEL_EVENT_NAME}: "error" `,
+  ];
+
+  queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;
+
+  const params = [{ traceId }, { transactionId }, { spanId }];
+
+  return where(queryString, params);
 };

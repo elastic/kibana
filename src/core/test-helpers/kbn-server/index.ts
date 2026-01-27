@@ -14,6 +14,7 @@ export {
   createRootWithCorePlugins,
   createTestServers,
   createTestServerlessInstances,
+  createServerlessKibana,
   request,
 } from './src';
 

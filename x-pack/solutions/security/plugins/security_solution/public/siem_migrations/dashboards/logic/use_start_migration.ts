@@ -11,6 +11,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import type { MigrationSettingsBase } from '../../common/types';
 import { initialState, reducer } from '../../common/service';
+import type { DashboardMigrationStats } from '../types';
 
 export const DASHBOARDS_DATA_INPUT_START_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.service.startMigrationSuccess',
@@ -22,7 +23,7 @@ export const DASHBOARDS_DATA_INPUT_START_MIGRATION_ERROR = i18n.translate(
 );
 
 export type StartMigration = (
-  migrationId: string,
+  migrationStats: DashboardMigrationStats,
   retry?: SiemMigrationRetryFilter,
   settings?: MigrationSettingsBase
 ) => void;
@@ -34,15 +35,16 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const startMigration = useCallback<StartMigration>(
-    (migrationId, retry, settings) => {
+    (migrationStats, retry, settings) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const { started } = await siemMigrations.dashboards.startDashboardMigration(
-            migrationId,
+          const { started } = await siemMigrations.dashboards.startDashboardMigration({
+            migrationId: migrationStats.id,
+            vendor: migrationStats.vendor,
             retry,
-            settings
-          );
+            settings,
+          });
 
           if (started) {
             notifications.toasts.addSuccess(DASHBOARDS_DATA_INPUT_START_MIGRATION_SUCCESS);

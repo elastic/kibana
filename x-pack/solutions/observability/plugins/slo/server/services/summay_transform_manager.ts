@@ -123,12 +123,21 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { ignore: [404], signal: this.abortController.signal }
+            { signal: this.abortController.signal }
           ),
         { logger: this.logger }
       );
-      return response?.transforms[0]?._meta?.version;
+
+      if (response.count === 0) {
+        return undefined;
+      }
+
+      return response.transforms[0]._meta?.version;
     } catch (err) {
+      if (err.meta?.body?.error?.type === 'resource_not_found_exception') {
+        return undefined;
+      }
+
       this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }

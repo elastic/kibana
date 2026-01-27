@@ -10,7 +10,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetInternalRuleTypesQuery } from './use_get_internal_rule_types_query';
 import type { InternalRuleType } from '../apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '../apis/get_internal_rule_types';

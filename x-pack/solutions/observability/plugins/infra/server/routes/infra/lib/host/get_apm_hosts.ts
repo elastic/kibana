@@ -16,7 +16,8 @@ export const getApmHostNames = async ({
   to: end,
   query,
   limit,
-}: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to'>> & {
+  schema,
+}: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to' | 'schema'>> & {
   query?: estypes.QueryDslQueryContainer;
   limit?: number;
   apmDocumentSources: TimeRangeMetadata['sources'];
@@ -27,5 +28,6 @@ export const getApmHostNames = async ({
     start,
     end,
     size: limit,
+    schema,
   });
 };

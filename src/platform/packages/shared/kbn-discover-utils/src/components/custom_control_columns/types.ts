@@ -34,4 +34,5 @@ export type RowControlComponent = FC<RowControlProps>;
 export interface RowControlColumn {
   id: string;
   render: (Control: RowControlComponent, props: RowControlRowProps) => ReactElement;
+  width?: number;
 }

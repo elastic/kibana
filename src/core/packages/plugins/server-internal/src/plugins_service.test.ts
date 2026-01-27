@@ -758,7 +758,7 @@ describe('PluginsService', () => {
           shouldEnableAllPlugins: false,
         },
         coreContext: { coreId, env, logger, configService },
-        instanceInfo: { uuid: 'uuid' },
+        instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 

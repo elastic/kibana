@@ -8,19 +8,19 @@
  */
 
 import path from 'path';
-import { CiStats } from '#pipeline-utils';
+import { pickScoutTestGroupRunOrder, getKibanaDir } from '#pipeline-utils';
 
 (async () => {
   try {
     const scoutConfigsPath = path.resolve(
-      process.cwd(),
+      getKibanaDir(),
       '.scout',
       'test_configs',
       'scout_playwright_configs.json'
     );
-    await CiStats.pickScoutTestGroupRunOrder(scoutConfigsPath);
+    await pickScoutTestGroupRunOrder(scoutConfigsPath);
   } catch (ex) {
-    console.error('CI Stats Error', ex.message);
+    console.error('Scout test grouping error: ', ex.message);
     if (ex.response) {
       console.error('HTTP Error Response Status', ex.response.status);
       console.error('HTTP Error Response Body', ex.response.data);

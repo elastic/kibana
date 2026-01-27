@@ -152,3 +152,37 @@ export const LIST_NAME_REQUIRED_ERROR = i18n.translate(
     defaultMessage: 'List name cannot be empty',
   }
 );
+
+export const ACTIONS_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.header_menu_actions_aria_label',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const EXCEPTION_ITEM_CARD_ACTIONS_ARIA_LABEL = (itemName: string) =>
+  i18n.translate('exceptionList-components.exception_item_card_actions_aria_label', {
+    values: { itemName },
+    defaultMessage: 'Actions for {itemName}',
+  });
+
+export const LINKED_RULES_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.linked_rules_aria_label',
+  {
+    defaultMessage: 'Linked rules',
+  }
+);
+
+export const EXCEPTION_LIST_ACTIONS_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.exception_list_actions_aria_label',
+  {
+    defaultMessage: 'Exception list actions',
+  }
+);
+
+export const AFFECTED_RULES_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.affected_rules_aria_label',
+  {
+    defaultMessage: 'Affected rules',
+  }
+);

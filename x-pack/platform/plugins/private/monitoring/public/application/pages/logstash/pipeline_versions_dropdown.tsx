@@ -42,6 +42,12 @@ export const PipelineVersions = (props: Props) => {
             }
           )}
           onChange={({ target }) => onChangePipelineHash(target.value)}
+          aria-label={i18n.translate(
+            'xpack.monitoring.logstashNavigation.pipelineVersionSelectLabel',
+            {
+              defaultMessage: 'Pipeline version',
+            }
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -87,18 +87,18 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async fetchComponentTemplateVersion(name: string) {
-    const getTemplateRes = await this.execute(() =>
+    const response = await this.execute(() =>
       this.esClient.cluster.getComponentTemplate({ name }, { ignore: [404] })
     );
 
-    return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version ?? null;
+    return response?.component_templates?.[0]?.component_template?._meta?.version ?? null;
   }
 
   private async fetchIndexTemplateVersion(name: string) {
-    const getTemplateRes = await this.execute(() =>
+    const response = await this.execute(() =>
       this.esClient.indices.getIndexTemplate({ name }, { ignore: [404] })
     );
 
-    return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version ?? null;
+    return response?.index_templates?.[0]?.index_template?._meta?.version ?? null;
   }
 }

@@ -15,7 +15,8 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core-saved-objects-server';
+import type { AccessControlImportTransformsFactory } from '@kbn/core-saved-objects-server/src/import';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
@@ -27,6 +28,8 @@ interface CollectSavedObjectsOptions {
   filter?: (obj: SavedObject) => boolean;
   supportedTypes: string[];
   managed?: boolean;
+  typeRegistry: ISavedObjectTypeRegistry;
+  createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
 }
 
 export async function collectSavedObjects({
@@ -35,10 +38,15 @@ export async function collectSavedObjects({
   filter,
   supportedTypes,
   managed,
+  typeRegistry,
+  createAccessControlImportTransforms,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string }> = [];
   const importStateMap: ImportStateMap = new Map();
+
+  const accessControlTransforms = createAccessControlImportTransforms?.(typeRegistry, errors);
+
   const collectedObjects: Array<SavedObject<{ title?: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
@@ -58,6 +66,8 @@ export async function collectSavedObjects({
       });
       return false;
     }),
+    ...(accessControlTransforms?.filterStream ? [accessControlTransforms.filterStream] : []),
+    ...(accessControlTransforms?.mapStream ? [accessControlTransforms.mapStream] : []),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
       importStateMap.set(`${obj.type}:${obj.id}`, {});

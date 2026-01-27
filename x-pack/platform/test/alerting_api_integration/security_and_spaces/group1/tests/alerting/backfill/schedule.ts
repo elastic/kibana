@@ -13,7 +13,7 @@ import type { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/typ
 import { get } from 'lodash';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { asyncForEach } from '../../../../../../api_integration/services/transform/api';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { ManualRunOnlyUserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
 import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { TEST_ACTIONS_INDEX, getScheduledTask } from './test_utils';
@@ -112,7 +112,9 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
       }
     }
 
-    for (const scenario of UserAtSpaceScenarios) {
+    const ScenariosToTest = [...UserAtSpaceScenarios, ManualRunOnlyUserAtSpace1];
+
+    for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         const apiOptions = {
@@ -190,6 +192,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -206,6 +210,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(result[0].end).to.eql(defaultEnd);
               expect(result[0].status).to.eql('pending');
               expect(result[0].space_id).to.eql(space.id);
+              expect(result[0].initiator).to.eql('user');
+              expect(result[0].initiator_id).to.be(undefined);
               expect(typeof result[0].created_at).to.be('string');
               testExpectedRule(result[0], ruleId1, false);
 
@@ -226,6 +232,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(result[1].end).to.eql(moment(defaultStart).add(12, 'hours').toISOString());
               expect(result[1].status).to.eql('pending');
               expect(result[1].space_id).to.eql(space.id);
+              expect(result[1].initiator).to.eql('user');
+              expect(result[1].initiator_id).to.be(undefined);
               expect(typeof result[1].created_at).to.be('string');
               testExpectedRule(result[1], ruleId2, false);
               expect(result[1].schedule[0].interval).to.eql('12h');
@@ -379,6 +387,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -692,6 +702,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -787,6 +799,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -896,6 +910,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -1230,6 +1246,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               break;
             // Superuser has access to everything
             case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space

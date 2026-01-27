@@ -15,12 +15,11 @@ import type { RenderResult } from '@testing-library/react';
 import { act, render as rtlRender, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
-import type { ControlGroupApi } from '../../../../control_group/types';
 import { EuiThemeProvider } from '@elastic/eui';
 
 const render = (ui: React.ReactElement) => {
@@ -324,9 +323,7 @@ describe('Options list popover', () => {
         ...contextMock,
         componentApi: {
           ...contextMock.componentApi,
-          parentApi: {
-            allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
-          } as unknown as ControlGroupApi,
+          allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
         },
       });
       const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');

@@ -19,17 +19,19 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
   const toolCallChunks = chunk.tool_calls.map<ToolCallChunk>((toolCall) => {
     return {
       index: toolCall.index,
-      id: toolCall.toolCallId,
-      name: toolCall.function.name,
-      args: toolCall.function.arguments,
+      id: toolCall.toolCallId || undefined,
+      name: toolCall.function.name || undefined,
+      args: toolCall.function.arguments || undefined,
       type: 'tool_call_chunk',
     };
   });
 
+  const additionalKwargs = chunk.refusal ? { refusal: chunk.refusal } : {};
+
   return new AIMessageChunk({
     content: chunk.content,
     tool_call_chunks: toolCallChunks,
-    additional_kwargs: {},
+    additional_kwargs: additionalKwargs,
     response_metadata: {},
   });
 };

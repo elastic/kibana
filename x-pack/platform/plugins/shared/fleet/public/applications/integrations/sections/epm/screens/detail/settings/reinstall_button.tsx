@@ -23,8 +23,14 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
-
   const isReinstalling = installationStatus === InstallStatus.reinstalling;
+
+  const isStatusInProgress = [
+    InstallStatus.installing,
+    InstallStatus.rollingBack,
+    InstallStatus.uninstalling,
+  ].includes(installationStatus);
+
   const isUploadedPackage = installSource === 'upload';
 
   const handleClickReinstall = useCallback(() => {
@@ -33,10 +39,11 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
 
   const reinstallButton = (
     <EuiButton
+      data-test-subj="reinstallButton"
       iconType="refresh"
       isLoading={isReinstalling}
       onClick={handleClickReinstall}
-      disabled={isUploadedPackage || isCustomPackage}
+      disabled={isUploadedPackage || isCustomPackage || isStatusInProgress}
     >
       {isReinstalling ? (
         <FormattedMessage

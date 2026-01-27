@@ -60,6 +60,7 @@ describe('EmailNotificationService', () => {
         to: ['test@test.com'],
         subject: 'Scheduled report for 04/18/2025',
         spaceId: 'space1',
+        message: 'Your scheduled report is attached for you to download or share.',
       },
     });
     expect(notifications.getEmailService().sendAttachmentEmail).toHaveBeenCalledWith({
@@ -105,6 +106,7 @@ describe('EmailNotificationService', () => {
         emailParams: {
           to: ['test@test.com'],
           subject: 'Scheduled report for 04/18/2025',
+          message: 'Your scheduled report is attached for you to download or share.',
           spaceId: 'space1',
         },
       })

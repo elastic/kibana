@@ -18,7 +18,7 @@ describe('color_assignment', () => {
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split1',
+      splitAccessors: ['split1'],
       accessors: ['y1', 'y2'],
     },
     {
@@ -26,7 +26,7 @@ describe('color_assignment', () => {
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split2',
+      splitAccessors: ['split2'],
       accessors: ['y3', 'y4'],
     },
   ];
@@ -96,7 +96,7 @@ describe('color_assignment', () => {
 
     it('should calculate total number of series for non split series', () => {
       const assignments = getColorAssignments(
-        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessor: undefined }],
+        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessors: undefined }],
         data,
         formatFactory
       );
@@ -174,7 +174,7 @@ describe('color_assignment', () => {
     it('should return the correct rank for a series without a split', () => {
       const newLayers = [
         layers[0],
-        { ...layers[1], palette: layers[0].palette, splitAccessor: undefined },
+        { ...layers[1], palette: layers[0].palette, splitAccessors: undefined },
       ];
       const assignments = getColorAssignments(newLayers, data, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1

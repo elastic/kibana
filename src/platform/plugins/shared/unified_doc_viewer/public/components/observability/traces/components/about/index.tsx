@@ -38,7 +38,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
-import { useFetchTraceRootItemContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_item';
+import { useFetchTraceRootSpanContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_span';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -75,7 +75,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const traceRootItem = useFetchTraceRootItemContext();
+  const traceRootSpan = useFetchTraceRootSpanContext();
 
   const aboutFieldConfigurations = useMemo(
     () => ({
@@ -96,7 +96,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
         duration={value as number}
         size="xs"
         parent={{
-          duration: traceRootItem?.item?.duration,
+          duration: traceRootSpan?.span?.duration,
           type: 'trace',
         }}
       />

@@ -13,16 +13,16 @@ import type {
 } from './use_alert_prevalence_from_process_tree';
 import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 import { useHttp } from '../../../../common/lib/kibana';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { mockStatsNode } from '../../right/mocks/mock_analyzer_data';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/containers/use_timeline_data_filters');
 jest.mock('./use_alert_document_analyzer_schema');
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
@@ -45,9 +45,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     (useHttp as jest.Mock).mockReturnValue({
       post: jest.fn(),
     });
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });

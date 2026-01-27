@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import {
   AGENT_NAME,
   HOST_HOSTNAME,

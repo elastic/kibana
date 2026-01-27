@@ -22,7 +22,6 @@ import { PipelineListProvider } from './pipeline_list';
 import { RandomProvider } from './random';
 import { RulesServiceProvider } from './rules';
 import { SampleDataServiceProvider } from './sample_data';
-import { SearchSessionsService } from './search_sessions';
 import { TransformProvider } from './transform';
 import { UserMenuProvider } from './user_menu';
 
@@ -78,7 +77,6 @@ export const services = {
   rules: RulesServiceProvider,
   sampleData: SampleDataServiceProvider,
   grokDebugger: GrokDebuggerProvider,
-  searchSessions: SearchSessionsService,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,

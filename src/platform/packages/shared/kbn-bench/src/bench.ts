@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { IWorkspace } from '@kbn/workspaces';
-import { activateWorktree, getWorkspaceFromSourceRepo } from '@kbn/workspaces';
+import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
 import { collectAndRun } from './collect_and_run';
 import { collectAndRunForRightHandSide } from './collect_and_run_for_right_hand_side';
 import { getGlobalConfig } from './config/get_global_config';
@@ -29,6 +29,7 @@ export async function bench({
   openProfile,
   grep,
   runs,
+  configFromCwd,
 }: {
   log: ToolingLog;
   config?: string | string[];
@@ -38,24 +39,21 @@ export async function bench({
   openProfile?: boolean;
   grep?: string | string[];
   runs?: number;
+  configFromCwd?: boolean;
 }) {
   log.info(`Creating workspace for ${left || 'current working directory'}`);
 
-  const leftWorkspace = left
-    ? await activateWorktree({
-        log,
-        ref: left,
-      })
-    : await getWorkspaceFromSourceRepo({
-        log,
-      });
+  const leftWorkspace = await activateWorktreeOrUseSourceRepo({
+    log,
+    ref: left,
+  });
 
   let rightWorkspace: IWorkspace | undefined;
 
   if (right) {
     log.info(`Creating workspace for ${right}`);
 
-    rightWorkspace = await activateWorktree({
+    rightWorkspace = await activateWorktreeOrUseSourceRepo({
       log,
       ref: right,
     });
@@ -89,6 +87,7 @@ export async function bench({
   const leftResults = await collectAndRun({
     configGlob,
     context: leftContext,
+    configFromCwd,
   });
 
   leftLog.info(`Completed benchmarks`);
@@ -117,6 +116,7 @@ export async function bench({
   const rightResults = await collectAndRunForRightHandSide({
     context: rightContext,
     leftResults,
+    configFromCwd,
   });
 
   rightLog.info(`Completed benchmarks`);

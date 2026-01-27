@@ -10,6 +10,8 @@
         "label": "ContentClient",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21,9 +23,17 @@
             "label": "queryClient",
             "description": [],
             "signature": [
-              "QueryClient"
+              {
+                "pluginId": "@kbn/react-query",
+                "scope": "common",
+                "docId": "kibKbnReactQueryPluginApi",
+                "section": "def-common.QueryClient",
+                "text": "QueryClient"
+              }
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +80,8 @@
               "<string, object>, O = unknown>(_input: I) => { queryKey: readonly [string, \"search\", unknown, object | undefined]; queryFn: () => Promise<O>; }; }"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +96,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -105,6 +119,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 97,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,6 +136,8 @@
                   "ContentTypeRegistry"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -154,6 +172,8 @@
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -168,6 +188,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 107,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -206,6 +228,8 @@
               "<O, unknown>>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -220,6 +244,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 111,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,6 +272,8 @@
               "<string, object, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -260,6 +288,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 115,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -286,6 +316,8 @@
               "<string, object, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -300,6 +332,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 121,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -326,6 +360,8 @@
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -340,6 +376,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 127,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -366,6 +404,8 @@
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -380,6 +420,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 133,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -410,6 +452,8 @@
               "<O, unknown>>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -424,6 +468,8 @@
                   "I"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 139,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -450,6 +496,8 @@
               ") => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -470,6 +518,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 146,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -501,6 +551,8 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +575,8 @@
               "; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+            "lineNumber": 27,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -549,6 +603,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -584,6 +640,8 @@
           "<O, unknown, I, unknown>"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -619,6 +677,8 @@
           "<O, unknown, I, unknown>"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -664,6 +724,8 @@
           "<O, unknown>"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -680,6 +742,8 @@
               "I"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -704,6 +768,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -751,6 +817,8 @@
           "<O, unknown>"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -767,6 +835,8 @@
               "I"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -791,6 +861,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -828,6 +900,8 @@
           "<O, unknown, I, unknown>"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -844,6 +918,8 @@
         "label": "CrudClient",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -866,6 +942,8 @@
               "<string, object>) => Promise<unknown>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -887,6 +965,8 @@
                   "<string, object>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 13,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -913,6 +993,8 @@
               "<string, object, object>) => Promise<unknown>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -934,6 +1016,8 @@
                   "<string, object, object>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 14,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -960,6 +1044,8 @@
               "<string, object, object>) => Promise<unknown>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -981,6 +1067,8 @@
                   "<string, object, object>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 15,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1007,6 +1095,8 @@
               "<string, object>) => Promise<unknown>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1028,6 +1118,8 @@
                   "<string, object>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 16,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1054,6 +1146,8 @@
               "<string, object>) => Promise<unknown>"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1075,6 +1169,8 @@
                   "<string, object>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 17,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1101,6 +1197,8 @@
               ") => Promise<unknown>) | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1121,6 +1219,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 18,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1147,6 +1247,8 @@
           "{ enabled?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1161,6 +1263,8 @@
       "label": "ContentManagementPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/content_management/public/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1181,6 +1285,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1199,6 +1305,8 @@
             "[]; }"
           ],
           "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1214,6 +1322,8 @@
       "label": "ContentManagementPublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/content_management/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1232,6 +1342,8 @@
             "; }"
           ],
           "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1262,6 +1374,8 @@
           "<T, U, TMSearchConfig>"
         ],
         "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1286,6 +1400,8 @@
               ", id: string, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1306,6 +1422,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1321,6 +1439,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1336,6 +1456,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1364,6 +1486,8 @@
               ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; meta?: undefined; } | { item: T; meta: any; })[]; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1384,6 +1508,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1399,6 +1525,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1414,6 +1542,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1442,6 +1572,8 @@
               ", data: object, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1462,6 +1594,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1477,6 +1611,8 @@
                   "object"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1492,6 +1628,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1520,6 +1658,8 @@
               ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; meta?: undefined; } | { item: U; meta: any; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1540,6 +1680,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 77,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1555,6 +1697,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 78,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1570,6 +1714,8 @@
                   "object"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1585,6 +1731,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1621,6 +1769,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1641,6 +1791,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1656,6 +1808,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1671,6 +1825,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1707,6 +1863,8 @@
               ", options?: object | undefined) => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1727,6 +1885,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1748,6 +1908,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1763,6 +1925,8 @@
                   "object | undefined"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1783,6 +1947,8 @@
               "TMSearchConfig | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1809,6 +1975,8 @@
           "<T, TSavedObjectAttributes>"
         ],
         "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1822,6 +1990,8 @@
               "\nThe saved object type that corresponds to this content type."
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1848,6 +2018,8 @@
               "<TSavedObjectAttributes>) => T"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1868,6 +2040,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 121,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1884,6 +2058,8 @@
                   "<TSavedObjectAttributes>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1904,6 +2080,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1920,6 +2098,8 @@
           "Context that is sent to all storage instance methods"
         ],
         "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1935,6 +2115,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1951,6 +2133,8 @@
               "RequestHandlerContext"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1965,6 +2149,8 @@
               "{ request: number; latest: number; }"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1981,6 +2167,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2010,6 +2198,8 @@
         "CoreApi"
       ],
       "path": "src/platform/plugins/shared/content_management/server/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2024,6 +2214,8 @@
             "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
           ],
           "path": "src/platform/plugins/shared/content_management/server/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2039,6 +2231,8 @@
       "label": "ContentManagementServerStart",
       "description": [],
       "path": "src/platform/plugins/shared/content_management/server/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -2068,6 +2262,8 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2082,6 +2278,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2096,6 +2294,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2110,6 +2310,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2124,6 +2326,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2148,6 +2352,8 @@
           "<T, Data, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2162,6 +2368,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2176,6 +2384,8 @@
               "Data"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2190,6 +2400,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2204,6 +2416,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2228,6 +2442,8 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2242,6 +2458,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2253,6 +2471,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2267,6 +2487,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2281,6 +2503,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2295,6 +2519,8 @@
         "label": "DeleteResult",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2306,6 +2532,8 @@
             "label": "success",
             "description": [],
             "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2330,6 +2558,8 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2341,6 +2571,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2355,6 +2587,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2369,6 +2603,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2383,6 +2619,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2397,6 +2635,8 @@
         "label": "MSearchIn",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2411,6 +2651,8 @@
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2431,6 +2673,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2455,6 +2699,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2469,6 +2715,8 @@
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2483,6 +2731,8 @@
               "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2497,6 +2747,8 @@
         "label": "ProcedureSchemas",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2519,6 +2771,8 @@
               "<any>"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2541,6 +2795,8 @@
               "<any> | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2565,6 +2821,8 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2579,6 +2837,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2599,6 +2859,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2613,6 +2875,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2627,6 +2891,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2641,6 +2907,8 @@
         "label": "SearchQuery",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2657,6 +2925,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2673,6 +2943,8 @@
               "{ included?: string[] | undefined; excluded?: string[] | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2689,6 +2961,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2705,6 +2979,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2729,6 +3005,8 @@
           "<T, Data, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2743,6 +3021,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2754,6 +3034,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2768,6 +3050,8 @@
               "Data"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2782,6 +3066,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2796,6 +3082,8 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2816,6 +3104,8 @@
           "\"/api/content_management/rpc\""
         ],
         "path": "src/platform/plugins/shared/content_management/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2835,6 +3125,8 @@
           "<T, ItemMeta>[]; meta: ResultMeta; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2850,6 +3142,8 @@
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2865,6 +3159,8 @@
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2886,6 +3182,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2901,6 +3199,8 @@
           "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2916,6 +3216,8 @@
           "\"contentManagement\""
         ],
         "path": "src/platform/plugins/shared/content_management/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2931,6 +3233,8 @@
           "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2946,6 +3250,8 @@
           "M extends void ? { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; } : { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; meta: M; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2961,6 +3267,8 @@
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -101,3 +101,15 @@ export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
     },
   },
 };
+
+export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    apiKeyId: {
+      type: 'keyword',
+    },
+    createdAt: {
+      type: 'date',
+    },
+  },
+};

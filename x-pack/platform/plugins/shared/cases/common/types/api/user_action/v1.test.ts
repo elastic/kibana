@@ -121,6 +121,8 @@ describe('User actions APIs', () => {
         total_deletions: 0,
         total_comments: 10,
         total_comment_deletions: 0,
+        total_comment_creations: 0,
+        total_hidden_comment_updates: 0,
         total_other_actions: 5,
         total_other_action_deletions: 0,
       };
@@ -150,6 +152,8 @@ describe('User actions APIs', () => {
         total_deletions: 0,
         total_comments: 60,
         total_comment_deletions: 0,
+        total_comment_creations: 0,
+        total_hidden_comment_updates: 0,
         total_other_actions: 40,
         total_other_action_deletions: 0,
       };

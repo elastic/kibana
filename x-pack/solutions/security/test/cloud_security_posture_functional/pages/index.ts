@@ -40,5 +40,6 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./benchmark'));
     loadTestFile(require.resolve('./alerts_flyout'));
     loadTestFile(require.resolve('./events_flyout'));
+    loadTestFile(require.resolve('./entity_preview_flyout'));
   });
 }

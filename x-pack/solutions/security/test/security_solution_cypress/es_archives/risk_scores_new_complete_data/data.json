@@ -249,6 +249,15 @@
               "risk_score": 70,
               "timestamp": "2023-08-14T09:08:18.664Z"
             }
+          ],
+          "modifiers": [
+            {
+              "type": "asset_criticality",
+              "contribution": 220,
+              "metadata": {
+                "criticality_level": "extreme_impact"
+              }
+            }
           ]
         }
       }
@@ -462,6 +471,15 @@
               "contribution_score": 50,
               "risk_score": 70,
               "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "asset_criticality",
+              "contribution": 220,
+              "metadata": {
+                "criticality_level": "extreme_impact"
+              }
             }
           ]
         }
@@ -764,6 +782,15 @@
               "risk_score": 70,
               "timestamp": "2023-08-14T09:08:18.664Z"
             }
+          ],
+          "modifiers": [
+            {
+              "type": "asset_criticality",
+              "contribution": 220,
+              "metadata": {
+                "criticality_level": "extreme_impact"
+              }
+            }
           ]
         }
       }
@@ -983,6 +1010,15 @@
               "contribution_score": 50,
               "risk_score": 70,
               "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "asset_criticality",
+              "contribution": 220,
+              "metadata": {
+                "criticality_level": "extreme_impact"
+              }
             }
           ]
         }

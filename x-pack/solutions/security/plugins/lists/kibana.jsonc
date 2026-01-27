@@ -18,6 +18,9 @@
       "spaces",
       "security"
     ],
+    "requiredBundles": [
+      "kibanaReact",
+    ],
     "extraPublicDirs": [
       "common"
     ]

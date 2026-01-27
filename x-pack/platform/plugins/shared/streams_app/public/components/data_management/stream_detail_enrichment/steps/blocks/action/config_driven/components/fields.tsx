@@ -26,6 +26,11 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
     return null;
   }
 
+  const optionalFields = processor.fieldConfigurations.filter(
+    (fieldConfiguration) => !fieldConfiguration.required
+  );
+  const hasOptionalContent = optionalFields.length > 0 || processor.fieldOptions.includeCondition;
+
   return (
     <>
       <ProcessorFieldSelector
@@ -38,19 +43,19 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
           <FieldComponentByConfig key={id} fieldConfiguration={fieldConfiguration} />
         ))}
       <EuiSpacer size="m" />
-      <FieldsAccordion>
-        {processor.fieldConfigurations
-          .filter((fieldConfiguration) => !fieldConfiguration.required)
-          .map((fieldConfiguration, id) => (
+      {hasOptionalContent && (
+        <FieldsAccordion>
+          {optionalFields.map((fieldConfiguration, id) => (
             <FieldComponentByConfig key={id} fieldConfiguration={fieldConfiguration} />
           ))}
-        {processor.fieldOptions.includeCondition && (
-          <>
-            <EuiSpacer size="m" />
-            <ProcessorConditionEditor />
-          </>
-        )}
-      </FieldsAccordion>
+          {processor.fieldOptions.includeCondition && (
+            <>
+              <EuiSpacer size="m" />
+              <ProcessorConditionEditor />
+            </>
+          )}
+        </FieldsAccordion>
+      )}
       <EuiSpacer size="m" />
       {processor.fieldOptions.includeIgnoreFailures && <IgnoreFailureToggle />}
       {processor.fieldOptions.includeIgnoreMissing && <IgnoreMissingToggle />}

@@ -7,44 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { AppMountParameters } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsRoutes } from './routes';
-import type {
-  WorkflowsPluginStartAdditionalServices,
-  WorkflowsPluginStartDependencies,
-} from './types';
-
-const queryClient = new QueryClient();
+import { queryClient } from './shared/lib/query_client';
+import type { WorkflowsServices } from './types';
 
 export const renderApp = (
-  coreStart: CoreStart,
-  pluginsStart: WorkflowsPluginStartDependencies,
-  additionalServices: WorkflowsPluginStartAdditionalServices,
+  services: WorkflowsServices,
   { history, element }: AppMountParameters
 ) => {
-  const { chrome, theme } = coreStart;
-
-  chrome.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-    },
-  ]);
+  const { theme } = services;
 
   ReactDOM.render(
     <KibanaThemeProvider theme={theme}>
-      <KibanaContextProvider
-        services={{
-          ...coreStart,
-          ...pluginsStart,
-          ...additionalServices,
-        }}
-      >
+      <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsRoutes history={history} />
         </QueryClientProvider>

@@ -17,6 +17,10 @@ import type { AlertsDataGridProps, BulkActionsState } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
@@ -35,12 +39,11 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { useIndividualTagsActionContext } from '../contexts/individual_tags_action_context';
+import { useTagsAction } from './tags/use_tags_action';
 
 jest.mock('../hooks/use_case_view_navigation');
+jest.mock('./tags/use_tags_action');
 
 const cellActionOnClickMockedFn = jest.fn();
 const mockOnChangeVisibleColumns = jest.fn();
@@ -66,17 +69,17 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
   leadingControlColumns: [],
   trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
+  columnVisibility: {
+    visibleColumns: mockColumns.map((c) => c.id),
+    setVisibleColumns: mockOnChangeVisibleColumns,
+  },
   'data-test-subj': 'testTable',
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
   onSortChange: jest.fn(),
-  onChangePageIndex: jest.fn(),
-  onChangePageSize: jest.fn(),
   additionalBulkActions: [
     {
       id: 0,
@@ -111,7 +114,7 @@ describe('AlertsDataGrid', () => {
       bulkActionsReducer,
       props.initialBulkActionsState || createMockBulkActionsState()
     );
-    const renderContext = useMemo(
+    const renderContext: RenderContext<AdditionalContext> = useMemo(
       () => ({
         ...mockRenderContext,
         bulkActionsStore,
@@ -133,6 +136,17 @@ describe('AlertsDataGrid', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset the tags action mock to default state
+    const mockUseTagsAction = jest.mocked(useTagsAction);
+    mockUseTagsAction.mockReset();
+    mockUseTagsAction.mockImplementation(() => ({
+      isFlyoutOpen: false,
+      selectedAlerts: [],
+      openFlyout: jest.fn(),
+      onClose: jest.fn(),
+      onSaveTags: jest.fn(),
+      getAction: jest.fn(),
+    }));
   });
 
   describe('Alerts table UI', () => {
@@ -166,7 +180,7 @@ describe('AlertsDataGrid', () => {
         pointerEventsCheck: 0,
       });
 
-      expect(mockDataGridProps.onChangePageIndex).toHaveBeenCalledWith(1);
+      expect(mockRenderContext.onPageIndexChange).toHaveBeenCalledWith(1);
     });
 
     it('should show when it was updated', () => {
@@ -201,7 +215,7 @@ describe('AlertsDataGrid', () => {
       );
     });
 
-    describe('leading control columns', () => {
+    describe('Leading control columns', () => {
       it('should render other leading controls', () => {
         const props: TestAlertsDataGridProps = {
           ...mockDataGridProps,
@@ -220,7 +234,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('actions column', () => {
+    describe('Actions column', () => {
       it('should render custom actions cells', () => {
         render(
           <TestComponent
@@ -329,7 +343,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('cell Actions', () => {
+    describe('Cell Actions', () => {
       const mockGetCellActionsForColumn = jest.fn(
         (columnId: string): EuiDataGridColumnCellAction[] => [
           ({ rowIndex, Component }) => {
@@ -445,8 +459,10 @@ describe('AlertsDataGrid', () => {
             toolbarVisibility={{
               showColumnSelector: true,
             }}
-            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
-            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+            columnVisibility={{
+              visibleColumns: mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay),
+              setVisibleColumns: mockOnChangeVisibleColumns,
+            }}
           />
         );
         const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
@@ -468,7 +484,65 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('cases column', () => {
+    describe('Expanded alert view', () => {
+      it('should render the default alert flyout when `renderExpandedAlertView` is undefined', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+            }}
+          />
+        );
+
+        expect(await screen.findByTestId('alertFlyout')).toBeInTheDocument();
+      });
+
+      it('should render the expanded alert view when `expandedAlertIndex` is defined', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+              renderExpandedAlertView: () => <div data-test-subj="expandedAlertView" />,
+            }}
+          />
+        );
+
+        expect(screen.getByTestId('expandedAlertView')).toBeInTheDocument();
+      });
+
+      it('should not render the expanded alert view when `expandedAlertIndex` is nullish', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: null,
+              renderExpandedAlertView: () => <div data-test-subj="expandedAlertView" />,
+            }}
+          />
+        );
+
+        expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
+      });
+
+      it('should not render any expanded alert view when `renderExpandedAlertView` is null', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+              renderExpandedAlertView: null,
+            }}
+          />
+        );
+
+        await expect(screen.findByTestId('alertFlyout')).rejects.toThrow();
+        expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('Cases column', () => {
       const props: TestAlertsDataGridProps = {
         ...mockDataGridProps,
         renderContext: {
@@ -512,7 +586,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('dynamic row height mode', () => {
+    describe('Dynamic row height mode', () => {
       it('should render a non-virtualized grid body when the dynamicRowHeight option is on', async () => {
         const { container } = render(<TestComponent {...mockDataGridProps} dynamicRowHeight />);
 
@@ -523,6 +597,126 @@ describe('AlertsDataGrid', () => {
         const { container } = render(<TestComponent {...mockDataGridProps} />);
 
         expect(container.querySelector('.euiDataGrid__virtualized')).toBeTruthy();
+      });
+    });
+
+    describe('Individual tags flyout', () => {
+      const mockUseTagsAction = jest.mocked(useTagsAction);
+      const mockAlert = {
+        _id: 'alert-1',
+        _index: 'test-index',
+        version: 'v1',
+        title: 'Test Alert',
+        'kibana.alert.workflow_tags': ['tag1', 'tag2'],
+      } as any;
+
+      beforeEach(() => {
+        // Reset the mock before each test
+        mockUseTagsAction.mockReset();
+        // Default mock: flyout closed
+        mockUseTagsAction.mockImplementation(() => ({
+          isFlyoutOpen: false,
+          selectedAlerts: [],
+          openFlyout: jest.fn(),
+          onClose: jest.fn(),
+          onSaveTags: jest.fn(),
+          getAction: jest.fn(),
+        }));
+      });
+
+      it('should not render individual tags flyout when closed', async () => {
+        render(<TestComponent {...mockDataGridProps} />);
+
+        // By default, the flyout should be closed
+        expect(screen.queryByTestId('alerts-edit-tags-flyout')).not.toBeInTheDocument();
+      });
+
+      it('should render individual tags flyout when opened', async () => {
+        const mockOnClose = jest.fn();
+        const mockOnSaveTags = jest.fn();
+
+        // Set up the mock implementation before rendering
+        mockUseTagsAction.mockImplementation(() => ({
+          isFlyoutOpen: true,
+          selectedAlerts: [mockAlert],
+          openFlyout: jest.fn(),
+          onClose: mockOnClose,
+          onSaveTags: mockOnSaveTags,
+          getAction: jest.fn(),
+        }));
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        expect(await screen.findByTestId('alerts-edit-tags-flyout')).toBeInTheDocument();
+        expect(screen.getByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
+      });
+
+      it('should call onClose when cancel button is clicked', async () => {
+        const mockOnClose = jest.fn();
+        const mockOnSaveTags = jest.fn();
+
+        mockUseTagsAction.mockImplementation(() => ({
+          isFlyoutOpen: true,
+          selectedAlerts: [mockAlert],
+          openFlyout: jest.fn(),
+          onClose: mockOnClose,
+          onSaveTags: mockOnSaveTags,
+          getAction: jest.fn(),
+        }));
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        const cancelButton = await screen.findByTestId('alerts-edit-tags-flyout-cancel');
+        await userEvent.click(cancelButton);
+
+        // The onClose should be called
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+
+      it('should provide IndividualTagsActionContext to child components', async () => {
+        const TestChildComponent = () => {
+          try {
+            const context = useIndividualTagsActionContext();
+            return (
+              <div data-test-subj="context-test">
+                {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
+              </div>
+            );
+          } catch (e) {
+            return <div data-test-subj="context-test">Context Not Available</div>;
+          }
+        };
+
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              renderActionsCell: () => <TestChildComponent />,
+            }}
+          />
+        );
+
+        // The context should be available (flyout closed by default)
+        expect(await screen.findByTestId('context-test')).toHaveTextContent('Flyout Closed');
+      });
+
+      it('should render individual tags flyout with correct alert data', async () => {
+        mockUseTagsAction.mockImplementation(() => ({
+          isFlyoutOpen: true,
+          selectedAlerts: [mockAlert],
+          openFlyout: jest.fn(),
+          onClose: jest.fn(),
+          onSaveTags: jest.fn(),
+          getAction: jest.fn(),
+        }));
+
+        render(<TestComponent {...mockDataGridProps} />);
+
+        const flyout = await screen.findByTestId('alerts-edit-tags-flyout');
+        expect(flyout).toBeInTheDocument();
+
+        // Verify the flyout title is present
+        expect(screen.getByTestId('alerts-edit-tags-flyout-title')).toBeInTheDocument();
       });
     });
   });

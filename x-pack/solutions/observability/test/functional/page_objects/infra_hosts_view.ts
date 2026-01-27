@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -127,7 +127,9 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getAllMetricsCharts() {
       const container = await this.getChartsContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="hostsView-metricChart-"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async clickAndValidateMetricChartActionOptions() {
@@ -202,8 +204,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await alertsTab.click();
     },
 
-    setAlertStatusFilter(alertStatus?: AlertStatus) {
-      const buttons: Record<AlertStatus | 'all', string> = {
+    setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
+      const buttons: Record<PublicAlertStatus | 'all', string> = {
         active: 'hostsView-alert-status-filter-active-button',
         recovered: 'hostsView-alert-status-filter-recovered-button',
         untracked: 'hostsView-alert-status-filter-untracked-button',

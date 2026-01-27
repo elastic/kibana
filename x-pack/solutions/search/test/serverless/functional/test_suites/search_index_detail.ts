@@ -24,7 +24,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'indexManagement',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -54,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await createIndices();
+      await esDeleteAllIndices([indexDoesNotExistName]);
     });
 
     after(async () => {
@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe.skip('page loading error', () => {
+        describe('page loading error', () => {
           before(async () => {
             // manually navigate to index detail page for an index that doesn't exist
             await pageObjects.common.navigateToApp(
@@ -217,20 +217,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
             await pageObjects.searchIndexDetailsPage.expectIndexNotFoundErrorExists();
-          });
-          it('reload button shows details page again', async () => {
-            await es.indices.create({ index: indexDoesNotExistName });
-            await retry.tryForTime(
-              30 * 1000,
-              async () => {
-                if (await pageObjects.searchIndexDetailsPage.pageReloadButtonIsVisible()) {
-                  await pageObjects.searchIndexDetailsPage.clickPageReload();
-                }
-                await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-              },
-              undefined,
-              1000
-            );
           });
         });
         describe('Index more options menu', () => {

@@ -9,7 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -86,7 +86,6 @@ export class FlyoutService {
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
-        const { isResizable, ...restOptions } = options;
         // If there is an active flyout session close it before opening a new one.
         if (this.activeFlyout) {
           this.activeFlyout.close();
@@ -113,17 +112,15 @@ export class FlyoutService {
         };
 
         const getWrapper = (children: JSX.Element) => {
-          return isResizable ? (
-            <EuiFlyoutResizable
-              {...restOptions}
+          return (
+            <EuiFlyout
+              resizable={options.isResizable}
+              {...options}
+              aria-label={options['aria-label']}
+              aria-labelledby={options['aria-labelledby']}
               onClose={onCloseFlyout}
-              ref={React.createRef()}
-              maxWidth={Number(options?.maxWidth)}
+              session="never"
             >
-              {children}
-            </EuiFlyoutResizable>
-          ) : (
-            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
               {children}
             </EuiFlyout>
           );

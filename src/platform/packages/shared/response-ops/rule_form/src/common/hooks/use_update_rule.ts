@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import type { UpdateRuleBody } from '../apis/update_rule';
 import { updateRule } from '../apis/update_rule';

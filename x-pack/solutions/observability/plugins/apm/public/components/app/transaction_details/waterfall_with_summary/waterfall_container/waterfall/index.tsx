@@ -88,7 +88,7 @@ export function Waterfall({
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction?.transaction.marks?.agent);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   const timelineMargins = useMemo(() => {
@@ -107,6 +107,7 @@ export function Waterfall({
     <Container>
       {waterfall.exceedsMax && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="apmWaterfallSizeWarning"
           color="warning"
           size="s"

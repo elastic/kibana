@@ -37,9 +37,7 @@ export const QueryBar = () => {
 
   const {
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
   const { query, setQuery, submitImmediately } = useQueryBar();
 

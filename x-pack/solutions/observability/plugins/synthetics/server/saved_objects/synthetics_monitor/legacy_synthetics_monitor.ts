@@ -35,6 +35,7 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
     name: legacySyntheticsMonitorTypeSingle,
     hidden: false,
     namespaceType: 'single',
+    hiddenFromHttpApis: true,
     migrations: {
       '8.6.0': monitorMigrations['8.6.0'](encryptedSavedObjects),
       '8.8.0': monitorMigrations['8.8.0'](encryptedSavedObjects),

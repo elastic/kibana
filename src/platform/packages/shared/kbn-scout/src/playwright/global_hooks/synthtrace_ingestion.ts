@@ -16,8 +16,8 @@ import type {
   InfraDocument,
   Serializable,
   SynthtraceGenerator,
-} from '@kbn/apm-synthtrace-client';
-import type { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+} from '@kbn/synthtrace-client';
+import type { SynthtraceClientTypes } from '@kbn/synthtrace';
 import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
 import { ScoutLogger } from '../../common/services/logger';
 import type { ScoutTestOptions } from '../types';

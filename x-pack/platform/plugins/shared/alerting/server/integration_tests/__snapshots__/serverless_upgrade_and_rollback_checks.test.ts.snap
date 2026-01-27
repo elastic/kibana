@@ -3200,10 +3200,30 @@ Object {
                           },
                           "filter": Object {
                             "flags": Object {
+                              "default": [Function],
                               "error": [Function],
-                              "presence": "forbidden",
+                              "presence": "optional",
                             },
-                            "type": "any",
+                            "metas": Array [
+                              Object {
+                                "x-oas-optional": true,
+                              },
+                            ],
+                            "rules": Array [
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
+                            ],
+                            "type": "string",
                           },
                           "name": Object {
                             "flags": Object {
@@ -4821,6 +4841,19 @@ Object {
                       },
                     ],
                     "type": "string",
+                  },
+                  "managed": Object {
+                    "flags": Object {
+                      "default": [Function],
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
+                    "type": "boolean",
                   },
                   "name": Object {
                     "flags": Object {
@@ -11335,6 +11368,44 @@ Object {
       ],
       "type": "object",
     },
+    "kqlQueryString": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "lookbackInterval": Object {
       "flags": Object {
         "default": null,
@@ -11476,6 +11547,14 @@ Object {
       "type": "alternatives",
     },
   },
+  "rules": Array [
+    Object {
+      "args": Object {
+        "method": [Function],
+      },
+      "name": "custom",
+    },
+  ],
   "type": "object",
 }
 `;

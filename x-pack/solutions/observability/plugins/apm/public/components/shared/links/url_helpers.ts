@@ -87,6 +87,14 @@ export interface APMQueryParams {
   agentName?: string;
   serviceVersion?: string;
   serviceGroup?: string;
+
+  // Logs tab state (for persisting saved search customizations)
+  logsColumns?: string;
+  logsSort?: string;
+  logsGrid?: string;
+  logsRowHeight?: number;
+  logsRowsPerPage?: number;
+  logsDensity?: string;
 }
 
 // forces every value of T[K] to be type: string

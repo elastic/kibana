@@ -20,6 +20,8 @@
         "label": "I18nServiceSetup",
         "description": [],
         "path": "src/core/packages/i18n/server/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "() => string"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -54,6 +58,8 @@
               "() => string[]"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -72,6 +78,8 @@
               "() => string"
             ],
             "path": "src/core/packages/i18n/server/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

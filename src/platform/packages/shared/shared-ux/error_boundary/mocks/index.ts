@@ -11,3 +11,11 @@ export { BadComponent } from './src/bad_component';
 export { ChunkLoadErrorComponent } from './src/chunk_load_error_component';
 export { getServicesMock } from './src/jest';
 export { KibanaErrorBoundaryStorybookMock } from './src/storybook';
+export { createAnalyticsMock } from './src/analytics_mock';
+export {
+  ControlsBar,
+  Spacer,
+  DocsBlock,
+  StoryActionButton,
+} from './src/error_boundary_story_controls';
+export { createServicesWithAnalyticsMock } from './src/story_services';

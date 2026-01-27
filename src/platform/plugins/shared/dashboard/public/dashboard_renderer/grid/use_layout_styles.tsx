@@ -58,7 +58,14 @@ export const useLayoutStyles = () => {
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
-      .kbnGridPanel--resizeHandle {
+      // allows embeddables (specifically the control embeddables in this case) to hide the drag handle icon
+      .kbnGridPanel:has(.kbnGridLayout--hideDragHandle) {
+        .kbnGridPanel--resizeHandle::after {
+          display: none !important;
+        }
+      }
+
+      .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
@@ -72,7 +79,7 @@ export const useLayoutStyles = () => {
           mask-position: bottom ${euiTheme.size.s} right ${euiTheme.size.s};
           mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cg clip-path='url(%23clip0_472_172810)'%3E%3Ccircle cx='7' cy='1' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip1_472_172810)'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='4' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip2_472_172810)'%3E%3Ccircle cx='1' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='4' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='7' r='1' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E");
 
-          background-color: ${euiTheme.colors.borderBaseFormsControl};
+          background-color: ${euiTheme.colors.borderBaseProminent};
         }
         &:hover,
         &:focus-visible {

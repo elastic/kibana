@@ -250,6 +250,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     } = useFetchPolicyData(
       {
         kuery: searchKuery,
+        // @ts-expect-error upgrade typescript v5.9.3
         sortOrder,
         sortField,
         perPage,
@@ -327,6 +328,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             appPath={urlPath}
             target="_blank"
             data-test-subj={getTestId(`policy-${policy.id}-policyLink`)}
+            // @ts-expect-error upgrade typescript v5.9.3
             onClick={(event) => {
               event.stopPropagation();
             }}

@@ -26,6 +26,8 @@
           "<ValueType>"
         ],
         "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               "\nThe ID of the feature flag. Used to reference it when evaluating the flag."
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,6 +56,8 @@
               "\nHuman friendly name."
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -68,6 +74,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +92,8 @@
               "string[]"
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +110,8 @@
               "ValueType"
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,6 +128,8 @@
               "{ name: string; description?: string | undefined; value: ValueType extends \"string\" ? string : ValueType extends \"boolean\" ? boolean : number; }[]"
             ],
             "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -132,6 +146,8 @@
           "\nSetup contract of the Feature Flags Service"
         ],
         "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +166,8 @@
               ") => void"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -166,6 +184,8 @@
                   "Provider"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 102,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -188,6 +208,8 @@
               ") => void"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -204,6 +226,8 @@
                   "EvaluationContext"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 109,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -224,6 +248,8 @@
           "\nSetup contract of the Feature Flags Service"
         ],
         "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,6 +268,8 @@
               ") => void"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -258,6 +286,8 @@
                   "EvaluationContext"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 131,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -278,6 +308,8 @@
               "(flagName: string, fallbackValue: boolean) => Promise<boolean>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -294,6 +326,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 139,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -311,6 +345,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 139,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -331,6 +367,8 @@
               "<Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -347,6 +385,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 147,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -364,6 +404,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 147,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -384,6 +426,8 @@
               "<Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -400,6 +444,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 155,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,6 +463,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 155,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -439,6 +487,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -455,6 +505,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 163,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -472,6 +524,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 163,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -494,6 +548,8 @@
               "<Value>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -510,6 +566,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 171,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -527,6 +585,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 171,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -549,6 +609,8 @@
               "<Value>"
             ],
             "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -565,6 +627,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 179,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -582,6 +646,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+                "lineNumber": 179,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -610,6 +676,8 @@
           "SingleContextEvaluationContext"
         ],
         "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -633,6 +701,8 @@
           "<\"number\">)[]"
         ],
         "path": "src/core/packages/feature-flags/server/src/feature_flag_definition.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -650,6 +720,8 @@
           "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
         ],
         "path": "src/core/packages/feature-flags/server/src/request_handler_context.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -673,6 +745,8 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -692,6 +766,8 @@
           "> & { kind?: \"kibana\" | \"organization\" | undefined; }"
         ],
         "path": "src/core/packages/feature-flags/server/src/contracts.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

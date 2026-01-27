@@ -12,7 +12,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Subject } from 'rxjs';
 import type { Store } from 'redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
@@ -51,12 +51,13 @@ export const SyntheticsSharedContext: React.FC<
         spaces: startPlugins.spaces,
         fleet: startPlugins.fleet,
         share: startPlugins.share,
+        kql: startPlugins.kql,
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
-        security: startPlugins.security,
+        uiActions: startPlugins.uiActions,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

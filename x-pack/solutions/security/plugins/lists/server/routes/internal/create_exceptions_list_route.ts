@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { InternalCreateExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
 import { internalCreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL } from '@kbn/securitysolution-list-constants';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { createExceptionListHandler } from '../../handlers/create_exception_list_handler';
 import type { ListsPluginRouter } from '../../types';
@@ -21,7 +22,7 @@ export const internalCreateExceptionListRoute = (router: ListsPluginRouter): voi
       path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

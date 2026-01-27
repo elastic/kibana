@@ -20,6 +20,7 @@ jest.mock('../../../hooks/use_entity_store');
 jest.mock('../helpers');
 
 const mockUseEnableEntityStoreMutation = useEnableEntityStoreMutation as jest.Mock;
+// @ts-expect-error upgrade typescript v5.9.3
 const mockIsEngineLoading = isEngineLoading as jest.Mock;
 
 const defaultComponent: EngineComponentStatus = {

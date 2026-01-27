@@ -24,9 +24,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
 
   const {
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
 
   const [inputVal, setInputVal] = useState<string>(query);

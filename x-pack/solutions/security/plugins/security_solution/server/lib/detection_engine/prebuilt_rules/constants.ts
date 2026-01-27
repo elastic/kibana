@@ -18,3 +18,11 @@ export const PREBUILT_RULES_OPERATION_CONCURRENCY = 1;
  * is expected to be requested much more often than the other prebuilt rules API endpoints.
  */
 export const PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY = 3;
+
+/**
+ * Prebuilt rules installation review API endpoint max concurrency.
+ *
+ * The value 5 was chosen as a result of performance testing the endpoint.
+ * Related issue: https://github.com/elastic/kibana/issues/241656
+ */
+export const PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY = 5;

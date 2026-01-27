@@ -14,24 +14,28 @@ import { verifyQueries } from './verify_queries';
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     wired: {
       fields: {},
       routing: [],
     },
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
 describe('verifyQueries', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
+  let abortCtrl: AbortController;
 
   beforeEach(() => {
     loggerMock = loggingSystemMock.createLogger();
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    abortCtrl = new AbortController();
   });
 
   it('filters out the invalid queries', async () => {
@@ -41,7 +45,11 @@ describe('verifyQueries', () => {
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: { total: { value: 42, relation: 'eq' }, hits: [] },
     });
-    const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
+    const esClient = createTracedEsClient({
+      client: esClientMock,
+      logger: loggerMock,
+      abortSignal: abortCtrl.signal,
+    });
 
     const result = await verifyQueries(
       {
@@ -64,7 +72,11 @@ describe('verifyQueries', () => {
 
   it('handles any search error gracefully', async () => {
     esClientMock.search.mockRejectedValue(new Error('timeout error'));
-    const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
+    const esClient = createTracedEsClient({
+      client: esClientMock,
+      logger: loggerMock,
+      abortSignal: abortCtrl.signal,
+    });
 
     const result = await verifyQueries(
       {

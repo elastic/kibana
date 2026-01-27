@@ -14,9 +14,37 @@ import {
   TestProviders,
 } from '../../../mock/test_providers/test_providers';
 import { AssistantSettingsContextMenu } from './settings_context_menu';
-import { AI_ASSISTANT_MENU } from './translations';
+import { AI_ASSISTANT_MENU, TRY_AI_AGENT, AI_AGENT_SWITCH_ERROR } from './translations';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KNOWLEDGE_BASE_TAB } from '../const';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+
+jest.mock('@kbn/ai-agent-confirmation-modal', () => ({
+  AIAgentConfirmationModal: ({
+    onConfirm,
+    onCancel,
+  }: {
+    onConfirm: () => void | Promise<void>;
+    onCancel: () => void;
+  }) => (
+    <div data-test-subj="ai-agent-confirmation-modal">
+      <button
+        type="button"
+        onClick={async () => {
+          await onConfirm();
+        }}
+        data-test-subj="confirm-ai-agent"
+      >
+        {'Confirm'}
+      </button>
+      <button type="button" onClick={onCancel} data-test-subj="cancel-ai-agent">
+        {'Cancel'}
+      </button>
+    </div>
+  ),
+}));
+
 const props = {};
 describe('AssistantSettingsContextMenu', () => {
   beforeEach(() => {
@@ -123,6 +151,163 @@ describe('AssistantSettingsContextMenu', () => {
     expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       deepLinkId: SecurityPageName.configurationsAiSettings,
       path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+    });
+  });
+
+  it('renders Try AI Agent button in menu', async () => {
+    render(
+      <TestProviders>
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    expect(screen.getByRole('button', { name: TRY_AI_AGENT })).toBeInTheDocument();
+  });
+
+  it('opens AI Agent confirmation modal when Try AI Agent button is clicked', async () => {
+    render(
+      <TestProviders>
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    await userEvent.click(screen.getByTestId('try-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-agent-confirmation-modal')).toBeInTheDocument();
+    });
+  });
+
+  it('closes popover when Try AI Agent button is clicked', async () => {
+    render(
+      <TestProviders>
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    await userEvent.click(screen.getByTestId('try-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('ai-assistant-settings')).not.toBeVisible();
+    });
+  });
+
+  it('renders confirm and cancel buttons in AI Agent confirmation modal', async () => {
+    render(
+      <TestProviders>
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    await userEvent.click(screen.getByTestId('try-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-agent-confirmation-modal')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('confirm-ai-agent')).toBeInTheDocument();
+    expect(screen.getByTestId('cancel-ai-agent')).toBeInTheDocument();
+  });
+
+  it('closes modal when cancel is clicked', async () => {
+    render(
+      <TestProviders>
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    await userEvent.click(screen.getByTestId('try-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-agent-confirmation-modal')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('cancel-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('ai-agent-confirmation-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows error toast when settings.client.set fails', async () => {
+    const mockSet = jest.fn().mockRejectedValue(new Error('Failed to set setting'));
+    const mockAddError = jest.fn();
+    render(
+      <TestProviders
+        providerContext={{
+          settings: {
+            client: {
+              get: jest.fn(),
+              set: mockSet,
+            },
+          } as unknown as SettingsStart,
+          toasts: {
+            addError: mockAddError,
+          } as unknown as IToasts,
+        }}
+      >
+        <AssistantSettingsContextMenu {...props} />
+      </TestProviders>
+    );
+
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
+    await waitFor(() => expect(screen.getByTestId('try-ai-agent')).toBeVisible());
+    await userEvent.click(screen.getByTestId('try-ai-agent'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-agent-confirmation-modal')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('confirm-ai-agent'));
+
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({
+          title: AI_AGENT_SWITCH_ERROR,
+        })
+      );
+    });
+  });
+
+  describe('hasAgentBuilderManagePrivilege', () => {
+    it('enables try-ai-agent button when hasAgentBuilderManagePrivilege is true', async () => {
+      render(
+        <TestProviders>
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      const tryAiAgentButton = screen.getByTestId('try-ai-agent');
+      expect(tryAiAgentButton).not.toBeDisabled();
+    });
+
+    it('disables try-ai-agent button when hasAgentBuilderManagePrivilege is false', async () => {
+      render(
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            hasAgentBuilderManagePrivilege: false,
+          }}
+        >
+          <AssistantSettingsContextMenu {...props} />
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('chat-context-menu'));
+      const tryAiAgentButton = screen.getByTestId('try-ai-agent');
+      expect(tryAiAgentButton).toBeDisabled();
     });
   });
 });

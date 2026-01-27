@@ -30,9 +30,18 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     describe('Screenshot mode', () => {
       const checkCanSendTelemetry = (): Promise<boolean> => {
         return browser.executeAsync<boolean>((cb) => {
-          (window as unknown as Record<string, () => Promise<boolean>>)
-            ._checkCanSendTelemetry()
-            .then(cb)
+          const controller = new AbortController();
+          // Reporting to telemetry can
+          const timeout = setTimeout(
+            () => controller.abort('Request aborted after 10 seconds'),
+            10_000
+          );
+          (window as unknown as Record<string, (signal?: AbortSignal) => Promise<boolean>>)
+            ._checkCanSendTelemetry(controller.signal)
+            .then((res) => {
+              clearTimeout(timeout);
+              return cb(res);
+            })
             .catch((err) => log.error(err));
         });
       };
@@ -40,9 +49,18 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       after(async () => {
         await browser.removeLocalStorageItem(KBN_SCREENSHOT_MODE_ENABLED_KEY);
         await browser.executeAsync<void>((cb) => {
+          const controller = new AbortController();
+          // Reporting to telemetry can
+          const timeout = setTimeout(
+            () => controller.abort('Request aborted after 10 seconds'),
+            10_000
+          );
           (window as unknown as Record<string, () => Promise<boolean>>)
             ._resetTelemetry()
-            .then(() => cb())
+            .then(() => {
+              clearTimeout(timeout);
+              return cb();
+            })
             .catch((err) => log.error(err));
         });
       });

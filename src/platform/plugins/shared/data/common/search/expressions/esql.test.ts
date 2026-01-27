@@ -34,7 +34,7 @@ describe('getEsqlFn', () => {
 
     const input = null; // Mock input
     const args = {
-      query: 'SELECT * FROM index',
+      query: 'FROM index',
     };
 
     const context = {

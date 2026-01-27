@@ -27,6 +27,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: false,
+        is_deprecated: false,
       },
     ];
     http.get.mockResolvedValueOnce(apiResponseValue);
@@ -41,6 +42,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -65,6 +67,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: false,
+        is_deprecated: false,
       },
     ];
     http.get.mockResolvedValueOnce(apiResponseValue);
@@ -79,6 +82,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -107,6 +111,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: true,
+        is_deprecated: false,
       },
       {
         id: 'test',
@@ -117,6 +122,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: false,
+        is_deprecated: false,
       },
     ];
 
@@ -132,6 +138,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: true,
+        isDeprecated: false,
       },
       {
         id: 'test',
@@ -142,6 +149,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -166,6 +174,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: true,
+        is_deprecated: false,
       },
       {
         id: 'test',
@@ -176,6 +185,7 @@ describe('loadActionTypes', () => {
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
         is_system_action_type: false,
+        is_deprecated: false,
       },
     ];
 
@@ -191,6 +201,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: true,
+        isDeprecated: false,
       },
       {
         id: 'test',
@@ -201,6 +212,7 @@ describe('loadActionTypes', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 

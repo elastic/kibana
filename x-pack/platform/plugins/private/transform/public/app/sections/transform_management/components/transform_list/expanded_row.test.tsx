@@ -8,7 +8,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import moment from 'moment-timezone';
 import type { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';

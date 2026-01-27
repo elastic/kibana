@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/security-labs-artifact-builder",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-labs-artifact-builder",
+        "id": "def-common.runScript",
+        "type": "Function",
+        "tags": [],
+        "label": "runScript",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "x-pack/packages/ai-infra/security-labs-artifact-builder/src/command.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

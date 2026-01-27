@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/oidc-provider-plugin",
   "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "oidcProviderPlugin",
     "server": true,

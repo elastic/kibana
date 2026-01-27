@@ -61,7 +61,13 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
       installSelectedRule?.();
     }, [installSelectedRule]);
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={true}
+        data-test-subj="migrationsBulkActions"
+      >
         {showUpdateMissingIndexPatternButton && (
           <UpdateMissingIndex
             setMissingIndexPatternFlyoutOpen={setMissingIndexPatternFlyoutOpen}

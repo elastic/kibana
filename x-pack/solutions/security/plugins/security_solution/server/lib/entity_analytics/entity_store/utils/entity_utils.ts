@@ -20,6 +20,7 @@ import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics
 import { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 import { getEntityUpdatesDataStreamName } from '../elasticsearch_assets/updates_entity_data_stream';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 export const buildIndexPatterns = async (
   space: string,
@@ -33,6 +34,7 @@ export const buildIndexPatterns = async (
   );
   return [
     ...securitySolutionDataViewIndices.filter((item) => item !== alertsIndex),
+    ...(onlyForType === 'user' ? [getPrivilegedMonitorUsersIndex(space)] : []),
     getAssetCriticalityIndex(space),
     getRiskScoreLatestIndex(space),
   ];
@@ -44,8 +46,8 @@ export const buildIndexPatternsByEngine = async (
   appClient: AppClient,
   dataViewsService: DataViewsService
 ) => {
-  const patterns = await buildIndexPatterns(space, appClient, dataViewsService);
-  patterns.push(getEntitiesResetIndexName(entityType, space));
+  const patterns = await buildIndexPatterns(space, appClient, dataViewsService, entityType);
+  patterns.push(getEntitiesResetIndexName(entityType, space).concat('*'));
   patterns.push(...getEntityUpdatesIndexPatterns(space, entityType));
   return patterns;
 };

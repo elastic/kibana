@@ -42,7 +42,7 @@ export class IndicesMetadataPlugin
   private readonly indicesMetadataService: IndicesMetadataService;
   private readonly configurationService: ConfigurationService;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(private readonly context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.config$ = context.config.create<PluginConfig>();
 
@@ -63,6 +63,7 @@ export class IndicesMetadataPlugin
 
   public start(core: CoreStart, plugin: IndicesMetadataPluginStartDeps) {
     this.logger.debug('Starting indices metadata plugin');
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
@@ -78,7 +79,8 @@ export class IndicesMetadataPlugin
         this.indicesMetadataService.start(
           plugin.taskManager,
           core.analytics,
-          core.elasticsearch.client.asInternalUser
+          core.elasticsearch.client.asInternalUser,
+          isServerless
         );
       } else {
         this.logger.info('Indices metadata plugin is disabled, stopping services');

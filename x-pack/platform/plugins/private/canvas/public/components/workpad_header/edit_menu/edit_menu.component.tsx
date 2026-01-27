@@ -531,6 +531,7 @@ EditMenu.propTypes = {
   distributeHorizontally: PropTypes.func.isRequired,
   distributeVertically: PropTypes.func.isRequired,
   createCustomElement: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   selectedNodes: PropTypes.arrayOf(PropTypes.object).isRequired,
   groupIsSelected: PropTypes.bool.isRequired,
   groupNodes: PropTypes.func.isRequired,

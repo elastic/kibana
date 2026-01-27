@@ -14,6 +14,8 @@
           "({\n  codeLanguage,\n  id,\n  message = '…',\n  stackframes = [],\n}: CauseStacktraceProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/cause_stacktrace.tsx",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "CauseStacktraceProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/cause_stacktrace.tsx",
+            "lineNumber": 58,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -47,6 +51,8 @@
           "({ codeLanguage, exceptions }: ExceptionStacktraceProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/exception/exception_stacktrace.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +67,8 @@
               "ExceptionStacktraceProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/exception/exception_stacktrace.tsx",
+            "lineNumber": 19,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,6 +88,8 @@
           "({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/frame_heading.tsx",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +104,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/frame_heading.tsx",
+            "lineNumber": 48,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,6 +133,8 @@
           "[]) => StackframesGroup[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +156,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+            "lineNumber": 80,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -161,6 +177,8 @@
           "({ codeLanguage, id, stackframes }: Props) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/library_stacktrace.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +193,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/library_stacktrace.tsx",
+            "lineNumber": 25,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -194,6 +214,8 @@
           "({\n  codeLanguage,\n  message,\n  stacktrace,\n  type,\n}: PlaintextStacktraceProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/plain/plaintext_stacktrace.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,6 +230,8 @@
               "PlaintextStacktraceProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/plain/plaintext_stacktrace.tsx",
+            "lineNumber": 19,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -227,6 +251,8 @@
           "({\n  stackframe,\n  codeLanguage,\n  id,\n  initialIsOpen = false,\n  isLibraryFrame = false,\n}: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/stackframe.tsx",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +267,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/stackframe.tsx",
+            "lineNumber": 38,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +288,8 @@
           "({ stackframes = [], codeLanguage }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,6 +304,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +325,8 @@
           "({ vars }: Props) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/variables.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,6 +341,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/variables.tsx",
+            "lineNumber": 26,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

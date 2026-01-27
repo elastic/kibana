@@ -13,16 +13,21 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { search } from '@kbn/data-plugin/public';
+import type {
+  LensAppServices,
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+  XYState,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+} from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
-import type { LensAppServices } from '../../../../app_plugin/types';
-import { updateLayer } from '..';
-import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../../types';
-import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
+import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
 
 export const AnnotationsPanel = (
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     datatableUtilities: DatatableUtilitiesService;
     dataViewsService: DataViewsPublicPluginStart;
   }
@@ -89,22 +94,24 @@ export const AnnotationsPanel = (
   }
 
   return currentDataView ? (
-    <AnnotationEditorControls
-      annotation={currentAnnotation}
-      onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
-      dataView={currentDataView}
-      getDefaultRangeEnd={(rangeStart) =>
-        getEndTimestamp(
-          props.datatableUtilities,
-          rangeStart,
-          frame,
-          localState.layers.filter(isDataLayer)
-        )
-      }
-      queryInputServices={queryInputServices}
-      calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-      appName={LENS_APP_NAME}
-    />
+    <div className="lnsIndexPatternDimensionEditor--padded">
+      <AnnotationEditorControls
+        annotation={currentAnnotation}
+        onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
+        dataView={currentDataView}
+        getDefaultRangeEnd={(rangeStart) =>
+          getEndTimestamp(
+            props.datatableUtilities,
+            rangeStart,
+            frame,
+            localState.layers.filter(isDataLayer)
+          )
+        }
+        queryInputServices={queryInputServices}
+        calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        appName={LENS_APP_NAME}
+      />
+    </div>
   ) : null;
 };
 

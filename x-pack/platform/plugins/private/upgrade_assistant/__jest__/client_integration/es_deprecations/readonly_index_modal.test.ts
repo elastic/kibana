@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { ReindexStatusResponse } from '@kbn/reindex-service-plugin/common';
 import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
@@ -30,19 +31,17 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
 };
 
 describe('Readonly index modal', () => {
-  let testBed: ElasticsearchTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  const openReadOnlyModal = async () => {
+    await user.click(screen.getAllByTestId('deprecation-reindex-readonly')[0]);
+    return await screen.findByTestId('updateIndexModal');
+  };
+
+  beforeEach(() => {
+    user = userEvent.setup();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -65,12 +64,6 @@ describe('Readonly index modal', () => {
       },
     });
     httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([]);
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
   });
 
   describe('low disk space', () => {
@@ -80,21 +73,17 @@ describe('Readonly index modal', () => {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
           available: '25%',
-          lowDiskWatermarkSetting: '50%',
         },
       ]);
 
-      const { actions, find } = testBed;
+      await setupElasticsearchPage(httpSetup);
+      const modal = await openReadOnlyModal();
 
-      await actions.table.clickDeprecationRowAt({
-        deprecationType: 'reindex',
-        index: 0,
-        action: 'readonly',
-      });
-
-      expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
-      expect(find('impactedNodeListItem').length).toEqual(1);
-      expect(find('impactedNodeListItem').at(0).text()).toContain(
+      expect(await within(modal).findByTestId('lowDiskSpaceCallout')).toHaveTextContent(
+        'Nodes with low disk space'
+      );
+      expect(within(modal).getAllByTestId('impactedNodeListItem')).toHaveLength(1);
+      expect(within(modal).getAllByTestId('impactedNodeListItem')[0]).toHaveTextContent(
         'MacBook-Pro.local (25% available)'
       );
     });
@@ -102,16 +91,13 @@ describe('Readonly index modal', () => {
 
   describe('readonly', () => {
     it('renders a modal with index confirm step for read-only', async () => {
-      const { actions, find, exists } = testBed;
+      await setupElasticsearchPage(httpSetup);
+      const modal = await openReadOnlyModal();
 
-      await actions.table.clickDeprecationRowAt({
-        deprecationType: 'reindex',
-        index: 0,
-        action: 'readonly',
-      });
-
-      expect(exists('updateIndexModal')).toBe(true);
-      expect(find('updateIndexModalTitle').text()).toContain('Set index to read-only');
+      expect(modal).toBeInTheDocument();
+      expect(within(modal).getByTestId('updateIndexModalTitle')).toHaveTextContent(
+        'Set index to read-only'
+      );
     });
 
     it('shows success state when marking as readonly an index that has failed to reindex', async () => {
@@ -126,20 +112,18 @@ describe('Readonly index modal', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      const { actions, find, exists } = testBed;
+      await setupElasticsearchPage(httpSetup);
+      const modal = await openReadOnlyModal();
 
-      await actions.table.clickDeprecationRowAt({
-        deprecationType: 'reindex',
-        index: 0,
-        action: 'readonly',
-      });
-      await actions.reindexDeprecationFlyout.clickReadOnlyButton();
+      await user.click(within(modal).getByTestId('startIndexReadonlyButton'));
 
-      expect(exists('updateIndexModalTitle')).toBe(true);
-      expect(find('updateIndexModalTitle').text()).toBe('Setting index to read-only');
+      expect(await screen.findByTestId('updateIndexModalTitle')).toHaveTextContent(
+        'Setting index to read-only'
+      );
 
-      expect(exists('stepProgressStep')).toBe(true);
-      expect(find('stepProgressStep').text()).toBe('Setting foo index to read-only.');
+      expect(screen.getByTestId('stepProgressStep')).toHaveTextContent(
+        'Setting foo index to read-only.'
+      );
     });
   });
 
@@ -155,26 +139,15 @@ describe('Readonly index modal', () => {
         },
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
-
-      const { actions, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt({
-        deprecationType: 'reindex',
-        index: 0,
-        action: 'readonly',
-      });
+      await setupElasticsearchPage(httpSetup);
+      const modal = await openReadOnlyModal();
 
       // Verify follower index callout is displayed
-      expect(exists('followerIndexCallout')).toBe(true);
+      expect(within(modal).getByTestId('followerIndexCallout')).toBeInTheDocument();
 
       // Verify only mark as read-only button is available (no reindex button)
-      expect(exists('startIndexReadonlyButton')).toBe(true);
-      expect(exists('startReindexingButton')).toBe(false);
+      expect(within(modal).getByTestId('startIndexReadonlyButton')).toBeInTheDocument();
+      expect(within(modal).queryByTestId('startReindexingButton')).toBeNull();
     });
   });
 });

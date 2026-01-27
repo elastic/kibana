@@ -54,7 +54,7 @@ export const ComparePercentage = ({
         width: ${positionForLens ? '90%' : 'auto'};
       `}
     >
-      <EuiText size="s">
+      <EuiText size="s" color="subdued">
         {percentInfo.note}
         {` `}
         {i18n.TIME_RANGE(timeRange)}

@@ -8,20 +8,20 @@
  */
 
 import type { DashboardState } from '../../common';
+import type { DashboardReadResponseBody } from '../../server';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
-  timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',
   filters: [],
   panels: [],
   title: '',
   tags: [],
-
-  // options
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-  hidePanelTitles: false,
 };
+
+export function getLastSavedState(readResult?: DashboardReadResponseBody) {
+  return {
+    ...DEFAULT_DASHBOARD_STATE,
+    ...readResult?.data,
+  };
+}

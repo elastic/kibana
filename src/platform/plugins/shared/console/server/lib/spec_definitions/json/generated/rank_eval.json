@@ -14,7 +14,10 @@
         "none"
       ],
       "ignore_unavailable": "__flag__",
-      "search_type": ""
+      "search_type": [
+        "query_then_fetch",
+        "dfs_query_then_fetch"
+      ]
     },
     "methods": [
       "GET",

@@ -10,7 +10,7 @@
   "plugin": {
     "id": "uiActionsEnhanced",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
       "src",
       "ui_actions_enhanced"

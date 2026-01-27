@@ -80,12 +80,12 @@ describe('hasStep', () => {
     'secondThenTestConnectorStep',
     'elseTestConnectorStep',
   ])('should return true for existing stepId: %s', (stepId) => {
-    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     expect(workflowGraph.hasStep(stepId)).toBe(true);
   });
 
   it('should return false for non-existing stepId', () => {
-    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     expect(workflowGraph.hasStep('nonExistingStepId')).toBe(false);
   });
 });

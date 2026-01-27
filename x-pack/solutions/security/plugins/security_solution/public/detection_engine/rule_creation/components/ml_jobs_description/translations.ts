@@ -20,13 +20,6 @@ export const ML_STOP_JOB_LABEL = i18n.translate(
   }
 );
 
-export const ML_JOB_STOPPED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
-  {
-    defaultMessage: 'Stopped',
-  }
-);
-
 export const ML_ADMIN_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlAdminPermissionsRequiredDescription',
   {

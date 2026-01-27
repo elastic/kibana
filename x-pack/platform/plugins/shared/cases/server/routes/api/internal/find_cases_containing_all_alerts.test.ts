@@ -13,36 +13,75 @@ describe('findCasesContainingAllAlerts', () => {
     it('returns null when required alert not found', async () => {
       const casesClient = {
         attachments: {
-          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([]),
+          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue([]),
         },
       } as unknown as CasesClient;
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalled();
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalled();
       expect(result).toBeNull();
     });
 
     it('returns case id when all alerts are present', async () => {
       const casesClient = {
         attachments: {
-          getAllAlertsAttachToCase: jest.fn().mockResolvedValue([{ id: 'alert-id' }]),
+          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue([{ id: 'alert-id' }]),
         },
       } as unknown as CasesClient;
 
       const result = await processCase(casesClient, 'case-id', new Set(['alert-id']));
       expect(result).toBe('case-id');
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledTimes(1);
-      expect(casesClient.attachments.getAllAlertsAttachToCase).toHaveBeenCalledWith({
-        caseId: 'case-id',
-        filter: {
-          arguments: [
-            { isQuoted: false, type: 'literal', value: 'cases-comments.attributes.alertId' },
-            { isQuoted: false, type: 'literal', value: 'alert-id' },
-          ],
-          function: 'is',
-          type: 'function',
-        },
-      });
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledTimes(1);
+
+      const {
+        calls: [params],
+      } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
+
+      expect(params).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "caseId": "case-id",
+            "filter": Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases-comments.attributes.eventId",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "alert-id",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases-comments.attributes.alertId",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "alert-id",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "or",
+              "type": "function",
+            },
+          },
+        ]
+      `);
     });
   });
 

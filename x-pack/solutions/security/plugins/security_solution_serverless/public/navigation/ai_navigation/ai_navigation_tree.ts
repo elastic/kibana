@@ -5,127 +5,222 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import {
+  defaultNavigationTree,
+  LazyIconAgentBuilder,
+} from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { AiNavigationIcon } from './icon';
-import { createStackManagementNavigationTree } from '../stack_management_navigation';
-import { renderAiSocCallout } from './callout';
-import { v2EaseFooterItems } from './v2_ease_footer_items';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  workflowsUiEnabled: boolean = false
+): NavigationTreeDefinition => ({
   body: [
     {
-      type: 'navGroup',
-      id: 'security_solution_ai_nav',
+      id: 'ease_home',
+      link: securityLink(SecurityPageName.landing),
       title: SOLUTION_NAME,
       icon: AiNavigationIcon,
+      renderAs: 'home',
+    },
+    {
+      id: SecurityPageName.alertSummary,
+      link: securityLink(SecurityPageName.alertSummary),
+      icon: 'warning',
+    },
+    {
+      id: SecurityPageName.attackDiscovery,
+      link: securityLink(SecurityPageName.attackDiscovery),
+      icon: 'bolt',
+    },
+    {
       breadcrumbStatus: 'hidden',
-      defaultIsCollapsed: false,
-      isCollapsible: false,
       children: [
+        defaultNavigationTree.cases(),
         {
-          id: 'ease_home',
-          link: securityLink(SecurityPageName.landing),
-          title: SOLUTION_NAME,
-          icon: AiNavigationIcon,
-          renderAs: 'home',
-          sideNavVersion: 'v2',
-        },
-        {
-          id: SecurityPageName.alertSummary,
-          link: securityLink(SecurityPageName.alertSummary),
-          iconV2: 'warning',
-        },
-        {
-          id: SecurityPageName.attackDiscovery,
-          link: securityLink(SecurityPageName.attackDiscovery),
-          iconV2: 'bolt',
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
-            defaultNavigationTree.cases({ sideNavVersion: 'v2' }),
-            {
-              id: SecurityPageName.configurations,
-              link: securityLink(SecurityPageName.configurations),
-              renderAs: 'item',
-              iconV2: 'controlsHorizontal',
-              children: [
-                {
-                  id: SecurityPageName.configurationsIntegrations,
-                  link: securityLink(SecurityPageName.configurationsIntegrations),
-                },
-                {
-                  id: SecurityPageName.configurationsBasicRules,
-                  link: securityLink(SecurityPageName.configurationsBasicRules),
-                },
-                {
-                  id: SecurityPageName.configurationsAiSettings,
-                  link: securityLink(SecurityPageName.configurationsAiSettings),
-                },
-              ],
-            },
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
+          id: SecurityPageName.configurations,
+          link: securityLink(SecurityPageName.configurations),
+          icon: 'controlsHorizontal',
           children: [
             {
-              link: 'discover',
+              id: SecurityPageName.configurationsIntegrations,
+              link: securityLink(SecurityPageName.configurationsIntegrations),
             },
             {
-              id: SecurityPageName.aiValue,
-              link: securityLink(SecurityPageName.aiValue),
-              iconV2: 'reporter',
+              id: SecurityPageName.configurationsBasicRules,
+              link: securityLink(SecurityPageName.configurationsBasicRules),
             },
+            ...(chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    id: SecurityPageName.configurationsAiSettings,
+                    link: securityLink(SecurityPageName.configurationsAiSettings),
+                  },
+                ]
+              : []),
           ],
         },
       ],
     },
-  ],
-  callout: [
     {
-      type: 'navGroup',
-      id: 'calloutGroup',
-      defaultIsCollapsed: false,
-      isCollapsible: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
-          renderItem: renderAiSocCallout,
+          link: 'discover' as AppDeepLinkId,
+        },
+        ...(chatExperience === AIChatExperience.Agent
+          ? [
+              {
+                // TODO: update icon to 'robot' once it's available in EUI
+                icon: LazyIconAgentBuilder,
+                link: 'agent_builder' as AppDeepLinkId,
+              },
+            ]
+          : []),
+        ...(workflowsUiEnabled
+          ? [
+              {
+                link: 'workflows' as AppDeepLinkId,
+              },
+            ]
+          : []),
+        {
+          id: SecurityPageName.aiValue,
+          link: securityLink(SecurityPageName.aiValue),
+          icon: 'reporter',
         },
       ],
     },
   ],
   footer: [
     {
-      id: 'security_solution_ai_nav_footer',
-      type: 'navGroup',
+      id: SecurityPageName.landing,
+      link: securityLink(SecurityPageName.landing),
+      icon: 'launch',
+    },
+    {
+      link: 'dev_tools',
+      title: i18nStrings.devTools,
+      icon: 'editorCodeBlock',
+    },
+    {
+      title: i18nStrings.ingestAndManageData.title,
+      icon: 'database',
+      breadcrumbStatus: 'hidden',
+      renderAs: 'panelOpener',
       children: [
         {
-          id: SecurityPageName.landing,
-          link: securityLink(SecurityPageName.landing),
-          icon: 'launch',
-          iconV2: 'launch',
+          title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
+          children: [
+            // TODO: same as Configurations/Integrations on the main nav list
+            // sets to active when on integrations page
+            // {
+            //   id: `external-integrations`,
+            //   link: securityLink(SecurityPageName.configurationsIntegrations),
+            // },
+            { link: 'management:ingest_pipelines' },
+            { link: 'management:pipelines' },
+            { link: 'management:content_connectors' },
+          ],
         },
         {
-          link: 'dev_tools',
-          title: i18nStrings.devTools,
-          icon: 'editorCodeBlock',
-          iconV2: 'editorCodeBlock',
+          title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
+          children: [
+            { link: 'management:index_management' },
+            { link: 'management:transform' },
+            { link: 'management:data_quality' },
+          ],
         },
-        ...v2EaseFooterItems,
-        createStackManagementNavigationTree(),
+      ],
+    },
+    {
+      title: i18nStrings.stackManagementV2.serverlessTitle,
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      renderAs: 'panelOpener',
+      children: [
+        {
+          title: i18nStrings.stackManagementV2.access.title,
+          children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+        },
+        {
+          title: i18nStrings.stackManagementV2.organization.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              cloudLink: 'billingAndSub',
+            },
+            {
+              cloudLink: 'userAndRoles',
+            },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.alertsAndInsights.title,
+          children: [
+            { link: 'management:triggersActions' },
+            { link: 'management:triggersActionsConnectors' },
+          ],
+        },
+        {
+          title: i18nStrings.ml.title,
+          children: [
+            {
+              link: 'management:overview',
+            },
+            {
+              link: 'management:trained_models',
+            },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagement.ai.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            { link: 'management:genAiSettings' },
+            { link: 'management:securityAiAssistantManagement' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.data.title,
+          children: [
+            { link: 'management:cross_cluster_replication' },
+            { link: 'management:remote_clusters' },
+            { link: 'management:migrate_data' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagement.content.title,
+          children: [
+            { link: 'management:dataViews' },
+            { link: 'management:spaces' },
+            { link: 'management:objects' },
+            { link: 'management:filesManagement' },
+            { link: 'management:reporting' },
+            { link: 'management:tags' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagement.other.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:settings',
+            },
+          ],
+        },
       ],
     },
   ],

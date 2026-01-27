@@ -41,6 +41,18 @@ export const ConfigureRiskEngineSavedObjectRequestBody = z.object({
     })
     .optional(),
   exclude_alert_tags: z.array(z.string()).optional(),
+  enable_reset_to_zero: z.boolean().optional(),
+  filters: z
+    .array(
+      z.object({
+        entity_types: z.array(z.enum(['host', 'user', 'service'])),
+        /**
+         * KQL filter string
+         */
+        filter: z.string(),
+      })
+    )
+    .optional(),
 });
 export type ConfigureRiskEngineSavedObjectRequestBodyInput = z.input<
   typeof ConfigureRiskEngineSavedObjectRequestBody

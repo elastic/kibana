@@ -19,7 +19,8 @@ import { mockData } from './mock';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+
+import { PageScope } from '../../../../data_view_manager/constants';
 
 describe('IP Overview Component', () => {
   describe('rendering', () => {
@@ -41,7 +42,7 @@ describe('IP Overview Component', () => {
       }>,
       indexPatterns: [],
       jobNameById: {},
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       isFlyoutOpen: false,
     };
 
@@ -67,6 +68,15 @@ describe('IP Overview Component', () => {
       );
 
       expect(container.children[0]).toMatchSnapshot();
+    });
+
+    test('it renders host id', () => {
+      const { container } = render(
+        <TestProviders>
+          <IpOverview {...mockProps} data={mockData.complete} />
+        </TestProviders>
+      );
+      expect(container).toHaveTextContent('b19a781f683541a7a25ee345133aa399');
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
@@ -60,8 +60,8 @@ describe('get_export_rule_exceptions', () => {
       const { exportData } = await getRuleExceptionsForExport(
         [
           {
-            id: ENDPOINT_LIST_ID,
-            list_id: ENDPOINT_LIST_ID,
+            id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+            list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
             namespace_type: 'agnostic',
             type: 'endpoint',
           },

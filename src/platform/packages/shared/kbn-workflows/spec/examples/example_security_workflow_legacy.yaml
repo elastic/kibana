@@ -1,0 +1,93 @@
+name: Threat Intelligence Enrichment & Incident Response (Legacy Format)
+description: Same workflow using legacy array-based inputs format (backward compatibility)
+enabled: true
+triggers:
+  - type: manual
+# Legacy format - this will be automatically converted to JSON Schema format
+inputs:
+  - name: analystEmail
+    type: string
+    description: Security analyst email address
+    required: true
+  - name: analystName
+    type: string
+    description: Security analyst full name
+    required: true
+  - name: team
+    type: choice
+    options:
+      - SOC
+      - Threat Intelligence
+      - Incident Response
+      - Forensics
+    description: Security team
+    required: true
+  - name: threatType
+    type: choice
+    options:
+      - ip
+      - domain
+      - hash
+      - url
+      - email
+    description: Type of threat indicator
+    required: true
+  - name: threatValue
+    type: string
+    description: The threat indicator value
+    required: true
+  - name: severity
+    type: choice
+    options:
+      - low
+      - medium
+      - high
+      - critical
+    description: Threat severity level
+    required: true
+    default: medium
+  - name: incidentId
+    type: string
+    description: Incident ID
+    required: true
+  - name: source
+    type: choice
+    options:
+      - SIEM Alert
+      - Threat Intelligence Feed
+      - Manual Report
+      - EDR Detection
+    description: Source of the incident
+    required: true
+  - name: affectedSystems
+    type: array
+    description: List of affected system hostnames or IPs
+    required: true
+    minItems: 1
+    maxItems: 50
+  - name: priority
+    type: choice
+    options:
+      - P1
+      - P2
+      - P3
+      - P4
+    description: Incident priority (P1=Critical, P4=Low)
+    required: false
+    default: P2
+steps:
+  - name: enrich-threat-indicator
+    type: console
+    with:
+      message: "Enriching threat indicator: {{ inputs.threatValue }} (Type: {{ inputs.threatType }}, Severity: {{ inputs.severity }})"
+  
+  - name: create-incident-ticket
+    type: console
+    with:
+      message: "Creating incident ticket {{ inputs.incidentId }} for analyst {{ inputs.analystName }} ({{ inputs.analystEmail }})"
+  
+  - name: execute-response-actions
+    type: console
+    with:
+      message: "Executing response actions for priority {{ inputs.priority }} incident"
+

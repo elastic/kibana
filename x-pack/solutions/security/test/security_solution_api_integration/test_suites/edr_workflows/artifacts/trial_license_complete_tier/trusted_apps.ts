@@ -11,11 +11,13 @@ import expect from '@kbn/expect';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type TestAgent from 'supertest/lib/agent';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
@@ -26,9 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  // Failing: See https://github.com/elastic/kibana/issues/235451
-  // Failing: See https://github.com/elastic/kibana/issues/235456
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Trusted Applications', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Trusted Applications', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let t1AnalystSupertest: TestAgent;
     let endpointPolicyManagerSupertest: TestAgent;
@@ -304,6 +304,20 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
 
+          it(`should error on [${trustedAppApiCall.method}] if process descendants is used in basic mode`, async () => {
+            const body = trustedAppApiCall.getBody();
+            body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(
+                anErrorMessageWith(/Process descendants feature is only allowed on advanced mode/)
+              );
+          });
+
           describe('when in advanced form mode', () => {
             const getAdvancedModeBody = () => {
               const body = trustedAppApiCall.getBody();
@@ -390,7 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
                 .expect(200);
             });
 
-            it('should not error if signer is set for a windows os entry item', async () => {
+            it('should NOT error if signer is set for a windows os entry item', async () => {
               const body = getAdvancedModeBody();
 
               body.os_types = ['windows'];
@@ -402,11 +416,22 @@ export default function ({ getService }: FtrProviderContext) {
                 .expect(200);
             });
 
-            it('should not error if signer is set for a mac os entry item', async () => {
+            it('should NOT error if signer is set for a mac os entry item', async () => {
               const body = getAdvancedModeBody();
 
               body.os_types = ['macos'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+              await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200);
+            });
+
+            it(`should NOT error on [${trustedAppApiCall.method}] if process descendants is used`, async () => {
+              const body = getAdvancedModeBody();
+
+              body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -451,11 +476,18 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      // no such role in serverless
-      describe('@skipInServerless and user has authorization to read trusted apps', function () {
+      describe('and user has authorization to read trusted apps', function () {
         let hunterSupertest: TestAgent;
+
         before(async () => {
-          hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+          hunterSupertest = await utils.createSuperTestWithCustomRole({
+            name: 'custom_hunter_role',
+            privileges: getHunter(),
+          });
+        });
+
+        after(async () => {
+          await utils.cleanUpCustomRoles();
         });
 
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {

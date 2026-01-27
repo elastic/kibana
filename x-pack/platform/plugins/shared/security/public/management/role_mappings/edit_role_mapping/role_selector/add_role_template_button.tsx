@@ -20,6 +20,7 @@ export const AddRoleTemplateButton = (props: Props) => {
   if (!props.canUseStoredScripts && !props.canUseInlineScripts) {
     return (
       <EuiCallOut
+        announceOnMount
         iconType="warning"
         color="danger"
         title={

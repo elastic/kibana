@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { Subject } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -14,9 +15,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { logOverallStatusChanges } from './log_overall_status';
-
-const delay = async (millis: number = 10) =>
-  await new Promise((resolve) => setTimeout(resolve, millis));
 
 describe('logOverallStatusChanges', () => {
   let overall$: Subject<ServiceStatus>;
@@ -46,7 +44,7 @@ describe('logOverallStatusChanges', () => {
 
     overall$.next({ level: ServiceStatusLevels.unavailable, summary: 'Initializing . . .' });
 
-    await delay();
+    await timer(10);
 
     expect(l.get).not.toBeCalled();
     expect(l.info).not.toBeCalled();
@@ -66,7 +64,7 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting for ES indices' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
     expect(l.get).not.toBeCalled();
     expect(l.error).toBeCalledTimes(1);
@@ -94,7 +92,7 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting (attempt #4)' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
     expect(l.get).not.toBeCalled();
     expect(l.error).toBeCalledTimes(1);
@@ -123,7 +121,7 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting (attempt #4)' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
     expect(l.get).not.toBeCalled();
     expect(l.error).toBeCalledTimes(1);

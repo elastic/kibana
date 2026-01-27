@@ -9,6 +9,7 @@ const createBackfillClientMock = () => {
     return {
       bulkQueue: jest.fn(),
       deleteBackfillForRules: jest.fn(),
+      deleteBackfillsByInitiatorId: jest.fn(),
       findOverlappingBackfills: jest.fn(),
     };
   });

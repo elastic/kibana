@@ -1757,63 +1757,24 @@ paths:
         content:
           application/json:
             schema:
-              example:
-                description: This is a sample detection type exception item.
-                entries:
-                  - field: actingProcess.file.signer
-                    operator: excluded
-                    type: exists
-                  - field: host.name
-                    operator: included
-                    type: match_any
-                    value:
-                      - saturn
-                      - jupiter
-                item_id: simple_list_item
-                list_id: simple_list
-                name: Sample Exception List Item
-                namespace_type: single
-                os_types:
-                  - linux
-                tags:
-                  - malware
-                type: simple
-              type: object
-              properties:
-                comments:
-                  $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
-                  default: []
-                description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
-                entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
-                expire_time:
-                  $ref: '#/components/schemas/ExceptionListItemExpireTime'
-                item_id:
-                  $ref: '#/components/schemas/ExceptionListItemHumanId'
-                list_id:
-                  $ref: '#/components/schemas/ExceptionListHumanId'
-                meta:
-                  $ref: '#/components/schemas/ExceptionListItemMeta'
-                name:
-                  $ref: '#/components/schemas/ExceptionListItemName'
-                namespace_type:
-                  $ref: '#/components/schemas/ExceptionNamespaceType'
-                  default: single
-                os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
-                tags:
-                  $ref: '#/components/schemas/ExceptionListItemTags'
-                  default: []
-                type:
-                  $ref: '#/components/schemas/ExceptionListItemType'
-              required:
-                - list_id
-                - type
-                - name
-                - description
-                - entries
+              oneOf:
+                - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/CreateExceptionListItemEndpointList'
+                - $ref: >-
+                    #/components/schemas/CreateExceptionListItemTrustedAppsWindows
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsLinux'
+                - $ref: >-
+                    #/components/schemas/CreateExceptionListItemTrustedDevicesWindows
+                - $ref: >-
+                    #/components/schemas/CreateExceptionListItemTrustedDevicesMac
+                - $ref: >-
+                    #/components/schemas/CreateExceptionListItemTrustedDevicesWindowsMac
+                - $ref: '#/components/schemas/CreateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/CreateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistMac'
         description: Exception list item's properties
         required: true
       responses:
@@ -2088,64 +2049,25 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              comments: []
-              description: Updated description
-              entries:
-                - field: host.name
-                  operator: included
-                  type: match
-                  value: rock01
-              item_id: simple_list_item
-              name: Updated name
-              namespace_type: single
-              tags: []
-              type: simple
             schema:
-              type: object
-              properties:
-                _version:
-                  description: >-
-                    The version id, normally returned by the API when the item
-                    was retrieved. Use it ensure updates are done against the
-                    latest version.
-                  type: string
-                comments:
-                  $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
-                  default: []
-                description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
-                entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
-                expire_time:
-                  $ref: '#/components/schemas/ExceptionListItemExpireTime'
-                id:
-                  $ref: '#/components/schemas/ExceptionListItemId'
-                  description: Either `id` or `item_id` must be specified
-                item_id:
-                  $ref: '#/components/schemas/ExceptionListItemHumanId'
-                  description: Either `id` or `item_id` must be specified
-                list_id:
-                  $ref: '#/components/schemas/ExceptionListHumanId'
-                meta:
-                  $ref: '#/components/schemas/ExceptionListItemMeta'
-                name:
-                  $ref: '#/components/schemas/ExceptionListItemName'
-                namespace_type:
-                  $ref: '#/components/schemas/ExceptionNamespaceType'
-                  default: single
-                os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
-                tags:
-                  $ref: '#/components/schemas/ExceptionListItemTags'
-                type:
-                  $ref: '#/components/schemas/ExceptionListItemType'
-              required:
-                - type
-                - name
-                - description
-                - entries
+              oneOf:
+                - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/UpdateExceptionListItemEndpointList'
+                - $ref: >-
+                    #/components/schemas/UpdateExceptionListItemTrustedAppsWindows
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsLinux'
+                - $ref: >-
+                    #/components/schemas/UpdateExceptionListItemTrustedDevicesWindows
+                - $ref: >-
+                    #/components/schemas/UpdateExceptionListItemTrustedDevicesMac
+                - $ref: >-
+                    #/components/schemas/UpdateExceptionListItemTrustedDevicesWindowsMac
+                - $ref: '#/components/schemas/UpdateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/UpdateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistMac'
         description: Exception list item's properties
         required: true
       responses:
@@ -2743,6 +2665,226 @@ paths:
         - Security Exceptions API
 components:
   schemas:
+    BlocklistHashOrPathEntry:
+      type: object
+      properties:
+        field:
+          description: File hash or path field
+          enum:
+            - file.hash.md5
+            - file.hash.sha1
+            - file.hash.sha256
+            - file.path
+            - file.path.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be match_any for blocklists
+          enum:
+            - match_any
+          type: string
+        value:
+          description: Array of hash values or file paths
+          items:
+            type: string
+          minItems: 1
+          type: array
+      required:
+        - field
+        - type
+        - value
+        - operator
+    BlocklistLinuxProperties:
+      description: Blocklist list item properties (Linux, code signature not supported).
+      type: object
+      properties:
+        entries:
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+          items:
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_blocklists
+          example: endpoint_blocklists
+          type: string
+        os_types:
+          description: Linux-only
+          items:
+            enum:
+              - linux
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    BlocklistMacProperties:
+      description: Blocklist list item properties (macOS, code signature not supported).
+      type: object
+      properties:
+        entries:
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+          items:
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_blocklists
+          example: endpoint_blocklists
+          type: string
+        os_types:
+          description: macOS-only
+          items:
+            enum:
+              - macos
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    BlocklistWindowsCodeSignatureEntry:
+      type: object
+      properties:
+        entries:
+          description: Nested subject_name entries
+          items:
+            type: object
+            properties:
+              field:
+                description: Certificate subject name
+                enum:
+                  - subject_name
+                type: string
+              operator:
+                description: Must be the value "included"
+                enum:
+                  - included
+                type: string
+              type:
+                description: Match type for subject name
+                enum:
+                  - match
+                  - match_any
+                type: string
+              value:
+                oneOf:
+                  - description: Single subject name (used with match)
+                    type: string
+                  - description: Array of subject names (used with match_any)
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+            required:
+              - field
+              - type
+              - value
+              - operator
+          minItems: 1
+          type: array
+        field:
+          description: Windows code signature field
+          enum:
+            - file.Ext.code_signature
+          type: string
+        type:
+          description: Must be nested for Windows code signature
+          enum:
+            - nested
+          type: string
+      required:
+        - field
+        - type
+        - entries
+    BlocklistWindowsProperties:
+      description: Blocklist list item properties (Windows, supports code signature).
+      type: object
+      properties:
+        entries:
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+            * Code signature entry: only 1 allowed
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/BlocklistWindowsCodeSignatureEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_blocklists
+          example: endpoint_blocklists
+          type: string
+        os_types:
+          description: Windows-only
+          items:
+            enum:
+              - windows
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    CreateExceptionListItemBase:
+      type: object
+      properties:
+        comments:
+          $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
+          default: []
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        expire_time:
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+          default: single
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+      required:
+        - type
+        - name
+        - description
+    CreateExceptionListItemBlocklistLinux:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistLinuxProperties'
+    CreateExceptionListItemBlocklistMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistMacProperties'
+    CreateExceptionListItemBlocklistWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistWindowsProperties'
     CreateExceptionListItemComment:
       type: object
       properties:
@@ -2754,6 +2896,81 @@ components:
       items:
         $ref: '#/components/schemas/CreateExceptionListItemComment'
       type: array
+    CreateExceptionListItemEndpointList:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/EndpointListProperties'
+    CreateExceptionListItemEventFilters:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/EventFiltersProperties'
+    CreateExceptionListItemGeneric:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - example:
+            description: This is a sample detection type exception item.
+            entries:
+              - field: actingProcess.file.signer
+                operator: excluded
+                type: exists
+              - field: host.name
+                operator: included
+                type: match_any
+                value:
+                  - saturn
+                  - jupiter
+            item_id: simple_list_item
+            list_id: simple_list
+            name: Sample Exception List Item
+            namespace_type: single
+            os_types:
+              - linux
+            tags:
+              - malware
+            type: simple
+          type: object
+          properties:
+            entries:
+              $ref: '#/components/schemas/ExceptionListItemEntryArray'
+            list_id:
+              $ref: '#/components/schemas/ExceptionListHumanId'
+            os_types:
+              $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+              default: []
+            tags:
+              $ref: '#/components/schemas/ExceptionListItemTags'
+              default: []
+          required:
+            - list_id
+            - entries
+    CreateExceptionListItemHostIsolation:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/HostIsolationProperties'
+    CreateExceptionListItemTrustedAppsLinux:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsLinuxProperties'
+    CreateExceptionListItemTrustedAppsMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsMacProperties'
+    CreateExceptionListItemTrustedAppsWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsWindowsProperties'
+    CreateExceptionListItemTrustedDevicesMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesMacProperties'
+    CreateExceptionListItemTrustedDevicesWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsProperties'
+    CreateExceptionListItemTrustedDevicesWindowsMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsMacProperties'
     CreateRuleExceptionListItemComment:
       type: object
       properties:
@@ -2800,6 +3017,74 @@ components:
         - name
         - description
         - entries
+    EndpointArtifactTags:
+      default: []
+      description: >
+        Tags for categorization. Special tags for scope control:
+
+        * `"policy:all"` - Global artifact (applies to all Elastic Defend
+        policies)
+
+        * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic
+        Defend policy only, where `<policy_id>` is the Elastic Defend
+        integration policy ID)
+      items:
+        type: string
+      type: array
+    EndpointListProperties:
+      description: Elastic Endpoint exception list item properties.
+      type: object
+      properties:
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+          description: >
+            Exception entries for endpoint security exceptions (used to prevent
+            detection rule alerts).
+
+
+            **Fully flexible:** Supports any field name for maximum
+            compatibility with detection rules. No field restrictions are
+            enforced.
+        list_id:
+          enum:
+            - endpoint_list
+          example: endpoint_list
+          type: string
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    EventFiltersProperties:
+      description: Event filters list item properties.
+      type: object
+      properties:
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+          description: >
+            Exception entries for the event filter.
+
+
+            **Flexible field support:** Any event field name is allowed (e.g.,
+            `process.name`, `file.path`, `event.action`, `dns.question.name`,
+            etc.)
+
+
+            **Minimum requirement:** At least 1 entry required
+        list_id:
+          enum:
+            - endpoint_event_filters
+          example: endpoint_event_filters
+          type: string
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
     ExceptionList:
       type: object
       properties:
@@ -2869,7 +3154,30 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: The exception list's human readable string identifier, `endpoint_list`.
+      description: >
+        The exception list's human-readable string identifier.
+
+
+        For endpoint artifacts, use one of the following values:
+
+
+        * `endpoint_list`: [Elastic Endpoint exception
+        list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+
+        * `endpoint_trusted_apps`: [Trusted applications
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+
+        * `endpoint_trusted_devices`: [Trusted devices
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+
+        * `endpoint_event_filters`: [Event filters
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+
+        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+
+        * `endpoint_blocklists`: [Blocklists
+        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: simple_list
       format: nonempty
       minLength: 1
@@ -3248,6 +3556,11 @@ components:
         - `single`: Only available in the Kibana space in which it is created.
 
         - `agnostic`: Available in all Kibana spaces.
+
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`.
+        Space awareness for endpoint artifacts is enforced based on Elastic
+        Defend policy assignments.
       enum:
         - agnostic
         - single
@@ -3257,6 +3570,63 @@ components:
     FindExceptionListsFilter:
       example: exception-list.attributes.name:%Detection%20List
       type: string
+    HostIsolationProperties:
+      description: Host isolation exceptions list item properties.
+      type: object
+      properties:
+        entries:
+          description: Exactly one entry allowed for host isolation exceptions
+          items:
+            type: object
+            properties:
+              field:
+                description: Must be destination.ip
+                enum:
+                  - destination.ip
+                type: string
+              operator:
+                description: Must be the value "included"
+                enum:
+                  - included
+                type: string
+              type:
+                description: Must be match
+                enum:
+                  - match
+                type: string
+              value:
+                description: >-
+                  Valid IPv4 address or CIDR notation (e.g., "192.168.1.1" or
+                  "10.0.0.0/8")
+                type: string
+            required:
+              - field
+              - type
+              - value
+              - operator
+          maxItems: 1
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_host_isolation_exceptions
+          example: endpoint_host_isolation_exceptions
+          type: string
+        os_types:
+          description: Must include all three operating systems (windows, linux, macos)
+          items:
+            enum:
+              - windows
+              - linux
+              - macos
+            type: string
+          maxItems: 3
+          minItems: 3
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
     ListId:
       description: Value list's identifier.
       example: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -3330,6 +3700,556 @@ components:
       required:
         - status_code
         - message
+    TrustedAppHashEntry:
+      type: object
+      properties:
+        field:
+          description: Process hash field
+          enum:
+            - process.hash.md5
+            - process.hash.sha1
+            - process.hash.sha256
+          type: string
+        operator:
+          enum:
+            - included
+          type: string
+        type:
+          description: Hash entries only support match type
+          enum:
+            - match
+          type: string
+        value:
+          description: Hash value (MD5, SHA1, or SHA256)
+          type: string
+      required:
+        - field
+        - type
+        - value
+        - operator
+    TrustedAppMacCodeSignatureEntry:
+      type: object
+      properties:
+        entries:
+          description: >-
+            Must include exactly 2 entries - one for subject_name and one for
+            trusted
+          items:
+            oneOf:
+              - type: object
+                properties:
+                  field:
+                    enum:
+                      - subject_name
+                    type: string
+                  operator:
+                    enum:
+                      - included
+                    type: string
+                  type:
+                    enum:
+                      - match
+                    type: string
+                  value:
+                    description: Certificate subject name
+                    type: string
+                required:
+                  - field
+                  - type
+                  - value
+                  - operator
+              - type: object
+                properties:
+                  field:
+                    enum:
+                      - trusted
+                    type: string
+                  operator:
+                    enum:
+                      - included
+                    type: string
+                  type:
+                    enum:
+                      - match
+                    type: string
+                  value:
+                    description: Must be the string 'true'
+                    enum:
+                      - 'true'
+                    type: string
+                required:
+                  - field
+                  - type
+                  - value
+                  - operator
+          maxItems: 2
+          minItems: 2
+          type: array
+        field:
+          description: macOS code signature field
+          enum:
+            - process.code_signature
+          type: string
+        type:
+          enum:
+            - nested
+          type: string
+      required:
+        - field
+        - type
+        - entries
+    TrustedAppPathEntry:
+      type: object
+      properties:
+        field:
+          description: Process executable path field
+          enum:
+            - process.executable.caseless
+          type: string
+        operator:
+          enum:
+            - included
+          type: string
+        type:
+          description: Path supports both match and wildcard types
+          enum:
+            - match
+            - wildcard
+          type: string
+        value:
+          description: Executable path
+          type: string
+      required:
+        - field
+        - type
+        - value
+        - operator
+    TrustedAppsLinuxProperties:
+      description: Trusted applications list item properties (Linux).
+      type: object
+      properties:
+        entries:
+          description: >-
+            Process hash or executable path entries (code signature not
+            supported on Linux)
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_apps
+          example: endpoint_trusted_apps
+          type: string
+        os_types:
+          description: Must be Linux only
+          items:
+            enum:
+              - linux
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    TrustedAppsMacProperties:
+      description: Trusted applications list item properties (macOS).
+      type: object
+      properties:
+        entries:
+          description: Process hash, executable path, or code signature entries
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppMacCodeSignatureEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_apps
+          example: endpoint_trusted_apps
+          type: string
+        os_types:
+          description: Must be macOS only
+          items:
+            enum:
+              - macos
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    TrustedAppsWindowsProperties:
+      description: Trusted applications list item properties (Windows).
+      type: object
+      properties:
+        entries:
+          description: Process hash, executable path, or code signature entries
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppWindowsCodeSignatureEntry'
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_apps
+          example: endpoint_trusted_apps
+          type: string
+        os_types:
+          description: Must be Windows only
+          items:
+            enum:
+              - windows
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    TrustedAppWindowsCodeSignatureEntry:
+      type: object
+      properties:
+        entries:
+          description: >-
+            Must include exactly 2 entries - one for subject_name and one for
+            trusted
+          items:
+            oneOf:
+              - type: object
+                properties:
+                  field:
+                    enum:
+                      - subject_name
+                    type: string
+                  operator:
+                    enum:
+                      - included
+                    type: string
+                  type:
+                    enum:
+                      - match
+                    type: string
+                  value:
+                    description: Certificate subject name
+                    type: string
+                required:
+                  - field
+                  - type
+                  - value
+                  - operator
+              - type: object
+                properties:
+                  field:
+                    enum:
+                      - trusted
+                    type: string
+                  operator:
+                    enum:
+                      - included
+                    type: string
+                  type:
+                    enum:
+                      - match
+                    type: string
+                  value:
+                    description: Must be the string 'true'
+                    enum:
+                      - 'true'
+                    type: string
+                required:
+                  - field
+                  - type
+                  - value
+                  - operator
+          maxItems: 2
+          minItems: 2
+          type: array
+        field:
+          description: Windows code signature field
+          enum:
+            - process.Ext.code_signature
+          type: string
+        type:
+          enum:
+            - nested
+          type: string
+      required:
+        - field
+        - type
+        - entries
+    TrustedDevicesMacProperties:
+      description: >-
+        Trusted devices list item properties (macOS-only, username not
+        supported).
+      type: object
+      properties:
+        entries:
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
+            are not allowed)
+          items:
+            type: object
+            properties:
+              field:
+                description: Device field to match against
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                type: string
+              operator:
+                description: Must be the value "included"
+                enum:
+                  - included
+                type: string
+              type:
+                description: Entry match type
+                enum:
+                  - match
+                  - wildcard
+                  - match_any
+                type: string
+              value:
+                oneOf:
+                  - description: Single value (used with match or wildcard)
+                    type: string
+                  - description: Array of values (used with match_any)
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+            required:
+              - field
+              - type
+              - value
+              - operator
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_devices
+          example: endpoint_trusted_devices
+          type: string
+        os_types:
+          description: macOS-only
+          items:
+            enum:
+              - macos
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    TrustedDevicesWindowsMacProperties:
+      description: >-
+        Trusted devices list item properties (Windows + macOS, username not
+        supported).
+      type: object
+      properties:
+        entries:
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
+            are not allowed, username not available when targeting both OS)
+          items:
+            type: object
+            properties:
+              field:
+                description: >-
+                  Device field to match against (username not available for
+                  multi-OS)
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                type: string
+              operator:
+                description: Must be the value "included"
+                enum:
+                  - included
+                type: string
+              type:
+                description: Entry match type
+                enum:
+                  - match
+                  - wildcard
+                  - match_any
+                type: string
+              value:
+                oneOf:
+                  - description: Single value (used with match or wildcard)
+                    type: string
+                  - description: Array of values (used with match_any)
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+            required:
+              - field
+              - type
+              - value
+              - operator
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_devices
+          example: endpoint_trusted_devices
+          type: string
+        os_types:
+          description: Must include both Windows and macOS (username field not allowed)
+          items:
+            enum:
+              - windows
+              - macos
+            type: string
+          maxItems: 2
+          minItems: 2
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    TrustedDevicesWindowsProperties:
+      description: >-
+        Trusted devices list item properties (Windows-only, allows username
+        field).
+      type: object
+      properties:
+        entries:
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
+            are not allowed)
+          items:
+            type: object
+            properties:
+              field:
+                description: Device field to match against (user.name is Windows-only)
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                  - user.name
+                type: string
+              operator:
+                description: Must be the value "included"
+                enum:
+                  - included
+                type: string
+              type:
+                description: Entry match type
+                enum:
+                  - match
+                  - wildcard
+                  - match_any
+                type: string
+              value:
+                oneOf:
+                  - description: Single value (used with match or wildcard)
+                    type: string
+                  - description: Array of values (used with match_any)
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+            required:
+              - field
+              - type
+              - value
+              - operator
+          minItems: 1
+          type: array
+        list_id:
+          enum:
+            - endpoint_trusted_devices
+          example: endpoint_trusted_devices
+          type: string
+        os_types:
+          description: Must be Windows-only to allow username field
+          items:
+            enum:
+              - windows
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+    UpdateExceptionListItemBase:
+      type: object
+      properties:
+        _version:
+          description: >-
+            The version ID, normally returned by the API when the item is
+            retrieved. Use it to ensure updates are made against the latest
+            version.
+          type: string
+        comments:
+          $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
+          default: []
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        expire_time:
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
+        id:
+          $ref: '#/components/schemas/ExceptionListItemId'
+          description: Either `id` or `item_id` must be specified
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+          description: Either `id` or `item_id` must be specified
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+          default: single
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+      required:
+        - type
+        - name
+        - description
+    UpdateExceptionListItemBlocklistLinux:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistLinuxProperties'
+    UpdateExceptionListItemBlocklistMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistMacProperties'
+    UpdateExceptionListItemBlocklistWindows:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistWindowsProperties'
     UpdateExceptionListItemComment:
       type: object
       properties:
@@ -3343,6 +4263,71 @@ components:
       items:
         $ref: '#/components/schemas/UpdateExceptionListItemComment'
       type: array
+    UpdateExceptionListItemEndpointList:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/EndpointListProperties'
+    UpdateExceptionListItemEventFilters:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/EventFiltersProperties'
+    UpdateExceptionListItemGeneric:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - example:
+            comments: []
+            description: Updated description
+            entries:
+              - field: host.name
+                operator: included
+                type: match
+                value: rock01
+            item_id: simple_list_item
+            name: Updated name
+            namespace_type: single
+            tags: []
+            type: simple
+          type: object
+          properties:
+            entries:
+              $ref: '#/components/schemas/ExceptionListItemEntryArray'
+            list_id:
+              $ref: '#/components/schemas/ExceptionListHumanId'
+            os_types:
+              $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+              default: []
+            tags:
+              $ref: '#/components/schemas/ExceptionListItemTags'
+          required:
+            - entries
+    UpdateExceptionListItemHostIsolation:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/HostIsolationProperties'
+    UpdateExceptionListItemTrustedAppsLinux:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsLinuxProperties'
+    UpdateExceptionListItemTrustedAppsMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsMacProperties'
+    UpdateExceptionListItemTrustedAppsWindows:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsWindowsProperties'
+    UpdateExceptionListItemTrustedDevicesMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesMacProperties'
+    UpdateExceptionListItemTrustedDevicesWindows:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsProperties'
+    UpdateExceptionListItemTrustedDevicesWindowsMac:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsMacProperties'
     UUID:
       description: A universally unique identifier
       format: uuid

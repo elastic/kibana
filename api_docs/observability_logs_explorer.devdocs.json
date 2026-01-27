@@ -28,6 +28,8 @@
         "label": "ObservabilityLogsExplorerConfig",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

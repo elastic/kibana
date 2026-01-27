@@ -18,7 +18,10 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { StoredRuleMigrationRule } from '../types';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
-import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
+import {
+  SiemMigrationsDataItemClient,
+  type CreateMigrationItemInput,
+} from '../../common/data/siem_migrations_data_item_client';
 import { dsl } from './dsl_queries';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 
@@ -693,6 +696,29 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
 
+      // calls to get vendor for the migration
+      jest.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
+        total: 1,
+        data: [
+          {
+            migration_id: 'migration1',
+            original_rule: {
+              id: 'rule1',
+              vendor: 'splunk',
+              title: 'Sample Rule 1',
+              description: 'Test description 1',
+              data: 'test data 1',
+              format: 'json',
+            },
+            elastic_dashboard: {
+              id: 'elastic_rule_1',
+              title: 'Elastic Rule 1',
+              data: 'elastic data 1',
+            },
+          },
+        ],
+      });
+
       const result = await ruleMigrationsDataRulesClient.getAllStats();
 
       expect(result).toEqual([
@@ -705,6 +731,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             [SiemMigrationStatus.COMPLETED]: 3,
             [SiemMigrationStatus.FAILED]: 2,
           },
+          vendor: 'splunk',
           created_at: '2025-08-04T00:00:00.000Z',
           last_updated_at: '2025-08-04T00:00:00.000Z',
         },
@@ -920,7 +947,28 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       test('should build filter query with searchTerm filter', () => {
         const result = getFilterQuery({ searchTerm: 'test' });
-        expect(result.bool.filter[1]).toEqual({ match: { 'elastic_rule.title': 'test' } });
+        expect(result).toEqual({
+          bool: {
+            filter: [
+              { term: { migration_id: 'migration1' } },
+              {
+                bool: {
+                  should: [
+                    { match: { 'elastic_rule.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_rule.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
       });
 
       test('should build filter query with multiple statuses', () => {
@@ -1079,28 +1127,32 @@ describe('RuleMigrationsDataRulesClient', () => {
         expect(result).toEqual({
           bool: {
             filter: [
-              { term: { migration_id: migrationId } },
+              { term: { migration_id: 'migration1' } },
               { terms: { _id: ['doc1', 'doc2'] } },
-              { bool: { must_not: { term: { status: SiemMigrationStatus.FAILED } } } },
-              { term: { translation_result: MigrationTranslationResult.FULL } },
+              { bool: { must_not: { term: { status: 'failed' } } } },
+              { term: { translation_result: 'full' } },
+              { bool: { must_not: { term: { translation_result: 'partial' } } } },
+              { bool: { must_not: { term: { translation_result: 'untranslatable' } } } },
               {
                 bool: {
-                  must_not: { term: { translation_result: MigrationTranslationResult.PARTIAL } },
+                  should: [
+                    { match: { 'elastic_rule.title': 'test' } },
+                    {
+                      bool: {
+                        must: [
+                          { term: { status: 'failed' } },
+                          { match: { 'original_rule.title': 'test' } },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
-              {
-                bool: {
-                  must_not: {
-                    term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE },
-                  },
-                },
-              },
-              { match: { 'elastic_rule.title': 'test' } },
               { exists: { field: 'elastic_rule.id' } },
               {
                 bool: {
                   must: [
-                    { term: { translation_result: MigrationTranslationResult.FULL } },
+                    { term: { translation_result: 'full' } },
                     { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
                   ],
                 },

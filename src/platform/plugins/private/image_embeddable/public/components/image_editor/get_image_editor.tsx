@@ -11,7 +11,7 @@ import React from 'react';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import type { ImageConfig } from '../../image_embeddable/types';
+import type { ImageConfig } from '../../types';
 import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';

@@ -20,12 +20,11 @@ import { ContentInsightsProvider } from '@kbn/content-management-content-insight
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import { UserProfilesKibanaProvider } from '@kbn/content-management-user-profiles';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
@@ -126,7 +125,10 @@ export interface TableListViewKibanaDependencies {
       };
     };
     overlays: {
-      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+      openSystemFlyout(
+        content: React.ReactElement,
+        options?: OverlaySystemFlyoutOpenOptions
+      ): OverlayRef;
     };
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
@@ -255,51 +257,49 @@ export const TableListViewKibanaProvider: FC<
   );
 
   return (
-    <RedirectAppLinksKibanaProvider coreStart={core}>
-      <MaybeQueryClientProvider>
-        <UserProfilesKibanaProvider core={core}>
-          <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-            <ContentInsightsProvider
-              contentInsightsClient={services.contentInsightsClient}
-              isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
+    <MaybeQueryClientProvider>
+      <UserProfilesKibanaProvider core={core}>
+        <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
+          <ContentInsightsProvider
+            contentInsightsClient={services.contentInsightsClient}
+            isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
+          >
+            <FavoritesContextProvider
+              favoritesClient={services.favorites}
+              notifyError={(title, text) => {
+                notifications.toasts.addDanger({
+                  title: toMountPoint(title, rendering),
+                  text,
+                });
+              }}
             >
-              <FavoritesContextProvider
-                favoritesClient={services.favorites}
+              <TableListViewProvider
                 notifyError={(title, text) => {
                   notifications.toasts.addDanger({
                     title: toMountPoint(title, rendering),
                     text,
                   });
                 }}
+                searchQueryParser={searchQueryParser}
+                DateFormatterComp={(props) => <FormattedRelative {...props} />}
+                currentAppId$={application.currentAppId$}
+                navigateToUrl={application.navigateToUrl}
+                isTaggingEnabled={() => Boolean(savedObjectsTagging)}
+                isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
+                getTagList={getTagList}
+                TagList={TagList}
+                itemHasTags={itemHasTags}
+                getTagIdsFromReferences={getTagIdsFromReferences}
+                getTagManagementUrl={() => http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
               >
-                <TableListViewProvider
-                  notifyError={(title, text) => {
-                    notifications.toasts.addDanger({
-                      title: toMountPoint(title, rendering),
-                      text,
-                    });
-                  }}
-                  searchQueryParser={searchQueryParser}
-                  DateFormatterComp={(props) => <FormattedRelative {...props} />}
-                  currentAppId$={application.currentAppId$}
-                  navigateToUrl={application.navigateToUrl}
-                  isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-                  isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
-                  getTagList={getTagList}
-                  TagList={TagList}
-                  itemHasTags={itemHasTags}
-                  getTagIdsFromReferences={getTagIdsFromReferences}
-                  getTagManagementUrl={() => http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
-                  isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
-                >
-                  {children}
-                </TableListViewProvider>
-              </FavoritesContextProvider>
-            </ContentInsightsProvider>
-          </ContentEditorKibanaProvider>
-        </UserProfilesKibanaProvider>
-      </MaybeQueryClientProvider>
-    </RedirectAppLinksKibanaProvider>
+                {children}
+              </TableListViewProvider>
+            </FavoritesContextProvider>
+          </ContentInsightsProvider>
+        </ContentEditorKibanaProvider>
+      </UserProfilesKibanaProvider>
+    </MaybeQueryClientProvider>
   );
 };
 

@@ -12,7 +12,7 @@ const TAG_NAME = 'testing';
 const TAG_DESCRIPTION = 'test description';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
   kbnArchives: ['x-pack/performance/kbn_archives/many_tags_and_visualizations'],
 })
   .step('Go to Tags Page', async ({ page, kbnUrl }) => {

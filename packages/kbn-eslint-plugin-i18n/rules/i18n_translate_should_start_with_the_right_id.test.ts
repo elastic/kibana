@@ -11,6 +11,7 @@ import { RuleTester } from 'eslint';
 import {
   I18nTranslateShouldStartWithTheRightId,
   RULE_WARNING_MESSAGE,
+  NO_IDENTIFIER_MESSAGE,
 } from './i18n_translate_should_start_with_the_right_id';
 
 const tsTester = [
@@ -150,6 +151,22 @@ function TestComponent() {
   const foo = i18n.translate('xpack.observability.testComponent.', { defaultMessage: '' });
 }`,
   },
+  {
+    name: 'When a file is not in a known package or the package has no i18n identifier, it should report an error',
+    filename: '/some/fake/path/that/does/not/exist/test_component.ts',
+    code: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('some.id', { defaultMessage: 'test' });
+}`,
+    errors: [
+      {
+        line: 5,
+        message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', 'Unknown package'),
+      },
+    ],
+  },
 ];
 
 const valid: RuleTester.ValidTestCase[] = [
@@ -162,6 +179,26 @@ const valid: RuleTester.ValidTestCase[] = [
     name: invalid[1].name,
     filename: invalid[1].filename,
     code: invalid[1].output as string,
+  },
+  {
+    name: 'When a ternary is passed to i18n.translate, and the root of the i18n identifier is correct, and the branches are valid strings starting with the correct prefix, it should not mark the code as incorrect',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.ts',
+    code: `import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const isCollapsed = true;
+  const foo = i18n.translate(
+    isCollapsed
+      ? 'xpack.observability.foo.collapsedNodeAriaLabel'
+      : 'xpack.observability.foo.expandedNodeAriaLabel',
+    {
+      defaultMessage: isCollapsed
+        ? 'Collapsed node with {childCount} children'
+        : 'Expanded node with {childCount} children',
+      values: { childCount: item.children.length },
+    }
+  );
+}`,
   },
 ];
 

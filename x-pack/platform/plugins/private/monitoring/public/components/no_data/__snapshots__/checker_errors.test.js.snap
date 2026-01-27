@@ -5,7 +5,7 @@ exports[`CheckerErrors should render nothing if errors is empty 1`] = `null`;
 exports[`CheckerErrors should render typical boom errors from api response 1`] = `
 Array [
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-m-danger-euiCallOut"

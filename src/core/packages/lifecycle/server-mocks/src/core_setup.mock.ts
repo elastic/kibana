@@ -93,6 +93,7 @@ export function createCoreSetupMock({
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
+    createRequestHandlerContext: jest.fn(),
   });
 
   return mock;

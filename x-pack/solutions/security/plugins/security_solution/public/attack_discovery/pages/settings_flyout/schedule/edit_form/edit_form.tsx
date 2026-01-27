@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -19,6 +20,7 @@ import { useSettingsView } from '../../hooks/use_settings_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
 import type { FormHook } from '../../../../../shared_imports';
 import {
   Field,
@@ -48,12 +50,19 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
   const { initialValue, onChange, onFormMutated } = props;
   const {
     triggersActionsUi: { actionTypeRegistry },
+    http,
   } = useKibana().services;
+  const { connectors, setCurrentConnector } = useConnectors({ http });
+
+  const schema = useMemo(
+    () => getSchema({ actionTypeRegistry, connectors }),
+    [actionTypeRegistry, connectors]
+  );
 
   const { form } = useForm<AttackDiscoveryScheduleSchema>({
     defaultValue: initialValue,
     options: { stripEmptyFields: false },
-    schema: getSchema({ actionTypeRegistry }),
+    schema,
   });
 
   const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
@@ -148,6 +157,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
                 throttle: null,
                 summary: false,
               },
+              onNewConnectorCreated: (connector: ActionConnector) => setCurrentConnector(connector),
             }}
           />
         </EuiFlexItem>

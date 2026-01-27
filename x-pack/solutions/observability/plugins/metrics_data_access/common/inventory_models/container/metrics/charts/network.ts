@@ -9,6 +9,7 @@ import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_LEGEND,
+  DEFAULT_LEGEND_STATS,
   NETWORK_LABEL,
   RX_LABEL,
   TX_LABEL,
@@ -38,7 +39,10 @@ const dockerContainerRxTx: LensConfigWithId = {
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_LEGEND,
+  legend: {
+    ...DEFAULT_XY_LEGEND.legend,
+    legendStats: DEFAULT_LEGEND_STATS,
+  },
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 

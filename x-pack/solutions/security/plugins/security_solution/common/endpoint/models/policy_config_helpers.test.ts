@@ -17,6 +17,7 @@ import {
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
   removeDeviceControl,
+  removeLinuxDnsEvents,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -109,6 +110,7 @@ describe('Policy Config helpers', () => {
       };
 
       const linuxEvents: typeof defaultPolicy.linux.events = {
+        dns: false,
         file: false,
         process: false,
         network: false,
@@ -444,6 +446,70 @@ describe('Policy Config helpers', () => {
       expect(result.mac).not.toBe(policy.mac);
     });
   });
+
+  describe('removeLinuxDnsEvents', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it('removes dns field from Linux events', () => {
+      const result = removeLinuxDnsEvents(policy);
+
+      expect(result.linux.events).not.toHaveProperty('dns');
+    });
+
+    it('preserves all other Linux event fields', () => {
+      const result = removeLinuxDnsEvents(policy);
+
+      expect(result.linux.events.file).toEqual(policy.linux.events.file);
+      expect(result.linux.events.process).toEqual(policy.linux.events.process);
+      expect(result.linux.events.network).toEqual(policy.linux.events.network);
+      expect(result.linux.events.session_data).toEqual(policy.linux.events.session_data);
+      expect(result.linux.events.tty_io).toEqual(policy.linux.events.tty_io);
+    });
+
+    it('preserves all other Linux fields', () => {
+      const result = removeLinuxDnsEvents(policy);
+
+      expect(result.linux.malware).toEqual(policy.linux.malware);
+      expect(result.linux.memory_protection).toEqual(policy.linux.memory_protection);
+      expect(result.linux.behavior_protection).toEqual(policy.linux.behavior_protection);
+      expect(result.linux.popup).toEqual(policy.linux.popup);
+      expect(result.linux.logging).toEqual(policy.linux.logging);
+      expect(result.linux.advanced).toEqual(policy.linux.advanced);
+    });
+
+    it('preserves Windows and Mac configurations unchanged', () => {
+      const result = removeLinuxDnsEvents(policy);
+
+      expect(result.windows).toEqual(policy.windows);
+      expect(result.mac).toEqual(policy.mac);
+    });
+
+    it('preserves global fields unchanged', () => {
+      const result = removeLinuxDnsEvents(policy);
+
+      expect(result.global_manifest_version).toEqual(policy.global_manifest_version);
+      expect(result.global_telemetry_enabled).toEqual(policy.global_telemetry_enabled);
+      expect(result.meta).toEqual(policy.meta);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+      const result = removeLinuxDnsEvents(policy);
+
+      // Verify original policy is unchanged
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.linux.events.dns).toBeDefined();
+
+      // Verify result is a different object
+      expect(result).not.toBe(policy);
+      expect(result.linux).not.toBe(policy.linux);
+      expect(result.linux.events).not.toBe(policy.linux.events);
+    });
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -506,8 +572,9 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
   },
   linux: {
     events: {
-      process: true,
+      dns: true,
       file: true,
+      process: true,
       network: true,
       session_data: false,
       tty_io: false,

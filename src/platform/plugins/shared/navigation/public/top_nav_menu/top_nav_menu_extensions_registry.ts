@@ -9,6 +9,9 @@
 
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export class TopNavMenuExtensionsRegistry {
   private menuItems: RegisteredTopNavMenuData[];
 
@@ -16,8 +19,9 @@ export class TopNavMenuExtensionsRegistry {
     this.menuItems = [];
   }
 
-  /** @public **/
-  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
+  /**
+   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+   */
   public register(menuItem: RegisteredTopNavMenuData) {
     this.menuItems.push(menuItem);
   }
@@ -33,4 +37,7 @@ export class TopNavMenuExtensionsRegistry {
   }
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;

@@ -31,4 +31,5 @@ export const awsSQS = createInventoryModel('awsSQS', {
     id: 'aws.sqs.queue.name',
     name: 'aws.sqs.queue.name',
   },
+  nodeFilter: () => [{ term: { 'event.module': 'aws' } }],
 });

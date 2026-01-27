@@ -8,22 +8,21 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { CollapseFunctions } from './constants';
-import type { SupportedMetric } from './lib/convert/supported_metrics';
 import type {
   CollapseFunction,
-  Column,
-  ColumnWithMeta,
-  Layer,
-  XYAnnotationsLayerConfig,
+  NavigateToLensLayer,
   XYLayerConfig,
-} from './types';
+  XYByValueAnnotationLayerConfig,
+} from '@kbn/lens-common';
+import { LENS_COLLAPSE_FUNCTIONS } from '@kbn/lens-common';
+import type { SupportedMetric } from './lib/convert/supported_metrics';
+import type { Column, ColumnWithMeta } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
-): layer is XYAnnotationsLayerConfig => layer.layerType === 'annotations';
+): layer is XYByValueAnnotationLayerConfig => layer.layerType === 'annotations';
 
-export const getIndexPatternIds = (layers: Layer[]) =>
+export const getIndexPatternIds = (layers: NavigateToLensLayer[]) =>
   layers.map(({ indexPatternId }) => indexPatternId);
 
 const isValidFieldType = (
@@ -52,7 +51,7 @@ export const isFieldValid = (
 };
 
 export const isCollapseFunction = (candidate: string | undefined): candidate is CollapseFunction =>
-  Boolean(candidate && CollapseFunctions.includes(candidate as CollapseFunction));
+  Boolean(candidate && LENS_COLLAPSE_FUNCTIONS.includes(candidate as CollapseFunction));
 
 const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {

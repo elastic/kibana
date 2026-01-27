@@ -80,9 +80,6 @@ export const ACTIONS_THROTTLE_UNIT_INPUT = '[data-test-subj="throttleUnitInput"]
 
 export const ACTIONS_SUMMARY_ALERT_BUTTON = '[data-test-subj="actionNotifyWhen-option-summary"]';
 
-export const ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON =
-  '[data-test-subj="actionNotifyWhen-option-for_each"]';
-
 export const ACTIONS_ALERTS_QUERY_FILTER_BUTTON = '[data-test-subj="alertsFilterQueryToggle"]';
 
 export const ACTIONS_ALERTS_QUERY_FILTER_INPUT = (actionIndex = 0) =>

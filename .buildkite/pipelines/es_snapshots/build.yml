@@ -9,4 +9,4 @@ steps:
       localSsds: 1
       localSsdInterface: nvme
       machineType: c2-standard-8
-      diskSizeGb: 100
+      diskSizeGb: 130

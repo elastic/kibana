@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export { buildNewAlert } from './build_new_alert';
-export { buildOngoingAlert } from './build_ongoing_alert';
-export { buildRecoveredAlert } from './build_recovered_alert';
-export { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
+export { AlertBuilder } from './alert_builder/alert_builder';
 export { formatRule } from './format_rule';
 export {
   getHitsWithCount,

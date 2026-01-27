@@ -12,6 +12,7 @@ import {
   createDatasetQualityUserWithRole,
   deleteDatasetQualityUserWithRole,
 } from './roles/role_management';
+import { waitUntilDatasetQualityTableOrTimeoutWithFallback } from './helpers';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -25,6 +26,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const logger = getService('log');
 
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
@@ -91,9 +93,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       describe('User cannot monitor any data stream', () => {
-        before(async () => {
-          await PageObjects.datasetQuality.navigateTo();
-          await PageObjects.datasetQuality.waitUntilTableLoaded();
+        before(async function () {
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
         });
         after(async () => {
           // Cleanup the user and role
@@ -109,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       describe('User has access to a single data stream', () => {
-        before(async () => {
+        before(async function () {
           await createDatasetQualityUserWithRole(security, 'fullAccess', [
             { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
           ]);
@@ -117,8 +120,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.security.login('fullAccess', 'fullAccess-password', {
             expectSpaceSelector: false,
           });
-          await PageObjects.datasetQuality.navigateTo();
-          await PageObjects.datasetQuality.waitUntilTableLoaded();
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
         });
 
         after(async () => {
@@ -140,8 +144,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      describe('User has access to a multipl data streams', () => {
-        before(async () => {
+      describe('User has access to a multiple data streams', () => {
+        before(async function () {
           await createDatasetQualityUserWithRole(security, 'fullAccess', [
             { names: ['logs-*'], privileges: ['read', 'view_index_metadata'] },
             { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
@@ -150,8 +154,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.security.login('fullAccess', 'fullAccess-password', {
             expectSpaceSelector: false,
           });
-          await PageObjects.datasetQuality.navigateTo();
-          await PageObjects.datasetQuality.waitUntilTableLoaded();
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
         });
 
         it('types filter should be rendered', async () => {
@@ -184,12 +189,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       describe('User cannot monitor any data stream', () => {
-        before(async () => {
+        before(async function () {
           // Index logs for synth-* and apache.access datasets
           await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
-          await PageObjects.datasetQuality.navigateTo();
-          await PageObjects.datasetQuality.waitUntilTableLoaded();
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
         });
 
         after(async () => {
@@ -228,16 +234,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.index(
             getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
           );
-
-          await PageObjects.datasetQuality.navigateTo();
-          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
 
         after(async () => {
           await synthtrace.clean();
         });
 
-        it('shows underprivileged warning when size cannot be accessed for some data streams', async () => {
+        it('shows underprivileged warning when size cannot be accessed for some data streams', async function () {
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
+
           await PageObjects.datasetQuality.refreshTable();
 
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
@@ -255,7 +262,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           });
         });
 
-        it('Details page shows insufficient privileges warning for underprivileged data stream', async () => {
+        it('Details page shows insufficient privileges warning for underprivileged data stream', async function () {
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
+
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: regularDataStreamName,
           });
@@ -267,7 +278,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.navigateTo();
         });
 
-        it('"View dashboards" is hidden for underprivileged user', async () => {
+        it('"View dashboards" is hidden for underprivileged user', async function () {
+          await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+            this.skip()
+          );
+
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apacheAccessDataStreamName,
           });

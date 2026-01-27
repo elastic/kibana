@@ -98,7 +98,7 @@ describe('group selector', () => {
           def groupValues = [];
           if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
             groupValues = doc[params['selectedGroup']];
-          }  
+          }
           int count = groupValues.size();
           if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
           else {
@@ -126,7 +126,7 @@ describe('group selector', () => {
           def groupValues = [];
           if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
             groupValues = doc[params['selectedGroup']];
-          }  
+          }
           int count = groupValues.size();
           if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
           else {

@@ -11,4 +11,4 @@ import { appendSearch } from './helpers';
 export const getKubernetesUrl = (search?: string) => `${KUBERNETES_PATH}${appendSearch(search)}`;
 
 export const getKubernetesDetailsUrl = (detailName: string, search?: string) =>
-  `/${detailName}${appendSearch(search)}`;
+  `/${encodeURIComponent(detailName)}${appendSearch(search)}`;

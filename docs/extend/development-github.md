@@ -55,7 +55,7 @@ In order to assist with developer tooling we ask that all Elastic engineers use 
     git commit -m 'commit using @elastic.co' --allow-empty
     ```
 
-5. Push the new commit to your PR and the status should now be green
+5. Push the new commit to your PR and the status should now be green
 
 
 ### Rebasing and fixing merge conflicts [_rebasing_and_fixing_merge_conflicts]

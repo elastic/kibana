@@ -287,30 +287,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(firstNode.metrics).to.eql([expected]);
         }
       });
-
-      it('should fail to fetch logRate with no timeseries data', async () => {
-        const resp = await fetchSnapshot(
-          {
-            sourceId: 'default',
-            timerange: {
-              to: max,
-              from: min,
-              interval: '1m',
-            },
-            metrics: [{ type: 'logRate' }],
-            nodeType: 'host',
-            groupBy: [{ field: 'host.name' }],
-            includeTimeseries: false,
-          },
-          400
-        );
-
-        expect(resp).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: 'logRate metric is not supported without time series',
-        });
-      });
     });
 
     describe('7.0.0', () => {

@@ -20,9 +20,9 @@ export const KIBANA_SECURITY_SOLUTION = 'security' as const;
  */
 export const KIBANA_SEARCH_SOLUTION = 'search' as const;
 /**
- * Constant for the Kibana Chat (workchat) solution.
+ * Constant for the Kibana Workplace AI solution.
  */
-export const KIBANA_CHAT_SOLUTION = 'chat' as const;
+export const KIBANA_WORKPLACE_AI_SOLUTION = 'workplaceai' as const;
 
 /**
  * A list of all Kibana solutions.
@@ -31,7 +31,7 @@ export const KIBANA_SOLUTIONS = [
   KIBANA_OBSERVABILITY_SOLUTION,
   KIBANA_SECURITY_SOLUTION,
   KIBANA_SEARCH_SOLUTION,
-  KIBANA_CHAT_SOLUTION,
+  KIBANA_WORKPLACE_AI_SOLUTION,
 ] as const; // BOOKMARK - List of Kibana solutions
 
 /**
@@ -74,7 +74,7 @@ export const KIBANA_PRODUCT_TIERS = {
     KIBANA_SECURITY_SEARCH_AI_LAKE_TIER,
   ] as const,
   [KIBANA_SEARCH_SOLUTION]: [] as const,
-  [KIBANA_CHAT_SOLUTION]: [] as const,
+  [KIBANA_WORKPLACE_AI_SOLUTION]: [] as const,
 } as const;
 
 /**

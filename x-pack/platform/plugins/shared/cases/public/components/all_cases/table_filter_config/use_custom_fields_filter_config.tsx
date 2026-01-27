@@ -91,7 +91,6 @@ export const useCustomFieldsFilterConfig = ({
   onFilterOptionsChange: FilterChangeHandler;
 }) => {
   const customFieldsFilterConfig: FilterConfig[] = [];
-
   if (isSelectorView) {
     return { customFieldsFilterConfig: [] };
   }

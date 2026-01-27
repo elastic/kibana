@@ -48,6 +48,7 @@ import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
@@ -87,7 +88,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -98,8 +98,10 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
-import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
+import {
+  getMockMaintenanceWindow,
+  maintenanceWindowsServiceMock,
+} from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
@@ -247,6 +249,12 @@ describe('Task Runner', () => {
 
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
 
+    alertsClient.updatePersistedAlerts.mockResolvedValue({
+      failures: [],
+      updated: 0,
+      total: 1,
+    });
+
     ruleResultService.getLastRunResults.mockImplementation(() => ({
       errors: [],
       warnings: [],
@@ -344,6 +352,84 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
+  });
+
+  test('should update the persisted alerts', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [mockAAD],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    alertsClient.getAlertsToUpdateWithMaintenanceWindows.mockReturnValue([
+      mockAAD['kibana.alert.uuid'],
+    ]);
+    alertsClient.getAlertsToUpdateWithLastScheduledActions.mockReturnValue({
+      [mockAAD['kibana.alert.uuid']]: {
+        group: 'default',
+        date: new Date().toISOString(),
+      },
+    });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {
+        [mockAAD['kibana.alert.uuid']]: {
+          meta: {
+            uuid: mockAAD['kibana.alert.uuid'],
+            lastScheduledActions: {
+              group: 'default',
+              date: new Date().toISOString(),
+            },
+          },
+          state: {},
+        },
+      },
+      rawRecoveredAlerts: {},
+    });
+
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'slack',
+          frequency: {
+            notifyWhen: 'onThrottleInterval',
+            summary: true,
+            throttle: '1h',
+          },
+          params: {
+            foo: true,
+          },
+          uuid: '111-111',
+        },
+      ],
+    });
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+
+    expect(alertsClient.updatePersistedAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithMaintenanceWindows).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
   test('throws error when schedule.interval is not provided', async () => {
@@ -2809,6 +2895,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -2981,6 +3068,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -2999,6 +3087,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -3137,16 +3226,9 @@ describe('Task Runner', () => {
       triggeredActions: 0,
       generatedActions: 1,
       status: 'ok',
-      logAlert: 1,
+      logAlert: 0,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-      1,
-      generateAlertOpts({
-        action: EVENT_LOG_ACTIONS.activeInstance,
-        group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
-      })
-    );
+    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -3513,6 +3595,7 @@ describe('Task Runner', () => {
             rule_type_run_duration_ms: 0,
             total_run_duration_ms: 0,
             trigger_actions_duration_ms: 0,
+            update_alerts_duration_ms: 0,
           },
         });
       }
@@ -3549,6 +3632,7 @@ describe('Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'skip') {
@@ -3582,6 +3666,7 @@ describe('Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     }

@@ -68,6 +68,7 @@ rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule)
 describe('snoozeAlertRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
   });
 
   it('snoozes a rule', async () => {
@@ -350,5 +351,45 @@ describe('snoozeAlertRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
+
+      snoozeRuleRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
+
+      rulesClient.snooze.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient, // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          params: {
+            id: '1',
+          },
+          body: {
+            schedule,
+          },
+        },
+        ['noContent']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot snooze rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
   });
 });

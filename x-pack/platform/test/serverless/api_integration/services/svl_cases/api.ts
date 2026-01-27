@@ -116,6 +116,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         category: null,
         customFields: [],
         observables: [],
+        total_observables: 0,
       };
     },
 
@@ -203,6 +204,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         },
         settings: {
           syncAlerts: true,
+          extractObservables: false,
         },
         owner,
         assignees: [],

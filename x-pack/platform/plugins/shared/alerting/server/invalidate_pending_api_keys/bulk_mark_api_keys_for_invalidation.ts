@@ -36,7 +36,10 @@ export const bulkMarkApiKeysForInvalidation = async (
       logger.error(
         `Failed to bulk mark list of API keys [${apiKeys
           .map((key) => `"${key}"`)
-          .join(', ')}] for invalidation: ${e.message}`
+          .join(', ')}] for invalidation: ${e.message}`,
+        {
+          error: { stack_trace: e.stack },
+        }
       );
     }
   });

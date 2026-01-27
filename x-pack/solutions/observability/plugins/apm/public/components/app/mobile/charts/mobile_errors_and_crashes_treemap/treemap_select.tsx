@@ -93,6 +93,9 @@ export function TreemapSelect({
             onChange={onChange}
             itemLayoutAlign="top"
             hasDividers
+            aria-label={i18n.translate('xpack.apm.transactionOverview.treemap.select.ariaLabel', {
+              defaultMessage: 'Treemap',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

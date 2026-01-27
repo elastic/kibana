@@ -16,10 +16,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type {
-  ContentManagementServerSetup,
-  ContentStorage,
-} from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -27,27 +24,31 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import type { DashboardItem } from './content_management';
-import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
+import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
+import { scanDashboards } from './scan_dashboards';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -62,15 +63,15 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
-  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -84,18 +85,6 @@ export class DashboardPlugin
         },
       })
     );
-
-    const { contentClient } = plugins.contentManagement.register<ContentStorage<DashboardItem>>({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
-    });
-    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -136,10 +125,15 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerAPIRoutes({
+    registerRoutes(core.http);
+
+    void registerAccessControl({
       http: core.http,
-      contentManagement: plugins.contentManagement,
-      logger: this.logger,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
     });
 
     return {};
@@ -174,7 +168,29 @@ export class DashboardPlugin
     }
 
     return {
-      getContentClient: () => this.contentClient,
+      getDashboard: async (ctx: RequestHandlerContext, id: string) => {
+        const { core: coreCtx } = await ctx.resolve(['core']);
+        const soResponse =
+          await coreCtx.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+            DASHBOARD_SAVED_OBJECT_TYPE,
+            id
+          );
+        return {
+          id: soResponse.saved_object.id,
+          description: soResponse.saved_object.attributes.description,
+          tags: soResponse.saved_object.references
+            .filter(({ type }) => type === tagSavedObjectTypeName)
+            .map((ref) => ref.id),
+          title: soResponse.saved_object.attributes.title,
+        };
+      },
+      scanDashboards,
+      client: {
+        create,
+        read,
+        update,
+        delete: deleteDashboard,
+      },
     };
   }
 

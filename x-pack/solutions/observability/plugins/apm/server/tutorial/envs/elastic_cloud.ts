@@ -29,10 +29,14 @@ export function createElasticCloudInstructions({
   cloudSetup,
   apmIndices,
   isFleetPluginEnabled,
+  isManagedOtlpServiceFeatureEnabled,
+  managedOtlpServiceUrl,
 }: {
   cloudSetup?: CloudSetup;
   apmIndices: APMIndices;
   isFleetPluginEnabled: boolean;
+  isManagedOtlpServiceFeatureEnabled: boolean;
+  managedOtlpServiceUrl: string;
 }): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
@@ -42,7 +46,13 @@ export function createElasticCloudInstructions({
   }
 
   instructionSets.push(getOnPremApmServerInstructionSet({ apmIndices, isFleetPluginEnabled }));
-  instructionSets.push(getApmAgentInstructionSet(cloudSetup));
+  instructionSets.push(
+    getApmAgentInstructionSet({
+      cloudSetup,
+      isManagedOtlpServiceFeatureEnabled,
+      managedOtlpServiceUrl,
+    })
+  );
 
   return {
     instructionSets,
@@ -74,9 +84,19 @@ function getApmServerInstructionSet(cloudSetup?: CloudSetup): InstructionSetSche
   };
 }
 
-function getApmAgentInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchema {
+function getApmAgentInstructionSet({
+  cloudSetup,
+  isManagedOtlpServiceFeatureEnabled,
+  managedOtlpServiceUrl,
+}: {
+  cloudSetup?: CloudSetup;
+  isManagedOtlpServiceFeatureEnabled: boolean;
+  managedOtlpServiceUrl: string;
+}): InstructionSetSchema {
   const apmServerUrl = cloudSetup?.apm.url;
   const secretToken = cloudSetup?.apm.secretToken;
+  const isOpenTelemetryEnabled =
+    !isManagedOtlpServiceFeatureEnabled || !Boolean(managedOtlpServiceUrl);
 
   return {
     title: i18n.translate('xpack.apm.tutorial.elasticCloudInstructions.title', {
@@ -123,10 +143,14 @@ function getApmAgentInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchem
         id: INSTRUCTION_VARIANT.PHP,
         instructions: createPhpAgentInstructions(apmServerUrl, secretToken),
       },
-      {
-        id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
-        instructions: createOpenTelemetryAgentInstructions(apmServerUrl, secretToken),
-      },
+      ...(isOpenTelemetryEnabled
+        ? [
+            {
+              id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
+              instructions: createOpenTelemetryAgentInstructions(apmServerUrl, secretToken),
+            },
+          ]
+        : []),
     ],
   };
 }

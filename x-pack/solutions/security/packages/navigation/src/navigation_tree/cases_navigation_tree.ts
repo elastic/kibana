@@ -11,20 +11,14 @@ import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
 const LazyIconBriefcase = lazy(() =>
-  import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+  import('./custom_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
 );
 
-export const createCasesNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createCasesNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
-  renderAs: 'item',
   // TODO: update icon from EUI
-  iconV2: LazyIconBriefcase,
-  sideNavVersion,
+  icon: LazyIconBriefcase,
   children: [
     {
       id: SecurityPageName.caseCreate,

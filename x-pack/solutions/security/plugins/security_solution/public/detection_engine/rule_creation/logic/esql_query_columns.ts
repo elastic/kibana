@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  FetchQueryOptions,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-} from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { FetchQueryOptions, QueryClient, QueryFunction, QueryKey } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { KibanaServices } from '../../../common/lib/kibana';

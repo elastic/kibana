@@ -7,8 +7,6 @@
 
 export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
-export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
-
 export const DEFINITION_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
 
 export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
@@ -68,8 +66,6 @@ export const SAVE_WITH_ERRORS_MODAL = '[data-test-subj="save-with-errors-confirm
 export const SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
-
-export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
 
 export const QUERY_BAR_ADD_FILTER =
   '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="addFilter"]';
@@ -172,8 +168,6 @@ export const LOOK_BACK_TIME_TYPE =
 
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
-
-export const MACHINE_LEARNING_DROPDOWN_OPTION = '[data-test-subj="comboBoxOptionsList "] button';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
@@ -305,8 +299,6 @@ export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
-
-export const PREVIEW_SUBMIT_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
 export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticsearch-requests"]';
 

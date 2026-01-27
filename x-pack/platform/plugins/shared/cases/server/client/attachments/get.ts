@@ -11,18 +11,19 @@ import type {
   AlertAttachmentAttributes,
   Attachment,
   Attachments,
+  EventAttachmentAttributes,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
-import type { AlertResponse, AttachmentsFindResponse } from '../../../common/types/api';
+import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/types/api';
 import {
-  AlertResponseRt,
+  DocumentResponseRt,
   FindAttachmentsQueryParamsRt,
   AttachmentsFindResponseRt,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
-import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
@@ -39,11 +40,11 @@ import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
 import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 
-const normalizeAlertResponse = (
-  alerts: Array<SavedObject<AlertAttachmentAttributes>>
-): AlertResponse =>
-  alerts.reduce((acc: AlertResponse, alert) => {
-    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
+const normalizeDocumentResponse = (
+  documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
+): DocumentResponse =>
+  documents.reduce((acc: DocumentResponse, document) => {
+    const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
 
     if (ids.length !== indices.length) {
       return acc;
@@ -53,20 +54,20 @@ const normalizeAlertResponse = (
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
-        attached_at: alert.attributes.created_at,
+        attached_at: document.attributes.created_at,
       }))
     );
     return acc;
   }, []);
 
 /**
- * Retrieves all alerts attached to a specific case.
+ * Retrieves all documents attached to a specific case.
  */
-export const getAllAlertsAttachToCase = async (
-  { caseId, filter }: GetAllAlertsAttachToCase,
+export const getAllDocumentsAttachedToCase = async (
+  { caseId, filter, attachmentTypes }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<AlertResponse> => {
+): Promise<DocumentResponse> => {
   const {
     authorization,
     services: { attachmentService },
@@ -86,24 +87,25 @@ export const getAllAlertsAttachToCase = async (
     const filterArray = [authorizationFilter];
     if (filter) filterArray.push(filter);
 
-    const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
+    const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
+      attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
     });
 
     ensureSavedObjectsAreAuthorized(
-      alerts.map((alert) => ({
-        owner: alert.attributes.owner,
-        id: alert.id,
+      documents.map((document) => ({
+        owner: document.attributes.owner,
+        id: document.id,
       }))
     );
 
-    const res = normalizeAlertResponse(alerts);
+    const res = normalizeDocumentResponse(documents);
 
-    return decodeOrThrow(AlertResponseRt)(res);
+    return decodeOrThrow(DocumentResponseRt)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get alerts attached to case id: ${caseId}: ${error}`,
+      message: `Failed to get documents attached to case id: ${caseId}: ${error}`,
       error,
       logger,
     });

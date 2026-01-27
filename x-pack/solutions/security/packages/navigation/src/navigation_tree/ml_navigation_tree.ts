@@ -10,16 +10,11 @@ import { SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { i18nStrings } from '../i18n_strings';
 
-export const createMachineLearningNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createMachineLearningNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
-  iconV2: 'machineLearningApp',
+  icon: 'machineLearningApp',
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       breadcrumbStatus: 'hidden',
@@ -30,7 +25,26 @@ export const createMachineLearningNavigationTree = (
         },
         {
           link: 'ml:dataVisualizer',
-          title: i18nStrings.ml.dataVisualizer,
+        },
+        {
+          link: 'ml:dataDrift',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:dataDriftPage',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:fileUpload',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:indexDataVisualizer',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:indexDataVisualizerPage',
+          sideNavStatus: 'hidden',
         },
       ],
     },
@@ -71,12 +85,24 @@ export const createMachineLearningNavigationTree = (
           title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
         },
         {
+          link: 'ml:logRateAnalysisPage',
+          sideNavStatus: 'hidden',
+        },
+        {
           link: 'ml:logPatternAnalysis',
           title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
         },
         {
+          link: 'ml:logPatternAnalysisPage',
+          sideNavStatus: 'hidden',
+        },
+        {
           link: 'ml:changePointDetections',
           title: i18nStrings.ml.aiopsLabs.changePointDetection,
+        },
+        {
+          link: 'ml:changePointDetectionsPage',
+          sideNavStatus: 'hidden',
         },
       ],
     },

@@ -9,7 +9,7 @@
 
 import { escape, isFunction } from 'lodash';
 import type { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
-import { asPrettyString, getHighlightHtml } from '../utils';
+import { getHighlightHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
@@ -37,10 +37,6 @@ export const setup = (
   const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
-    if (value == null) {
-      return asPrettyString(value, options);
-    }
-
     if (!value || !isFunction(value.map)) {
       return convert.call(format, value, options);
     }

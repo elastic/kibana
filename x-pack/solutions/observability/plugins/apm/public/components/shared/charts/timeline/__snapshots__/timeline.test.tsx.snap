@@ -77,6 +77,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="timeToFirstByte-wrapper"
       >
         <div
           class="css-1ejn3a9-Container en0jakt1"
@@ -95,6 +96,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="domInteractive-wrapper"
       >
         <div
           class="css-1ejn3a9-Container en0jakt1"
@@ -113,6 +115,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="domComplete-wrapper"
       >
         <div
           class="css-1ejn3a9-Container en0jakt1"

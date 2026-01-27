@@ -9,23 +9,25 @@
 
 import type { EmbeddableTransforms } from '../common';
 
-const registry: { [key: string]: () => Promise<EmbeddableTransforms<any, any> | undefined> } = {};
+const registry: {
+  [key: string]: () => Promise<EmbeddableTransforms['transformOut']>;
+} = {};
 
-export function registerTransforms(
+export function registerLegacyURLTransform(
   type: string,
-  getTransformsCallback: () => Promise<EmbeddableTransforms<any, any> | undefined>
+  getTransformOut: () => Promise<EmbeddableTransforms['transformOut']>
 ) {
   if (registry[type]) {
-    throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
+    throw new Error(`Embeddable legacy URL transform for type "${type}" is already registered.`);
   }
 
-  registry[type] = getTransformsCallback;
+  registry[type] = getTransformOut;
 }
 
-export async function getTransforms(type: string) {
+export async function getLegacyURLTransform(type: string) {
   return await registry[type]?.();
 }
 
-export function hasTransforms(type: string) {
+export function hasLegacyURLTransform(type: string) {
   return Boolean(registry[type]);
 }

@@ -18,10 +18,9 @@ jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
       throw error;
     }
     return {
-      attributes: {
-        title: `Dashboard ${id}`,
-        description: 'Some descriptive text.',
-      },
+      id,
+      title: `Dashboard ${id}`,
+      description: 'Some descriptive text.',
     };
   },
 }));

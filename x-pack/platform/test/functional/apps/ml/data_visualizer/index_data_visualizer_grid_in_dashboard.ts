@@ -96,8 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
 
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardTitle);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.loadDashboardInEditMode(dashboardTitle);
 
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
         await PageObjects.header.waitUntilLoadingHasFinished();

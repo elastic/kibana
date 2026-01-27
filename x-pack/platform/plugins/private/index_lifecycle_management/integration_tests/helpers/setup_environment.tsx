@@ -21,13 +21,16 @@ import {
   applicationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
+  i18nServiceMock,
+  themeServiceMock,
+  analyticsServiceMock,
 } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initHttpRequests } from './http_requests';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
 import { init as initNotification } from '../../public/application/services/notification';
-import { KibanaContextProvider } from '../../public/shared_imports';
+import { KibanaContextProvider, KibanaRenderContextProvider } from '../../public/shared_imports';
 import { createBreadcrumbsMock } from '../../public/application/services/breadcrumbs.mock';
 
 const breadcrumbService = createBreadcrumbsMock();
@@ -43,16 +46,27 @@ const appContextMock = {
   history: scopedHistoryMock.create(),
 };
 
+const startServicesMock = {
+  i18n: i18nServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
+  analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+};
+
 export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, overrides: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
     initHttp(httpSetup);
     breadcrumbService.setup(() => '');
 
+    // Create a fresh copy of appContextMock to avoid mutation across tests
+    const services = merge({}, appContextMock, overrides);
+
     return (
-      <KibanaContextProvider services={merge(appContextMock, overrides)}>
-        <Comp {...props} />
-      </KibanaContextProvider>
+      <KibanaRenderContextProvider {...startServicesMock}>
+        <KibanaContextProvider services={services}>
+          <Comp {...props} />
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
     );
   };
 

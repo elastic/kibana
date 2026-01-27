@@ -226,6 +226,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
 };
 
 ElementMenu.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   elements: PropTypes.object,
   addElement: PropTypes.func.isRequired,
 };

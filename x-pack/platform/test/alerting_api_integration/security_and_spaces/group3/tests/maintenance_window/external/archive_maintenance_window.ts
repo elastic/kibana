@@ -19,7 +19,6 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
-      enabled: false,
       schedule: {
         custom: {
           duration: '1d',

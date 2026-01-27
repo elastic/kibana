@@ -17,8 +17,8 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
   if (!connector.config) {
     return undefined;
   }
-  if (connector.config?.contextWindowSize) {
-    return connector.config.contextWindowSize;
+  if (connector.config?.contextWindowLength) {
+    return connector.config.contextWindowLength;
   }
 
   const defaultModel = getConnectorDefaultModel(connector);

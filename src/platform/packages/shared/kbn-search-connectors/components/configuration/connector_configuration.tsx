@@ -147,6 +147,7 @@ export const ConnectorConfigurationComponent: FC<
         {!uncategorizedDisplayList.length && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               color="warning"
               title={i18n.translate(
                 'searchConnectors.configurationConnector.config.noConfigCallout.title',
@@ -235,6 +236,7 @@ export const ConnectorConfigurationComponent: FC<
         {!!error && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate('searchConnectors.configurationConnector.config.error.title', {
                 defaultMessage: 'Connector error',

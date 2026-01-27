@@ -12,11 +12,7 @@ import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';
 
-import {
-  getRequestEndLineNumber,
-  getRequestStartLineNumber,
-  SELECTED_REQUESTS_CLASSNAME,
-} from './utils';
+import { getRequestEndLineNumber, getRequestStartLineNumber } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 
@@ -27,14 +23,15 @@ export class MonacoEditorOutputActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    private highlightedLinesClassName: string
   ) {
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
       async () => {
         if (editor.hasTextFocus()) {
-          await this.highlightRequests();
+          await this.highlightRequests(this.highlightedLinesClassName);
         } else {
           this.clearEditorDecorations();
         }
@@ -96,7 +93,7 @@ export class MonacoEditorOutputActionsProvider {
     }
   }
 
-  private async highlightRequests(): Promise<void> {
+  private async highlightRequests(highlightedLinesClassName: string): Promise<void> {
     // get the requests in the selected range
     const parsedRequests = await this.getSelectedParsedOutput();
     // if any requests are selected, highlight the lines and update the position of actions buttons
@@ -117,7 +114,7 @@ export class MonacoEditorOutputActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            blockClassName: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: highlightedLinesClassName,
           },
         },
       ]);

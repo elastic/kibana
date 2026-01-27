@@ -26,6 +26,10 @@ import { Reference } from '../references';
  */
 export interface TypeMeta {
   /**
+   * A unique identifier for this type, reduces duplication.
+   */
+  id?: string;
+  /**
    * A human-friendly description of this type to be used in documentation.
    */
   description?: string;

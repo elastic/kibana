@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query';
+
 export interface GenericBuckets {
   key: string | string[];
   key_as_string?: string; // contains, for example, formatted dates
@@ -77,6 +79,11 @@ export type GetGroupStats<T> = (
   fieldBucket: RawBucket<T>
 ) => GroupStatsItem[];
 
+export type GetAdditionalActionButtons<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => JSX.Element[];
+
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
   fieldBucket: RawBucket<T>,
@@ -90,5 +97,11 @@ export type OnGroupToggle = (params: {
   groupNumber: number;
   groupingId: string;
 }) => void;
+
+export type GroupChildComponentRenderer<T> = (
+  groupingFilters: Filter[],
+  selectedGroup?: string,
+  fieldBucket?: RawBucket<T>
+) => React.ReactElement;
 
 export type { GroupingProps } from './grouping';

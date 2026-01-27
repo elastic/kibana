@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  // Failing: See https://github.com/elastic/kibana/issues/231246
+  // Failing: See https://github.com/elastic/kibana/issues/246083
   describe.skip('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
@@ -67,6 +67,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Select indices
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
 
+        // Select created openai connector
+        await pageObjects.searchPlayground.PlaygroundChatPage.selectConnector(openaiConnectorName);
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToExist();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToBeEnabled();
         await pageObjects.searchPlayground.PlaygroundChatPage.savePlayground(testPlaygroundName);
@@ -89,7 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           testPlaygroundName
         );
         const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: testPlaygroundName,
@@ -151,7 +152,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
       });
     });
-    describe('Update Saved Playground', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/242276
+    describe.skip('Update Saved Playground', function () {
       before(async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();

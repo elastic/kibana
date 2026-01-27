@@ -25,6 +25,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -131,7 +132,15 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const paginationControls =
       pageCount > 1 ? (
         <EuiFlexItem grow={false}>
-          <EuiPagination pageCount={pageCount} activePage={page} onPageClick={this.onChangePage} />
+          <EuiPagination
+            data-test-subj="indicesListPagination"
+            pageCount={pageCount}
+            activePage={page}
+            onPageClick={this.onChangePage}
+            aria-label={i18n.translate('indexPatternEditor.pagination.ariaLabel', {
+              defaultMessage: 'Indices list pagination',
+            })}
+          />
         </EuiFlexItem>
       ) : null;
 
@@ -145,7 +154,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             closePopover={this.closePerPageControl}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel items={items} />
+            <EuiContextMenuPanel items={items} data-test-subj="perPageIndicesListMenu" />
           </EuiPopover>
         </EuiFlexItem>
         {paginationControls}
@@ -204,7 +213,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
-        <EuiTableRow key={key}>
+        <EuiTableRow data-test-subj="indicesListTableRow" key={key}>
           <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {

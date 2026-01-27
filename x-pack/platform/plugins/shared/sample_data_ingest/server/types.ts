@@ -6,15 +6,22 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SampleDataManager } from './services/sample_data_manager';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
+export interface SampleDataSetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
 
-export interface SampleDataSetupDependencies {}
-
-export interface SampleDataStartDependencies {}
+export interface SampleDataStartDependencies {
+  taskManager: TaskManagerStartContract;
+}
 
 export interface InternalServices {
   logger: Logger;
   sampleDataManager: SampleDataManager;
+  taskManager: TaskManagerStartContract;
 }

@@ -31,6 +31,9 @@ function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   if (fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) {
     throw Boom.badRequest('Cannot specify both ssl.es_key and secrets.ssl.es_key');
   }
+  if (fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key) {
+    throw Boom.badRequest('Cannot specify both ssl.agent_key and secrets.ssl.agent_key');
+  }
 }
 
 async function checkFleetServerHostsWriteAPIsAllowed(
@@ -44,7 +47,6 @@ async function checkFleetServerHostsWriteAPIsAllowed(
 
   // Fleet Server hosts must have the default host URL in serverless.
   const serverlessDefaultFleetServerHost = await fleetServerHostService.get(
-    soClient,
     SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
   );
   if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
@@ -89,9 +91,8 @@ export const postFleetServerHost: RequestHandler<
 export const getFleetServerHostHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const item = await fleetServerHostService.get(soClient, request.params.itemId);
+    const item = await fleetServerHostService.get(request.params.itemId);
     const body = {
       item,
     };
@@ -113,10 +114,9 @@ export const deleteFleetServerHostHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const coreContext = await context.core;
-    const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    await fleetServerHostService.delete(soClient, esClient, request.params.itemId);
+    await fleetServerHostService.delete(esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
     };
@@ -178,8 +178,7 @@ export const putFleetServerHostHandler: RequestHandler<
 };
 
 export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const res = await fleetServerHostService.list(soClient);
+  const res = await fleetServerHostService.list();
   const body = {
     items: res.items,
     page: res.page,

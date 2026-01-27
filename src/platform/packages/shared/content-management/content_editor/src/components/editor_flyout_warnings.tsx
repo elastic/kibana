@@ -26,7 +26,7 @@ export const ContentEditorFlyoutWarningsCallOut = ({
 
   return warningMessages?.length ? (
     <>
-      <EuiCallOut title={i18nTexts.title} color="warning">
+      <EuiCallOut announceOnMount={false} title={i18nTexts.title} color="warning">
         <ul>
           {warningMessages.map((message) => (
             <li>{message}</li>

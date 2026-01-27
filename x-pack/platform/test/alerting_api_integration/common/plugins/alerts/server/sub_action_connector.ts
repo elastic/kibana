@@ -9,19 +9,20 @@
 import type { AxiosError } from 'axios';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-const TestConfigSchema = schema.object({ url: schema.string() });
-const TestSecretsSchema = schema.object({
-  username: schema.string(),
-  password: schema.string(),
-});
+const TestConfigSchema = z.object({ url: z.string() }).strict();
+const TestSecretsSchema = z
+  .object({
+    username: z.string(),
+    password: z.string(),
+  })
+  .strict();
 
-type TestConfig = TypeOf<typeof TestConfigSchema>;
-type TestSecrets = TypeOf<typeof TestSecretsSchema>;
+type TestConfig = z.infer<typeof TestConfigSchema>;
+type TestSecrets = z.infer<typeof TestSecretsSchema>;
 
 interface ErrorSchema {
   errorMessage: string;
@@ -39,7 +40,7 @@ export const getTestSubActionConnector = (
       this.registerSubAction({
         name: 'subActionWithParams',
         method: 'subActionWithParams',
-        schema: schema.object({ id: schema.string() }),
+        schema: z.object({ id: z.string() }).strict(),
       });
 
       this.registerSubAction({
@@ -51,13 +52,13 @@ export const getTestSubActionConnector = (
       this.registerSubAction({
         name: 'notExist',
         method: 'notExist',
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
       });
 
       this.registerSubAction({
         name: 'notAFunction',
         method: 'notAFunction',
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
       });
 
       this.registerSubAction({

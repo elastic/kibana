@@ -35,6 +35,7 @@ export function InvestigationGuide({ blob, onUpdate, refetch, rule }: Investigat
   ) : (
     <>
       <EuiEmptyPrompt
+        data-test-subj="alertInvestigationGuideEmptyPrompt"
         iconType="logoObservability"
         iconColor="default"
         title={

@@ -13,7 +13,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID } from '../../../common/jira-service-management/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/jira-service-management';
 import { JiraServiceManagementConnector } from './connector';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -73,7 +73,7 @@ describe('JiraServiceManagementConnector', () => {
     connector = new JiraServiceManagementConnector({
       configurationUtilities: mockedActionsConfig,
       config: { apiUrl: 'https://api.atlassian.com' },
-      connector: { id: '1', type: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       secrets: { apiKey: '123' },
       logger,
       services,

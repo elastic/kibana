@@ -17,13 +17,15 @@
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
       "include_named_queries_score": "__flag__",
+      "index": [],
       "max_concurrent_searches": "",
       "max_concurrent_shard_requests": [
         "5"
       ],
       "pre_filter_shard_size": "",
+      "project_routing": "",
       "rest_total_hits_as_int": "__flag__",
-      "routing": "",
+      "routing": [],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"

@@ -14,6 +14,8 @@
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -47,6 +51,8 @@
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +69,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,6 +88,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +107,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -113,6 +125,8 @@
           "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +143,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +161,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +179,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -177,6 +197,8 @@
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +212,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +231,8 @@
               "<void>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +250,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,6 +265,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -253,6 +283,8 @@
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,6 +298,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,6 +313,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,6 +328,8 @@
               "the type of result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -308,6 +346,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,6 +364,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -337,6 +379,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +405,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -377,6 +423,8 @@
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -390,6 +438,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,6 +464,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -428,6 +480,8 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -443,6 +497,8 @@
                   "GlobalSearchProviderFindOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -463,6 +519,8 @@
               "() => string[] | Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -485,6 +543,8 @@
           "GlobalSearchFindParams"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -502,6 +562,8 @@
           "string | { path: string; prependBasePath: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -521,6 +583,8 @@
           ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -546,6 +610,8 @@
         ") => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -576,6 +642,8 @@
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -596,6 +664,8 @@
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,6 +683,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -629,6 +701,8 @@
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -645,6 +719,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,6 +738,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,6 +757,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -695,6 +775,8 @@
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -719,6 +801,8 @@
               ">; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -735,6 +819,8 @@
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,6 +834,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -765,6 +853,8 @@
               "<void>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,6 +872,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +887,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -811,6 +905,8 @@
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,6 +920,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -837,6 +935,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -850,6 +950,8 @@
               "the type of result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -866,6 +968,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -882,6 +986,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,6 +1001,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -919,6 +1027,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -935,6 +1045,8 @@
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -948,6 +1060,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1094,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -994,6 +1110,8 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1009,6 +1127,8 @@
                   "GlobalSearchProviderFindOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1030,6 +1150,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1058,6 +1180,8 @@
               ") => string[] | Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1078,6 +1202,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 140,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1098,6 +1224,8 @@
           "\nglobalSearch route handler context.\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1128,6 +1256,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1142,6 +1272,8 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1163,6 +1295,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1183,6 +1317,8 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1207,6 +1343,8 @@
           "string | { path: string; prependBasePath: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1226,6 +1364,8 @@
           ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1261,6 +1401,8 @@
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1285,6 +1427,8 @@
         ") => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",

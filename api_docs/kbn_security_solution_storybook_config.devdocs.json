@@ -35,6 +35,8 @@
           "\"Security Solution Storybook\""
         ],
         "path": "x-pack/solutions/security/packages/storybook/config/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "\"https://github.com/elastic/kibana/tree/main/packages/security_solution\""
         ],
         "path": "x-pack/solutions/security/packages/storybook/config/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

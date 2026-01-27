@@ -6,6 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import {
+  convertObjectKeysToCamelCase,
+  convertObjectKeysToSnakeCase,
+} from '../../../../../../utils/object_case_converters';
 import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
@@ -21,6 +25,7 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { normalizeRuleSource } from '../converters/normalize_rule_source';
 
 export const RULE_DEFAULTS = {
   enabled: false,
@@ -56,23 +61,15 @@ export function applyRuleDefaults(
     ...typeSpecificParams,
     rule_id: rule.rule_id ?? uuidv4(),
     immutable,
-    rule_source: rule.rule_source ?? convertImmutableToRuleSource(immutable),
+    rule_source: convertObjectKeysToSnakeCase(
+      normalizeRuleSource({
+        immutable,
+        ruleSource: rule.rule_source ? convertObjectKeysToCamelCase(rule.rule_source) : undefined,
+      })
+    ),
     required_fields: addEcsToRequiredFields(rule.required_fields),
   };
 }
-
-const convertImmutableToRuleSource = (immutable: boolean): RuleSource => {
-  if (immutable) {
-    return {
-      type: 'external',
-      is_customized: false,
-    };
-  }
-
-  return {
-    type: 'internal',
-  };
-};
 
 export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
   switch (props.type) {

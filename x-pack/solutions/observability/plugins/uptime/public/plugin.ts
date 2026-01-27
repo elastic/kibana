@@ -56,6 +56,7 @@ import type {
   ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { PLUGIN } from '../common/constants/plugin';
 import type { UptimeConfig } from '../common/config';
 import {
@@ -87,6 +88,7 @@ export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;

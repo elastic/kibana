@@ -232,6 +232,12 @@ export const RelationsParameter = () => {
                 items={items}
                 itemId="id"
                 columns={columns}
+                tableCaption={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.caption',
+                  {
+                    defaultMessage: 'Defined relationships',
+                  }
+                )}
                 noItemsMessage={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.emptyTableMessage',
                   {

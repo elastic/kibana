@@ -31,6 +31,17 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
   const {
     euiTheme: { size },
   } = useEuiTheme();
+
+  const filteredPercentage = formatPercent(valueMetrics.filteredAlertsPerc);
+  const escalatedPercentage = formatPercent(valueMetrics.escalatedAlertsPerc);
+  const filteredCount = formatThousands(valueMetrics.filteredAlerts);
+  const escalatedCount = formatThousands(valueMetrics.totalAlerts - valueMetrics.filteredAlerts);
+
+  const isFilteredNone = filteredPercentage === '0.00%';
+  const isFilteredAll = filteredPercentage === '100.00%';
+  const isEscalatedAll = escalatedPercentage === '100.00%';
+  const isEscalatedNone = escalatedPercentage === '0.00%';
+
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"
@@ -76,6 +87,7 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
             css={css`
               line-height: 1.6em;
             `}
+            color="subdued"
           >
             <ul>
               <li
@@ -85,20 +97,32 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
               >
                 <strong>
                   {i18n.FILTERED_ALERTS_1({
-                    percentage: formatPercent(valueMetrics.filteredAlertsPerc),
-                    count: formatThousands(valueMetrics.filteredAlerts),
+                    percentage: filteredPercentage,
+                    count: filteredCount,
                   })}
                 </strong>
-                {i18n.FILTERED_ALERTS_2}
+                {isFilteredAll
+                  ? i18n.FILTERED_ALERTS_2_NONE
+                  : isFilteredNone
+                  ? i18n.FILTERED_ALERTS_2_ALL
+                  : i18n.FILTERED_ALERTS_2}
               </li>
               <li>
                 <strong>
-                  {i18n.ESCALATED_ALERTS_1({
-                    percentage: formatPercent(valueMetrics.escalatedAlertsPerc),
-                    count: formatThousands(valueMetrics.totalAlerts - valueMetrics.filteredAlerts),
+                  {(isEscalatedAll
+                    ? i18n.ESCALATED_ALERTS_1_ALL
+                    : isEscalatedNone
+                    ? i18n.ESCALATED_ALERTS_1_NONE
+                    : i18n.ESCALATED_ALERTS_1)({
+                    percentage: escalatedPercentage,
+                    count: escalatedCount,
                   })}
                 </strong>
-                {i18n.ESCALATED_ALERTS_2}
+                {isEscalatedAll
+                  ? i18n.ESCALATED_ALERTS_2_ALL
+                  : isEscalatedNone
+                  ? i18n.ESCALATED_ALERTS_2_NONE
+                  : i18n.ESCALATED_ALERTS_2}
               </li>
             </ul>
             <EuiHorizontalRule />

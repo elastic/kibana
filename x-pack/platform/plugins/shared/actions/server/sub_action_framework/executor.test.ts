@@ -255,8 +255,8 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
-      'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Request validation failed (Field \\"id\\": Required)"`
     );
   });
 

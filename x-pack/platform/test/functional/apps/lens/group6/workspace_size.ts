@@ -229,7 +229,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
 
       await assertWorkspaceDimensions('600px', '430px');
 
@@ -250,8 +253,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('gauge size (absolute pixels) - vertical', async () => {
-      await lens.openVisualOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_gaugeOrientation_verticalBullet');
+      await lens.closeFlyoutWithBackButton();
 
       // this height is below the requested 600px
       // that is because the window size isn't large enough to fit the requested dimensions
@@ -262,19 +266,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('gauge size (absolute pixels) - arc', async () => {
-      await lens.openVisualOptions();
       await lens.setGaugeShape('Minor arc');
       await assertWorkspaceDimensions('600px', '375px');
     });
 
     it('gauge size (absolute pixels) - major arc', async () => {
-      await lens.openVisualOptions();
       await lens.setGaugeShape('Major arc');
       await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('gauge size (absolute pixels) - circle', async () => {
-      await lens.openVisualOptions();
       await lens.setGaugeShape('Circle');
       await assertWorkspaceDimensions('600px', '430px');
     });

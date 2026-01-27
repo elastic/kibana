@@ -10,6 +10,8 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import { toastsServiceMock } from './toasts_service.mock';
+import { feedbackServiceMock } from './feedback_service.mock';
+import { toursServiceMock } from './tours_service.mock';
 import { createNotificationCoordinatorMock } from './notification_coordinator.mock';
 
 import { lazyObject } from '@kbn/lazy-object';
@@ -28,6 +30,8 @@ const createStartContractMock = () => {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
     showErrorDialog: jest.fn(),
+    feedback: feedbackServiceMock.createStartContract(),
+    tours: toursServiceMock.createStartContract(),
   });
   return startContract;
 };

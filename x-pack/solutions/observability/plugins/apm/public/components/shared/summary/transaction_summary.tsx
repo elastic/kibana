@@ -13,7 +13,7 @@ import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
-import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
+import { ColdStartBadge } from '../trace_waterfall/badges/cold_start_badge';
 import { buildUrl } from '../../../utils/build_url';
 
 interface Props {

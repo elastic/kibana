@@ -14,7 +14,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Intercept Trigger APIs', () => {
+  describe('Intercept Trigger APIs', function () {
     before(async () => {
       await kibanaServer.savedObjects.clean({
         types: [interceptTriggerRecordSavedObject.name],

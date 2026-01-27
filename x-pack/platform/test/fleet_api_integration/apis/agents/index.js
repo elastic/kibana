@@ -29,5 +29,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./migrate'));
     loadTestFile(require.resolve('./privilege_level_change'));
+    loadTestFile(require.resolve('./last_known_status'));
+    loadTestFile(require.resolve('./rollback'));
   });
 }

@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  FormulaPublicApi,
+  TermsIndexPatternColumn,
+  TypedLensByValueInput,
+} from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DataViewsCommon } from './config_builder';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { XYLegendValue } from '@kbn/chart-expressions-common';
+
+export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -116,6 +123,7 @@ export interface LensYBoundsConfig {
 export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
+  legendStats?: XYLegendValue[];
 }
 
 export interface LensBreakdownDateHistogramConfig {
@@ -142,6 +150,7 @@ export interface LensBreakdownTopValuesConfig {
   type: 'topValues';
   field: string;
   size?: number;
+  orderBy?: Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>;
 }
 
 export type LensBreakdownConfig =
@@ -242,10 +251,14 @@ export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHe
 
 export interface LensReferenceLineLayerBase {
   type: 'reference';
-  lineThickness?: number;
-  color?: string;
-  fill?: 'none' | 'above' | 'below';
-  value?: string;
+  yAxis: Array<
+    LensBaseLayer & {
+      lineThickness?: number;
+      color?: string;
+      fill?: 'none' | 'above' | 'below';
+      value?: string;
+    }
+  >;
 }
 
 export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseXYLayer;
@@ -279,7 +292,7 @@ export type LensSeriesLayer = Identity<
   LensBaseXYLayer & {
     type: 'series';
     breakdown?: LensBreakdownConfig;
-    xAxis: LensBreakdownConfig;
+    xAxis?: LensBreakdownConfig;
     seriesType: 'line' | 'bar' | 'area';
   }
 >;
@@ -292,6 +305,7 @@ export interface LensXYConfigBase {
   emphasizeFitting?: boolean;
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
+  valueLabels?: 'hide' | 'show';
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;

@@ -12,7 +12,7 @@
     "patterns": [
       "_query/queries"
     ],
-    "documentation": null,
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-list-queries",
     "availability": {
       "stack": true,
       "serverless": true

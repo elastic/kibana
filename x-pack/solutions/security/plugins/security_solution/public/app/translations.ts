@@ -65,13 +65,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_OVERVIEW = i18n.translate(
-  'xpack.securitySolution.navigation.entityAnalytics.overview',
-  {
-    defaultMessage: 'Entity Analytics overview',
-  }
-);
-
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -123,6 +116,10 @@ export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts',
   defaultMessage: 'Alerts',
 });
 
+export const ATTACKS = i18n.translate('xpack.securitySolution.navigation.attacks', {
+  defaultMessage: 'Attacks',
+});
+
 export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.navigation.alertSummary', {
   defaultMessage: 'Alert summary',
 });
@@ -154,9 +151,6 @@ export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.
   defaultMessage: 'Configurations',
 });
 
-export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
-  defaultMessage: 'Administration',
-});
 export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administration.endpoints', {
   defaultMessage: 'Endpoints',
 });
@@ -214,6 +208,10 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
     defaultMessage: 'Response actions history',
   }
 );
+
+export const SCRIPTS_LIBRARY = i18n.translate('xpack.securitySolution.navigation.scriptsLibrary', {
+  defaultMessage: 'Scripts library',
+});
 
 export const PROTECTION_UPDATES = i18n.translate(
   'xpack.securitySolution.navigation.protectionUpdates',

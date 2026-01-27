@@ -174,6 +174,29 @@ describe('prepareSearchParams', () => {
     expect(result).toEqual({ query: expect.any(String), gapRange });
   });
 
+  test('should include gapFillStatuses in the query when provided', () => {
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+      gapFillStatuses: ['unfilled', 'filled'],
+    };
+    const dryRunResult: DryRunResult = {
+      ruleErrors: [],
+    };
+    const result = prepareSearchParams({
+      filterOptions,
+      dryRunResult,
+      gapFillStatuses: filterOptions.gapFillStatuses,
+    });
+
+    expect(result).toEqual({
+      query: expect.any(String),
+      gapFillStatuses: ['unfilled', 'filled'],
+    });
+  });
+
   test('should return only query when neither selectedRuleIds nor gapRange are provided', () => {
     const dryRunResult: DryRunResult = { ruleErrors: [] };
 

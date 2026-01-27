@@ -39,6 +39,8 @@ const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
 
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
+const jobId = 'mock-job-id';
+
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
@@ -97,6 +99,7 @@ describe('CsvESQLGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       maxConcurrentShardRequests: 5,
+      maxRows: 500,
     };
 
     mockLogger = loggingSystemMock.createLogger();
@@ -114,7 +117,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -146,7 +150,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -174,7 +179,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(false);
@@ -204,7 +210,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(true);
@@ -297,7 +304,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(timeFromNowInMs);
@@ -373,7 +381,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(requestDuration);
@@ -421,7 +430,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -456,7 +466,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -482,7 +493,7 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: query.esql,
+            query: 'FROM kibana_sample_data_logs | LIMIT 10 | LIMIT 500',
           },
         },
         {
@@ -521,7 +532,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -555,7 +567,46 @@ describe('CsvESQLGenerator', () => {
               }),
             ]),
             locale: 'en',
-            query: query.esql,
+            query: `${query.esql} | LIMIT 500`,
+          },
+        },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+
+    it('adds maxRows limit to the query', async () => {
+      const query = {
+        esql: 'FROM custom-metrics',
+      };
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            filter: undefined,
+            locale: 'en',
+            query: 'FROM custom-metrics | LIMIT 500',
           },
         },
         {
@@ -589,7 +640,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -619,7 +671,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -640,6 +693,7 @@ describe('CsvESQLGenerator', () => {
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s', strategy: 'pit' },
         maxConcurrentShardRequests: 5,
+        maxRows: 500,
       };
       mockSearchResponse({
         columns: [{ name: 'message', type: 'string' }],
@@ -657,7 +711,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -686,7 +741,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
@@ -723,7 +779,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const { error_code: errorCode, warnings } = await generateCsv.generateData();
@@ -738,6 +795,11 @@ describe('CsvESQLGenerator', () => {
         Array [
           Array [
             [ResponseError: Response Error],
+            Object {
+              "tags": Array [
+                "mock-job-id",
+              ],
+            },
           ],
         ]
       `);

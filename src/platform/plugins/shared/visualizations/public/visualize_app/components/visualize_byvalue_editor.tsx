@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import type { VisualizeInput } from '../..';
 import {
   useChromeVisibility,
@@ -23,7 +24,6 @@ import {
 import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import type { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();

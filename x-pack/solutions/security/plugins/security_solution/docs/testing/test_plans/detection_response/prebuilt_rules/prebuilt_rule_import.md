@@ -274,6 +274,7 @@ When the user imports these rules
 Then the rules should be created
 And the created rules should be correctly identified as prebuilt or custom
 And the created rules' is_customized field should be correctly calculated
+And the created rules' customized_fields field should be correctly calculated
 And the created rules' parameters should match the import payload
 ```
 
@@ -292,6 +293,7 @@ When the user imports these rules
 Then the rules should be updated
 And the updated rules should be correctly identified as prebuilt or custom
 And the updated rules' is_customized field should be correctly calculated
+And the created rules' customized_fields field should be correctly calculated
 And the updated rules' parameters should match the import payload
 ```
 

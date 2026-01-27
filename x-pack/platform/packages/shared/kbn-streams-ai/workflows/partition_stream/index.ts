@@ -10,10 +10,13 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { DeepStrict } from '@kbn/zod-helpers';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
+
+const strictConditionSchema = DeepStrict(conditionSchema);
 
 export async function partitionStream({
   definition,
@@ -93,13 +96,20 @@ export async function partitionStream({
     response?.toolCalls
       ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
       .map(({ name, condition }) => {
+        // Sanitize name to be alphanumeric with dashes only, lowercase
+        const sanitizedName = name
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '');
         return {
-          name: `${definition.name}.${name}`,
+          name: `${definition.name}.${sanitizedName}`,
           condition: condition as Condition,
         };
       }) ?? [];
 
-  return proposedPartitions.filter(({ condition }) => {
-    return !isEqual(condition, { always: {} });
-  });
+  return proposedPartitions.filter(
+    ({ condition }) =>
+      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
+  );
 }

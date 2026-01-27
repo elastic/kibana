@@ -11,6 +11,7 @@
         "0"
       ],
       "wait_for_active_shards": [
+        "0",
         "all",
         "index-setting"
       ]

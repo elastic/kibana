@@ -11,6 +11,12 @@ import type { MachineLearningRuleCreateProps } from '@kbn/security-solution-plug
 import type { Anomaly } from '@kbn/security-solution-plugin/server/lib/machine_learning';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import moment from 'moment';
+import {
+  createRule,
+  deleteAllAlerts,
+  deleteAllAnomalies,
+  deleteAllRules,
+} from '@kbn/detections-response-ftr-services';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -22,12 +28,6 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
 } from '../../../../utils';
-import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllAnomalies,
-  deleteAllRules,
-} from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

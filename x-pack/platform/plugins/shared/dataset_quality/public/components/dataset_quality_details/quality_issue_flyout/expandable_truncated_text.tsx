@@ -39,7 +39,11 @@ export const ExpandableTruncatedText = ({
     >
       <EuiCode
         language={codeLanguage}
-        style={{ fontWeight: 'normal', color: euiTheme.colors.textParagraph }}
+        style={{
+          fontWeight: 'normal',
+          color: euiTheme.colors.textParagraph,
+          overflowWrap: 'break-word',
+        }}
       >
         {displayText}
       </EuiCode>

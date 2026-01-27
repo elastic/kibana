@@ -22,7 +22,7 @@ import type { LicenseStatus } from '../../../common/types/license_status';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 class MockTimeBuckets {
-  setBounds(_domain: any) {
+  setBounds(_domain: unknown) {
     return {};
   }
   getInterval() {
@@ -49,9 +49,7 @@ export const mockContextValue: AppDeps = {
   i18n: coreStart.i18n,
   theme: coreStart.theme,
   userProfile: coreStart.userProfile,
-  chartsTheme: {
-    useChartsBaseTheme: jest.fn(),
-  } as any,
+  chartsTheme: { useChartsBaseTheme: jest.fn() } as unknown as AppDeps['chartsTheme'],
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
   history,

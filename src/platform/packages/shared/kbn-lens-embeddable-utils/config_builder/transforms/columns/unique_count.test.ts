@@ -8,7 +8,7 @@
  */
 
 import { fromUniqueCountAPItoLensState, fromUniqueCountLensStateToAPI } from './unique_count';
-import type { CardinalityIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiUniqueCountMetricOperation } from '../../schema/metric_ops';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 

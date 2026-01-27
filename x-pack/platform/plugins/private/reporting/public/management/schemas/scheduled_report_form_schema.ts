@@ -9,6 +9,10 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import {
+  SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+  SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+} from '../../../common/translations';
 import type { ReportTypeData, ReportTypeId } from '../../types';
 import { getEmailsValidator } from '../validators/emails_validator';
 import * as i18n from '../translations';
@@ -59,5 +63,37 @@ export const getScheduledReportFormSchema = (
         validator: getEmailsValidator(validateEmailAddresses),
       },
     ],
+  },
+  emailCcRecipients: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_CC_RECIPIENTS_LABEL,
+    defaultValue: [],
+    validations: [
+      {
+        isBlocking: false,
+        validator: getEmailsValidator(validateEmailAddresses),
+      },
+    ],
+  },
+  emailBccRecipients: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_BCC_RECIPIENTS_LABEL,
+    defaultValue: [],
+    validations: [
+      {
+        isBlocking: false,
+        validator: getEmailsValidator(validateEmailAddresses),
+      },
+    ],
+  },
+  emailSubject: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL,
+    defaultValue: SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+  },
+  emailMessage: {
+    type: FIELD_TYPES.TEXTAREA,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL,
+    defaultValue: SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
   },
 });

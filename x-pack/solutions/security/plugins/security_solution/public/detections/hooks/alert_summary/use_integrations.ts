@@ -19,7 +19,7 @@ export const INTEGRATION_OPTION_TEST_ID = 'alert-summary-integration-option-';
 
 export interface UseIntegrationsParams {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }

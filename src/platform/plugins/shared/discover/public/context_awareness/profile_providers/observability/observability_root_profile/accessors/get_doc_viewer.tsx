@@ -31,7 +31,7 @@ export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocVi
             id: 'doc_view_obs_attributes_overview',
             title: tabTitle,
             order: 9,
-            component: (props) => {
+            render: (props) => {
               return <UnifiedDocViewerObservabilityAttributesOverview {...props} />;
             },
           });

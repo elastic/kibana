@@ -10,9 +10,14 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import type { ConfigSchema } from '../server/config';
 
-export class InspectComponentPluginPublic implements Plugin {
+interface PluginStartDeps {
+  developerToolbar?: DeveloperToolbarStart;
+}
+
+export class InspectComponentPluginPublic implements Plugin<void, PluginStartDeps> {
   private readonly isDev: boolean;
   private readonly isEnabled: boolean;
   private readonly logger: Logger;
@@ -30,17 +35,33 @@ export class InspectComponentPluginPublic implements Plugin {
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: PluginStartDeps) {
     if (this.isEnabled && this.isDev) {
       Promise.all([
         import('./components/inspect/inspect_button'),
         import('@kbn/react-kibana-mount'),
       ])
         .then(([{ InspectButton }, { toMountPoint }]) => {
-          core.chrome.navControls.registerRight({
-            order: 1002,
-            mount: toMountPoint(<InspectButton core={core} branch={this.branch} />, core.rendering),
-          });
+          if (plugins.developerToolbar) {
+            plugins.developerToolbar.registerItem({
+              id: 'Inspect Component',
+              children: (
+                <InspectButton
+                  core={core}
+                  branch={this.branch}
+                  buttonLocation={'developerToolbar'}
+                />
+              ),
+            });
+          } else {
+            core.chrome.navControls.registerRight({
+              order: 1002,
+              mount: toMountPoint(
+                <InspectButton core={core} branch={this.branch} buttonLocation={'header'} />,
+                core.rendering
+              ),
+            });
+          }
         })
         .catch(() => {
           this.logger.error('Failed to import plugin files.');

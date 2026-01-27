@@ -83,6 +83,12 @@ const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
     includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
   },
+  EuiPopover: {
+    repositionOnScroll: true,
+  },
+  EuiToolTip: {
+    repositionOnScroll: true,
+  },
 };
 
 /**

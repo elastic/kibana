@@ -9,7 +9,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import userEvent from '@testing-library/user-event';
 import { FilesUtilityBar } from './files_utility_bar';
 import { renderWithTestingProviders } from '../../common/mock';
 
@@ -26,7 +25,6 @@ useCreateAttachmentsMock.mockReturnValue({
 
 const defaultProps = {
   caseId: 'foobar',
-  onSearch: jest.fn(),
 };
 
 describe('FilesUtilityBar', () => {
@@ -37,14 +35,6 @@ describe('FilesUtilityBar', () => {
   it('renders correctly', async () => {
     renderWithTestingProviders(<FilesUtilityBar {...defaultProps} />);
 
-    expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
-  });
-
-  it('search text passed correctly to callback', async () => {
-    renderWithTestingProviders(<FilesUtilityBar {...defaultProps} />);
-
-    await userEvent.type(await screen.findByTestId('cases-files-search'), 'My search{enter}');
-    expect(defaultProps.onSearch).toBeCalledWith('My search');
   });
 });

@@ -7,6 +7,6 @@
 
 import { objectTypeToGetResultSchema } from '@kbn/content-management-utils';
 
-import { lensSavedObjectSchema } from './common';
+import { lensSavedObjectSchemaV1 } from './common';
 
-export const lensCMGetResultSchema = objectTypeToGetResultSchema(lensSavedObjectSchema);
+export const lensCMGetResultSchema = objectTypeToGetResultSchema(lensSavedObjectSchemaV1);

@@ -27,9 +27,6 @@ import {
   OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
   OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
-  STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
-  STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS,
 } from '../../../../constants/fleet_es_assets';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -342,14 +339,11 @@ describe('EPM template', () => {
       });
 
       expect(template.composed_of).toStrictEqual([
-        STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
-        STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
         OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
         ...composedOfTemplates,
-        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
       ]);
@@ -373,14 +367,11 @@ describe('EPM template', () => {
         isOtelInputType: true,
       });
       expect(template.composed_of).toStrictEqual([
-        STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
         OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
         ...composedOfTemplates,
-
-        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
       ]);
@@ -404,15 +395,11 @@ describe('EPM template', () => {
         isOtelInputType: true,
       });
       expect(template.composed_of).toStrictEqual([
-        STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
-        STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_SETTINGS,
         OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
         ...composedOfTemplates,
-
-        STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
       ]);
@@ -1962,6 +1949,26 @@ describe('EPM template', () => {
         const processedFields = processFields(fields);
         generateMappings(processedFields);
       }).toThrow();
+    });
+
+    it('tests processing flattened field with ignore_above 1024', () => {
+      const flattenedFieldYml = `
+- name: flattenedField
+  type: flattened
+  ignore_above: 1024
+`;
+      const flattenedFieldMapping = {
+        properties: {
+          flattenedField: {
+            type: 'flattened',
+            ignore_above: 1024,
+          },
+        },
+      };
+      const fields: Field[] = load(flattenedFieldYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(flattenedFieldMapping);
     });
   });
 

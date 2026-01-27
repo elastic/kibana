@@ -17,11 +17,7 @@ export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsS
     type: BUTTON_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       function serializeState() {
-        return {
-          rawState: {},
-          references: [],
-          // references: if this embeddable had any references - this is where we would extract them.
-        };
+        return {};
       }
 
       const api = finalizeApi({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Walker, type ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { Walker, type ESQLAstQueryExpression } from '@kbn/esql-language';
 import { isLikeOperatorNode, isStringLiteralNode } from '../typeguards';
 import type { ESQLLikeOperator, ESQLStringLiteral } from '../types';
 import type { QueryCorrection } from './types';

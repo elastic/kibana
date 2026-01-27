@@ -33,7 +33,7 @@
       "visualizations",
     ],
     "optionalPlugins": [
-      "onechat",
+      "agentBuilder",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",

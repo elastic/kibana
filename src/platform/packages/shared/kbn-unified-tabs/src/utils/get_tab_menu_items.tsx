@@ -39,6 +39,8 @@ export interface GetTabMenuItemsFnProps {
   onDuplicate: (item: TabItem) => void;
   onCloseOtherTabs: (item: TabItem) => void;
   onCloseTabsToTheRight: (item: TabItem) => void;
+  /** Optional function to provide additional menu items for tabs */
+  getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
 export const getTabMenuItemsFn = ({
@@ -47,6 +49,7 @@ export const getTabMenuItemsFn = ({
   onDuplicate,
   onCloseOtherTabs,
   onCloseTabsToTheRight,
+  getAdditionalTabMenuItems,
 }: GetTabMenuItemsFnProps): GetTabMenuItems => {
   return (item) => {
     const closeOtherTabsItem = hasSingleTab(tabsState)
@@ -107,6 +110,15 @@ export const getTabMenuItemsFn = ({
       if (closeTabsToTheRightItem) {
         items.push(closeTabsToTheRightItem);
       }
+    }
+
+    // Add any additional menu items provided by the consumer
+    const additionalItems = getAdditionalTabMenuItems?.(item);
+    if (additionalItems && additionalItems.length > 0) {
+      if (items.length > 0) {
+        items.push(DividerMenuItem);
+      }
+      items.push(...additionalItems);
     }
 
     return items;

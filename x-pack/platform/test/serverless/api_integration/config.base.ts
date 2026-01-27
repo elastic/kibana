@@ -7,6 +7,7 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
+import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
@@ -30,12 +31,24 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...(options.esServerArgs ?? []),
         ],
       },
+      esServerlessOptions: {
+        ...svlSharedConfig.get('esServerlessOptions'),
+        ...(options.esServerlessOptions || {}),
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs || []),
+          ...(options.esServerlessOptions?.uiam
+            ? [
+                '--mockIdpPlugin.uiam.enabled=true',
+                `--xpack.security.uiam.enabled=true`,
+                `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+                `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+              ]
+            : []),
         ],
       },
       testFiles: options.testFiles,

@@ -1,7 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/inference-cli",
-  "owner": "@elastic/appex-ai-infra",
+  "owner": [
+    "@elastic/appex-ai-infra",
+    "@elastic/search-inference-team"
+  ],
   "group": "platform",
   "visibility": "shared",
   "devOnly": true

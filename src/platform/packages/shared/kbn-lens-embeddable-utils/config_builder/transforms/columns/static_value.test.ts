@@ -8,7 +8,7 @@
  */
 
 import { fromStaticValueAPItoLensState, fromStaticValueLensStateToAPI } from './static_value';
-import type { StaticValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { StaticValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiStaticValueOperation } from '../../schema/metric_ops';
 import { LENS_STATIC_VALUE_DEFAULT } from '../../schema/constants';
 

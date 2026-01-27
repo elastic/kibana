@@ -20,5 +20,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./space_awareness_migration'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./outputs'));
+    loadTestFile(require.resolve('./package_policies'));
+    loadTestFile(require.resolve('./package_rollback'));
   });
 }

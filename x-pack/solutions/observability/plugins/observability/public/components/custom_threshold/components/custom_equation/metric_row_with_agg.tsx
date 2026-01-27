@@ -22,6 +22,7 @@ import type { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/publi
 import { get } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
 import { ClosablePopoverTitle } from '../closable_popover_title';
@@ -34,6 +35,7 @@ interface MetricRowWithAggProps extends MetricRowBaseProps {
   dataView: DataViewBase;
   filter?: string;
   fields: NormalizedFields;
+  kql: KqlPluginStart;
 }
 
 const DEFAULT_COUNT_FILTER_TITLE = i18n.translate(
@@ -53,6 +55,7 @@ export function MetricRowWithAgg({
   aggregationTypes,
   onChange,
   errors,
+  kql,
 }: MetricRowWithAggProps) {
   const handleDelete = useCallback(() => {
     onDelete(name);
@@ -212,6 +215,7 @@ export function MetricRowWithAgg({
                       onChange={handleFilterChange}
                       onSubmit={handleFilterChange}
                       value={filter}
+                      kql={kql}
                     />
                   </EuiFormRow>
                 ) : (

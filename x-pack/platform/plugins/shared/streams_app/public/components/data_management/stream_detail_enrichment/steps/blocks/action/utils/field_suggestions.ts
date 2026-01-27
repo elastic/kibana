@@ -22,5 +22,5 @@ export function createFieldSuggestions(
   detectedFields?: DetectedField[]
 ): FieldSuggestion[] {
   const orderedFields = getAllFieldsInOrder(previewRecords, detectedFields);
-  return orderedFields.map((fieldName) => ({ name: fieldName }));
+  return orderedFields.map((fieldName) => ({ name: fieldName, icon: true }));
 }

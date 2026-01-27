@@ -1,7 +1,12 @@
 post:
   summary: Create a saved object
   operationId: createSavedObject
-  description: Create a Kibana saved object with a randomly generated identifier.
+  description: >
+    Create a Kibana saved object with a randomly generated identifier.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    Consider using the import API for your use case.
   deprecated: true
   tags:
     - saved objects

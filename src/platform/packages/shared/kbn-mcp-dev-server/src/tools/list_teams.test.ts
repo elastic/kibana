@@ -9,6 +9,7 @@
 
 import { listKibanaTeamsTool } from './list_teams';
 import { getPackages } from '@kbn/repo-packages';
+import { parseToolResultJsonContent } from './test_utils';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: jest.fn() }));
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -37,7 +38,7 @@ describe('listKibanaTeamsTool', () => {
     ] as any);
 
     const result = await listKibanaTeamsTool.handler({});
-    const resultObject = JSON.parse(result.content[0].text as string);
+    const resultObject = parseToolResultJsonContent(result);
 
     expect(resultObject.teams.sort()).toEqual(['team-a', 'team-b', 'team-c'].sort());
   });

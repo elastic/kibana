@@ -96,6 +96,10 @@ export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint'
   defaultMessage: 'Endpoint',
 });
 
+export const MODEL = i18n.translate('xpack.searchInferenceEndpoints.model', {
+  defaultMessage: 'Model',
+});
+
 export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
   defaultMessage: 'Service',
 });
@@ -149,5 +153,12 @@ export const ENDPOINT_VIEW_ACTION_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.viewEndpooint',
   {
     defaultMessage: 'View endpoint',
+  }
+);
+
+export const INFERENCE_ENDPOINTS_TABLE_CAPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.table.caption',
+  {
+    defaultMessage: 'Inference endpoints table',
   }
 );

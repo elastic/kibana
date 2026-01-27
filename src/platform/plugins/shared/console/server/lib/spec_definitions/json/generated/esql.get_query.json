@@ -12,7 +12,7 @@
     "patterns": [
       "_query/queries/{id}"
     ],
-    "documentation": null,
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-get-query",
     "availability": {
       "stack": true,
       "serverless": true

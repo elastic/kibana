@@ -226,7 +226,12 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           created_by: 'mockUserOne',
           updated_at: '02/02/2024T00:00:001z',
           updated_by: 'mockUserThree',
-          rule_source: { type: 'external', is_customized: true },
+          rule_source: {
+            type: 'external',
+            is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
+          },
         };
 
         renderRuleDiffComponent({ oldRule, newRule });

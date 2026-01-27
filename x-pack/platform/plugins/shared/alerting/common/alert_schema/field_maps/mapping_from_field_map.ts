@@ -18,21 +18,21 @@ export function mappingFromFieldMap(
     properties: {},
   };
 
-  const fields = Object.keys(fieldMap).map((key: string) => {
-    const field = fieldMap[key];
-    return {
-      name: key,
-      ...field,
-    };
-  });
+  const fields = Object.keys(fieldMap)
+    .filter((key) => fieldMap[key].type !== 'unmapped')
+    .map((key: string) => {
+      const field = fieldMap[key];
+      return {
+        name: key,
+        ...field,
+      };
+    });
 
   fields.forEach((field) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { name, required, array, multi_fields, ...rest } = field;
     const mapped = multi_fields
       ? {
           ...rest,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           fields: multi_fields.reduce((acc, multi_field: MultiField) => {
             acc[multi_field.name] = {
               type: multi_field.type,

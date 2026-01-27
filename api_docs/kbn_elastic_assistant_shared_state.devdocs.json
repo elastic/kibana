@@ -10,6 +10,8 @@
         "label": "AssistantContextValueService",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               " | undefined>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -46,6 +50,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -62,6 +68,8 @@
         "label": "AugmentMessageCodeBlocksService",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +102,8 @@
               ">; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -110,6 +120,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -126,6 +138,8 @@
         "label": "CommentsService",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,6 +172,8 @@
               "[]>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -174,6 +190,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -190,6 +208,8 @@
         "label": "PromptContextService",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,6 +242,8 @@
               ">>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -238,6 +260,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -254,6 +278,8 @@
         "label": "SignalIndexService",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,6 +296,8 @@
               "<string | undefined>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -286,6 +314,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -305,6 +335,8 @@
         "label": "AugmentMessageCodeBlocks",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,6 +360,8 @@
               "UnmountCallback"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -339,6 +373,8 @@
                 "label": "args",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                "lineNumber": 14,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -359,6 +395,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                    "lineNumber": 15,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -370,6 +408,8 @@
                     "label": "showAnonymizedValues",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -389,6 +429,8 @@
         "label": "CommentServiceActions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,6 +445,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -427,6 +471,8 @@
               "<HTMLElement>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -438,6 +484,8 @@
                 "label": "args",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -458,6 +506,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 19,
                     "deprecated": false,
                     "trackAdoption": false
                   }

@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entity-store",
+  "owner": "@elastic/core-analysis",
+  "description": "Central place for Entities management and logs extraction",
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "entityStore",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "spaces",
+      "taskManager",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "security",
+      "encryptedSavedObjects"
+    ]
+  }
+}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery, mutate } from '@kbn/esql-ast';
+import { EsqlQuery, mutate } from '@kbn/esql-language';
 
 export function replaceESQLQueryIndexPattern(esql: string, replacements: Record<string, string>) {
   const inputQuery = EsqlQuery.fromSrc(esql);

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StorybookConfig } from '@kbn/storybook';
-import { defaultConfig } from '@kbn/storybook';
+import { resolve } from 'path';
 import type { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
-import { resolve } from 'path';
+import type { StorybookConfig } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 
 const webpackConfig: Configuration = {
   resolve: {

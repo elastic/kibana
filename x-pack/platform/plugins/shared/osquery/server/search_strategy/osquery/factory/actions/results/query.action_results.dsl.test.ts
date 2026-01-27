@@ -91,7 +91,8 @@ describe('buildActionResultsQuery', () => {
             ],
           },
         },
-        size: 10000,
+        from: 0,
+        size: 50,
         track_total_hits: true,
         fields: ['*'],
         sort: [
@@ -331,7 +332,8 @@ describe('buildActionResultsQuery', () => {
             ],
           },
         },
-        size: 10000,
+        from: 500,
+        size: 500,
         track_total_hits: true,
         fields: ['*'],
         sort: [
@@ -345,47 +347,130 @@ describe('buildActionResultsQuery', () => {
     });
   });
 
-  describe('index selection logic', () => {
-    it('should prioritize useNewDataStream over componentTemplateExists', () => {
-      const options: ActionResultsRequestOptions = {
-        actionId: 'action-priority-test',
-        pagination: {
-          activePage: 0,
-          querySize: 10,
-          cursorStart: 0,
-        },
+  describe('pagination behavior', () => {
+    it.each([
+      {
+        activePage: 5,
+        querySize: 50,
+        expectedFrom: 250,
+        expectedSize: 50,
+        description: 'custom pagination',
+      },
+      {
+        activePage: 0,
+        querySize: 100,
+        expectedFrom: 0,
+        expectedSize: 100,
+        description: 'default pagination',
+      },
+      {
+        activePage: 0,
+        querySize: 10,
+        expectedFrom: 0,
+        expectedSize: 10,
+        description: 'small page size',
+      },
+      {
+        activePage: 0,
+        querySize: 50,
+        expectedFrom: 0,
+        expectedSize: 50,
+        description: 'medium page size',
+      },
+      {
+        activePage: 0,
+        querySize: 500,
+        expectedFrom: 0,
+        expectedSize: 500,
+        description: 'large page size',
+      },
+      {
+        activePage: 99,
+        querySize: 100,
+        expectedFrom: 9900,
+        expectedSize: 100,
+        description: 'large page numbers for 10k+ agents',
+      },
+    ])(
+      'should handle $description (page $activePage, size $querySize)',
+      ({ activePage, querySize, expectedFrom, expectedSize }) => {
+        const options: ActionResultsRequestOptions = {
+          actionId: 'test-pagination',
+          pagination: { activePage, querySize, cursorStart: 0 },
+          sort: {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+          componentTemplateExists: false,
+          useNewDataStream: false,
+        };
+
+        const result = buildActionResultsQuery(options);
+
+        expect(result.from).toBe(expectedFrom);
+        expect(result.size).toBe(expectedSize);
+      }
+    );
+
+    it('should maintain aggregations regardless of pagination', () => {
+      const optionsPage1: ActionResultsRequestOptions = {
+        actionId: 'test-aggs',
+        pagination: { activePage: 0, querySize: 50, cursorStart: 0 },
         sort: {
-          field: 'started_at',
-          direction: Direction.desc,
-        },
-        componentTemplateExists: true,
-        useNewDataStream: true, // This should take priority
-      };
-
-      const result = buildActionResultsQuery(options);
-
-      expect(result.index).toBe('logs-osquery_manager.action.responses*');
-    });
-
-    it('should fall back to agent actions results index when both flags are false', () => {
-      const options: ActionResultsRequestOptions = {
-        actionId: 'action-fallback-test',
-        pagination: {
-          activePage: 0,
-          querySize: 10,
-          cursorStart: 0,
-        },
-        sort: {
-          field: 'started_at',
+          field: '@timestamp',
           direction: Direction.desc,
         },
         componentTemplateExists: false,
         useNewDataStream: false,
       };
 
+      const optionsPage10: ActionResultsRequestOptions = {
+        ...optionsPage1,
+        pagination: { activePage: 10, querySize: 50, cursorStart: 0 },
+      };
+
+      const resultPage1 = buildActionResultsQuery(optionsPage1);
+      const resultPage10 = buildActionResultsQuery(optionsPage10);
+
+      expect(resultPage1.aggs).toEqual(resultPage10.aggs);
+      expect(resultPage1.from).toBe(0);
+      expect(resultPage10.from).toBe(500);
+    });
+  });
+
+  describe('index selection logic', () => {
+    it.each([
+      {
+        componentTemplateExists: true,
+        useNewDataStream: true,
+        expectedIndex: 'logs-osquery_manager.action.responses*',
+        description: 'prioritize useNewDataStream over componentTemplateExists',
+      },
+      {
+        componentTemplateExists: false,
+        useNewDataStream: false,
+        expectedIndex: '.fleet-actions-results*',
+        description: 'fall back to agent actions results index when both flags are false',
+      },
+    ])('should $description', ({ componentTemplateExists, useNewDataStream, expectedIndex }) => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-index-test',
+        pagination: {
+          activePage: 0,
+          querySize: 10,
+          cursorStart: 0,
+        },
+        sort: {
+          field: 'started_at',
+          direction: Direction.desc,
+        },
+        componentTemplateExists,
+        useNewDataStream,
+      };
+
       const result = buildActionResultsQuery(options);
 
-      expect(result.index).toBe('.fleet-actions-results*');
+      expect(result.index).toBe(expectedIndex);
     });
   });
 });

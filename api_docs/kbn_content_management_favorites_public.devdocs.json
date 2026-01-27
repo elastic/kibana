@@ -28,6 +28,8 @@
           "<Metadata>"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -71,6 +77,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -83,6 +91,8 @@
                 "label": "deps",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 46,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -97,6 +107,8 @@
                       "HttpSetup"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "lineNumber": 47,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -111,6 +123,8 @@
                       "UserProfileService"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "lineNumber": 48,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -132,6 +146,8 @@
                       " | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "lineNumber": 49,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -151,6 +167,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -169,6 +187,8 @@
               "<Metadata>>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -193,6 +213,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -207,6 +229,8 @@
                   "AddFavoriteRequest<Metadata>"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 67,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -233,6 +257,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -244,6 +270,8 @@
                 "label": "{ id }",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 75,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -255,6 +283,8 @@
                     "label": "id",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "lineNumber": 75,
+                    "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -274,6 +304,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -290,6 +322,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -306,6 +340,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -332,6 +368,8 @@
           "SerializedStyles"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+        "lineNumber": 81,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,6 +385,8 @@
               "<{}>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+            "lineNumber": 81,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -374,6 +414,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,6 +436,8 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+            "lineNumber": 25,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -413,6 +457,8 @@
           "({ favoritesClient, notifyError, children, }: React.PropsWithChildren<FavoritesContextValue>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_context.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -427,6 +473,8 @@
               "React.PropsWithChildren<FavoritesContextValue>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_context.tsx",
+            "lineNumber": 21,
+            "columnNumber": 100,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,6 +494,8 @@
           "({ emptyStateType, entityNamePlural, entityName, }: { emptyStateType: \"noItems\" | \"noMatchingItems\"; entityNamePlural?: string | undefined; entityName?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -457,6 +507,8 @@
             "label": "{\n  emptyStateType = 'noItems',\n  entityNamePlural = i18n.translate('contentManagement.favorites.defaultEntityNamePlural', {\n    defaultMessage: 'items',\n  }),\n  entityName = i18n.translate('contentManagement.favorites.defaultEntityName', {\n    defaultMessage: 'item',\n  }),\n}",
             "description": [],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
+            "lineNumber": 26,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -471,6 +523,8 @@
                   "\"noItems\" | \"noMatchingItems\""
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -485,6 +539,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -499,6 +555,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -519,6 +577,8 @@
           "({ active, className, children, }: React.PropsWithChildren<{ className?: string | undefined; active: boolean; }>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/stardust_wrapper.tsx",
+        "lineNumber": 106,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,6 +593,8 @@
               "React.PropsWithChildren<{ className?: string | undefined; active: boolean; }>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/stardust_wrapper.tsx",
+            "lineNumber": 106,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -556,6 +618,8 @@
           "<void>, unknown>"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_query.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -567,6 +631,8 @@
             "label": "{ enabled = true }",
             "description": [],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_query.tsx",
+            "lineNumber": 22,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -581,6 +647,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_query.tsx",
+                "lineNumber": 22,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -600,6 +668,8 @@
         "label": "FavoriteButtonProps",
         "description": [],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -611,6 +681,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -625,6 +697,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -649,6 +723,8 @@
           "<Metadata>"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +741,8 @@
               "<Metadata>>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -689,6 +767,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -703,6 +783,8 @@
                   "AddFavoriteRequest<Metadata>"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 31,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -729,6 +811,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -740,6 +824,8 @@
                 "label": "params",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                "lineNumber": 32,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -751,6 +837,8 @@
                     "label": "id",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "lineNumber": 32,
+                    "columnNumber": 28,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -770,6 +858,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -786,6 +876,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -802,6 +894,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -818,6 +912,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -24,7 +24,9 @@ describe('RuleEditorPanel', () => {
     const viewProps = { ...props, docLinks: coreStart.docLinks };
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
-        <RuleEditorPanel {...viewProps} />
+        <EuiProvider>
+          <RuleEditorPanel {...viewProps} />
+        </EuiProvider>
       </KibanaContextProvider>
     );
   };

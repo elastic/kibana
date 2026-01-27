@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

@@ -173,6 +173,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           )}
           onChange={onChange}
           accept=".ndjson"
+          data-test-subj="knowledgeBaseBulkImportFilePicker"
         />
       </EuiFlyoutBody>
 

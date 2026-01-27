@@ -16,6 +16,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
   { getService, getPageObjects }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
+  const find = getService('find');
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
@@ -34,20 +35,25 @@ export function MachineLearningDataVisualizerFileBasedProvider(
         await testSubjects.existOrFail('~dataVisualizerFileUploadErrorCallout');
       } else {
         await testSubjects.missingOrFail('~dataVisualizerFileUploadErrorCallout');
-        await testSubjects.existOrFail('dataVisualizerPageFileResults');
       }
     },
 
-    async assertFileTitle(expectedTitle: string) {
-      const actualTitle = await testSubjects.getVisibleText('dataVisualizerFileResultsTitle');
+    async assertFileTitle(expectedTitle: string, index: number) {
+      const actualTitle = await testSubjects.getVisibleText(
+        `dataVisualizerFileResultsTitle-${index}`
+      );
       expect(actualTitle).to.eql(
         expectedTitle,
         `Expected file title to be '${expectedTitle}' (got '${actualTitle}')`
       );
     },
 
-    async assertFileContentPanelExists() {
-      await testSubjects.existOrFail('dataVisualizerFileFileContentPanel');
+    async assertFilePreviewPanelExists(index: number) {
+      await testSubjects.existOrFail(`dataVisualizerFilePreviewPanel-${index}`);
+    },
+
+    async assertFileContentsPanelExists(index: number) {
+      await testSubjects.existOrFail(`dataVisualizerFileContentsPanel-${index}`);
     },
 
     async assertFileContentHighlightingSwitchExists(exist: boolean) {
@@ -76,12 +82,25 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       );
     },
 
-    async assertSummaryPanelExists() {
-      await testSubjects.existOrFail('dataVisualizerFileSummaryPanel');
+    async selectAnalysisExplanationButton(index: number) {
+      await testSubjects.click(`mlFileUploadAnalysisExplanationButton-${index}`);
+      await testSubjects.existOrFail('mlFileUploadAnalysisExplanationModal');
     },
 
-    async assertFileStatsPanelExists() {
-      await testSubjects.existOrFail('dataVisualizerFileFileStatsPanel');
+    async assertSummaryPanelExists() {
+      await testSubjects.existOrFail('mlFileUploadFileSummaryPanel');
+    },
+
+    async assertAnalysisExplanationPanelExists() {
+      await testSubjects.existOrFail('mlFileUploadAnalysisExplanationText');
+    },
+
+    async closeAnalysisExplanationPanel() {
+      await find.clickByCssSelector('.euiButtonIcon.euiModal__closeIcon');
+    },
+
+    async assertFileStatsPanelExists(index: number) {
+      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel-${index}`);
     },
 
     async assertNumberOfFieldCards(number: number) {
@@ -93,18 +112,20 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertImportButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('dataVisualizerFileOpenImportPageButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(60 * 1000, async () => {
+        const isEnabled = await testSubjects.isEnabled('fileUploadImportButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+      });
     },
 
-    async navigateToFileImport() {
-      await testSubjects.click('dataVisualizerFileOpenImportPageButton');
-      await testSubjects.existOrFail('dataVisualizerPageFileImport');
+    async selectFieldStatsTab(index: number) {
+      await testSubjects.click(`mlFileUploadFileStatusStatsTab-${index}`);
+      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel-${index}`);
     },
 
     async assertImportSettingsPanelExists() {
@@ -130,7 +151,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertCreateIndexPatternCheckboxValue(expectedValue: boolean) {
-      const isChecked = await testSubjects.isChecked('dataVisualizerFileCreateDataViewCheckbox');
+      const isChecked = await testSubjects.isEuiSwitchChecked('dataVisualizerCreateDataViewSwitch');
       expect(isChecked).to.eql(
         expectedValue,
         `Expected create index pattern checkbox to be ${expectedValue ? 'checked' : 'unchecked'}`
@@ -138,20 +159,17 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setCreateIndexPatternCheckboxState(newState: boolean) {
-      const isChecked = await testSubjects.isChecked('dataVisualizerFileCreateDataViewCheckbox');
+      const isChecked = await testSubjects.isEuiSwitchChecked('dataVisualizerCreateDataViewSwitch');
       if (isChecked !== newState) {
-        // this checkbox can't be clicked directly, instead click the corresponding label
-        const panel = await testSubjects.find('dataVisualizerFileImportSettingsPanel');
-        const label = await panel.findByCssSelector('[for="createDataView"]');
-        await label.click();
+        await testSubjects.click('dataVisualizerCreateDataViewSwitch');
       }
       await this.assertCreateIndexPatternCheckboxValue(newState);
     },
 
     async startImportAndWaitForProcessing() {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerFileImportButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('fileUploadImportButton');
       await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail('dataVisualizerFileImportSuccessCallout');
+        await testSubjects.existOrFail('dataVisualizerFileResultsLinks');
       });
     },
 
@@ -164,6 +182,11 @@ export function MachineLearningDataVisualizerFileBasedProvider(
         count,
         `Expected Documents ingested count to be '${count}' (got '${docCount}')`
       );
+    },
+
+    async openAdvancedSettings() {
+      await testSubjects.click('dataVisualizerAdvancedSettingsAccordion');
+      await testSubjects.existOrFail('dataVisualizerDataViewNameInput');
     },
 
     async selectCreateFilebeatConfig() {

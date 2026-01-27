@@ -80,6 +80,7 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],
@@ -231,6 +232,7 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],

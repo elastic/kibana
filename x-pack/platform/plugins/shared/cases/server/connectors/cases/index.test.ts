@@ -9,12 +9,15 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_PROJECT_TYPE_ID, SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
+import {
+  DEFAULT_MAX_OPEN_CASES,
+  OBSERVABILITY_PROJECT_TYPE_ID,
+  SECURITY_PROJECT_TYPE_ID,
+} from '../../../common/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';
-import { DEFAULT_MAX_OPEN_CASES } from './constants';
 import type { AttackDiscoveryExpandedAlert } from './attack_discovery';
 import { ATTACK_DISCOVERY_MAX_OPEN_CASES } from './attack_discovery';
 
@@ -87,6 +90,8 @@ describe('getCasesConnectorType', () => {
         reopenClosedCases: false,
         timeWindow: '7d',
         templateId: null,
+        autoPushCase: null,
+        maximumCasesToOpen: null,
         ...overrides,
       },
     });
@@ -156,10 +161,60 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "autoPushCase": null,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
+              "owner": "cases",
+              "reopenClosedCases": false,
+              "rule": Object {
+                "id": "rule-id",
+                "name": "my rule name",
+                "ruleUrl": "https://example.com",
+                "tags": Array [
+                  "my-tag",
+                ],
+              },
+              "templateId": null,
+              "timeWindow": "7d",
+            },
+          }
+        `);
+      });
+
+      it('builds the action getParams() and maximumCasesToOpen correctly', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        expect(
+          adapter.buildActionParams({
+            // @ts-expect-error: not all fields are needed
+            alerts,
+            rule,
+            // 22 is too high, it will get clamped to MAX_OPEN_CASES
+            params: getParams({ maximumCasesToOpen: 22 }),
+            spaceId: 'default',
+            ruleUrl: 'https://example.com',
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "subAction": "run",
+            "subActionParams": Object {
+              "alerts": Array [
+                Object {
+                  "_id": "alert-id-1",
+                  "_index": "alert-index-1",
+                },
+                Object {
+                  "_id": "alert-id-2",
+                  "_index": "alert-index-2",
+                },
+              ],
+              "autoPushCase": null,
+              "groupedAlerts": null,
+              "groupingBy": Array [],
+              "internallyManagedAlerts": false,
+              "maximumCasesToOpen": 20,
               "owner": "cases",
               "reopenClosedCases": false,
               "rule": Object {
@@ -203,6 +258,7 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "autoPushCase": null,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
@@ -248,6 +304,7 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "autoPushCase": null,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,

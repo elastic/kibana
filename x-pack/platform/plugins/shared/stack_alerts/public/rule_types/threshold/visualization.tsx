@@ -216,6 +216,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          announceOnMount
           data-test-subj="errorCallout"
           title={
             <FormattedMessage
@@ -311,6 +312,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            announceOnMount
             data-test-subj="noDataCallout"
             size="s"
             title={

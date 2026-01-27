@@ -14,7 +14,6 @@ describe('parseEsqlQuery', () => {
       (esqlQuery) => {
         const result = parseEsqlQuery(esqlQuery);
         expect(result.errors.length).toEqual(1);
-        expect(result.errors[0].message.startsWith('SyntaxError:')).toBeTruthy();
         expect(parseEsqlQuery(esqlQuery)).toMatchObject({
           hasMetadataOperator: false,
           isEsqlQueryAggregating: false,

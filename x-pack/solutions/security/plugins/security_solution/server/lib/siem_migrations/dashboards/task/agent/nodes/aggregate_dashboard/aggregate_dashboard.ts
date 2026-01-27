@@ -20,8 +20,18 @@ interface DashboardData {
 
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
+    const title = state.original_dashboard.title || 'Untitled Dashboard';
+    const description = state.description || '';
+
     if (!state.translated_panels?.length) {
-      throw new Error('No panels found'); // The dashboard migration status will be set to 'failed' and the error stored in the document.
+      return {
+        elastic_dashboard: {
+          title,
+          description,
+        },
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+        comments: [generateAssistantComment('No panels found')],
+      };
     }
 
     // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
@@ -37,9 +47,6 @@ export const getAggregateDashboardNode = (): GraphNode => {
 
     // Create the dashboard object
     const dashboardData: DashboardData = structuredClone(dashboardTemplate);
-    const title = state.original_dashboard.title || 'Untitled Dashboard';
-    const description = state.description || '';
-
     dashboardData.attributes.title = title;
     dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));

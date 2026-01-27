@@ -34,13 +34,3 @@ export const SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL = i18n.translate(
     defaultMessage: 'Unknown',
   }
 );
-
-export const SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR = (status?: string) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.common.translationResult.unknownError',
-    {
-      defaultMessage: 'Unknown translation result status: ({status})',
-      values: { status },
-    }
-  );
-};

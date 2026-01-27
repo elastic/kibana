@@ -64,17 +64,24 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
 
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
 
-        const existingFields = alertFieldMap;
+        // unmapped fields are ignored since they are not added to the index mappings
+        const existingFields = Object.values(alertFieldMap).filter(
+          (field) => field.type !== 'unmapped'
+        );
+
         const numberOfExistingFields = Object.keys(existingFields).length;
         // there is no way to get the real number of fields from ES.
-        // Eventhough we have only as many as alertFieldMap fields,
-        // ES counts the each childs of the nested objects and multi_fields as seperate fields.
+        // Even though we have only as many as alertFieldMap fields,
+        // ES counts the each child of the nested objects and multi_fields as separate fields.
         // therefore we add 11 to get the real number.
-        const nestedObjectsAndMultiFields = 11;
+        // if you have added a new field like: kibana.alert.new_field.sub_field
+        // Kibana counts this as 2 fields: "kibana.alert.new_field" and "kibana.alert.new_field.sub_field"
+        // So you need to bump the below number by 1
+        const nestedObjectsAndMultiFields = 12;
         // Number of free slots that we want to have, so we can add dynamic fields as many
-        const numberofFreeSlots = 2;
+        const numberOfFreeSlots = 2;
         const totalFields =
-          numberOfExistingFields + nestedObjectsAndMultiFields + numberofFreeSlots;
+          numberOfExistingFields + nestedObjectsAndMultiFields + numberOfFreeSlots;
 
         const dummyFields: Record<PropertyName, MappingProperty> = {};
         for (let i = 0; i < TOTAL_FIELDS_LIMIT - totalFields; i++) {

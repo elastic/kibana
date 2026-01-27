@@ -51,9 +51,10 @@ value:
         profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
       owner: cases
       payload:
-        comment: A new comment
-        owner: cases
-        type: user
+        comment:
+          comment: A new comment
+          owner: cases
+          type: user
       version: WzM1ODg4LDFa
       type: comment
     - id: 573c6980-6123-11ed-aa41-81a0a61fe447
@@ -68,6 +69,6 @@ value:
       owner: cases
       payload:
         assignees:
-          uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
       version: WzM1ODg4LDFb
       type: assignees

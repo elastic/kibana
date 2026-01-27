@@ -8,7 +8,16 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES, type MlPages } from '../../../../../common/constants/locator';
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
@@ -88,15 +97,22 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
   );
 
   const button = (
-    <EuiButton
-      data-test-subj="mlJobSelectionBadge"
-      iconType="boxesVertical"
-      iconSide="right"
-      onClick={onButtonClick}
-      size="s"
-      color="text"
-    >
-      {jobId}
+    <EuiButton data-test-subj="mlJobSelectionBadge" onClick={onButtonClick} size="s" color="text">
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={true}>
+          <EuiText textAlign="center" size="s">
+            {jobId}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="boxesVertical" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiButton>
   );
   return (

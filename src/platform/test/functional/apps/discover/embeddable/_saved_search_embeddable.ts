@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -195,6 +196,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(2);
       });
+    });
+
+    it('can edit a session and return to the dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch('Rendering-Test:-saved-search');
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
     });
   });
 }

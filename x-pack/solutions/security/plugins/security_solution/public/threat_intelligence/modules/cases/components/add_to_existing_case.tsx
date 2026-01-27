@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -50,25 +50,19 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
-
   const attachments: CaseAttachmentsWithoutOwner = generateAttachmentsWithoutOwner(
     id,
     attachmentMetadata
   );
-  const menuItemClicked = () => {
+  const menuItemClicked = useCallback(() => {
     onClick();
     selectCaseModal.open({ getAttachments: () => attachments });
-  };
+  }, [attachments, onClick, selectCaseModal]);
 
   const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
-    <EuiContextMenuItem
-      key="attachmentsExistingCase"
-      onClick={() => menuItemClicked()}
-      data-test-subj={dataTestSubj}
-      disabled={disabled}
-    >
+    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>
       <FormattedMessage
         defaultMessage="Add to existing case"
         id="xpack.securitySolution.threatIntelligence.addToExistingCase"

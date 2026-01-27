@@ -6,11 +6,10 @@
  */
 
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-
 import {
-  AttackDiscoveryPostResponse,
   API_VERSIONS,
-  ATTACK_DISCOVERY,
+  ATTACK_DISCOVERY_GENERATE,
+  PostAttackDiscoveryGenerateResponse,
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
@@ -116,13 +115,13 @@ export const useAttackDiscovery = ({
         }
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        // call the internal API to generate attack discoveries:
-        const rawResponse = await http.post(ATTACK_DISCOVERY, {
+        // call the API to generate attack discoveries:
+        const rawResponse = await http.post(ATTACK_DISCOVERY_GENERATE, {
           body: JSON.stringify(bodyWithOverrides),
-          version: API_VERSIONS.internal.v1,
+          version: API_VERSIONS.public.v1,
         });
 
-        const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
+        const parsedResponse = PostAttackDiscoveryGenerateResponse.safeParse(rawResponse);
 
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');

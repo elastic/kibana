@@ -116,6 +116,26 @@ describe('helpers', () => {
       result.current({ param1: 'value2' });
       expect(history.location.search).toBe('?param1=value2');
     });
+
+    it('preserves history.location.state when the search params change', () => {
+      const history = createMemoryHistory();
+      const initialState = {
+        foo: { bar: 'baz' },
+      };
+
+      history.push('/?param1=value1', initialState);
+
+      const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+        <Router history={history}>{children}</Router>
+      );
+      const { result } = renderHook(() => useReplaceUrlParams(), { wrapper: Wrapper });
+
+      window.history.pushState({}, '', '?param1=value1');
+      result.current({ param1: 'value2' });
+      expect(history.location.search).toBe('?param1=value2');
+
+      expect(history.location.state).toEqual(initialState);
+    });
   });
 
   describe('createHistoryEntry', () => {

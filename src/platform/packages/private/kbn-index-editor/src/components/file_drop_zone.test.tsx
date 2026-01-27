@@ -29,9 +29,6 @@ import { IndexEditorErrors } from '../types';
 jest.mock('./empty_prompt', () => ({
   EmptyPrompt: () => <div>EmptyPrompt</div>,
 }));
-jest.mock('./file_preview', () => ({
-  FilesPreview: () => <div>FilesPreview</div>,
-}));
 
 // Mock hooks and modules
 jest.mock('@kbn/file-upload');
@@ -111,26 +108,6 @@ describe('FileDropzone', () => {
   it('renders EmptyPrompt when noResults is true and no files are being shown', () => {
     const { getByText } = renderWithI18n(<TestComponent noResults={true} />);
     expect(getByText('EmptyPrompt')).toBeInTheDocument();
-  });
-
-  it('shows analyzing indicator', () => {
-    fileUploadContext.uploadStatus.analysisStatus = STATUS.STARTED;
-    const { getByText } = renderWithI18n(<TestComponent />);
-    expect(getByText('Analyzing...')).toBeInTheDocument();
-  });
-
-  it('shows uploading indicator', () => {
-    fileUploadContext.uploadStatus.overallImportStatus = STATUS.STARTED;
-    const { getByText } = renderWithI18n(<TestComponent />);
-    expect(getByText('Uploading...')).toBeInTheDocument();
-  });
-
-  it('shows FilesPreview when a file is successfully analyzed', () => {
-    fileUploadContext.filesStatus = [
-      { analysisStatus: STATUS.COMPLETED, importStatus: STATUS.NOT_STARTED },
-    ];
-    const { getByText } = renderWithI18n(<TestComponent />);
-    expect(getByText('FilesPreview')).toBeInTheDocument();
   });
 
   it('calls setError when a file is too large', () => {

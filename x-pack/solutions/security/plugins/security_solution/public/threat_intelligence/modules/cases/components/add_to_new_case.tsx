@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -50,21 +50,19 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
-
   const attachments: CaseAttachmentsWithoutOwner = generateAttachmentsWithoutOwner(
     id,
     attachmentMetadata
   );
-  const menuItemClicked = () => {
+  const menuItemClicked = useCallback(() => {
     onClick();
     createCaseFlyout.open({ attachments });
-  };
+  }, [attachments, createCaseFlyout, onClick]);
 
   const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
     <EuiContextMenuItem
-      key="attachmentsNewCase"
       onClick={() => menuItemClicked()}
       data-test-subj={dataTestSubj}
       disabled={disabled}

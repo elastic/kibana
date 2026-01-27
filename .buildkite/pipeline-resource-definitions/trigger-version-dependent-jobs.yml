@@ -46,11 +46,6 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
       schedules:
-        Trigger ES forward compatibility tests:
-          cronline: 0 5 * * *
-          message: Trigger ES forward compatibility tests
-          env:
-            TRIGGER_PIPELINE_SET: es-forward
         Trigger ES forward compatibility tests 9.1:
           cronline: 0 5 * * *
           message: Trigger ES forward compatibility tests 9.1

@@ -22,7 +22,11 @@ import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
-import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
+import {
+  ENDPOINT_ALERTS_INDEX,
+  ENDPOINT_EVENTS_INDEX,
+  ENDPOINT_DEVICE_INDEX,
+} from './common/constants';
 
 main();
 
@@ -147,6 +151,12 @@ async function main() {
       default: ENDPOINT_ALERTS_INDEX,
       type: 'string',
     },
+    deviceIndex: {
+      alias: 'di',
+      describe: 'index to store device events in',
+      default: ENDPOINT_DEVICE_INDEX,
+      type: 'string',
+    },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
@@ -231,6 +241,12 @@ async function main() {
       describe: 'number of resolver trees to make for each host',
       type: 'number',
       default: 1,
+    },
+    deviceEvents: {
+      alias: 'dev',
+      describe: 'number of device events to create per host',
+      type: 'number',
+      default: 5,
     },
     delete: {
       alias: 'd',
@@ -413,6 +429,7 @@ async function main() {
     argv.policyIndex,
     argv.eventIndex,
     argv.alertIndex,
+    argv.deviceIndex,
     argv.alertsPerHost,
     argv.fleet,
     {
@@ -427,6 +444,7 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
+      deviceEvents: argv.deviceEvents,
     },
     DocGenerator
   );

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmFields } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 
 export const config = {
   appleTransaction: {
@@ -27,12 +27,14 @@ export async function generateData({
   start,
   end,
   overrides,
+  withoutErrorId = false,
 }: {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
   overrides?: Partial<ApmFields>;
+  withoutErrorId?: boolean;
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -57,7 +59,7 @@ export async function generateData({
           .overrides(overrides ? overrides : {})
           .errors(
             serviceGoProdInstance
-              .error({ message: `Error ${index}`, type: transaction.name })
+              .error({ message: `Error ${index}`, type: transaction.name, withoutErrorId })
               .timestamp(timestamp)
           )
           .duration(1000)

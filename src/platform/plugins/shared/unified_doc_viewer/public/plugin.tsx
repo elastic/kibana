@@ -62,7 +62,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: (props) => {
+      render: (props) => {
         return <LazyDocViewerTable {...props} />;
       },
     });
@@ -73,7 +73,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
+      render: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}

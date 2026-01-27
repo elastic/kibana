@@ -12,21 +12,21 @@ import type { SerializedTitles } from './title_manager';
 import { initializeTitleManager, titleComparators } from './title_manager';
 
 describe('titles api', () => {
-  const rawState: SerializedTitles = {
+  const initialTitles: SerializedTitles = {
     title: 'very cool title',
     description: 'less cool description',
     hidePanelTitles: false,
   };
 
-  it('should initialize publishing subjects with the provided rawState', () => {
-    const { api } = initializeTitleManager(rawState);
-    expect(api.title$.value).toBe(rawState.title);
-    expect(api.description$.value).toBe(rawState.description);
-    expect(api.hidePanelTitles$.value).toBe(rawState.hidePanelTitles);
+  it('should initialize publishing subjects from initialState', () => {
+    const { api } = initializeTitleManager(initialTitles);
+    expect(api.title$.value).toBe(initialTitles.title);
+    expect(api.description$.value).toBe(initialTitles.description);
+    expect(api.hidePanelTitles$.value).toBe(initialTitles.hidePanelTitles);
   });
 
   it('should update publishing subject values when set functions are called', () => {
-    const { api } = initializeTitleManager(rawState);
+    const { api } = initializeTitleManager(initialTitles);
 
     api.setTitle('even cooler title');
     api.setDescription('super uncool description');
@@ -38,7 +38,7 @@ describe('titles api', () => {
   });
 
   it('should correctly serialize current state', () => {
-    const titleManager = initializeTitleManager(rawState);
+    const titleManager = initializeTitleManager(initialTitles);
     titleManager.api.setTitle('UH OH, A TITLE');
 
     const serializedTitles = titleManager.getLatestState();

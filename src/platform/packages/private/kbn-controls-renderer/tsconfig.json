@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@emotion/react/types/css-prop"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/presentation-panel-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/css-utils",
+    "@kbn/presentation-publishing",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/controls-constants",
+    "@kbn/i18n",
+    "@kbn/controls-schemas",
+    "@kbn/presentation-containers"
+  ]
+}

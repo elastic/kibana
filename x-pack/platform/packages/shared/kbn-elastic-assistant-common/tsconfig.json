@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -21,6 +21,8 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/zod",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser"
   ]
 }

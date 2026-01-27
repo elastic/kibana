@@ -84,10 +84,9 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
     setQuery,
   });
 
-  const { openDetailsPanel, isLinkEnabled } = useNavigateToServiceDetails({
+  const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     scopeId,
-    contextID,
     isRiskScoreExist,
   });
 
@@ -120,7 +119,6 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        isLinkEnabled={isLinkEnabled}
       />
     </>
   );

@@ -7,19 +7,21 @@
 
 import { matchPath } from 'react-router-dom';
 
+import { PageScope } from '../../data_view_manager/constants';
 import {
-  CASES_PATH,
   ALERTS_PATH,
   ATTACK_DISCOVERY_PATH,
+  ATTACKS_PATH,
+  CASES_PATH,
+  DATA_QUALITY_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   HOSTS_PATH,
-  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  DATA_QUALITY_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  USERS_PATH,
 } from '../../../common/constants';
-import { SourcererScopeName } from '../store/model';
 
 export const sourcererPaths = [
   ALERTS_PATH,
@@ -39,25 +41,37 @@ const detectionsPaths = [
   ATTACK_DISCOVERY_PATH,
 ];
 
+const attacksPaths = [ATTACKS_PATH];
+
 const explorePaths = [
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
-  OVERVIEW_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
 ];
 
 export const getScopeFromPath = (
   pathname: string,
   newDataViewPickerEnabled?: boolean
-): SourcererScopeName.default | SourcererScopeName.detections | SourcererScopeName.explore => {
+): PageScope.default | PageScope.alerts | PageScope.attacks | PageScope.explore => {
   if (
     matchPath(pathname, {
       path: detectionsPaths,
       strict: false,
     })
   ) {
-    return SourcererScopeName.detections;
+    return PageScope.alerts;
+  }
+
+  if (
+    newDataViewPickerEnabled &&
+    matchPath(pathname, {
+      path: attacksPaths,
+      strict: false,
+    })
+  ) {
+    return PageScope.attacks;
   }
 
   if (
@@ -67,10 +81,10 @@ export const getScopeFromPath = (
       strict: false,
     })
   ) {
-    return SourcererScopeName.explore;
+    return PageScope.explore;
   }
 
-  return SourcererScopeName.default;
+  return PageScope.default;
 };
 
 export const showSourcererByPath = (pathname: string): boolean =>

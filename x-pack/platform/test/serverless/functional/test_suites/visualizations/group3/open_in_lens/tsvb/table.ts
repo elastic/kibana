@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Table');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - TSVB - Table');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -87,8 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
         const metricDimensionText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
         expect(metricDimensionText).to.be('Count of records last 1m');
       });
@@ -99,8 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
         const metricDimensionText1 = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
         const metricDimensionText2 = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
         expect(metricDimensionText1).to.be('Count of records');
@@ -113,8 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
         const splitRowsText1 = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
         const splitRowsText2 = await lens.getDimensionTriggerText('lnsDatatable_rows', 1);
         expect(splitRowsText1).to.be('Top 10 values of machine.os.raw');
@@ -131,8 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
-        expect(layerCount).to.be(1);
+        await lens.assertLayerCount(1);
         const splitRowsText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
         expect(splitRowsText).to.be('test');
       });

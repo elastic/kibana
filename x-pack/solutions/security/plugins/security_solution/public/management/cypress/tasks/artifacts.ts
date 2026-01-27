@@ -257,8 +257,13 @@ export const trustedDevicesFormSelectors = {
   },
 
   fillValue: (value: string) => {
-    cy.getByTestSubj('trustedDevices-form-valueField').clear();
-    cy.getByTestSubj('trustedDevices-form-valueField').type(value);
+    cy.getByTestSubj('trustedDevices-form-valueField').within(() => {
+      cy.get('input[role="combobox"]').click();
+      cy.get('input[role="combobox"]').should('be.focused');
+      cy.get('input[role="combobox"]').type(`{selectall}{backspace}`);
+      cy.get('input[role="combobox"]').should('have.value', '');
+      cy.get('input[role="combobox"]').type(`${value}{enter}`);
+    });
   },
 
   fillOutTrustedDevicesFlyout: (name = 'Test Trusted Device', description = 'Test Description') => {

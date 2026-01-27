@@ -15,6 +15,7 @@ import type {
 import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import {
+  parseContent,
   useParseFileInput,
   type SplunkRow,
 } from '../../../../../../../common/hooks/use_parse_file_input';
@@ -39,8 +40,8 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
       createResources(macrosToUpload);
     }, [createResources, macrosToUpload]);
 
-    const onFileParsed = useCallback((content: Array<SplunkRow<SplunkMacroResult>>) => {
-      const macros = content.map(formatMacroRow);
+    const onFileParsed = useCallback((content: string) => {
+      const macros = parseContent(content).map(formatMacroRow);
       setMacrosToUpload(macros);
     }, []);
 
@@ -69,7 +70,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow
             helpText={
-              <EuiText color="danger" size="xs">
+              <EuiText color="danger" size="xs" data-test-subj="macrosFileUploadError">
                 {error}
               </EuiText>
             }
@@ -99,7 +100,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="macrosUploadFileButton">
               <UploadFileButton
                 onClick={createMacros}
                 isLoading={showLoader}

@@ -46,11 +46,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     version: '1.14.0',
   };
 
-  const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-  const bitbucketAuditDataStreamName = `logs-${bitbucketDatasetName}-${defaultNamespace}`;
-  const bitbucketPkg = {
-    name: 'atlassian_bitbucket',
-    version: '1.14.0',
+  const fleetServerDatasetName = 'fleet_server.output_health';
+  const fleetServerOutputHealthDataStreamName = `logs-${fleetServerDatasetName}-${defaultNamespace}`;
+  const fleetServerPkg = {
+    name: 'fleet_server',
+    version: '1.6.0',
   };
 
   const regularDatasetName = datasetNames[0];
@@ -63,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
 
-      // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
-      await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+      // Install fleet server Integration (package which does not has Dashboards) and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(fleetServerPkg);
 
       await synthtrace.index([
         // Ingest basic logs
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           isMalformed: true,
         }),
         // Index logs for Bitbucket integration
-        getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+        getLogsForDataset({ to, count: 10, dataset: fleetServerDatasetName }),
       ]);
 
       await PageObjects.svlCommonPage.loginAsViewer();
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
-      await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(fleetServerPkg);
       await synthtrace.clean();
     });
 
@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
 
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Should navigate to integration overview page on clicking integration overview action', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
@@ -254,8 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
-
-          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/fleet_server');
         });
       });
 

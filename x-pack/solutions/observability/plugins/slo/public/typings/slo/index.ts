@@ -6,7 +6,7 @@
  */
 
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { Dependency } from '../../../common/types';
+import type { Dependency } from '../../../common/burn_rate_rule/types';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 

@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-change-point-detection/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   fetch$,
@@ -28,7 +24,6 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 import fastIsEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
@@ -38,23 +33,10 @@ import {
   changePointComparators,
   initializeChangePointControls,
 } from './initialize_change_point_controls';
-import type { ChangePointEmbeddableApi, ChangePointEmbeddableState } from './types';
-import { getDataviewReferences } from '../get_dataview_references';
+import type { ChangePointEmbeddableApi } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
-
-function injectReferences(state: SerializedPanelState<ChangePointEmbeddableState>) {
-  const serializedState = cloneDeep(state.rawState);
-  // inject the reference
-  const dataViewIdRef = state.references?.find(
-    (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
-  );
-  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-  if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
-    serializedState.dataViewId = dataViewIdRef?.id;
-  }
-  return serializedState;
-}
 
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
@@ -64,10 +46,10 @@ export const getChangePointChartEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const state = injectReferences(initialState);
+      const state = initialState;
 
       const changePointManager = initializeChangePointControls(state);
 
@@ -81,14 +63,10 @@ export const getChangePointChartEmbeddableFactory = (
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
       function serializeState() {
-        const dataViewId = changePointManager.api.dataViewId.getValue();
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...changePointManager.getLatestState(),
-          },
-          references: getDataviewReferences(dataViewId, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...changePointManager.getLatestState(),
         };
       }
 
@@ -109,9 +87,9 @@ export const getChangePointChartEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) changePointManager.reinitializeState(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) changePointManager.reinitializeState(lastSaved);
         },
       });
 

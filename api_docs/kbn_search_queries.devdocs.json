@@ -39,6 +39,8 @@
           }
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +55,8 @@
               "string"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
               "IndicesGetMappingIndexMappingRecord"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -123,6 +129,8 @@
           " | undefined; }"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +151,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,6 +174,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,6 +197,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -208,6 +222,8 @@
               "> | undefined"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -242,6 +258,8 @@
           }
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -262,6 +280,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -296,6 +316,8 @@
           }
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -316,6 +338,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -343,6 +367,8 @@
           ") => string[] | undefined"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -363,6 +389,8 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -398,6 +426,8 @@
           }
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -409,6 +439,8 @@
             "label": "sparse_vector",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -423,6 +455,8 @@
         "label": "GenerateQueryMatches",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -438,6 +472,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,6 +495,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -473,6 +511,8 @@
         "label": "GenerateQueryOptions",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -484,6 +524,8 @@
             "label": "rrf",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,6 +537,8 @@
             "label": "queryString",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -509,6 +553,8 @@
         "label": "IndexQueryFields",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +569,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,6 +592,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,6 +615,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -586,6 +638,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -600,6 +654,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,6 +667,8 @@
             "label": "skipped_fields",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -625,6 +683,8 @@
         "label": "KnnQueryMatch",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -639,6 +699,8 @@
               "KnnQuery"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -653,6 +715,8 @@
         "label": "ModelField",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -664,6 +728,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -675,6 +741,8 @@
             "label": "model_id",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -689,6 +757,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -703,6 +773,8 @@
         "label": "SemanticField",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -714,6 +786,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -725,6 +799,8 @@
             "label": "inferenceId",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -739,6 +815,8 @@
               "\"dense_vector\" | \"sparse_vector\""
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -753,6 +831,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -773,6 +853,8 @@
           "{ [x: string]: string[]; }"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -796,6 +878,8 @@
           "; }"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -811,6 +895,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -826,6 +912,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -841,6 +929,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

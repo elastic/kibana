@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
+import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -14,13 +16,21 @@ import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
-import type { SentinelOneRunScriptActionParameters } from '../command_render_components/run_script_action';
+import type {
+  EndpointRunScriptActionParameters,
+  SentinelOneRunScriptActionParameters,
+} from '../command_render_components/run_script_action';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
-import { ArgumentFileSelector } from '../../console_argument_selectors';
+import {
+  ArgumentFileSelector,
+  CrowdstrikeScriptInputParams,
+  EndpointScriptInputParams,
+  MicrosoftScriptInputParams,
+} from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -46,6 +56,7 @@ import {
 } from '../command_render_components/execute_action';
 import type {
   EndpointPrivileges,
+  EndpointScript,
   ImmutableArray,
   SentinelOneScript,
 } from '../../../../../common/endpoint/types';
@@ -59,9 +70,11 @@ import { validateUnitOfTime } from './utils';
 import {
   CONSOLE_COMMANDS,
   CROWDSTRIKE_CONSOLE_COMMANDS,
+  ENDPOINT_EXECUTION_TIMEOUT,
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
+import { SentinelOneScriptInputParams } from '../../console_argument_selectors/script_input_params_selector';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -104,17 +117,17 @@ const capabilitiesAndPrivilegesValidator = (
     const privileges = command.commandDefinition.meta.privileges;
     const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
     const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-    const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    const responderCapabilities =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? [];
     let errorMessage = '';
 
     // We only validate Agent capabilities for the command for Endpoint agents
     if (agentType === 'endpoint') {
-      if (!responderCapability) {
+      if (!responderCapabilities.length) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
-      }
-
-      if (responderCapability && !agentCapabilities.includes(responderCapability)) {
+      } else if (
+        !responderCapabilities.some((capability) => agentCapabilities.includes(capability))
+      ) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
@@ -184,10 +197,11 @@ export const getEndpointConsoleCommands = ({
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const {
-    responseActionUploadEnabled: isUploadEnabled,
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointMemoryDump,
+    responseActionsEndpointRunScript,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -203,11 +217,12 @@ export const getEndpointConsoleCommands = ({
       return true;
     }
 
-    const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    const responderCapability: EndpointCapabilities[] = [
+      ...(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? []),
+    ];
 
-    if (responderCapability) {
-      return endpointCapabilities.includes(responderCapability);
+    if (responderCapability.length) {
+      return responderCapability.some((capability) => endpointCapabilities.includes(capability));
     }
 
     return false;
@@ -217,7 +232,7 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
-  const consoleCommands: CommandDefinition[] = [
+  let consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
       about: getCommandAboutInfo({
@@ -273,19 +288,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -308,19 +323,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -477,65 +492,181 @@ export const getEndpointConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
       helpDisabled: !isActionSupportedByAgentType(agentType, 'runscript', 'manual'),
-      helpHidden:
-        !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }) ||
-        (agentType === 'endpoint' && !doesEndpointSupportCommand('runscript')),
+      helpHidden: !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }),
     },
   ];
 
-  // `upload` command
-  // planned for 8.9
-  if (isUploadEnabled) {
-    consoleCommands.push({
-      name: 'upload',
-      about: getCommandAboutInfo({
-        aboutInfo: CONSOLE_COMMANDS.upload.about,
-        isSupported: doesEndpointSupportCommand('upload'),
-      }),
-      RenderComponent: UploadActionResult,
-      meta: commandMeta,
-      exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
-      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
-      args: {
-        file: {
-          required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.upload.args.file.about,
-          mustHaveValue: 'truthy',
-          SelectorComponent: ArgumentFileSelector,
-        },
-        overwrite: {
-          required: false,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.upload.args.overwrite.about,
-          mustHaveValue: false,
-        },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+  // Adjust `runscript` for use with Endpoint
+  if (agentType === 'endpoint' && !responseActionsEndpointRunScript) {
+    consoleCommands = consoleCommands.filter((command) => command.name !== 'runscript');
+  } else if (agentType === 'endpoint') {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
+
+    runscriptCommand.helpDisabled = false;
+    runscriptCommand.mustHaveArgs = true;
+    runscriptCommand.exampleUsage = (
+      enteredCommand?: Command<
+        CommandDefinition,
+        EndpointRunScriptActionParameters,
+        { script: CustomScriptSelectorState<EndpointScript> }
+      >
+    ) => {
+      let exampleUsageText = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+
+      if (enteredCommand) {
+        const scriptArgState = enteredCommand?.argState?.script?.at(0);
+        const selectedScript = scriptArgState?.store?.selectedOption;
+
+        if (selectedScript?.meta?.example) {
+          exampleUsageText = i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputExample',
+            {
+              defaultMessage: '{scriptName} script input: {example}',
+              values: {
+                scriptName: scriptArgState?.valueText,
+                example: selectedScript?.meta?.example,
+              },
+            }
+          );
+        }
+      }
+
+      return exampleUsageText;
+    };
+    runscriptCommand.args = {
+      script: {
+        required: true,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg',
+          { defaultMessage: 'The script to run (selected from popup list)' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: CustomScriptSelector,
       },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 7,
-      helpDisabled: !doesEndpointSupportCommand('upload'),
-      helpHidden: !getRbacControl({
-        commandName: 'upload',
-        privileges: endpointPrivileges,
-      }),
-    });
+      inputParams: {
+        required: false,
+        allowMultiples: false,
+        about: i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg',
+          { defaultMessage: 'Input arguments for the selected script' }
+        ),
+        mustHaveValue: 'non-empty-string',
+        SelectorComponent: EndpointScriptInputParams,
+      },
+      timeout: {
+        required: false,
+        allowMultiples: false,
+        about: ENDPOINT_EXECUTION_TIMEOUT,
+        mustHaveValue: 'non-empty-string',
+        validate: executeTimeoutValidator,
+      },
+      ...commandCommentArgument(),
+    };
+
+    const priorValidateFn = runscriptCommand.validate;
+
+    runscriptCommand.validate = (
+      enteredCommand: Command<CommandDefinition, SentinelOneRunScriptActionParameters>
+    ) => {
+      // First do the base validation - like authz checks
+      const baseValidation = priorValidateFn ? priorValidateFn(enteredCommand) : true;
+
+      if (baseValidation !== true) {
+        return baseValidation;
+      }
+
+      const { argState, args } = enteredCommand;
+
+      // No need to validate display of command help `help`
+      if (args.hasArg('help')) {
+        return true;
+      }
+
+      // Validate the script that was selected
+      const scriptInfo = (argState?.script?.[0]?.store as CustomScriptSelectorState<EndpointScript>)
+        ?.selectedOption;
+      const script = args.args.script[0];
+      const inputParams = args.args?.inputParams?.[0];
+
+      if (!script) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArgValueMissing',
+          { defaultMessage: 'A script selection is required' }
+        );
+      }
+
+      if (scriptInfo?.meta?.requiresInput && !inputParams) {
+        return i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptInputParamsMissing',
+          {
+            defaultMessage:
+              'Script "{name}" requires input parameters to be entered{instructions, select, false {.} other {: {instructions}}}',
+            values: {
+              name: scriptInfo.name,
+              instructions:
+                (scriptInfo.meta.instructions || scriptInfo.meta.example || '').trim() || false,
+            },
+          }
+        );
+      }
+
+      return true;
+    };
   }
 
+  // `upload` command
+  consoleCommands.push({
+    name: 'upload',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.upload.about,
+      isSupported: doesEndpointSupportCommand('upload'),
+    }),
+    RenderComponent: UploadActionResult,
+    meta: commandMeta,
+    exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    args: {
+      file: {
+        required: true,
+        allowMultiples: false,
+        about: CONSOLE_COMMANDS.upload.args.file.about,
+        mustHaveValue: 'truthy',
+        SelectorComponent: ArgumentFileSelector,
+      },
+      overwrite: {
+        required: false,
+        allowMultiples: false,
+        about: CONSOLE_COMMANDS.upload.args.overwrite.about,
+        mustHaveValue: false,
+      },
+      comment: {
+        required: false,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about: COMMENT_ARG_ABOUT,
+      },
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 7,
+    helpDisabled: !doesEndpointSupportCommand('upload'),
+    helpHidden: !getRbacControl({
+      commandName: 'upload',
+      privileges: endpointPrivileges,
+    }),
+  });
+
   if (microsoftDefenderEndpointCancelEnabled) {
+    const isSupported = canCancelForCurrentContext();
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported: canCancelForCurrentContext(),
+        isSupported,
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -546,26 +677,161 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        action: {
-          required: true,
-          allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-            {
-              defaultMessage: 'The response action to cancel',
+        ...(isSupported
+          ? {
+              action: {
+                required: true,
+                allowMultiples: false,
+                about: i18n.translate(
+                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+                  {
+                    defaultMessage: 'The response action to cancel',
+                  }
+                ),
+                mustHaveValue: 'truthy',
+                SelectorComponent: PendingActionsSelector,
+              },
             }
-          ),
-          mustHaveValue: 'truthy',
-          selectorShowTextValue: true,
-          SelectorComponent: PendingActionsSelector,
+          : {}),
+        comment: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: COMMENT_ARG_ABOUT,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !canCancelForCurrentContext(),
-      helpHidden: !canCancelForCurrentContext(),
+      helpDisabled: !isSupported,
+      helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
+    });
+  }
+
+  if (responseActionsEndpointMemoryDump) {
+    const endpointSupportsKernelDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_kernel'
+    );
+    const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_process'
+    );
+    const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
+      i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
+        {
+          defaultMessage:
+            '"{type}" memory dump type is not currently supported for this host OS type ({osType})',
+          values: { osType: platform, type },
+        }
+      );
+
+    consoleCommands.push({
+      name: 'memory-dump',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.memoryDump.about,
+        isSupported: doesEndpointSupportCommand('memory-dump'),
+      }),
+      RenderComponent: MemoryDumpActionResult,
+      meta: commandMeta,
+      exampleUsage: 'memory-dump --process --pid=123 --comment="dump process 123"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: (enteredCommand) => {
+        const standardValidation = capabilitiesAndPrivilegesValidator(agentType)(enteredCommand);
+
+        if (standardValidation !== true) {
+          return standardValidation;
+        }
+
+        const argsInterface = enteredCommand.args;
+
+        // Nothing to do if all the user did was `--help`
+        if (argsInterface.hasArg('help')) {
+          return true;
+        }
+
+        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
+
+        // PID and Entity ID are only supported for process memory dumps
+        if (
+          memoryDumpType === 'kernel' &&
+          (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
+            {
+              defaultMessage:
+                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+            }
+          );
+        }
+
+        // Process memory dump requires either pid or entityId
+        if (
+          memoryDumpType === 'process' &&
+          !argsInterface.hasArg('pid') &&
+          !argsInterface.hasArg('entityId')
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess',
+            {
+              defaultMessage: '"pid" or "entityId argument is required for "process" memory dumps',
+            }
+          );
+        }
+
+        return true;
+      },
+      mustHaveArgs: true,
+      args: {
+        process: {
+          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsProcessDump) {
+              return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
+        },
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
+            }
+
+            return true;
+          },
+        },
+        entityId: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'number-greater-than-zero',
+          about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('memory-dump'),
+      helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
+      helpUsage: getMemoryDumpHelpUsage(),
     });
   }
 
@@ -605,8 +871,6 @@ const adjustCommandsForSentinelOne = ({
   platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
-  const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
   const isRunscriptEnabled = featureFlags.responseActionsSentinelOneRunScriptEnabled;
 
   return commandList.map((command) => {
@@ -630,8 +894,6 @@ const adjustCommandsForSentinelOne = ({
 
     if (
       command.name === 'status' ||
-      (command.name === 'kill-process' && !isKillProcessEnabled) ||
-      (command.name === 'processes' && !isProcessesEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
@@ -702,7 +964,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: CustomScriptSelector,
-            selectorShowTextValue: true,
           },
           inputParams: {
             required: false,
@@ -712,6 +973,7 @@ const adjustCommandsForSentinelOne = ({
               { defaultMessage: 'Input arguments for the selected script' }
             ),
             mustHaveValue: 'non-empty-string',
+            SelectorComponent: SentinelOneScriptInputParams,
           },
           ...commandCommentArgument(),
         };
@@ -803,7 +1065,7 @@ const adjustCommandsForCrowdstrike = ({
         return {
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-          helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          helpExample: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpExample,
           mustHaveArgs: true,
           args: {
             Raw: {
@@ -819,7 +1081,6 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -827,6 +1088,7 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
+              SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
               required: false,
@@ -859,13 +1121,11 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
   microsoftDefenderEndpointRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
   const microsoftDefenderEndpointCancelEnabled =
     featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
-      !isMicrosoftDefenderEndpointEnabled ||
       command.name === 'status' ||
       !isAgentTypeAndActionSupported(
         'microsoft_defender_endpoint',
@@ -893,7 +1153,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             Args: {
@@ -901,6 +1160,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
+              SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),
           },

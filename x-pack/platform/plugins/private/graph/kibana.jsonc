@@ -17,8 +17,9 @@
     "requiredPlugins": [
       "licensing",
       "data",
+      "dataViews",
       "navigation",
-      "unifiedSearch",
+      "kql",
       "inspector",
       "savedObjectsManagement",
       "savedObjectsFinder",

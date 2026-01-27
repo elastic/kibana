@@ -241,6 +241,9 @@ describe('on_failure graph', () => {
         stepId: 'testRetryConnectorStep',
         stepType: 'continue',
         exitNodeId: 'exitContinue_testRetryConnectorStep',
+        configuration: {
+          condition: true,
+        },
       });
     });
 
@@ -255,6 +258,7 @@ describe('on_failure graph', () => {
           stepType: 'fallback',
           type: 'enter-try-block',
           enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
+          enterFallbackPathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
 

@@ -24,3 +24,5 @@ export type {
   NotificationsSetup,
   NotificationsStart,
 } from './src/contracts';
+export type { FeedbackStart } from './src/feedback_types';
+export type { ToursStart } from './src/tours_types';

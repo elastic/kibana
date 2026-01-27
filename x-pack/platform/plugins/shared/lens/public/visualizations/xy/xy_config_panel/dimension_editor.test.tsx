@@ -11,8 +11,8 @@ import { render, screen } from '@testing-library/react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
-import type { State, XYState, XYDataLayerConfig } from '../types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '@kbn/lens-common';
+import type { XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -24,7 +24,7 @@ import { getKbnPalettes } from '@kbn/palettes';
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -34,7 +34,7 @@ describe('XY Config panels', () => {
           seriesType: 'bar',
           layerType: LayerTypes.DATA,
           layerId: 'first',
-          splitAccessor: 'baz',
+          splitAccessors: ['baz'],
           xAccessor: 'foo',
           accessors: ['bar'],
         },
@@ -119,7 +119,7 @@ describe('XY Config panels', () => {
             seriesType: 'bar',
             layerType: LayerTypes.DATA,
             layerId: 'first',
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             xAccessor: 'foo',
             accessors: ['bar'],
           },
@@ -164,7 +164,7 @@ describe('XY Config panels', () => {
             seriesType: 'bar',
             layerType: LayerTypes.DATA,
             layerId: 'first',
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             xAccessor: 'foo',
             accessors: ['bar'],
             yConfig: [{ forAccessor: 'bar', color: 'red' }],
@@ -218,7 +218,7 @@ describe('XY Config panels', () => {
               seriesType: 'bar',
               layerType: LayerTypes.DATA,
               layerId: 'first',
-              splitAccessor: 'breakdownAccessor',
+              splitAccessors: ['breakdownAccessor'],
               xAccessor: 'foo',
               accessors: ['bar'],
               yConfig: [{ forAccessor: 'bar', color: 'red' }],
@@ -272,7 +272,7 @@ describe('XY Config panels', () => {
             seriesType: 'bar',
             layerType: LayerTypes.DATA,
             layerId: 'first',
-            splitAccessor: undefined,
+            splitAccessors: undefined,
             xAccessor: 'foo',
             accessors: ['bar'],
             yConfig: [{ forAccessor: 'bar', color: 'red' }],

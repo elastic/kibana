@@ -7,7 +7,7 @@
 
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { TableSuggestion, Visualization } from '../../types';
+import type { TableSuggestion, Visualization } from '@kbn/lens-common';
 import type { MetricVisualizationState } from './types';
 import { metricLabel, supportedDataTypes } from './visualization';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../hooks/use_kibana';
 import type { ComplianceDashboardDataV2, PosturePolicyTemplate } from '../../../common/types_old';

@@ -153,6 +153,9 @@ export class Footer extends Component<Props, State> {
             activePage={pageNumber}
             onPageClick={this._onPageChange}
             compressed
+            aria-label={i18n.translate('xpack.maps.tooltip.paginationLabel', {
+              defaultMessage: 'Tooltip results pagination',
+            })}
           />
         </EuiFlexItem>
       );

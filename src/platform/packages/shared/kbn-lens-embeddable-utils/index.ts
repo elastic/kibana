@@ -7,36 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './attribute_builder/types';
-
+export { LensConfigBuilder } from './config_builder';
 export type {
-  MetricLayerOptions,
-  MetricLayerConfig,
-  XYLayerOptions,
-  XYDataLayerConfig,
-  XYReferenceLinesLayerConfig,
-  XYVisualOptions,
-  XYLayerConfig,
-  ChartTypes,
-  ChartModel,
-  XYChartModel,
-  MetricChartModel,
-} from './attribute_builder/visualization_types';
+  DataViewsCommon,
+  LensAttributes,
+  ChartType,
+  TimeRange,
+  LensLayerQuery,
+  LensDataviewDataset,
+  LensDatatableDataset,
+  LensESQLDataset,
+  LensDataset,
+  LensBaseConfig,
+  LensConfig,
+  LensConfigOptions,
+  LensReferenceLineLayer,
+  LensAnnotationLayer,
+  LensGaugeConfig,
+  LensHeatmapConfig,
+  LensMetricConfig,
+  LensMosaicConfig,
+  LensPieConfig,
+  LensRegionMapConfig,
+  LensTableConfig,
+  LensTagCloudConfig,
+  LensTreeMapConfig,
+  LensXYConfig,
+  LensSeriesLayer,
+  LensBaseLayer,
+  LensXYConfigBase,
+  LensBreakdownConfig,
+} from './config_builder';
 
-export {
-  FormulaColumn,
-  MetricChart,
-  MetricLayer,
-  StaticColumn,
-  XYChart,
-  XYDataLayer,
-  XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
-  METRIC_ID,
-  METRIC_TREND_LINE_ID,
-  XY_ID,
-  XY_DATA_ID,
-  XY_REFERENCE_LINE_ID,
-} from './attribute_builder/visualization_types';
-
-export { LensAttributesBuilder } from './attribute_builder/lens_attributes_builder';
+export { lensApiStateSchema } from './config_builder';
+export type { LensApiSchemaType } from './config_builder';

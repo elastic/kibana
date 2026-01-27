@@ -100,6 +100,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       {readOnlyMode && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="lock"
             title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {

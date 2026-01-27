@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from 'expect';
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { serviceMap, timerange, apm } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/synthtrace-client';
+import { serviceMap, timerange, apm } from '@kbn/synthtrace-client';
 import { Readable } from 'node:stream';
 import { compact } from 'lodash';
 import type { SupertestReturnType } from '../../../../apm_api_integration/common/apm_api_supertest';

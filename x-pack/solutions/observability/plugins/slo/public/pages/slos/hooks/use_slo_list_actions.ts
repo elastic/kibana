@@ -39,14 +39,14 @@ export function useSloListActions({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type: SLO_OVERVIEW_EMBEDDABLE_ID,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

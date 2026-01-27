@@ -7,6 +7,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import type { EuiToolTip as EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
@@ -57,6 +59,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
+          aiAssistantManagementSelection,
         },
       },
     },
@@ -117,6 +120,19 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     };
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
+  useEffect(() => {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIAssistantType.Observability) {
+        service.conversations.openNewConversation({ messages: [] });
+        aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [aiAssistantManagementSelection, service.conversations]);
+
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
   ) ?? {
@@ -142,14 +158,19 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   }, [service.conversations]);
 
   const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
+  const tooltipRef = useRef<EuiToolTipRef | null>(null);
+  const hideToolTip = () => tooltipRef.current?.hideToolTip();
 
   return (
     <>
       <EuiToolTip
+        ref={tooltipRef}
         content={i18n.translate(
           'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
           { defaultMessage: 'Keyboard shortcut Ctrl ;' }
         )}
+        disableScreenReaderOutput
+        onMouseOut={hideToolTip}
       >
         <EuiButtonBasicOrEmpty
           aria-label={i18n.translate(
@@ -158,6 +179,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           )}
           data-test-subj="observabilityAiAssistantAppNavControlButton"
           onClick={() => {
+            hideToolTip();
             service.conversations.openNewConversation({
               messages: [],
             });

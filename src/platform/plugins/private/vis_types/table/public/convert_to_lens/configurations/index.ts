@@ -9,10 +9,10 @@
 
 import type {
   CollapseFunction,
-  Column,
   PagingState,
-  TableVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
+  DatatableVisualizationState as TableVisConfiguration,
+} from '@kbn/lens-common';
+import type { Column } from '@kbn/visualizations-plugin/common';
 import type { TableVisParams } from '../../../common';
 
 enum RowHeightMode {

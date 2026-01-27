@@ -61,7 +61,7 @@ import {
   getAlertsByIds,
   createRule,
   getQueryAlertIds,
-} from '../../../../../common/utils/detections_response';
+} from '@kbn/detections-response-ftr-services';
 import { getSignalsWithES } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -70,7 +70,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('patch_cases', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238980
+  describe.skip('patch_cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -139,7 +140,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
@@ -177,7 +177,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
           removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -1707,6 +1706,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1726,6 +1726,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1798,7 +1799,7 @@ export default ({ getService }: FtrProviderContext): void => {
               cases: updatedIndWithStatus.map((caseInfo) => ({
                 id: caseInfo.id,
                 version: caseInfo.version,
-                settings: { syncAlerts: true },
+                settings: { syncAlerts: true, extractObservables: true },
               })),
             },
           });
@@ -1856,6 +1857,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1927,7 +1929,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: updatedIndWithStatus[0].id,
                   version: updatedIndWithStatus[0].version,
-                  settings: { syncAlerts: true },
+                  settings: { syncAlerts: true, extractObservables: true },
                 },
               ],
             },
@@ -2031,7 +2033,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           const { id } = await createRule(supertest, log, rule);
@@ -2087,7 +2089,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           const { id } = await createRule(supertest, log, rule);
@@ -2135,7 +2137,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseStatusUpdated[0].id,
                   version: caseStatusUpdated[0].version,
-                  settings: { syncAlerts: true },
+                  settings: { syncAlerts: true, extractObservables: true },
                 },
               ],
             },
@@ -2193,7 +2195,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseUpdated.id,
                   version: caseUpdated.version,
-                  settings: { syncAlerts: false },
+                  settings: { syncAlerts: false, extractObservables: false },
                 },
               ],
             },

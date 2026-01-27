@@ -37,6 +37,19 @@ describe('streamToResponse', () => {
     });
   });
 
+  it('returns a response with model if present in the token event', async () => {
+    const response = await streamToResponse(
+      fromEvents(
+        chunkEvent('chunk_1'),
+        chunkEvent('chunk_2'),
+        tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'my_model' }),
+        messageEvent('message')
+      )
+    );
+
+    expect(response.model).toEqual('my_model');
+  });
+
   it('returns a response with tool calls if present', async () => {
     const someToolCall = {
       toolCallId: '42',

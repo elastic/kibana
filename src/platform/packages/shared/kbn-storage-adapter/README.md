@@ -36,7 +36,7 @@ Storage adapters should largely adhere to the following principles:
 
 Currently, we only have the StorageIndexAdapter which writes to plain indices. In the future, we'll want more:
 
-- A StorageDataStreamAdapter or StorageSavedObjectAdapter
+- A StorageDataStreamAdapter
 - Federated search
 - Data/Index Lifecycle Management
 - Migration scripts

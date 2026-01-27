@@ -97,9 +97,9 @@ describe('extractRegionId', () => {
     }
   );
 
-  it('returns default region if no region is found', () => {
+  it('returns undefined region if no region is found', () => {
     const result = extractRegionId('https://invalid.url.com');
-    expect(result).toBe('us-east-1');
+    expect(result).toBeUndefined();
   });
 });
 

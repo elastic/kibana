@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTimeRange,
   PublishingSubject,
-  SerializedTimeRange,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 export interface ChangePointComponentApi {
   viewType: PublishingSubject<ChangePointEmbeddableState['viewType']>;
@@ -32,13 +30,3 @@ export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointEmbeddabl
   PublishesDataViews &
   PublishesTimeRange &
   ChangePointComponentApi;
-
-export interface ChangePointEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  viewType: ChangePointDetectionViewType;
-  dataViewId: string;
-  fn: 'avg' | 'sum' | 'min' | 'max' | string;
-  metricField: string;
-  splitField?: string;
-  partitions?: string[];
-  maxSeriesToPlot?: number;
-}

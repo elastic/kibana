@@ -15,6 +15,8 @@
         "label": "deprecationsServiceMock",
         "description": [],
         "path": "src/core/packages/deprecations/browser-mocks/src/deprecations_service.mock.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">>"
             ],
             "path": "src/core/packages/deprecations/browser-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               "() => undefined"
             ],
             "path": "src/core/packages/deprecations/browser-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/browser-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

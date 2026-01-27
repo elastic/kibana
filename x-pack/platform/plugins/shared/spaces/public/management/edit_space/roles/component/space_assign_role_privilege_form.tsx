@@ -426,6 +426,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               <EuiFormRow>
                 {selectedRolesCombinedPrivileges.length > 1 ? (
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="warning"
                     iconType="info"
@@ -447,6 +448,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                   </EuiCallOut>
                 ) : (
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="primary"
                     iconType="info"

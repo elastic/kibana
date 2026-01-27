@@ -12,7 +12,7 @@ import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_cli
 import type { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
 import { mgetGaps } from '../mget_gaps';
-import type { GapBase } from '../types';
+import type { GapBase } from '../../../application/gaps/types';
 
 const CONFLICT_STATUS_CODE = 409;
 const MAX_RETRIES = 3;

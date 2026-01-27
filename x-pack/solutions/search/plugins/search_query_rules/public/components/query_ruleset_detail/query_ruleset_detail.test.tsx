@@ -7,7 +7,7 @@
 
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';

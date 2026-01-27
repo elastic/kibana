@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export enum OpsgenieSubActions {
-  CreateAlert = 'createAlert',
-  CloseAlert = 'closeAlert',
-}
-
 export const RULE_TAGS_TEMPLATE = `{{rule.tags}}`;
-
-export const OpsgenieConnectorTypeId = '.opsgenie';

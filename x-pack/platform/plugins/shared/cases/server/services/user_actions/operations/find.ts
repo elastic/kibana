@@ -128,6 +128,12 @@ export class UserActionFinder {
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
+        buildFilter({
+          filters: [UserActionActions.create],
+          field: 'action',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
       ],
       NodeBuilderOperators.and
     );

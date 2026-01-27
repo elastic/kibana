@@ -5,33 +5,169 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Phase } from '../../../common/types';
-import { createFormToggleAction } from './form_toggle_action';
 
-export const createSearchableSnapshotActions = (testBed: TestBed, phase: Phase) => {
-  const { exists, find, component } = testBed;
+export const createSearchableSnapshotActions = (phase: Phase) => {
   const fieldSelector = `searchableSnapshotField-${phase}`;
-  const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
-  const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
-  const toggleSearchableSnapshot = createFormToggleAction(testBed, toggleSelector);
+  const openPhaseAdvancedSettings = async () => {
+    const phaseContainer = screen.queryByTestId(`${phase}-phase`);
+    if (!phaseContainer) {
+      return;
+    }
+    const advancedButton = within(phaseContainer).queryByRole('button', {
+      name: /advanced settings/i,
+    }) as HTMLButtonElement | null;
+    if (advancedButton && advancedButton.getAttribute('aria-expanded') !== 'true') {
+      fireEvent.click(advancedButton);
+    }
+  };
+  const ensurePhasePreconditions = async () => {
+    if (phase === 'hot') {
+      const defaultSwitch = screen.queryByTestId('useDefaultRolloverSwitch');
+      if (defaultSwitch && defaultSwitch.getAttribute('aria-checked') !== 'true') {
+        fireEvent.click(defaultSwitch);
+        await waitFor(() => {
+          expect(defaultSwitch.getAttribute('aria-checked')).toBe('true');
+        });
+      }
+      const rolloverSwitch = screen.queryByTestId('rolloverSwitch');
+      if (rolloverSwitch && rolloverSwitch.getAttribute('aria-checked') !== 'true') {
+        fireEvent.click(rolloverSwitch);
+        await waitFor(() => {
+          expect(rolloverSwitch.getAttribute('aria-checked')).toBe('true');
+        });
+      }
+    }
+
+    if (phase !== 'delete') {
+      const phaseSwitch = screen.queryByTestId(`enablePhaseSwitch-${phase}`);
+      if (phaseSwitch) {
+        if (phaseSwitch.getAttribute('aria-checked') !== 'true') {
+          fireEvent.click(phaseSwitch);
+          await waitFor(() => {
+            expect(phaseSwitch.getAttribute('aria-checked')).toBe('true');
+          });
+        }
+      }
+    }
+
+    await openPhaseAdvancedSettings();
+  };
+
+  const waitForFieldContainer = async () => {
+    // Try quick path first, then ensure preconditions if needed
+    await waitFor(
+      async () => {
+        let container = screen.queryByTestId(fieldSelector);
+
+        if (!container) {
+          // Ensure phase is set up correctly
+          await ensurePhasePreconditions();
+
+          if (phase === 'cold' || phase === 'frozen') {
+            const minAgeInput = screen.queryByTestId<HTMLInputElement>(`${phase}-selectedMinAge`);
+            if (minAgeInput && !minAgeInput.value) {
+              fireEvent.change(minAgeInput, { target: { value: '1' } });
+              fireEvent.blur(minAgeInput);
+            }
+          }
+
+          container = screen.queryByTestId(fieldSelector);
+        }
+
+        if (!container) {
+          const availableFields = Array.from(
+            screen.queryAllByTestId(/^searchableSnapshotField-/),
+            (el) => el.getAttribute('data-test-subj')
+          );
+          throw new Error(
+            `Container ${fieldSelector} not found. Available fields: ${JSON.stringify(
+              availableFields
+            )}`
+          );
+        }
+
+        return container;
+      },
+      { timeout: 5000 }
+    );
+
+    return screen.getByTestId(fieldSelector);
+  };
+
+  const waitForCombobox = async (container: HTMLElement) => {
+    return (await within(container).findByTestId('searchableSnapshotCombobox')) as HTMLInputElement;
+  };
+
+  const toggleSearchableSnapshot = async () => {
+    const container = await waitForFieldContainer();
+    const toggle = within(container).queryByTestId('searchableSnapshotToggle');
+
+    // Frozen phase cannot disable the field so the toggle is absent. No action required.
+    if (!toggle) {
+      return;
+    }
+
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
+
+    await user.click(toggle);
+  };
+
   return {
-    searchableSnapshotDisabledDueToLicense: () =>
-      exists(licenseCalloutSelector) && find(toggleSelector).props().disabled === true,
-    searchableSnapshotsExists: () => exists(fieldSelector),
+    searchableSnapshotDisabledDueToLicense: () => {
+      const container = screen.queryByTestId(fieldSelector);
+      if (!container) return false;
+      const licenseCallout = within(container).queryByTestId(
+        'searchableSnapshotDisabledDueToLicense'
+      );
+      const toggle = within(container).queryByTestId(
+        'searchableSnapshotToggle'
+      ) as HTMLButtonElement | null;
+      return Boolean(licenseCallout && toggle?.disabled);
+    },
+    searchableSnapshotsExists: () => Boolean(screen.queryByTestId(fieldSelector)),
     toggleSearchableSnapshot,
     setSearchableSnapshot: async (value: string) => {
-      if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
-        await toggleSearchableSnapshot();
+      let container = screen.queryByTestId(fieldSelector);
+
+      if (!container) {
+        container = await waitForFieldContainer();
       }
-      act(() => {
-        find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
-          { label: value },
-        ]);
+
+      let combobox = within(container).queryByTestId(
+        'searchableSnapshotCombobox'
+      ) as HTMLInputElement | null;
+
+      if (!combobox) {
+        await toggleSearchableSnapshot();
+        container = await waitForFieldContainer();
+        combobox = within(container).queryByTestId(
+          'searchableSnapshotCombobox'
+        ) as HTMLInputElement | null;
+      }
+
+      if (!combobox) {
+        combobox = await waitForCombobox(container);
+      }
+
+      const user = userEvent.setup({
+        advanceTimers: jest.advanceTimersByTime,
+        pointerEventsCheck: 0,
       });
-      component.update();
+
+      await user.click(combobox);
+      await user.clear(combobox);
+
+      if (value !== '') {
+        await user.type(combobox, value);
+        fireEvent.keyDown(combobox, { key: 'Enter', code: 'Enter', keyCode: 13 });
+      }
     },
   };
 };

@@ -15,7 +15,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
 
 interface Ignore {
   normal_constant?: string;

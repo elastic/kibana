@@ -61,7 +61,7 @@ jest.mock('../../sourcerer/containers', () => ({
 }));
 
 const defaultUseAlertsPrivilegesReturn = {
-  hasKibanaREAD: true,
+  hasAlertsRead: true,
   hasIndexRead: true,
 };
 
@@ -174,7 +174,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not index read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: false,
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
     });
 
     const result = render(
@@ -198,7 +198,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not kibana read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: true,
-      hasKibanaREAD: false,
+      hasAlertsRead: false,
     });
 
     const result = render(
@@ -243,7 +243,7 @@ describe('DetectionResponse', () => {
   it('should render page permissions message if the user does not have read permission', () => {
     mockCanUseCases.mockReturnValue(noCasesPermissions());
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
       hasIndexRead: false,
     });
 

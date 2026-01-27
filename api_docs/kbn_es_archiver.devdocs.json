@@ -26,6 +26,8 @@
         "label": "EsArchiver",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "Options"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 40,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -79,6 +85,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -95,6 +103,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -112,6 +122,8 @@
                   "string | string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 59,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +136,8 @@
                 "label": "{\n      raw = false,\n      keepIndexNames = false,\n      query,\n    }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 64,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -138,6 +152,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -152,6 +168,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -166,6 +184,8 @@
                       "Record<string, any> | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 51,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -201,6 +221,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -217,6 +239,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 88,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -229,6 +253,8 @@
                 "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n      performance,\n    }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 94,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -243,6 +269,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 95,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -257,6 +285,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 96,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -271,6 +301,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 97,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -292,6 +324,8 @@
                       " | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                    "lineNumber": 98,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -315,6 +349,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -331,6 +367,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 120,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -351,6 +389,8 @@
               "(dir: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -367,6 +407,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 137,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -387,6 +429,8 @@
               "(path: string, handler: () => Promise<void>) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -403,6 +447,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 151,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -418,6 +464,8 @@
                   "() => Promise<void>"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 151,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,6 +496,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -462,6 +512,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 164,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -484,6 +536,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+                "lineNumber": 164,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -506,6 +560,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/es_archiver.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -527,6 +583,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-es-archiver/src/cli.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -543,6 +601,8 @@
         "label": "LoadActionPerfOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -557,6 +617,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,6 +633,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -15,7 +15,7 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-migration",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

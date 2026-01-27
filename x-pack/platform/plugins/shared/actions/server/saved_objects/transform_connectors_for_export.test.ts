@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
+import type { ActionTypeRegistryContract } from '../types';
+import { getConnectorType } from '../fixtures';
 
 describe('transform connector for export', () => {
-  const connectorType: jest.Mocked<ActionType> = {
+  const connectorType = getConnectorType({
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor: jest.fn(),
-    validate: {
-      config: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
-      secrets: {
-        schema: {
-          validate: (value: unknown) => value as ActionTypeSecrets,
-        },
-      },
-    },
-  };
+  });
   const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> =
     actionTypeRegistryMock.create();
 
@@ -248,14 +237,10 @@ describe('transform connector for export', () => {
     actionTypeRegistry.get.mockReturnValue({
       ...connectorType,
       validate: {
-        config: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
+        config: { schema: z.object({}) },
+        params: { schema: z.object({}) },
         secrets: {
-          schema: {
-            validate: (value: unknown) => {
-              throw new Error('i need secrets!');
-            },
-          },
+          schema: z.object({}).refine(() => false, { message: 'i need secrets!' }),
         },
       },
     });

@@ -571,7 +571,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           {splom.messages.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut color="warning">
+              <EuiCallOut announceOnMount color="warning">
                 {splom.messages.map((m) => (
                   <span key={stringHash(m)}>
                     {m}

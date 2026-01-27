@@ -5,70 +5,78 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers';
-import type { DownsampleTestBed } from './downsample.helpers';
-import { setupDownsampleTestBed } from './downsample.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
+import { createDownsampleActions } from '../../helpers/actions/downsample_actions';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
 
 describe('<EditPolicy /> downsample', () => {
-  let testBed: DownsampleTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
-    await act(async () => {
-      testBed = await setupDownsampleTestBed(httpSetup);
-    });
+    renderEditPolicy(httpSetup);
 
-    const { component } = testBed;
-    component.update();
+    await screen.findByTestId('savePolicyButton');
 
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.togglePhase('warm');
-    await actions.togglePhase('cold');
+    const rolloverActions = createRolloverActions();
+    const togglePhase = createTogglePhaseAction();
+
+    rolloverActions.rollover.toggleDefault();
+    await togglePhase('warm');
+    await togglePhase('cold');
   });
 
   test('enabling downsample in hot should hide readonly in hot, warm and cold', async () => {
-    const { actions } = testBed;
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('warm-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('cold-readonlySwitch')).toBeInTheDocument();
 
-    expect(actions.hot.readonlyExists()).toBeTruthy();
-    expect(actions.warm.readonlyExists()).toBeTruthy();
-    expect(actions.cold.readonlyExists()).toBeTruthy();
+    const hotDownsampleActions = createDownsampleActions('hot');
+    hotDownsampleActions.downsample.toggle();
 
-    await actions.hot.downsample.toggle();
-
-    expect(actions.hot.readonlyExists()).toBeFalsy();
-    expect(actions.warm.readonlyExists()).toBeFalsy();
-    expect(actions.cold.readonlyExists()).toBeFalsy();
+    expect(screen.queryByTestId('hot-readonlySwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('warm-readonlySwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cold-readonlySwitch')).not.toBeInTheDocument();
   });
 
   test('enabling downsample in warm should hide readonly in warm and cold', async () => {
-    const { actions } = testBed;
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('warm-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('cold-readonlySwitch')).toBeInTheDocument();
 
-    expect(actions.hot.readonlyExists()).toBeTruthy();
-    expect(actions.warm.readonlyExists()).toBeTruthy();
-    expect(actions.cold.readonlyExists()).toBeTruthy();
+    const warmDownsampleActions = createDownsampleActions('warm');
+    warmDownsampleActions.downsample.toggle();
 
-    await actions.warm.downsample.toggle();
-
-    expect(actions.hot.readonlyExists()).toBeTruthy();
-    expect(actions.warm.readonlyExists()).toBeFalsy();
-    expect(actions.cold.readonlyExists()).toBeFalsy();
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
+    expect(screen.queryByTestId('warm-readonlySwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cold-readonlySwitch')).not.toBeInTheDocument();
   });
 
   test('enabling downsample in cold should hide readonly in cold', async () => {
-    const { actions } = testBed;
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('warm-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('cold-readonlySwitch')).toBeInTheDocument();
 
-    expect(actions.hot.readonlyExists()).toBeTruthy();
-    expect(actions.warm.readonlyExists()).toBeTruthy();
-    expect(actions.cold.readonlyExists()).toBeTruthy();
+    const coldDownsampleActions = createDownsampleActions('cold');
+    coldDownsampleActions.downsample.toggle();
 
-    await actions.cold.downsample.toggle();
-
-    expect(actions.hot.readonlyExists()).toBeTruthy();
-    expect(actions.warm.readonlyExists()).toBeTruthy();
-    expect(actions.cold.readonlyExists()).toBeFalsy();
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('warm-readonlySwitch')).toBeInTheDocument();
+    expect(screen.queryByTestId('cold-readonlySwitch')).not.toBeInTheDocument();
   });
 });

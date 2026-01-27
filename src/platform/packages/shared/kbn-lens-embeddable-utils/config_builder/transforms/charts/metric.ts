@@ -12,8 +12,9 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+  TextBasedLayer,
+  TypedLensSerializedState,
+} from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes } from '../../types';
@@ -29,28 +30,39 @@ import {
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, MetricState } from '../../schema';
+import type { MetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
-import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  getSharedChartLensStateToAPI,
+  getSharedChartAPIToLensState,
+  getMetricAccessor,
+  getDatasourceLayers,
+  getLensStateLayer,
+} from './utils';
+import {
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  fromStaticColorAPIToLensState,
+  fromStaticColorLensStateToAPI,
+} from '../coloring';
 
 type MetricApiCompareType = Extract<
   Required<MetricState['secondary_metric']>,
   { compare: any }
 >['compare'];
 
-const ACCESSOR = 'metric_formula_accessor';
+const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
-function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
+function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
 
@@ -80,12 +92,14 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    metricAccessor: ACCESSOR,
-    // todo: handle all color configs
-    ...(layer.metric.color?.type === 'static' ? { color: layer.metric.color.color } : {}),
-    ...(layer.metric.color?.type === 'gradient'
-      ? { palette: { type: 'palette', name: layer.metric.color.palette! } }
+    metricAccessor: getAccessorName('metric'),
+    ...(layer.metric.color?.type === 'static'
+      ? fromStaticColorAPIToLensState(layer.metric.color)
       : {}),
+    ...(layer.metric.color?.type === 'dynamic'
+      ? { palette: fromColorByValueAPIToLensState(layer.metric.color) }
+      : {}),
+    ...(layer.metric.apply_color_to ? { applyColorTo: layer.metric.apply_color_to } : {}),
     subtitle: layer.metric.sub_label ?? '',
     showBar: false,
     valueFontMode: layer.metric.fit ? 'fit' : 'default',
@@ -105,9 +119,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
           secondaryPrefix: layer.secondary_metric.prefix,
-          secondaryAlign: layer.metric.alignments.value,
-          // secondaryLabelPosition: layer.metric.alignments.labels,
-          // secondaryLabel: '',
+          secondaryAlign: layer.metric.alignments?.value,
           ...(layer.secondary_metric.compare
             ? fromCompareAPIToLensState(layer.secondary_metric.compare)
             : {}),
@@ -122,10 +134,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn:
-      layer.breakdown_by && layer.breakdown_by.collapse_by
-        ? layer.breakdown_by.collapse_by
-        : undefined,
+    collapseFn: layer.breakdown_by?.collapse_by,
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -179,17 +188,18 @@ function fromCompareLensStateToAPI(
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): MetricState {
-  if (visualization.metricAccessor === undefined) {
+  const metricAccessor = getMetricAccessor(visualization);
+  if (metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');
@@ -201,7 +211,7 @@ function reverseBuildVisualizationState(
     const esqlLayer = layer as TextBasedLayer;
     props = {
       ...props,
-      metric: getValueApiColumn(visualization.metricAccessor, esqlLayer),
+      metric: getValueApiColumn(metricAccessor, esqlLayer),
       ...(visualization.secondaryMetricAccessor
         ? {
             secondary_metric: {
@@ -229,10 +239,7 @@ function reverseBuildVisualizationState(
     } as MetricState;
   } else if (dataset.type === 'dataView' || dataset.type === 'index') {
     const formLayer = layer as FormBasedLayer;
-    const metric = operationFromColumn(
-      visualization.metricAccessor,
-      formLayer
-    ) as LensApiAllMetricOperations;
+    const metric = operationFromColumn(metricAccessor, formLayer) as LensApiAllMetricOperations;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const secondary_metric = visualization.secondaryMetricAccessor
       ? (operationFromColumn(
@@ -282,21 +289,19 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.color) {
-      props.metric.color = {
-        type: 'static',
-        color: visualization.color,
-      };
+      props.metric.color = fromStaticColorLensStateToAPI(visualization.color);
     }
 
     if (visualization.palette) {
-      props.metric.color = {
-        type: 'gradient',
-        palette: visualization.palette.name,
-      };
+      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      if (colorByValue?.range === 'absolute') {
+        props.metric.color = colorByValue;
+      }
     }
 
-    // todo: what to do with this ?
-    // if (visualization.applyColorTo) {}
+    if (visualization.applyColorTo) {
+      props.metric.apply_color_to = visualization.applyColorTo;
+    }
 
     if (visualization.icon) {
       props.metric.icon = {
@@ -361,16 +366,21 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
-  addLayerColumn(defaultLayer, ACCESSOR, columns);
+  if (trendLineLayer) {
+    trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
+  }
+
+  addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
   if (trendLineLayer) {
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, columns);
+    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, columns);
   }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
     const breakdownColumn = fromBucketLensApiToLensState(
       layer.breakdown_by as LensApiBucketOperations,
-      []
+      columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
     );
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
@@ -409,7 +419,7 @@ function getValueColumns(layer: MetricStateESQL) {
     ...(layer.breakdown_by
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
       : []),
-    getValueColumn(ACCESSOR, layer.metric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
     ...(layer.metric?.background_chart?.type === 'bar'
       ? [
           getValueColumn(
@@ -425,7 +435,16 @@ function getValueColumns(layer: MetricStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: MetricState): LensAttributes {
+type MetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsMetric' }
+>;
+
+export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
+  state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: MetricState): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
@@ -438,7 +457,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -448,30 +467,24 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
 }
 
-export function fromLensStateToAPI(
-  config: LensAttributes
-): Extract<LensApiState, { type: 'metric' }> {
+export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
-
-  const [layerId, layer] = Object.entries(layers)[0];
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

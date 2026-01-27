@@ -42,6 +42,7 @@ export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
         setUrlandReplaceHistory={() => {}}
         setUrlandPushHistory={() => {}}
         showCardLabels={showCardLabels}
+        sortByFeaturedIntegrations={false}
       />
     </Suspense>
   );

@@ -6,11 +6,6 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
       "bytes": [
         "b",
         "kb",
@@ -19,6 +14,20 @@
         "tb",
         "pb"
       ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
       "h": [
         "assignment_explanation",
         "buckets.count",
@@ -142,15 +151,6 @@
         "node.name",
         "opened_time",
         "state"
-      ],
-      "time": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
       ]
     },
     "methods": [

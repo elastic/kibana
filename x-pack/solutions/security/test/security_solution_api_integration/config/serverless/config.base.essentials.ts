@@ -21,6 +21,7 @@ export interface CreateTestConfigOptions {
    * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
    */
   kbnTestServerWait?: RegExp;
+  indexRefreshInterval?: string | false;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -70,6 +71,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             installMockPrebuiltRulesPackage({ getService }),
         },
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

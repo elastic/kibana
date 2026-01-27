@@ -8,10 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FormBasedLayer } from '../types';
+import type {
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  IndexPatternField,
+} from '@kbn/lens-common';
 import { hasField } from '../pure_utils';
-import type { GenericIndexPatternColumn } from '../operations';
-import type { IndexPatternField } from '../../../types';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);

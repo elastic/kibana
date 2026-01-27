@@ -21,7 +21,8 @@ import { typedMemo } from '../utils/react';
 export const ViewAlertDetailsAlertAction = typedMemo(
   <AC extends AdditionalContext = AdditionalContext>({
     alert,
-    openAlertInFlyout,
+    rowIndex,
+    onExpandedAlertIndexChange,
     onActionExecuted,
     isAlertDetailsEnabled,
     resolveAlertPagePath,
@@ -62,7 +63,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         size="s"
         onClick={() => {
           onActionExecuted?.();
-          openAlertInFlyout(alert._id);
+          onExpandedAlertIndexChange(rowIndex);
         }}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {

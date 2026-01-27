@@ -19,7 +19,7 @@ import type {
 } from '../../../api/connector/add_connector_api_logic';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
-import { SearchIndexTabId } from '../../search_index/search_index';
+import { SearchIndexTabId } from '../../search_index/constants';
 
 type AddConnectorActions = Pick<
   Actions<AddConnectorApiLogicArgs, AddConnectorApiLogicResponse>,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import { EuiHeaderSectionItem } from '@elastic/eui';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -32,7 +33,15 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
   return (
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (
-        <EuiHeaderSectionItem key={index}>
+        <EuiHeaderSectionItem
+          key={index}
+          css={css`
+            &:has(> :empty) {
+              // containers that have empty children should be removed from the layout flow and be unaffected by the flex layout gap of this element's parent flex layout gap
+              display: contents;
+            }
+          `}
+        >
           <HeaderExtension extension={navControl.mount} />
         </EuiHeaderSectionItem>
       ))}

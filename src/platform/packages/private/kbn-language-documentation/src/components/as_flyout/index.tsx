@@ -8,6 +8,7 @@
  */
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFlyout,
   useEuiTheme,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
-import { DocumentationMainContent, DocumentationNavigation } from '../shared';
+import { DocumentationMainContent, DocumentationNavigation, SEARCH_DEBOUNCE_TIME } from '../shared';
 import { getESQLDocsSections } from '../../sections';
 import type { LanguageDocumentationSections } from '../../types';
 
@@ -43,6 +44,15 @@ function DocumentationFlyout({
 
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchText(searchText);
+    },
+    SEARCH_DEBOUNCE_TIME,
+    [searchText]
+  );
 
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -71,8 +81,8 @@ function DocumentationFlyout({
   }, [documentationSections]);
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
-  }, [documentationSections, searchText, searchInDescription]);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, documentationSections, 1);
+  }, [documentationSections, debouncedSearchText, searchInDescription]);
 
   return (
     <>
@@ -108,7 +118,7 @@ function DocumentationFlyout({
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <DocumentationMainContent
-              searchText={searchText}
+              searchText={debouncedSearchText}
               scrollTargets={scrollTargets}
               filteredGroups={filteredGroups}
               sections={documentationSections}

@@ -12,9 +12,9 @@ const features = [
   { id: 'feature1', category: { id: 'observability' } },
   { id: 'feature2', category: { id: 'enterpriseSearch' } },
   { id: 'feature3', category: { id: 'securitySolution' } },
-  { id: 'feature5', category: { id: 'chat' } },
+  { id: 'feature5', category: { id: 'workplaceai' } },
   { id: 'feature4', category: { id: 'should_not_be_returned' } }, // not a solution, it should never appeared in the disabled features
-  { id: 'feature6', category: { id: 'chat' }, deprecated: true },
+  { id: 'feature6', category: { id: 'workplaceai' }, deprecated: true },
 ] as KibanaFeature[];
 
 describe('#withSpaceSolutionDisabledFeatures', () => {
@@ -44,7 +44,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "es"', () => {
-    test('it removes the "oblt", "security" and "chat" features', () => {
+    test('it removes the "oblt", "security" and "workplaceai" features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
       const spaceSolution = 'es';
 
@@ -60,7 +60,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "oblt"', () => {
-    test('it removes the "security" and "chat" features', () => {
+    test('it removes the "security" and "workplaceai" features', () => {
       const spaceDisabledFeatures: string[] = [];
       const spaceSolution = 'oblt';
 
@@ -75,7 +75,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "security"', () => {
-    test('it removes the "observability", "enterpriseSearch" and "chat" features', () => {
+    test('it removes the "observability", "enterpriseSearch" and "workplaceai" features', () => {
       const spaceDisabledFeatures: string[] = ['baz'];
       const spaceSolution = 'security';
 
@@ -102,10 +102,10 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
     });
   });
 
-  describe('when the space solution is "chat"', () => {
+  describe('when the space solution is "workplaceai"', () => {
     test('it removes the "oblt", "es" and "security" features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
-      const spaceSolution = 'chat';
+      const spaceSolution = 'workplaceai';
 
       const result = withSpaceSolutionDisabledFeatures(
         features,

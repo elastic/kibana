@@ -17,6 +17,8 @@
           "OverlayBannersStart"
         ],
         "path": "src/core/packages/overlays/browser-internal/src/banners/banners_service.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

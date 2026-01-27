@@ -64,20 +64,20 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
         describe('find gaps with request body', () => {
           it('should handle finding gaps with various parameters', async () => {
             // Create 2 rules
-            const rresponse1 = await supertest
+            const response1 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
               .send(getRule())
               .expect(200);
-            const ruleId1 = rresponse1.body.id;
+            const ruleId1 = response1.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
 
-            const rresponse2 = await supertest
+            const response2 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
               .send(getRule())
               .expect(200);
-            const ruleId2 = rresponse2.body.id;
+            const ruleId2 = response2.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
 
             // Create gaps for both rules
@@ -109,6 +109,7 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
                 start: gap2Start,
                 end: gap2End,
                 spaceId: apiOptions.spaceId,
+                failedAutoFillAttempts: 2,
               });
 
             // Test cases for finding gaps
@@ -129,6 +130,12 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
                   rule_id: ruleId2,
                   start: searchStart,
                   end: searchEnd,
+                },
+                validate: (response: any) => {
+                  const data = response.body.data;
+
+                  // gap should have failedAutoFillAttempts set to 2
+                  expect(data[0].failed_auto_fill_attempts).to.eql(2);
                 },
                 expectedTotal: 1,
                 description: 'should find gaps for rule 2',

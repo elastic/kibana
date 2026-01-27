@@ -6,10 +6,12 @@
  */
 
 import expect from 'expect';
+import pRetry from 'p-retry';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { dashboardMigrationRouteFactory } from '../../../../utils/dashboards';
 import {
   deleteAllDashboardMigrations,
+  deleteAllLookupIndices,
   getDashboardResourcesPerMigrationFromES,
 } from '../../../../utils/es_queries_dashboards';
 
@@ -22,9 +24,133 @@ export default ({ getService }: FtrProviderContext) => {
     let migrationId: string;
 
     beforeEach(async () => {
+      await deleteAllLookupIndices(es);
       await deleteAllDashboardMigrations(es);
       const response = await dashboardMigrationRoutes.create({});
       migrationId = response.body.migration_id;
+    });
+
+    describe('Lookup Resource', () => {
+      it('should successfully upsert lookup resources even with capital letters', async () => {
+        const lookupResources = [
+          {
+            type: 'lookup' as const,
+            name: 'severity_lookUp',
+            content: 'high,1\nmedium,2\nlow,3',
+            metadata: { format: 'csv', description: 'Severity to numeric mapping' },
+          },
+          {
+            type: 'lookup' as const,
+            name: 'user_roles',
+            content: 'admin,Administrator\nuser,Regular User\nguest,Guest User',
+            metadata: { format: 'csv' },
+          },
+        ];
+
+        const response = await dashboardMigrationRoutes.resources.upsert({
+          migrationId,
+          body: lookupResources,
+        });
+
+        expect(response.body).toEqual({ acknowledged: true });
+
+        // Verify resources were stored in ES
+        const esResources = await getDashboardResourcesPerMigrationFromES({
+          es,
+          migrationId,
+        });
+
+        expect(esResources.hits.hits.length).toBeGreaterThan(0);
+
+        // Check that the resources contain the expected data
+        const storedResources = esResources.hits.hits.map((hit: any) => hit._source);
+        const lookupResourcesInES = storedResources.filter(
+          (resource: any) => resource.type === 'lookup'
+        );
+
+        expect(lookupResourcesInES).toHaveLength(2);
+        expect(
+          lookupResourcesInES.some((resource: any) => resource.name === 'severity_lookUp')
+        ).toBe(true);
+        expect(lookupResourcesInES.some((resource: any) => resource.name === 'user_roles')).toBe(
+          true
+        );
+        expect(
+          lookupResourcesInES.some(
+            (resource: any) => resource.content === 'lookup_default_severity-look-up'
+          )
+        ).toBe(true);
+      });
+
+      it('should upsert the content of lookup correctly', async () => {
+        const lookupResources = [
+          {
+            type: 'lookup' as const,
+            name: 'severity_lookUp',
+            content: 'high,medium,low\n1,2,3',
+            metadata: { format: 'csv', description: 'Severity to numeric mapping' },
+          },
+        ];
+
+        const lookupIndexName = 'lookup_default_severity-look-up';
+
+        const response = await dashboardMigrationRoutes.resources.upsert({
+          migrationId,
+          body: lookupResources,
+        });
+
+        expect(response.body).toEqual({ acknowledged: true });
+
+        /** since we do not wait for lookups to fully index across shards. for test , we will retry a couple of times to make sure the data is fully indexed */
+        await pRetry(
+          async () => {
+            const lookupContent = await es.search({
+              index: lookupIndexName,
+              size: 10,
+            });
+            if (lookupContent.hits.hits.length === 0) {
+              throw new Error('Lookup content not found yet');
+            }
+          },
+          { retries: 3 }
+        );
+
+        const lookupContent = await es.search({
+          index: lookupIndexName,
+          size: 10,
+        });
+
+        expect(lookupContent.hits.hits.length).toBe(1);
+        expect(lookupContent.hits.hits[0]._source).toEqual({
+          high: '1',
+          medium: '2',
+          low: '3',
+        });
+      });
+
+      it('should raise error when upserting a lookup with invalid name', async () => {
+        const lookupResources = [
+          {
+            type: 'lookup' as const,
+            name: '-',
+            content: 'high,1\nmedium,2\nlow,3',
+            metadata: { format: 'csv', description: 'Severity to numeric mapping' },
+          },
+        ];
+
+        const response = await dashboardMigrationRoutes.resources.upsert({
+          migrationId,
+          body: lookupResources,
+          expectedStatusCode: 500,
+        });
+
+        expect(response.body).toEqual({
+          error: 'Internal Server Error',
+          message:
+            'Failed to process lookups: Error: Error creating lookup index from lookup: -. It does not conform to index naming rules. No valid characters in input string',
+          statusCode: 500,
+        });
+      });
     });
 
     it('should successfully upsert macro resources', async () => {
@@ -68,52 +194,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(macroResourcesInES).toHaveLength(2);
       expect(macroResourcesInES.some((resource: any) => resource.name === 'test_macro')).toBe(true);
       expect(macroResourcesInES.some((resource: any) => resource.name === 'another_macro')).toBe(
-        true
-      );
-    });
-
-    it('should successfully upsert lookup resources', async () => {
-      const lookupResources = [
-        {
-          type: 'lookup' as const,
-          name: 'severity_lookup',
-          content: 'high,1\nmedium,2\nlow,3',
-          metadata: { format: 'csv', description: 'Severity to numeric mapping' },
-        },
-        {
-          type: 'lookup' as const,
-          name: 'user_roles',
-          content: 'admin,Administrator\nuser,Regular User\nguest,Guest User',
-          metadata: { format: 'csv' },
-        },
-      ];
-
-      const response = await dashboardMigrationRoutes.resources.upsert({
-        migrationId,
-        body: lookupResources,
-      });
-
-      expect(response.body).toEqual({ acknowledged: true });
-
-      // Verify resources were stored in ES
-      const esResources = await getDashboardResourcesPerMigrationFromES({
-        es,
-        migrationId,
-      });
-
-      expect(esResources.hits.hits.length).toBeGreaterThan(0);
-
-      // Check that the resources contain the expected data
-      const storedResources = esResources.hits.hits.map((hit: any) => hit._source);
-      const lookupResourcesInES = storedResources.filter(
-        (resource: any) => resource.type === 'lookup'
-      );
-
-      expect(lookupResourcesInES).toHaveLength(2);
-      expect(lookupResourcesInES.some((resource: any) => resource.name === 'severity_lookup')).toBe(
-        true
-      );
-      expect(lookupResourcesInES.some((resource: any) => resource.name === 'user_roles')).toBe(
         true
       );
     });

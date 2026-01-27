@@ -22,6 +22,7 @@ import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
 import { FocusedTraceWaterfallEmbeddable } from './focused_trace_waterfall_embeddable';
+import type { OnErrorClick } from '../../components/shared/trace_waterfall/trace_waterfall_context';
 
 interface BaseProps {
   traceId: string;
@@ -40,7 +41,8 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
-  mode: 'full';
+  onErrorClick?: OnErrorClick;
+  mode: 'full' | 'filtered';
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
@@ -54,7 +56,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
   > = {
     type: APM_TRACE_WATERFALL_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject('serviceName' in state ? state.serviceName : '');
       const traceId$ = new BehaviorSubject(state.traceId);
@@ -72,22 +74,24 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const getRelatedErrorsHref$ = new BehaviorSubject(
         'getRelatedErrorsHref' in state ? state.getRelatedErrorsHref : undefined
       );
+      const onErrorClick$ = new BehaviorSubject(
+        'onErrorClick' in state ? state.onErrorClick : undefined
+      );
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            serviceName: serviceName$.getValue(),
-            traceId: traceId$.getValue(),
-            rangeFrom: rangeFrom$.getValue(),
-            rangeTo: rangeTo$.getValue(),
-            displayLimit: displayLimit$.getValue(),
-            docId: docId$.getValue(),
-            scrollElement: scrollElement$.getValue(),
-            onNodeClick: onNodeClick$.getValue(),
-            getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
-            mode: mode$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          traceId: traceId$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          displayLimit: displayLimit$.getValue(),
+          docId: docId$.getValue(),
+          scrollElement: scrollElement$.getValue(),
+          onNodeClick: onNodeClick$.getValue(),
+          getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
+          onErrorClick: onErrorClick$.getValue(),
+          mode: mode$.getValue(),
         };
       }
 
@@ -106,6 +110,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           scrollElement$,
           onNodeClick$,
           getRelatedErrorsHref$,
+          onErrorClick$,
           mode$
         ).pipe(map(() => undefined)),
         getComparators: () => {
@@ -120,28 +125,30 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement: 'referenceEquality',
             onNodeClick: 'referenceEquality',
             getRelatedErrorsHref: 'referenceEquality',
+            onErrorClick: 'referenceEquality',
             mode: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
 
           // reset base state
-          traceId$.next(lastSaved?.rawState.traceId ?? '');
-          rangeFrom$.next(lastSaved?.rawState.rangeFrom ?? '');
-          rangeTo$.next(lastSaved?.rawState.rangeTo ?? '');
-          mode$.next(lastSaved?.rawState.mode ?? 'summary');
+          traceId$.next(lastSaved?.traceId ?? '');
+          rangeFrom$.next(lastSaved?.rangeFrom ?? '');
+          rangeTo$.next(lastSaved?.rangeTo ?? '');
+          mode$.next(lastSaved?.mode ?? 'summary');
 
           // reset entry state
-          const entryState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableEntryProps;
+          const entryState = lastSaved as ApmTraceWaterfallEmbeddableEntryProps;
           serviceName$.next(entryState?.serviceName ?? '');
           displayLimit$.next(entryState?.displayLimit ?? 0);
           scrollElement$.next(entryState?.scrollElement ?? undefined);
           onNodeClick$.next(entryState?.onNodeClick ?? undefined);
           getRelatedErrorsHref$.next(entryState?.getRelatedErrorsHref ?? undefined);
+          onErrorClick$.next(entryState?.onErrorClick ?? undefined);
 
           // reset focused state
-          const focusedState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableFocusedProps;
+          const focusedState = lastSaved as ApmTraceWaterfallEmbeddableFocusedProps;
           docId$.next(focusedState?.docId ?? '');
         },
       });
@@ -165,6 +172,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement,
             onNodeClick,
             getRelatedErrorsHref,
+            onErrorClick,
             mode,
           ] = useBatchedPublishingSubjects(
             serviceName$,
@@ -176,10 +184,18 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement$,
             onNodeClick$,
             getRelatedErrorsHref$,
+            onErrorClick$,
             mode$
           );
           const content =
-            mode === 'full' ? (
+            mode === 'summary' ? (
+              <FocusedTraceWaterfallEmbeddable
+                traceId={traceId}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                docId={docId}
+              />
+            ) : (
               <TraceWaterfallEmbeddable
                 serviceName={serviceName}
                 traceId={traceId}
@@ -189,13 +205,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
                 onNodeClick={onNodeClick}
                 scrollElement={scrollElement}
                 getRelatedErrorsHref={getRelatedErrorsHref}
-              />
-            ) : (
-              <FocusedTraceWaterfallEmbeddable
-                traceId={traceId}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                docId={docId}
+                onErrorClick={onErrorClick}
+                mode={mode}
               />
             );
 

@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/esql-composer",
-  "owner": ["@elastic/obs-ux-infra_services-team", "@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-ai-team"],
   "group": "platform",
   "visibility": "shared"
 }

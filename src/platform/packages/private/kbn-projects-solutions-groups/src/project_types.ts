@@ -8,21 +8,21 @@
  */
 
 /**
- * Constant for the Kibana Observability (workchat) serverless project type.
+ * Constant for the Kibana Observability serverless project type.
  */
 export const KIBANA_OBSERVABILITY_PROJECT = 'oblt' as const;
 /**
- * Constant for the Kibana Security (workchat) serverless project type.
+ * Constant for the Kibana Security serverless project type.
  */
 export const KIBANA_SECURITY_PROJECT = 'security' as const;
 /**
- * Constant for the Kibana Search (workchat) serverless project type.
+ * Constant for the Kibana Search serverless project type.
  */
 export const KIBANA_SEARCH_PROJECT = 'es' as const;
 /**
- * Constant for the Kibana Chat (workchat) serverless project type.
+ * Constant for the Kibana Workplace AI serverless project type.
  */
-export const KIBANA_CHAT_PROJECT = 'chat' as const;
+export const KIBANA_WORKPLACE_AI_PROJECT = 'workplaceai' as const;
 
 /**
  * A list of all Kibana serverless project types.
@@ -31,7 +31,7 @@ export const KIBANA_PROJECTS = [
   KIBANA_OBSERVABILITY_PROJECT,
   KIBANA_SECURITY_PROJECT,
   KIBANA_SEARCH_PROJECT,
-  KIBANA_CHAT_PROJECT,
+  KIBANA_WORKPLACE_AI_PROJECT,
 ] as const; // BOOKMARK - List of Kibana project types
 
 /**

@@ -28,6 +28,8 @@
         "label": "AgentEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/agent/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/agent/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +60,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/agent/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -70,6 +76,8 @@
         "label": "AuditdEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,6 +92,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +108,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -113,6 +125,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,6 +142,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -142,6 +158,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -156,6 +174,8 @@
         "label": "CloudEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/cloud/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -171,6 +191,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,6 +208,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -200,6 +224,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,6 +240,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -228,6 +256,8 @@
         "label": "CodeSignature",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,6 +272,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -253,6 +285,8 @@
             "label": "trusted",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -267,6 +301,8 @@
         "label": "DestinationEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -281,6 +317,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +333,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,6 +349,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -323,6 +365,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +388,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,6 +404,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/destination/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -372,6 +420,8 @@
         "label": "DllEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,6 +437,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -401,6 +453,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -422,6 +476,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,6 +493,25 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.hash",
+            "type": "Object",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "Hash",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -451,6 +526,8 @@
         "label": "DnsEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dns/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -466,6 +543,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dns/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,6 +559,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dns/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -494,6 +575,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dns/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -508,6 +591,8 @@
         "label": "EcsSecurityExtension",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -529,6 +614,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,6 +637,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,6 +660,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -592,6 +683,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +706,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +729,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -655,6 +752,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,6 +768,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,6 +791,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,6 +814,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,6 +837,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -753,6 +860,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -774,6 +883,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +906,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -816,6 +929,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -837,6 +952,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -858,6 +975,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -879,6 +998,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -890,6 +1011,8 @@
             "label": "_id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -904,6 +1027,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -925,6 +1050,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -946,6 +1073,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -967,6 +1096,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,6 +1114,8 @@
               "; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -997,6 +1130,8 @@
               "{ index: string[]; data_view_id?: string | undefined; type?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,6 +1146,8 @@
               "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,6 +1169,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1053,6 +1192,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1074,6 +1215,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,6 +1238,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1109,6 +1254,8 @@
               "{ parentId: string; sequenceNumber: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1130,6 +1277,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1151,6 +1300,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,6 +1323,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1186,6 +1339,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1207,6 +1362,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1228,6 +1385,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/index.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1242,6 +1401,8 @@
         "label": "EndgameEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1256,6 +1417,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1270,6 +1433,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1284,6 +1449,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1298,6 +1465,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,6 +1481,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1326,6 +1497,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1340,6 +1513,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1354,6 +1529,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1368,6 +1545,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1382,6 +1561,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1396,6 +1577,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1410,6 +1593,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1424,6 +1609,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1438,6 +1625,8 @@
         "label": "EventEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1452,6 +1641,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1466,6 +1657,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1480,6 +1673,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1494,6 +1689,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1508,6 +1705,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1522,6 +1721,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1536,6 +1737,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1550,6 +1753,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1564,6 +1769,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1578,6 +1785,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,6 +1801,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,6 +1817,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1620,6 +1833,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1634,6 +1849,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1648,6 +1865,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1662,6 +1881,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1676,6 +1897,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1690,6 +1913,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1704,6 +1929,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1718,6 +1945,8 @@
         "label": "FileEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1732,6 +1961,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1746,6 +1977,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1760,6 +1993,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1774,6 +2009,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1789,6 +2026,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1803,6 +2042,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1824,6 +2065,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,6 +2081,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1852,6 +2097,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1866,6 +2113,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1880,6 +2129,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1894,6 +2145,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1908,6 +2161,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,6 +2177,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1936,6 +2193,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1950,6 +2209,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1964,6 +2225,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1979,6 +2242,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1993,6 +2258,8 @@
         "label": "GeoEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2007,6 +2274,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2021,6 +2290,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,6 +2306,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2049,6 +2322,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2064,6 +2339,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2078,6 +2355,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2092,6 +2371,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/geo/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2106,6 +2387,8 @@
         "label": "HostEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2120,6 +2403,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2134,6 +2419,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2148,6 +2435,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2162,6 +2451,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2176,6 +2467,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2197,6 +2490,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2211,6 +2506,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2225,6 +2522,8 @@
         "label": "HttpEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/http/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2239,6 +2538,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/http/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2254,6 +2555,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/http/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2269,6 +2572,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/http/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2283,6 +2588,8 @@
         "label": "MemoryProtection",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2297,6 +2604,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2311,6 +2620,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2325,6 +2636,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2339,6 +2652,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2353,6 +2668,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2367,6 +2684,8 @@
         "label": "NetworkEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2381,6 +2700,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2395,6 +2716,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2409,6 +2732,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2423,6 +2748,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2437,6 +2764,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2451,6 +2780,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/network/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2465,6 +2796,8 @@
         "label": "OsEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2479,6 +2812,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2493,6 +2828,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2507,6 +2844,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2521,6 +2860,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2535,6 +2876,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2549,6 +2892,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/host/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2563,6 +2908,8 @@
         "label": "ProcessEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2578,6 +2925,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2592,6 +2941,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2606,6 +2957,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2621,6 +2974,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2636,6 +2991,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2651,6 +3008,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2665,6 +3024,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2680,6 +3041,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2695,6 +3058,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2716,6 +3081,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2730,6 +3097,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2744,6 +3113,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2758,6 +3129,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2772,6 +3145,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2786,6 +3161,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2800,6 +3177,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2815,6 +3194,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2829,6 +3210,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/process/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2843,6 +3226,8 @@
         "label": "Ransomware",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2857,6 +3242,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2871,6 +3258,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2885,6 +3274,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2899,6 +3290,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2914,6 +3307,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2928,6 +3323,8 @@
         "label": "RegistryEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2942,6 +3339,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2956,6 +3355,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2970,6 +3371,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2984,6 +3387,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2999,6 +3404,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/registry/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3013,6 +3420,8 @@
         "label": "RuleEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3027,6 +3436,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3041,6 +3452,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3055,6 +3468,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3069,6 +3484,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3083,6 +3500,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3097,6 +3516,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3111,6 +3532,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3125,6 +3548,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3139,6 +3564,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3153,6 +3580,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3167,6 +3596,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3181,6 +3612,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3195,6 +3628,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3209,6 +3644,8 @@
               "boolean[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3223,6 +3660,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3237,6 +3676,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3251,6 +3692,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3265,6 +3708,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3279,6 +3724,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3293,6 +3740,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3307,6 +3756,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3321,6 +3772,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3335,6 +3788,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3349,6 +3804,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3363,6 +3820,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3377,6 +3836,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3391,6 +3852,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3405,6 +3868,8 @@
               "boolean[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3419,6 +3884,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3433,6 +3900,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3447,6 +3916,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3461,6 +3932,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3475,6 +3948,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3489,6 +3964,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3503,6 +3980,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3517,6 +3996,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/rule/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3531,6 +4012,8 @@
         "label": "ServiceEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3545,6 +4028,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3559,6 +4044,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3573,6 +4060,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3587,6 +4076,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3601,6 +4092,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3615,6 +4108,8 @@
               "{ name: string[]; roles: string[]; role: string[]; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3629,6 +4124,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3643,6 +4140,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3657,6 +4156,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3671,6 +4172,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/service/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3685,6 +4188,8 @@
         "label": "SignalEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3706,6 +4211,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3720,6 +4227,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3734,6 +4243,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3748,6 +4259,8 @@
               "{ id?: string[] | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3762,6 +4275,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/signal/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3776,6 +4291,8 @@
         "label": "SourceEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3790,6 +4307,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3804,6 +4323,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3818,6 +4339,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3832,6 +4355,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3853,6 +4378,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3867,6 +4394,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/source/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3881,6 +4410,8 @@
         "label": "SuricataEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/suricata/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3896,6 +4427,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/suricata/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3910,6 +4443,8 @@
         "label": "SystemEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/system/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3925,6 +4460,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/system/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3940,6 +4477,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/system/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3954,6 +4493,8 @@
         "label": "Target",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/target_type/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3974,6 +4515,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/target_type/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3988,6 +4531,8 @@
         "label": "ThreatEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4003,6 +4548,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4018,6 +4565,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4032,6 +4581,8 @@
         "label": "ThreatIndicatorEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4053,6 +4604,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4067,6 +4620,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4081,6 +4636,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4095,6 +4652,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/threat/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4109,6 +4668,8 @@
         "label": "TlsEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/tls/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4124,6 +4685,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/tls/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4139,6 +4702,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/tls/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4154,6 +4719,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/tls/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4168,6 +4735,8 @@
         "label": "UrlEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/url/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4182,6 +4751,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/url/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4196,6 +4767,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/url/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4210,6 +4783,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/url/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4224,6 +4799,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4238,6 +4815,8 @@
         "label": "UserEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4252,6 +4831,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4266,6 +4847,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4280,6 +4863,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4294,6 +4879,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4308,6 +4895,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4322,6 +4911,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4336,6 +4927,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/user/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4350,6 +4943,8 @@
         "label": "WinlogEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/winlog/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4364,6 +4959,8 @@
               "number[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/winlog/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4378,6 +4975,8 @@
         "label": "ZeekEcs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4392,6 +4991,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4407,6 +5008,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4422,6 +5025,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4437,6 +5042,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4452,6 +5059,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4467,6 +5076,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4482,6 +5093,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4498,6 +5111,8 @@
         "label": "EventCategory",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4510,6 +5125,8 @@
         "label": "EventCode",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/event/index.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4525,6 +5142,8 @@
         "label": "cloudFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4536,6 +5155,8 @@
             "label": "'cloud.account.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4547,6 +5168,8 @@
             "label": "'cloud.availability_zone'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4558,6 +5181,8 @@
             "label": "'cloud.instance.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4569,6 +5194,8 @@
             "label": "'cloud.instance.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4580,6 +5207,8 @@
             "label": "'cloud.machine.type'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4591,6 +5220,8 @@
             "label": "'cloud.provider'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4602,6 +5233,8 @@
             "label": "'cloud.region'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4616,6 +5249,8 @@
         "label": "hostFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4627,6 +5262,8 @@
             "label": "'host.architecture'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4638,6 +5275,8 @@
             "label": "'host.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4649,6 +5288,8 @@
             "label": "'host.ip'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4660,6 +5301,8 @@
             "label": "'host.mac'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4671,6 +5314,8 @@
             "label": "'host.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4685,6 +5330,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4699,6 +5346,8 @@
         "label": "osFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4710,6 +5359,8 @@
             "label": "'os.platform'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4721,6 +5372,8 @@
             "label": "'os.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4732,6 +5385,8 @@
             "label": "'os.full'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4743,6 +5398,8 @@
             "label": "'os.family'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4754,6 +5411,8 @@
             "label": "'os.version'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4765,6 +5424,8 @@
             "label": "'os.kernel'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4779,6 +5440,8 @@
         "label": "processFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4790,6 +5453,8 @@
             "label": "'process.hash.md5'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4801,6 +5466,8 @@
             "label": "'process.hash.sha1'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4812,6 +5479,8 @@
             "label": "'process.hash.sha256'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4823,6 +5492,8 @@
             "label": "'process.pid'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4834,6 +5505,8 @@
             "label": "'process.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4845,6 +5518,8 @@
             "label": "'process.ppid'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4856,6 +5531,8 @@
             "label": "'process.args'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4867,6 +5544,8 @@
             "label": "'process.entity_id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4878,6 +5557,8 @@
             "label": "'process.executable'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4889,6 +5570,8 @@
             "label": "'process.title'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4900,6 +5583,8 @@
             "label": "'process.thread'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4911,6 +5596,8 @@
             "label": "'process.working_directory'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4925,6 +5612,8 @@
         "label": "sourceFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4936,6 +5625,8 @@
             "label": "'source.bytes'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4947,6 +5638,8 @@
             "label": "'source.ip'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4958,6 +5651,8 @@
             "label": "'source.packets'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4969,6 +5664,8 @@
             "label": "'source.port'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4980,6 +5677,8 @@
             "label": "'source.domain'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4991,6 +5690,8 @@
             "label": "'source.geo.continent_name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5002,6 +5703,8 @@
             "label": "'source.geo.country_name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5013,6 +5716,8 @@
             "label": "'source.geo.country_iso_code'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5024,6 +5729,8 @@
             "label": "'source.geo.city_name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5035,6 +5742,8 @@
             "label": "'source.geo.region_iso_code'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5046,6 +5755,8 @@
             "label": "'source.geo.region_name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5060,6 +5771,8 @@
         "label": "userFieldsMap",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5071,6 +5784,8 @@
             "label": "'user.domain'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5082,6 +5797,8 @@
             "label": "'user.id'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5093,6 +5810,8 @@
             "label": "'user.name'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5106,6 +5825,8 @@
               "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5119,6 +5840,8 @@
               "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5132,6 +5855,8 @@
               "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5145,6 +5870,8 @@
               "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

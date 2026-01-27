@@ -8,6 +8,7 @@
  */
 
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
@@ -26,12 +27,9 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { MARKDOWN_ID } from './constants';
-import type {
-  MarkdownEditorApi,
-  MarkdownEditorSerializedState,
-  MarkdownEditorState,
-} from './types';
+import type { MarkdownEditorState, MarkdownEmbeddableState } from '../server';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import type { MarkdownEditorApi } from './types';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
@@ -40,19 +38,21 @@ const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
 };
 
+const flexCss = css({
+  display: 'flex',
+  flex: '1 1 100%',
+});
+
 const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
 
 export const markdownEmbeddableFactory: EmbeddableFactory<
-  MarkdownEditorSerializedState,
+  MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
-  type: MARKDOWN_ID,
+  type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const titleManager = initializeTitleManager(initialState.rawState);
-    const markdownStateManager = initializeStateManager(
-      initialState.rawState,
-      defaultMarkdownState
-    );
+    const titleManager = initializeTitleManager(initialState);
+    const markdownStateManager = initializeStateManager(initialState, defaultMarkdownState);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
@@ -60,10 +60,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = () => ({
-      rawState: {
-        ...titleManager.getLatestState(),
-        ...markdownStateManager.getLatestState(),
-      },
+      ...titleManager.getLatestState(),
+      ...markdownStateManager.getLatestState(),
     });
 
     const resetEditingState = () => {
@@ -87,8 +85,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         return { ...titleComparators, ...markdownComparators };
       },
       onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved?.rawState);
-        markdownStateManager.reinitializeState(lastSaved?.rawState);
+        titleManager.reinitializeState(lastSaved);
+        markdownStateManager.reinitializeState(lastSaved);
       },
     });
 
@@ -140,30 +138,39 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           );
         }
 
-        if (viewMode === 'view' || !isEditing) {
-          return <MarkdownRenderer processingPluginList={processingPluginList} content={content} />;
-        }
+        const editorContent =
+          viewMode === 'view' || !isEditing ? (
+            <MarkdownRenderer processingPluginList={processingPluginList} content={content} />
+          ) : (
+            <MarkdownEditor
+              uiPlugins={uiPlugins}
+              processingPluginList={processingPluginList}
+              content={content}
+              onCancel={() => {
+                if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
+                  parentApi.removePanel(api.uuid);
+                }
+                resetEditingState();
+              }}
+              onSave={(value: string) => {
+                resetEditingState();
+                markdownStateManager.api.setContent(value);
+                if (isNewPanel$.getValue()) {
+                  isNewPanel$.next(false);
+                }
+              }}
+              isPreview$={isPreview$}
+            />
+          );
 
         return (
-          <MarkdownEditor
-            uiPlugins={uiPlugins}
-            processingPluginList={processingPluginList}
-            content={content}
-            onCancel={() => {
-              if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
-                parentApi.removePanel(api.uuid);
-              }
-              resetEditingState();
-            }}
-            onSave={(value: string) => {
-              resetEditingState();
-              markdownStateManager.api.setContent(value);
-              if (isNewPanel$.getValue()) {
-                isNewPanel$.next(false);
-              }
-            }}
-            isPreview$={isPreview$}
-          />
+          <div
+            css={flexCss}
+            data-shared-item
+            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
+          >
+            {editorContent}
+          </div>
         );
       },
     };

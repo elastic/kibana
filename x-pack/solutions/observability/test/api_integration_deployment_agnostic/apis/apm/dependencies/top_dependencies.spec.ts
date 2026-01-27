@@ -8,10 +8,12 @@ import expect from '@kbn/expect';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { DependencyNode } from '@kbn/apm-plugin/common/connections';
 import { NodeType } from '@kbn/apm-plugin/common/connections';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../utils/common';
+import { generateManyDependencies } from './generate_many_dependencies';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_dependencies'>;
 type TopDependenciesStatistics =
@@ -155,10 +157,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           } = dependencies;
           const { errorRate } = dataConfig;
           const totalRate = errorRate;
-          expect(roundNumber(throughput.value)).to.be(roundNumber(totalRate));
+          expect(roundNumber(throughput.value)).to.be(
+            roundNumber(totalRate * SPANS_PER_DESTINATION_METRIC)
+          );
           expect(
             topDependenciesStats.currentTimeseries[dataConfig.span.destination].throughput.every(
-              ({ y }) => roundNumber(y) === roundNumber(totalRate)
+              ({ y }) => roundNumber(y) === roundNumber(totalRate * SPANS_PER_DESTINATION_METRIC)
             )
           ).to.be(true);
         });
@@ -169,7 +173,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           } = dependencies;
           const { transaction, errorRate } = dataConfig;
 
-          const expectedValuePerBucket = errorRate * transaction.duration * 1000;
+          const expectedValuePerBucket =
+            errorRate * transaction.duration * SPANS_PER_DESTINATION_METRIC * 1000;
           expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         });
 
@@ -186,6 +191,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             )
           ).to.be(true);
         });
+      });
+    });
+
+    describe('when a high volume of data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns an array of top dependencies without error', async () => {
+        const response = await callApi();
+        expect(response.status).to.be(200);
+        expect(response.body.dependencies.length).to.be.greaterThan(0);
+      });
+
+      it('returns dependencies statistics without error', async () => {
+        const response = await callStatisticsApi();
+        expect(response.status).to.be(200);
+        expect(Object.keys(response.body.currentTimeseries).length).to.be.greaterThan(0);
       });
     });
   });

@@ -76,6 +76,8 @@ describe('reindex API', () => {
             licensing: licensingMock.createStart(),
             security: securityMock.createStart(),
             version: { getMajorVersion: () => 8 } as unknown as Version,
+            rollupsEnabled: true,
+            isServerless: false,
           })
         ),
     };

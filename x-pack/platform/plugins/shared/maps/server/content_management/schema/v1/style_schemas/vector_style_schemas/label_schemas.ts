@@ -13,7 +13,7 @@ import {
   MIN_ZOOM,
   STYLE_TYPE,
 } from '../../../../../../common/constants';
-import { styleField } from './vector_style_schemas';
+import { styleFieldSchema } from './style_field_schema';
 
 export const labelBorderSizeOptions = schema.object({
   size: schema.oneOf([
@@ -85,7 +85,7 @@ export const labelZoomRangeSchema = schema.object(
 );
 
 export const labelDynamicOptions = schema.object({
-  field: schema.maybe(styleField),
+  field: schema.maybe(styleFieldSchema),
 });
 
 export const labelStaticOptions = schema.object({

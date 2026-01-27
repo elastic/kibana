@@ -1,6 +1,12 @@
 post:
   summary: Create saved objects
   operationId: bulkCreateSavedObjects
+  description: >
+    Create multiple Kibana saved objects.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    Consider using the import API for your use case.
   deprecated: true
   tags:
     - saved objects

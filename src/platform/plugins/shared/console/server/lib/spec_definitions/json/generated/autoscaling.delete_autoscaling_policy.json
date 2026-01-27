@@ -24,7 +24,7 @@
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-delete-autoscaling-policy",
     "availability": {
-      "stack": true,
+      "stack": false,
       "serverless": false
     }
   }

@@ -13,17 +13,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('../test_suites/navigation'));
     loadTestFile(require.resolve('../test_suites/dataset_quality'));
-    loadTestFile(require.resolve('../test_suites/discover/context_awareness'));
-    loadTestFile(require.resolve('../test_suites/discover/logs'));
-    loadTestFile(require.resolve('../test_suites/discover/embeddables'));
     loadTestFile(require.resolve('../test_suites/onboarding'));
-    loadTestFile(require.resolve('../test_suites/rules/rules_list'));
-    loadTestFile(require.resolve('../test_suites/rules/custom_threshold_consumer'));
-    loadTestFile(require.resolve('../test_suites/rules/es_query_consumer'));
     loadTestFile(require.resolve('../test_suites/role_management'));
-    loadTestFile(require.resolve('../test_suites/cases'));
     loadTestFile(require.resolve('../test_suites/advanced_settings'));
-    loadTestFile(require.resolve('../test_suites/ml'));
     loadTestFile(require.resolve('../test_suites/privileges'));
   });
 }

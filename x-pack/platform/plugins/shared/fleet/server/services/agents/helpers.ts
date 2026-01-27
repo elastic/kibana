@@ -98,6 +98,7 @@ export function searchHitToAgent(
     local_metadata: hit._source?.local_metadata!,
     unhealthy_reason: hit._source?.unhealthy_reason,
     last_known_status: hit._source?.last_known_status,
+    upgrade: hit._source?.upgrade,
   };
 
   if (!hit.fields?.status?.length) {

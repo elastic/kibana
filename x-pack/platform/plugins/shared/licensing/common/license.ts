@@ -136,9 +136,9 @@ export class License implements ILicense {
     return { state: 'valid' };
   }
 
-  getFeature(name: string) {
-    if (this.isAvailable && this.features && Object.hasOwn(this.features, name)) {
-      return { ...this.features[name] };
+  getFeature(id: string) {
+    if (this.isAvailable && this.features && Object.hasOwn(this.features, id)) {
+      return { ...this.features[id] };
     }
 
     return {

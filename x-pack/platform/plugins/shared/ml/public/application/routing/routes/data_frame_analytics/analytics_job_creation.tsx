@@ -56,6 +56,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     services: {
       data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
+      notifications,
     },
   } = useMlKibana();
   const mlApi = useMlApi();
@@ -72,7 +73,8 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           mlApi,
           dataViewsService,
           savedSearchService,
-          DATA_FRAME_ANALYTICS
+          DATA_FRAME_ANALYTICS,
+          notifications
         ),
     }
   );

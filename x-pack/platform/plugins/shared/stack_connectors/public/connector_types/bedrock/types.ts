@@ -6,8 +6,7 @@
  */
 
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SUB_ACTION } from '../../../common/bedrock/constants';
-import type { RunActionParams } from '../../../common/bedrock/types';
+import type { SUB_ACTION, RunActionParams } from '@kbn/connector-schemas/bedrock';
 
 export interface BedrockActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;

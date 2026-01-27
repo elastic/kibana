@@ -9,25 +9,43 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { RequestResult } from '../../../hooks/use_send_current_request/send_request';
-import { STATUS_CODE_LINE_CLASSNAME } from './constants';
+import type { StatusCodeClassNames } from '../types';
 
-const getStatusCodeClassNameSuffix = (statusCode: number) => {
+const getStatusCodeClassNames = (statusCode: number, classNames: StatusCodeClassNames) => {
   if (statusCode <= 199) {
-    return '--default';
+    return {
+      blockClassName: classNames.monacoStatusCodeLineDefault,
+      marginClassName: classNames.monacoStatusCodeLineNumberDefault,
+    };
   }
   if (statusCode <= 299) {
-    return '--success';
+    return {
+      blockClassName: classNames.monacoStatusCodeLineSuccess,
+      marginClassName: classNames.monacoStatusCodeLineNumberSuccess,
+    };
   }
   if (statusCode <= 399) {
-    return '--primary';
+    return {
+      blockClassName: classNames.monacoStatusCodeLinePrimary,
+      marginClassName: classNames.monacoStatusCodeLineNumberPrimary,
+    };
   }
   if (statusCode <= 499) {
-    return '--warning';
+    return {
+      blockClassName: classNames.monacoStatusCodeLineWarning,
+      marginClassName: classNames.monacoStatusCodeLineNumberWarning,
+    };
   }
-  return '--danger';
+  return {
+    blockClassName: classNames.monacoStatusCodeLineDanger,
+    marginClassName: classNames.monacoStatusCodeLineNumberDanger,
+  };
 };
 
-export const getStatusCodeDecorations = (data: RequestResult[]) => {
+export const getStatusCodeDecorations = (
+  data: RequestResult[],
+  classNames: StatusCodeClassNames
+) => {
   const decorations: monaco.editor.IModelDeltaDecoration[] = [];
   let lastResponseEndLine = 0;
 
@@ -39,13 +57,18 @@ export const getStatusCodeDecorations = (data: RequestResult[]) => {
         endLineNumber: lastResponseEndLine + 1,
         endColumn: 1, // It doesn't matter what endColumn we set as the decoration will be applied to the whole line
       };
-      const classNameSuffix = getStatusCodeClassNameSuffix(response.statusCode);
+
+      const { blockClassName, marginClassName } = getStatusCodeClassNames(
+        response.statusCode,
+        classNames
+      );
+
       decorations.push({
         range,
         options: {
           isWholeLine: true,
-          blockClassName: `${STATUS_CODE_LINE_CLASSNAME}${classNameSuffix}`,
-          marginClassName: `${STATUS_CODE_LINE_CLASSNAME}_number${classNameSuffix}`,
+          blockClassName,
+          marginClassName,
         },
       });
       lastResponseEndLine += (response.value as string).split(/\\n|\n/).length;

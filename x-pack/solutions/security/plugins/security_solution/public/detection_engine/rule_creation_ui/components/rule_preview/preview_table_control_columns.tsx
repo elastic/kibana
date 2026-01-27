@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -47,7 +47,12 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const PreviewActionsComponent: React.FC<ActionProps> = ({
+type PreviewActionsComponentProps = Pick<
+  ActionProps,
+  'ariaRowindex' | 'columnValues' | 'onEventDetailsPanelOpened'
+>;
+
+const PreviewActionsComponent: React.FC<PreviewActionsComponentProps> = ({
   ariaRowindex,
   columnValues,
   onEventDetailsPanelOpened,

@@ -22,6 +22,8 @@
           "() => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-bench/src/cli.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -38,6 +40,8 @@
         "label": "BenchmarkRunContext",
         "description": [],
         "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +62,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,6 +84,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -92,6 +100,8 @@
         "label": "BenchmarkRunnable",
         "description": [],
         "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +124,8 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -134,6 +146,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "lineNumber": 61,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -160,6 +174,8 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -180,6 +196,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -206,6 +224,8 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -226,6 +246,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -252,6 +274,8 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -272,6 +296,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "lineNumber": 64,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -300,6 +326,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -320,6 +348,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -338,6 +368,8 @@
         "label": "InitialBenchConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -349,6 +381,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -364,6 +398,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,6 +414,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,6 +430,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,6 +446,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,6 +462,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -434,6 +478,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -459,6 +505,8 @@
           "BenchmarkBase"
         ],
         "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -473,6 +521,8 @@
               "\"module\""
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -484,6 +534,8 @@
             "label": "module",
             "description": [],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -509,6 +561,8 @@
           "BenchmarkBase"
         ],
         "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +577,8 @@
               "\"script\""
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -537,6 +593,8 @@
               "{ bootstrap?: boolean | undefined; build?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -552,6 +610,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,6 +627,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -582,6 +644,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -597,6 +661,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,6 +677,8 @@
               "string | { cwd?: string | undefined; cmd: string; args?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

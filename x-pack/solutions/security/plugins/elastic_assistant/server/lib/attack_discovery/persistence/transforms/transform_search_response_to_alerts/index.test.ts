@@ -12,8 +12,11 @@ import {
   ALERT_UPDATED_AT,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
+import cloneDeep from 'lodash/cloneDeep';
+import { omit } from 'lodash/fp';
 
 import { transformSearchResponseToAlerts } from '.';
+import * as transformModule from './transform_attack_discovery_alert_document_to_api';
 import { getResponseMock } from '../../../../../__mocks__/attack_discovery_alert_document_response';
 import { ALERT_ATTACK_DISCOVERY_REPLACEMENTS } from '../../../schedules/fields/field_names';
 
@@ -30,20 +33,26 @@ const createLoggerMock = (): Logger =>
   } as unknown as Logger);
 
 describe('transformSearchResponseToAlerts', () => {
-  let logger: Logger;
+  const logger: Logger = createLoggerMock();
 
   beforeEach(() => {
-    logger = createLoggerMock();
+    // reuse the same logger instance but clear mock histories between tests
+    jest.clearAllMocks();
   });
 
   it('returns the expected alerts from a valid search response', () => {
     const response = getResponseMock();
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data).toEqual([
       {
-        alertIds: [
+        alert_ids: [
           'ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21',
           '46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5',
           '857f6434220ff27f807bef6829f32d1ad1c337026db016bc54e302eecf95cf93',
@@ -108,22 +117,22 @@ describe('transformSearchResponseToAlerts', () => {
           'fbf23653042416c886f12df972a885d847fe5681f466aff64a611aa01f9a5011',
           'b0c92ae7ecaa07702798fbb161ce189a80da259390876c14daace753d73896f9',
         ],
-        alertRuleUuid: 'attack_discovery_ad_hoc_rule_id',
-        alertStart: '2025-06-23T14:25:24.104Z',
-        alertUpdatedAt: '2025-06-23T15:16:52.984Z',
-        alertUpdatedByUserId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        alertUpdatedByUserName: 'elastic',
-        alertWorkflowStatus: 'acknowledged',
-        alertWorkflowStatusUpdatedAt: '2025-06-23T15:16:52.984Z',
-        connectorId: 'gemini_2_5_pro',
-        connectorName: 'Gemini 2.5 Pro',
-        detailsMarkdown:
+        alert_rule_uuid: 'attack_discovery_ad_hoc_rule_id',
+        alert_start: '2025-06-23T14:25:24.104Z',
+        alert_updated_at: '2025-06-23T15:16:52.984Z',
+        alert_updated_by_user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        alert_updated_by_user_name: 'elastic',
+        alert_workflow_status: 'acknowledged',
+        alert_workflow_status_updated_at: '2025-06-23T15:16:52.984Z',
+        connector_id: 'gemini_2_5_pro',
+        connector_name: 'Gemini 2.5 Pro',
+        details_markdown:
           'A widespread attack campaign was executed across multiple Windows hosts, unified by the use of a single compromised user account, {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }}. The attacker leveraged this access to deploy a variety of malware families using different initial access and execution techniques, culminating in a ransomware attack.\n* **Qakbot Infection:** On host {{ host.name 0d7534c9-79f5-46ed-9df9-3dfcff57e5ed }}, the attack began with a malicious OneNote file. This led to {{ process.name mshta.exe }} executing a script, which used {{ process.name curl.exe }} to download a payload from {{ source.ip 77.75.230.128 }}. The payload was executed via {{ process.name rundll32.exe }} and injected into {{ process.name AtBroker.exe }}, identified as the {{ rule.name Windows.Trojan.Qbot }} trojan.\n* **Emotet Infection:** On host {{ host.name deb5784c-55d3-4422-9d7c-06f1f71c04b3 }}, a malicious Excel document spawned {{ process.name regsvr32.exe }} to load a malicious DLL, ultimately leading to the execution of the {{ rule.name Windows.Trojan.Emotet }} trojan and the establishment of persistence via registry run keys.\n* **Bumblebee Trojan:** On host {{ host.name 4d9943f7-cbef-462b-a882-e39db5da7abd }}, the attacker used {{ process.parent.name msiexec.exe }} to proxy the execution of a malicious PowerShell script, which injected the {{ rule.name Windows.Trojan.Bumblebee }} trojan into its own memory and established C2 communication.\n* **Generic Droppers:** On other hosts, similar initial access vectors were used. On host {{ host.name 9a98cc1d-a7a3-4924-b939-b17b2ec5dbdd }}, a Word document dropped and executed a VBScript, which then used PowerShell and created a scheduled task for persistence. On host {{ host.name 7c9a79a0-c029-4acb-b61c-d5831b409943 }}, an Excel file used {{ process.name certutil.exe }} to decode and execute a payload.\n* **Ransomware Deployment:** The campaign culminated on host {{ host.name 6aece05f-675e-4dc0-b8fa-ba0f1a43d691 }} with the deployment of Sodinokibi (REvil) ransomware. A malicious executable used DLL side-loading to compromise the legitimate Microsoft Defender process, {{ process.name MsMpEng.exe }}, which then executed the ransomware and began encrypting files.',
-        entitySummaryMarkdown:
+        entity_summary_markdown:
           'A widespread malware campaign using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }} impacted multiple Windows hosts, including {{ host.name 6aece05f-675e-4dc0-b8fa-ba0f1a43d691 }} and {{ host.name 0d7534c9-79f5-46ed-9df9-3dfcff57e5ed }}.',
-        generationUuid: 'c10c51a5-10d2-481d-853a-e7fd5f393b23',
+        generation_uuid: 'c10c51a5-10d2-481d-853a-e7fd5f393b23',
         id: '29ceb1fa1482f02a2eb6073991078544e529edfc633a5621b20a93eefbb63083',
-        mitreAttackTactics: [
+        mitre_attack_tactics: [
           'Initial Access',
           'Execution',
           'Persistence',
@@ -144,13 +153,13 @@ describe('transformSearchResponseToAlerts', () => {
           '6aece05f-675e-4dc0-b8fa-ba0f1a43d691': 'SRVWIN02',
           '7c9a79a0-c029-4acb-b61c-d5831b409943': 'SRVWIN01',
         },
-        riskScore: 6237,
-        summaryMarkdown:
+        risk_score: 6237,
+        summary_markdown:
           'A widespread campaign was conducted using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }}, deploying various malware including Sodinokibi, Emotet, Qakbot, and Bumblebee across multiple Windows hosts.',
         timestamp: '2025-06-23T14:25:24.104Z',
         title: 'Widespread Malware Campaign via Compromised Account',
-        userId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        userName: 'elastic',
+        user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        user_name: 'elastic',
         users: [
           {
             name: 'elastic',
@@ -165,7 +174,12 @@ describe('transformSearchResponseToAlerts', () => {
     const response = getResponseMock();
     response.hits.hits[0]._source = undefined;
 
-    transformSearchResponseToAlerts({ logger, response });
+    transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(logger.warn).toHaveBeenCalled();
   });
@@ -185,7 +199,12 @@ describe('transformSearchResponseToAlerts', () => {
       },
     ];
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data).toEqual([]);
   });
@@ -197,9 +216,14 @@ describe('transformSearchResponseToAlerts', () => {
       response.hits.hits[0]._source[ALERT_START] = testDate;
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
-    expect(result.data[0].alertStart).toBe(testDate);
+    expect(result.data[0].alert_start).toBe(testDate);
   });
 
   it('correctly transforms the ALERT_UPDATED_AT field', () => {
@@ -209,9 +233,14 @@ describe('transformSearchResponseToAlerts', () => {
       response.hits.hits[0]._source[ALERT_UPDATED_AT] = testDate;
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
-    expect(result.data[0].alertUpdatedAt).toBe(testDate);
+    expect(result.data[0].alert_updated_at).toBe(testDate);
   });
 
   it('correctly transforms the ALERT_WORKFLOW_STATUS_UPDATED_AT field', () => {
@@ -221,9 +250,14 @@ describe('transformSearchResponseToAlerts', () => {
       response.hits.hits[0]._source[ALERT_WORKFLOW_STATUS_UPDATED_AT] = testDate;
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
-    expect(result.data[0].alertWorkflowStatusUpdatedAt).toBe(testDate);
+    expect(result.data[0].alert_workflow_status_updated_at).toBe(testDate);
   });
 
   it("returns undefined for mitreAttackTactics when it's not an array", () => {
@@ -233,9 +267,14 @@ describe('transformSearchResponseToAlerts', () => {
       src['kibana.alert.attack_discovery.mitre_attack_tactics'] = 123;
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
-    expect(result.data[0].mitreAttackTactics).toBeUndefined();
+    expect(result.data[0].mitre_attack_tactics).toBeUndefined();
   });
 
   it("returns undefined for replacements when it's not an array", () => {
@@ -245,7 +284,12 @@ describe('transformSearchResponseToAlerts', () => {
       src[ALERT_ATTACK_DISCOVERY_REPLACEMENTS] = 123;
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data[0].replacements).toBeUndefined();
   });
@@ -257,7 +301,12 @@ describe('transformSearchResponseToAlerts', () => {
       delete src['kibana.alert.attack_discovery.api_config'];
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data).toEqual([]);
   });
@@ -270,7 +319,12 @@ describe('transformSearchResponseToAlerts', () => {
       delete src[ALERT_RULE_EXECUTION_UUID]; // purposely delete ALERT_RULE_EXECUTION_UUID for test
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data).toEqual([]);
   });
@@ -280,7 +334,12 @@ describe('transformSearchResponseToAlerts', () => {
     response.aggregations = {
       unique_alert_ids_count: { value: 42 },
     } as Record<string, { value: number }>;
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.uniqueAlertIdsCount).toBe(42);
   });
@@ -288,7 +347,12 @@ describe('transformSearchResponseToAlerts', () => {
   it('returns 0 for uniqueAlertIdsCount if aggregation is missing', () => {
     const response = getResponseMock();
     response.aggregations = undefined;
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.uniqueAlertIdsCount).toBe(0);
   });
@@ -303,7 +367,12 @@ describe('transformSearchResponseToAlerts', () => {
         ],
       },
     } as unknown as Record<string, { buckets: Array<{ key: string; doc_count: number }> }>;
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.connectorNames).toEqual(['a', 'b']);
   });
@@ -312,7 +381,12 @@ describe('transformSearchResponseToAlerts', () => {
     const response = getResponseMock();
     response.aggregations = undefined;
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.connectorNames).toEqual([]);
   });
@@ -321,7 +395,12 @@ describe('transformSearchResponseToAlerts', () => {
     const response = getResponseMock();
     response.hits.hits = [];
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data).toEqual([]);
   });
@@ -334,10 +413,15 @@ describe('transformSearchResponseToAlerts', () => {
       response.hits.hits[0]._source[ALERT_START] = 'not-a-date';
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(new Date(result.data[0].timestamp).toString()).not.toBe('Invalid Date');
-    expect(result.data[0].alertStart).toBeUndefined();
+    expect(result.data[0].alert_start).toBeUndefined();
   });
 
   it('handles replacements array with missing uuid/value', () => {
@@ -350,27 +434,226 @@ describe('transformSearchResponseToAlerts', () => {
       ];
     }
 
-    const result = transformSearchResponseToAlerts({ logger, response });
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
 
     expect(result.data[0].replacements).toEqual({ a: 'A' });
   });
 
-  it('uses _id as id if present, otherwise falls back to generationUuid', () => {
-    const response = getResponseMock();
-    const hit = response.hits.hits[0];
-    hit._id = 'my-id';
-    if (hit._source) {
-      hit._source[ALERT_RULE_EXECUTION_UUID] = 'gen-uuid';
-    }
-    let result = transformSearchResponseToAlerts({ logger, response });
-    expect(result.data[0].id).toBe('my-id');
+  describe.each([[false], [true]])('when enableFieldRendering=%s', (enableFieldRendering) => {
+    it(`calls transformAttackDiscoveryAlertDocumentToApi with enableFieldRendering=${enableFieldRendering}`, () => {
+      const response = getResponseMock();
 
-    // Simulate fallback: create a new hit with _id set to generationUuid and check
-    const fallbackHit = { ...hit, _id: 'gen-uuid' };
-    response.hits.hits = [fallbackHit];
+      const spy = jest.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
 
-    result = transformSearchResponseToAlerts({ logger, response });
+      transformSearchResponseToAlerts({
+        enableFieldRendering,
+        logger,
+        response,
+        withReplacements: false,
+      });
 
-    expect(result.data[0].id).toBe('gen-uuid');
+      expect(spy).toHaveBeenCalled();
+      // inspect the first call's argument object
+      const firstCallArg = spy.mock.calls[0][0] as Record<string, unknown>;
+      expect(firstCallArg.enableFieldRendering).toBe(enableFieldRendering);
+
+      spy.mockRestore();
+    });
+  });
+
+  describe.each([[false], [true]])('when withReplacements=%s', (withReplacements) => {
+    it(`calls transformAttackDiscoveryAlertDocumentToApi with withReplacements=${withReplacements}`, () => {
+      const response = getResponseMock();
+
+      const spy = jest.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
+
+      transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response,
+        withReplacements,
+      });
+
+      expect(spy).toHaveBeenCalled();
+      const firstCallArg = spy.mock.calls[0][0] as Record<string, unknown>;
+      expect(firstCallArg.withReplacements).toBe(withReplacements);
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('when withReplacements is true', () => {
+    it('returns the expected alerts with replaced field values from a valid search response', () => {
+      const response = getResponseMock();
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response,
+        withReplacements: true,
+      });
+
+      expect(result.data[0]).toEqual(
+        expect.objectContaining({
+          title: 'Widespread Malware Campaign via Compromised Account', // from title_with_replacements
+          summary_markdown:
+            'A widespread campaign was conducted using the compromised account of user {{ user.name Administrator }}, deploying various malware including Sodinokibi, Emotet, Qakbot, and Bumblebee across multiple Windows hosts.', // from summary_markdown_with_replacements
+          entity_summary_markdown:
+            'A widespread malware campaign using the compromised account of user {{ user.name Administrator }} impacted multiple Windows hosts, including {{ host.name SRVWIN02 }} and {{ host.name SRVWIN04 }}.', // from entity_summary_markdown_with_replacements
+          details_markdown: expect.stringContaining('{{ user.name Administrator }}'), // from details_markdown_with_replacements with actual replacements
+        })
+      );
+    });
+
+    it('uses replacement fields when both normal and replacement fields are present', () => {
+      const response = getResponseMock();
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response,
+        withReplacements: true,
+      });
+
+      // Verify that it uses the replacement field (with actual values) instead of the normal field (with UUIDs)
+      expect(result.data[0].summary_markdown).toBe(
+        'A widespread campaign was conducted using the compromised account of user {{ user.name Administrator }}, deploying various malware including Sodinokibi, Emotet, Qakbot, and Bumblebee across multiple Windows hosts.'
+      );
+      expect(result.data[0].summary_markdown).not.toContain('6f53c297-f5cb-48c3-8aff-2e2d7a390169'); // Should not contain UUID
+    });
+
+    it('falls back to normal fields when replacement fields are missing', () => {
+      const response = getResponseMock();
+      const modifiedResponse: typeof response = response.hits.hits[0]._source
+        ? ((): typeof response => {
+            const mr = cloneDeep(response);
+            const src = mr.hits.hits[0]._source as Record<string, unknown>;
+            mr.hits.hits[0]._source = omit(
+              ['kibana.alert.attack_discovery.title_with_replacements'],
+              src
+            ) as unknown as ReturnType<typeof getResponseMock>['hits']['hits'][0]['_source'];
+            return mr;
+          })()
+        : response;
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response: modifiedResponse,
+        withReplacements: true,
+      });
+
+      expect(result.data[0].title).toBe('Widespread Malware Campaign via Compromised Account'); // falls back to normal field
+    });
+
+    it('uses replacement field when present, falls back to normal field when missing', () => {
+      const response = getResponseMock();
+      const modifiedResponse: typeof response = response.hits.hits[0]._source
+        ? ((): typeof response => {
+            const mr = cloneDeep(response);
+            const src = mr.hits.hits[0]._source as Record<string, unknown>;
+            mr.hits.hits[0]._source = omit(
+              ['kibana.alert.attack_discovery.details_markdown_with_replacements'],
+              src
+            ) as unknown as ReturnType<typeof getResponseMock>['hits']['hits'][0]['_source'];
+            return mr;
+          })()
+        : response;
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response: modifiedResponse,
+        withReplacements: true,
+      });
+
+      expect(result.data[0].details_markdown).toContain('6f53c297-f5cb-48c3-8aff-2e2d7a390169'); // should use normal field with UUIDs
+      expect(result.data[0].details_markdown).not.toContain('Administrator'); // should not contain replacement values
+    });
+
+    it('returns undefined for optional fields when both normal and replacement fields are missing', () => {
+      const response = getResponseMock();
+      const modifiedResponse: typeof response = response.hits.hits[0]._source
+        ? ((): typeof response => {
+            const mr = cloneDeep(response);
+            const src = mr.hits.hits[0]._source as Record<string, unknown>;
+            mr.hits.hits[0]._source = omit(
+              [
+                'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements',
+                'kibana.alert.attack_discovery.entity_summary_markdown',
+              ],
+              src
+            ) as unknown as ReturnType<typeof getResponseMock>['hits']['hits'][0]['_source'];
+            return mr;
+          })()
+        : response;
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response: modifiedResponse,
+        withReplacements: true,
+      });
+
+      expect(result.data[0].entity_summary_markdown).toBeUndefined(); // optional field defaults to undefined
+    });
+
+    it('processes mixed field types correctly when some have replacements and others do not', () => {
+      const response = getResponseMock();
+      const modifiedResponse: typeof response = response.hits.hits[0]._source
+        ? ((): typeof response => {
+            const mr = cloneDeep(response);
+            const src = mr.hits.hits[0]._source as Record<string, unknown>;
+            mr.hits.hits[0]._source = omit(
+              ['kibana.alert.attack_discovery.details_markdown_with_replacements'],
+              src
+            ) as unknown as ReturnType<typeof getResponseMock>['hits']['hits'][0]['_source'];
+            return mr;
+          })()
+        : response;
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response: modifiedResponse,
+        withReplacements: true,
+      });
+
+      // Title should use replacement field (actual value)
+      expect(result.data[0].title).toBe('Widespread Malware Campaign via Compromised Account');
+      // Details should fall back to normal field (with UUIDs)
+      expect(result.data[0].details_markdown).toContain('6f53c297-f5cb-48c3-8aff-2e2d7a390169');
+    });
+
+    it('handles aggregation data correctly when withReplacements is true', () => {
+      const response = getResponseMock();
+      response.aggregations = {
+        unique_alert_ids_count: { value: 100 },
+        api_config_name: {
+          buckets: [
+            { key: 'Connector B', doc_count: 3 },
+            { key: 'Connector A', doc_count: 5 },
+          ],
+        },
+      } as unknown as Record<
+        string,
+        { buckets?: Array<{ key: string; doc_count: number }>; value?: number }
+      >;
+
+      const result = transformSearchResponseToAlerts({
+        enableFieldRendering: true,
+        logger,
+        response,
+        withReplacements: true,
+      });
+
+      expect(result.uniqueAlertIdsCount).toBe(100);
+      expect(result.connectorNames).toEqual(['Connector A', 'Connector B']); // sorted
+    });
   });
 });

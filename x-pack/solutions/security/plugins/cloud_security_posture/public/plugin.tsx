@@ -21,6 +21,7 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDeps } from './types';
@@ -137,13 +138,15 @@ export class CspPlugin
     // Keep as constant to prevent remounts https://github.com/elastic/kibana/issues/146773
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
-        <RedirectAppLinks coreStart={core}>
-          <div css={{ width: '100%', height: '100%' }}>
-            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
-              <CspRouter {...props} />
-            </SetupContext.Provider>
-          </div>
-        </RedirectAppLinks>
+        <NoDataCardKibanaProvider coreStart={core}>
+          <RedirectAppLinks coreStart={core}>
+            <div css={{ width: '100%', height: '100%' }}>
+              <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+                <CspRouter {...props} />
+              </SetupContext.Provider>
+            </div>
+          </RedirectAppLinks>
+        </NoDataCardKibanaProvider>
       </KibanaContextProvider>
     );
 

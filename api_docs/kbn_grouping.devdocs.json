@@ -35,6 +35,8 @@
           "GroupingQuery"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,6 +51,8 @@
               "GroupingQueryArgs"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,6 +76,8 @@
           "(groupKeys: string[]) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,6 +94,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,13 +116,15 @@
           "\nHook to configure grouping component"
         ],
         "signature": [
-          "<T>({ componentProps, defaultGroupingOptions, initialGroupings, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, onOpenTracker, }: ",
+          "<T>({ componentProps, defaultGroupingOptions, initialGroupings, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, onOpenTracker, settings, }: ",
           "GroupingArgs",
           "<T>) => ",
           "UseGrouping",
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+        "lineNumber": 114,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,13 +133,15 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  initialGroupings,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n  onOpenTracker,\n}",
+            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  initialGroupings,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n  onOpenTracker,\n  settings,\n}",
             "description": [],
             "signature": [
               "GroupingArgs",
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+            "lineNumber": 114,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,6 +160,8 @@
         "label": "GroupOption",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +173,8 @@
             "label": "key",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +186,114 @@
             "label": "label",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grouping",
+        "id": "def-common.GroupSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupSettings",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.hideNoneOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideNoneOption",
+            "description": [
+              "\nAllows to hide the None option in the group selection dropdown."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.hideCustomFieldOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideCustomFieldOption",
+            "description": [
+              "\nAllows to hide the Custom field option in the group selection dropdown."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.hideOptionsTitle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideOptionsTitle",
+            "description": [
+              "\nAllows to hide the title in the group selection dropdown."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.popoverButtonLabel",
+            "type": "string",
+            "tags": [],
+            "label": "popoverButtonLabel",
+            "description": [
+              "\nAllows to customize the label of the group selection dropdown."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.enforcedGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "enforcedGroups",
+            "description": [
+              "\nArray of group keys that are enforced and cannot be deselected by users.\nEnforced groups are automatically added to activeGroups on initialization.\nConstraints:\n- 'none' cannot be in enforcedGroups\n- enforcedGroups cannot be used when maxGroupingLevels === 1 (toggle mode)\n- enforcedGroups.length must be <= maxGroupingLevels"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -184,6 +308,8 @@
         "label": "GroupStatsItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,6 +321,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,6 +337,8 @@
               "JSX.Element | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +354,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -255,83 +387,13 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[], groupNumber: number) => { items: ((",
-          "DisambiguateSet",
-          "<(",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          ", ",
-          "EuiContextMenuPanelItemSeparator",
-          "> & ",
-          "EuiContextMenuPanelItemSeparator",
-          ") | (",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemSeparator",
-          ", ",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          "> & Omit<",
-          "EuiContextMenuItemProps",
-          ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
-          "EuiContextMenuPanelId",
-          " | undefined; }), ",
-          "EuiContextMenuPanelItemRenderCustom",
-          "> & ",
-          "EuiContextMenuPanelItemRenderCustom",
-          ") | (",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemRenderCustom",
-          ", (",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          ", ",
-          "EuiContextMenuPanelItemSeparator",
-          "> & ",
-          "EuiContextMenuPanelItemSeparator",
-          ") | (",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemSeparator",
-          ", ",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          "> & Omit<",
-          "EuiContextMenuItemProps",
-          ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
-          "EuiContextMenuPanelId",
-          " | undefined; })> & ((",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          ", ",
-          "EuiContextMenuPanelItemSeparator",
-          "> & ",
-          "EuiContextMenuPanelItemSeparator",
-          ") | (",
-          "DisambiguateSet",
-          "<",
-          "EuiContextMenuPanelItemSeparator",
-          ", ",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          "> & Omit<",
-          "EuiContextMenuItemProps",
-          ", \"hasPanel\"> & { name: React.ReactNode; key?: string | undefined; panel?: ",
-          "EuiContextMenuPanelId",
-          " | undefined; }))))[]; panels: ",
-          "EuiContextMenuPanelDescriptor",
-          "[]; }) | undefined; renderChildComponent: (groupFilter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; itemsPerPage: number; onGroupClose: () => void; }"
+          "[], groupNumber: number) => JSX.Element | undefined) | undefined; renderChildComponent: ",
+          "GroupChildComponentRenderer",
+          "<T>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; additionalToolbarControls?: JSX.Element[] | undefined; itemsPerPage: number; onGroupClose: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -350,6 +412,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -367,6 +431,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -383,6 +449,8 @@
           " & T"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

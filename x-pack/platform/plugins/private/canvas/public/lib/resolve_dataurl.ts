@@ -16,6 +16,7 @@ import { missingImage } from './missing_asset';
  */
 export const resolveFromArgs = (args: any, defaultDataurl: string | null = null): string => {
   const dataurl = get(args, 'dataurl.0', null);
+  // @ts-expect-error upgrade typescript v5.9.3
   return isValidUrl(dataurl) ? dataurl : defaultDataurl;
 };
 

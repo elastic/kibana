@@ -19,6 +19,8 @@
           ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
         ],
         "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -37,6 +39,8 @@
           "IntegrationsServiceContract"
         ],
         "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -51,6 +55,8 @@
         "label": "integrationsServiceMock",
         "description": [],
         "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,6 +72,8 @@
               "IntegrationsServiceMock"
             ],
             "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

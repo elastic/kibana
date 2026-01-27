@@ -24,10 +24,15 @@ export const edotSDKSettings: RawSettingDefinition[] = [
           'Comma-separated list of instrumentation names to disable. When an instrumentation is disabled, no telemetry will be collected for the library/module it instruments. ' +
           'The list of supported instrumentation names is language specific:\n' +
           '- [EDOT Java](https://ela.st/otel-agent-instructions): for example "akka-http,grpc"\n' +
-          '- [EDOT Node.js](https://ela.st/edot-node-disable-instrs): for example "net,dns,http"',
+          '- [EDOT Node.js](https://ela.st/edot-node-disable-instrs): for example "net,dns,http"\n' +
+          '- [EDOT PHP](https://ela.st/edot-php-deactivate-instrumentations): for example "curl,laravel,pdo"',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+    ],
   },
   {
     key: 'deactivate_all_instrumentations',
@@ -42,7 +47,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         defaultMessage: 'No spans will be collected for any instrumentation modules.',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+    ],
   },
   {
     key: 'infer_spans',
@@ -100,7 +109,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'The default interval between checking the collector for new changes to config.\n' +
         'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'sampling_rate',
@@ -115,7 +124,12 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
         'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
   {
     key: 'send_traces',
@@ -129,7 +143,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the traces exporter to send or discard traces. When set to false, all traces will be discarded so there will be no traces sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+    ],
   },
   {
     key: 'send_metrics',
@@ -143,7 +161,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the metrics exporter to send or discard metrics. When set to false, all metrics will be discarded so there will be no metrics sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+    ],
   },
   {
     key: 'send_logs',
@@ -157,6 +179,10 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the logs exporter to send or discard logs. When set to false, all logs (that are normally sent by the agent) will be discarded so there will be no logs sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+    ],
   },
 ];

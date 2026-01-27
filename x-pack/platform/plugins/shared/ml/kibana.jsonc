@@ -29,11 +29,13 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",
       "presentationUtil",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "fileUpload"
     ],
     "optionalPlugins": [
       "alerting",

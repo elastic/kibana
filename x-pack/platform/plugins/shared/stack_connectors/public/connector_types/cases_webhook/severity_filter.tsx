@@ -10,6 +10,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
 
 import * as i18n from './translations';
+import { CASE_SEVERITY_ARIA_LABEL } from './translations';
 
 export enum CaseSeverity {
   LOW = 'low',
@@ -25,23 +26,22 @@ interface Props {
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const severities = {
     [CaseSeverity.LOW]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.severity.neutral,
+      color: euiTheme.colors.severity.neutral,
       label: i18n.SEVERITY_LOW_LABEL,
     },
     [CaseSeverity.MEDIUM]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.severity.warning,
+      color: euiTheme.colors.severity.warning,
       label: i18n.SEVERITY_MEDIUM_LABEL,
     },
     [CaseSeverity.HIGH]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis7 : euiTheme.colors.severity.risk,
+      color: euiTheme.colors.severity.risk,
       label: i18n.SEVERITY_HIGH_LABEL,
     },
     [CaseSeverity.CRITICAL]: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.severity.danger,
+      color: euiTheme.colors.severity.danger,
       label: i18n.SEVERITY_CRITICAL_LABEL,
     },
   };
@@ -72,6 +72,7 @@ export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityCh
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
+      aria-label={CASE_SEVERITY_ARIA_LABEL}
     />
   );
 };

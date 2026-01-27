@@ -28,6 +28,8 @@
           ">"
         ],
         "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+                "lineNumber": 97,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -77,6 +83,8 @@
               "InternalCoreUsageDataSetup"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+            "lineNumber": 459,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -91,6 +99,8 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+                "lineNumber": 459,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -115,6 +125,8 @@
               ">; }"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+            "lineNumber": 547,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,6 +141,8 @@
                   "StartDeps"
                 ],
                 "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+                "lineNumber": 547,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,6 +161,8 @@
               "() => void"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
+            "lineNumber": 558,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

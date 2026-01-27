@@ -16,11 +16,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { PackageInfo } from '../../../types';
+import type { InstallationInfo } from '../../../../common/types';
 import type { FleetStartServices } from '../../../plugin';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
 import { InstallStatus } from '../../../types';
 import { isVerificationError } from '../services';
+
+import type { InstalledPackageUIPackageListItem } from '../sections/epm/screens/installed_integrations/types';
 
 import { useConfirmForceInstall } from '.';
 
@@ -252,12 +255,52 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
     [notifications.toasts, setPackageInstallStatus, getPath, history, startServices]
   );
 
+  const rollbackPackage = useCallback(
+    async (
+      packageInfo: PackageInfo & { installationInfo?: InstallationInfo },
+      bulkRollbackIntegrationsWithConfirmModal: (
+        selectedItems: InstalledPackageUIPackageListItem[],
+        onActionCompleted?: (status: string) => void
+      ) => Promise<string>
+    ) => {
+      const { name, version } = packageInfo;
+      const redirectToVersion = packageInfo.installationInfo?.previous_version!;
+      const result = await bulkRollbackIntegrationsWithConfirmModal(
+        [packageInfo as any],
+        (status: string) => {
+          setPackageInstallStatus({
+            name,
+            status: InstallStatus.installed,
+            version,
+          });
+          if (status === 'success') {
+            if (redirectToVersion !== version) {
+              const settingsPath = getPath('integration_details_settings', {
+                pkgkey: `${name}-${redirectToVersion}`,
+              });
+              history.push(settingsPath);
+            }
+          }
+        }
+      );
+      if (result === 'confirmed') {
+        setPackageInstallStatus({
+          name,
+          status: InstallStatus.rollingBack,
+          version,
+        });
+      }
+    },
+    [setPackageInstallStatus, getPath, history]
+  );
+
   return {
     packages,
     installPackage,
     setPackageInstallStatus,
     getPackageInstallStatus,
     uninstallPackage,
+    rollbackPackage,
   };
 }
 
@@ -267,10 +310,12 @@ export const [
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
   useUninstallPackage,
+  useRollbackPackage,
 ] = createContainer(
   usePackageInstall,
   (value) => value.installPackage,
   (value) => value.setPackageInstallStatus,
   (value) => value.getPackageInstallStatus,
-  (value) => value.uninstallPackage
+  (value) => value.uninstallPackage,
+  (value) => value.rollbackPackage
 );

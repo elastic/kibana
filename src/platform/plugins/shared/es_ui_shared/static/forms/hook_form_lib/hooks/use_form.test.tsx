@@ -8,10 +8,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import type { TestBed } from '../shared_imports';
-import { registerTestBed, getRandomString } from '../shared_imports';
+import { getRandomString } from '../shared_imports';
 import { emptyField } from '../../helpers/field_validators';
 import { ComboBoxField } from '../../components';
 import { Form, UseField, UseArray } from '../components';
@@ -40,26 +40,25 @@ const onFormHook = (_form: FormHook<any>) => {
   formHook = _form;
 };
 
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  formHook = null;
+});
+
+const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
 describe('useForm() hook', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    formHook = null;
-  });
+  const onFormData = jest.fn();
 
   describe('form.submit() & config.onSubmit()', () => {
-    const onFormData = jest.fn();
-
-    afterEach(() => {
-      onFormData.mockReset();
-    });
-
     test('should receive the form data and the validity of the form', async () => {
       const TestComp = ({ onData }: Props) => {
         const { form } = useForm<MyForm>({ onSubmit: onData });
@@ -72,21 +71,16 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
+      render(<TestComp onData={onFormData} />);
 
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
+      const usernameField = screen.getByTestId('usernameField');
+      await user.clear(usernameField);
+      await user.type(usernameField, 'John');
 
-      await act(async () => {
-        setInputValue('usernameField', 'John');
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      const button = screen.getByRole('button');
+      await user.click(button);
+
+      expect(onFormData).toHaveBeenCalled();
 
       const [formData, isValid] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
@@ -110,15 +104,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
+      render(<TestComp onData={onFormData} />);
 
       const expectedData = {
         address: {
@@ -130,15 +116,20 @@ describe('useForm() hook', () => {
         tags: ['Belgium', 'Europe'],
       };
 
-      await act(async () => {
-        setInputValue('countryCodeField', expectedData.address.country.code);
-        setInputValue('addressNote1Field', expectedData.address.notes[0]);
-        setInputValue('tagField1', expectedData.tags[0]);
-        setInputValue('tagField2', expectedData.tags[1]);
+      const countryCodeField = screen.getByTestId('countryCodeField');
+      const addressNote1Field = screen.getByTestId('addressNote1Field');
+      const tagField1 = screen.getByTestId('tagField1');
+      const tagField2 = screen.getByTestId('tagField2');
 
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      await user.type(countryCodeField, expectedData.address.country.code);
+      await user.type(addressNote1Field, expectedData.address.notes[0]);
+      await user.type(tagField1, expectedData.tags[0]);
+      await user.type(tagField2, expectedData.tags[1]);
+
+      const button = screen.getByRole('button');
+      await user.click(button);
+
+      expect(onFormData).toHaveBeenCalled();
 
       const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
@@ -169,14 +160,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onForm: onFormHook },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      render(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
         throw new Error(
@@ -189,18 +173,20 @@ describe('useForm() hook', () => {
 
       await act(async () => {
         const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         ({ data, isValid } = await submitPromise);
       });
 
       expect(isValid).toBe(true);
       expect(data).toEqual({ username: 'initialValue' });
 
-      await act(async () => {
-        setInputValue('myField', 'wrongValue'); // Validation will fail
+      const myField = screen.getByTestId('myField');
+      await user.clear(myField);
+      await user.type(myField, 'wrongValue'); // Validation will fail
 
+      await act(async () => {
         const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         ({ data, isValid } = await submitPromise);
       });
 
@@ -212,12 +198,6 @@ describe('useForm() hook', () => {
   });
 
   describe('form.subscribe()', () => {
-    const onFormData = jest.fn();
-
-    afterEach(() => {
-      onFormData.mockReset();
-    });
-
     test('should allow subscribing to the form data changes and provide a handler to build the form data', async () => {
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm({
@@ -242,14 +222,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      render(<TestComp onData={onFormData} />);
 
       let [{ data, isValid }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
@@ -260,10 +233,9 @@ describe('useForm() hook', () => {
       expect(isValid).toBeUndefined();
 
       // Make some changes to the form fields
-      await act(async () => {
-        setInputValue('usernameField', 'John');
-        jest.advanceTimersByTime(0);
-      });
+      const usernameField = screen.getByTestId('usernameField');
+      await user.clear(usernameField);
+      await user.type(usernameField, 'John');
 
       [{ data, isValid }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
@@ -278,12 +250,6 @@ describe('useForm() hook', () => {
   });
 
   describe('config.defaultValue', () => {
-    const onFormData = jest.fn();
-
-    afterEach(() => {
-      onFormData.mockReset();
-    });
-
     test('should set the default value of a field ', () => {
       const defaultValue = {
         title: getRandomString(),
@@ -309,10 +275,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      })();
+      render(<TestComp onData={onFormData} />);
 
       expect(onFormData.mock.calls.length).toBe(1);
 
@@ -334,7 +297,7 @@ describe('useForm() hook', () => {
       });
     });
 
-    test('should be updated with the UseField "defaultValue" prop', () => {
+    test('should be updated with the UseField "defaultValue" prop', async () => {
       const TestComp = () => {
         const { form } = useForm({ defaultValue: { name: 'Mike' } });
         const [_, setDate] = useState(new Date());
@@ -351,14 +314,13 @@ describe('useForm() hook', () => {
         );
       };
 
-      const { find } = registerTestBed(TestComp, { memoryRouter: { wrapComponent: false } })();
+      render(<TestComp />);
 
       expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
 
       // Make sure a re-render of the component does not re-update the defaultValue
-      act(() => {
-        find('forceUpdateBtn').simulate('click');
-      });
+      const forceUpdateBtn = screen.getByTestId('forceUpdateBtn');
+      await user.click(forceUpdateBtn);
 
       expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
     });
@@ -400,15 +362,8 @@ describe('useForm() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onForm: onFormHook },
-      memoryRouter: { wrapComponent: false },
-    });
-
     test('should put back the defaultValue for each field', async () => {
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      render(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
         throw new Error(
@@ -418,35 +373,36 @@ describe('useForm() hook', () => {
 
       let formData: Partial<RestFormTest> = {};
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'defaultValue',
         city: 'inlineDefaultValue',
         deeply: { nested: { value: 'defaultValue' } },
       });
 
-      setInputValue('userNameField', 'changedValue');
-      setInputValue('cityField', 'changedValue');
-      setInputValue('deeplyNestedField', 'changedValue');
+      const userNameField = screen.getByTestId('userNameField');
+      const cityField = screen.getByTestId('cityField');
+      const deeplyNestedField = screen.getByTestId('deeplyNestedField');
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      await user.clear(userNameField);
+      await user.type(userNameField, 'changedValue');
+      await user.clear(cityField);
+      await user.type(cityField, 'changedValue');
+      await user.clear(deeplyNestedField);
+      await user.type(deeplyNestedField, 'changedValue');
+
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'changedValue',
         city: 'changedValue',
         deeply: { nested: { value: 'changedValue' } },
       });
 
-      await act(async () => {
+      act(() => {
         formHook!.reset();
       });
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'defaultValue',
         city: 'inlineDefaultValue', // Inline default value is correctly kept after resetting
@@ -455,9 +411,7 @@ describe('useForm() hook', () => {
     });
 
     test('should allow to pass a new "defaultValue" object for the fields', async () => {
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      render(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
         throw new Error(
@@ -465,13 +419,20 @@ describe('useForm() hook', () => {
         );
       }
 
-      setInputValue('userNameField', 'changedValue');
-      setInputValue('cityField', 'changedValue');
-      setInputValue('deeplyNestedField', 'changedValue');
+      const userNameField = screen.getByTestId('userNameField');
+      const cityField = screen.getByTestId('cityField');
+      const deeplyNestedField = screen.getByTestId('deeplyNestedField');
+
+      await user.clear(userNameField);
+      await user.type(userNameField, 'changedValue');
+      await user.clear(cityField);
+      await user.type(cityField, 'changedValue');
+      await user.clear(deeplyNestedField);
+      await user.type(deeplyNestedField, 'changedValue');
 
       let formData: Partial<RestFormTest> = {};
 
-      await act(async () => {
+      act(() => {
         formHook!.reset({
           defaultValue: {
             city: () => 'newDefaultValue', // A function can also be passed
@@ -479,9 +440,7 @@ describe('useForm() hook', () => {
           },
         });
       });
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'configDefaultValue', // Back to the config defaultValue as no value was provided when resetting
         city: 'newDefaultValue',
@@ -489,14 +448,12 @@ describe('useForm() hook', () => {
       });
 
       // Make sure all field are back to the config defautlValue, even when we have a UseField with inline prop "defaultValue"
-      await act(async () => {
+      act(() => {
         formHook!.reset({
           defaultValue: {},
         });
       });
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'configDefaultValue',
         city: 'configDefaultValue', // Inline default value **is not** kept after resetting with undefined "city" value
@@ -532,23 +489,21 @@ describe('useForm() hook', () => {
         );
       };
 
-      const {
-        form: { setInputValue },
-      } = registerTestBed(TestResetComp, {
-        memoryRouter: { wrapComponent: false },
-      })() as TestBed;
+      render(<TestResetComp />);
 
       let { isValid } = formHook!;
       expect(isValid).toBeUndefined();
 
-      await act(async () => {
-        setInputValue('myField', 'changedValue');
-      });
+      const myField = screen.getByTestId('myField');
+      await user.clear(myField);
+      await user.type(myField, 'changedValue');
+      myField.blur();
+
       ({ isValid } = formHook!);
       expect(isValid).toBe(true);
 
-      await act(async () => {
-        // When we reset the form, value is back to "", which is invalid for the field
+      // When we reset the form, value is back to "", which is invalid for the field
+      act(() => {
         formHook!.reset();
       });
 
@@ -581,13 +536,13 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
       let isValid: boolean = false;
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -624,19 +579,21 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
       let isValid: boolean = false;
 
-      act(() => {
-        // We need to call the field validation to mark this field as invalid.
-        // This will then mark the form as invalid when calling formHook.validate() below
-        fieldHook.validate({ validationType: VALIDATION_TYPES.ARRAY_ITEM });
+      // We need to call the field validation to mark this field as invalid.
+      // This will then mark the form as invalid when calling formHook.validate() below
+      await act(async () => {
+        const validatePromise = fieldHook.validate({ validationType: VALIDATION_TYPES.ARRAY_ITEM });
+        await jest.runAllTimersAsync();
+        await validatePromise;
       });
 
       await act(async () => {
         const validatePromise = formHook!.validate();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -672,23 +629,29 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
       let isValid: boolean = false;
 
-      await act(async () => {
+      act(() => {
         fieldHook.setValue([]);
+      });
+
+      await act(async () => {
         const validatePromise = formHook!.validate();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
       expect(isValid).toBe(false);
 
-      await act(async () => {
+      act(() => {
         fieldHook.setValue(['bar']);
+      });
+
+      await act(async () => {
         const validatePromise = formHook!.validate();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         isValid = await validatePromise;
       });
 
@@ -736,22 +699,24 @@ describe('useForm() hook', () => {
         );
       };
 
-      const {
-        form: { setInputValue },
-      } = registerTestBed(TestComp)() as TestBed;
+      render(<TestComp />);
 
       let errors: string[] = formHook!.getErrors();
       expect(errors).toEqual([]);
 
       await act(async () => {
         const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         await submitPromise;
       });
+
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty']);
 
-      await setInputValue('field2', 'bad');
+      const field2 = screen.getByTestId('field2');
+      await user.type(field2, 'bad');
+      field2.blur();
+
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty', 'Field2 is invalid']);
     });
@@ -772,7 +737,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
       expect(formHook!.getFormData()).toEqual({
         field1: 'field1_defaultValue',
@@ -782,7 +747,7 @@ describe('useForm() hook', () => {
         },
       });
 
-      await act(async () => {
+      act(() => {
         formHook!.updateFieldValues({
           field1: 'field1_updated',
           field2: {
@@ -791,6 +756,10 @@ describe('useForm() hook', () => {
           },
           unknownField: 'foo',
         });
+      });
+
+      await act(async () => {
+        await jest.runAllTimersAsync();
       });
 
       expect(formHook!.getFormData()).toEqual({
@@ -833,13 +802,9 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
-      if (formHook === null) {
-        throw new Error('Formhook has not been set.');
-      }
-
-      expect(formHook.getFormData()).toEqual({
+      expect(formHook!.getFormData()).toEqual({
         users: [
           {
             name: 'John',
@@ -861,11 +826,15 @@ describe('useForm() hook', () => {
         ],
       };
 
-      await act(async () => {
+      act(() => {
         formHook!.updateFieldValues(newFormData);
       });
 
-      expect(formHook.getFormData()).toEqual(newFormData);
+      await act(async () => {
+        await jest.runAllTimersAsync();
+      });
+
+      expect(formHook!.getFormData()).toEqual(newFormData);
     });
 
     test('should update an array of string fields (ComboBox)', async () => {
@@ -880,13 +849,9 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
-      if (formHook === null) {
-        throw new Error('Formhook has not been set.');
-      }
-
-      expect(formHook.getFormData()).toEqual({
+      expect(formHook!.getFormData()).toEqual({
         tags: ['foo', 'bar'],
       });
 
@@ -894,11 +859,15 @@ describe('useForm() hook', () => {
         tags: ['updated', 'array'],
       };
 
-      await act(async () => {
+      act(() => {
         formHook!.updateFieldValues(newFormData);
       });
 
-      expect(formHook.getFormData()).toEqual(newFormData);
+      await act(async () => {
+        await jest.runAllTimersAsync();
+      });
+
+      expect(formHook!.getFormData()).toEqual(newFormData);
     });
 
     test('should update recursively an array of object fields', async () => {
@@ -950,13 +919,9 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      render(<TestComp />);
 
-      if (formHook === null) {
-        throw new Error('Formhook has not been set.');
-      }
-
-      expect(formHook.getFormData()).toEqual({
+      expect(formHook!.getFormData()).toEqual({
         users: [
           {
             name: 'John',
@@ -1000,11 +965,15 @@ describe('useForm() hook', () => {
         ],
       };
 
-      await act(async () => {
+      act(() => {
         formHook!.updateFieldValues(newFormData);
       });
 
-      expect(formHook.getFormData()).toEqual(newFormData);
+      await act(async () => {
+        await jest.runAllTimersAsync();
+      });
+
+      expect(formHook!.getFormData()).toEqual(newFormData);
     });
 
     describe('deserializer', () => {
@@ -1025,13 +994,9 @@ describe('useForm() hook', () => {
       };
 
       test('should run deserializer on the new form data provided', async () => {
-        registerTestBed(TestComp)();
+        render(<TestComp />);
 
-        if (formHook === null) {
-          throw new Error('Formhook has not been set.');
-        }
-
-        expect(formHook.getFormData()).toEqual({
+        expect(formHook!.getFormData()).toEqual({
           foo: { label: 'INITIAL', value: 'initial' },
         });
 
@@ -1039,23 +1004,23 @@ describe('useForm() hook', () => {
           foo: 'updated',
         };
 
-        await act(async () => {
+        act(() => {
           formHook!.updateFieldValues(newFormData);
         });
 
-        expect(formHook.getFormData()).toEqual({
+        await act(async () => {
+          await jest.runAllTimersAsync();
+        });
+
+        expect(formHook!.getFormData()).toEqual({
           foo: { label: 'UPDATED', value: 'updated' },
         });
       });
 
       test('should not run deserializer on the new form data provided', async () => {
-        registerTestBed(TestComp)();
+        render(<TestComp />);
 
-        if (formHook === null) {
-          throw new Error('Formhook has not been set.');
-        }
-
-        expect(formHook.getFormData()).toEqual({
+        expect(formHook!.getFormData()).toEqual({
           foo: { label: 'INITIAL', value: 'initial' },
         });
 
@@ -1063,11 +1028,15 @@ describe('useForm() hook', () => {
           foo: 'updated',
         };
 
-        await act(async () => {
+        act(() => {
           formHook!.updateFieldValues(newFormData, { runDeserializer: false });
         });
 
-        expect(formHook.getFormData()).toEqual({
+        await act(async () => {
+          await jest.runAllTimersAsync();
+        });
+
+        expect(formHook!.getFormData()).toEqual({
           foo: 'updated',
         });
       });

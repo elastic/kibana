@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const RULES_MIGRATION_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.caption',
+  {
+    defaultMessage: 'Rules migration status',
+  }
+);
+
 export const ALREADY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.alreadyTranslatedTooltip',
   {
@@ -32,54 +39,5 @@ export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installAndEnableButtonLabel',
   {
     defaultMessage: 'Install and enable',
-  }
-);
-
-export const REPROCESS_RULES_DIALOG_TITLE = (count: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.title', {
-    defaultMessage: 'Reprocess {count} {count, plural, one {rule} other {rules}}',
-    values: { count },
-  });
-
-export const REPROCESS_RULES_DIALOG_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.description',
-  {
-    defaultMessage:
-      "You are about to reprocess selected rules and this will incur additional tokens. You have option to choose a different LLM and to switch off mapping to Elastic's prebuilt rules. These options apply only to the current execution.",
-  }
-);
-
-export const START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.aiConnectorLabel',
-  {
-    defaultMessage: 'AI connector',
-  }
-);
-
-export const START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.setupNewAiConnectorHelpText',
-  {
-    defaultMessage: 'Configure AI Provider',
-  }
-);
-
-export const START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.prebuiltRulesLabel',
-  {
-    defaultMessage: 'Match to Elastic prebuilt rules',
-  }
-);
-
-export const START_RULE_MIGRATION_MODAL_TRANSLATE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.translate',
-  {
-    defaultMessage: 'Translate',
-  }
-);
-
-export const START_RULE_MIGRATION_MODAL_CANCEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.cancel',
-  {
-    defaultMessage: 'Cancel',
   }
 );

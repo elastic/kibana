@@ -15,7 +15,10 @@ import {
 import type { ElasticsearchRoleDescriptor } from '../../../../common';
 import { coreWorkerFixtures } from './core_fixtures';
 
-export type DefaultRolesFixture = Map<string, ElasticsearchRoleDescriptor>;
+export interface DefaultRolesFixture {
+  availableRoles: Map<string, ElasticsearchRoleDescriptor>;
+  rolesFilePath: string;
+}
 
 /**
  * Provides role descriptors for default roles.
@@ -41,7 +44,7 @@ export const defaultRolesFixture = coreWorkerFixtures.extend<
       const data = new Map<string, ElasticsearchRoleDescriptor>(Object.entries(rolesDescriptors));
 
       log.serviceLoaded('defaultRoles');
-      await use(data);
+      await use({ availableRoles: data, rolesFilePath: resourcePath });
     },
     { scope: 'worker' },
   ],

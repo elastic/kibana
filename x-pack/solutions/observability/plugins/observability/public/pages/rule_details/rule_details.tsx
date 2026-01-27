@@ -17,12 +17,9 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { ruleDetailsLocatorID } from '../../../common';
-import {
-  ALERT_STATUS_ALL,
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
+import { ruleDetailsLocatorID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { ALERT_STATUS_ALL, observabilityAlertFeatureIds } from '../../../common/constants';
 import { paths, relativePaths } from '../../../common/locators/paths';
 import type { AlertStatus } from '../../../common/typings';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { esqlResponseToRecords } from '../../../common/utils/esql';
 import { useKibana } from '../../../common/lib/kibana';
@@ -15,7 +15,7 @@ const FIELD = 'event.ingested';
 
 export interface UseIntegrationsLastAlertIngestedParams {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   integrationName: string;
 }

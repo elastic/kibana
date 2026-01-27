@@ -46,6 +46,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         actions={[
           <EuiButtonIcon
             iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
+            size="s"
             color="text"
             onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"

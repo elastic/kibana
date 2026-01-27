@@ -19,13 +19,19 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 import { riskScoreEntityCalculationRoute } from './entity_calculation';
 import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');
 
 describe('entity risk score calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
   const entityAnalyticsConfig = {
@@ -60,6 +66,11 @@ describe('entity risk score calculation route', () => {
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScoreEntityCalculationRoute(server.router, getStartServicesMock, logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const buildRequest = (overrides: object = {}) => {

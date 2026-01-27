@@ -73,5 +73,6 @@ export function manuallyCountTokens(
       completion: completionTokens,
       total: promptTokens + completionTokens,
     },
+    ...(request.model ? { model: request.model } : {}),
   };
 }

@@ -25,8 +25,8 @@ export class WatcherPageObject extends FtrService {
   async createWatch(watchName: string, name: string) {
     await this.testSubjects.click('createWatchButton');
     await this.testSubjects.click('jsonWatchCreateLink');
-    await this.find.setValue('#id', watchName);
-    await this.find.setValue('#watchName', name);
+    await this.testSubjects.setValue('idInput', watchName);
+    await this.testSubjects.setValue('nameInput', name);
     await this.find.clickByCssSelector('[type="submit"]');
     await this.header.waitUntilLoadingHasFinished();
   }

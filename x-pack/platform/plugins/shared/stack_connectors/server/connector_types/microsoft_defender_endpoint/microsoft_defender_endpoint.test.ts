@@ -140,10 +140,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
                 errors: [],
                 command: {
                   type: 'RunScript',
-                  params: [
-                    { key: 'ScriptName', value: 'hello.sh' },
-                    { key: 'Args', value: '--noargs' },
-                  ],
+                  params: [{ key: 'ScriptName', value: 'hello.sh' }],
                 },
               },
             ],

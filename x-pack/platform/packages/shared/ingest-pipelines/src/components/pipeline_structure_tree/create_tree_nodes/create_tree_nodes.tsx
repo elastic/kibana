@@ -29,6 +29,9 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
+        isSelected={treeNode.pipelineName === selectedPipeline}
+        onClick={() => clickTreeNode(treeNode.pipelineName)}
+        level={level - 1}
       />
     ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
@@ -37,7 +40,6 @@ export const createTreeNodesFromPipelines = (
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
     children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
-    callback: () => clickTreeNode(treeNode.pipelineName),
   } as unknown as Node;
 
   if (level === MAX_TREE_LEVEL) {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
 import { duration as momentDuration } from 'moment';
@@ -18,6 +19,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
 import { httpServerMock, createConfigService } from '@kbn/core-http-server-mocks';
@@ -55,6 +57,8 @@ const configService = createConfigService({
 const contextSetup = contextServiceMock.createSetupContract();
 const contextPreboot = contextServiceMock.createPrebootContract();
 
+const docLinksPreboot = docLinksServiceMock.createSetupContract();
+
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -62,6 +66,7 @@ const setupDeps = {
 
 const prebootDeps = {
   context: contextPreboot,
+  docLinks: docLinksPreboot,
 };
 
 interface User {
@@ -87,7 +92,7 @@ const userData = { id: '42' };
 const sessionDurationMs = 1000;
 const path = '/';
 const sessVal = () => ({ value: userData, expires: Date.now() + sessionDurationMs, path });
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
@@ -258,7 +263,7 @@ describe('Cookie based SessionStorage', () => {
       const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
 
-      await delay(sessionDurationMs);
+      await timer(sessionDurationMs);
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
       const response2 = await supertest(innerServer.listener)

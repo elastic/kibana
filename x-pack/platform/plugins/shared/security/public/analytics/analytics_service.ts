@@ -77,6 +77,10 @@ export class AnalyticsService {
   }
 
   private static async recordAuthTypeAnalytics(http: HttpStart) {
+    if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      return;
+    }
+
     localStorage.setItem(
       AnalyticsService.AuthTypeInfoStorageKey,
       JSON.stringify(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { AssetInventoryStatusResponse } from '../../../common/api/asset_inventory/types';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 

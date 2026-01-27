@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -17,5 +17,6 @@
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-plugin",
+    "@kbn/lens-common",
   ]
 }

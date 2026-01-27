@@ -8,13 +8,12 @@
  */
 
 import React, { forwardRef, useMemo } from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import type { DocViewerApi, DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DocViewer } from '@kbn/unified-doc-viewer';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-export const UnifiedDocViewer = forwardRef<DocViewerApi, DocViewRenderProps>(
+export const UnifiedDocViewer = forwardRef<DocViewerApi, Omit<DocViewerProps, 'docViews'>>(
   ({ docViewsRegistry, ...props }, ref) => {
     const { unifiedDocViewer } = getUnifiedDocViewerServices();
 

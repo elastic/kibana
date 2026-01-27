@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 
 import { InterceptTelemetry } from './telemetry';
 
-interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
+export interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   id: string;
   /**
    * expects a react component that will be rendered in the dialog, and expects a callback to be called with the value

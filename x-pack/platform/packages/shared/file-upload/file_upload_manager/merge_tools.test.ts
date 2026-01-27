@@ -11,6 +11,7 @@ import {
   getFormatClashes,
   CLASH_TYPE,
   CLASH_ERROR_TYPE,
+  getFieldsFromMappings,
 } from './merge_tools';
 import type { FileWrapper, FileAnalysis } from './file_wrapper';
 import type { FindFileStructureResponse } from '@kbn/file-upload-common';
@@ -366,6 +367,115 @@ describe('merge_tools', () => {
         { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
         { fileName: 'file3', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.UNSUPPORTED },
       ]);
+    });
+
+    describe('getFieldsFromMappings', () => {
+      it('should return an empty array for empty mappings', () => {
+        const mappings = { properties: {} };
+        expect(getFieldsFromMappings(mappings)).toEqual([]);
+      });
+
+      it('should handle mappings with no properties field', () => {
+        const mappings = {};
+        expect(getFieldsFromMappings(mappings as any)).toEqual([]);
+      });
+
+      it('should extract a single top-level field', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should extract multiple top-level fields and sort them', () => {
+        const mappings = {
+          properties: {
+            field2: { type: 'keyword' },
+            field1: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'float' } },
+          { name: 'field2', value: { type: 'keyword' } },
+        ]);
+      });
+
+      it('should extract nested fields with dot notation', () => {
+        const mappings = {
+          properties: {
+            parent: {
+              properties: {
+                child: { type: 'text' },
+              },
+            },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'parent.child', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should extract a mix of top-level and nested fields and sort them', () => {
+        const mappings = {
+          properties: {
+            field2: { type: 'keyword' },
+            parent: {
+              properties: {
+                child2: { type: 'float' },
+                child1: { type: 'text' },
+              },
+            },
+            field1: { type: 'boolean' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any)).toEqual([
+          { name: 'field1', value: { type: 'boolean' } },
+          { name: 'field2', value: { type: 'keyword' } },
+          { name: 'parent.child1', value: { type: 'text' } },
+          { name: 'parent.child2', value: { type: 'float' } },
+        ]);
+      });
+
+      it('should filter fields by a single allowed type', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+            field3: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['text'])).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+        ]);
+      });
+
+      it('should filter fields by multiple allowed types and sort them', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+            field3: { type: 'float' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['float', 'text'])).toEqual([
+          { name: 'field1', value: { type: 'text' } },
+          { name: 'field3', value: { type: 'float' } },
+        ]);
+      });
+
+      it('should return an empty array when allowed types do not match any field', () => {
+        const mappings = {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'keyword' },
+          },
+        };
+        expect(getFieldsFromMappings(mappings as any, ['float'])).toEqual([]);
+      });
     });
   });
 });

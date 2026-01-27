@@ -29,7 +29,7 @@ export const NavControlInitiator = ({
   pluginsStart,
   isServerless,
 }: NavControlInitiatorProps) => {
-  const { isVisible } = useIsNavControlVisible({ coreStart, pluginsStart });
+  const { isVisible } = useIsNavControlVisible({ coreStart, pluginsStart, isServerless });
 
   if (!isVisible) {
     return null;

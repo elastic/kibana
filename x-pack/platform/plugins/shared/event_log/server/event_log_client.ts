@@ -100,6 +100,7 @@ interface EventLogServiceCtorParams {
   savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
+  spaceId?: string;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -108,12 +109,20 @@ export class EventLogClient implements IEventLogClient {
   private savedObjectGetter: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
+  private spaceId?: string;
 
-  constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectGetter,
+    spacesService,
+    request,
+    spaceId,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
     this.savedObjectGetter = savedObjectGetter;
     this.spacesService = spacesService;
     this.request = request;
+    this.spaceId = spaceId;
   }
 
   public async findEventsBySavedObjectIds(
@@ -255,6 +264,9 @@ export class EventLogClient implements IEventLogClient {
   }
 
   private async getNamespace() {
+    if (this.spaceId) {
+      return this.spacesService?.spaceIdToNamespace(this.spaceId);
+    }
     const space = await this.spacesService?.getActiveSpace(this.request);
     return space && this.spacesService?.spaceIdToNamespace(space.id);
   }

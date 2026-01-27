@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { LensItem, LensItemMeta, LensSavedObject } from '../../server/content_management';
+import type { LensSavedObject } from '../../server/content_management';
+import type { LensItemResponse } from './lens_client';
 
 /**
  * Converts Lens Response Item to Lens Saved Object
@@ -15,10 +16,7 @@ import type { LensItem, LensItemMeta, LensSavedObject } from '../../server/conte
 export function getLensSOFromResponse({
   item: { id, references, ...attributes },
   meta: { type, createdAt, updatedAt, createdBy, updatedBy, managed, originId },
-}: {
-  item: LensItem;
-  meta: LensItemMeta;
-}): LensSavedObject {
+}: LensItemResponse): LensSavedObject {
   return {
     id,
     references,

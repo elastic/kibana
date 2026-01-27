@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/kibana-cors-test-plugin",
   "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "kibanaCorsTest",
     "server": true,

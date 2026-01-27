@@ -33,7 +33,7 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
     });
 
   return (
-    <EuiPageTemplate data-test-subj="appRenderErrorPageContent">
+    <EuiPageTemplate grow={false} data-test-subj="appRenderErrorPageContent">
       <EuiPageTemplate.EmptyPrompt
         iconType="warning"
         iconColor="danger"

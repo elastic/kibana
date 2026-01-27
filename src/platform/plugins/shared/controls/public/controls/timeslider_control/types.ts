@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
-import type { DefaultControlState } from '../../../common';
-import type { DefaultControlApi } from '../types';
+import type {
+  PublishesTitle,
+  AppliesTimeslice,
+  PublishingSubject,
+  PublishesUnsavedChanges,
+} from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { HasCustomPrepend, TimeSliderControlState } from '@kbn/controls-schemas';
 
-export type Timeslice = [number, number];
-
-export interface TimesliderControlState extends DefaultControlState {
-  isAnchored?: boolean;
-  // Encode value as percentage of time range to support relative time ranges.
-  timesliceStartAsPercentageOfTimeRange?: number;
-  timesliceEndAsPercentageOfTimeRange?: number;
-}
-
-export type TimesliderControlApi = DefaultControlApi &
+export type TimeSliderControlApi = DefaultEmbeddableApi<TimeSliderControlState> &
   Pick<PublishesTitle, 'defaultTitle$'> &
-  PublishesTimeslice;
+  AppliesTimeslice &
+  PublishesUnsavedChanges &
+  HasCustomPrepend & {
+    clearSelections: () => void;
+    hasSelections$: PublishingSubject<boolean | undefined>;
+  };

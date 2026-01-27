@@ -9,6 +9,7 @@ export const METRICS_EXPLORER_API_MAX_METRICS = 20;
 
 export const TIMESTAMP = '@timestamp';
 export const HOST_NAME = 'host.name';
+export const HOST_HOSTNAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
@@ -28,3 +29,4 @@ export const OS_NAME = 'os.name';
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
 export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';
+export const KUBELET_STATS_RECEIVER_OTEL = 'kubeletstatsreceiver.otel';

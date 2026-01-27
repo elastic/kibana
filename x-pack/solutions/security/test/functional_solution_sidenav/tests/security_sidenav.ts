@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('sidenav & breadcrumbs', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244347
+    describe.skip('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
@@ -41,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('security_solution_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'securitySolutionUI:get_started',
         });
@@ -50,11 +50,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check the Investigations subsection
-        await solutionNavigation.sidenav.openPanel('securityGroup:investigations'); // open Investigations panel
-        await testSubjects.click(`~panelNavItem-id-timelines`);
-        await solutionNavigation.sidenav.expectLinkActive({
-          navId: 'securityGroup:investigations',
-        });
+        await solutionNavigation.sidenav.expandMore();
+        // open Investigations popover and navigate to some link inside the popover to open the panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:timelines',
@@ -73,11 +72,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('renders a feedback callout', async () => {
+        await solutionNavigation.sidenav.feedbackCallout.reset();
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

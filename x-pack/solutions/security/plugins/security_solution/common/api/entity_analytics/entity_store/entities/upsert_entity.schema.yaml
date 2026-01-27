@@ -23,6 +23,9 @@ paths:
         > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
         
         > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time for a document to be present in the 
+        > final index depends on the entity store transform and usually takes more than 1 minute.
       parameters:
         - name: entityType
           in: path
@@ -43,8 +46,8 @@ paths:
             schema:
               $ref: './common.schema.yaml#/components/schemas/Entity'
       responses:
-        '404':
-          description: Entity not found
+        '409':
+          description: Conflict. The entity was updated while another update was happening in ElasticSearch
         '403':
           description: Operation on a restricted field
         '503':

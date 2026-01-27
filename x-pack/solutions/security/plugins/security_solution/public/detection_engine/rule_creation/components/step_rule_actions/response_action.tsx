@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { getActionDetails } from '../../../rule_response_actions/constants';
 
@@ -21,9 +21,7 @@ export function ResponseAction({ action }: ResponseActionProps) {
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-            <EuiIcon size="m" type={logo} />
-          </EuiToolTip>
+          <EuiIconTip size="m" type={logo} content={name} anchorClassName="eui-textTruncate" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{name}</EuiText>

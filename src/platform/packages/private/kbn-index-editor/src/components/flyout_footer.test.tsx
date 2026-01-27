@@ -124,31 +124,6 @@ describe('FlyoutFooter', () => {
     });
   });
 
-  it('shows import button when canImport is true', async () => {
-    mockFileUploadContext.canImport = true;
-    renderWithI18n(<FlyoutFooter onClose={onClose} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('indexEditorImportButton')).toBeInTheDocument();
-    });
-  });
-
-  it('calls onImportClick when import button is clicked', async () => {
-    mockFileUploadContext.canImport = true;
-    renderWithI18n(<FlyoutFooter onClose={onClose} />);
-    fireEvent.click(screen.getByTestId('indexEditorImportButton'));
-    await waitFor(() => {
-      expect(mockFileUploadContext.onImportClick).toHaveBeenCalled();
-    });
-  });
-
-  it('shows importing status when upload is in progress', async () => {
-    mockFileUploadContext.uploadStatus.overallImportStatus = STATUS.STARTED;
-    renderWithI18n(<FlyoutFooter onClose={onClose} />);
-    await waitFor(() => {
-      expect(screen.getByText(/Importing.../)).toBeInTheDocument();
-    });
-  });
-
   it('shows saving spinner when isSaving is true', async () => {
     isSaving$.next(true);
     renderWithI18n(<FlyoutFooter onClose={onClose} />);

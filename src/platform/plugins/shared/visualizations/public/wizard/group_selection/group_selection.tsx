@@ -88,6 +88,10 @@ interface VisCardProps {
   shouldStretch?: boolean;
 }
 
+const legacyTabTitle = i18n.translate('visualizations.newVisWizard.legacyTab', {
+  defaultMessage: 'Legacy',
+});
+
 const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj: string }> = [
   {
     id: 'recommended',
@@ -100,12 +104,13 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
     id: 'legacy',
     dataTestSubj: 'groupModalLegacyTab',
     label: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {i18n.translate('visualizations.newVisWizard.legacyTab', {
-            defaultMessage: 'Legacy',
-          })}
-        </EuiFlexItem>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        aria-label={legacyTabTitle}
+      >
+        <EuiFlexItem grow={false}>{legacyTabTitle}</EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiIconTip

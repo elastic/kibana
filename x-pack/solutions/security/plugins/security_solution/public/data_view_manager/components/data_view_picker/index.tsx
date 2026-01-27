@@ -6,7 +6,7 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
@@ -18,18 +18,17 @@ import { useKibana } from '../../../common/lib/kibana';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 import { useDataView } from '../../hooks/use_data_view';
-import { browserFieldsManager } from '../../utils/security_browser_fields_manager';
 
 interface DataViewPickerProps {
   /**
    * The scope of the data view picker
    */
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
   /**
    * Optional callback when the data view picker is closed
    */
@@ -45,7 +44,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, onAppLeave },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
 
   const canEditDataView = useMemo(
@@ -65,7 +64,8 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
   const savedDataViews = useSavedDataViews();
 
-  const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
+  const isDefaultSourcerer = scope === PageScope.default;
+  const isExploreSourcerer = scope === PageScope.explore;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataView?.id;
@@ -74,12 +74,21 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   // hence - it is the only place where we should update the url param for the data view selection.
   const handleChangeDataView = useCallback(
     (id: string, indexPattern: string = '') => {
-      browserFieldsManager.removeFromCache(scope);
       selectDataView({ id, scope });
 
       if (isDefaultSourcerer) {
         updateUrlParam({
-          [DataViewManagerScopeName.default]: {
+          [PageScope.default]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
+
+      if (isExploreSourcerer) {
+        updateUrlParam({
+          [PageScope.explore]: {
             id,
             // NOTE: Boolean filter for removing empty patterns
             selectedPatterns: indexPattern.split(',').filter(Boolean),
@@ -87,7 +96,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         });
       }
     },
-    [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
+    [isDefaultSourcerer, isExploreSourcerer, scope, selectDataView, updateUrlParam]
   );
 
   const handleCreateNewDataView = useCallback(
@@ -110,8 +119,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
       // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
-      data.dataViews.clearInstanceCache(dataViewId);
-      browserFieldsManager.removeFromCache(scope);
+      if (dataViewInstance.isPersisted?.()) {
+        data.dataViews.clearInstanceCache(dataViewId);
+      }
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
@@ -127,20 +137,8 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         },
       });
     },
-    [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
   );
-
-  // clearing browser fields cache when user leaves the app
-  // this is to account for any new fields added outside of security solution
-  useEffect(() => {
-    onAppLeave?.((actions) => {
-      browserFieldsManager.clearCache();
-      return actions.default();
-    });
-    return () => {
-      onAppLeave?.((actions) => actions.default());
-    };
-  }, [onAppLeave]);
 
   const getDataViewHelpText = useCallback(
     (dv: DataView) =>

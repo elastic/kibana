@@ -47,7 +47,7 @@ export function TestNowMode({
   return (
     <EuiPanel color="subdued" hasBorder={true}>
       {(hasBlockingError && !isPushing && (
-        <EuiCallOut title={blockingErrorTitle} color="danger" iconType="warning">
+        <EuiCallOut announceOnMount title={blockingErrorTitle} color="danger" iconType="warning">
           {blockingErrorMessage}
         </EuiCallOut>
       )) ||

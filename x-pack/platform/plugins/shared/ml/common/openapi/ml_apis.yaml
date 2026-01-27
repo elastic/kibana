@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
-  version: "1.0.1"
+  version: '1.0.1'
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
@@ -40,54 +40,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/mlSync4xxResponse'
+              examples:
+                syncExample:
+                  $ref: '#/components/examples/mlSync401Example'
+
+  /api/ml/saved_objects/update_jobs_spaces:
+    post:
+      summary: Update jobs spaces
+      description: Update a list of jobs to add and/or remove them from given spaces.
+      operationId: mlUpdateJobsSpaces
+      tags:
+        - ml
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateADJobSpacesRequest:
+                value:
+                  jobType: 'anomaly-detector'
+                  jobIds: ['test-job']
+                  spacesToAdd: ['default']
+                  spacesToRemove: ['*']
+              updateDFAJobSpacesRequest:
+                value:
+                  jobType: 'data-frame-analytics'
+                  jobIds: ['test-job']
+                  spacesToAdd: ['default']
+                  spacesToRemove: ['*']
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              examples:
+                successADResponse:
+                  value:
+                    'test-job':
+                      success: true
+                      type: 'anomaly-detector'
+                successDFAResponse:
+                  value:
+                    'test-job':
+                      success: true
+                      type: 'data-frame-analytics'
+
+  /api/ml/saved_objects/update_trained_models_spaces:
+    post:
+      summary: Update trained models spaces
+      description: Update a list of trained models to add and/or remove them from given spaces.
+      operationId: mlUpdateTrainedModelsSpaces
+      tags:
+        - ml
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateTrainedModelsSpacesRequest:
+                value:
+                  modelIds: ['test-model']
+                  spacesToAdd: ['default']
+                  spacesToRemove: ['*']
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              examples:
+                successTMResponse:
+                  value:
+                    'test-model':
+                      success: true
+                      type: 'trained-model"'
 
   # /s/{spaceId}/api/ml/saved_objects/sync:
-    # get:
-    #   summary: Sync saved objects
-    #   description: >
-    #     Synchronizes Kibana saved objects for machine learning jobs and trained models.
-    #     You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
-    #     This API runs automatically when you start Kibana and periodically thereafter.
-    #   operationId: mlSyncWithSpaceId
-    #   tags:
-    #     - ml
-    #   parameters:
-    #     - $ref: '#/components/parameters/spaceParam'
-    #     - $ref: '#/components/parameters/simulateParam'
-    #   responses:
-    #     '200':
-    #       description: Indicates a successful call
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: '#/components/schemas/mlSync200Response'
-    #           examples:
-    #             syncExample:
-    #               $ref: '#/components/examples/mlSyncExample'
-    #     '401':
-    #       description: Authorization information is missing or invalid.
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: '#/components/schemas/mlSync4xxResponse'
+  # get:
+  #   summary: Sync saved objects
+  #   description: >
+  #     Synchronizes Kibana saved objects for machine learning jobs and trained models.
+  #     You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+  #     This API runs automatically when you start Kibana and periodically thereafter.
+  #   operationId: mlSyncWithSpaceId
+  #   tags:
+  #     - ml
+  #   parameters:
+  #     - $ref: '#/components/parameters/spaceParam'
+  #     - $ref: '#/components/parameters/simulateParam'
+  #   responses:
+  #     '200':
+  #       description: Indicates a successful call
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/mlSync200Response'
+  #           examples:
+  #             syncExample:
+  #               $ref: '#/components/examples/mlSyncExample'
+  #     '401':
+  #       description: Authorization information is missing or invalid.
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/mlSync4xxResponse'
 components:
- parameters:
-  # spaceParam:
-  #   in: path
-  #   name: spaceId
-  #   description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-  #   required: true
-  #   schema:
-  #     type: string
-  simulateParam:
-    in: query
-    name: simulate
-    description: When true, simulates the synchronization by returning only the list of actions that would be performed.
-    required: false
-    schema:
-      type: boolean
-    example: 'true'
- schemas:
+  parameters:
+    # spaceParam:
+    #   in: path
+    #   name: spaceId
+    #   description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+    #   required: true
+    #   schema:
+    #     type: string
+    simulateParam:
+      in: query
+      name: simulate
+      description: When true, simulates the synchronization by returning only the list of actions that would be performed.
+      required: false
+      schema:
+        type: boolean
+      example: 'true'
+  schemas:
     mlSyncResponseSuccess:
       type: boolean
       description: The success or failure of the synchronization.
@@ -185,22 +256,28 @@ components:
           type: string
           example: Unauthorized
         message:
-          type: string 
+          type: string
         statusCode:
           type: integer
           example: 401
- examples:
-   mlSyncExample:
-     summary: Two anomaly detection jobs required synchronization in this example.
-     value:
-       {
-         "savedObjectsCreated": {
-           "anomaly-detector": {
-             "myjob1": { "success":true },
-             "myjob2": { "success":true }
-           }
-          },
-          "savedObjectsDeleted": {},
-          "datafeedsAdded": {},
-          "datafeedsRemoved": {}
+  examples:
+    mlSyncExample:
+      summary: Two anomaly detection jobs required synchronization in this example.
+      value:
+        {
+          'savedObjectsCreated':
+            {
+              'anomaly-detector': { 'myjob1': { 'success': true }, 'myjob2': { 'success': true } },
+            },
+          'savedObjectsDeleted': {},
+          'datafeedsAdded': {},
+          'datafeedsRemoved': {},
+        }
+    mlSync401Example:
+      summary: Two anomaly detection jobs required synchronization in this example.
+      value:
+        {
+          'statusCode': 401,
+          'error': 'Unauthorized',
+          'message': "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]",
         }

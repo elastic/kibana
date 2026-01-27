@@ -30,6 +30,8 @@
           ">>; useRestorableState: <TKey extends keyof TState>(key: TKey, initialValue: InitialValue<TState, TKey>, options?: { shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey> | undefined; shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; useRestorableRef: <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey], options?: { shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => React.MutableRefObject<TState[TKey]>; useRestorableLocalStorage: <TKey extends keyof TState>(key: TKey, localStorageKey: string, initialValue: TState[TKey]) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; }"
         ],
         "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -46,6 +48,8 @@
         "label": "RestorableStateProviderApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,6 +64,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -86,6 +92,8 @@
           "<TState>"
         ],
         "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,6 +108,8 @@
               "Partial<TState> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,6 +124,8 @@
               "((initialState: Partial<TState>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,6 +140,8 @@
                   "Partial<TState>"
                 ],
                 "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+                "lineNumber": 32,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

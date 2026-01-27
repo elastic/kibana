@@ -9,9 +9,17 @@
 
 /**
  * Stress Test Mappings Script -- generated almost entirely by gemini-pro-2.5 via gemini-cli.
+ *
+ * Updated to include test data for nested fields and multi-fields scenarios to validate
+ * the Security Assistant Index Entry form field suggestions fix (issue #239429).
+ *
+ * The script now creates indices with:
+ * - Multi-field examples: keyword fields with text sub-fields (e.g., executable.text)
+ * - Nested object examples: complex nested structures with searchable fields at various levels
+ * - Original simple and complex field types for comprehensive stress testing
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const http = require('http');
 const https = require('https');
 const readline = require('readline');
@@ -116,16 +124,122 @@ const complexFieldTypes = [
   { type: 'semantic_text' },
 ];
 
+// Multi-field examples (keyword with text sub-fields)
+const multiFieldExamples = [
+  {
+    name: 'executable',
+    definition: {
+      type: 'keyword',
+      ignore_above: 1024,
+      fields: {
+        text: { type: 'text' },
+        caseless: { type: 'keyword', normalizer: 'lowercase' },
+      },
+    },
+  },
+  {
+    name: 'process_name',
+    definition: {
+      type: 'keyword',
+      fields: {
+        text: { type: 'text' },
+      },
+    },
+  },
+  {
+    name: 'file_path',
+    definition: {
+      type: 'keyword',
+      ignore_above: 1024,
+      fields: {
+        text: { type: 'text' },
+      },
+    },
+  },
+];
+
+// Nested object examples
+const nestedObjectExamples = [
+  {
+    name: 'Events',
+    definition: {
+      type: 'object',
+      properties: {
+        executable: {
+          type: 'keyword',
+          ignore_above: 1024,
+          fields: {
+            text: { type: 'text' },
+            caseless: { type: 'keyword', normalizer: 'lowercase' },
+          },
+        },
+        process: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'keyword',
+              fields: {
+                text: { type: 'text' },
+              },
+            },
+            command_line: { type: 'text' },
+            pid: { type: 'long' },
+          },
+        },
+        timestamp: { type: 'date' },
+      },
+    },
+  },
+  {
+    name: 'user',
+    definition: {
+      type: 'object',
+      properties: {
+        name: { type: 'text' },
+        email: { type: 'keyword' },
+        profile: {
+          type: 'object',
+          properties: {
+            bio: { type: 'text' },
+            location: {
+              type: 'keyword',
+              fields: {
+                text: { type: 'text' },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+];
+
 function generateIndexBody(numMappings, maxFields, numShards, numReplicas) {
   const properties = {};
   let fieldCount = 0;
 
+  // Add multi-field examples (tests for keyword fields with text sub-fields)
+  for (const multiField of multiFieldExamples) {
+    if (fieldCount >= numMappings) break;
+    properties[multiField.name] = { ...multiField.definition };
+    fieldCount++;
+  }
+
+  // Add nested object examples (tests for nested properties with searchable fields)
+  for (const nestedObj of nestedObjectExamples) {
+    if (fieldCount >= numMappings) break;
+    properties[nestedObj.name] = { ...nestedObj.definition };
+    fieldCount++;
+  }
+
+  // Add complex field types
   for (const fieldType of complexFieldTypes) {
     if (fieldCount >= numMappings) break;
     properties[`complex_${fieldType.type}_${fieldCount}`] = { ...fieldType };
     fieldCount++;
   }
 
+  // Fill remaining with simple field types
   while (fieldCount < numMappings) {
     const fieldTypeDefinition = simpleFieldTypes[fieldCount % simpleFieldTypes.length];
     properties[`field_${fieldCount}`] = { ...fieldTypeDefinition };

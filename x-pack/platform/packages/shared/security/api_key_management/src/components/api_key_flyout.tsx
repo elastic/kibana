@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -29,6 +30,7 @@ import {
   EuiTitle,
   htmlIdGenerator,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
@@ -57,7 +59,6 @@ import type {
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from './api_keys_api_client';
-import { DocLink } from './doc_link';
 
 const TypeLabel = () => (
   <FormattedMessage
@@ -185,8 +186,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSize = isSmallScreen ? 'm' : 's';
   const {
-    services: { http },
+    services: { http, docLinks },
   } = useKibana();
   const [responseError, setResponseError] = useState<KibanaServerError | undefined>(undefined);
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(() => {
@@ -324,7 +327,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   return (
     <FormikProvider value={formik}>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size="m" ownFocus>
+      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size={flyoutSize} ownFocus>
         <Form
           onSubmit={formik.handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
@@ -339,6 +342,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               {responseError && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     data-test-subj="apiKeyFlyoutResponseError"
                     color="danger"
                     title={
@@ -357,6 +361,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 !isOwner ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage
@@ -370,6 +375,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 ) : hasExpired ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage
@@ -700,15 +706,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       />
                     }
                     helpText={
-                      <DocLink
-                        app="elasticsearch"
-                        doc="security-api-create-cross-cluster-api-key.html#security-api-create-cross-cluster-api-key-request-body"
+                      <EuiLink
+                        href={docLinks!.links.apis.createCrossClusterApiKey}
+                        target="_blank"
+                        external
                       >
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.accessHelpText"
                           defaultMessage="Learn how to structure access permissions."
                         />
-                      </DocLink>
+                      </EuiLink>
                     }
                     fullWidth
                   >
@@ -835,15 +842,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       </EuiPanel>
                       <FormRow
                         helpText={
-                          <DocLink
-                            app="elasticsearch"
-                            doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                          <EuiLink
+                            href={docLinks!.links.apis.createApiKeyRoleDescriptors}
+                            target="_blank"
+                            external
                           >
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
                               defaultMessage="Learn how to structure role descriptors."
                             />
-                          </DocLink>
+                          </EuiLink>
                         }
                         fullWidth
                         data-test-subj="apiKeysRoleDescriptorsCodeEditor"
@@ -921,15 +929,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     <FormRow
                       data-test-subj="apiKeysMetadataCodeEditor"
                       helpText={
-                        <DocLink
-                          app="elasticsearch"
-                          doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                        <EuiLink
+                          href={docLinks!.links.apis.createApiKeyMetadata}
+                          target="_blank"
+                          external
                         >
                           <FormattedMessage
                             id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
                             defaultMessage="Learn how to structure metadata."
                           />
-                        </DocLink>
+                        </EuiLink>
                       }
                       fullWidth
                     >

@@ -58,7 +58,13 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
       installSelectedDashboards?.();
     }, [installSelectedDashboards]);
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={true}
+        data-test-subj="migrationsBulkActions"
+      >
         {showRetryFailedDashboardsButton && (
           <EuiFlexItem grow={false}>
             <ReprocessFailedDashboardsButton

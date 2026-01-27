@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableActionSecrets } from '../../helpers';
+import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -21,6 +22,14 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agents_migrate', () => {
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+
+      // install with force flag to bypass package verification error
+      await supertest
+        .post(`/api/fleet/epm/packages/elastic_agent`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({ force: true })
+        .expect(200);
 
       // Create agent policies using the Fleet API
       // Policy 1 - regular policy without tamper protection
@@ -221,6 +230,28 @@ export default function (providerContext: FtrProviderContext) {
           enrolled_at: new Date().toISOString(),
         },
       });
+
+      // Create a containerized agent (upgradeable: false)
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent_containerized',
+        document: {
+          policy_id: policy1.id,
+          enrolled_at: new Date().toISOString(),
+          agent: {
+            version: '9.2.0',
+          },
+          local_metadata: {
+            elastic: {
+              agent: {
+                version: '9.2.0',
+                upgradeable: false, // Containerized agent
+              },
+            },
+          },
+        },
+      });
     });
 
     after(async () => {
@@ -290,6 +321,17 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a 400 if the agent is an unsupported version', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent3_91/migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            enrollment_token: '1234',
+            uri: 'https://example.com',
+          })
+          .expect(400);
+      });
+
+      it('should return a 400 if the agent is containerized', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/agent_containerized/migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
             enrollment_token: '1234',
@@ -383,6 +425,27 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should return a 200 if any agent is containerized', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent1', 'agent_containerized'],
+            uri: 'https://example.com',
+            enrollment_token: '1234',
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.latestErrors[0].error).to.eql(
+          'Agent agent_containerized cannot be migrated because it is containerized.'
+        );
+      });
+
       async function verifyActionResult(agentCount: number) {
         const { body } = await supertest
           .get(`/api/fleet/agents/action_status`)
@@ -419,27 +482,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const actionId = body.actionId;
-
-        await new Promise((resolve, reject) => {
-          let attempts = 0;
-          const intervalId = setInterval(async () => {
-            if (attempts > 5) {
-              clearInterval(intervalId);
-              reject(new Error('action timed out'));
-            }
-            ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-            const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
-              clearInterval(intervalId);
-              resolve({});
-            }
-          }, 3000);
-        }).catch((e) => {
-          throw e;
-        });
+        await checkBulkAgentAction(supertest, actionId);
       });
     });
   });

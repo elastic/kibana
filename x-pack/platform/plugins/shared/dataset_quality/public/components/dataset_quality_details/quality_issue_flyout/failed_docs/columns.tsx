@@ -41,11 +41,14 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
     render: (_, { message }) => {
       return <ErrorMessage errorMessage={message} />;
     },
+    mobileOptions: {
+      width: '100%',
+    },
   },
   {
     name: (
       <EuiToolTip content={typeColumnTooltip}>
-        <span>
+        <span tabIndex={0}>
           {`${typeColumnName} `}
           <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
         </span>

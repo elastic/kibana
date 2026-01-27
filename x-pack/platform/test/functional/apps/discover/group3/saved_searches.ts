@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch('Ecommerce Data');
         expect(await dataGrid.getDocCount()).to.be(500);
 

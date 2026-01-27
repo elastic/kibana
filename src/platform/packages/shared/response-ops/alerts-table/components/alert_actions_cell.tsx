@@ -18,7 +18,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from './default_alert_actions';
-import type { GetAlertsTableProp } from '../types';
+import type { AdditionalContext, GetAlertsTableProp } from '../types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '../constants';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
@@ -41,7 +41,7 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
 
   const DefaultRowActions = useMemo(
     () => (
-      <DefaultAlertActions
+      <DefaultAlertActions<AdditionalContext>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}

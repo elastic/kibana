@@ -30,8 +30,8 @@ class TestResourceRetriever extends ResourceRetriever {
 
 const defaultResourceIdentifier = () =>
   ({
-    fromOriginal: jest.fn().mockReturnValue([]),
-    fromResources: jest.fn().mockReturnValue([]),
+    fromOriginal: jest.fn().mockResolvedValue([]),
+    fromResources: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>);
 
 describe('ResourceRetriever', () => {
@@ -127,8 +127,8 @@ describe('ResourceRetriever', () => {
       () =>
         ({
           ...defaultResourceIdentifier(),
-          fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
-          fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
+          fromOriginal: jest.fn().mockResolvedValue(mockResourcesIdentifiedFromRule),
+          fromResources: jest.fn().mockResolvedValue([]).mockResolvedValueOnce(mockNestedResources),
         } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
     );
 

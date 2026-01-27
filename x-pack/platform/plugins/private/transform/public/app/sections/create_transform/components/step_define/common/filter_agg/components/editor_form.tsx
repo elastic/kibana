@@ -41,7 +41,7 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
       {isValid === false ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut color="danger" iconType="warning" size="s">
+          <EuiCallOut announceOnMount color="danger" iconType="warning" size="s">
             <FormattedMessage
               id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
               defaultMessage="JSON is invalid."

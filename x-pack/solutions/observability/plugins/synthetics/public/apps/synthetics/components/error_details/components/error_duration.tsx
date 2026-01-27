@@ -7,10 +7,11 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import type { Moment } from 'moment';
 import moment from 'moment';
 import { useErrorFailedTests } from '../hooks/use_error_failed_tests';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
-import { getErrorDuration } from '../../../utils/formatting';
 
 export const ErrorDuration: React.FC = () => {
   const { failedTests } = useErrorFailedTests();
@@ -30,3 +31,28 @@ export const ErrorDuration: React.FC = () => {
 const ERROR_DURATION = i18n.translate('xpack.synthetics.errorDetails.errorDuration', {
   defaultMessage: 'Error duration',
 });
+
+const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
+  // const endsAt = state.ends ? moment(state.ends) : moment();
+  // const startedAt = moment(state?.started_at);
+
+  const diffInDays = endsAt.diff(startedAt, 'days');
+  if (diffInDays > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
+      defaultMessage: '{value} days',
+      values: { value: diffInDays },
+    });
+  }
+  const diffInHours = endsAt.diff(startedAt, 'hours');
+  if (diffInHours > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.hours', {
+      defaultMessage: '{value} hours',
+      values: { value: diffInHours },
+    });
+  }
+  const diffInMinutes = endsAt.diff(startedAt, 'minutes');
+  return i18n.translate('xpack.synthetics.errorDetails.errorDuration.mins', {
+    defaultMessage: '{value} mins',
+    values: { value: diffInMinutes },
+  });
+};

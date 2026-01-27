@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type {
@@ -39,7 +40,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
-import type { ConnectorFormSchema } from './types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { SectionLoading } from '../../components';
 
@@ -73,23 +73,29 @@ const ConnectorAddModal = ({
     config: {},
     secrets: {},
     isMissingSecrets: false,
+    isConnectorTypeDeprecated: false,
   });
 
   const canSave = hasSaveActionsCapability(capabilities);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.subtype
-      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
+
+  const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
+    ? (actionTypeModel?.subtype ?? [])
+        .filter((item) => allActionTypes?.[item.id]?.enabledInConfig)
+        .map((subtypeAction) => ({
           ...actionTypeRegistry.get(subtypeAction.id),
           name: subtypeAction.name,
         }))
-      : [];
+    : [];
 
-  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
-    id: gAction.id,
-    label: gAction.name,
-    'data-test-subj': `${gAction.id}Button`,
-  }));
+  const groupActionButtons =
+    groupActionTypeModel?.length > 1
+      ? groupActionTypeModel.map((gAction) => ({
+          id: gAction.id,
+          label: gAction.name,
+          'data-test-subj': `${gAction.id}Button`,
+        }))
+      : [];
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
@@ -106,6 +112,7 @@ const ConnectorAddModal = ({
         config: {},
         secrets: {},
         isMissingSecrets: false,
+        isConnectorTypeDeprecated: false,
       });
       if (resetConnectorForm.current) {
         resetConnectorForm.current({
@@ -269,6 +276,7 @@ const ConnectorAddModal = ({
                 {actionTypeModel && actionTypeModel.isExperimental && (
                   <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                     <EuiBetaBadge
+                      data-test-subj="betaBadge"
                       label={TECH_PREVIEW_LABEL}
                       tooltipContent={TECH_PREVIEW_DESCRIPTION}
                     />

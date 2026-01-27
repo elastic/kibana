@@ -31,6 +31,19 @@ export const DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
             type: 'keyword',
             _meta: { optional: true, description: 'ILM policy associated to the datastream' },
           },
+          dsl: {
+            properties: {
+              enabled: {
+                type: 'boolean',
+                _meta: { description: 'Whether the data stream is enabled' },
+              },
+              data_retention: {
+                type: 'text',
+                _meta: { optional: true, description: 'Data retention period' },
+              },
+            },
+            _meta: { optional: true, description: 'Data stream lifecycle settings' },
+          },
           template: {
             type: 'keyword',
             _meta: { optional: true, description: 'Template associated to the datastream' },

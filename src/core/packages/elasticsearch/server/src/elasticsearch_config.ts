@@ -24,6 +24,11 @@ export interface IElasticsearchConfig {
   readonly healthCheckDelay: Duration;
 
   /**
+   * The number of times to retry the health check request
+   */
+  readonly healthCheckRetry: number;
+
+  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   readonly ignoreVersionMismatch: boolean;
@@ -65,11 +70,6 @@ export interface IElasticsearchConfig {
    * will be sent.
    */
   readonly requestHeadersWhitelist: string[];
-
-  /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  readonly pingTimeout: Duration;
 
   /**
    * Timeout after which HTTP request will be aborted and retried.

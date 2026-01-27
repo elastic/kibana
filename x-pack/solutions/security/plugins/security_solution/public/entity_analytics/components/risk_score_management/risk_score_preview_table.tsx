@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskSeverity } from '../../../../common/search_strategy';
@@ -79,6 +80,9 @@ export const RiskScorePreviewTable = ({
       responsiveBreakpoint={false}
       items={items}
       columns={columns}
+      tableCaption={i18n.translate('xpack.securitySolution.riskScore.previewTable.caption', {
+        defaultMessage: 'Entity risk score preview',
+      })}
     />
   );
 };

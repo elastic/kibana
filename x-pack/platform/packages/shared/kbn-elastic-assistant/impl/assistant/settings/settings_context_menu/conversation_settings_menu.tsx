@@ -21,11 +21,12 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ConversationWithOwner } from '../../api';
 import { DeleteConversationModal } from '../../conversations/delete_conversation_modal';
 import { DELETE_CONVERSATION } from '../../conversations/conversation_sidepanel/translations';
@@ -51,8 +52,6 @@ interface Params {
   selectedConversation?: Conversation;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const ConditionalWrap = ({
   condition,
@@ -244,9 +243,10 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                 </ConditionalWrap>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
-                  key={'anonymize-values-tooltip'}
+                  key="anonymize-values-tooltip"
+                  type="info"
                   content={
                     <FormattedMessage
                       id="xpack.elasticAssistant.assistant.settings.anonymizeValues.tooltip"
@@ -257,9 +257,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                       }}
                     />
                   }
-                >
-                  <EuiIcon tabIndex={0} type="info" />
-                </EuiToolTip>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
@@ -299,9 +297,10 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                 </ConditionalWrap>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
-                  key={'show-citations-tooltip'}
+                  key="show-citations-tooltip"
+                  type="info"
                   content={
                     <FormattedMessage
                       id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
@@ -312,9 +311,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                       }}
                     />
                   }
-                >
-                  <EuiIcon tabIndex={0} type="info" />
-                </EuiToolTip>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>

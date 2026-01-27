@@ -129,6 +129,29 @@ export const resetConfirmStrings = {
     }),
 };
 
+export const unsavedChangesConfirmStrings = {
+  getUnsavedChangesTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
+      defaultMessage: 'Unsaved changes',
+    }),
+  getUnsavedChangesSubtitle: () =>
+    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+      defaultMessage: `You have unsaved changes. Would you like to save or discard your work?`,
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDiscardButtonText: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.discardButtonLabel', {
+      defaultMessage: 'Discard',
+    }),
+  getSaveButtonText: () =>
+    i18n.translate('dashboard.unsavedChangesConfirmModal.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
+
 export const createConfirmStrings = {
   getCreateTitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {

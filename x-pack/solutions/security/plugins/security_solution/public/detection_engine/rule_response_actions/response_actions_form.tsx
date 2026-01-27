@@ -100,6 +100,7 @@ export const ResponseActionsForm = ({
         <>
           <p>
             <EuiCallOut
+              announceOnMount
               data-test-subj="response-actions-error"
               title={FORM_ERRORS_TITLE}
               color="danger"

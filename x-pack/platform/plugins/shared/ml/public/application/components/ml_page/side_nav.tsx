@@ -88,7 +88,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'datavisualizer',
             name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-              defaultMessage: 'Data Visualizer',
+              defaultMessage: 'Data visualizer',
             }),
             disabled: false,
             pathId: ML_PAGES.DATA_VISUALIZER,
@@ -108,7 +108,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                 {
                   id: 'anomaly_explorer',
                   name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
-                    defaultMessage: 'Anomaly Explorer',
+                    defaultMessage: 'Anomaly explorer',
                   }),
                   disabled: disableLinks || !isADEnabled,
                   pathId: ML_PAGES.ANOMALY_EXPLORER,
@@ -117,7 +117,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                 {
                   id: 'single_metric_viewer',
                   name: i18n.translate('xpack.ml.navMenu.anomalyDetection.singleMetricViewerText', {
-                    defaultMessage: 'Single Metric Viewer',
+                    defaultMessage: 'Single metric viewer',
                   }),
                   pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
                   disabled: disableLinks || !isADEnabled,
@@ -132,7 +132,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             {
               id: 'data_frame_analytics_section',
               name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-                defaultMessage: 'Data Frame Analytics',
+                defaultMessage: 'Data frame analytics',
               }),
               disabled: disableLinks || !isDFAEnabled,
               items: [
@@ -140,7 +140,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                   id: 'data_frame_analytics_results_explorer',
                   pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
                   name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
-                    defaultMessage: 'Results Explorer',
+                    defaultMessage: 'Results explorer',
                   }),
                   disabled: disableLinks || !isDFAEnabled,
                   testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
@@ -149,7 +149,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                   id: 'data_frame_analytics_job_map',
                   pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
                   name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
-                    defaultMessage: 'Analytics Map',
+                    defaultMessage: 'Analytics map',
                   }),
                   disabled: disableLinks || !isDFAEnabled,
                   testSubj: 'mlMainTab dataFrameAnalyticsMap',
@@ -175,7 +175,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           id: 'logRateAnalysis',
           pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
-            defaultMessage: 'Log Rate Analysis',
+            defaultMessage: 'Log rate analysis',
           }),
           disabled: disableLinks,
           testSubj: 'mlMainTab logRateAnalysis',
@@ -185,7 +185,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           id: 'logCategorization',
           pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
-            defaultMessage: 'Log Pattern Analysis',
+            defaultMessage: 'Log pattern analysis',
           }),
           disabled: disableLinks,
           testSubj: 'mlMainTab logCategorization',
@@ -197,7 +197,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                 id: 'changePointDetection',
                 pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
                 name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
-                  defaultMessage: 'Change Point Detection',
+                  defaultMessage: 'Change point detection',
                 }),
                 disabled: disableLinks,
                 testSubj: 'mlMainTab changePointDetection',

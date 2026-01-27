@@ -46,6 +46,7 @@ export const getDiscoverSession = async (
       rowsPerPage: tab.attributes.rowsPerPage,
       sampleSize: tab.attributes.sampleSize,
       breakdownField: tab.attributes.breakdownField,
+      chartInterval: tab.attributes.chartInterval,
       density: tab.attributes.density as DataGridDensity,
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,

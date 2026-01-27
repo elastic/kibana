@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import path from 'node:path';
+import { type FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('./reporting_and_security.config'));
-
+  const pluginPath = path.resolve(__dirname, 'plugins');
   return {
     ...apiConfig.getAll(),
     junit: { reportName: 'X-Pack Reporting API Integration Tests Without Security Enabled' },
@@ -24,7 +25,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
-      serverArgs: [...apiConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...apiConfig.get('kbnTestServer.serverArgs'),
+        ...findTestPluginPaths(pluginPath),
+      ],
     },
   };
 }

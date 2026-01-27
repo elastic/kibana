@@ -1,0 +1,62 @@
+{
+  "id": "@kbn/deeplinks-data-sources",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-data-sources",
+        "id": "def-common.DATA_SOURCES_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_SOURCES_APP_ID",
+        "description": [],
+        "signature": [
+          "\"data_sources\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/data_sources/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-data-sources",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"data_sources\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/data_sources/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { StoredMapAttributes } from '../../../server';
 import type { MapByReferenceState, MapByValueState } from '../types';
 
-export type StoredMapByReferenceState = Omit<MapByReferenceState, 'savedObjectId'>;
+type StoredMapByReferenceState = Omit<MapByReferenceState, 'savedObjectId'>;
 
-export type StoredMapEmbeddableState = StoredMapByReferenceState | MapByValueState;
+type StoredByValueState = Omit<MapByValueState, 'attributes'> & {
+  attributes: StoredMapAttributes;
+};
+
+export type StoredMapEmbeddableState = StoredMapByReferenceState | StoredByValueState;

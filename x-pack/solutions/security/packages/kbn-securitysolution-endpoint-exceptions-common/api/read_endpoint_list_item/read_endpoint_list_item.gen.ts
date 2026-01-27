@@ -38,4 +38,4 @@ export type ReadEndpointListItemRequestQueryInput = z.input<
 >;
 
 export type ReadEndpointListItemResponse = z.infer<typeof ReadEndpointListItemResponse>;
-export const ReadEndpointListItemResponse = z.array(EndpointListItem);
+export const ReadEndpointListItemResponse = EndpointListItem;

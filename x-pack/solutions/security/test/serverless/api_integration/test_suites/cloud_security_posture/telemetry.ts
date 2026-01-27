@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { data as telemetryMockData } from './data';
-import { createPackagePolicy } from './helper';
 import { waitForPluginInitialized, EsIndexDataProvider } from './utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';

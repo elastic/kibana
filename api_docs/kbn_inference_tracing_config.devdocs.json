@@ -30,6 +30,8 @@
           "\nConfiguration schema for the Langfuse exporter."
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nThe URL for Langfuse server and Langfuse UI."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +60,8 @@
               "\nThe public key for API requests to Langfuse server."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,6 +75,8 @@
               "\nThe secret key for API requests to Langfuse server."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,6 +90,8 @@
               "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -98,6 +108,8 @@
           "\nConfiguration schema for the Phoenix exporter."
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -111,6 +123,8 @@
               "\nThe URL for Phoenix server."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -127,6 +141,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,6 +159,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,6 +177,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,6 +192,8 @@
               "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,6 +224,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing-config/config.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

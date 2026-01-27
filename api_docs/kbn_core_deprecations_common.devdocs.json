@@ -33,6 +33,8 @@
           "BaseDeprecationDetails"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
             "label": "apiId",
             "description": [],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,6 +62,8 @@
               "\"api\""
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -74,6 +80,8 @@
           "\nBase properties shared by all types of deprecations\n"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +95,8 @@
               "\nThe title of the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,6 +117,8 @@
               ")[]"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,6 +135,8 @@
               "\"warning\" | \"critical\" | \"fetch_error\""
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -139,6 +153,8 @@
               "\"config\" | \"api\" | \"feature\" | undefined"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -155,6 +171,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -171,6 +189,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -187,6 +207,8 @@
               "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; mark_as_resolved_api?: { apiTotalCalls: number; totalMarkedAsResolved: number; timestamp: string | number | Date; routePath: string; routeMethod: string; routeVersion?: string | undefined; } | undefined; }"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -206,6 +228,8 @@
           "BaseDeprecationDetails"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +241,8 @@
             "label": "configPath",
             "description": [],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +257,8 @@
               "\"config\""
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -245,6 +273,8 @@
         "label": "DeprecationDetailsMessage",
         "description": [],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,6 +289,8 @@
               "\"text\" | \"markdown\""
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,6 +302,8 @@
             "label": "content",
             "description": [],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -284,6 +318,8 @@
         "label": "DeprecationsGetResponse",
         "description": [],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 133,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -301,6 +337,8 @@
               ">[]"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -320,6 +358,8 @@
           "BaseDeprecationDetails"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +374,8 @@
               "\"feature\" | undefined"
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -358,6 +400,8 @@
           "FeatureDeprecationDetails"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -373,6 +417,8 @@
           "ExtendedDetails & { domainId: string; }"
         ],
         "path": "src/core/packages/deprecations/common/src/types.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

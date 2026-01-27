@@ -11,11 +11,11 @@ import type { DataProvider } from '@kbn/timelines-plugin/common';
 import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import type { EuiButtonIcon } from '@elastic/eui';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSecurityContext } from '../../../hooks/use_security_context';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
@@ -59,10 +59,14 @@ export const AddToTimelineButtonIcon: FC<AddToTimelineProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const addToTimelineButton = useAddToTimelineButton();
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
-  if (!securitySolutionContext?.hasAccessToTimeline || !addToTimelineProps) {
+  if (!hasAccessToTimeline || !addToTimelineProps) {
     return null;
   }
 
@@ -89,7 +93,11 @@ export const AddToTimelineButtonEmpty: FC<AddToTimelineProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const styles = useStyles();
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const { analytics, i18n: i18nStart, theme } = useKibana().services;
@@ -99,7 +107,7 @@ export const AddToTimelineButtonEmpty: FC<AddToTimelineProps> = ({
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !fieldAndValueValid(key, value)) {
+  if (!hasAccessToTimeline || !fieldAndValueValid(key, value)) {
     return null;
   }
 
@@ -150,7 +158,11 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const styles = useStyles();
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
   const { analytics, i18n: i18nStart, theme } = useKibana().services;
@@ -161,7 +173,7 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !fieldAndValueValid(key, value)) {
+  if (!hasAccessToTimeline || !fieldAndValueValid(key, value)) {
     return null;
   }
 
@@ -209,11 +221,15 @@ export const AddToTimelineCellAction: FC<AddToTimelineCellActionProps> = ({
   Component,
   'data-test-subj': dataTestSubj,
 }) => {
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
   const addToTimelineButton = useAddToTimelineButton();
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
-  if (!securitySolutionContext?.hasAccessToTimeline || !addToTimelineProps) {
+  if (!hasAccessToTimeline || !addToTimelineProps) {
     return null;
   }
   addToTimelineProps.Component = Component;

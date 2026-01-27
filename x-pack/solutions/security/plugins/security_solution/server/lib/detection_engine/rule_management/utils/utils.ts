@@ -23,6 +23,7 @@ import type {
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
+import type { WarningSchema } from '../../../../../common/api/detection_engine';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -63,7 +64,10 @@ export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] =
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
-export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
+export const transformFindAlerts = (
+  ruleFindResults: FindResult<RuleParams>,
+  warnings?: WarningSchema[]
+): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
     perPage: ruleFindResults.perPage,
@@ -71,6 +75,7 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
     data: ruleFindResults.data.map((rule) => {
       return internalRuleToAPIResponse(rule);
     }),
+    ...(warnings && warnings.length > 0 ? { warnings } : {}),
   };
 };
 

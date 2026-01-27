@@ -227,6 +227,7 @@ const RuntimeFieldFormComp = ({
         <>
           <EuiSpacer />
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
               defaultMessage: 'Field shadowing',
             })}

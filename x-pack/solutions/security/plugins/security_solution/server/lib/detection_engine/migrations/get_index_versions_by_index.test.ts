@@ -15,6 +15,13 @@ describe('getIndexVersionsByIndex', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
+  it('short-circuits if no indices are provided', async () => {
+    const result = await getIndexVersionsByIndex({ esClient, index: [] });
+
+    expect(result).toEqual({});
+    expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+  });
+
   it('returns keys for each specified index', async () => {
     esClient.indices.getMapping.mockResponse({});
 

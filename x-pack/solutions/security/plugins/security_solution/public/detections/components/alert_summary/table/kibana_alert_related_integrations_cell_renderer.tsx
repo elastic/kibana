@@ -21,14 +21,14 @@ export interface KibanaAlertRelatedIntegrationsCellRendererProps {
    */
   alert: Alert;
   /**
-   * List of installed AI for SOC integrations.
+   * List of installed EASE integrations.
    * This comes from the additionalContext property on the table.
    */
   packages: PackageListItem[];
 }
 
 /**
- * Renders an integration/package icon within the AI for SOC alert summary table Integration column.
+ * Renders an integration/package icon within EASE alert summary table Integration column.
  */
 export const KibanaAlertRelatedIntegrationsCellRenderer = memo(
   ({ alert, packages }: KibanaAlertRelatedIntegrationsCellRendererProps) => {

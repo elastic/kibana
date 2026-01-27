@@ -49,7 +49,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }

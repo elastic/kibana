@@ -7,7 +7,7 @@
 
 import * as z from '@kbn/zod';
 
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -28,7 +28,6 @@ import type {
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
-import type { GapRangeValue } from '../../rule_gaps/constants';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;
@@ -66,10 +65,6 @@ export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
-  gapsRange?: {
-    start: string;
-    end: string;
-  };
   signal?: AbortSignal;
 }
 
@@ -107,8 +102,7 @@ export interface FilterOptions {
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
-  showRulesWithGaps?: boolean;
-  gapSearchRange?: GapRangeValue;
+  gapFillStatuses?: GapFillStatus[];
   includeRuleTypes?: Type[];
 }
 
@@ -117,6 +111,7 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: RuleResponse[];
+  warnings?: WarningSchema[];
 }
 
 export interface FetchRuleProps {

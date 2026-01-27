@@ -9,14 +9,15 @@ import type { AxiosError } from 'axios';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
-  DEFAULT_OPENAI_MODEL,
+  DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
-  OPENAI_CONNECTOR_ID,
+  CONNECTOR_ID,
   OpenAiProviderType,
-} from '../../../common/openai/constants';
+  RunActionResponseSchema,
+  StreamingResponseSchema,
+} from '@kbn/connector-schemas/openai';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -93,11 +94,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         headers: {
           'X-My-Custom-Header': 'foo',
           Authorization: 'override',
@@ -136,7 +137,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -183,7 +184,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -275,7 +276,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -307,7 +308,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -414,7 +415,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -440,7 +441,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -467,7 +468,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -507,7 +508,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -531,7 +532,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -554,7 +555,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -585,7 +586,7 @@ describe('OpenAIConnector', () => {
           {
             ...sampleOpenAiBody,
             stream: true,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           },
           { signal: undefined }
         );
@@ -603,7 +604,7 @@ describe('OpenAIConnector', () => {
           {
             ...sampleOpenAiBody,
             stream: true,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           },
           {
             signal,
@@ -716,11 +717,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI with special headers', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         organizationId: 'org-id',
         projectId: 'proj-id',
         headers: {
@@ -760,7 +761,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({
             ...sampleOpenAiBody,
             stream: false,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           }),
           headers: {
             'OpenAI-Organization': 'org-id',
@@ -779,11 +780,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI without headers', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -818,7 +819,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -835,7 +836,7 @@ describe('OpenAIConnector', () => {
   describe('Other OpenAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'http://localhost:1234/v1/chat/completions',
         apiProvider: OpenAiProviderType.Other,
@@ -1260,7 +1261,7 @@ describe('OpenAIConnector', () => {
   describe('AzureAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl:
           'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -1466,7 +1467,7 @@ describe('OpenAIConnector', () => {
   describe('Token dashboard', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -1561,7 +1562,7 @@ describe('OpenAIConnector', () => {
     it('should initialize PKI SSL overrides when PKI secrets are present', () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config,
         secrets,
         logger,
@@ -1576,7 +1577,7 @@ describe('OpenAIConnector', () => {
       expect(() => {
         new OpenAIConnector({
           configurationUtilities: actionsConfigMock.create(),
-          connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+          connector: { id: '1', type: CONNECTOR_ID },
           config,
           secrets: badSecrets,
           logger,
@@ -1587,7 +1588,7 @@ describe('OpenAIConnector', () => {
     it('should call runApi with sslOverrides when they exist', async () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config,
         secrets,
         logger,
@@ -1616,11 +1617,11 @@ describe('OpenAIConnector', () => {
     it('should include OpenAI-Organization and OpenAI-Project headers if present', async () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config: {
           apiUrl: 'https://api.openai.com/v1/chat/completions',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
           organizationId: 'org-id',
           projectId: 'proj-id',
           headers: { 'X-My-Custom-Header': 'foo' },
@@ -1646,11 +1647,11 @@ describe('OpenAIConnector', () => {
   describe('Enhanced error handling', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         headers: {},
       },
       secrets: { apiKey: '123' },

@@ -670,9 +670,9 @@
               "The node in the main panel that opens the secondary panel"
             ],
             "signature": [
-              "{ id: string; title?: string | undefined; children?: ",
+              "{ id: string; path: string; title?: string | undefined; children?: ",
               "ChromeProjectNavigationNode",
-              "[] | undefined; path: string; sideNavStatus?: ",
+              "[] | undefined; sideNavStatus?: ",
               "SideNavNodeStatus",
               " | undefined; deepLink?: ",
               "ChromeNavLink",

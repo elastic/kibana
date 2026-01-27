@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { InstallResponse } from '@kbn/sample-data-ingest/common';
+import type { InstallingResponse, InstalledResponse } from '@kbn/sample-data-ingest/common';
 import { useKibana } from './use_kibana';
 
 import { QueryKeys } from '../constants';
@@ -22,7 +22,11 @@ export function useIngestSampleData() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const { mutate: ingestSampleData, isLoading } = useMutation<InstallResponse, ServerError, void>(
+  const { mutate: ingestSampleData, isLoading } = useMutation<
+    InstallingResponse | InstalledResponse,
+    ServerError,
+    void
+  >(
     [QueryKeys.IngestSampleData],
     () => {
       if (!sampleDataIngest) {
