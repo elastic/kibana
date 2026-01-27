@@ -10,6 +10,7 @@ import { FtrProviderContext } from './config';
 
 const initialPackageMap = {
   apache: 'Apache HTTP Server',
+  aws: 'AWS',
   system: 'System',
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
@@ -213,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should display a list of installed integrations', async () => {
           const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
 
-          expect(integrations.length).to.be(2);
+          expect(integrations.length).to.be(3);
           expect(integrations).to.eql(initialPackagesTexts);
         });
 
@@ -255,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql([initialPackageMap.apache]);
+            expect(integrations).to.eql([initialPackageMap.apache, initialPackageMap.aws]);
           });
         });
 

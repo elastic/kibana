@@ -25,7 +25,7 @@ const packages: IntegrationPackage[] = [
     version: '1.14.0',
   },
   {
-    name: 'aws', // not available in the dockerized package registry
+    name: 'aws',
     version: '1.51.0',
   },
   {

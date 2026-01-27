@@ -6,10 +6,9 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { defineDockerServersConfig, dockerRegistryPort, packageRegistryDocker } from '@kbn/test';
-import { pageObjects } from './page_objects';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
+import { pageObjects } from './page_objects';
 
 export async function getFunctionalConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackPlatformFunctionalTestsConfig = await readConfigFile(
@@ -22,21 +21,13 @@ export async function getFunctionalConfig({ readConfigFile }: FtrConfigProviderC
     pageObjects,
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     servers: xPackPlatformFunctionalTestsConfig.get('servers'),
-    dockerServers: defineDockerServersConfig({
-      registry: packageRegistryDocker,
-    }),
     security: xPackPlatformFunctionalTestsConfig.get('security'),
     junit: {
       reportName: 'X-Pack Observability Functional UI Tests',
     },
     kbnTestServer: {
       ...xPackPlatformFunctionalTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackPlatformFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        ...(dockerRegistryPort
-          ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
-          : []),
-      ],
+      serverArgs: [...xPackPlatformFunctionalTestsConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster: {
       ...xPackPlatformFunctionalTestsConfig.get('esTestCluster'),
