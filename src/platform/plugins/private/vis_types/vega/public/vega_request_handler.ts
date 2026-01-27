@@ -45,6 +45,7 @@ export function createVegaRequestHandler(
   context: VegaRequestHandlerContext = {}
 ) {
   let searchAPI: SearchAPI;
+  let lastProjectRouting: ProjectRouting | undefined;
   const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
@@ -60,7 +61,8 @@ export function createVegaRequestHandler(
     const { search } = getData();
     const dataViews = getDataViews();
 
-    if (!searchAPI) {
+    // Recreate SearchAPI if projectRouting has changed
+    if (!searchAPI || lastProjectRouting !== projectRouting) {
       searchAPI = new SearchAPI(
         {
           uiSettings,
@@ -73,6 +75,7 @@ export function createVegaRequestHandler(
         executionContext,
         projectRouting
       );
+      lastProjectRouting = projectRouting;
     }
 
     timeCache.setTimeRange(timeRange);

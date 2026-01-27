@@ -126,6 +126,10 @@ export class EsqlQueryParser {
     // Handle context
     if (context === true) {
       internalUrl.filter = this._filters;
+      // Include projectRouting from SearchAPI so Vega can detect changes
+      if (this._searchAPI.projectRouting !== undefined) {
+        internalUrl.project_routing = this._searchAPI.projectRouting;
+      }
     }
 
     // Mark that we need time parameter injection
@@ -152,6 +156,7 @@ export class EsqlQueryParser {
         filter: r.url.filter,
         params: urlParams,
         dropNullColumns: r.url.dropNullColumns ?? DEFAULT_DROP_NULL_COLUMNS,
+        ...(r.url.project_routing !== undefined && { project_routing: r.url.project_routing }),
         name: getRequestName(r.dataObject.name, index),
       };
     });
