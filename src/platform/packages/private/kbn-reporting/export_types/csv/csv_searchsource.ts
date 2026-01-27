@@ -84,9 +84,7 @@ export class CsvSearchSourceExportType extends ExportType<
     const es = this.startDeps.esClient.asScoped(request);
     const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
 
-    const dataClient = useInternalUser
-      ? await this.getInternalSearchClient(dataPluginStart, request)
-      : dataPluginStart.search.asScoped(request);
+    const dataClient = dataPluginStart.search.asScoped(request);
 
     const clients = {
       uiSettings,

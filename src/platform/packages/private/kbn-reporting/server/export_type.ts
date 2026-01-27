@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
   FakeRawRequest,
@@ -27,13 +26,6 @@ import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchClient,
-  ISearchOptions,
-} from '@kbn/search-types';
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -136,24 +128,6 @@ export abstract class ExportType<
     }
   }
 
-  // Provides a no-op search sessions client for internal user searches.
-  private getNoOpSearchSessionsClient(): SearchStrategyDependencies['searchSessionsClient'] {
-    return {
-      getId: async () => '',
-      save: async () => undefined,
-      get: async () => ({ id: '', attributes: {}, references: [], type: '' } as any),
-      find: async () => ({ saved_objects: [], total: 0 } as any),
-      update: async () => ({ id: '', attributes: {}, references: [], type: '' }),
-      cancel: async () => ({}),
-      delete: async () => ({}),
-      extend: async () => ({ id: '', attributes: {}, references: [], type: '' }),
-      status: async () => ({ status: 'complete' } as any),
-      trackId: async () => {},
-      getSearchIdMapping: async () => new Map(),
-      getConfig: () => ({} as any),
-    };
-  }
-
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
@@ -204,48 +178,6 @@ export abstract class ExportType<
       port: serverInfo.port,
       uuid: this.context.env.instanceUuid,
       protocol: serverInfo.protocol,
-    };
-  }
-
-  /**
-   * The data plugin doesn't provide an internal search client out of the box yet.
-   * See: https://github.com/elastic/kibana/issues/249146
-   * This method builds a search client that uses the internal user search strategy.
-   */
-  protected async getInternalSearchClient(
-    dataPluginStart: DataPluginStart,
-    request: KibanaRequest
-  ): Promise<ISearchClient> {
-    const internalSearchStrategy = dataPluginStart.search.searchAsInternalUser;
-
-    const searchDeps = {
-      savedObjectsClient: await this.getSavedObjectsClient(request),
-      uiSettingsClient: await this.getUiSettingsClient(request),
-      esClient: this.startDeps.esClient.asScoped(request),
-      // No-op search sessions client to satisfy the interface, internal search strategy makes no use of this dep.
-      searchSessionsClient: this.getNoOpSearchSessionsClient(),
-      request,
-    };
-
-    return {
-      search: <
-        SearchStrategyRequest extends IKibanaSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse
-      >(
-        searchRequest: SearchStrategyRequest,
-        options: ISearchOptions = {}
-      ) =>
-        internalSearchStrategy.search(
-          searchRequest,
-          options,
-          searchDeps
-        ) as Observable<SearchStrategyResponse>,
-      cancel: (id: string, options?: ISearchOptions) =>
-        internalSearchStrategy.cancel?.(id, options || {}, searchDeps) || Promise.resolve(),
-
-      extend: (id: string, keepAlive: string, options?: ISearchOptions) =>
-        internalSearchStrategy.extend?.(id, keepAlive, options || {}, searchDeps) ||
-        Promise.resolve(),
     };
   }
 }

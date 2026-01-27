@@ -623,7 +623,7 @@ describe('CsvGenerator', () => {
           stream,
           false,
           jobId,
-          true // useInternalUser
+          true
         );
 
         await generateCsv.generateData();

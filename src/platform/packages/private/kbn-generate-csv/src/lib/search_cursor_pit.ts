@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
+import { INTERNAL_ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/server';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -90,9 +91,13 @@ export class SearchCursorPit extends SearchCursor {
       },
     };
 
+    const strategy = this.useInternalUser
+      ? INTERNAL_ENHANCED_ES_SEARCH_STRATEGY
+      : ES_SEARCH_STRATEGY;
+
     return await lastValueFrom(
       this.clients.data.search(searchParamsPit, {
-        strategy: ES_SEARCH_STRATEGY,
+        strategy,
         abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
