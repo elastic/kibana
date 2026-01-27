@@ -13,7 +13,7 @@ import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { PinnedControlState } from '@kbn/controls-schemas';
+import type { PinnedControlLayoutState, PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { PanelPackage } from '@kbn/presentation-containers';
 

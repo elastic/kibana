@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  ControlGroupRenderer,
-  apiHasEditorConfig,
-  type ControlGroupRendererProps,
-  controlGroupStateBuilder,
-  isControlGroupRendererApi,
-} from './src';
-export type {
-  ControlGroupRendererApi,
-  ControlGroupCreationOptions,
-  ControlGroupRuntimeState,
-  ControlGroupStateBuilder,
-  ControlGroupEditorConfig,
-  ControlStateTransform,
-  ControlPanelsState,
-  ControlPanelState,
-} from './src/types';
+import type { ControlGroupRendererApi, HasEditorConfig } from './types';
+
+export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorConfig => {
+  return typeof (parentApi as HasEditorConfig).getEditorConfig === 'function';
+};
+
+export const isControlGroupRendererApi = (api: unknown): api is ControlGroupRendererApi => {
+  return Boolean(typeof (api as ControlGroupRendererApi).getControls === 'function');
+};

@@ -164,6 +164,7 @@ export const ControlGroupRenderer = ({
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
       appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
       appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      getControls: parentApi.layout$.getValue().controls ?? {},
       reload: () => {
         parentApi.reload$.next();
       },
