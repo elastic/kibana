@@ -28,6 +28,10 @@ export interface CloudConnectedAppContextValue {
   hasActionsSavePrivilege?: boolean;
   hasAnyDefaultLLMConnectors?: boolean;
   setHasAnyDefaultLLMConnectors?: (value: boolean) => void;
+  justConnected: boolean;
+  setJustConnected: (value: boolean) => void;
+  autoEnablingEis: boolean;
+  setAutoEnablingEis: (value: boolean) => void;
 }
 
 const CloudConnectedAppContext = createContext<CloudConnectedAppContextValue | null>(null);
