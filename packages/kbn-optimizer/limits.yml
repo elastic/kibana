@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 4662
+  automaticImportVTwo: 10605
   banners: 4087
   canvas: 15142
   cases: 153204
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9285
+  presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
