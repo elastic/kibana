@@ -866,10 +866,11 @@ describe('SharepointOnline', () => {
         {
           requests: [
             {
-              entityTypes: ['driveItem'],
+              entityTypes: ['site'],
               query: {
                 queryString: 'test document',
               },
+              region: 'NAM',
             },
           ],
         }
@@ -917,6 +918,7 @@ describe('SharepointOnline', () => {
               query: {
                 queryString: 'project site',
               },
+              region: 'NAM',
             },
           ],
         }
@@ -953,10 +955,11 @@ describe('SharepointOnline', () => {
         {
           requests: [
             {
-              entityTypes: ['driveItem'],
+              entityTypes: ['site'],
               query: {
                 queryString: 'documents',
               },
+              region: 'NAM',
               from: 10,
               size: 25,
             },

@@ -372,6 +372,12 @@ export const SharepointOnline: ConnectorSpec = {
           .array(z.enum(['site', 'list', 'listItem', 'drive', 'driveItem']))
           .optional()
           .describe('Entity types to search'),
+        region: z
+          .string()
+          .optional()
+          .describe(
+            'Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
+          ),
         from: z.number().optional().describe('Offset for pagination'),
         size: z.number().optional().describe('Number of results to return'),
       }),
@@ -382,17 +388,17 @@ export const SharepointOnline: ConnectorSpec = {
           entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
+          region?: string;
         };
-        // const config = ctx.config as { region: string };
 
         const searchRequest = {
           requests: [
             {
-              entityTypes: typedInput.entityTypes ?? ['driveItem'],
+              entityTypes: typedInput.entityTypes ?? ['site'],
               query: {
                 queryString: typedInput.query,
               },
-              // region: config.region,
+              region: typedInput.region ?? 'NAM',
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },

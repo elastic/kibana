@@ -38,7 +38,8 @@ The SharePoint Online connector has the following actions:
 Search
 :   Search for content across SharePoint sites, lists, and drives using Microsoft Graph Search API.
     - **query** (required): The search query string.
-    - **entityTypes** (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `driveItem`.
+    - **entityTypes** (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `site`.
+    - **region** (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Defaults to `NAM`.
     - **from** (optional): Offset for pagination.
     - **size** (optional): Number of results to return.
 
