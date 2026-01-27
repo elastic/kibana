@@ -211,42 +211,18 @@ export class ConfigService {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
 
-    let validatedConfig = hasSchema
+    const rawConfigAtPath = config.get(path);
+    const validatedConfig = hasSchema
       ? await firstValueFrom(
-          this.getValidatedConfigAtPath$(
-            path,
+          this.getValidatedConfigAtPath$(path, {
             // At this point we don't care about how valid the config is: we just want to read `enabled`
-            { stripUnknownKeys: true }
-          ) as Observable<{ enabled?: boolean }>,
+            stripUnknownKeys: true,
+            // Pass raw config to detect when user tries to set `enabled` on a non-disableable plugin
+            rawConfig: rawConfigAtPath,
+          }) as Observable<{ enabled?: boolean }>,
           { defaultValue: undefined }
         )
       : undefined;
-
-    // Special use case: when the provided config includes `enabled` and the validated config doesn't,
-    // it's quite likely that's not an allowed config and it should fail.
-    // Applying "normal" validation (not stripping unknowns) in that case.
-    if (
-      hasSchema &&
-      typeof config.get(path)?.enabled !== 'undefined' &&
-      typeof validatedConfig?.enabled === 'undefined'
-    ) {
-      try {
-        validatedConfig = await firstValueFrom(
-          this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
-          { defaultValue: undefined }
-        );
-      } catch (error) {
-        if (error instanceof ValidationError) {
-          throw new ValidationError(
-            new SchemaTypeError(
-              `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`,
-              [namespace]
-            )
-          );
-        }
-        throw error;
-      }
-    }
 
     const isDisabled = validatedConfig?.enabled === false;
     if (isDisabled) {
@@ -363,7 +339,10 @@ export class ConfigService {
   private validateAtPath(
     path: ConfigPath,
     config: Record<string, unknown>,
-    validateOptions?: { stripUnknownKeys?: boolean }
+    validateOptions?: {
+      stripUnknownKeys?: boolean;
+      rawConfig?: Record<string, unknown>;
+    }
   ) {
     const stripUnknownKeys = validateOptions?.stripUnknownKeys || this.stripUnknownKeys;
 
@@ -372,7 +351,7 @@ export class ConfigService {
     if (!schema) {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
-    return schema.validate(
+    const validatedValue = schema.validate(
       config,
       {
         dev: this.env.mode.dev,
@@ -383,6 +362,24 @@ export class ConfigService {
       `config validation of [${namespace}]`,
       stripUnknownKeys ? { stripUnknownKeys } : {}
     );
+
+    // Check for stripped 'enabled' field: when the raw config has `enabled` but
+    // the validated config doesn't, it means the schema doesn't allow `enabled`
+    if (
+      stripUnknownKeys &&
+      validateOptions?.rawConfig &&
+      typeof validateOptions.rawConfig.enabled !== 'undefined' &&
+      typeof (validatedValue as { enabled?: boolean })?.enabled === 'undefined'
+    ) {
+      throw new ValidationError(
+        new SchemaTypeError(
+          `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`,
+          [namespace]
+        )
+      );
+    }
+
+    return validatedValue;
   }
 
   private getValidatedConfigAtPath$(
@@ -390,12 +387,17 @@ export class ConfigService {
     {
       ignoreUnchanged = true,
       stripUnknownKeys,
-    }: { ignoreUnchanged?: boolean; stripUnknownKeys?: boolean } = {}
+      rawConfig,
+    }: {
+      ignoreUnchanged?: boolean;
+      stripUnknownKeys?: boolean;
+      rawConfig?: Record<string, unknown>;
+    } = {}
   ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
       ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
-      map((config) => this.validateAtPath(path, config, { stripUnknownKeys }))
+      map((config) => this.validateAtPath(path, config, { stripUnknownKeys, rawConfig }))
     );
   }
 
