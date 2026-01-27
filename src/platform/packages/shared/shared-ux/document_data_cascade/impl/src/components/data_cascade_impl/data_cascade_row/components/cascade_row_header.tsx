@@ -146,6 +146,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         )}
       </React.Fragment>
       <EuiFlexGroup
+        data-test-subj={`${rowId}-row-header`}
         gutterSize={size}
         direction="row"
         alignItems="center"
