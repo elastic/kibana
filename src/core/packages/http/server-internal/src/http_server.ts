@@ -558,6 +558,9 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
+      // TODO: This only works if we get the execution context from the request in the x-kbn-context header.
+      // The browser does this but if someone does a request directly to the server it may not exist.
+      // Should we do it differently or is this ok?
       userActivity?.setInjectedContext({
         kibana: { space: { id: parentContext?.space } },
       });

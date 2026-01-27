@@ -19,14 +19,14 @@ interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
 }
 
-interface EventParams {
+interface ObjectParams {
   id: string;
   name: string;
   type: string;
   tags: string[];
 }
 
-interface ObjectParams {
+interface EventParams {
   action: string;
   type: string;
 }
@@ -97,7 +97,7 @@ export class UserActivityService
       ['user_activity'],
       config$.pipe(
         map((config) => {
-          const userActivityJsonFileAppender = getuserActivityAppender(config.file);
+          const userActivityJsonFileAppender = getUserActivityAppender(config.file);
 
           return {
             appenders: {
@@ -164,9 +164,10 @@ export class UserActivityService
   };
 }
 
-function getuserActivityAppender(
+function getUserActivityAppender(
   fileName: string | undefined
 ): ConsoleAppenderConfig | FileAppenderConfig {
+  // TODO: we should allow rolling appender and other layouts but json default
   if (fileName) {
     return {
       type: 'file',
@@ -175,7 +176,6 @@ function getuserActivityAppender(
     };
   }
 
-  // TODO: figure out what to do with the default, is it console or some file that we decide?
   return {
     type: 'console',
     layout: { type: 'json' },
