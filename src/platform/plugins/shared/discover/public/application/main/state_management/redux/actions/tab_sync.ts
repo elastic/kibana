@@ -40,12 +40,8 @@ export const createUrlSyncObservables: InternalStateThunkActionCreator<
   [TabActionPayload],
   UrlSyncObservables
 > = ({ tabId }) =>
-  function createUrlSyncObservablesThunkFn(dispatch, getState, { runtimeStateManager }) {
-    const { internalState$ } = runtimeStateManager;
-
-    if (!internalState$) {
-      throw new Error('Internal state observable is not available in runtime state manager');
-    }
+  function createUrlSyncObservablesThunkFn(dispatch, getState, { getInternalState$ }) {
+    const internalState$ = getInternalState$();
 
     const getAppState = (): DiscoverAppState => {
       return selectTab(getState(), tabId).appState;

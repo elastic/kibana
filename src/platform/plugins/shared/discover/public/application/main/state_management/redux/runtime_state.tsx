@@ -10,16 +10,15 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, type Observable, from } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
-import type { UrlSyncObservables, DiscoverInternalState, TabState } from './types';
+import type { UrlSyncObservables, TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
-import type { InternalStateStore } from './internal_state';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -55,22 +54,12 @@ export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'cur
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
-  internalState$: Observable<DiscoverInternalState> | undefined;
-  setInternalState$: (internalState: InternalStateStore) => void;
 };
 
 export const createRuntimeStateManager = (): RuntimeStateManager => {
-  let internalState$: Observable<DiscoverInternalState> | undefined;
-
   return {
     adHocDataViews$: new BehaviorSubject<DataView[]>([]),
     tabs: { byId: {} },
-    get internalState$() {
-      return internalState$;
-    },
-    setInternalState$: (internalState: InternalStateStore) => {
-      internalState$ = from(internalState);
-    },
   };
 };
 
