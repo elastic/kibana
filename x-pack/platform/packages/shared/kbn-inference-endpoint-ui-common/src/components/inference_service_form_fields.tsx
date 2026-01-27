@@ -63,6 +63,26 @@ import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidde
 import { useProviders } from '../hooks/use_providers';
 import { useKibana } from '../hooks/use_kibana';
 
+/**
+ * Returns the default model for a given field key and provider service.
+ * If the field is 'model_id' or 'model' and the provider has a default model defined
+ * in DEFAULT_MODELS, returns that default model. Otherwise, returns null.
+ *
+ * @param fieldKey - the configuration field key (e.g., 'model_id', 'model')
+ * @param providerService - the service provider identifier
+ * @returns the default model string if available, otherwise null
+ */
+function getDefaultModelValue(
+  fieldKey: string,
+  providerService: string | undefined
+): string | null {
+  const isModelField = fieldKey === 'model_id' || fieldKey === 'model';
+  if (isModelField && providerService && DEFAULT_MODELS[providerService as ServiceProviderKeys]) {
+    return DEFAULT_MODELS[providerService as ServiceProviderKeys] ?? null;
+  }
+  return null;
+}
+
 // Custom trigger button CSS
 export const buttonCss = css`
   &:hover {
@@ -267,19 +287,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          // Set default value from provider configuration
+          // Set default value from provider configuration, using DEFAULT_MODELS for model fields
           const defaultValue = newProvider?.configurations[k]?.default_value;
-          // If it's model_id or model and no default value set, use DEFAULT_MODELS mapping
-          if (
-            (k === 'model_id' || k === 'model') &&
-            !defaultValue &&
-            newProvider?.service &&
-            DEFAULT_MODELS[newProvider.service as ServiceProviderKeys]
-          ) {
-            newConfig[k] = DEFAULT_MODELS[newProvider.service as ServiceProviderKeys];
-          } else {
-            newConfig[k] = defaultValue ?? null;
-          }
+          newConfig[k] = defaultValue ?? getDefaultModelValue(k, newProvider?.service);
         }
       });
 
@@ -333,16 +343,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         if (!fieldConfig.sensitive) {
           if (fieldConfig && !!fieldConfig.default_value) {
             defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
-          } else if (
-            (fieldConfig.key === 'model_id' || fieldConfig.key === 'model') &&
-            newProvider?.service &&
-            DEFAULT_MODELS[newProvider.service as ServiceProviderKeys]
-          ) {
-            // Set default model for model_id or model field if provider has a default model defined
-            defaultProviderConfig[fieldConfig.key] =
-              DEFAULT_MODELS[newProvider.service as ServiceProviderKeys];
           } else {
-            defaultProviderConfig[fieldConfig.key] = null;
+            // Use DEFAULT_MODELS for model fields, otherwise null
+            defaultProviderConfig[fieldConfig.key] = getDefaultModelValue(
+              fieldConfig.key,
+              newProvider?.service
+            );
           }
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
