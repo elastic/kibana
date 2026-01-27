@@ -6,7 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { LogExtractionState } from '../domain/definitions/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
@@ -34,5 +34,3 @@ export const LogExtractionBodyParams = LogExtractionState.pick({
   delay: true,
   docsLimit: true,
 }).partial();
-
-
