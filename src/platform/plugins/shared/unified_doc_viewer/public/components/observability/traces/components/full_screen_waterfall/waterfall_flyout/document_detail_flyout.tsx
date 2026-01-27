@@ -58,6 +58,8 @@ export function DocumentDetailFlyout({
 }: DocumentDetailFlyoutProps) {
   const isSpanType = type === spanFlyoutId;
 
+  // Both hooks are called here to provide hit, loading, and title to WaterfallFlyout.
+  // They short-circuit with empty strings, so no unnecessary API calls are made.
   const spanData = useSpanFlyoutData({
     spanId: isSpanType ? docId : '',
     traceId,
