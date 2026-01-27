@@ -9,9 +9,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { isZod } from '@kbn/zod';
-import { toJSONSchema } from './zod-to-json-schema-polyfill';
 import { isPassThroughAny } from '@kbn/zod-helpers';
 import type { OpenAPIV3 } from 'openapi-types';
+import { toJSONSchema } from './zod-to-json-schema-polyfill';
 
 import type { KnownParameters } from '../../type';
 import { validatePathParameters } from '../common';
@@ -28,7 +28,10 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
   }
 }
 
-const instanceofZodTypeKind = (type: z.ZodTypeAny | z.core.$ZodType, zodTypeKind: z.core.$ZodTypeDef['type']) => {
+const instanceofZodTypeKind = (
+  type: z.ZodTypeAny | z.core.$ZodType,
+  zodTypeKind: z.core.$ZodTypeDef['type']
+) => {
   // classic API case
   if ('def' in type && type.def && typeof type.def === 'object' && 'type' in type.def) {
     return type.def.type === zodTypeKind;
@@ -296,7 +299,7 @@ export const convert = (schema: z.ZodType<any>) => {
     shared: {},
     schema: toJSONSchema(schema, {
       target: 'openapi-3.0',
-      unrepresentable: 'any'
+      unrepresentable: 'any',
     }) as OpenAPIV3.SchemaObject,
   };
 };
