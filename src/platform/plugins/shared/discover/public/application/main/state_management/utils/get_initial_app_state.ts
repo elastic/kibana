@@ -48,6 +48,7 @@ export function getInitialAppState({
     persistedTab,
     dataView,
     services,
+    initialUrlState,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
@@ -85,6 +86,7 @@ function isDataView(dataView: unknown): dataView is DataView {
 }
 
 function getDefaultQuery({
+  initialUrlState,
   persistedTab,
   storage,
   data,
@@ -94,9 +96,19 @@ function getDefaultQuery({
   storage: DiscoverServices['storage'];
   data: DiscoverServices['data'];
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+  initialUrlState: DiscoverAppState | undefined;
 }): Query | AggregateQuery | undefined {
   if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
 
+  // This scenarios are used when we are adding a new tab:
+  //  1. We only have the query set if:
+  //    a. The tab is in ES|QL mode
+  //    b. The tab is in other mode but has some filter in place
+  // 2. We have no query set but we do have a data source if we are in classic mode with no filters
+  if (initialUrlState?.query) return initialUrlState.query;
+  if (initialUrlState?.dataSource) return data.query.queryString.getDefaultQuery();
+
+  // Fallback to last query mode for new sessions
   const queryMode = storage.get(DISCOVER_QUERY_MODE_KEY);
   if (queryMode === 'esql' && isDataView(dataView))
     return { esql: getInitialESQLQuery(dataView, true) };
@@ -108,13 +120,15 @@ function getDefaultAppState({
   persistedTab,
   dataView,
   services,
+  initialUrlState,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
+  initialUrlState: DiscoverAppState | undefined;
 }) {
   const { data, uiSettings, storage } = services;
-  const query = getDefaultQuery({ persistedTab, storage, data, dataView });
+  const query = getDefaultQuery({ persistedTab, storage, data, dataView, initialUrlState });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
   // we assume the sort array is valid since we can't know for sure

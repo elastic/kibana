@@ -341,6 +341,111 @@ describe('getInitialAppState', () => {
     `);
   });
 
+  describe('when there is no persistedTab', () => {
+    describe('when there is a query in the url state', () => {
+      it('should use the query from the url state', () => {
+        // Given
+        const services = createDiscoverServicesMock();
+        const query = { language: 'kuery', query: 'url state query' };
+
+        // When
+        const appState = getInitialAppState({
+          initialUrlState: { query },
+          persistedTab: undefined,
+          dataView: dataViewMock,
+          services,
+        });
+
+        // Then
+        expect(appState).toEqual(
+          expect.objectContaining({
+            query,
+          })
+        );
+      });
+    });
+
+    describe('when there is no query in the url state', () => {
+      describe('when there is a data source in the url state', () => {
+        it('should use the default query', () => {
+          // Given
+          const services = createDiscoverServicesMock();
+          const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
+          services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
+
+          // When
+          const appState = getInitialAppState({
+            initialUrlState: { dataSource },
+            persistedTab: undefined,
+            dataView: dataViewMock,
+            services,
+          });
+
+          // Then
+          expect(appState).toEqual(
+            expect.objectContaining({
+              query: defaultQuery,
+            })
+          );
+        });
+      });
+
+      describe('when there is no data source in the url state', () => {
+        describe('when the query mode is esql', () => {
+          it('should return an esql initial query', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest.fn().mockReturnValue('esql');
+
+            // When
+            const appState = getInitialAppState({
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: dataViewMock,
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: { esql: 'FROM the-data-view-title' },
+              })
+            );
+          });
+        });
+
+        describe.each([
+          { queryMode: 'classic', description: 'classic' },
+          { queryMode: undefined, description: 'unset' },
+        ])('when the query mode is $description', ({ queryMode }) => {
+          it('should return the default query', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest.fn().mockReturnValue(queryMode);
+            services.data.query.queryString.getDefaultQuery = jest
+              .fn()
+              .mockReturnValue(defaultQuery);
+
+            // When
+            const appState = getInitialAppState({
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: dataViewMock,
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: defaultQuery,
+              })
+            );
+          });
+        });
+      });
+    });
+  });
+
   describe('default sort array', () => {
     test('should use persistedTab sort array if valid and data view is provided', () => {
       const services = createDiscoverServicesMock();
