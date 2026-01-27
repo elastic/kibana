@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 export const EngineDescriptorTypeName = 'entity-engine-descriptor-v2';
 
@@ -78,9 +80,48 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
   },
 };
 
+const engineDescriptorAttributesSchema = {
+  type: schema.string(),
+  status: schema.string(),
+  logExtractionState: schema.object({
+    filter: schema.string(),
+    additionalIndexPattern: schema.string(),
+    fieldHistoryLength: schema.number(),
+    lookbackPeriod: schema.string(),
+    delay: schema.string(),
+    docsLimit: schema.number(),
+    timeout: schema.string(),
+    frequency: schema.string(),
+    paginationTimestamp: schema.maybe(schema.string()),
+    lastExecutionTimestamp: schema.maybe(schema.string()),
+  }),
+  error: schema.maybe(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+  versionState: schema.object({
+    version: schema.number(),
+    state: schema.string(),
+    isMigratedFromV1: schema.boolean(),
+  }),
+};
+
+const version1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: schema.object(engineDescriptorAttributesSchema),
+    forwardCompatibility: schema.object(engineDescriptorAttributesSchema, {
+      unknowns: 'ignore',
+    }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
+  modelVersions: { 1: version1 },
 };
