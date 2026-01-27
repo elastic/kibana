@@ -183,11 +183,11 @@ POST kbn://api/agent_builder/agents
     "tools": [
       {
         "tool_ids": [
-          "example-books-esql-tool"
+          "example-books-esql-tool",
           "platform.core.search",
           "platform.core.list_indices",
           "platform.core.get_index_mapping",
-          "platform.core.get_document_by_id",
+          "platform.core.get_document_by_id"
         ]
       }
     ]
@@ -237,11 +237,8 @@ POST kbn://api/agent_builder/converse
 # ✅ The response includes the agent's reply and creates a new conversation.
 # Note the "conversation_id" at the top of the response which we will use in the next step.
 
-# -----------------------------------------------
-# Step 11: Chat with streaming events 🌊
-# -----------------------------------------------
-# For real-time responses, use the async converse API which streams events.
-# Replace <CONVERSATION_ID> with the ID from the previous response.
+
+# Now let the agent match our specific query with the custom tool we created:
 
 POST kbn://api/agent_builder/converse
 {
@@ -250,10 +247,10 @@ POST kbn://api/agent_builder/converse
   "conversation_id": "<CONVERSATION_ID>"
 }
 
-# ✅ Notice how the agent is able to match our specific query with the custom tool we created.
-# Instead of multiple reasoning and tool call steps, the agent completes the task in a single step.
+# ✅ Instead of multiple reasoning and tool call steps, the agent completes the task in a single step.
 # Optimizing tools for common use cases is a key to building efficient agents.
 
+# Tip: Chat with streaming events 🌊
 # You can also receive realtime chat responses through streaming via the async converse API:
 # https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-converse-async
 
