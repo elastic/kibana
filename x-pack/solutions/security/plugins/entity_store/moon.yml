@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/security-plugin-types-server'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/scout-security'
 tags:
   - plugin
   - prod
@@ -48,6 +49,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*.ts
     - '!target/**/*'
 tasks:
   jest:
