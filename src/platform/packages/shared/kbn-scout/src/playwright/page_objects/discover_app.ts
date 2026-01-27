@@ -27,9 +27,16 @@ export class DiscoverApp {
     await this.page.testSubj.click('*dataView-switch-link');
     await this.page.testSubj.waitForSelector('indexPattern-switcher');
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    await this.page.testSubj.locator('indexPattern-switcher').locator(`[title="${name}"]`).click();
+    const matchingDataViewLocator = this.page.testSubj
+      .locator('indexPattern-switcher')
+      .locator(`[title="${name}"]`);
+    if (await matchingDataViewLocator.isVisible()) {
+      await matchingDataViewLocator.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
@@ -40,7 +47,7 @@ export class DiscoverApp {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');
     await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
   async saveSearch(name: string) {
@@ -49,6 +56,12 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  async waitUntilFieldListHasCountOfFields() {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
   }
 
   async waitForHistogramRendered() {
@@ -101,6 +114,19 @@ export class DiscoverApp {
     });
   }
 
+  async waitForDocTableRendered() {
+    const table = this.page.testSubj.locator('discoverDocTable');
+    await expect(table).toBeVisible();
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: 30_000,
+    });
+  }
+
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -128,10 +154,14 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 
@@ -228,5 +258,18 @@ export class DiscoverApp {
     await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
     await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
     await this.page.getByText(`Move ${direction}`).click();
+  }
+
+  async selectTextBaseLang() {
+    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+      await this.page.testSubj.click('select-text-based-language-btn');
+      await this.waitForDocTableRendered();
+    }
+  }
+
+  async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
+    await rowLocator.waitFor({ state: 'visible', timeout });
   }
 }

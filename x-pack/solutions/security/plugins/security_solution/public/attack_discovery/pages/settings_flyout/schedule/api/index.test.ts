@@ -19,11 +19,6 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE,
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 
@@ -90,156 +85,83 @@ describe('Schedule API', () => {
     sortDirection: 'desc' as 'asc' | 'desc',
   };
 
-  describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    const attackDiscoveryPublicApiEnabled = true;
+  it('should send a create schedule POST request to the public API', async () => {
+    await createAttackDiscoverySchedule({ body });
 
-    it('should send a create schedule POST request to the public API', async () => {
-      await createAttackDiscoverySchedule({ body, attackDiscoveryPublicApiEnabled });
-
-      const expectedTransformedBody = transformAttackDiscoveryScheduleCreatePropsToApi(body);
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_SCHEDULES,
-        expect.objectContaining({
-          body: JSON.stringify(expectedTransformedBody),
-          version: API_VERSIONS.public.v1,
-        })
-      );
-    });
-
-    it('should send a fetch schedule GET request to the public API', async () => {
-      await getAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({ version: API_VERSIONS.public.v1 })
-      );
-    });
-
-    it('should send an update schedule PUT request to the public API', async () => {
-      const expectedUpdateTransformedBody =
-        transformAttackDiscoveryScheduleUpdatePropsToApi(updateBody);
-      await updateAttackDiscoverySchedule({
-        id,
-        body: updateBody,
-        attackDiscoveryPublicApiEnabled,
-      });
-      expect(mockKibanaServices().http.put).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({
-          body: JSON.stringify(expectedUpdateTransformedBody),
-          version: API_VERSIONS.public.v1,
-        })
-      );
-    });
-
-    it('should send a delete schedule DELETE request to the public API', async () => {
-      await deleteAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.delete).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({ version: API_VERSIONS.public.v1 })
-      );
-    });
-
-    it('should send an enable schedule POST request to the public API', async () => {
-      await enableAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
-        expect.objectContaining({ version: API_VERSIONS.public.v1 })
-      );
-    });
-
-    it('should send a disable schedule POST request to the public API', async () => {
-      await disableAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
-        expect.objectContaining({ version: API_VERSIONS.public.v1 })
-      );
-    });
-
-    it('should send a find schedules GET request with snake_case query params to the public API', async () => {
-      await findAttackDiscoverySchedule({ ...params, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_SCHEDULES_FIND,
-        expect.objectContaining({
-          version: API_VERSIONS.public.v1,
-          query: expect.objectContaining({
-            page: params.page,
-            per_page: params.perPage,
-            sort_field: params.sortField,
-            sort_direction: params.sortDirection,
-          }),
-        })
-      );
-    });
+    const expectedTransformedBody = transformAttackDiscoveryScheduleCreatePropsToApi(body);
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_SCHEDULES,
+      expect.objectContaining({
+        body: JSON.stringify(expectedTransformedBody),
+        version: API_VERSIONS.public.v1,
+      })
+    );
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is false', () => {
-    const attackDiscoveryPublicApiEnabled = false;
+  it('should send a fetch schedule GET request to the public API', async () => {
+    await getAttackDiscoverySchedule({ id });
+    expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
+      replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+      expect.objectContaining({ version: API_VERSIONS.public.v1 })
+    );
+  });
 
-    it('should send a create schedule POST request to the internal API', async () => {
-      await createAttackDiscoverySchedule({ body, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
-        expect.objectContaining({ body: JSON.stringify(body), version: API_VERSIONS.internal.v1 })
-      );
+  it('should send an update schedule PUT request to the public API', async () => {
+    await updateAttackDiscoverySchedule({
+      id,
+      body: updateBody,
     });
 
-    it('should send a fetch schedule GET request to the internal API', async () => {
-      await getAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({ version: API_VERSIONS.internal.v1 })
-      );
-    });
+    const expectedTransformedUpdateBody =
+      transformAttackDiscoveryScheduleUpdatePropsToApi(updateBody);
 
-    it('should send an update schedule PUT request to the internal API', async () => {
-      await updateAttackDiscoverySchedule({
-        id,
-        body: updateBody,
-        attackDiscoveryPublicApiEnabled,
-      });
-      expect(mockKibanaServices().http.put).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({
-          body: JSON.stringify(updateBody),
-          version: API_VERSIONS.internal.v1,
-        })
-      );
-    });
+    expect(mockKibanaServices().http.put).toHaveBeenCalledWith(
+      replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+      expect.objectContaining({
+        body: JSON.stringify(expectedTransformedUpdateBody),
+        version: API_VERSIONS.public.v1,
+      })
+    );
+  });
 
-    it('should send a delete schedule DELETE request to the internal API', async () => {
-      await deleteAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.delete).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
-        expect.objectContaining({ version: API_VERSIONS.internal.v1 })
-      );
-    });
+  it('should send a delete schedule DELETE request to the public API', async () => {
+    await deleteAttackDiscoverySchedule({ id });
+    expect(mockKibanaServices().http.delete).toHaveBeenCalledWith(
+      replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+      expect.objectContaining({ version: API_VERSIONS.public.v1 })
+    );
+  });
 
-    it('should send an enable schedule POST request to the internal API', async () => {
-      await enableAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE, { id }),
-        expect.objectContaining({ version: API_VERSIONS.internal.v1 })
-      );
-    });
+  it('should send an enable schedule POST request to the public API', async () => {
+    await enableAttackDiscoverySchedule({ id });
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
+      expect.objectContaining({ version: API_VERSIONS.public.v1 })
+    );
+  });
 
-    it('should send a disable schedule POST request to the internal API', async () => {
-      await disableAttackDiscoverySchedule({ id, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
-        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE, { id }),
-        expect.objectContaining({ version: API_VERSIONS.internal.v1 })
-      );
-    });
+  it('should send a disable schedule POST request to the public API', async () => {
+    await disableAttackDiscoverySchedule({ id });
+    expect(mockKibanaServices().http.post).toHaveBeenCalledWith(
+      replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
+      expect.objectContaining({ version: API_VERSIONS.public.v1 })
+    );
+  });
 
-    it('should send a find schedules GET request to the internal API', async () => {
-      await findAttackDiscoverySchedule({ ...params, attackDiscoveryPublicApiEnabled });
-      expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
-        expect.objectContaining({
-          version: API_VERSIONS.internal.v1,
-          query: expect.objectContaining(params),
-        })
-      );
-    });
+  it('should send a find schedules GET request with snake_case query params to the public API', async () => {
+    await findAttackDiscoverySchedule({ ...params });
+    expect(mockKibanaServices().http.get).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_SCHEDULES_FIND,
+      expect.objectContaining({
+        version: API_VERSIONS.public.v1,
+        query: expect.objectContaining({
+          page: params.page,
+          per_page: params.perPage,
+          sort_field: params.sortField,
+          sort_direction: params.sortDirection,
+        }),
+      })
+    );
   });
 
   it('should send a fetch rule types GET request', async () => {

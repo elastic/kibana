@@ -27,10 +27,9 @@ interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  reset?: (existingIndex?: string) => void;
 }
 
-export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
+export const FileUploadView: FC<Props> = ({ getAdditionalLinks }) => {
   const {
     fileUploadManager,
     filesStatus,
@@ -42,6 +41,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
     importResults,
     indexName,
     abortImport,
+    reset,
   } = useFileUploadContext();
 
   const showImportControls =

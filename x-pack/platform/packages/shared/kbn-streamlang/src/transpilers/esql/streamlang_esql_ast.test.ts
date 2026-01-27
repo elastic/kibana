@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { Builder, BasicPrettyPrinter } from '@kbn/esql-language';
 import { transpile } from '.';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import type { SetProcessor } from '../../../types/processors';

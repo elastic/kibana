@@ -8,16 +8,17 @@
  */
 
 import type {
+  BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
-  EnhancedInternalConnectorContract,
-  InternalConnectorContract,
+  StepPropertyHandler,
 } from '@kbn/workflows';
 import {
-  enhanceKibanaConnectorsWithFetcher,
   generateYamlSchemaFromConnectors,
+  getElasticsearchConnectors,
+  getKibanaConnectors,
 } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
 import {
@@ -28,7 +29,6 @@ import {
   ConnectorSpecsInputSchemas,
   staticConnectors,
 } from './connector_action_schema';
-import { mergeEnhancedConnectors } from './enhanced_es_connectors';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
 
@@ -83,77 +83,36 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 }
 
 /**
- * Elasticsearch Connector Generation
- *
- * This system provides ConnectorContract[] for all Elasticsearch APIs
- * by using pre-generated definitions from Console's API specifications.
- *
- * Benefits:
- * 1. **Schema Validation**: Zod schemas for all ES API parameters
- * 2. **Autocomplete**: Monaco YAML editor gets full autocomplete via JSON Schema
- * 3. **Comprehensive Coverage**: 568 Elasticsearch APIs supported
- * 4. **Browser Compatible**: No file system access required
- * 5. **Lazy Loading**: Large generated files are only loaded when needed, reducing main bundle size
- *
- * The generated connectors include:
- * - All Console API definitions converted to Zod schemas
- * - Path parameters extracted from patterns (e.g., {index}, {id})
- * - URL parameters with proper types (flags, enums, strings, numbers)
- * - Proper ConnectorContract format for workflow execution
- *
- * To regenerate: run `npm run generate:es-connectors` from @kbn/workflows package
+ * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
-function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] {
-  // Lazy load the large generated files to keep them out of the main bundle
-  const {
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/elasticsearch_connectors');
+function getRegisteredStepDefinitions(): BaseConnectorContract[] {
+  return stepSchemas
+    .getAllRegisteredStepDefinitions()
+    .map((stepDefinition): BaseConnectorContract => {
+      const definition = {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        configSchema: stepDefinition.configSchema,
+        summary: null,
+        description: null,
+      };
 
-  const {
-    ENHANCED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./enhanced_es_connectors');
-
-  // Return enhanced connectors (merge generated with enhanced definitions)
-  return mergeEnhancedConnectors(
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    ENHANCED_ELASTICSEARCH_CONNECTORS
-  );
-}
-
-function generateKibanaConnectors(): InternalConnectorContract[] {
-  // Lazy load the generated Kibana connectors
-  const {
-    GENERATED_KIBANA_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/kibana_connectors');
-
-  // Enhance connectors with fetcher parameter support
-  return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
-}
-
-/**
- * Get registered step definitions from workflowExtensions
- */
-function getRegisteredStepDefinitions(): EnhancedInternalConnectorContract[] {
-  return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
-    const extra: Partial<EnhancedInternalConnectorContract> = {};
-    if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      extra.summary = stepDefinition.description;
-      extra.description = stepDefinition.label;
-      extra.documentation = stepDefinition.documentation?.url;
-      if (stepDefinition.documentation?.examples) {
-        extra.examples = { snippet: stepDefinition.documentation?.examples.join('\n') };
+      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+        // Only public step definitions have documentation and examples
+        return {
+          ...definition,
+          description: stepDefinition.label, // Short title-like text
+          summary: stepDefinition.description ?? null, // Explanation of the step behavior
+          documentation: stepDefinition.documentation?.url,
+          examples: stepDefinition.documentation?.examples
+            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+            : undefined,
+          editorHandlers: stepDefinition.editorHandlers,
+        };
       }
-    }
-    return {
-      type: stepDefinition.id,
-      paramsSchema: stepDefinition.inputSchema,
-      outputSchema: stepDefinition.outputSchema,
-      ...extra,
-    };
-  });
+      return definition;
+    });
 }
 
 /**
@@ -184,13 +143,17 @@ function convertDynamicConnectorsToContractsInternal(
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 
+          const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
+          const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+
           connectorContracts.push({
+            actionTypeId: connectorType.actionTypeId,
             type: subActionType,
             summary: subAction.displayName,
-            paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
+            paramsSchema,
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
-            outputSchema: getSubActionOutputSchema(connectorType.actionTypeId, subAction.name),
+            outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
           });
@@ -202,6 +165,7 @@ function convertDynamicConnectorsToContractsInternal(
         const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, '');
 
         connectorContracts.push({
+          actionTypeId: connectorType.actionTypeId,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -216,6 +180,7 @@ function convertDynamicConnectorsToContractsInternal(
       // console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
       // Return a basic connector contract as fallback
       connectorContracts.push({
+        actionTypeId: connectorType.actionTypeId,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
@@ -223,6 +188,7 @@ function convertDynamicConnectorsToContractsInternal(
         connectorId: z.string(),
         outputSchema: z.any(),
         description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
+        instances: connectorType.instances,
       });
     }
   });
@@ -243,7 +209,7 @@ export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(static
  * Combine static connectors with dynamic Elasticsearch and Kibana connectors
  * Internal implementation - use exported getAllConnectors() instead
  */
-function getAllConnectorsInternal(): ConnectorContractUnion[] {
+export function getAllConnectorsInternal(): ConnectorContractUnion[] {
   // Return cached connectors if available
   const cached = stepSchemas.getAllConnectorsCache();
   if (cached !== null) {
@@ -254,8 +220,8 @@ function getAllConnectorsInternal(): ConnectorContractUnion[] {
   const registeredStepDefinitions = getRegisteredStepDefinitions();
 
   // Initialize cache with static and generated connectors
-  const elasticsearchConnectors = generateElasticsearchConnectors();
-  const kibanaConnectors = generateKibanaConnectors();
+  const elasticsearchConnectors = getElasticsearchConnectors();
+  const kibanaConnectors = getKibanaConnectors();
   const allConnectors = [
     ...staticConnectors,
     ...elasticsearchConnectors,
@@ -342,8 +308,8 @@ export function addDynamicConnectorsToCache(
     // Get registered step definitions
     const registeredStepDefinitions = getRegisteredStepDefinitions();
     // Get base connectors
-    const elasticsearchConnectors = generateElasticsearchConnectors();
-    const kibanaConnectors = generateKibanaConnectors();
+    const elasticsearchConnectors = getElasticsearchConnectors();
+    const kibanaConnectors = getKibanaConnectors();
     const allConnectors = [
       ...staticConnectors,
       ...elasticsearchConnectors,
@@ -383,27 +349,6 @@ export function getAllConnectors(): ConnectorContractUnion[] {
   return getAllConnectorsInternal();
 }
 
-export const getOutputSchemaForStepType = (stepType: string): z.ZodSchema => {
-  const allConnectors = getAllConnectorsInternal();
-  const connector = allConnectors.find((c) => c.type === stepType);
-  if (connector) {
-    return connector.outputSchema;
-  }
-
-  // Handle internal actions with pattern matching
-  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
-  if (stepType.startsWith('elasticsearch.')) {
-    return z.any();
-  }
-
-  if (stepType.startsWith('kibana.')) {
-    return z.any();
-  }
-
-  // Fallback to any if not found
-  return z.any();
-};
-
 export function getAllConnectorsWithDynamic(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
@@ -412,14 +357,23 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
-): z.ZodTypeAny => {
+): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
-): z.ZodTypeAny => {
+): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
+};
+
+export const getPropertyHandler = (
+  stepType: string,
+  scope: 'config' | 'input',
+  propertyKey: string
+): StepPropertyHandler | null => {
+  const connector = stepSchemas.getAllConnectorsMapCache()?.get(stepType);
+  return connector?.editorHandlers?.[scope]?.[propertyKey] ?? null;
 };

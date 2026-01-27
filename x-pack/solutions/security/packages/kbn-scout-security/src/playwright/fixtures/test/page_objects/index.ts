@@ -9,10 +9,14 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { AlertsTablePage } from './alerts_table';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
+import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
+import { CspmIntegrationPage } from './cspm_integration_page';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
+  entityAnalyticsDashboardsPage: EntityAnalyticsDashboardsPage;
+  cspmIntegrationPage: CspmIntegrationPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
@@ -20,5 +24,7 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Se
     ...pageObjects,
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
+    entityAnalyticsDashboardsPage: createLazyPageObject(EntityAnalyticsDashboardsPage, page),
+    cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
   };
 }

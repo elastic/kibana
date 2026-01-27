@@ -45,7 +45,6 @@ export const createGridColumns = (
         negate?: boolean
       ) => void)
     | undefined,
-  isReadOnly: boolean,
   columnConfig: DatatableColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
@@ -240,32 +239,31 @@ export const createGridColumns = (
         });
       }
 
-      if (!isReadOnly) {
-        if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
-          const bucketValues = columnArgs?.bucketValues;
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, false),
-            iconType: 'plusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-              defaultMessage: 'Filter for',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
+      if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter for',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
 
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, true),
-            iconType: 'minusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-              defaultMessage: 'Filter out',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
-        }
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
       }
+
       const currentAlignment = alignments && alignments.get(field);
       const hasMultipleRows = [
         LENS_ROW_HEIGHT_MODE.auto,

@@ -14,7 +14,8 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -125,6 +126,8 @@
     "@kbn/spaces-utils",
     "@kbn/setup-node-env",
     "@kbn/react-query",
-    "@kbn/fs"
+    "@kbn/fs",
+    "@kbn/kql",
+    "@kbn/scout"
   ]
 }

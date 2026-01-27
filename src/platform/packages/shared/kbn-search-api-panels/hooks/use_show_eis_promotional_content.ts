@@ -11,27 +11,23 @@ import { useCallback, useEffect, useState } from 'react';
 
 interface UseShowEisPromotionalContentProps {
   promoId: string;
-  isCloudEnabled: boolean;
 }
 
-export const useShowEisPromotionalContent = ({
-  promoId,
-  isCloudEnabled,
-}: UseShowEisPromotionalContentProps) => {
+export const useShowEisPromotionalContent = ({ promoId }: UseShowEisPromotionalContentProps) => {
   const localStorageKey = `${promoId}Closed`;
   const [isPromoVisible, setIsPromoVisible] = useState<boolean>(false);
-  const onSkipTour = useCallback(() => {
+  const onDismissPromo = useCallback(() => {
     localStorage.setItem(localStorageKey, 'true');
     setIsPromoVisible(false);
   }, [localStorageKey]);
 
   useEffect(() => {
-    const isTourSkipped = localStorage.getItem(localStorageKey) === 'true';
+    const isTourDismiss = localStorage.getItem(localStorageKey) === 'true';
 
-    if (!isTourSkipped && isCloudEnabled && !isPromoVisible) {
+    if (!isTourDismiss && !isPromoVisible) {
       setIsPromoVisible(true);
     }
-  }, [isCloudEnabled, isPromoVisible, localStorageKey]);
+  }, [isPromoVisible, localStorageKey]);
 
-  return { isPromoVisible, onSkipTour };
+  return { isPromoVisible, onDismissPromo };
 };

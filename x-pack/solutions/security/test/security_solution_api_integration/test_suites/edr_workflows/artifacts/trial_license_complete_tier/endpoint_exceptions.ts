@@ -25,12 +25,13 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
@@ -178,6 +179,13 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    after(async () => {
+      const promises = ALL_ENDPOINT_ARTIFACT_LIST_IDS.map((listId) =>
+        endpointArtifactTestResources.deleteList(listId)
+      );
+      await Promise.all(promises);
+    });
+
     describe(`and using Import API`, function () {
       const buildImportBuffer = (
         listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]
@@ -218,16 +226,16 @@ export default function ({ getService }: FtrProviderContext) {
 
         return Buffer.from(
           `
-{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
-            listInfo!.description
-          }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
+  {"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
+    listInfo!.description
+  }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
             listInfo!.name
           }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
-${JSON.stringify(createItem())}
-${JSON.stringify(createItem())}
-${JSON.stringify(createItem())}
-{"exported_exception_list_count":1,"exported_exception_list_item_count":3,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
-`,
+  ${JSON.stringify(createItem())}
+  ${JSON.stringify(createItem())}
+  ${JSON.stringify(createItem())}
+  {"exported_exception_list_count":1,"exported_exception_list_item_count":3,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
+  `,
           'utf8'
         );
       };
@@ -386,29 +394,31 @@ ${JSON.stringify(createItem())}
       }
     });
 
-    describe('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
+    describe('and user has endpoint exception access but no global artifact access', () => {
       let noGlobalArtifactSupertest: TestAgent;
 
       before(async () => {
-        const loadedRole = await rolesUsersProvider.loader.create({
+        const role: CustomRole = {
           name: 'no_global_artifact_role',
-          kibana: [
-            {
-              base: [],
-              feature: {
-                [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+                },
+                spaces: ['*'],
               },
-              spaces: ['*'],
-            },
-          ],
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-        });
+            ],
+            elasticsearch: { cluster: [], indices: [] },
+          },
+        };
 
-        noGlobalArtifactSupertest = await utils.createSuperTest(loadedRole.username);
+        noGlobalArtifactSupertest = await utils.createSuperTestWithCustomRole(role);
       });
 
       after(async () => {
-        await rolesUsersProvider.loader.delete('no_global_artifact_role');
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of endpointExceptionCalls) {
@@ -467,11 +477,17 @@ ${JSON.stringify(createItem())}
       }
     });
 
-    describe('@skipInServerless and user has authorization to read endpoint exceptions', function () {
+    describe('and user has authorization to read endpoint exceptions', function () {
       let hunterSupertest: TestAgent;
 
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of [...endpointExceptionCalls, ...needsWritePrivilege]) {

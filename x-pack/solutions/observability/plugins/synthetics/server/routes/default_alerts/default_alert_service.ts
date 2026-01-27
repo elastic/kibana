@@ -8,7 +8,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
-import { isEmpty } from 'lodash';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
@@ -48,13 +47,6 @@ export class DefaultRuleService {
 
   async setupDefaultRules() {
     this.settings = await this.getSettings();
-    if (isEmpty(this.settings?.defaultConnectors)) {
-      this.server.logger.debug(`Default connectors are not set. Skipping default rule setup.`);
-      return {
-        statusRule: null,
-        tlsRule: null,
-      };
-    }
 
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),

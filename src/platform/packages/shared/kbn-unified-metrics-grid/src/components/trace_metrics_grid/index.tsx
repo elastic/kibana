@@ -8,7 +8,6 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useMemo } from 'react';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
@@ -16,10 +15,9 @@ import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
 import { MetricsGridWrapper } from '../metrics_grid_wrapper';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
-
-export type DataSource = 'apm' | 'otel';
 
 function TraceMetricsGrid({
   fetchParams,
@@ -27,13 +25,11 @@ function TraceMetricsGrid({
   services,
   onBrushEnd,
   onFilter,
-  dataSource,
+  actions,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
-}: ChartSectionProps & {
-  dataSource: DataSource;
-}) {
+}: UnifiedMetricsGridProps) {
   const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
@@ -72,7 +68,6 @@ function TraceMetricsGrid({
     >
       <TraceMetricsProvider
         value={{
-          dataSource,
           indexes: indexPattern,
           filters,
           services,
@@ -80,6 +75,7 @@ function TraceMetricsGrid({
           onFilter,
           fetchParams,
           discoverFetch$,
+          actions,
         }}
       >
         <EuiPanel

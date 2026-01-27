@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
@@ -28,6 +28,21 @@ export enum ExecutionStatus {
 }
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
 export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.SKIPPED,
+  ExecutionStatus.TIMED_OUT,
+] as const;
+
+export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.RUNNING,
+] as const;
 
 export enum ExecutionType {
   TEST = 'test',
@@ -60,6 +75,14 @@ export interface StackFrame {
   nestedScopes: ScopeEntry[];
 }
 
+export interface QueueMetrics {
+  scheduledAt?: string;
+  runAt?: string;
+  startedAt: string;
+  queueDelayMs: number | null;
+  scheduleDelayMs: number | null;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -84,8 +107,11 @@ export interface EsWorkflowExecution {
   cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  queueMetrics?: QueueMetrics; // Queue delay metrics for observability
 }
 
 export interface ProviderInput {
@@ -171,6 +197,8 @@ export interface WorkflowExecutionDto {
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -235,20 +263,20 @@ export const SearchWorkflowCommandSchema = z.object({
 });
 
 export const RunWorkflowCommandSchema = z.object({
-  inputs: z.record(z.unknown()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  contextOverride: z.record(z.unknown()).optional(),
+  contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
 export const TestWorkflowCommandSchema = z.object({
   workflowYaml: z.string(),
-  inputs: z.record(z.unknown()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
@@ -367,62 +395,147 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export interface ConnectorContract {
+export type CompletionFn = () => Promise<
+  Array<{ label: string; value: string; detail?: string; documentation?: string }>
+>;
+
+export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;
   outputSchema: z.ZodType;
-  description?: string;
-  summary?: string;
-  instances?: ConnectorInstance[];
+  configSchema?: z.ZodObject;
+  summary: string | null;
+  description: string | null;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  examples?: ConnectorExamples;
+  // Rich property handlers for completions, validation and decorations
+  editorHandlers?: {
+    config?: Record<string, StepPropertyHandler | undefined>;
+    input?: Record<string, StepPropertyHandler | undefined>;
+  };
 }
 
-export interface DynamicConnectorContract extends ConnectorContract {
+export interface DynamicConnectorContract extends BaseConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
   /** Available connector instances */
-  instances: Array<{
-    id: string;
-    name: string;
-    isPreconfigured: boolean;
-    isDeprecated: boolean;
-  }>;
+  instances: ConnectorInstance[];
   /** Whether this connector type is enabled */
   enabled?: boolean;
   /** Whether this is a system action type */
   isSystemActionType?: boolean;
 }
 
-export interface InternalConnectorContract extends ConnectorContract {
+export const KNOWN_HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+] as const;
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples: ConnectorExamples;
+}
+
+export interface InternalConnectorContract extends BaseConnectorContract {
   /** HTTP method(s) for this API endpoint */
-  methods?: string[];
-  /** Summary for this API endpoint */
-  summary?: string;
+  methods: HttpMethod[];
   /** URL pattern(s) for this API endpoint */
-  patterns?: string[];
-  /** Whether this is an internal connector with hardcoded endpoint details */
-  isInternal?: boolean;
-  /** Documentation URL for this API endpoint */
-  documentation?: string | null;
+  patterns: string[];
   /** Parameter type metadata for proper request building */
-  parameterTypes?: {
-    pathParams?: string[];
-    urlParams?: string[];
-    bodyParams?: string[];
+  parameterTypes: {
+    headerParams: string[];
+    pathParams: string[];
+    urlParams: string[];
+    bodyParams: string[];
   };
 }
+
+export interface StepPropertyHandler<T = unknown> {
+  /**
+   * Entity selection configuration for the property.
+   * Provides a unified interface for search, resolution, and decoration of entity references.
+   */
+  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+}
+
+export interface PropertySelectionHandler<T = unknown> {
+  /**
+   * Search for options matching the input query.
+   * Used by autocomplete dropdowns when the user types.
+   */
+  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+
+  /**
+   * Resolve an entity by its value.
+   * Used when loading existing values or when a value is pasted.
+   * Returns null if the entity is not found.
+   */
+  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+
+  /**
+   * Get detailed information for the current value.
+   * Used for decoration and metadata display in the editor.
+   * The option parameter is the resolved entity from `resolve`, if available.
+   */
+  getDetails: (
+    input: string,
+    context: SelectionContext,
+    option: SelectionOption<T> | null
+  ) => Promise<SelectionDetails>;
+}
+
+export interface SelectionOption<T = unknown> {
+  /** The value that will be stored in the YAML */
+  value: T;
+  /** The label displayed in the UI */
+  label: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+
+export interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
+}
+
+export interface PropertyValidationContext {
+  /** The step type ID (e.g., "onechat.runAgent") */
+  stepType: string;
+  /** The property path ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent_id") */
+  propertyKey: string;
+}
+
+export type SelectionContext = PropertyValidationContext;
 
 export interface ConnectorExamples {
   params?: Record<string, string>;
   snippet?: string;
 }
 
-export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
-  examples?: ConnectorExamples;
-}
-
-export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+export type ConnectorContractUnion =
+  | DynamicConnectorContract
+  | BaseConnectorContract
+  | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
   size: number;
@@ -430,4 +543,14 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+}
+
+export interface RequestOptions {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bulk body for elasticsearch.bulk step */
+  bulkBody?: Array<Record<string, unknown>>;
 }

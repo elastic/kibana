@@ -1811,6 +1811,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       maximumCasesToOpen: 5,
       templateId: null,
       internallyManagedAlerts: null,
+      autoPushCase: null,
       ...params,
     },
   };
@@ -1871,7 +1872,6 @@ const generateId = ({
 const removeServerGeneratedData = (
   theCase: Case
 ): Omit<Case, 'created_at' | 'updated_at' | 'version'> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...restCase } = theCase;
 
   return restCase;

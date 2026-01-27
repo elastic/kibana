@@ -49,6 +49,7 @@ export function defineEnrollRoutes({
       },
       validate: {
         body: schema.object({
+          // codeql[js/kibana/unbounded-array-in-schema] This is a pre-boot feature and the input is trusted.
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
             minSize: 1,
           }),

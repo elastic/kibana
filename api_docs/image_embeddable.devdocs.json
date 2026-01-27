@@ -17,6 +17,8 @@
           "\"IMAGE_CLICK_TRIGGER\""
         ],
         "path": "src/platform/plugins/private/image_embeddable/public/actions/image_click_trigger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -38,9 +40,11 @@
         "label": "ImageConfig",
         "description": [],
         "signature": [
-          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { height: number; width: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -53,9 +57,11 @@
         "label": "ImageConfigState",
         "description": [],
         "signature": [
-          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { height: number; width: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -68,9 +74,11 @@
         "label": "ImageEmbeddableState",
         "description": [],
         "signature": [
-          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly enhancements?: any; readonly hidePanelTitles?: boolean | undefined; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
+          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly hidePanelTitles?: boolean | undefined; readonly enhancements?: any; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { height: number; width: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -10,6 +10,8 @@ export interface CasesSubActionParamsUI {
   reopenClosedCases: boolean;
   groupingBy: string[];
   templateId?: string;
+  autoPushCase?: boolean;
+  maximumCasesToOpen?: number;
 }
 export interface CasesActionParams {
   subAction: string;

@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/utility-types'
   - '@kbn/core'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package

@@ -72,7 +72,17 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label).sort()).toEqual(
-      ['consts', 'event', 'kibanaUrl', 'now', 'workflow', 'steps', 'execution', 'inputs'].sort()
+      [
+        'consts',
+        'event',
+        'kibanaUrl',
+        'now',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+        'variables',
+      ].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
       [
@@ -84,6 +94,7 @@ steps:
         '"{{ consts$0 }}"',
         '"{{ now$0 }}"',
         '"{{ steps$0 }}"',
+        '"{{ variables$0 }}"',
       ].sort()
     );
   });
@@ -111,6 +122,7 @@ steps:
         '{{ consts$0 }}',
         '{{ now$0 }}',
         '{{ steps$0 }}',
+        '{{ variables$0 }}',
       ].sort()
     );
   });
@@ -177,20 +189,14 @@ steps:
 `.trim();
 
     const suggestions = await getSuggestions(yamlContent);
-    expect(suggestions).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ label: 'apiUrl', detail: '"https://api.example.com"' }),
-        expect.objectContaining({
-          label: 'threshold',
-          detail: '100',
-        }),
-        expect.objectContaining({
-          label: 'templates',
-          detail: expect.stringContaining(
-            '{  name: "template1";  template: {  subject: "Suspicious activity detected";  body: "Go look at the activity"}}[]'
-          ),
-        }),
-      ])
+    expect(suggestions.length).toEqual(3);
+    expect(suggestions[0].label).toEqual('apiUrl');
+    expect(suggestions[0].detail).toEqual('"https://api.example.com"');
+    expect(suggestions[1].label).toEqual('threshold');
+    expect(suggestions[1].detail).toEqual('100');
+    expect(suggestions[2].label).toEqual('templates');
+    expect(suggestions[2].detail).toEqual(
+      '{ name: "template1"; template: { subject: "Suspicious activity detected"; body: "Go look at the activity" } }[]'
     );
   });
 
@@ -214,14 +220,12 @@ steps:
 `.trim();
 
     const suggestions = await getSuggestions(yamlContent);
-    expect(suggestions).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ label: 'name', detail: '"template1"' }),
-        expect.objectContaining({
-          label: 'template',
-          detail: '{  subject: "Suspicious activity detected";  body: "Go look at the activity"}',
-        }),
-      ])
+    expect(suggestions.length).toEqual(2);
+    expect(suggestions[0].label).toEqual('name');
+    expect(suggestions[0].detail).toEqual('"template1"');
+    expect(suggestions[1].label).toEqual('template');
+    expect(suggestions[1].detail).toEqual(
+      '{ subject: "Suspicious activity detected"; body: "Go look at the activity" }'
     );
   });
 
