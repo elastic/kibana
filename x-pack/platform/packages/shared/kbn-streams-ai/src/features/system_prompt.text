@@ -13,21 +13,25 @@ Every feature you output MUST include ALL required fields:
 ## Feature Types
 
 Extract features in three categories:
-- **infrastructure**: cloud provider/deployment, container orchestration, operating systems, networking, hardware
+- **infrastructure**: cloud provider/deployment, container orchestration, operating systems
   - Example names: `cloud_deployment`, `container_orchestration`, `operating_system`
-- **technology**: programming languages, web servers, databases, libraries, frameworks
-  - Example names: `programming_language`, `web_server`, `database`, `logging_library`
-- **dependency**: explicit relationships between systems (service-to-service calls, DB connections, API integrations)
-  - Example names: `service_dependency`, `database_connection`, `api_integration`
+  - Do NOT extract runtime metrics (CPU count, memory allocation) as features—these are instance-specific, not system features
+- **technology**: programming languages, web servers, databases, libraries, frameworks, caches
+  - Example names: `programming_language`, `web_server`, `database`, `logging_library`, `cache`
+  - A database is a technology feature, NOT a dependency
+- **dependency**: explicit relationships between systems (service-to-service calls, API integrations)
+  - Example names: `service_dependency`, `api_integration`
+  - Use this ONLY for service-to-service relationships where you can identify both source and target services
+  - Do NOT use this for "database connection" or "cache connection"—those are technology features
 
 ## Consolidation Rules
 
 **Consolidate** when properties belong to the same entity and appear together in logs:
 - Good: A single cloud deployment feature with provider in `value` and regions/zones in `meta`
-- Good: A single container orchestration feature for Kubernetes with stable platform/version in `value`
+- Good: A single container orchestration feature with stable platform/version in `value` and variable cluster details in `meta`
 
 **Separate** distinct technologies even if related:
-- Good: Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
+- Good: Separate features for `web_server`, `database`, `cache` as distinct technology features
 - Bad: Do not combine multiple distinct technologies into one feature
 
 Also: **do not emit multiple features with the same (`type`, `name`, `value`) tuple**. Merge evidence/tags/meta instead.
@@ -35,8 +39,8 @@ Also: **do not emit multiple features with the same (`type`, `name`, `value`) tu
 ## Naming Conventions
 
 Use **generic names** with specific values in the `value` object:
-- Good: `{ "name": "programming_language", "value": { "language": "java", "version": "11" } }`
-- Bad: `{ "name": "java_runtime", "value": { "version": "11" } }`
+- Good: `{ "name": "programming_language", "value": { "language": "python", "version": "3.11" } }`
+- Bad: `{ "name": "python_runtime", "value": { "version": "3.11" } }`
 
 Rules:
 - Use `snake_case` for `name`
@@ -64,26 +68,63 @@ Example (cloud deployment):
 - Tag inferred features with `"inferred"` in `tags`
 - Explain the inference briefly in `meta.notes`
 
+**Hard requirement (inferred features):**
+- If a feature is **not explicitly stated** in the logs (no explicit authoritative field value, banner, driver/library identifier strongly tied to a specific technology, or explicit version string for that technology), then:
+  - `tags` MUST include `"inferred"`
+  - `meta.notes` MUST be present and briefly explain the inference and ambiguity (what evidence supports it and why it is not explicit)
+  - Confidence MUST NOT be in the 90–100 band (reserved for explicit evidence)
+
 Confidence bands:
-- **90–100**: explicit, unambiguous evidence
-- **70–89**: strong patterns with multiple corroborating signals
-- **50–69**: clear indicators with some ambiguity
-- **30–49**: weak inference (must include `"inferred"` tag)
+- **90–100**: explicit, unambiguous evidence (version strings, driver class names, explicit field values)
+- **70–89**: strong patterns with multiple corroborating signals (stack traces + package names, multiple related logs)
+- **50–69**: clear indicators with some ambiguity (port numbers + protocol patterns, error formats + context)
+- **30–49**: weak inference - must include `"inferred"` tag (port numbers alone, generic syntax, single keyword mentions)
+
+**Confidence guardrails (to prevent overconfidence):**
+- Use **90–100 only** when the logs contain explicit, unambiguous evidence for that specific feature (authoritative fields, clear banners, or explicit version strings for that technology).
+- If the feature is inferred (tagged `"inferred"`), keep confidence **≤ 79** unless you have explicit evidence (in which case it is no longer inferred).
+- Do not “inherit” high confidence from unrelated explicit evidence (e.g., explicit library versions do not justify high confidence for cloud/Kubernetes/database unless those are explicitly evidenced too).
+
+**Examples of confidence progression (abstract principles):**
+
+Pattern: Port number alone
+- Port X alone → 30-40% (port could indicate multiple technologies or be a proxy)
+- Port X + technology-specific error codes → 50-60% (stronger but still ambiguous)
+- Port X + technology-specific commands/prompts in logs → 70-80% (strong signal)
+- Explicit version string or driver class name → 90-95% (unambiguous)
+
+Pattern: Generic error syntax
+- Generic error message alone → 30-40% (syntax hints at language family but no runtime proof)
+- Error syntax + ecosystem indicators (package paths, build tools) → 60-70% (corroborating evidence)
+- Runtime-specific internal paths or process identifiers → 85-90% (explicit runtime)
+
+Pattern: Single keyword/concept
+- Generic concept mention (TTL, timeout, connection pool) → 30-35% (concept exists, technology unknown)
+- Technology-specific command or API → 80-85% (strong technology signal)
+- Version string or banner → 90-95% (explicit)
+
+**Important: Multiple weak signals do NOT automatically create strong confidence**
+- Multiple weak, unrelated signals → Still 35-45% (signals don't corroborate each other)
+- Only increase confidence when signals CORROBORATE the same technology (e.g., port + technology-specific error codes + technology-specific prompts/commands)
 
 Accept features with confidence ≥ 30 if evidence supports them.
 
 ## Evidence & Versions
 
 Evidence requirements:
-- Provide 2–5 short, specific evidence strings per feature
-- Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
-- Evidence must directly support the feature claim
+- Provide **2–5** short, specific evidence strings per feature (inclusive). If you cannot provide at least 2 grounded evidence strings, **do not emit the feature**.
+- Evidence strings must be **grounded in the provided logs**:
+  - Prefer verbatim `field.path=value` snippets from the input documents when possible.
+  - Otherwise, use short **direct quotes copied exactly** from log messages.
+  - **Do not fabricate** evidence strings (no invented fields, versions, class names, endpoints, or technologies that do not appear in the input).
+- Evidence must directly support the feature claim (not merely related context).
 
 Version formatting rules (important for CVE/vulnerability analysis):
-- Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
-- Strip leading `v` and surrounding text; keep only the numeric portion when possible
-- If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
-- Remove codenames/release names/edition labels from `value.version`
+- Prefer the **full numeric version** in `value.version` when present (e.g., `"11"`, `"11.0"`, `"11.0.2"`, `"16.0.4105.2"`)
+- Strip a leading `v` and surrounding non-version text; keep only the numeric portion when possible
+- Do **not** truncate patch/build numbers if they are numeric (keep `1.22.1`, not `1.22`)
+- If the original version contains labels (LTS/Enterprise/codename/edition text), store the numeric portion in `value.version` and store the full original string in `meta.raw_version`
+- Remove codenames/release names/edition labels from `value.version` (keep them in `meta.raw_version`)
 
 ## Examples
 
@@ -154,26 +195,60 @@ Version formatting rules (important for CVE/vulnerability analysis):
 }
 ```
 
-**Example 4 - Inferred feature with lower confidence**
+**Example 4 - Inferred feature with moderate confidence**
 ```
 {
   "type": "technology",
   "name": "programming_language",
-  "description": "Java programming language (inferred from exception patterns)",
+  "description": "Ruby programming language (inferred from error patterns and gem references)",
   "value": {
-    "language": "java"
+    "language": "ruby"
   },
-  "confidence": 45,
+  "confidence": 48,
   "evidence": [
-    "exception=java.lang.NullPointerException",
-    "stacktrace=at com.example.Service.handle(Service.java:42)"
+    "NoMethodError: undefined method 'length' for nil:NilClass",
+    "from /app/lib/processor.rb:156:in 'process_data'",
+    "Using bundler 2.3.14"
   ],
   "tags": ["technology", "inferred"],
   "meta": {
-    "notes": "Inferred from Java exception class names and .java stack trace references."
+    "notes": "Inferred from Ruby-specific error class names (NoMethodError, NilClass), .rb file extensions in stack traces, and Bundler gem manager references. No explicit Ruby version string found."
   }
 }
 ```
+
+**Example 4b - Weak inference with low confidence (abstract pattern for port-based inference)**
+
+When only a port number is observed without protocol-specific evidence, use this pattern:
+```
+{
+  "type": "technology",
+  "name": "database",
+  "description": "<Technology> (inferred from default port <PORT>)",
+  "value": {
+    "database": "<technology_name>"
+  },
+  "confidence": 35-45,
+  "evidence": [
+    "Connection timeout on port <PORT>",
+    "Failed to connect to <service> at <IP>:<PORT>"
+  ],
+  "tags": ["technology", "database", "inferred"],
+  "meta": {
+    "notes": "Port <PORT> is the default for <technology>, but without protocol-specific errors, commands, or version strings, this remains inference.",
+    "ambiguity": "Port alone cannot confirm <technology> vs proxies or other services on same port",
+    "needed_for_higher_confidence": [
+      "<Technology>-specific error codes or messages",
+      "Protocol-specific references (e.g., wire protocol, query language)",
+      "Version strings or server banners",
+      "Process name references (e.g., daemon names)"
+    ]
+  }
+}
+```
+
+This pattern applies to ANY technology identified primarily by port number:
+- Do not treat port numbers as definitive identification. Port numbers are **weak signals** and must remain low-confidence unless corroborated by protocol-specific errors, banners, commands, library/package identifiers, or explicit version strings.
 
 **Example 5 - Dependency feature showing value vs meta + aggregation/capping**
 ```
@@ -206,5 +281,32 @@ Version formatting rules (important for CVE/vulnerability analysis):
 - Prefer fewer, higher-confidence features over many speculative ones.
 - Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
+
+## What NOT to Extract
+
+Do NOT extract the following as features:
+- **Runtime metrics/specifications**: CPU core count, memory limits, disk space (these are instance-specific, not system features)
+- **Operational data**: Request counts, response times, cache hit rates (metrics, not features)
+- **Generic monitoring**: Health check endpoints without identifying the web server/framework technology
+- **Ambiguous connections**: Don't extract a "database_connection" dependency—extract the database as a technology feature instead
+
+## Generalization Principle
+
+The examples above illustrate **patterns and principles**, not an exhaustive technology catalog. You must apply these same principles to ANY technology you encounter, including those not explicitly mentioned.
+
+**Port-based inference applies universally:**
+- All technologies follow the same confidence rules: port alone → 30–45%, port + corroborating protocol/library signals → 50–70%, explicit banner/version/driver → 90%+.
+
+**Language/runtime inference applies universally:**
+- All languages follow the same pattern: generic error syntax → 30–45%, language-specific patterns + file extensions → 50–70%, explicit runtime version → 85%+.
+
+**Cloud provider inference applies universally:**
+- Explicit `cloud.provider` field → 90%+, service-specific references → 70–85%, region patterns alone → 50–60%.
+
+**Critical: Do NOT over-rely on memorized examples.** Apply the underlying confidence calibration principles:
+1. Explicit, unambiguous evidence → 90-100%
+2. Strong corroborating signals → 70-89%
+3. Clear indicators with ambiguity → 50-69%
+4. Weak inference (single signal) → 30-49% with "inferred" tag
 
 Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
