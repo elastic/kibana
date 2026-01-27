@@ -21,20 +21,21 @@ function getRootBreadcrumbs({
   breadcrumb?: string;
   embeddable: EmbeddableEditorService;
 }): ChromeBreadcrumb[] {
-  const href = embeddable.isEmbeddedEditor() ? undefined : breadcrumb || rootPath;
+  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
+  const href = isEmbeddedEditor ? undefined : breadcrumb || rootPath;
 
   return [
     {
-      text: embeddable.isEmbeddedEditor()
+      text: isEmbeddedEditor
         ? i18n.translate('discover.rootDashboardsEditorBreadcrumb', {
             defaultMessage: 'Dashboards',
           })
         : i18n.translate('discover.rootBreadcrumb', {
             defaultMessage: 'Discover',
           }),
-      deepLinkId: embeddable.isEmbeddedEditor() ? 'dashboards' : 'discover',
+      deepLinkId: isEmbeddedEditor ? 'dashboards' : 'discover',
       href,
-      onClick: embeddable.isEmbeddedEditor() ? embeddable.transferBackToEditor : undefined,
+      onClick: isEmbeddedEditor ? () => embeddable.transferBackToEditor() : undefined,
     },
   ];
 }

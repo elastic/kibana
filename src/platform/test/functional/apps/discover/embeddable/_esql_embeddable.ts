@@ -67,5 +67,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.verifyNoRenderErrors();
       expect(await dataGrid.getDocCount()).to.be(1000);
     });
+
+    it('can edit a by-value session and return to the dashboard', async () => {
+      await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.clickSaveSearchButton();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+    });
   });
 }
