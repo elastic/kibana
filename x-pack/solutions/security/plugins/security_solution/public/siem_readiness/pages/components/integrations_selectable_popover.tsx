@@ -22,12 +22,50 @@ import { i18n } from '@kbn/i18n';
 interface IntegrationSelectablePopoverProps
   extends Pick<EuiSelectableProps, 'options' | 'onChange'> {
   buttonLabel?: string;
+  showOnlySelectable?: boolean;
 }
 
 export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, onChange, buttonLabel } = props;
+  const { options, onChange, buttonLabel, showOnlySelectable = false } = props;
   const { euiTheme } = useEuiTheme();
+
+  const selectableComponent = (
+    <EuiSelectable
+      aria-label={i18n.translate(
+        'xpack.securitySolution.siemReadiness.integrationSelectablePopover.ariaLabel',
+        {
+          defaultMessage: 'Select integration to see details',
+        }
+      )}
+      searchable
+      singleSelection="always"
+      searchProps={{
+        placeholder: i18n.translate(
+          'xpack.securitySolution.siemReadiness.integrationSelectablePopover.searchPlaceholder',
+          {
+            defaultMessage: 'Filter list',
+          }
+        ),
+        compressed: true,
+      }}
+      options={options}
+      onChange={(newOptions, event, changedOption) => {
+        onChange?.(newOptions, event, changedOption);
+      }}
+    >
+      {(list, search) => (
+        <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
+          <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+          {list}
+        </div>
+      )}
+    </EuiSelectable>
+  );
+
+  if (showOnlySelectable) {
+    return selectableComponent;
+  }
 
   return (
     <EuiPopover
@@ -66,36 +104,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
     >
-      <EuiSelectable
-        aria-label={i18n.translate(
-          'xpack.securitySolution.siemReadiness.integrationSelectablePopover.ariaLabel',
-          {
-            defaultMessage: 'Select integration to see details',
-          }
-        )}
-        searchable
-        singleSelection="always"
-        searchProps={{
-          placeholder: i18n.translate(
-            'xpack.securitySolution.siemReadiness.integrationSelectablePopover.searchPlaceholder',
-            {
-              defaultMessage: 'Filter list',
-            }
-          ),
-          compressed: true,
-        }}
-        options={options}
-        onChange={(newOptions, event, changedOption) => {
-          onChange?.(newOptions, event, changedOption);
-        }}
-      >
-        {(list, search) => (
-          <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
+      {selectableComponent}
     </EuiPopover>
   );
 };

@@ -561,12 +561,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                     key: integration,
                   }))}
                   onChange={onChangePopOver}
-                  buttonLabel={i18n.translate(
-                    'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewMissingIntegrationsLabel',
-                    {
-                      defaultMessage: 'View missing Integrations',
-                    }
-                  )}
+                  showOnlySelectable={true}
                 />
               </EuiPopover>
             ))}
