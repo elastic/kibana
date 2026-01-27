@@ -178,6 +178,6 @@ describe('global header', () => {
       </TestProviders>
     );
 
-    waitFor(() => expect(findByTestId('assistantNavLink')).toBeInTheDocument());
+    waitFor(() => expect(findByTestId('assistantNavLinkButton')).toBeInTheDocument());
   });
 });
