@@ -92,7 +92,14 @@ export class CloudConnectApiService {
 
   public async rotateApiKey() {
     return await this.sendRequest<RotateApiKeyResponse>({
-      path: `${API_BASE_PATH}/cluster/apikey/_rotate`,
+      path: `${API_BASE_PATH}/cluster/rotate_api_key`,
+      method: 'post',
+    });
+  }
+
+  public async rotateServiceApiKey(serviceKey: string) {
+    return await this.sendRequest<RotateApiKeyResponse>({
+      path: `${API_BASE_PATH}/cluster/${serviceKey}/rotate_api_key`,
       method: 'post',
     });
   }
