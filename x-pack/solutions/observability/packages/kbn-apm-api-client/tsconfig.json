@@ -14,6 +14,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/apm-plugin"
+    "@kbn/apm-plugin",
+    "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-utils",
+    "@kbn/observability-plugin"
   ]
 }
