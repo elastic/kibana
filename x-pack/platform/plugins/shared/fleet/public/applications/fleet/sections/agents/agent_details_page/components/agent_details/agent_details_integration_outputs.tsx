@@ -9,25 +9,28 @@ import React, { memo, useMemo } from 'react';
 
 import type { Agent, PackagePolicy } from '../../../../../types';
 
-import { getInputUnitsByPackage, InputStatusFormatter } from './input_status_utils';
+import { getOutputUnitsByPackageAndInputType, InputStatusFormatter } from './input_status_utils';
 import { AgentDetailsIntegrationStatus } from './agent_details_integration_status';
 
-export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
+export const AgentDetailsIntegrationOutputs: React.FunctionComponent<{
   agent: Agent;
   packagePolicy: PackagePolicy;
   linkToLogs?: boolean;
   'data-test-subj'?: string;
 }> = memo(({ agent, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
-  const inputStatusMap = useMemo(
+  const outputStatusMap = useMemo(
     () =>
       packagePolicy.inputs.reduce((acc, current) => {
         if (!agent.components) {
           return new Map<string, InputStatusFormatter>();
         }
         if (current.enabled) {
-          const agentUnit = getInputUnitsByPackage(agent.components, packagePolicy)?.find((i) =>
-            i.id.match(new RegExp(current.type))
+          const agentUnit = getOutputUnitsByPackageAndInputType(
+            agent.components,
+            packagePolicy,
+            current.type
           );
+
           acc.set(
             current.type,
             agentUnit
@@ -44,8 +47,8 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
     <AgentDetailsIntegrationStatus
       agent={agent}
       packagePolicy={packagePolicy}
-      itemStatusMap={inputStatusMap}
-      itemType="Input"
+      itemStatusMap={outputStatusMap}
+      itemType="Output"
       linkToLogs={linkToLogs}
       data-test-subj={dataTestSubj}
     />

@@ -15,8 +15,9 @@ import type { Agent } from '../../../../../types';
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
+import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
 
-describe('AgentDetailsIntegrationInputs', () => {
+describe('AgentDetailsIntegrationOutputs', () => {
   const agent: Agent = {
     id: '123',
     packages: [],
@@ -32,19 +33,19 @@ describe('AgentDetailsIntegrationInputs', () => {
   const renderComponent = () => {
     const renderer = createFleetTestRendererMock();
     return renderer.render(
-      <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />
+      <AgentDetailsIntegrationOutputs agent={agent} packagePolicy={packageMock} />
     );
   };
 
   it('renders a default health icon when the agent has no components at all', async () => {
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a default health icon when the package input has no match in the agent component units', async () => {
+  it('renders a default health icon when the package output has no match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -54,7 +55,7 @@ describe('AgentDetailsIntegrationInputs', () => {
         units: [
           {
             id: 'endpoint-default',
-            type: 'input',
+            type: 'output',
             status: 'HEALTHY',
             message: 'Applied policy',
           },
@@ -63,13 +64,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a success health icon when the package input has a match in the agent component units', async () => {
+  it('renders a success health icon when the package output has a match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -83,14 +84,20 @@ describe('AgentDetailsIntegrationInputs', () => {
             status: 'HEALTHY',
             message: 'Applied policy',
           },
+          {
+            id: `endpoint-default`,
+            type: 'output',
+            status: 'HEALTHY',
+            message: 'It works',
+          },
         ],
       },
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthSuccess')
     ).toBeInTheDocument();
   });
 
@@ -105,9 +112,9 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+      component.queryByTestId('agentDetailsIntegrationsOutputStatusHealthSuccess')
     ).not.toBeInTheDocument();
   });
 

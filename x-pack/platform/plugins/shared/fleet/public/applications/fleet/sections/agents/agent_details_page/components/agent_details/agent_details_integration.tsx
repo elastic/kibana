@@ -27,7 +27,8 @@ import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
-import { getInputUnitsByPackage } from './input_status_utils';
+import { getInputUnitsByPackage, getOutputUnitsByPackage } from './input_status_utils';
+import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__button {
@@ -129,9 +130,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       if (!agent.components) {
         return [];
       }
-      return getInputUnitsByPackage(agent.components, packagePolicy).filter(
-        (u) => u.status === 'DEGRADED' || u.status === 'FAILED'
-      );
+
+      return [
+        ...getInputUnitsByPackage(agent.components, packagePolicy),
+        ...getOutputUnitsByPackage(agent.components, packagePolicy),
+      ].filter((u) => u.status === 'DEGRADED' || u.status === 'FAILED');
     }, [agent.components, packagePolicy]);
 
     const showNeedsAttentionBadge =
@@ -205,6 +208,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         }
       >
         <AgentDetailsIntegrationInputs
+          agent={agent}
+          packagePolicy={packagePolicy}
+          linkToLogs={linkToLogs}
+        />
+        <AgentDetailsIntegrationOutputs
           agent={agent}
           packagePolicy={packagePolicy}
           linkToLogs={linkToLogs}
