@@ -143,6 +143,13 @@ export function generateBuiltInStepSnippet(
         };
       }
       break;
+    case 'workflow.fail':
+      parameters = {
+        with: {
+          message: '${1:Error message}',
+        },
+      };
+      break;
     default:
       parameters = {
         with: { '# Add parameters here': '' },

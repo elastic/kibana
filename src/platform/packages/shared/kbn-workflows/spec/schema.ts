@@ -434,6 +434,14 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z.object({
+    message: z.string(),
+  }),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -606,6 +614,7 @@ const StepSchema = z.lazy(() =>
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
     WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -622,6 +631,7 @@ export const BuiltInStepTypes = [
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -798,7 +808,17 @@ export const WorkflowContextSchema = z.object({
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
-  output: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z
+    .record(
+      z.string(),
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
   parent: z
@@ -851,6 +871,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.any().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

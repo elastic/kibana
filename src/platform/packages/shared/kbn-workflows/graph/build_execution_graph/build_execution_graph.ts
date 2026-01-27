@@ -24,6 +24,7 @@ import type {
   WaitStep,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
+  WorkflowFailStep,
   WorkflowOnFailure,
   WorkflowOutputStep,
   WorkflowRetry,
@@ -170,6 +171,17 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'workflow.output') {
     return visitWorkflowOutputStep(currentStep, context);
+  }
+
+  if (currentStep.type === 'workflow.fail') {
+    // Transform workflow.fail to workflow.output internally
+    const transformedStep: WorkflowOutputStep = {
+      ...currentStep,
+      type: 'workflow.output',
+      status: 'failed',
+      with: (currentStep as WorkflowFailStep).with,
+    };
+    return visitWorkflowOutputStep(transformedStep, context);
   }
 
   return visitAtomicStep(currentStep, context);

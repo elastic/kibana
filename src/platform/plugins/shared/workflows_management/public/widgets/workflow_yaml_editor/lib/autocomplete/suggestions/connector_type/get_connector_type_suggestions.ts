@@ -19,6 +19,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
@@ -260,6 +261,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
     {
       schema: WorkflowOutputStepSchema,
       description: 'Emit workflow outputs and terminate execution',
+      icon: monaco.languages.CompletionItemKind.Event,
+    },
+    {
+      schema: WorkflowFailStepSchema,
+      description: 'Fail workflow with error message',
       icon: monaco.languages.CompletionItemKind.Event,
     },
   ];

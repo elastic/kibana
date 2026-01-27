@@ -25,6 +25,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
@@ -123,6 +124,7 @@ function createRecursiveStepSchema(
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
       WorkflowOutputStepSchema,
+      WorkflowFailStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
