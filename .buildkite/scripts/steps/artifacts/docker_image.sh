@@ -59,6 +59,8 @@ if docker manifest inspect "$KIBANA_IMAGE" &> /dev/null; then
   if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
     echo "Manifest already exists, exiting"
     exit 1
+  elif [[ "${BUILDKITE_RETRY_COUNT:-0}" -gt 0 ]]; then # is a retry
+    echo "Retry detected, retrying the full build to avoid partial build artifacts"
   else
     echo "Manifest already exists, skipping build.  Look up previous build for artifacts."
     SKIP_BUILD=true
