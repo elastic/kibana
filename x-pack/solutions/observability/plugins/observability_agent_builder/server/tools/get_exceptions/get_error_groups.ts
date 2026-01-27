@@ -8,8 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import {
-  AGENT_NAME,
-  AGENT_VERSION,
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
@@ -27,8 +25,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_PAGE_URL,
   URL_FULL,
-  USER_AGENT_NAME,
-  USER_AGENT_VERSION,
 } from '@kbn/observability-shared-plugin/common';
 import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
 import { ERROR_GROUP_ID as ERROR_GROUP_ID_MD } from '@kbn/observability-shared-plugin/common';
@@ -141,33 +137,31 @@ async function getErrorGroupSamples({
               fields: [
                 '_index',
                 // Error fields
-                ERROR_GROUP_ID,
-                ERROR_EXC_TYPE,
-                ERROR_EXC_MESSAGE,
-                ERROR_LOG_MESSAGE,
                 ERROR_CULPRIT,
                 ERROR_EXC_HANDLED,
+                ERROR_EXC_MESSAGE,
+                ERROR_EXC_TYPE,
+                ERROR_GROUP_ID,
+                ERROR_LOG_MESSAGE,
+
                 // Service fields
                 SERVICE_ENVIRONMENT,
-                SERVICE_NAME,
                 SERVICE_LANGUAGE_NAME,
-                // Agent fields
-                AGENT_NAME,
-                AGENT_VERSION,
+                SERVICE_NAME,
+
                 // Trace fields
+                SPAN_ID,
                 TRACE_ID,
                 TRANSACTION_ID,
                 TRANSACTION_NAME,
-                SPAN_ID,
+
                 // HTTP fields
-                URL_FULL,
                 HTTP_REQUEST_METHOD,
                 HTTP_RESPONSE_STATUS_CODE,
                 TRANSACTION_PAGE_URL,
-                // User agent fields
-                USER_AGENT_NAME,
-                USER_AGENT_VERSION,
-                // Stack trace string (OTel/ECS compliant)
+                URL_FULL,
+
+                // Stack trace if requested
                 ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
               ],
               sort: [{ '@timestamp': 'desc' as const }],

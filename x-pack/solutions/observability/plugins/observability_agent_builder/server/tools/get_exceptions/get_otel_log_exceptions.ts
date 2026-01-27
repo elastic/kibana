@@ -98,6 +98,7 @@ async function getLogExceptionCategories({
                   fields: [
                     '@timestamp',
                     '_index',
+                    'message',
                     EXCEPTION_TYPE,
                     EXCEPTION_MESSAGE,
                     SERVICE_NAME,
@@ -119,8 +120,7 @@ async function getLogExceptionCategories({
   const buckets = response.aggregations?.sampler?.categories?.buckets ?? [];
 
   return buckets.map((bucket) => {
-    const hit = bucket.sample?.hits?.hits?.[0];
-    const fields = unwrapEsFields(hit?.fields);
+    const fields = unwrapEsFields(bucket.sample?.hits?.hits?.[0]?.fields);
 
     const lastSeen = bucket.last_seen?.value
       ? new Date(bucket.last_seen.value).toISOString()
