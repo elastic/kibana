@@ -36,9 +36,16 @@ export {
 } from './src/inference_endpoint_autocomplete_types';
 
 export {
+  type PromQLFieldsAutocompleteResult,
+  type PromQLMetricField,
+  type PromQLLabelField,
+} from './src/promql_fields_autocomplete_types';
+
+export {
   REGISTRY_EXTENSIONS_ROUTE,
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
+  PROMQL_FIELDS_ROUTE,
   SOURCES_TYPES,
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,

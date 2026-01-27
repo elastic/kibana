@@ -12,6 +12,9 @@ import {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
+  type PromQLFieldsAutocompleteResult,
+  type PromQLMetricField,
+  type PromQLLabelField,
   SOURCES_TYPES,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -192,5 +195,45 @@ export class EsqlService {
         task_type: endpoint.task_type,
       })),
     };
+  }
+
+  /**
+   * Get PromQL fields (metrics and labels) from time series indices.
+   * Uses _field_caps API to discover fields with time_series_metric and time_series_dimension attributes.
+   * @param indexPattern The index pattern to query (e.g., "metrics-*").
+   * @returns A promise that resolves to metrics and labels autocomplete result.
+   */
+  public async getPromqlFields(indexPattern: string): Promise<PromQLFieldsAutocompleteResult> {
+    const { client } = this.options;
+    const fieldCapsResponse = await client.fieldCaps({
+      index: indexPattern,
+      fields: '*',
+      include_unmapped: false,
+    });
+
+    const metrics: PromQLMetricField[] = [];
+    const labels: PromQLLabelField[] = [];
+
+    for (const [fieldName, fieldTypes] of Object.entries(fieldCapsResponse.fields)) {
+      for (const [typeName, fieldInfo] of Object.entries(fieldTypes)) {
+        const { time_series_metric: metricType, time_series_dimension: isDimension } =
+          fieldInfo as { time_series_metric?: string; time_series_dimension?: boolean };
+
+        if (metricType) {
+          metrics.push({
+            name: fieldName,
+            type: typeName,
+            metricType,
+          });
+        } else if (isDimension) {
+          labels.push({
+            name: fieldName,
+            type: typeName,
+          });
+        }
+      }
+    }
+
+    return { metrics, labels };
   }
 }

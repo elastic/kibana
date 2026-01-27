@@ -13,6 +13,7 @@ import type { RecommendedField, RecommendedQuery } from './extensions_autocomple
 import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
 import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
+import type { PromQLFieldsAutocompleteResult } from './promql_fields_autocomplete_types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -113,6 +114,7 @@ export interface ESQLCallbacks {
     forceRefresh?: boolean;
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getPromqlFields?: (indexPattern: string) => Promise<PromQLFieldsAutocompleteResult>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];

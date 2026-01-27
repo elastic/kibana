@@ -14,6 +14,7 @@ import type {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
   ESQLCallbacks,
+  PromQLFieldsAutocompleteResult,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -155,6 +156,7 @@ export interface ICommandCallbacks {
   getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getPromqlFields?: (indexPattern: string) => Promise<PromQLFieldsAutocompleteResult>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
@@ -165,6 +167,7 @@ export interface ICommandContext {
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
+  promqlFields?: PromQLFieldsAutocompleteResult;
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
   editorExtensions?: EditorExtensions;

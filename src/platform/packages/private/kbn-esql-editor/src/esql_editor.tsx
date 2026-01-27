@@ -30,6 +30,7 @@ import {
   getEsqlPolicies,
   getJoinIndices,
   getTimeseriesIndices,
+  getPromqlFields,
   getInferenceEndpoints,
   getEditorExtensions,
   fixESQLQueryWithVariables,
@@ -685,6 +686,9 @@ const ESQLEditorInternal = function ESQLEditor({
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: async () => {
         return (await getTimeseriesIndices(core.http)) || [];
+      },
+      getPromqlFields: async (indexPattern: string) => {
+        return await getPromqlFields(core.http, indexPattern);
       },
       getEditorExtensions: async (queryString: string) => {
         // Only fetch recommendations if there's an active solutionId and a non-empty query

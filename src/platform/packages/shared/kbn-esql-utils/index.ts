@@ -59,6 +59,7 @@ export {
   getEsqlPolicies,
   getJoinIndices,
   getTimeseriesIndices,
+  getPromqlFields,
   getInferenceEndpoints,
   getEditorExtensions,
   hasDateBreakdown,

@@ -14,6 +14,7 @@ import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
 import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
+import { SuggestionCategory } from '../../../shared/sorting';
 import {
   assignCompletionItem,
   commaCompleteItem,
@@ -51,7 +52,6 @@ export async function autocomplete(
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
   const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
-
   switch (position.type) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
@@ -69,6 +69,7 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
+        ...(canSuggestColumn ? suggestMetrics(context, needsWrappedQuery) : []),
         ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
@@ -93,21 +94,22 @@ export async function autocomplete(
       return suggestParamValues(position.currentParam, context);
 
     case 'inside_grouping':
-      // Labels not yet supported - return empty suggestions
-      return [];
+      return suggestLabels(context);
 
     case 'inside_query':
       return [];
 
     case 'after_open_paren':
-      return wrapFunctionSuggestions(needsWrappedQuery);
+    case 'inside_function_args': {
+      const metrics = suggestMetrics(context, needsWrappedQuery);
+      const functions = wrapFunctionSuggestions(needsWrappedQuery);
+
+      return [...metrics, ...functions];
+    }
 
     case 'after_complete_expression':
       // Future: suggest binary operators (+, -, *, /, etc.)
       return [];
-
-    case 'inside_function_args':
-      return getPromqlFunctionSuggestions();
 
     case 'before_grouping':
       return [promqlByCompleteItem];
@@ -263,5 +265,27 @@ function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
   return suggestions.map((suggestion) => ({
     ...suggestion,
     text: `(${suggestion.text})`,
+  }));
+}
+
+/* Converts PromQL metric fields from context into autocomplete suggestions. */
+function suggestMetrics(context?: ICommandContext, wrap?: boolean): ISuggestionItem[] {
+  return (context?.promqlFields?.metrics ?? []).map((metric) => ({
+    label: metric.name,
+    text: wrap ? `(${metric.name})` : metric.name,
+    kind: 'Field',
+    detail: `${metric.metricType} (${metric.type})`,
+    category: SuggestionCategory.FIELD,
+  }));
+}
+
+/* Converts PromQL label (dimension) fields from context into autocomplete suggestions. */
+function suggestLabels(context?: ICommandContext): ISuggestionItem[] {
+  return (context?.promqlFields?.labels ?? []).map((label) => ({
+    label: label.name,
+    text: label.name,
+    kind: 'Field',
+    detail: `dimension (${label.type})`,
+    category: SuggestionCategory.FIELD,
   }));
 }

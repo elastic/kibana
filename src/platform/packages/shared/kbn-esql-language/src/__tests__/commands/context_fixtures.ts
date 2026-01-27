@@ -113,6 +113,18 @@ export const editorExtensions = {
   ],
 };
 
+export const promqlMetrics = [
+  { name: 'http_requests_total', type: 'counter_long', metricType: 'counter' as const },
+  { name: 'bytes_counter', type: 'counter_double', metricType: 'counter' as const },
+  { name: 'cpu_usage', type: 'gauge', metricType: 'gauge' as const },
+];
+
+export const promqlLabels = [
+  { name: 'job', type: 'keyword' },
+  { name: 'instance', type: 'keyword' },
+  { name: 'status_code', type: 'keyword' },
+];
+
 export const mockContext: ICommandContext = {
   columns: new Map<string, ESQLColumnData>([
     [
@@ -196,6 +208,10 @@ export const mockContext: ICommandContext = {
   })),
   joinSources: joinIndices,
   timeSeriesSources: timeseriesIndices,
+  promqlFields: {
+    metrics: promqlMetrics,
+    labels: promqlLabels,
+  },
   inferenceEndpoints,
   histogramBarTarget: 50,
   activeProduct: {
@@ -222,6 +238,10 @@ export const getMockCallbacks = (): MockedICommandCallbacks => {
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
+    getPromqlFields: jest.fn().mockResolvedValue({
+      metrics: promqlMetrics,
+      labels: promqlLabels,
+    }),
     canCreateLookupIndex: jest.fn().mockReturnValue(true),
     isServerless: false,
   };

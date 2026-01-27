@@ -13,6 +13,7 @@ import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
+import { registerGetPromqlFieldsRoute } from './get_promql_fields';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
 import { registerLookupIndexRoutes } from './lookup_index';
 import { registerGetSourcesRoute } from './get_all_sources';
@@ -27,6 +28,7 @@ export const registerRoutes = (
 
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
+  registerGetPromqlFieldsRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
   registerLookupIndexRoutes(router, initContext);

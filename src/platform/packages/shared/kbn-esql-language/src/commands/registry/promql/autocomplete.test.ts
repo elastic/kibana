@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
+import {
+  mockContext,
+  getMockCallbacks,
+  promqlMetrics,
+  promqlLabels,
+} from '../../../__tests__/commands/context_fixtures';
 import { suggest } from '../../../__tests__/commands/autocomplete';
 import { autocomplete } from './autocomplete';
 import {
@@ -267,10 +272,11 @@ describe('aggregation functions (by clause)', () => {
     });
   });
 
-  test('suggests functions inside incomplete aggregation function', async () => {
-    // Inside function args - suggest functions and metrics for completion
+  test('suggests functions and metrics inside incomplete aggregation function', async () => {
+    const metricNames = promqlMetrics.map(({ name }) => name);
+
     await expectPromqlSuggestions('PROMQL sum( ', {
-      labelsContain: promqlFunctionLabels,
+      labelsContain: [...promqlFunctionLabels, ...metricNames],
       labelsNotContain: [promqlByCompleteItem.label],
     });
   });
@@ -296,8 +302,11 @@ describe('aggregation functions (by clause)', () => {
     });
   });
 
-  test('inside by() returns empty suggestions (labels not yet supported)', async () => {
+  test('suggests labels inside by() grouping clause', async () => {
+    const labelNames = promqlLabels.map(({ name }) => name);
+
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests[5m])) by (', {
+      labelsContain: labelNames,
       labelsNotContain: ['sum', 'rate', 'avg'],
     });
   });

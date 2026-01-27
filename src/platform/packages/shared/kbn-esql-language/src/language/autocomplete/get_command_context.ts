@@ -11,11 +11,12 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isEqual, uniqWith } from 'lodash';
 import type { ParameterHint } from '../../..';
 import { walk } from '../../..';
-import type { ESQLAstAllCommands } from '../../types';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../types';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { parametersFromHintsResolvers } from '../../commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '../../commands/registry/types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
+import { getIndexFromPromQLParams } from '../../commands/definitions/utils/promql';
 
 export const getCommandContext = async (
   command: ESQLAstAllCommands,
@@ -101,12 +102,20 @@ export const getCommandContext = async (
         },
       };
       break;
-    case 'promql':
+    case 'promql': {
       const promqlTimeseriesSources = await callbacks?.getTimeseriesIndices?.();
+      const promqlIndex = getIndexFromPromQLParams(command as ESQLAstPromqlCommand);
+      const promqlFields =
+        promqlIndex && callbacks?.getPromqlFields
+          ? await callbacks.getPromqlFields(promqlIndex)
+          : undefined;
+
       context = {
         timeSeriesSources: promqlTimeseriesSources?.indices || [],
+        promqlFields,
       };
       break;
+    }
     default:
       break;
   }

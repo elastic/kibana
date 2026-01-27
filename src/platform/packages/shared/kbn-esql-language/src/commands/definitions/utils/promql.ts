@@ -8,6 +8,7 @@
  */
 import type { ISuggestionItem } from '../../registry/types';
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
+import { EDITOR_MARKER } from '../constants';
 import { PromQLFunctionDefinitionTypes, type PromQLFunctionDefinition } from '../types';
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
@@ -85,7 +86,7 @@ export function getIndexFromPromQLParams({
 
     const { value } = indexEntry ?? {};
 
-    if (isIdentifier(value) || isSource(value)) {
+    if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
       return value.name;
     }
   }
@@ -94,5 +95,6 @@ export function getIndexFromPromQLParams({
   // Needed by autocomplete and external consumers (e.g. getIndexPatternFromESQLQuery).
   const indexMatch = query?.text?.match(INDEX_PARAM_REGEX);
 
-  return indexMatch?.[1];
+  // same stuffs of getSourcesFromCommands for the other sources
+  return indexMatch?.[1]?.includes(EDITOR_MARKER) ? undefined : indexMatch?.[1];
 }

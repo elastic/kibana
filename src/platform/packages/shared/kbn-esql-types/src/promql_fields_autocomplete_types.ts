@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getESQLSources } from './sources';
-export { getEsqlColumns } from './columns';
-export { getEsqlPolicies } from './policies';
-export { getJoinIndices } from './lookup_indices';
-export { getTimeseriesIndices } from './timeseries_indices';
-export { getPromqlFields } from './promql_fields';
-export { getInferenceEndpoints } from './inference';
-export { getEditorExtensions } from './extensions';
+export interface PromQLMetricField {
+  name: string;
+  type: string;
+  metricType: string;
+}
+
+export interface PromQLLabelField {
+  name: string;
+  type: string;
+}
+
+export interface PromQLFieldsAutocompleteResult {
+  metrics: PromQLMetricField[];
+  labels: PromQLLabelField[];
+}
