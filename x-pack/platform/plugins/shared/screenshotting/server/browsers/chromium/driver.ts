@@ -287,6 +287,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      zoom: layout.getBrowserZoom(),
     });
   }
 

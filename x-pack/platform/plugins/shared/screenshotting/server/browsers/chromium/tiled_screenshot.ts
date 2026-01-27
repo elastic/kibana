@@ -9,8 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { Page, BoundingBox } from 'puppeteer';
 import UPNG from '@pdf-lib/upng';
 
-import { ZOOM } from '../../layouts/preserve_layout';
-
 export const ROWS_PER_TILE = 1000;
 export const TILED_ROW_HEIGHT = 8000;
 
@@ -18,6 +16,7 @@ interface GetScreenshotParams {
   logger: Logger;
   page: Page;
   rect: BoundingBox;
+  zoom: number;
 }
 
 export async function getTiledScreenshot(params: GetScreenshotParams): Promise<Buffer | undefined> {
@@ -32,7 +31,7 @@ export async function getTiledScreenshot(params: GetScreenshotParams): Promise<B
 export async function getTiledScreenshotWrapped(
   params: GetScreenshotParams
 ): Promise<Buffer | undefined> {
-  const { page, rect, logger } = params;
+  const { page, rect, zoom, logger } = params;
 
   const tiles = partitionScreen(rect);
   if (tiles.length === 0) {
@@ -40,8 +39,9 @@ export async function getTiledScreenshotWrapped(
     return;
   }
 
-  if (tiles.length === 1) {
-    const screenshot = await getSingleScreenshot({ logger, page, rect });
+  // disable tiling for now
+  if (tiles.length > 0) {
+    const screenshot = await getSingleScreenshot(params);
     return Buffer.from(screenshot);
   }
 
@@ -50,7 +50,7 @@ export async function getTiledScreenshotWrapped(
   const debug = (message: string) => logger.debug(`${messagePrefix}${message}`, messageMeta);
 
   // 4 bytes for each pixel (RGBA), multiply by zoom (both dimensions)
-  const bufferSize = 4 * ZOOM * ZOOM * rect.width * rect.height;
+  const bufferSize = 4 * zoom * zoom * rect.width * rect.height;
   const result = new Uint8Array(new ArrayBuffer(bufferSize));
   debug(
     `allocated buffer: width: ${rect.width}; height: ${rect.height}; bufferSize: ${bufferSize}`
@@ -59,7 +59,7 @@ export async function getTiledScreenshotWrapped(
   let offset = 0;
   for (const tile of tiles) {
     debug(`getting tile: ${JSON.stringify(tile)}`);
-    const screenshot = await getSingleScreenshot({ logger, page, rect: tile });
+    const screenshot = await getSingleScreenshot({ logger, page, rect: tile, zoom });
     const image = UPNG.decode(screenshot);
     const rgbaBytes = UPNG.toRGBA8(image)[0];
     debug(`got tile: width: ${image.width}; height: ${image.height}; depth: ${image.depth}`);
@@ -71,8 +71,8 @@ export async function getTiledScreenshotWrapped(
     offset += rgbaBytes.byteLength;
   }
 
-  const finalWidth = rect.width * ZOOM;
-  const finalHeight = rect.height * ZOOM;
+  const finalWidth = rect.width * zoom;
+  const finalHeight = rect.height * zoom;
   debug(`result image: width: ${finalWidth}; height: ${finalHeight}`);
 
   const resultImage = UPNG.encode([result.buffer], finalWidth, finalHeight, 0);
