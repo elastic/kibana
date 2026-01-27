@@ -70,13 +70,12 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
     </EuiTitle>
   );
 
+  const onToggle = useCallback(() => {
+    toggle({ localStorageKey, title: sectionId });
+  }, [toggle, localStorageKey, sectionId]);
+
   return (
-    <EuiAccordion
-      forceState={state}
-      onToggle={() => toggle({ localStorageKey, title: sectionId })}
-      id={accordionId}
-      buttonContent={header}
-    >
+    <EuiAccordion forceState={state} onToggle={onToggle} id={accordionId} buttonContent={header}>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize={gutterSize} direction="column" data-test-subj={contentDataTestSub}>
         {renderContent && children}
