@@ -9,7 +9,7 @@ exports[`TOCEntry is rendered 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
@@ -98,7 +98,7 @@ exports[`TOCEntry props Should indent child layer 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
@@ -183,7 +183,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
@@ -268,7 +268,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
@@ -353,7 +353,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
@@ -421,7 +421,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   <div
     className="mapTocEntry-visible"
   >
-    <Connect(TOCEntryActionsPopover)
+    <TOCEntryActionsPopover
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}

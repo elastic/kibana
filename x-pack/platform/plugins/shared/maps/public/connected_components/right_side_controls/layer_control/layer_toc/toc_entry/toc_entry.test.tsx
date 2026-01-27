@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
 jest.mock('../../../../../kibana_services', () => {
@@ -21,6 +22,20 @@ jest.mock('../../../../../kibana_services', () => {
         },
       };
     },
+  };
+});
+jest.mock('./toc_entry_actions_popover', () => {
+  const { TOCEntryActionsPopover } = jest.requireActual(
+    './toc_entry_actions_popover/toc_entry_actions_popover'
+  );
+  return { TOCEntryActionsPopover };
+});
+
+jest.mock('./toc_entry_button', () => {
+  return {
+    TOCEntryButton: ({ children }: React.PropsWithChildren) => (
+      <button className="mapTocEntry__layerName">{children}</button>
+    ),
   };
 });
 
@@ -151,6 +166,47 @@ describe('TOCEntry', () => {
       component.update();
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('getTOCEntryEditButton', () => {
+    test('returns the enclosed edit button', async () => {
+      const component = mount(<TOCEntry {...defaultProps} />);
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(
+        (
+          TOCEntry.getTOCEntryEditButton(LAYER_ID, (query: string) =>
+            component.find(query)
+          ) as ShallowWrapper | null
+        )?.is('[data-test-subj="editLayerSettingsButton"]')
+      ).toBe(true);
+    });
+  });
+
+  describe('showHiddenTOCEntryPopoverAction', () => {
+    test('focuses the enclosing popover', async () => {
+      const component = mount(<TOCEntry {...defaultProps} />);
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const element = TOCEntry.getTOCEntryEditButton(LAYER_ID, (query: string) =>
+        component.find(query)
+      );
+
+      const mockFocus = jest.fn();
+      TOCEntry.showHiddenTOCEntryPopoverAction(element!, (el) => (query: string) => {
+        const result = el.find(query);
+        result.focus = mockFocus;
+        return result;
+      });
+
+      expect(mockFocus).toHaveBeenCalled();
     });
   });
 });
