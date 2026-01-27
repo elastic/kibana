@@ -11,11 +11,11 @@ import { test as baseTest } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
-export interface StreamsTestFixtures extends ScoutTestFixtures {
+export interface LensTestFixtures extends ScoutTestFixtures {
   pageObjects: LensPageObjects;
 }
 
-export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<LensTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
