@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { WorkflowInfo, WorkflowReference } from '../common/data_source_spec';
+import type {
+  WorkflowInfo,
+  WorkflowReference,
+} from '@kbn/data-catalog-plugin/common/data_source_spec';
 
 /**
  * Represents a workflow definition from a registry

@@ -7,7 +7,10 @@
 
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
-import type { WorkflowInfo, WorkflowsConfig } from '../common/data_source_spec';
+import type {
+  WorkflowInfo,
+  WorkflowsConfig,
+} from '@kbn/data-catalog-plugin/common/data_source_spec';
 import type { WorkflowRegistry } from './workflow_registry';
 import { loadWorkflowsFromRegistry } from './workflow_registry';
 
