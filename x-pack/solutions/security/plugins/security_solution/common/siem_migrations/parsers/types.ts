@@ -23,6 +23,8 @@ export interface ParsedPanel {
   viz_type: VizType;
   /** the computed position */
   position: PanelPosition;
+  /** section in case of multitab dashboards **/
+  section?: PanelSection;
 }
 
 export type VizType =
@@ -47,4 +49,8 @@ export interface PanelPosition {
   y: number;
   w: number;
   h: number;
+}
+
+export interface PanelSection {
+  title: string;
 }

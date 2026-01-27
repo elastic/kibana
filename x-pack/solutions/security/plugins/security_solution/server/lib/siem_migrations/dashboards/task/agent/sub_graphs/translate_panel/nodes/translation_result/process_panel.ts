@@ -25,6 +25,7 @@ interface PanelJSON {
     w: number;
     h: number;
     i: string;
+    sectionId?: string;
   };
   panelIndex?: string;
   embeddableConfig?: {

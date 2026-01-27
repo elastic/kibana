@@ -139,4 +139,11 @@ export class XmlParser {
 
     return undefined;
   }
+
+  protected getStrValue(val: Array<string> | string): string {
+    if (Array.isArray(val)) {
+      return val[0].trim();
+    }
+    return val.trim();
+  }
 }

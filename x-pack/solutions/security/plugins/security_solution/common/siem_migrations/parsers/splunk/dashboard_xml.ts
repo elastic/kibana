@@ -62,7 +62,19 @@ interface SplunkXmlElement extends XmlElement {
  *
  *
  **/
-export class SplunkXmlDashboardParser extends XmlParser {
+export class SplunkXmlDashboardParser extends XmlParser implements SplunkXmlDashboardParser {
+  public async getVersion() {
+    const root = await this.parse();
+    const dashboard = this.findDeep(root, 'dashboard') as XmlElement;
+    const form = this.findDeep(root, 'form') as XmlElement;
+
+    const el = dashboard || form;
+    if (!el) {
+      return `Unsupported root tag`;
+    }
+    return el.$?.version;
+  }
+
   public async extractPanels(): Promise<ParsedPanel[]> {
     const root = await this.parse();
     const panels: ParsedPanel[] = [];
@@ -248,15 +260,6 @@ export class SplunkXmlDashboardParser extends XmlParser {
       return {
         isSupported: false,
         reason: `Unsupported root tag: ${rootTag}`,
-      };
-    }
-
-    // Check if rootTag has an attribute `version=1.1`
-    const versionMatch = xmlContent.match(/<\s*([a-zA-Z0-9_:]+)\s*.*version=['"]?1\.1['"]?/);
-    if (!versionMatch) {
-      return {
-        isSupported: false,
-        reason: `Unsupported version. Only version 1.1 is supported.`,
       };
     }
 
