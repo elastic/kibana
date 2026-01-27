@@ -9,7 +9,7 @@ import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
-const METRICS_INDEX_PATTERN = 'index-*';
+const METRICS_INDEX_PATTERN = 'metrics-*';
 const LOGS_INDEX_PATTERN = 'logs-*';
 
 const TRACES_ESQL_RECOMMENDED_QUERIES = [
