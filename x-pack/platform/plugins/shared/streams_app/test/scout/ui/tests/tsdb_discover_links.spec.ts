@@ -94,13 +94,13 @@ async function indexTsdbData(esClient: EsClient, dataStreamName: string) {
 async function cleanupTsdbResources(esClient: EsClient, templateName: string, streamName: string) {
   try {
     await esClient.indices.deleteDataStream({ name: streamName });
-  } catch (e) {
+  } catch {
     // Ignore errors if data stream doesn't exist
   }
 
   try {
     await esClient.indices.deleteIndexTemplate({ name: templateName });
-  } catch (e) {
+  } catch {
     // Ignore errors if template doesn't exist
   }
 }
@@ -124,6 +124,12 @@ test.describe(
       });
     });
 
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.expectStreamsTableVisible();
+    });
+
     test.afterAll(async ({ esClient, apiServices, logsSynthtraceEsClient }) => {
       // Cleanup TSDB resources
       await cleanupTsdbResources(esClient, TSDB_TEMPLATE_NAME, TSDB_STREAM_NAME);
@@ -131,22 +137,13 @@ test.describe(
       // Cleanup regular stream
       try {
         await apiServices.streams.deleteStream(REGULAR_STREAM_NAME);
-      } catch (e) {
+      } catch {
         // Ignore errors if stream doesn't exist
       }
       await logsSynthtraceEsClient.clean();
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamMainPage();
-      await pageObjects.streams.expectStreamsTableVisible();
-    });
-
-    test('should use TS source command for TSDB stream Discover link', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('should use TS source command for TSDB stream Discover link', async ({ pageObjects }) => {
       await expect
         .poll(
           async () => {
