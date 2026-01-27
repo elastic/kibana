@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import type * as monaco from 'monaco-editor';
+import type { monaco } from '@kbn/monaco';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { correctQuerySyntax } from '@kbn/esql-language/src/commands/definitions/utils/ast';
 import { Parser, suggest } from '@kbn/esql-language';
@@ -43,8 +43,8 @@ export function useResourceBrowser({
   const fieldsBrowserQueryStringRef = useRef<string>('');
   // Store the suggested field names from autocomplete to filter the fields browser display
   const suggestedFieldNamesRef = useRef<Set<string>>(new Set());
-  // Store the suggested source names from autocomplete to filter the data source browser display
-  const suggestedSourceNamesRef = useRef<Set<string>>(new Set());
+  // Track whether the current command is a TS command to filter timeseries indices
+  const isTSCommandRef = useRef<boolean>(false);
 
   const handleResourceBrowserSelect = useCallback(
     (newResourceNames: string, oldLength: number) => {
@@ -112,27 +112,25 @@ export function useResourceBrowser({
   }, [editorRef]);
 
   const openIndicesBrowser = useCallback(async () => {
+    // Determine if the current command is a TS command
     if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
       if (position) {
         const fullText = editorModel.current.getValue() || '';
         const offset = editorModel.current.getOffsetAt(position) || 0;
+        const innerText = fullText.substring(0, offset);
+        const correctedQuery = correctQuerySyntax(innerText);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+        const astContext = getCursorContext(innerText, root, offset);
 
-        // Call suggest() to get the same source suggestions as autocomplete
-        // This ensures the data source browser shows only the contextually relevant sources
-        const suggestions = await suggest(fullText, offset, esqlCallbacks);
-        // Extract source names from suggestions (sources have kind: 'Issue' or 'Class')
-        const sourceNames = new Set(
-          suggestions
-            .filter((s) => s.kind === 'Issue' || s.kind === 'Class')
-            .map((s) => s.label)
-        );
-        suggestedSourceNamesRef.current = sourceNames;
+        // Check if the current command is a timeseries command (TS)
+        const isTS = astContext.command?.name === 'ts';
+        isTSCommandRef.current = isTS;
       }
     }
     updateResourceBrowserPosition();
     setIsDataSourceBrowserOpen(true);
-  }, [updateResourceBrowserPosition, editorRef, editorModel, esqlCallbacks]);
+  }, [updateResourceBrowserPosition, editorRef, editorModel]);
 
   const openFieldsBrowser = useCallback(async () => {
     if (editorRef.current && editorModel.current) {
@@ -161,7 +159,7 @@ export function useResourceBrowser({
         const suggestions = await suggest(fullText, offset, esqlCallbacks);
         // Extract field names from suggestions (fields have kind: 'Variable')
         const fieldNames = new Set(
-          suggestions.filter((s) => s.kind === 'Variable').map((s) => s.label)
+          suggestions.filter((s) => s.category === 'field').map((s) => s.label)
         );
         suggestedFieldNamesRef.current = fieldNames;
 
@@ -182,7 +180,7 @@ export function useResourceBrowser({
     fieldsBrowserGetColumnMapRef,
     fieldsBrowserQueryStringRef,
     suggestedFieldNamesRef,
-    suggestedSourceNamesRef,
+    isTSCommandRef,
     handleResourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,

@@ -771,7 +771,7 @@ const ESQLEditorInternal = function ESQLEditor({
     fieldsBrowserGetColumnMapRef,
     fieldsBrowserQueryStringRef,
     suggestedFieldNamesRef,
-    suggestedSourceNamesRef,
+    isTSCommandRef,
     handleResourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,
@@ -1478,7 +1478,7 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={() => setIsDataSourceBrowserOpen(false)}
             onSelect={handleResourceBrowserSelect}
             position={browserPopoverPosition}
-            suggestedSourceNames={suggestedSourceNamesRef.current}
+            isTSCommand={isTSCommandRef.current}
           />
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}

@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
-import { getESQLSources } from '@kbn/esql-utils';
+import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
@@ -64,8 +64,7 @@ interface DataSourceBrowserProps {
   onClose: () => void;
   onSelect: (dataSourceName: string, oldLength: number) => void;
   position?: { top?: number; left?: number };
-  // Source names suggested by autocomplete - used to filter the displayed sources
-  suggestedSourceNames?: Set<string>;
+  isTSCommand?: boolean;
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
@@ -73,7 +72,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   onClose,
   onSelect,
   position,
-  suggestedSourceNames,
+  isTSCommand = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -99,14 +98,19 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     }
   }, [isOpen]);
 
-  const fetchData = useCallback(async () => {
-    const allSources = await getESQLSources(core, esql?.getLicense);
-    // If suggestedSourceNames is provided and non-empty, filter to only include suggested sources
-    if (suggestedSourceNames && suggestedSourceNames.size > 0) {
-      return allSources.filter((source) => suggestedSourceNames.has(source.name));
+  const fetchData = useCallback(async (): Promise<ESQLSourceResult[]> => {
+    if (isTSCommand) {
+      const timeseriesIndices = await getTimeseriesIndices(core.http);
+      return timeseriesIndices.indices.map((index) => ({
+        name: index.name,
+        type: 'timeseries',
+        title: index.name,
+        hidden: false,
+      }));
     }
-    return allSources;
-  }, [core, esql?.getLicense, suggestedSourceNames]);
+
+    return await getESQLSources(core, esql?.getLicense);
+  }, [core, esql?.getLicense, isTSCommand]);
 
   const getTypeKey = useCallback((source: ESQLSourceResult) => {
     return getSourceTypeKey(source.type);
