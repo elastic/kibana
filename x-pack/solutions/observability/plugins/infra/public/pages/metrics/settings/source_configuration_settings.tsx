@@ -8,12 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  BottomBarActions,
-  Prompt,
-  useEditableSettings,
-} from '@kbn/observability-shared-plugin/public';
-import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
+import { BottomBarActions, Prompt } from '@kbn/observability-shared-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
@@ -31,7 +26,6 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
-import { FeaturesConfigurationPanel } from './features_configuration_panel';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -88,7 +82,6 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings([enableInfrastructureAssetCustomDashboards]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();
@@ -163,9 +156,6 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
-      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-        <FeaturesConfigurationPanel readOnly={!isWriteable} {...infraUiSettings} />
-      </EuiPanel>
       <EuiSpacer />
       {errors.length > 0 ? (
         <>
