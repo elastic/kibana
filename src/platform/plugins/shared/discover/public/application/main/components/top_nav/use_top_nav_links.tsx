@@ -37,7 +37,6 @@ import {
   getBackgroundSearchFlyout,
   enhanceAppMenuItemWithRunAction,
 } from './app_menu_actions';
-import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
@@ -61,7 +60,6 @@ export const useTopNavLinks = ({
   hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
-  topNavCustomization,
   hasShareIntegration,
   persistedDiscoverSession,
 }: {
@@ -72,7 +70,6 @@ export const useTopNavLinks = ({
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
-  topNavCustomization: TopNavCustomization | undefined;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuConfig => {
@@ -112,20 +109,13 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
   );
 
-  const defaultMenu = topNavCustomization?.defaultMenu;
-
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
-    if (!defaultMenu?.inspectItem?.disabled) {
-      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-      items.push(inspectAppMenuItem);
-    }
 
-    if (
-      services.triggersActionsUi &&
-      !defaultMenu?.alertsItem?.disabled &&
-      discoverParams.authorizedRuleTypeIds.length
-    ) {
+    const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+    items.push(inspectAppMenuItem);
+
+    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
@@ -140,7 +130,7 @@ export const useTopNavLinks = ({
       services.capabilities.discover_v2.storeSearchSession
     ) {
       const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
-        onClick: () => {
+        onClick: ({ context: { onFinishAction } }) => {
           services.data.search.showSearchSessionsFlyout({
             appId,
             trackingProps: { openedFrom: 'background search button' },
@@ -148,13 +138,14 @@ export const useTopNavLinks = ({
               event?.preventDefault();
               dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
             },
+            onClose: onFinishAction,
           });
         },
       });
       items.push(backgroundSearchFlyoutMenuItem);
     }
 
-    if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.newItem?.disabled) {
+    if (!services.embeddableEditor.isEmbeddedEditor()) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
         isEsqlMode && currentDataView.type === ESQL_TYPE
           ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
@@ -178,7 +169,7 @@ export const useTopNavLinks = ({
       items.push(newSearchMenuItem);
     }
 
-    if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.openItem?.disabled) {
+    if (!services.embeddableEditor.isEmbeddedEditor()) {
       const openSearchMenuItem = getOpenSearchAppMenuItem({
         onOpenSavedSearch: (discoverSessionId) =>
           dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
@@ -186,24 +177,21 @@ export const useTopNavLinks = ({
       items.push(openSearchMenuItem);
     }
 
-    if (!defaultMenu?.shareItem?.disabled) {
-      const shareAppMenuItem = getShareAppMenuItem({
-        discoverParams,
-        services,
-        stateContainer: state,
-        hasIntegrations: hasShareIntegration,
-        hasUnsavedChanges,
-        currentTab,
-        persistedDiscoverSession,
-        totalHitsState,
-        intl,
-      });
-      items.push(...shareAppMenuItem);
-    }
+    const shareAppMenuItem = getShareAppMenuItem({
+      discoverParams,
+      services,
+      stateContainer: state,
+      hasIntegrations: hasShareIntegration,
+      hasUnsavedChanges,
+      currentTab,
+      persistedDiscoverSession,
+      totalHitsState,
+      intl,
+    });
+    items.push(...shareAppMenuItem);
 
     return items;
   }, [
-    defaultMenu,
     services,
     discoverParams,
     appId,
@@ -254,7 +242,7 @@ export const useTopNavLinks = ({
       });
     }
 
-    if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
+    if (services.capabilities.discover_v2.save) {
       const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
       newAppMenuRegistry.setPrimaryActionItem({
@@ -364,7 +352,6 @@ export const useTopNavLinks = ({
     dataView,
     dispatch,
     state,
-    defaultMenu?.saveItem?.disabled,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
   ]);
