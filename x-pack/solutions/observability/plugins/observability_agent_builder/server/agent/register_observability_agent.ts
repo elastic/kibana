@@ -36,7 +36,7 @@ export async function registerObservabilityAgent({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    configuration: {
+    configuration: ({ spaceId }) => ({
       instructions:
         dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
@@ -44,10 +44,10 @@ export async function registerObservabilityAgent({
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
-        ${getEntityLinkingInstructions()}
+        ${getEntityLinkingInstructions(spaceId)}
       `),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
-    },
+    }),
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
