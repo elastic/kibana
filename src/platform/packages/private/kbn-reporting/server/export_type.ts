@@ -26,7 +26,6 @@ import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -48,7 +47,6 @@ export interface BaseExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
-  data: DataPluginStart;
   screenshotting?: ScreenshottingStart;
 }
 
