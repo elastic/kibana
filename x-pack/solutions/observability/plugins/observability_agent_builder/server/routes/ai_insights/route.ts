@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { getCurrentSpaceId } from '@kbn/agent-builder-plugin/server/utils/spaces';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
@@ -36,13 +37,15 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { alertId } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
-      const { inference, ruleRegistry } = startDeps;
+      const { inference, ruleRegistry, spaces } = startDeps;
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request });
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
+
+      const spaceId = getCurrentSpaceId({ spaces, request });
 
       const result = await getAlertAiInsight({
         core,
@@ -87,14 +90,17 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { errorId, serviceName, start, end, environment = '' } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      const { inference, spaces } = startDeps;
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
+      const spaceId = getCurrentSpaceId({ spaces, request });
+
       const result = await generateErrorAiInsight({
         core,
         plugins,
+        spaceId,
         errorId,
         serviceName,
         start,
@@ -141,7 +147,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+      const spaceId = getCurrentSpaceId({ spaces, request });
 
       const result = await getLogAiInsights({
         index,
