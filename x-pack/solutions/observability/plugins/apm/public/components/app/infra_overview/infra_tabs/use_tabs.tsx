@@ -7,7 +7,6 @@
 import type { EuiTabbedContentProps } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -52,34 +51,18 @@ export function useTabs({
   );
 
   const hostsFilter = useMemo(
-    (): QueryDslQueryContainer => ({
-      bool: {
-        should: [
-          {
-            terms: {
-              [HOST_NAME]: hostNames,
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    }),
+    () => `${HOST_NAME}: (${hostNames.map((hostName) => `"${hostName}"`).join(' OR ')})`,
     [hostNames]
   );
+
   const podsFilter = useMemo(
-    () => ({
-      bool: {
-        filter: [{ terms: { [KUBERNETES_POD_NAME]: podNames } }],
-      },
-    }),
+    () => `${KUBERNETES_POD_NAME}: (${podNames.map((podName) => `"${podName}"`).join(' OR ')})`,
     [podNames]
   );
+
   const containersFilter = useMemo(
-    () => ({
-      bool: {
-        filter: [{ terms: { [CONTAINER_ID]: containerIds } }],
-      },
-    }),
+    () =>
+      `${CONTAINER_ID}: (${containerIds.map((containerId) => `"${containerId}"`).join(' OR ')})`,
     [containerIds]
   );
 
@@ -89,7 +72,7 @@ export function useTabs({
       {ContainerMetricsTable &&
         ContainerMetricsTable({
           timerange,
-          filterClauseDsl: containersFilter,
+          kuery: containersFilter,
         })}
     </>
   );
@@ -100,7 +83,7 @@ export function useTabs({
       {PodMetricsTable &&
         PodMetricsTable({
           timerange,
-          filterClauseDsl: podsFilter,
+          kuery: podsFilter,
         })}
     </>
   );
@@ -111,7 +94,7 @@ export function useTabs({
       {HostMetricsTable &&
         HostMetricsTable({
           timerange,
-          filterClauseDsl: hostsFilter,
+          kuery: hostsFilter,
         })}
     </>
   );
