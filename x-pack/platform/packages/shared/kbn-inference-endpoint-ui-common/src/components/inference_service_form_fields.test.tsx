@@ -17,7 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
-import { type InferenceProvider } from '../types/types';
+import type { InferenceProvider } from '../types/types';
 import { DEFAULT_MODELS } from '../constants';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
