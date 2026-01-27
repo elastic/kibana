@@ -154,6 +154,7 @@ const CaseContainerComponent: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const templates = useIsExperimentalFeatureEnabled('templates');
+  
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>

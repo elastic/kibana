@@ -25,6 +25,10 @@ export const ADD_TEMPLATE = i18n.translate('xpack.cases.templates.addTemplate', 
   defaultMessage: 'Add template',
 });
 
+export const IMPORT_TEMPLATE = i18n.translate('xpack.cases.templates.importTemplate', {
+  defaultMessage: 'Import template',
+});
+
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.createTemplate', {
   defaultMessage: 'Create template',
 });
@@ -80,3 +84,74 @@ export const MAX_TEMPLATE_LIMIT = (maxTemplates: number) =>
     values: { maxTemplates },
     defaultMessage: 'Maximum number of {maxTemplates} templates reached.',
   });
+
+export const ERROR_FETCHING_TEMPLATES = i18n.translate(
+  'xpack.cases.templates.errorFetchingTemplates',
+  {
+    defaultMessage: 'Error fetching templates',
+  }
+);
+
+// Table column names
+export const COLUMN_NAME = i18n.translate('xpack.cases.templates.column.name', {
+  defaultMessage: 'Name',
+});
+
+export const COLUMN_DESCRIPTION = i18n.translate('xpack.cases.templates.column.description', {
+  defaultMessage: 'Description',
+});
+
+export const COLUMN_SOLUTION = i18n.translate('xpack.cases.templates.column.solution', {
+  defaultMessage: 'Solution',
+});
+
+export const COLUMN_FIELDS = i18n.translate('xpack.cases.templates.column.fields', {
+  defaultMessage: 'Fields',
+});
+
+export const COLUMN_TAGS = i18n.translate('xpack.cases.templates.column.tags', {
+  defaultMessage: 'Tags',
+});
+
+export const COLUMN_LAST_UPDATE = i18n.translate('xpack.cases.templates.column.lastUpdate', {
+  defaultMessage: 'Last update',
+});
+
+export const COLUMN_LAST_TIME_USED = i18n.translate('xpack.cases.templates.column.lastTimeUsed', {
+  defaultMessage: 'Last time used',
+});
+
+export const COLUMN_USAGE = i18n.translate('xpack.cases.templates.column.usage', {
+  defaultMessage: 'Usage',
+});
+
+// Actions
+export const ACTIONS = i18n.translate('xpack.cases.templates.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const EDIT_TEMPLATE = i18n.translate('xpack.cases.templates.editTemplate', {
+  defaultMessage: 'Edit',
+});
+
+export const DELETE_TEMPLATE = i18n.translate('xpack.cases.templates.deleteTemplate', {
+  defaultMessage: 'Delete',
+});
+
+export const SHOWING_TEMPLATES = (total: number) =>
+  i18n.translate('xpack.cases.templates.showingTemplates', {
+    values: { total },
+    defaultMessage: 'of {total}',
+  });
+
+export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
+  defaultMessage: 'Showing',
+});
+
+export const CASE = i18n.translate('xpack.cases.templates.case', {
+  defaultMessage: 'Case',
+});
+
+export const CASES = i18n.translate('xpack.cases.templates.cases', {
+  defaultMessage: 'Cases',
+});

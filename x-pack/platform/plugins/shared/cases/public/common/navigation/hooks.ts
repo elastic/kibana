@@ -12,6 +12,7 @@ import {
   APP_ID,
   CASES_CONFIGURE_PATH,
   CASES_CREATE_PATH,
+  CASES_CREATE_TEMPLATE_PATH,
   CASES_TEMPLATES_PATH,
 } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
@@ -75,6 +76,7 @@ const navigationMapping = {
   create: { path: CASES_CREATE_PATH },
   configure: { path: CASES_CONFIGURE_PATH },
   templates: { path: CASES_TEMPLATES_PATH },
+  createTemplate: { path: CASES_CREATE_TEMPLATE_PATH },
 };
 
 export const useAllCasesNavigation = () => {
@@ -101,12 +103,21 @@ export const useConfigureCasesNavigation = () => {
   });
   return { getConfigureCasesUrl, navigateToConfigureCases };
 };
+
 export const useCasesTemplatesNavigation = () => {
   const [getCasesTemplatesUrl, navigateToCasesTemplates] = useCasesNavigation({
     path: navigationMapping.templates.path,
     deepLinkId: APP_ID,
   });
   return { getCasesTemplatesUrl, navigateToCasesTemplates };
+};
+
+export const useCasesCreateTemplateNavigation = () => {
+  const [getCasesCreateTemplateUrl, navigateToCasesCreateTemplate] = useCasesNavigation({
+    path: navigationMapping.createTemplate.path,
+    deepLinkId: APP_ID,
+  });
+  return { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate };
 };
 type GetCaseViewUrl = (pathParams: CaseViewPathParams, absolute?: boolean) => string;
 type NavigateToCaseView = (pathParams: CaseViewPathParams) => void;

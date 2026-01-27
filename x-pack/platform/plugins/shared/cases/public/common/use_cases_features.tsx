@@ -60,10 +60,10 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       features.alerts.sync,
       features.alerts.all,
       features.metrics,
-      features.observables.enabled,
-      features.observables.autoExtract,
       hasLicenseGreaterThanPlatinum,
       assign,
+      features.observables?.enabled,
+      features.observables?.autoExtract,
       hasLicenseWithAtLeastGold,
     ]
   );
