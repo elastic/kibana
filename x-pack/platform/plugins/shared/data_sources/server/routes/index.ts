@@ -356,7 +356,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Get bulk delete status
   router.get(
     {
-      path: `${API_BASE_PATH}/_bulk_delete/{taskId}`,
+      path: `${API_BASE_PATH}/_tasks/{taskId}`,
       validate: {
         params: schema.object({ taskId: schema.string() }),
       },

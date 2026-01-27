@@ -1032,7 +1032,7 @@ describe('DELETE /api/data_sources', () => {
   });
 });
 
-describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
+describe('GET /api/data_sources/_tasks/{taskId}', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let context: jest.Mocked<RequestHandlerContext>;
   let mockRouter: ReturnType<typeof httpServiceMock.createRouter>;
@@ -1074,7 +1074,7 @@ describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
     registerRoutes(dependencies);
 
     const getCall = (mockRouter.get as jest.Mock).mock.calls.find(
-      (call) => call[0].path === '/api/data_sources/_bulk_delete/{taskId}'
+      (call) => call[0].path === '/api/data_sources/_tasks/{taskId}'
     );
     routeHandler = getCall?.[1];
   });
