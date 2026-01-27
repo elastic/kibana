@@ -10,11 +10,11 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
-} from '../../../../../shared/charts/timeline';
+  type WaterfallGetRelatedErrorsHref,
+} from '@kbn/apm-ui-shared';
 import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
@@ -40,7 +40,7 @@ interface Props {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getRelatedErrorsHref?: WaterfallGetRelatedErrorsHref;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {

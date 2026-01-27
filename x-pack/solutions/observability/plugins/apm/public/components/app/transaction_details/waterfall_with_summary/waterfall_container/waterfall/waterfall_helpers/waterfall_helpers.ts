@@ -10,10 +10,12 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import type { Error } from '@kbn/apm-types';
-import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
-import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
+import {
+  type IWaterfallLegend,
+  WaterfallLegendType,
+  type CriticalPathSegment,
+} from '@kbn/apm-ui-shared';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
-import type { CriticalPathSegment } from '../../../../../../shared/trace_waterfall/critical_path';
 import type {
   WaterfallSpan,
   WaterfallTransaction,

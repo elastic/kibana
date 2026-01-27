@@ -7,19 +7,23 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
+import {
+  ColdStartBadge,
+  SpanLinksBadge,
+  type WaterfallGetRelatedErrorsHref,
+  TruncateWithTooltip,
+  type Margins,
+  SyncBadge,
+} from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import type { Margins } from '../../../../../shared/charts/timeline';
-import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
@@ -27,8 +31,6 @@ import type {
   IWaterfallSpan,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
-import { SpanLinksBadge } from '../../../../../shared/trace_waterfall/badges/span_links_badge';
-import { ColdStartBadge } from '../../../../../shared/trace_waterfall/badges/cold_start_badge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -130,7 +132,7 @@ interface IWaterfallItemProps {
     color: string;
   }>;
   onClick?: (flyoutDetailTab: string) => unknown;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getRelatedErrorsHref?: WaterfallGetRelatedErrorsHref;
   isEmbeddable?: boolean;
 }
 
@@ -365,7 +367,7 @@ function EmbeddableRelatedErrors({
 }: {
   item: IWaterfallSpanOrTransaction;
   errorCount: number;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getRelatedErrorsHref?: WaterfallGetRelatedErrorsHref;
 }) {
   const { euiTheme } = useEuiTheme();
 

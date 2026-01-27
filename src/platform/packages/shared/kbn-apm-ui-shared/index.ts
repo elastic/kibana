@@ -10,3 +10,10 @@
 export * from './src/components';
 export * from './src/hooks';
 export * from './src/utils';
+export { WaterfallLegendType, type IWaterfallLegend } from './src/types/legend';
+export type {
+  TraceItem,
+  TraceItemComposite,
+  CompressionStrategy,
+  WaterfallGetRelatedErrorsHref,
+} from './src/types/trace_item';

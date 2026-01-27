@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Exception } from '../../typings/es_schemas/raw/error_raw';
 import type { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
 import type { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
 import type { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
@@ -70,29 +69,3 @@ export interface WaterfallSpan {
   };
   child?: { id: string[] };
 }
-
-/**
- * @deprecated Use Error instead
- */
-export interface WaterfallError {
-  id: string;
-  timestamp: TimestampUs;
-  trace?: { id?: string };
-  transaction?: { id?: string };
-  parent?: { id?: string };
-  span?: { id?: string };
-  eventName?: string;
-  error: {
-    id: string;
-    log?: {
-      message: string;
-    };
-    exception?: Exception[];
-    grouping_key: string;
-  };
-  service: {
-    name: string;
-  };
-}
-
-export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;

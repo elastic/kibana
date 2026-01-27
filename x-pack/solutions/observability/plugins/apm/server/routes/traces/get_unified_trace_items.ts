@@ -11,6 +11,7 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { CompressionStrategy, TraceItem, TraceItemComposite } from '@kbn/apm-ui-shared';
 import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -42,11 +43,6 @@ import {
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type {
-  CompressionStrategy,
-  TraceItem,
-  TraceItemComposite,
-} from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';

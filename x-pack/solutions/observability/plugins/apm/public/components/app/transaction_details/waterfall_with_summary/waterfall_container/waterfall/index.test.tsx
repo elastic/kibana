@@ -10,7 +10,7 @@ import React from 'react';
 import { renderWithTheme } from '../../../../../../utils/test_helpers';
 import { Waterfall } from '.';
 import type { IWaterfall } from './waterfall_helpers/waterfall_helpers';
-import { WaterfallLegendType } from '../../../../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '@kbn/apm-ui-shared';
 
 describe('Waterfall', () => {
   const createMockWaterfall = (overrides?: Partial<IWaterfall>): IWaterfall => {

@@ -14,5 +14,13 @@ export * from './span_icon';
 export * from './timestamp';
 export * from './focused_trace_waterfall';
 export * from './full_trace_waterfall';
-
+export { WaterfallLegends } from './trace_waterfall/waterfall_legends';
+export * from './trace_waterfall/badges';
+export * from './trace_waterfall/critical_path';
+export * from './truncate_with_tooltip';
+export * from './timeline';
+export * from './timeline/legend';
 export { getSpanIcon } from './span_icon/get_span_icon';
+export * from './trace_waterfall/badges';
+
+export type { Margins } from './timeline';

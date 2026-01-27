@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiTitle, RIGHT_ALIGNMENT, EuiSpacer } from '@elastic/eui';
 import type { ValuesType } from 'utility-types';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -17,7 +18,6 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { useFetcher, FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { asInteger } from '../../../../../common/utils/formatters';

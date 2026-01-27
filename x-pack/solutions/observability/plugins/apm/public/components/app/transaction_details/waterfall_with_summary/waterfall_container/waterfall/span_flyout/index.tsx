@@ -26,7 +26,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { Duration, Timestamp, SyncBadge } from '@kbn/apm-ui-shared';
 import { OpenSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/open_span_in_discover_link';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -36,7 +36,6 @@ import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
-import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import type { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';

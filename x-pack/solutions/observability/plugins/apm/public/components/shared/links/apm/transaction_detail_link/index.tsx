@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { unit } from '../../../../../utils/style';
 import { PopoverTooltip } from '../../../popover_tooltip';
-import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import type { APMLinkExtendProps } from '../apm_link_hooks';
 import { MaxGroupsMessage } from '../max_groups_message';
 

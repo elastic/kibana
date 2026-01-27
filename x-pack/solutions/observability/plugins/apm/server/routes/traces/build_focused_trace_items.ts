@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '@kbn/apm-ui-shared';
 
 const MAX_NUMBER_OF_CHILDREN = 2;
 

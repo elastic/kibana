@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import type { TypeOf } from '@kbn/typed-react-router-config';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -24,7 +25,6 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import type { ApmRoutes } from '../../../routing/apm_route_config';

@@ -57,12 +57,6 @@ jest.mock('../../../../../shared/popover_tooltip', () => ({
   ),
 }));
 
-jest.mock('../../../../../shared/truncate_with_tooltip', () => ({
-  TruncateWithTooltip: ({ text, content, 'data-test-subj': testSubj }: any) => (
-    <div data-test-subj={testSubj}>{content || text}</div>
-  ),
-}));
-
 jest.mock('../../../../../shared/links/apm/metric_overview_link', () => ({
   MetricOverviewLink: ({ children, serviceName, query }: any) => (
     <a
@@ -77,6 +71,9 @@ jest.mock('../../../../../shared/links/apm/metric_overview_link', () => ({
 jest.mock('@kbn/apm-ui-shared', () => ({
   Timestamp: ({ timestamp }: { timestamp: number }) => (
     <span data-test-subj="timestamp">{new Date(timestamp).toISOString()}</span>
+  ),
+  TruncateWithTooltip: ({ text, content, 'data-test-subj': testSubj }: any) => (
+    <div data-test-subj={testSubj}>{content || text}</div>
   ),
 }));
 

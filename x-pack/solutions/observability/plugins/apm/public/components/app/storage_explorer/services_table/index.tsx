@@ -24,12 +24,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { downloadJson } from '../../../../utils/download_json';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';

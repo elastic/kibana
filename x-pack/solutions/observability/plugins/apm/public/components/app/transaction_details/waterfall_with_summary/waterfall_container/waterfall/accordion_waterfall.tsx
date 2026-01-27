@@ -21,9 +21,8 @@ import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
+import type { WaterfallGetRelatedErrorsHref, Margins } from '@kbn/apm-ui-shared';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
-import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
   IWaterfallNodeFlatten,
   IWaterfall,
@@ -45,7 +44,7 @@ interface AccordionWaterfallProps {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getRelatedErrorsHref?: WaterfallGetRelatedErrorsHref;
 }
 
 type WaterfallProps = Omit<

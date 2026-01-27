@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { ValuesType } from 'utility-types';
 import type { TypeOf } from '@kbn/typed-react-router-config';
-import { Timestamp } from '@kbn/apm-ui-shared';
+import { Timestamp, TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../../common/environment_filter_values';
@@ -30,7 +30,6 @@ import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
 import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
-import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import type { ApmRoutes } from '../../../../../routing/apm_route_config';
 
 type AgentExplorerInstance = ValuesType<

@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { WaterfallLegends } from '@kbn/apm-ui-shared';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { Waterfall } from './waterfall';
 import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 import { WaterfallFlyout } from './waterfall/waterfall_flyout';
 import type { IWaterfall, IWaterfallItem } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegends } from '../../../../shared/trace_waterfall/waterfall_legends';
 
 interface Props {
   waterfallItemId?: string;

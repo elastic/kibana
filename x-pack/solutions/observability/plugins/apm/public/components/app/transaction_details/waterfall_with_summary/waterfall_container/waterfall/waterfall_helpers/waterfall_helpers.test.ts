@@ -32,7 +32,7 @@ import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
-import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '@kbn/apm-ui-shared';
 import type { Error } from '@kbn/apm-types';
 
 describe('waterfall_helpers', () => {

@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { Duration, Timestamp, ColdStartBadge } from '@kbn/apm-ui-shared';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
-import { ColdStartBadge } from '../trace_waterfall/badges/cold_start_badge';
 import { buildUrl } from '../../../utils/build_url';
 
 interface Props {

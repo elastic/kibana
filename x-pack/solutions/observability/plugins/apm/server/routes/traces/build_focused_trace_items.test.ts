@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from '@kbn/apm-ui-shared';
 import { buildChildrenTree, buildFocusedTraceItems } from './build_focused_trace_items';
 
 const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId } as TraceItem);

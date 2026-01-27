@@ -17,6 +17,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 import {
@@ -35,7 +36,6 @@ import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail
 import type { ITableColumn } from '../../shared/managed_table';
 import { ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 const StyledTransactionLink = styled(TransactionDetailLink)`

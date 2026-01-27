@@ -85,7 +85,6 @@ export function FullTraceWaterfallFetcher({
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
-      isFiltered={false}
       agentMarks={value.agentMarks}
       showCriticalPathControl
     />
