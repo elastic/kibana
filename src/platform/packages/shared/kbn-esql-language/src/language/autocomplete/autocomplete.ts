@@ -293,7 +293,9 @@ async function getSuggestionsWithinCommandExpression(
   // Determine if we're suggesting indices or fields based on the command context
   // Indices are suggested in FROM/TS commands, fields are suggested in other commands
   const commandName = astContext.command.name.toLowerCase();
-  const sourceCommands = new Set(esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase()));
+  const sourceCommands = new Set(
+    esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase())
+  );
   const isSourceCommand = sourceCommands.has(commandName);
 
   // Add prepended resource browser suggestion if enabled
