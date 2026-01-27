@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './specs/abuseipdb/abuseipdb';
-export * from './specs/alienvault_otx/alienvault_otx';
-export * from './specs/brave_search/brave_search';
-export * from './specs/greynoise/greynoise';
-export * from './specs/notion/notion';
-export * from './specs/shodan/shodan';
-export * from './specs/urlvoid/urlvoid';
-export * from './specs/virustotal/virustotal';
-export * from './specs/sharepoint_online/sharepoint_online';
-export * from './specs/slack/slack';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+import slackIcon from './slack.svg';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={slackIcon} {...props} />;
+};

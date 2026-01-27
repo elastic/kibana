@@ -7,8 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { ActionsClient } from '../actions_client';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+
+// Build a map of connector specs by their metadata.id for quick lookup
+const connectorSpecsById = new Map(
+  Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
+);
 
 /**
  * OAuth connector secrets stored in encrypted saved objects
@@ -20,6 +26,7 @@ interface OAuthConnectorSecrets {
   tokenUrl?: string;
   scope?: string;
   redirectUri?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -35,6 +42,7 @@ interface OAuthConnectorConfig {
   tokenUrl?: string;
   scope?: string;
   redirectUri?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -45,6 +53,7 @@ export interface OAuthConfig {
   clientId: string;
   scope?: string;
   redirectUri?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -57,6 +66,7 @@ interface BuildAuthorizationUrlParams {
   redirectUri: string;
   state: string;
   codeChallenge: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -119,12 +129,23 @@ export class OAuthAuthorizationService {
     }>('action', connectorId);
 
     const secrets = rawAction.attributes.secrets;
+    const actionTypeId = rawAction.attributes.actionTypeId;
 
-    // Extract OAuth config - for connector specs, check secrets first, then config
-    const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
-    const clientId = secrets.clientId || config?.clientId;
-    const scope = secrets.scope || config?.scope;
-    const redirectUri = secrets.redirectUri || config?.redirectUri;
+    // Look up connector spec defaults for OAuth authorization code auth type
+    const connectorSpec = connectorSpecsById.get(actionTypeId);
+    const oauthAuthType = connectorSpec?.auth?.types?.find(
+      (authType) => authType.type === 'oauth_authorization_code'
+    );
+    const specDefaults = oauthAuthType?.defaults as OAuthConnectorSecrets | undefined;
+
+    // Extract OAuth config - priority: secrets > config > spec defaults
+    const authorizationUrl =
+      secrets.authorizationUrl || config?.authorizationUrl || specDefaults?.authorizationUrl;
+    const clientId = secrets.clientId || config?.clientId || specDefaults?.clientId;
+    const scope = secrets.scope || config?.scope || specDefaults?.scope;
+    const redirectUri = secrets.redirectUri || config?.redirectUri || specDefaults?.redirectUri;
+    const scopeQueryParam =
+      secrets.scopeQueryParam || config?.scopeQueryParam || specDefaults?.scopeQueryParam;
 
     if (!authorizationUrl || !clientId) {
       throw new Error(
@@ -139,6 +160,7 @@ export class OAuthAuthorizationService {
       clientId,
       scope,
       redirectUri,
+      scopeQueryParam,
     };
   }
 
@@ -175,7 +197,15 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { authorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const {
+      authorizationUrl,
+      clientId,
+      scope,
+      redirectUri,
+      state,
+      codeChallenge,
+      scopeQueryParam,
+    } = params;
 
     const authUrl = new URL(authorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
@@ -186,7 +216,9 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
     if (scope) {
-      authUrl.searchParams.set('scope', scope);
+      // Use custom scope query param name if provided (e.g., 'user_scope' for Slack),
+      // otherwise default to standard 'scope'
+      authUrl.searchParams.set(scopeQueryParam || 'scope', scope);
     }
 
     this.logger.debug(`Built OAuth authorization URL for client ${clientId}`);

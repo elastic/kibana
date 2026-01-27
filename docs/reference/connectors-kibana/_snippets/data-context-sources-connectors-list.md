@@ -1,6 +1,7 @@
 **Third-party search**
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
+* [Slack (v2)](/reference/connectors-kibana/slack-action-type.md): Search Slack for messages and files.
 
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.

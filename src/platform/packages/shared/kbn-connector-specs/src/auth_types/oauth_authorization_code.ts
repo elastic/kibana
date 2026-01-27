@@ -30,6 +30,10 @@ const authSchema = z
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
+    // Allows overriding the query parameter name for scope (e.g., 'user_scope' for Slack)
+    scopeQueryParam: z.string().default('scope').optional().meta({
+      hidden: true, // Hidden from UI - uses connector spec defaults
+    }),
   })
   .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
 

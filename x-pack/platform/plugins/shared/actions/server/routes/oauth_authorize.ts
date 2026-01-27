@@ -138,6 +138,7 @@ export const oauthAuthorizeRoute = (
             redirectUri,
             state: state.state,
             codeChallenge,
+            scopeQueryParam: oauthConfig.scopeQueryParam,
           });
 
           return res.ok({
