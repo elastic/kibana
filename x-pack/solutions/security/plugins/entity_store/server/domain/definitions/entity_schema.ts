@@ -28,23 +28,51 @@ const fieldSchema = z.object({
   retention: retentionOperationSchema,
 });
 
+const calculatedIdentityFieldLogic = z.object({
+  // The field that will be used as the default id field.
+  defaultIdField: z.string(),
+  defaultIdFieldMapping: mappingSchema,
+
+  // The type to append to the generated id (non default id)
+  // This is present because the `generic` definition don't need to append
+  // (we assume that the id is globally unique)
+  typeToAppendToGeneratedId: z.string().optional(),
+
+  // Filter to be applied before evaluating the evaluation logic
+  requiresOneOfFields: z.array(z.string()),
+
+  // Evaluation logic to be used to generate the identity field.
+  // Here, the default id (e.g. `host.entity.id`) should not be mentioned,
+  // because this is part of the main query building logic.
+  // The ids that were generated using the esqlEvaluation will also be prepended
+  // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
+  esqlEvaluation: z.string(),
+
+  calculated: z.literal(true),
+});
+
 const identityFieldSchema = z.object({
   field: z.string(),
+  typeToAppendToGeneratedId: z.string().optional(),
   mapping: mappingSchema,
+  calculated: z.literal(false).optional(),
 });
 
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.string(),
+  type: EntityType,
   filter: z.string().optional(),
+  entityTypeFallback: z.string().optional(),
   fields: z.array(fieldSchema),
-  identityFields: z.array(identityFieldSchema),
+  identityField: z.union([identityFieldSchema, calculatedIdentityFieldLogic]),
   indexPatterns: z.array(z.string()),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
-export type EntityIdentityField = z.infer<typeof identityFieldSchema>; // entities identity field
+export type EntityCalculatedIdentityLogic = z.infer<typeof calculatedIdentityFieldLogic>; // logic to generate identity field
+export type EntityIdentityField = z.infer<typeof identityFieldSchema>; // field to use as identity field
+export type EntityIdentity = EntityIdentityField | EntityCalculatedIdentityLogic; // instructions to use or generate identity field
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'

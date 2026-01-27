@@ -14,8 +14,13 @@ export const SERVICE_IDENTITY_FIELD = 'service.name';
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
-  identityFields: [{ field: SERVICE_IDENTITY_FIELD, mapping: { type: 'keyword' } }],
+  identityField: {
+    field: SERVICE_IDENTITY_FIELD,
+    mapping: { type: 'keyword' },
+    typeToAppendToGeneratedId: 'service',
+  },
   indexPatterns: [],
+  entityTypeFallback: 'Service',
   fields: [
     collect({ source: 'service.address' }),
     collect({ source: 'service.environment' }),

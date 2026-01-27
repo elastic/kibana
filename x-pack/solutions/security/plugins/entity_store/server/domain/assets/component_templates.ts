@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '../definitions/entity_schema';
 import { ENTITY_BASE_PREFIX } from '../constants';
 
@@ -16,6 +16,7 @@ const BASE_ENTITY_INDEX_MAPPING = {
   'event.ingested': { type: 'date' },
   labels: { type: 'object' },
   tags: { type: 'keyword', ignore_above: 1024 },
+  'entity.id': { type: 'keyword' },
 
   // 'asset.criticality': { type: 'keyword' },
   // 'entity.name': { type: 'keyword' },
@@ -35,7 +36,7 @@ export const getEntityDefinitionComponentTemplate = (definition: EntityDefinitio
 const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
-    ...Object.fromEntries(definition.identityFields.map((c) => [c.field, c.mapping])),
+    ...getIdentityFieldMapping(definition),
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
@@ -57,7 +58,7 @@ export const getUpdatesEntityDefinitionComponentTemplate = (definition: EntityDe
 const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
-    ...Object.fromEntries(definition.identityFields.map((c) => [c.field, c.mapping])),
+    ...getIdentityFieldMapping(definition),
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
@@ -66,3 +67,11 @@ const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMappi
     ),
   },
 });
+function getIdentityFieldMapping({
+  identityField,
+}: EntityDefinition): Record<string, MappingProperty> {
+  if (!identityField.calculated) {
+    return { [identityField.field]: identityField.mapping };
+  }
+  return { [identityField.defaultIdField]: identityField.defaultIdFieldMapping };
+}
