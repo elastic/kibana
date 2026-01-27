@@ -106,6 +106,7 @@ import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_t
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
+import { createInferenceConnectorConfig } from './create_inference_connector_config';
 
 export interface PluginSetupContract {
   registerType<
@@ -337,6 +338,33 @@ export class ActionsPlugin
         this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
+    }
+
+    // Fetch inference endpoints and set up preconfigured inference connectors if none set in the yml files
+    if (this.inMemoryConnectors.some((c) => c.actionTypeId === '.inference') === false) {
+      core.getStartServices().then(async ([coreStart, _]) => {
+        const esclient = coreStart.elasticsearch.client.asInternalUser;
+
+        try {
+          const { endpoints } = await esclient.inference.get({
+            inference_id: '_all',
+          });
+
+          const preconfigEndpoints =
+            // @ts-ignore kibana_connector_name does not exist on the type definition - this will be added to the endpoint return info
+            endpoints?.filter((endpoint) => endpoint.metadata.name !== undefined) ?? [];
+          const preconfigConnectors = preconfigEndpoints.map(createInferenceConnectorConfig);
+
+          // Update local inMemoryConnectors and update actionTypeRegistry
+          if (preconfigConnectors.length) {
+            this.inMemoryConnectors.push(...preconfigConnectors);
+            this.actionTypeRegistry!.updateInMemoryConnectors(preconfigConnectors);
+          }
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('Unable to get preconfigured inference connectors', e);
+        }
+      });
     }
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
