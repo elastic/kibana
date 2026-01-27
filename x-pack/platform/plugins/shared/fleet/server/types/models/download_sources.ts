@@ -37,9 +37,22 @@ const DownloadSourceBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
+  auth: schema.maybe(
+    schema.object({
+      username: schema.maybe(schema.string()),
+      password: schema.maybe(schema.string()),
+      api_key: schema.maybe(schema.string()),
+    })
+  ),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      auth: schema.maybe(
+        schema.object({
+          password: schema.maybe(secretRefSchema),
+          api_key: schema.maybe(secretRefSchema),
+        })
+      ),
     })
   ),
 };

@@ -26,9 +26,10 @@ import { i18n } from '@kbn/i18n';
 import {
   SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../../../../../../common/constants';
 
-export type SecretType = 'output' | 'ssl';
+export type SecretType = 'output' | 'ssl' | 'download_source_auth';
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
@@ -64,6 +65,8 @@ export const SecretFormRow: React.FC<{
   const minVersion =
     secretType === 'output'
       ? OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+      : secretType === 'download_source_auth'
+      ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
       : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);

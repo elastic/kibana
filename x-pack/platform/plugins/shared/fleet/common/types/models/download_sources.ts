@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { BaseSSLSecrets } from './secret';
+import type { BaseSSLSecrets, SOSecret } from './secret';
+
+export interface DownloadSourceSecrets extends BaseSSLSecrets {
+  auth?: {
+    password?: SOSecret;
+    api_key?: SOSecret;
+  };
+}
 
 export interface DownloadSourceBase {
   name: string;
@@ -17,7 +24,12 @@ export interface DownloadSourceBase {
     certificate?: string;
     key?: string;
   };
-  secrets?: BaseSSLSecrets;
+  auth?: {
+    username?: string;
+    password?: string;
+    api_key?: string;
+  };
+  secrets?: DownloadSourceSecrets;
 }
 
 export type DownloadSource = DownloadSourceBase & {

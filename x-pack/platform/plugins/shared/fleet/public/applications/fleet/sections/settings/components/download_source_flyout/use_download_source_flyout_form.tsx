@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useSecretInput, useComboInput } from '../../../../hooks';
+import { useSecretInput, useComboInput, useRadioInput } from '../../../../hooks';
 import {
   sendPostDownloadSource,
   useInput,
@@ -25,6 +25,8 @@ import type { DownloadSourceBase } from '../../../../../../../common/types';
 
 import { confirmUpdate } from './confirm_update';
 
+export type AuthType = 'none' | 'username_password' | 'api_key';
+
 export interface DownloadSourceFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   defaultDownloadSourceInput: ReturnType<typeof useSwitchInput>;
@@ -34,6 +36,22 @@ export interface DownloadSourceFormInputsType {
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  authTypeInput: ReturnType<typeof useRadioInput>;
+  usernameInput: ReturnType<typeof useInput>;
+  passwordInput: ReturnType<typeof useInput>;
+  passwordSecretInput: ReturnType<typeof useSecretInput>;
+  apiKeyInput: ReturnType<typeof useInput>;
+  apiKeySecretInput: ReturnType<typeof useSecretInput>;
+}
+
+function getInitialAuthType(downloadSource?: DownloadSource): AuthType {
+  if (!downloadSource) return 'none';
+  const ds = downloadSource as DownloadSourceBase;
+  if (ds.auth?.api_key || ds.secrets?.auth?.api_key) return 'api_key';
+  if (ds.auth?.username || ds.auth?.password || ds.secrets?.auth?.password) {
+    return 'username_password';
+  }
+  return 'none';
 }
 
 export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource?: DownloadSource) {
@@ -74,6 +92,34 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     undefined
   );
 
+  // Auth inputs
+  const authTypeInput = useRadioInput(getInitialAuthType(downloadSource), isEditDisabled);
+  const usernameInput = useInput(
+    (downloadSource as DownloadSourceBase)?.auth?.username ?? '',
+    undefined,
+    isEditDisabled
+  );
+  const passwordInput = useInput(
+    (downloadSource as DownloadSourceBase)?.auth?.password ?? '',
+    undefined,
+    isEditDisabled
+  );
+  const passwordSecretInput = useSecretInput(
+    (downloadSource as DownloadSourceBase)?.secrets?.auth?.password,
+    undefined,
+    isEditDisabled
+  );
+  const apiKeyInput = useInput(
+    (downloadSource as DownloadSourceBase)?.auth?.api_key ?? '',
+    undefined,
+    isEditDisabled
+  );
+  const apiKeySecretInput = useSecretInput(
+    (downloadSource as DownloadSourceBase)?.secrets?.auth?.api_key,
+    undefined,
+    isEditDisabled
+  );
+
   const inputs = {
     nameInput,
     hostInput,
@@ -83,6 +129,12 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     sslKeyInput,
     sslCertificateAuthoritiesInput,
     sslKeySecretInput,
+    authTypeInput,
+    usernameInput,
+    passwordInput,
+    passwordSecretInput,
+    apiKeyInput,
+    apiKeySecretInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -95,8 +147,69 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
 
-    return nameInputValid && hostValid && sslCertificateValid && sslKeyValid && sslKeySecretValid;
-  }, [nameInput, hostInput, sslCertificateInput, sslKeyInput, sslKeySecretInput]);
+    // Auth validation
+    const usernameValid = usernameInput.validate();
+    const passwordValid = passwordInput.validate();
+    const passwordSecretValid = passwordSecretInput.validate();
+    const apiKeyValid = apiKeyInput.validate();
+    const apiKeySecretValid = apiKeySecretInput.validate();
+
+    // Validate username and password are provided together when username_password auth type is selected
+    const authType = authTypeInput.value as AuthType;
+    let authValid = true;
+    if (authType === 'username_password') {
+      const hasUsername = !!usernameInput.value;
+      const hasPassword = !!passwordInput.value || !!passwordSecretInput.value;
+      if (hasUsername && !hasPassword) {
+        const passwordRequiredError = [
+          i18n.translate(
+            'xpack.fleet.settings.dowloadSourceFlyoutForm.passwordRequiredWithUsername',
+            { defaultMessage: 'Password is required when username is provided' }
+          ),
+        ];
+        // Set error on both inputs since we don't know which one is displayed
+        // (depends on useSecretsStorage which is not available here)
+        passwordInput.setErrors(passwordRequiredError);
+        passwordSecretInput.setErrors(passwordRequiredError);
+        authValid = false;
+      }
+      if (hasPassword && !hasUsername) {
+        usernameInput.setErrors([
+          i18n.translate(
+            'xpack.fleet.settings.dowloadSourceFlyoutForm.usernameRequiredWithPassword',
+            { defaultMessage: 'Username is required when password is provided' }
+          ),
+        ]);
+        authValid = false;
+      }
+    }
+
+    return (
+      nameInputValid &&
+      hostValid &&
+      sslCertificateValid &&
+      sslKeyValid &&
+      sslKeySecretValid &&
+      usernameValid &&
+      passwordValid &&
+      passwordSecretValid &&
+      apiKeyValid &&
+      apiKeySecretValid &&
+      authValid
+    );
+  }, [
+    nameInput,
+    hostInput,
+    sslCertificateInput,
+    sslKeyInput,
+    sslKeySecretInput,
+    usernameInput,
+    passwordInput,
+    passwordSecretInput,
+    apiKeyInput,
+    apiKeySecretInput,
+    authTypeInput.value,
+  ]);
 
   const submit = useCallback(async () => {
     try {
@@ -104,6 +217,43 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         return;
       }
       setIsloading(true);
+
+      // Build auth object based on selected auth type
+      const authType = authTypeInput.value as AuthType;
+      let auth: PostDownloadSourceRequest['body']['auth'];
+      if (authType === 'username_password') {
+        auth = {
+          username: usernameInput.value || undefined,
+          password: passwordInput.value || undefined,
+        };
+      } else if (authType === 'api_key') {
+        auth = {
+          api_key: apiKeyInput.value || undefined,
+        };
+      }
+
+      // Build secrets object
+      const sslSecrets =
+        !sslKeyInput.value && sslKeySecretInput.value
+          ? { key: sslKeySecretInput.value }
+          : undefined;
+
+      let authSecrets:
+        | { password?: string | { id: string }; api_key?: string | { id: string } }
+        | undefined;
+      if (authType === 'username_password' && !passwordInput.value && passwordSecretInput.value) {
+        authSecrets = { password: passwordSecretInput.value };
+      } else if (authType === 'api_key' && !apiKeyInput.value && apiKeySecretInput.value) {
+        authSecrets = { api_key: apiKeySecretInput.value };
+      }
+
+      const secrets =
+        sslSecrets || authSecrets
+          ? {
+              ...(sslSecrets && { ssl: sslSecrets }),
+              ...(authSecrets && { auth: authSecrets }),
+            }
+          : undefined;
 
       const data: PostDownloadSourceRequest['body'] = {
         name: nameInput.value.trim(),
@@ -115,14 +265,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
           key: sslKeyInput.value || undefined,
           certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
         },
-        ...(!sslKeyInput.value &&
-          sslKeySecretInput.value && {
-            secrets: {
-              ssl: {
-                key: sslKeySecretInput.value || undefined,
-              },
-            },
-          }),
+        ...(auth && { auth }),
+        ...(secrets && { secrets }),
       };
 
       if (downloadSource) {
@@ -167,6 +311,12 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     sslCertificateInput.value,
     sslKeyInput.value,
     sslKeySecretInput.value,
+    authTypeInput.value,
+    usernameInput.value,
+    passwordInput.value,
+    passwordSecretInput.value,
+    apiKeyInput.value,
+    apiKeySecretInput.value,
     validate,
   ]);
 

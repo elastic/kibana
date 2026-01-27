@@ -26,9 +26,37 @@ import type {
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
 
-function ensureNoDuplicateSecrets(downloadSource: Partial<DownloadSource>) {
+function validateDownloadSourceAuth(downloadSource: Partial<DownloadSource>) {
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+
+  if (downloadSource.auth?.password && downloadSource.secrets?.auth?.password) {
+    throw Boom.badRequest('Cannot specify both auth.password and secrets.auth.password');
+  }
+
+  if (downloadSource.auth?.api_key && downloadSource.secrets?.auth?.api_key) {
+    throw Boom.badRequest('Cannot specify both auth.api_key and secrets.auth.api_key');
+  }
+
+  const hasUsernameOrPassword =
+    downloadSource.auth?.username ||
+    downloadSource.auth?.password ||
+    downloadSource.secrets?.auth?.password;
+  const hasApiKey = downloadSource.auth?.api_key || downloadSource.secrets?.auth?.api_key;
+
+  if (hasUsernameOrPassword && hasApiKey) {
+    throw Boom.badRequest('Cannot specify both username/password and api_key authentication');
+  }
+
+  const hasUsername = !!downloadSource.auth?.username;
+  const hasPassword = !!downloadSource.auth?.password || !!downloadSource.secrets?.auth?.password;
+
+  if (hasUsername && !hasPassword) {
+    throw Boom.badRequest('Username and password must be provided together');
+  }
+  if (hasPassword && !hasUsername) {
+    throw Boom.badRequest('Username and password must be provided together');
   }
 }
 
@@ -75,7 +103,7 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  ensureNoDuplicateSecrets(request.body);
+  validateDownloadSourceAuth(request.body);
 
   try {
     await downloadSourceService.update(soClient, esClient, request.params.sourceId, request.body);
@@ -111,7 +139,7 @@ export const postDownloadSourcesHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...data } = request.body;
 
-  ensureNoDuplicateSecrets(data);
+  validateDownloadSourceAuth(data);
 
   const downloadSource = await downloadSourceService.create(soClient, esClient, data, { id });
   if (downloadSource.is_default) {

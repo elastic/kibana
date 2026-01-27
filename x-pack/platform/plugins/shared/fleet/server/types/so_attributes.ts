@@ -303,9 +303,14 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field
+  auth?: string | null; // encrypted auth field
   secrets?: {
     ssl?: {
       key?: { id: string };
+    };
+    auth?: {
+      password?: { id: string };
+      api_key?: { id: string };
     };
   };
 }

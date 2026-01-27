@@ -204,7 +204,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agent_download_sources', () => {
-      it('should not store secrets if fleet server does not meet minimum version', async function () {
+      it('should not store SSL secrets if fleet server does not meet minimum version', async function () {
         await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
 
@@ -340,7 +340,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
       });
 
-      it('should store secrets if fleet server meets minimum version', async function () {
+      it('should store SSL secrets if fleet server meets minimum version', async function () {
         await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
@@ -363,6 +363,175 @@ export default function (providerContext: FtrProviderContext) {
         const secret1 = await getSecretById(secretId1);
         // @ts-ignore _source unknown type
         expect(secret1._source.value).to.equal('KEY1');
+      });
+
+      it('should allow creating a download source with username/password auth', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with auth ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+            },
+          })
+          .expect(200);
+
+        expect(postResponse.item.auth.username).to.eql('testuser');
+        expect(postResponse.item.auth.password).to.eql('testpassword');
+      });
+
+      it('should allow creating a download source with api_key auth', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with api key ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              api_key: 'my-api-key',
+            },
+          })
+          .expect(200);
+
+        expect(postResponse.item.auth.api_key).to.eql('my-api-key');
+      });
+
+      it('should not allow both username/password and api_key', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with conflicting auth ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+              api_key: 'my-api-key',
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.contain(
+          'Cannot specify both username/password and api_key authentication'
+        );
+      });
+
+      it('should require password when username is provided', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with username only ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.contain('Username and password must be provided together');
+      });
+
+      it('should require username when password is provided', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with password only ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              password: 'testpassword',
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.contain('Username and password must be provided together');
+      });
+
+      it('should not allow auth.password and secrets.auth.password at the same time', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with duplicate password ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'plainpassword',
+            },
+            secrets: {
+              auth: {
+                password: 'secretpassword',
+              },
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.contain(
+          'Cannot specify both auth.password and secrets.auth.password'
+        );
+      });
+
+      it('should not allow auth.api_key and secrets.auth.api_key at the same time', async function () {
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with duplicate api_key ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              api_key: 'plain-api-key',
+            },
+            secrets: {
+              auth: {
+                api_key: 'secret-api-key',
+              },
+            },
+          })
+          .expect(400);
+
+        expect(res.body.message).to.contain(
+          'Cannot specify both auth.api_key and secrets.auth.api_key'
+        );
+      });
+
+      it('should store auth secrets when fleet server meets minimum version', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+        const res = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with auth secret ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+            },
+            secrets: {
+              auth: {
+                password: 'secretpassword',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(res.body.item.auth.username).to.eql('testuser');
+        expect(res.body.item.secrets.auth.password).to.have.property('id');
+        const secretId = res.body.item.secrets.auth.password.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.eql('secretpassword');
       });
     });
 
@@ -545,6 +714,155 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
           })
           .expect(400);
+      });
+
+      it('should delete password secret when switching from username/password to api_key', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        // Create with username/password
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Switch auth test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+            },
+            secrets: {
+              auth: {
+                password: 'secretpassword',
+              },
+            },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        const passwordSecretId = createRes.item.secrets.auth.password.id;
+
+        // Update to api_key
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Switch auth test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            secrets: {
+              auth: {
+                api_key: 'new-api-key',
+              },
+            },
+          })
+          .expect(200);
+
+        // Verify old password secret was deleted
+        try {
+          await getSecretById(passwordSecretId);
+          expect().fail('Password secret should have been deleted');
+        } catch (e) {
+          // not found - expected
+        }
+
+        // Verify new state
+        const { body: getRes } = await supertest
+          .get(`/api/fleet/agent_download_sources/${dsId}`)
+          .expect(200);
+
+        expect(getRes.item.auth).to.be(undefined);
+        expect(getRes.item.secrets.auth.api_key).to.have.property('id');
+      });
+
+      it('should delete api_key secret when switching from api_key to username/password', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        // Create with api_key
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Switch auth test 2 ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            secrets: {
+              auth: {
+                api_key: 'secret-api-key',
+              },
+            },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        const apiKeySecretId = createRes.item.secrets.auth.api_key.id;
+
+        // Update to username/password
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Switch auth test 2 ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'newuser',
+            },
+            secrets: {
+              auth: {
+                password: 'newpassword',
+              },
+            },
+          })
+          .expect(200);
+
+        // Verify old api_key secret was deleted
+        try {
+          await getSecretById(apiKeySecretId);
+          expect().fail('API key secret should have been deleted');
+        } catch (e) {
+          // not found - expected
+        }
+
+        // Verify new state
+        const { body: getRes } = await supertest
+          .get(`/api/fleet/agent_download_sources/${dsId}`)
+          .expect(200);
+
+        expect(getRes.item.auth.username).to.eql('newuser');
+        expect(getRes.item.secrets.auth.password).to.have.property('id');
+      });
+
+      it('should convert plain text auth to secret when secret storage is enabled', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        // Create with plain text auth
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Plain text to secret test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'plaintextpassword',
+            },
+          })
+          .expect(200);
+
+        // When auth secret storage is enabled, plain text password should be converted to secret
+        expect(createRes.item.auth.username).to.eql('testuser');
+        // Password should be stored as secret, not in auth
+        expect(createRes.item.auth.password).to.be(undefined);
+        expect(createRes.item.secrets.auth.password).to.have.property('id');
+
+        const secretId = createRes.item.secrets.auth.password.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.eql('plaintextpassword');
       });
     });
 
