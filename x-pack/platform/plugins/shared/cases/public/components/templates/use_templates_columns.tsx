@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type {
   EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -20,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -28,7 +30,10 @@ import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getEmptyCellValue } from '../empty_value';
 import * as i18n from './translations';
 
-type TemplatesColumns = EuiTableActionsColumnType<Template> | EuiTableFieldDataColumnType<Template>;
+type TemplatesColumns =
+  | EuiTableActionsColumnType<Template>
+  | EuiTableComputedColumnType<Template>
+  | EuiTableFieldDataColumnType<Template>;
 
 const LINE_CLAMP = 3;
 const getLineClampedCss = css`
@@ -155,8 +160,23 @@ export const useTemplatesColumns = ({
         field: 'name',
         name: i18n.COLUMN_NAME,
         sortable: true,
-        render: (name: string) =>
-          name ? <span data-test-subj="template-column-name">{name}</span> : getEmptyCellValue(),
+        render: (name: string, template: Template) =>
+          name ? (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
+                  {name}
+                </EuiLink>
+              </EuiFlexItem>
+              {template.isDefault && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj="template-column-default-badge">{i18n.DEFAULT}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ) : (
+            getEmptyCellValue()
+          ),
         width: '15%',
       },
       {
@@ -173,7 +193,7 @@ export const useTemplatesColumns = ({
           ) : (
             getEmptyCellValue()
           ),
-        width: '20%',
+        width: '22%',
       },
       {
         field: 'solution',
@@ -254,7 +274,7 @@ export const useTemplatesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '12%',
+        width: '16%',
       },
       {
         field: 'lastUpdate',
@@ -268,7 +288,7 @@ export const useTemplatesColumns = ({
           ) : (
             getEmptyCellValue()
           ),
-        width: '12%',
+        width: '11%',
       },
       {
         field: 'lastTimeUsed',
@@ -282,7 +302,7 @@ export const useTemplatesColumns = ({
           ) : (
             getEmptyCellValue()
           ),
-        width: '12%',
+        width: '11%',
       },
       {
         field: 'usage',
@@ -296,7 +316,7 @@ export const useTemplatesColumns = ({
           ) : (
             getEmptyCellValue()
           ),
-        width: '8%',
+        width: '6%',
       },
       {
         name: i18n.ACTIONS,

@@ -15,6 +15,7 @@ export interface Template {
   lastUpdate: string;
   lastTimeUsed: string;
   usage: number;
+  isDefault: boolean;
 }
 
 // Mock data - remove when API is available
@@ -29,6 +30,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-15T10:30:00.000Z',
     lastTimeUsed: '2024-01-20T14:45:00.000Z',
     usage: 45,
+    isDefault: true,
   },
   {
     key: 'template-2',
@@ -40,6 +42,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-10T08:00:00.000Z',
     lastTimeUsed: '2024-01-18T09:30:00.000Z',
     usage: 32,
+    isDefault: false,
   },
   {
     key: 'template-3',
@@ -51,6 +54,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-05T16:20:00.000Z',
     lastTimeUsed: '2024-01-19T11:15:00.000Z',
     usage: 78,
+    isDefault: false,
   },
   {
     key: 'template-4',
@@ -62,6 +66,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-12T13:45:00.000Z',
     lastTimeUsed: '2024-01-17T10:00:00.000Z',
     usage: 23,
+    isDefault: false,
   },
   {
     key: 'template-5',
@@ -73,6 +78,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-08T09:15:00.000Z',
     lastTimeUsed: '2024-01-21T08:30:00.000Z',
     usage: 56,
+    isDefault: false,
   },
   {
     key: 'template-6',
@@ -84,6 +90,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-14T11:20:00.000Z',
     lastTimeUsed: '2024-01-22T16:00:00.000Z',
     usage: 67,
+    isDefault: false,
   },
   {
     key: 'template-7',
@@ -95,6 +102,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-11T14:30:00.000Z',
     lastTimeUsed: '2024-01-23T07:45:00.000Z',
     usage: 89,
+    isDefault: false,
   },
   {
     key: 'template-8',
@@ -106,6 +114,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-09T09:00:00.000Z',
     lastTimeUsed: '2024-01-16T13:30:00.000Z',
     usage: 12,
+    isDefault: false,
   },
   {
     key: 'template-9',
@@ -117,6 +126,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-13T10:45:00.000Z',
     lastTimeUsed: '2024-01-24T09:15:00.000Z',
     usage: 134,
+    isDefault: false,
   },
   {
     key: 'template-10',
@@ -128,6 +138,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-06T15:00:00.000Z',
     lastTimeUsed: '2024-01-15T11:00:00.000Z',
     usage: 28,
+    isDefault: false,
   },
   {
     key: 'template-11',
@@ -139,6 +150,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-17T08:30:00.000Z',
     lastTimeUsed: '2024-01-25T10:20:00.000Z',
     usage: 41,
+    isDefault: false,
   },
   {
     key: 'template-12',
@@ -150,6 +162,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-18T12:00:00.000Z',
     lastTimeUsed: '2024-01-26T14:30:00.000Z',
     usage: 95,
+    isDefault: false,
   },
   {
     key: 'template-13',
@@ -161,6 +174,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-19T16:15:00.000Z',
     lastTimeUsed: '2024-01-27T08:00:00.000Z',
     usage: 36,
+    isDefault: false,
   },
   {
     key: 'template-14',
@@ -172,6 +186,7 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-20T09:45:00.000Z',
     lastTimeUsed: '2024-01-28T11:30:00.000Z',
     usage: 72,
+    isDefault: false,
   },
   {
     key: 'template-15',
@@ -183,5 +198,6 @@ export const MOCK_TEMPLATES: Template[] = [
     lastUpdate: '2024-01-21T13:20:00.000Z',
     lastTimeUsed: '2024-01-29T15:45:00.000Z',
     usage: 53,
+    isDefault: false,
   },
 ];

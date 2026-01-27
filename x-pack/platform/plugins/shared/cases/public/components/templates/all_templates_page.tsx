@@ -35,7 +35,8 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
 
-  const { queryParams, setQueryParams, selectedTemplates, selection } = useTemplatesState();
+  const { queryParams, setQueryParams, sorting, selectedTemplates, selection } =
+    useTemplatesState();
 
   const { data, isLoading } = useGetTemplates({
     page: queryParams.page,
@@ -130,6 +131,7 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
             pagination={pagination}
             rowProps={tableRowProps}
             selection={selection}
+            sorting={sorting}
           />
         </>
       )}

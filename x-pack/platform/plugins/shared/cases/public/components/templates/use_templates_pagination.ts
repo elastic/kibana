@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import type { CriteriaWithPagination, Pagination } from '@elastic/eui';
 import type { Template } from './sample_data';
-import type { QueryParams } from './use_templates_state';
+import type { QueryParams, SortField } from './use_templates_state';
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
@@ -42,10 +42,20 @@ export const useTemplatesPagination = ({
   );
 
   const onTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<Template>) => {
-      if (page) {
-        setQueryParams({ page: page.index + 1, perPage: page.size });
+    ({ page, sort }: CriteriaWithPagination<Template>) => {
+      const newParams: Partial<QueryParams> = {};
+
+      if (sort) {
+        newParams.sortField = sort.field as SortField;
+        newParams.sortOrder = sort.direction;
       }
+
+      if (page) {
+        newParams.page = page.index + 1;
+        newParams.perPage = page.size;
+      }
+
+      setQueryParams(newParams);
     },
     [setQueryParams]
   );

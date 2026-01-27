@@ -155,3 +155,7 @@ export const CASE = i18n.translate('xpack.cases.templates.case', {
 export const CASES = i18n.translate('xpack.cases.templates.cases', {
   defaultMessage: 'Cases',
 });
+
+export const DEFAULT = i18n.translate('xpack.cases.templates.default', {
+  defaultMessage: 'Default',
+});

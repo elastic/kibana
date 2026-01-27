@@ -6,23 +6,31 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { EuiTableSelectionType } from '@elastic/eui';
+import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
 import type { Template } from './sample_data';
 import { PAGE_SIZE_OPTIONS } from './use_templates_pagination';
+
+export type SortField = keyof Template;
+export type SortOrder = 'asc' | 'desc';
 
 const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: 1,
   perPage: PAGE_SIZE_OPTIONS[0],
+  sortField: 'name',
+  sortOrder: 'asc',
 };
 
 export interface QueryParams {
   page: number;
   perPage: number;
+  sortField: SortField;
+  sortOrder: SortOrder;
 }
 
 export interface UseTemplatesStateReturnValue {
   queryParams: QueryParams;
   setQueryParams: (params: Partial<QueryParams>) => void;
+  sorting: EuiBasicTableProps<Template>['sorting'];
   selectedTemplates: Template[];
   selection: EuiTableSelectionType<Template>;
   deselectTemplates: () => void;
@@ -41,6 +49,16 @@ export const useTemplatesState = (): UseTemplatesStateReturnValue => {
     setSelectedTemplates([]);
   }, []);
 
+  const sorting: EuiBasicTableProps<Template>['sorting'] = useMemo(
+    () => ({
+      sort: {
+        field: queryParams.sortField,
+        direction: queryParams.sortOrder,
+      },
+    }),
+    [queryParams.sortField, queryParams.sortOrder]
+  );
+
   const selection: EuiTableSelectionType<Template> = useMemo(
     () => ({
       onSelectionChange: setSelectedTemplates,
@@ -52,6 +70,7 @@ export const useTemplatesState = (): UseTemplatesStateReturnValue => {
   return {
     queryParams,
     setQueryParams,
+    sorting,
     selectedTemplates,
     selection,
     deselectTemplates,
