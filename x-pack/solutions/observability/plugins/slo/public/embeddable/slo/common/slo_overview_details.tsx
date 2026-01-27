@@ -52,14 +52,9 @@ export function SloOverviewDetailsContent({
     <>
       <HeaderTitle slo={slo} isLoading={false} />
       <EuiTabs>
-        {tabs.map((tab, index) => (
-          <EuiTab
-            key={index}
-            onClick={'onClick' in tab ? tab.onClick : undefined}
-            isSelected={tab.id === selectedTabId}
-            append={'append' in tab ? tab.append : null}
-          >
-            {tab.label}
+        {tabs.map(({ id, label, ...tab }) => (
+          <EuiTab key={id} {...tab} isSelected={id === selectedTabId}>
+            {label}
           </EuiTab>
         ))}
       </EuiTabs>
