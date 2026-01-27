@@ -61,6 +61,9 @@ export function EditQueryStreamFlyout({
   } = dependencies.start;
 
   const { timeState } = useTimefilter();
+  const timeStateRef = React.useRef(timeState);
+  timeStateRef.current = timeState;
+
   const streamName = definition.stream.name;
   const resolvedEsql = definition.stream.query.esql;
 
@@ -118,14 +121,14 @@ export function EditQueryStreamFlyout({
         query: query.esql,
         search: data.search.search,
         signal: controller?.signal,
-        start: timeState.start,
-        end: timeState.end,
+        start: timeStateRef.current.start,
+        end: timeStateRef.current.end,
         dropNullColumns: true,
       });
 
       return esqlResultToPlainObjects(results) as SampleDocument[];
     },
-    [timeState.start, timeState.end]
+    [data.search.search]
   );
 
   useEffect(() => {
@@ -135,11 +138,12 @@ export function EditQueryStreamFlyout({
   }, [resolvedEsql, setValue]);
 
   useEffect(() => {
-    // Execute query when it changes to show initial preview
+    // Execute query when time range changes
     if (esqlQuery) {
       handleQuerySubmit({ esql: esqlQuery });
     }
-  }, [handleQuerySubmit, esqlQuery]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeState.start, timeState.end]);
 
   return (
     <EuiFlyout size="l" onClose={onClose} aria-labelledby="edit-query-stream-flyout-title">

@@ -78,6 +78,8 @@ const QueryStreamFlyout = ({
   } = dependencies.start;
 
   const { timeState } = useTimefilter();
+  const timeStateRef = React.useRef(timeState);
+  timeStateRef.current = timeState;
 
   const { formState, register, handleSubmit, setValue, watch } = useForm<FormState>({
     defaultValues: {
@@ -139,23 +141,23 @@ const QueryStreamFlyout = ({
         query: query.esql,
         search: data.search.search,
         signal: controller?.signal,
-        start: timeState.start,
-        end: timeState.end,
+        start: timeStateRef.current.start,
+        end: timeStateRef.current.end,
         dropNullColumns: true,
       });
 
       return esqlResultToPlainObjects(results) as SampleDocument[];
     },
-    [timeState.start, timeState.end]
+    [data.search.search]
   );
 
   useEffect(() => {
-    // Update query on timerange change
+    // Update query when it changes or time range updates (handleQuerySubmit changes when time changes)
     if (esqlQuery) {
       handleQuerySubmit({ esql: esqlQuery });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleQuerySubmit]);
+  }, [handleQuerySubmit, timeState]);
 
   return (
     <EuiFlyout size="l" onClose={onClose} aria-labelledby="create-query-stream-flyout-title">
