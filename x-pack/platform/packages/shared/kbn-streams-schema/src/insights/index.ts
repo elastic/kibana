@@ -5,11 +5,26 @@
  * 2.0.
  */
 
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+
+export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
+
+interface InsightEvidence {
+  streamName: string;
+  queryTitle: string;
+  featureName?: string;
+  eventCount: number;
+}
+
+export interface Insight {
+  title: string;
+  description: string;
+  impact: InsightImpactLevel;
+  evidence: InsightEvidence[];
+  recommendations: string[];
+}
+
 export interface InsightsResult {
-  summary: string;
-  tokenUsage: {
-    prompt: number;
-    completion: number;
-    cached: number;
-  };
+  insights: Insight[];
+  tokensUsed: ChatCompletionTokenCount;
 }
