@@ -50,7 +50,7 @@ export const QualityTab: React.FC = () => {
   const { data: getIndexQualityData } = getIndexQualityResultsLatest;
 
   // Create a lookup map for index results by indexName
-  const indexResultsMap = useMemo(() => {
+  const indexDataQualityMap = useMemo(() => {
     if (!getIndexQualityData) return new Map<string, ResultDocument>();
 
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
@@ -63,7 +63,7 @@ export const QualityTab: React.FC = () => {
     return getReadinessCategoriesData.mainCategoriesMap.map((category) => ({
       category: category.category,
       items: category.indices.map((index) => {
-        const result = indexResultsMap.get(index.indexName);
+        const result = indexDataQualityMap.get(index.indexName);
         const incompatibleCount = result?.incompatibleFieldCount ?? 0;
         const isIncompatible = incompatibleCount > 0;
 
@@ -75,7 +75,7 @@ export const QualityTab: React.FC = () => {
         };
       }),
     }));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexResultsMap]);
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap]);
 
   // Calculate total incompatible indices
   const totalIncompatibleIndices = useMemo(() => {
@@ -112,8 +112,11 @@ export const QualityTab: React.FC = () => {
       (sum, item) => sum + item.incompatibleFieldCount,
       0
     );
-    const affectedIndices = new Set(category.items.map((index) => index.indexName.split('-')[0]))
-      .size;
+
+    const affectedIndices = new Set(
+      category.items.filter((item) => item.incompatibleFieldCount > 0).map((item) => item.indexName)
+    ).size;
+
     const totalDataSources = category.items.length;
 
     return (
