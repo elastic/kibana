@@ -45,6 +45,7 @@ import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
+  DEFAULT_MODELS,
 } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import type { TaskTypeOption } from '../utils/helpers';
@@ -266,7 +267,19 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          newConfig[k] = newProvider?.configurations[k]?.default_value ?? null;
+          // Set default value from provider configuration
+          const defaultValue = newProvider?.configurations[k]?.default_value;
+          // If it's model_id or model and no default value set, use DEFAULT_MODELS mapping
+          if (
+            (k === 'model_id' || k === 'model') &&
+            !defaultValue &&
+            newProvider?.service &&
+            DEFAULT_MODELS[newProvider.service as ServiceProviderKeys]
+          ) {
+            newConfig[k] = DEFAULT_MODELS[newProvider.service as ServiceProviderKeys];
+          } else {
+            newConfig[k] = defaultValue ?? null;
+          }
         }
       });
 
@@ -320,6 +333,14 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         if (!fieldConfig.sensitive) {
           if (fieldConfig && !!fieldConfig.default_value) {
             defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
+          } else if (
+            (fieldConfig.key === 'model_id' || fieldConfig.key === 'model') &&
+            newProvider?.service &&
+            DEFAULT_MODELS[newProvider.service as ServiceProviderKeys]
+          ) {
+            // Set default model for model_id or model field if provider has a default model defined
+            defaultProviderConfig[fieldConfig.key] =
+              DEFAULT_MODELS[newProvider.service as ServiceProviderKeys];
           } else {
             defaultProviderConfig[fieldConfig.key] = null;
           }

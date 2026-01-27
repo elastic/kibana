@@ -18,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
+import { DEFAULT_MODELS } from '../constants';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
@@ -120,6 +121,18 @@ describe('Inference Services', () => {
     expect(screen.queryByTestId('inference-endpoint-input-field')).toHaveDisplayValue(
       /anthropic-completion/
     );
+  });
+
+  it('populates default model_id when selecting anthropic provider', async () => {
+    renderForm();
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    await userEvent.click(screen.getByText('Anthropic'));
+
+    expect(screen.getByTestId('provider-select')).toHaveValue('Anthropic');
+    const modelIdInput = screen.getByTestId('model_id-input');
+    // Use the default from DEFAULT_MODELS constant for anthropic
+    expect(modelIdInput).toHaveValue(DEFAULT_MODELS.anthropic);
   });
 
   describe('isProviderForSolutions', () => {

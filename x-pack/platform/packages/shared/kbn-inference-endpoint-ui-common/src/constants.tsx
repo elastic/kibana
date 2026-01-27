@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { DEFAULT_MODEL as BEDROCK_DEFAULT_MODEL } from '@kbn/connector-schemas/bedrock/constants';
+import { DEFAULT_MODEL as GEMINI_DEFAULT_MODEL } from '@kbn/connector-schemas/gemini/constants';
+import { DEFAULT_MODEL as OPENAI_DEFAULT_MODEL } from '@kbn/connector-schemas/openai/constants';
 import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
 import { FieldType, type InternalOverrideFieldsType } from './types/types';
 
@@ -74,6 +77,36 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
+
+// Default model mappings for each service provider using already defined constants
+// Note: Only include providers that have a 'model_id' field for completion/chat tasks
+export const DEFAULT_MODELS: Partial<Record<ServiceProviderKeys, string>> = {
+  // Providers with connector schema constants
+  [ServiceProviderKeys.openai]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1'
+  [ServiceProviderKeys.azureopenai]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1'
+  [ServiceProviderKeys.amazonbedrock]: BEDROCK_DEFAULT_MODEL, // 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'
+  [ServiceProviderKeys.googlevertexai]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
+  [ServiceProviderKeys.googleaistudio]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
+
+  // Major LLM providers with established default models
+  [ServiceProviderKeys.anthropic]: 'claude-3-5-sonnet-20241022',
+  [ServiceProviderKeys.cohere]: 'command-r-plus',
+  [ServiceProviderKeys.mistral]: 'mistral-large-latest',
+  [ServiceProviderKeys.azureaistudio]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1' - similar to Azure OpenAI
+  [ServiceProviderKeys.groq]: 'llama-3.3-70b-versatile',
+  [ServiceProviderKeys.deepseek]: 'deepseek-chat',
+
+  // Additional providers with model_id field for completion/chat
+  [ServiceProviderKeys.ai21]: 'jamba-1.5-large', // AI21's latest Jamba model
+  [ServiceProviderKeys.watsonxai]: 'ibm/granite-13b-chat-v2', // IBM watsonx default
+  [ServiceProviderKeys.llama]: 'meta-llama/Llama-3.3-70B-Instruct', // Meta Llama Stack
+  [ServiceProviderKeys.contextualai]: 'contextual-ai/rag-1', // Contextual AI default
+
+  // Embedding service providers with model_id field
+  [ServiceProviderKeys.jinaai]: 'jina-embeddings-v3', // Jina AI's default embedding model
+  [ServiceProviderKeys.voyageai]: 'voyage-4', // Voyage AI's latest default embedding model
+  [ServiceProviderKeys.elasticsearch]: '.elser_model_2', // Elasticsearch default (also set in provider config)
+};
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
