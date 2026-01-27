@@ -1,7 +1,7 @@
-Please give me a summary of the findings from these queries for this data stream.
+Analyze the significant events for this data stream and generate structured insights.
 
 `data stream`
 {{{streamName}}}
 
-`summaries`
-{{{summaries}}}
+`queries with event data`
+{{{queries}}}

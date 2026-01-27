@@ -68,6 +68,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    configurationOverrides,
   },
   context
 ) => {
@@ -85,6 +86,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
+  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -100,7 +102,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
@@ -109,6 +110,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     attachmentsService: attachments,
     request,
+    spaceId: context.spaceId,
     runner: context.runner,
   });
 
@@ -158,6 +160,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap,
       cycleLimit,
+      conversationTimestamp,
     }),
     {
       version: 'v2',
@@ -189,6 +192,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
+  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
@@ -197,6 +203,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
+      configurationOverrides: effectiveOverrides,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -230,16 +238,18 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
+  conversationTimestamp,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
+  conversationTimestamp: string;
 }): Command => {
   const initialMessages = conversationToLangchainMessages({
     conversation,
   });
 
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit, conversationTimestamp };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

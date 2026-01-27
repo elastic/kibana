@@ -69,8 +69,11 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
-import { affectsYamlMetadata } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import {
+  parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
+  stringifyWorkflowDefinition,
+} from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -255,7 +258,6 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
-  // eslint-disable-next-line complexity
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -356,12 +358,12 @@ export class WorkflowsService {
       }
 
       // Handle individual field updates only when YAML is not being updated
-      if (affectsYamlMetadata(workflow)) {
-        const existingYaml = existingDocument._source?.yaml;
+      if (!workflow.yaml) {
+        let yamlUpdated = false;
 
-        // Update metadata fields
         if (workflow.name !== undefined) {
           updatedData.name = workflow.name;
+          yamlUpdated = true;
         }
         if (workflow.enabled !== undefined) {
           // If enabling a workflow, ensure it has a valid definition
@@ -370,28 +372,34 @@ export class WorkflowsService {
           } else if (!workflow.enabled) {
             updatedData.enabled = false;
           }
+          yamlUpdated = true;
         }
         if (workflow.description !== undefined) {
           updatedData.description = workflow.description;
+          yamlUpdated = true;
         }
         if (workflow.tags !== undefined) {
           updatedData.tags = workflow.tags;
+          yamlUpdated = true;
         }
 
-        // Update the YAML in place to preserve formatting
-        if (existingYaml) {
-          updatedData.yaml = updateWorkflowYamlFields(existingYaml, workflow, updatedData.enabled);
+        if (yamlUpdated && existingDocument._source?.yaml) {
+          const originalYamlParse = parseYamlToJSONWithoutValidation(existingDocument._source.yaml);
+          const baseDefinition = originalYamlParse.success
+            ? originalYamlParse.json
+            : existingDocument._source?.definition;
 
-          // Also update the definition object to keep it in sync
-          if (existingDocument._source?.definition) {
-            const updatedWorkflowDefinition = {
-              ...existingDocument._source.definition,
+          if (baseDefinition) {
+            const fieldUpdates = {
               ...(workflow.name !== undefined && { name: workflow.name }),
               ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
               ...(workflow.description !== undefined && { description: workflow.description }),
               ...(workflow.tags !== undefined && { tags: workflow.tags }),
             };
-            updatedData.definition = updatedWorkflowDefinition;
+            updatedData.yaml = stringifyWorkflowDefinition({
+              ...baseDefinition,
+              ...fieldUpdates,
+            });
           }
         }
       }
