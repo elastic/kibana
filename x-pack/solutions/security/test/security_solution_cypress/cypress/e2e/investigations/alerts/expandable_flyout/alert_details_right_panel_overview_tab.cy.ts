@@ -177,7 +177,8 @@ describe(
 
     describe('investigation section', () => {
       it('should display investigation section', () => {
-        toggleOverviewTabAboutSection();
+        toggleOverviewTabAboutSection(); // close About (optional)
+        toggleOverviewTabInvestigationSection();
 
         cy.log('header and content');
 
@@ -233,6 +234,7 @@ describe(
 
       it('should open host preview when host name is clicked', () => {
         toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
 
         cy.log('should open host preview when clicked on host name');
 
@@ -255,6 +257,7 @@ describe(
 
       it('should open user preview when user name is clicked', () => {
         toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
 
         const userNameCell =
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
