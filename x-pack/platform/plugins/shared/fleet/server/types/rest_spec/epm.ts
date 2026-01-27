@@ -520,7 +520,7 @@ export const GetInfoRequestSchema = {
 export const GetBulkAssetsRequestSchema = {
   body: schema.object({
     assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
-      maxSize: 1000,
+      maxSize: 10000,
     }),
   }),
 };
