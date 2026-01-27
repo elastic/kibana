@@ -96,9 +96,8 @@ export interface DataSource {
    */
   iconType: string;
 
-  // this would replace `generateWorkflows` in the future and become non-optional
-  workflows?: WorkflowsConfig;
-  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
+  /** How to load up workflows definitions for this data source type */
+  workflows: WorkflowsConfig;
 
   /**
    * Stack connector configuration.

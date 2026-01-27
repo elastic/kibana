@@ -1,6 +1,7 @@
 version: '1'
 name: 'sources.github.search_issues'
 description: 'Search for issues in a GitHub repository'
+tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
@@ -15,7 +16,7 @@ inputs:
 steps:
   - name: search-issues
     type: github.searchIssues
-    connector-id: {{stackConnectorId}}
+    connector-id: {{ stackConnectorId }}
     with:
       owner: "${{inputs.owner}}"
       repo: "${{inputs.repo}}"

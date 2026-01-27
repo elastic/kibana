@@ -1,6 +1,7 @@
 version: '1'
 name: 'sources.github.list_repos'
 description: 'List repositories for a specific owner (user or organization)'
+tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
@@ -10,6 +11,6 @@ inputs:
 steps:
   - name: list-repos
     type: github.listRepos
-    connector-id: {{stackConnectorId}}
+    connector-id: {{ stackConnectorId }}
     with:
       owner: "${{inputs.owner}}"

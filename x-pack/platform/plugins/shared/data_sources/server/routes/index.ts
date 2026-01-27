@@ -57,7 +57,6 @@ export interface RouteDependencies {
  */
 export function registerRoutes(dependencies: RouteDependencies) {
   const { router, logger, getStartServices, workflowManagement } = dependencies;
-
   // List all data sources
   router.get(
     {

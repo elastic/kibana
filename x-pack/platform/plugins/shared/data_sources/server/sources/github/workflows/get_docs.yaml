@@ -1,6 +1,7 @@
 version: '1'
 name: 'sources.github.get_docs'
 description: 'Get all markdown files from a GitHub repository'
+tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
@@ -15,7 +16,7 @@ inputs:
 steps:
   - name: get-docs
     type: github.getDocs
-    connector-id: {{stackConnectorId}}
+    connector-id: {{ stackConnectorId }}
     with:
       owner: "${{inputs.owner}}"
       repo: "${{inputs.repo}}"

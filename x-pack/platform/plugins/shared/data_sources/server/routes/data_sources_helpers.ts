@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource, WorkflowInfo } from '@kbn/data-catalog-plugin';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { loadWorkflows } from '../workflow_loader';
@@ -100,21 +100,15 @@ export async function createDataSourceAndRelatedResources(
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
 
-  // Load workflows
-  let workflowInfos: WorkflowInfo[];
-  if (dataSource.workflows) {
-    // Merge stackConnectorId into templateInputs
-    const templateInputs = {
-      ...dataSource.workflows.templateInputs,
-      stackConnectorId: finalStackConnectorId,
-    };
-    workflowInfos = await loadWorkflows({
-      directory: dataSource.workflows.directory,
-      templateInputs,
-    });
-  } else {
-    workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
-  }
+  // Merge stackConnectorId into workflows' templateInputs
+  const templateInputs = {
+    ...dataSource.workflows.templateInputs,
+    stackConnectorId: finalStackConnectorId,
+  };
+  const workflowInfos = await loadWorkflows({
+    directory: dataSource.workflows.directory,
+    templateInputs,
+  });
 
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 

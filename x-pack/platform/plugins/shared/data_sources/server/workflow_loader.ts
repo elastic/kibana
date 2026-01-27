@@ -7,6 +7,7 @@
 
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
+import { parse } from 'yaml';
 import type {
   WorkflowInfo,
   WorkflowsConfig,
@@ -70,25 +71,8 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
   }
 }
 
-/**
- * Determines if a workflow has the 'agent-builder-tool' tag.
- * Checks for the tag in the tags array of the YAML.
- *
- * @param yamlContent - The YAML content as a string
- * @returns true if the workflow has the 'agent-builder-tool' tag
- */
 function hasAgentBuilderToolTag(yamlContent: string): boolean {
-  // Simple regex-based check for the tag in a tags array
-  // Matches patterns like:
-  //   tags: ['agent-builder-tool']
-  //   tags: ["agent-builder-tool"]
-  //   tags:
-  //     - agent-builder-tool
-  const tagPatterns = [
-    /tags:\s*\[\s*['"]agent-builder-tool['"]\s*(?:,|\])/m,
-    /tags:\s*\[\s*['"]agent-builder-tool['"]/m,
-    /tags:\s*\n\s*-\s*['"]?agent-builder-tool['"]?/m,
-  ];
-
-  return tagPatterns.some((pattern) => pattern.test(yamlContent));
+  const parsed = parse(yamlContent);
+  const tags = parsed?.tags;
+  return tags.length > 0 && 'agent-builder-tool' in tags;
 }
