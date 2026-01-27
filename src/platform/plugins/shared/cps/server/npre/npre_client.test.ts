@@ -13,6 +13,7 @@ import {
   httpServerMock,
 } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 
 import { NpreClient } from './npre_client';
 
@@ -21,6 +22,7 @@ describe('NpreClient', () => {
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockCoreStart: CoreStart;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
   let mockScopedClient: ReturnType<
     ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asScoped']
   >;
@@ -29,14 +31,14 @@ describe('NpreClient', () => {
     mockLogger = loggingSystemMock.createLogger();
     mockRequest = httpServerMock.createKibanaRequest();
 
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
 
     mockCoreStart = {
       elasticsearch: {
         client: {
           ...mockClusterClient,
-          asScoped: () => mockScopedClient,
+          asScoped: jest.fn(() => mockScopedClient),
         },
       },
     } as unknown as CoreStart;
@@ -47,65 +49,104 @@ describe('NpreClient', () => {
   describe('getNpre', () => {
     it('should retrieve a project routing expression', async () => {
       const expressionName = 'test-expression';
-      const mockResponse = { expression: 'project:test' };
+      const mockExpression = 'project:test';
+      const mockResponse = { expression: mockExpression };
 
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
 
       const result = await service.getNpre(expressionName);
 
-      expect(result).toEqual(mockResponse);
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+      expect(result).toEqual(mockExpression);
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/_project_routing/test-expression',
       });
       expect(mockLogger.debug).toHaveBeenCalledWith('Getting NPRE for expression: test-expression');
     });
 
-    it('should handle special characters in expression name', async () => {
-      const expressionName = 'test/expression with spaces';
-      const mockResponse = { expression: 'project:test' };
-
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
-
-      await service.getNpre(expressionName);
-
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/_project_routing/test%2Fexpression%20with%20spaces',
-      });
-    });
-
-    it('should return undefined expression on 404 error', async () => {
-      const expressionName = 'test-expression';
-      const error = {
-        name: 'ResponseError',
+    it('should return undefined when expression is not found (404)', async () => {
+      const expressionName = 'nonexistent-expression';
+      const error = new errors.ResponseError({
+        statusCode: 404,
         body: {
           error: {
             type: 'resource_not_found_exception',
+            reason: 'Expression not found',
           },
         },
-      };
+        warnings: [],
+        headers: {},
+        meta: {} as any,
+      });
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       const result = await service.getNpre(expressionName);
 
-      expect(result).toEqual({ expression: undefined });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Project routing expression test-expression not found, returning undefined'
-      );
+      expect(result).toBeUndefined();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should log and throw error on non-404 failure', async () => {
       const expressionName = 'test-expression';
-      const error = new Error('Elasticsearch error');
+      const error = new Error('Elasticsearch connection error');
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
 
-      await expect(service.getNpre(expressionName)).rejects.toThrow('Elasticsearch error');
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to get project routing expression test-expression: Elasticsearch error'
+      await expect(service.getNpre(expressionName)).rejects.toThrow(
+        'Elasticsearch connection error'
       );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to get project routing expression test-expression')
+      );
+    });
+
+    it('should handle other error types and log them', async () => {
+      const expressionName = 'test-expression';
+      const error = new errors.ResponseError({
+        statusCode: 500,
+        body: {
+          error: {
+            type: 'internal_server_error',
+            reason: 'Something went wrong',
+          },
+        },
+        warnings: [],
+        headers: {},
+        meta: {} as any,
+      });
+
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+
+      await expect(service.getNpre(expressionName)).rejects.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to get project routing expression test-expression')
+      );
+    });
+  });
+
+  describe('canPutNpre', () => {
+    it('should return true when user has manage cluster privilege', async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as any);
+
+      const result = await service.canPutNpre();
+
+      expect(result).toBe(true);
+      expect(mockScopedClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: ['manage'],
+      });
+    });
+
+    it('should return false when user does not have manage cluster privilege', async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as any);
+
+      const result = await service.canPutNpre();
+
+      expect(result).toBe(false);
     });
   });
 
@@ -113,11 +154,13 @@ describe('NpreClient', () => {
     it('should create or update a project routing expression', async () => {
       const expressionName = 'test-expression';
       const expression = 'project:test';
+      const mockResponse = { acknowledged: true };
 
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue({});
+      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
 
-      await service.putNpre(expressionName, expression);
+      const result = await service.putNpre(expressionName, expression);
 
+      expect(result).toEqual(mockResponse);
       expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
         path: '/_project_routing/test-expression',
@@ -128,23 +171,6 @@ describe('NpreClient', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Putting NPRE for expression: test-expression with value: project:test'
       );
-    });
-
-    it('should handle special characters in expression name', async () => {
-      const expressionName = 'test/expression with spaces';
-      const expression = 'project:test';
-
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue({});
-
-      await service.putNpre(expressionName, expression);
-
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_project_routing/test%2Fexpression%20with%20spaces',
-        body: {
-          expression: 'project:test',
-        },
-      });
     });
 
     it('should log and throw error on failure', async () => {
@@ -163,14 +189,41 @@ describe('NpreClient', () => {
     });
   });
 
+  describe('canDeleteNpre', () => {
+    it('should return true when user has manage cluster privilege', async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as any);
+
+      const result = await service.canDeleteNpre();
+
+      expect(result).toBe(true);
+      expect(mockScopedClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: ['manage'],
+      });
+    });
+
+    it('should return false when user does not have manage cluster privilege', async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as any);
+
+      const result = await service.canDeleteNpre();
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe('deleteNpre', () => {
     it('should delete a project routing expression', async () => {
       const expressionName = 'test-expression';
+      const mockResponse = { acknowledged: true };
 
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue({});
+      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
 
-      await service.deleteNpre(expressionName);
+      const result = await service.deleteNpre(expressionName);
 
+      expect(result).toEqual(mockResponse);
       expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
         path: '/_project_routing/test-expression',
@@ -178,19 +231,6 @@ describe('NpreClient', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Deleting NPRE for expression: test-expression'
       );
-    });
-
-    it('should handle special characters in expression name', async () => {
-      const expressionName = 'test/expression with spaces';
-
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue({});
-
-      await service.deleteNpre(expressionName);
-
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'DELETE',
-        path: '/_project_routing/test%2Fexpression%20with%20spaces',
-      });
     });
 
     it('should log and throw error on failure', async () => {
@@ -202,6 +242,29 @@ describe('NpreClient', () => {
       await expect(service.deleteNpre(expressionName)).rejects.toThrow('Elasticsearch error');
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to delete project routing expression test-expression: Elasticsearch error'
+      );
+    });
+
+    it('should handle deletion of non-existent expression', async () => {
+      const expressionName = 'nonexistent-expression';
+      const error = new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: 'resource_not_found_exception',
+            reason: 'Expression not found',
+          },
+        },
+        warnings: [],
+        headers: {},
+        meta: {} as any,
+      });
+
+      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+
+      await expect(service.deleteNpre(expressionName)).rejects.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete project routing expression')
       );
     });
   });

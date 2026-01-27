@@ -245,7 +245,12 @@ export class SpacesClient implements ISpacesClient {
       } else {
         projectRoutingUpdated = true;
 
-        await this.npreClient.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
+        if (space.projectRouting === undefined) {
+          await this.npreClient.deleteNpre(getSpaceDefaultNpreName(id));
+        } else {
+          await this.npreClient.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
+        }
+
         // Remove projectRouting from space so it is not saved as part of the saved object
         delete space.projectRouting;
       }

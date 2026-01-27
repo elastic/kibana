@@ -40,7 +40,6 @@ export function setupCapabilitiesSwitcher(
       return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
     } catch (e) {
       logger.debug(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
-      logger.info(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;
     }
   };
