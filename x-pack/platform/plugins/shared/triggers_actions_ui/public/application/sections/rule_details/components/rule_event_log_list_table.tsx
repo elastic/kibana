@@ -720,7 +720,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         <EuiFlexItem>
           {hasExceedLogs && (
             <EuiCallOut
-              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
