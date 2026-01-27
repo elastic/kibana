@@ -8,7 +8,7 @@ import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
 import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
-import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { isChildOf, isSchema, routingDefinitionListSchema, getEsqlViewName } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -133,8 +133,8 @@ export const streamRoutingMachine = setup({
     clearRefreshing: assign(() => ({ isRefreshing: false })),
     // Query stream form actions
     initQueryStreamForm: assign(({ context }) => {
-      // Query from parent's ES|QL view (stream.{parentName})
-      const parentViewName = `stream.${context.definition.stream.name}`;
+      // Query from parent's ES|QL view
+      const parentViewName = getEsqlViewName(context.definition.stream.name);
       return {
         queryStreamForm: {
           name: '',

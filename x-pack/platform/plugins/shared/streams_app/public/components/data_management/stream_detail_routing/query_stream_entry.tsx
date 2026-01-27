@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -25,13 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
-
-// Local implementation since getEsqlViewName is not exported from client-side schema
-const getEsqlViewName = (streamName: string): string => `stream.${streamName}`;
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { NestedView } from '../../nested_view';
+import { StreamNameFormRow } from '../../stream_name_form_row';
 import {
   useQueryStreamForm,
   useStreamRoutingEvents,
@@ -185,10 +182,12 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   );
 
   const handleNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateQueryStreamName(e.target.value);
+    (fullName: string) => {
+      // Extract suffix from full name (remove parent prefix)
+      const suffix = fullName.replace(`${parentStreamName}.`, '');
+      updateQueryStreamName(suffix);
     },
-    [updateQueryStreamName]
+    [parentStreamName, updateQueryStreamName]
   );
 
   const canSave = queryStreamForm?.name && queryStreamForm.name.trim() !== '';
@@ -204,23 +203,12 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
           border-color: ${euiTheme.colors.primary};
         `}
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.queryStreamEntry.streamNameLabel', {
-            defaultMessage: 'Stream name',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            prepend={<span>{parentStreamName}.</span>}
-            value={queryStreamForm?.name ?? ''}
-            onChange={handleNameChange}
-            placeholder={i18n.translate('xpack.streams.queryStreamEntry.streamNamePlaceholder', {
-              defaultMessage: 'Enter stream name suffix',
-            })}
-            fullWidth
-            disabled={isSaving}
-          />
-        </EuiFormRow>
+        <StreamNameFormRow
+          prefix={`${parentStreamName}.`}
+          partitionName={queryStreamForm?.name ?? ''}
+          onChange={handleNameChange}
+          readOnly={isSaving}
+        />
 
         <EuiSpacer size="m" />
 

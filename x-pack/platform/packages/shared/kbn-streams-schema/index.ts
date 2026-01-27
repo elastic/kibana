@@ -11,6 +11,11 @@ export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
 export { Query } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+} from './src/models/query/view_name';
 
 export {
   type RoutingDefinition,
