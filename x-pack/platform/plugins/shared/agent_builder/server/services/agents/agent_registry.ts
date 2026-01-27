@@ -13,6 +13,8 @@ import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentAvailabilityContext,
   AgentAvailabilityResult,
+  BuiltInAgentConfiguration,
+  AgentConfigContext,
 } from '@kbn/agent-builder-server/agents';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -26,7 +28,11 @@ import type { WritableAgentProvider, ReadonlyAgentProvider } from './agent_sourc
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
-export type InternalAgentDefinition = AgentDefinition & {
+// Override configuration to support both static and dynamic (function) configuration
+export type InternalAgentDefinition = Omit<AgentDefinition, 'configuration'> & {
+  configuration:
+    | BuiltInAgentConfiguration
+    | ((ctx: AgentConfigContext) => MaybePromise<BuiltInAgentConfiguration>);
   isAvailable: InternalAgentDefinitionAvailabilityHandler;
 };
 

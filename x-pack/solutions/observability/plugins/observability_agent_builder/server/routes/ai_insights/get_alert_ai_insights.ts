@@ -46,6 +46,7 @@ interface GetAlertAiInsightParams {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   alertDoc: AlertDocForInsight;
+  spaceId: string;
   inferenceClient: InferenceClient;
   connectorId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;

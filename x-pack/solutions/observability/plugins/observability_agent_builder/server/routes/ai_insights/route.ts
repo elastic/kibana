@@ -51,6 +51,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         core,
         plugins,
         alertDoc,
+        spaceId,
         inferenceClient,
         connectorId,
         dataRegistry,
