@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -25,7 +26,27 @@ describe('attachment tools', () => {
     attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
   });
 
-  const getTools = () => createAttachmentTools({ attachmentManager });
+  const attachmentsService = {
+    getTypeDefinition: () => ({
+      id: 'text',
+      validate: (input: unknown) => ({ valid: true, data: input }),
+      format: (attachment: { data: unknown }) => ({
+        getRepresentation: () => ({
+          type: 'text',
+          value: `formatted:${String(attachment.data)}`,
+        }),
+      }),
+    }),
+  } as any;
+
+  const formatContext = { request: httpServerMock.createKibanaRequest(), spaceId: 'default' };
+
+  const getTools = () =>
+    createAttachmentTools({
+      attachmentManager,
+      attachmentsService,
+      formatContext,
+    });
   const getTool = (id: string) => getTools().find((t) => t.id === id)!;
 
   describe('attachment_add', () => {
@@ -102,7 +123,7 @@ describe('attachment tools', () => {
 
       expect(result.results).toHaveLength(1);
       expect((result.results[0] as any).data.type).toBe('text');
-      expect((result.results[0] as any).data.data).toBe('hello');
+      expect((result.results[0] as any).data.data).toBe('formatted:hello');
     });
 
     it('reads a specific version', async () => {
@@ -120,7 +141,7 @@ describe('attachment tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.type).toBe('text');
-      expect((result.results[0] as any).data.data).toBe('v1');
+      expect((result.results[0] as any).data.data).toBe('formatted:v1');
     });
 
     it('returns error for non-existent attachment', async () => {

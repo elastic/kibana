@@ -183,8 +183,35 @@ export const prepareConversation = async ({
     })
   );
 
-  const versionedAttachmentPresentation = prepareAttachmentPresentation(
-    attachmentStateManager.getAll()
+  const versionedAttachmentPresentation = await prepareAttachmentPresentation(
+    attachmentStateManager.getAll(),
+    undefined,
+    async (attachment, data) => {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      if (!definition) {
+        return undefined;
+      }
+
+      try {
+        const formatted = await definition.format(
+          {
+            id: attachment.id,
+            type: attachment.type,
+            data,
+          },
+          formatContext
+        );
+        if (!formatted.getRepresentation) {
+          return undefined;
+        }
+        const representation = await formatted.getRepresentation();
+        return representation.type === 'text'
+          ? representation.value
+          : JSON.stringify(representation);
+      } catch {
+        return undefined;
+      }
+    }
   );
 
   return {
@@ -257,7 +284,9 @@ const prepareAttachment = async ({
 
     return {
       attachment,
-      representation: await formatted.getRepresentation(),
+      representation: formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: JSON.stringify(attachment.data) },
       tools,
     };
   } catch (e) {
