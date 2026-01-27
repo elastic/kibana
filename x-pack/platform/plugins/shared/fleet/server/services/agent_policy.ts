@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import apm from 'elastic-apm-node';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
@@ -105,6 +105,11 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
 
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../common/services/version_specific_policies_utils';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -136,6 +141,8 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
+import { getVersionSpecificPolicies } from './utils/version_specific_policies';
+import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -189,12 +196,14 @@ class AgentPolicyService {
       skipValidation: boolean;
       returnUpdatedPolicy?: boolean;
       asyncDeploy?: boolean;
+      hasAgentVersionConditions?: boolean;
     } = {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: false,
       returnUpdatedPolicy: true,
       asyncDeploy: false,
+      hasAgentVersionConditions: false,
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('_update');
@@ -249,6 +258,7 @@ class AgentPolicyService {
           : { is_protected: agentPolicy.is_protected }),
         updated_at: new Date().toISOString(),
         updated_by: user ? user.username : 'system',
+        has_agent_version_conditions: options.hasAgentVersionConditions,
       })
       .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
 
@@ -749,7 +759,7 @@ class AgentPolicyService {
       if (typeof id === 'string') {
         return {
           ...options,
-          id,
+          id: removeVersionSuffixFromPolicyId(id),
           type: savedObjectType,
           namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
         };
@@ -759,7 +769,7 @@ class AgentPolicyService {
 
       return {
         ...options,
-        id: id.id,
+        id: removeVersionSuffixFromPolicyId(id.id),
         namespaces:
           isSpacesEnabled && spaceForThisAgentPolicy ? [spaceForThisAgentPolicy] : undefined,
         type: savedObjectType,
@@ -1197,6 +1207,7 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
+      hasAgentVersionConditions?: boolean;
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
@@ -1206,6 +1217,7 @@ class AgentPolicyService {
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
+        hasAgentVersionConditions: options?.hasAgentVersionConditions,
       });
     });
   }
@@ -1635,8 +1647,9 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[],
-    options?: { throwOnAgentlessError?: boolean }
+    options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
   ) {
+    const t = apm.startTransaction('deploy-policies', 'fleet');
     const logger = this.getLogger('deployPolicies');
     logger.debug(
       () =>
@@ -1689,14 +1702,15 @@ class AgentPolicyService {
       }
     );
 
-    const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
-      if (!fullPolicy || !fullPolicy.revision) {
-        return acc;
-      }
+    const fleetServerPolicies: FleetServerPolicy[] = [];
 
+    for (const fullPolicy of fullPolicies) {
+      if (!fullPolicy || !fullPolicy.revision) {
+        continue;
+      }
       const policy = policiesMap[fullPolicy.id];
       if (!policy) {
-        return acc;
+        continue;
       }
 
       const fleetServerPolicy: FleetServerPolicy = {
@@ -1709,9 +1723,22 @@ class AgentPolicyService {
         default_fleet_server: policy.is_default_fleet_server === true,
       };
 
-      acc.push(fleetServerPolicy);
-      return acc;
-    }, [] as FleetServerPolicy[]);
+      if (!options?.agentVersions) {
+        fleetServerPolicies.push(fleetServerPolicy);
+      }
+      if (
+        appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+        policy.has_agent_version_conditions
+      ) {
+        const versionSpecificPolicies = await getVersionSpecificPolicies(
+          soClient,
+          fleetServerPolicy,
+          fullPolicy,
+          options?.agentVersions
+        );
+        fleetServerPolicies.push(...versionSpecificPolicies);
+      }
+    }
 
     logger.debug(
       () =>
@@ -1785,6 +1812,7 @@ class AgentPolicyService {
 
     const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
       const policy = policiesMap[fleetServerPolicy.policy_id];
+      if (!policy) return false;
       return (
         !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
       );
@@ -1813,6 +1841,17 @@ class AgentPolicyService {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
     );
+    t.end();
+
+    if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      const versionSpecificAgentPolicyIds = fleetServerPolicies
+        .map((fsp) => fsp.policy_id)
+        .filter((id) => hasVersionSuffix(id));
+      await scheduleReassignAgentsToVersionSpecificPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        versionSpecificAgentPolicyIds
+      );
+    }
   }
 
   public async deleteFleetServerPoliciesForPolicyId(
@@ -1913,9 +1952,15 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+    options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
   ): Promise<FullAgentPolicy | null> {
-    return getFullAgentPolicy(soClient, id, options);
+    const span = apm.startSpan(
+      `getFullAgentPolicy ${id} ${options?.agentVersion ?? ''}`,
+      'full-agent-policy'
+    );
+    const result = await getFullAgentPolicy(soClient, id, options);
+    span?.end();
+    return result;
   }
 
   /**

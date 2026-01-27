@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { times } from 'lodash';
 import { setup } from './helpers';
 
 describe('column existence checks', () => {
@@ -33,14 +34,17 @@ describe('column existence checks', () => {
     );
   });
 
-  it('only returns one warning for the same unmapped column', async () => {
+  it('returns one warning for each instance of the same unmapped column', async () => {
     const { expectErrors } = await setup();
     await expectErrors(
       'SET unmapped_fields = "LOAD"; FROM index | WHERE unmapped == "" | KEEP unmapped',
       [],
-      [
-        `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
-      ]
+
+      times(
+        2,
+        () =>
+          `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`
+      )
     );
   });
 });

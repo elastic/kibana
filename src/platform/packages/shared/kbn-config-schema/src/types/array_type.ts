@@ -39,6 +39,10 @@ export class ArrayType<T> extends Type<T[]> {
       schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
     }
 
+    if (options.meta?.id) {
+      schema = schema.id(options.meta.id);
+    }
+
     super(schema, options);
     this.arrayType = type;
     this.arrayOptions = options;
