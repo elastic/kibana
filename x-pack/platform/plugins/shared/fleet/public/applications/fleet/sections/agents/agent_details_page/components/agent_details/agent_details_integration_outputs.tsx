@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 import type { Agent, PackagePolicy } from '../../../../../types';
 
 import { getOutputUnitsByPackageAndInputType, InputStatusFormatter } from './input_status_utils';
@@ -15,42 +16,61 @@ import { AgentDetailsIntegrationStatus } from './agent_details_integration_statu
 export const AgentDetailsIntegrationOutputs: React.FunctionComponent<{
   agent: Agent;
   packagePolicy: PackagePolicy;
+  outputs?: OutputsForAgentPolicy;
   linkToLogs?: boolean;
   'data-test-subj'?: string;
-}> = memo(({ agent, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
-  const outputStatusMap = useMemo(
-    () =>
-      packagePolicy.inputs.reduce((acc, current) => {
-        if (!agent.components) {
-          return new Map<string, InputStatusFormatter>();
-        }
-        if (current.enabled) {
-          const agentUnit = getOutputUnitsByPackageAndInputType(
-            agent.components,
-            packagePolicy,
-            current.type
-          );
+}> = memo(
+  ({ agent, packagePolicy, outputs, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
+    const outputId = packagePolicy.output_id;
+    const outputName = useMemo(() => {
+      if (!outputs) {
+        return outputId ?? 'default';
+      }
 
-          acc.set(
-            current.type,
-            agentUnit
-              ? new InputStatusFormatter(agentUnit.status, agentUnit.message)
-              : new InputStatusFormatter()
-          );
-        }
-        return acc;
-      }, new Map<string, InputStatusFormatter>()),
-    [agent.components, packagePolicy]
-  );
+      if (outputId) {
+        return (
+          outputs.data.integrations?.find((output) => output.id === outputId)?.name || outputId
+        );
+      }
 
-  return (
-    <AgentDetailsIntegrationStatus
-      agent={agent}
-      packagePolicy={packagePolicy}
-      itemStatusMap={outputStatusMap}
-      itemType="Output"
-      linkToLogs={linkToLogs}
-      data-test-subj={dataTestSubj}
-    />
-  );
-});
+      return outputs.data.output.name ?? 'default';
+    }, [outputs, outputId]);
+
+    const outputStatusMap = useMemo(
+      () =>
+        packagePolicy.inputs.reduce((acc, current) => {
+          if (!agent.components) {
+            return new Map<string, InputStatusFormatter>();
+          }
+          if (current.enabled) {
+            const agentUnit = getOutputUnitsByPackageAndInputType(
+              agent.components,
+              packagePolicy,
+              current.type
+            );
+
+            acc.set(
+              current.type,
+              agentUnit
+                ? new InputStatusFormatter(agentUnit.status, agentUnit.message)
+                : new InputStatusFormatter()
+            );
+          }
+          return acc;
+        }, new Map<string, InputStatusFormatter>()),
+      [agent.components, packagePolicy]
+    );
+
+    return (
+      <AgentDetailsIntegrationStatus
+        agent={agent}
+        packagePolicy={packagePolicy}
+        itemStatusMap={outputStatusMap}
+        itemType="Output"
+        outputName={outputName}
+        linkToLogs={linkToLogs}
+        data-test-subj={dataTestSubj}
+      />
+    );
+  }
+);

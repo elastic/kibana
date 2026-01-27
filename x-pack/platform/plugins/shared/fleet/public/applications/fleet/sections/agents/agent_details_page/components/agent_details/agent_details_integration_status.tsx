@@ -71,6 +71,7 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
   packagePolicy: PackagePolicy;
   itemStatusMap: Map<string, InputStatusFormatter>;
   itemType: 'Input' | 'Output';
+  outputName?: string;
   linkToLogs?: boolean;
   'data-test-subj'?: string;
 }> = memo(
@@ -79,6 +80,7 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
     packagePolicy,
     itemStatusMap,
     itemType,
+    outputName,
     linkToLogs = true,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -127,6 +129,11 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
         ) => {
           if (current.enabled) {
             const inputStatusFormatter = itemStatusMap.get(current.type);
+
+            const labelText = outputName
+              ? `${displayInputType(current.type, current?.id)}: ${outputName}`
+              : displayInputType(current.type, current?.id);
+
             return [
               ...acc,
               {
@@ -150,10 +157,10 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
                           }
                         )}
                       >
-                        {displayInputType(current.type, current?.id)}
+                        {labelText}
                       </StyledEuiLink>
                     ) : (
-                      <>{displayInputType(current.type)}</>
+                      <>{labelText}</>
                     )}
                   </EuiToolTip>
                 ),
@@ -180,7 +187,15 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
         },
         []
       );
-    }, [itemStatusMap, agent.id, linkToLogs, packagePolicy, getHref, getItemStatusIcon]);
+    }, [
+      itemStatusMap,
+      agent.id,
+      linkToLogs,
+      packagePolicy,
+      getHref,
+      getItemStatusIcon,
+      outputName,
+    ]);
 
     const itemsTreeView = useMemo(() => {
       const itemsTotalErrors = Array.from(itemStatusMap.values()).reduce((acc, item) => {

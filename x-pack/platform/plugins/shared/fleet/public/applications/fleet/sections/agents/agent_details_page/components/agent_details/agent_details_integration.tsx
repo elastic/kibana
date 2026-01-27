@@ -22,6 +22,7 @@ import styled from 'styled-components';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
@@ -97,11 +98,19 @@ const CollapsablePanel: React.FC<{
 export const AgentDetailsIntegration: React.FunctionComponent<{
   agent: Agent;
   agentPolicy: AgentPolicy;
+  outputs?: OutputsForAgentPolicy;
   packagePolicy: PackagePolicy;
   linkToLogs: boolean;
   'data-test-subj'?: string;
 }> = memo(
-  ({ agent, agentPolicy, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
+  ({
+    agent,
+    agentPolicy,
+    outputs,
+    packagePolicy,
+    linkToLogs = true,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { getHref } = useLink();
     const theme = useEuiTheme();
 
@@ -216,6 +225,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
           agent={agent}
           packagePolicy={packagePolicy}
           linkToLogs={linkToLogs}
+          outputs={outputs}
         />
         {policyResponseExtensionViewWrapper}
         {genericErrorsListExtensionViewWrapper}
