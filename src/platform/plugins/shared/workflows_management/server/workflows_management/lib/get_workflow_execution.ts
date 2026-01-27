@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
@@ -36,29 +35,34 @@ export const getWorkflowExecution = async ({
   spaceId,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    const response = await esClient.search<EsWorkflowExecution>({
-      index: workflowExecutionIndex,
-      query: {
-        bool: {
-          must: [
-            {
-              ids: {
-                values: [workflowExecutionId],
-              },
-            },
-            { term: { spaceId } },
-          ],
-        },
-      },
-    });
+    // Use direct GET by _id for O(1) lookup performance instead of search
+    // This is critical for reducing ES CPU load from frequent UI polling
+    let response;
+    try {
+      response = await esClient.get<EsWorkflowExecution>({
+        index: workflowExecutionIndex,
+        id: workflowExecutionId,
+      });
+    } catch (error: unknown) {
+      // Handle 404 - document not found
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
 
-    const hit = response.hits.hits[0] ?? null;
+    const doc = response._source;
 
-    if (!hit || !hit._source) {
+    // Verify spaceId matches for security/multi-tenancy
+    if (!doc || doc.spaceId !== spaceId) {
       return null;
     }
 
-    const stepExecutions = await searchStepExecutions({
+    let stepExecutions = await searchStepExecutions({
       esClient,
       logger,
       stepsExecutionIndex,
@@ -66,7 +70,20 @@ export const getWorkflowExecution = async ({
       spaceId,
     });
 
-    return transformToWorkflowExecutionDetailDto(hit._id!, hit._source, stepExecutions, logger);
+    // If workflow is in terminal status but no steps found, refresh and retry
+    // Steps may not be visible yet due to refresh: false on writes
+    if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
+      await esClient.indices.refresh({ index: stepsExecutionIndex });
+      stepExecutions = await searchStepExecutions({
+        esClient,
+        logger,
+        stepsExecutionIndex,
+        workflowExecutionId,
+        spaceId,
+      });
+    }
+
+    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
@@ -97,5 +114,7 @@ function transformToWorkflowExecutionDetailDto(
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
     yaml,
+    traceId: workflowExecution.traceId,
+    entryTransactionId: workflowExecution.entryTransactionId,
   };
 }

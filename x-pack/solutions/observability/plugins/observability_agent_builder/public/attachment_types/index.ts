@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
@@ -37,21 +37,21 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
   {
     type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.alert.label', {
-      defaultMessage: 'Observability Alert',
+      defaultMessage: 'Observability alert',
     }),
     icon: 'warning',
   },
   {
     type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.error.label', {
-      defaultMessage: 'APM Error',
+      defaultMessage: 'APM error',
     }),
     icon: 'bug',
   },
   {
     type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.log.label', {
-      defaultMessage: 'Log Entry',
+      defaultMessage: 'Log entry',
     }),
     icon: 'logPatternAnalysis',
   },

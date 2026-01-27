@@ -666,6 +666,10 @@ const expectAssetsInstalled = ({
             type: 'security-rule',
           },
           {
+            id: 'sample_slo_template',
+            type: 'slo_template',
+          },
+          {
             id: 'sample_tag',
             type: 'tag',
           },
@@ -884,6 +888,11 @@ const expectAssetsInstalled = ({
           {
             id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
             path: 'all_assets-0.1.0/kibana/security_rule/sample_security_rule.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'c09e8ecb-7030-5b81-8b93-890f0f3bd272',
+            path: 'all_assets-0.1.0/kibana/slo_template/nginx-availability.json',
             type: 'epm-packages-assets',
           },
           {

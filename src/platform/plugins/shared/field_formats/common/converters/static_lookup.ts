@@ -19,6 +19,19 @@ function convertLookupEntriesToMap(
   return lookupEntries.reduce(
     (lookupMap: Record<string, unknown>, lookupEntry: { key: string; value: unknown }) => {
       lookupMap[lookupEntry.key] = lookupEntry.value;
+
+      /**
+       * Do some key translations because Elasticsearch returns
+       * boolean-type aggregation results as 0 and 1
+       */
+      if (lookupEntry.key === 'true') {
+        lookupMap[1] = lookupEntry.value;
+      }
+
+      if (lookupEntry.key === 'false') {
+        lookupMap[0] = lookupEntry.value;
+      }
+
       return lookupMap;
     },
     {} as Record<string, unknown>

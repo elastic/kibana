@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getExpressionType } from '../..';
+import { getExpressionType, getFunctionDefinition } from '../..';
 import { isFunctionExpression } from '../../../../../ast/is';
 import { within } from '../../../../../ast/location';
+import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
 import { isExpressionComplete } from '../../expressions';
@@ -18,6 +19,9 @@ import { dispatchPartialOperators } from './operators/partial/dispatcher';
 import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
 import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
+import type { MapParameters } from '../map_expression';
+import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
+import { SignatureAnalyzer } from './signature_analyzer';
 import type {
   ExpressionComputedMetadata,
   ExpressionContext,
@@ -25,10 +29,13 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { isNullCheckOperator } from './utils';
+import { getKqlSuggestionsIfApplicable, isNullCheckOperator } from './utils';
+import { isInsideMapExpression, parseMapParams } from '../../maps';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
+// Matches tokens like "foo(" to recover function names when the AST is missing
+const FUNCTION_CALL_REGEX = /\b([a-z_][a-z0-9_]*)\s*\(/gi;
 
 /** Coordinates position detection, handler selection, and range attachment */
 export async function suggestForExpression(
@@ -36,6 +43,24 @@ export async function suggestForExpression(
 ): Promise<SuggestForExpressionResult> {
   const baseCtx = buildContext(params);
   const computed = computeDerivedState(baseCtx);
+
+  const kqlSuggestions = await getKqlSuggestionsIfApplicable(baseCtx);
+
+  if (kqlSuggestions !== null) {
+    return {
+      suggestions: kqlSuggestions,
+      computed,
+    };
+  }
+
+  const mapSuggestions = getMapExpressionSuggestions(baseCtx.innerText);
+
+  if (mapSuggestions !== null) {
+    return {
+      suggestions: attachRanges(baseCtx, mapSuggestions),
+      computed,
+    };
+  }
 
   const partialSuggestions = await trySuggestForPartialOperators(baseCtx);
 
@@ -103,9 +128,14 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
   const { query, cursorPosition } = params;
   const innerText = query.slice(0, cursorPosition);
   const isCursorFollowedByComma = query.slice(cursorPosition).trimStart().startsWith(',');
+  const isCursorFollowedByParens = query.slice(cursorPosition).trimStart().startsWith('(');
 
   const baseOptions: ExpressionContextOptions = params.options ?? ({} as ExpressionContextOptions);
-  const options: ExpressionContextOptions = { ...baseOptions, isCursorFollowedByComma };
+  const options: ExpressionContextOptions = {
+    ...baseOptions,
+    isCursorFollowedByComma,
+    isCursorFollowedByParens,
+  };
 
   return {
     query,
@@ -124,12 +154,17 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =
-    expressionRoot !== undefined &&
-    isFunctionExpression(expressionRoot) &&
-    within(cursorPosition, expressionRoot);
+    (expressionRoot &&
+      isFunctionExpression(expressionRoot) &&
+      within(cursorPosition, expressionRoot)) ||
+    isMapExpressionInFunctionCall(innerText);
 
   return {
     innerText,
@@ -147,6 +182,11 @@ function attachRanges(ctx: ExpressionContext, suggestions: ISuggestionItem[]): I
   const hasNonWhitespacePrefix = !WHITESPACE_REGEX.test(lastChar);
 
   return suggestions.map((suggestion) => {
+    // Preserve existing rangeToReplace if already set (e.g., from map expression suggestions)
+    if (suggestion.rangeToReplace) {
+      return { ...suggestion };
+    }
+
     if (isNullCheckOperator(suggestion.text)) {
       return {
         ...suggestion,
@@ -166,4 +206,56 @@ function attachRanges(ctx: ExpressionContext, suggestions: ISuggestionItem[]): I
 
     return { ...suggestion };
   });
+}
+
+function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | null {
+  if (!isInsideMapExpression(innerText)) {
+    return null;
+  }
+
+  const functionName = getLastFunctionName(innerText);
+  const functionDef = functionName && getFunctionDefinition(functionName);
+  const mapParamsStr = functionDef && SignatureAnalyzer.extractMapParams(functionDef.signatures);
+
+  if (!mapParamsStr) {
+    return null;
+  }
+
+  const parsedParameters = parseMapParams(mapParamsStr);
+  if (Object.keys(parsedParameters).length === 0) {
+    return null;
+  }
+
+  const availableParameters = Object.entries(parsedParameters).reduce<MapParameters>(
+    (acc, [paramName, paramDef]) => {
+      acc[paramName] = {
+        ...paramDef,
+        suggestions: paramDef.values.map((value) => buildMapValueCompleteItem(value)),
+      };
+      return acc;
+    },
+    {}
+  );
+  const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters, true);
+  return suggestions.length > 0 ? suggestions : [];
+}
+
+function isMapExpressionInFunctionCall(innerText: string): boolean {
+  if (!isInsideMapExpression(innerText)) {
+    return false;
+  }
+
+  return getLastFunctionName(innerText) !== null;
+}
+
+function getLastFunctionName(innerText: string): string | null {
+  // Limit search to the text before the current map and ignore function-like tokens inside strings
+  const lastOpenBrace = innerText.lastIndexOf('{');
+  const searchText = lastOpenBrace >= 0 ? innerText.slice(0, lastOpenBrace) : innerText;
+  const textWithoutStrings = searchText.replace(DOUBLE_QUOTED_STRING_REGEX, ' ');
+
+  const allMatches = [...textWithoutStrings.matchAll(FUNCTION_CALL_REGEX)];
+  const fnMatch = allMatches.length > 0 ? allMatches[allMatches.length - 1] : null;
+
+  return fnMatch ? fnMatch[1].toLowerCase() : null;
 }

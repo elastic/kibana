@@ -6,7 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { budgetingMethodSchema, objectiveSchema, optionalSettingsSchema, tagsSchema } from './slo';
+import {
+  budgetingMethodSchema,
+  dashboardsWithIdSchema,
+  objectiveSchema,
+  optionalSettingsSchema,
+  tagsSchema,
+} from './slo';
 import { timeWindowSchema } from './time_window';
 import { indicatorSchema } from './indicators';
 
@@ -23,6 +29,8 @@ const sloTemplateSchema = t.intersection([
     timeWindow: timeWindowSchema,
     tags: tagsSchema,
     settings: optionalSettingsSchema,
+    groupBy: t.array(t.string),
+    artifacts: dashboardsWithIdSchema,
   }),
 ]);
 
