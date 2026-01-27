@@ -42,7 +42,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 import type { ESQLDataGroupNode } from './types';
-import { internalStateActions, useInternalStateDispatch } from '../../../../state_management/redux';
+import type { internalStateActions } from '../../../../state_management/redux';
 
 interface RowContext {
   groupId: string;
@@ -269,21 +269,19 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   editorQuery,
   statsFieldSummary,
   updateESQLQuery,
+  openInNewTab,
 }: Pick<
   ContextMenuProps,
-  'dataView' | 'esqlVariables' | 'editorQuery' | 'statsFieldSummary' | 'updateESQLQuery'
+  | 'dataView'
+  | 'esqlVariables'
+  | 'editorQuery'
+  | 'statsFieldSummary'
+  | 'updateESQLQuery'
+  | 'openInNewTab'
 >) => {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
-  const dispatch = useInternalStateDispatch();
   const closePopover = useCallback(() => setPopoverRowData(null), [setPopoverRowData]);
-
-  const openInNewTab = useCallback(
-    (...args: Parameters<typeof internalStateActions.openInNewTab>) => {
-      dispatch(internalStateActions.openInNewTab(...args));
-    },
-    [dispatch]
-  );
 
   /**
    * Helper function to toggle the popover for the row action (3 dots) button.

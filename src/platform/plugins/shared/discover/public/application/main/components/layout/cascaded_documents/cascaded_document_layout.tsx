@@ -165,7 +165,8 @@ export type CascadedDocumentsLayoutProps = Omit<
 
 export const CascadedDocumentsLayout = React.memo(
   ({ dataView, ...props }: CascadedDocumentsLayoutProps) => {
-    const { esqlQuery, esqlVariables, onUpdateESQLQuery } = useCascadedDocumentsContext();
+    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab } =
+      useCascadedDocumentsContext();
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -186,6 +187,7 @@ export const CascadedDocumentsLayout = React.memo(
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
       updateESQLQuery: onUpdateESQLQuery,
+      openInNewTab,
     });
 
     return (
