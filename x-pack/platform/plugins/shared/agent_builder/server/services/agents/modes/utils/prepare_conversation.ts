@@ -193,7 +193,8 @@ export const prepareConversation = async ({
       }
 
       try {
-        const isReadonly = attachment.readonly ?? definition.isReadonly ?? true;
+        const typeReadonly = definition.isReadonly ?? true;
+        const isReadonly = typeReadonly || attachment.readonly === true;
         if (!isReadonly) {
           return undefined;
         }
