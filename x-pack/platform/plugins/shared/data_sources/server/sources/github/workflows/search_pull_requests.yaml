@@ -1,6 +1,6 @@
 version: '1'
-name: 'sources.github.search_issues'
-description: 'Search for issues in a GitHub repository'
+name: 'sources.github.search_pull_requests'
+description: 'Search for pull requests in a GitHub repository'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -29,11 +29,11 @@ inputs:
     default: "created"
     description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
 steps:
-  - name: search-issues
+  - name: search-pull-requests
     type: mcp.callTool
     connector-id: {{ stackConnectorId }}
     with:
-      name: "search_issues"
+      name: "search_pull_requests"
       arguments:
         query: "${{inputs.query}}"
         order: "${{inputs.order}}"
@@ -42,4 +42,3 @@ steps:
         page: "${{inputs.page}}"
         perPage: "${{inputs.per_page}}"
         sort: "${{inputs.sort}}"
-        type: "issue"

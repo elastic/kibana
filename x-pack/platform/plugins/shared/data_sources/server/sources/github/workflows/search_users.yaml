@@ -1,6 +1,6 @@
 version: '1'
-name: 'sources.github.search_issues'
-description: 'Search for issues in a GitHub repository'
+name: 'sources.github.search_users'
+description: 'Search for GitHub users'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -12,12 +12,6 @@ inputs:
     type: string
     default: "desc"
     description: "Sort order. Valid values: asc, desc"
-  - name: owner
-    type: string
-    required: false
-  - name: repo
-    type: string
-    required: false
   - name: page
     type: number
     default: 1
@@ -26,20 +20,17 @@ inputs:
     default: 10
   - name: sort
     type: string
-    default: "created"
-    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
+    default: "followers"
+    description: "Sort field. Valid values: followers, repositories, joined"
 steps:
-  - name: search-issues
+  - name: search-users
     type: mcp.callTool
     connector-id: {{ stackConnectorId }}
     with:
-      name: "search_issues"
+      name: "search_users"
       arguments:
         query: "${{inputs.query}}"
         order: "${{inputs.order}}"
-        owner: "${{inputs.owner}}"
-        repo: "${{inputs.repo}}"
         page: "${{inputs.page}}"
         perPage: "${{inputs.per_page}}"
         sort: "${{inputs.sort}}"
-        type: "issue"
