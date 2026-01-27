@@ -95,7 +95,7 @@ async function getFirstSeenWithinWindow({
   groupIds: string[];
   startMs: number;
   endMs: number;
-}): Promise<Map<string, number>> {
+}): Promise<Map<string, number | null>> {
   const response = await apmEventClient.search('get_error_groups_first_seen_within_window', {
     apm: {
       sources: [
@@ -138,9 +138,7 @@ async function getFirstSeenWithinWindow({
   const entries = compact(
     (response.aggregations?.groups?.buckets ?? []).map((bucket) => {
       const firstSeen = bucket.first_seen?.value;
-      if (firstSeen != null) {
-        return [bucket.key as string, firstSeen] as const;
-      }
+      return [bucket.key as string, firstSeen] as const;
     })
   );
 
