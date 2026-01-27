@@ -10,6 +10,7 @@ steps:
             --context "kibana-storybooks-from-pr" \
             --clear-previous
     agents:
+      provider: gcp
       machineType: n2-standard-8
       preemptible: true
     timeout_in_minutes: 50
