@@ -9291,6 +9291,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-chart-section-viewer@link:src/platform/packages/shared/kbn-unified-chart-section-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""
@@ -9316,10 +9320,6 @@
   uid ""
 
 "@kbn/unified-histogram@link:src/platform/packages/shared/kbn-unified-histogram":
-  version "0.0.0"
-  uid ""
-
-"@kbn/unified-metrics-grid@link:src/platform/packages/shared/kbn-unified-metrics-grid":
   version "0.0.0"
   uid ""
 
