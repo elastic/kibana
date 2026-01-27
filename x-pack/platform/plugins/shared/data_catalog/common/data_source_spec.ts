@@ -45,7 +45,8 @@ export interface WorkflowReference {
   id: string;
   /**
    * Optional override to control AB tool generation.
-   * If not specified, the registry's default behavior will be used.
+   * If not specified, the registry's default behavior will be used,
+   * which relies on whether there is an ` agent-builder-tool ` tag or not.
    */
   shouldGenerateABTool?: boolean;
 }
@@ -112,23 +113,8 @@ export interface DataSource {
    */
   iconType: string;
 
-  /**
-   * Workflow configuration. Supports three formats:
-   *
-   * 1. String (directory path): '/path/to/workflows'
-   *    - YAML files can use `{{stackConnectorId}}` template variable
-   *    - Agent Builder tool generation controlled by 'agent-builder-tool' tag in YAML
-   *
-   * 2. Array (registry references): [{ id: 'workflow-1' }, { id: 'workflow-2' }]
-   *    - References workflows from a third-party registry
-   *    - Registry client will fetch workflow definitions
-   *    - Optional shouldGenerateABTool override per workflow
-   *
-   * 3. Object (mixed): { directory: '/path', registry: [...] }
-   *    - Combines both local files and registry workflows
-   */
-  workflows?: string | WorkflowReference[] | WorkflowsConfig;
-
+  // this would replace `generateWorkflows` in the future and become non-optional
+  workflows?: WorkflowsConfig;
   generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
 
   /**

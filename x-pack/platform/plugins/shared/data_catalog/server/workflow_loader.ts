@@ -7,7 +7,7 @@
 
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
-import type { WorkflowInfo, WorkflowReference, WorkflowsConfig } from '../common/data_source_spec';
+import type { WorkflowInfo, WorkflowsConfig } from '../common/data_source_spec';
 import type { WorkflowRegistry } from './workflow_registry';
 import { loadWorkflowsFromRegistry } from './workflow_registry';
 
@@ -90,39 +90,11 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
   return tagPatterns.some((pattern) => pattern.test(yamlContent));
 }
 
-/**
- * Loads workflows from various sources based on the configuration format.
- * Supports:
- * - String: directory path
- * - Array: workflow registry references
- * - Object: mixed (both directory and registry)
- *
- * @param workflowsConfig - Workflow configuration (string, array, or object)
- * @param registry - Optional workflow registry client (required for registry references)
- * @param stackConnectorId - Stack connector ID to substitute in workflow templates
- * @returns Array of WorkflowInfo objects
- *
- * @throws Error if configuration is invalid, or registry is required but not provided
- */
 export async function loadWorkflows(
-  workflowsConfig: string | WorkflowReference[] | WorkflowsConfig,
+  workflowsConfig: WorkflowsConfig,
   registry: WorkflowRegistry | undefined,
   stackConnectorId?: string
 ): Promise<WorkflowInfo[]> {
-  // Case 1: String - directory path
-  if (typeof workflowsConfig === 'string') {
-    return loadWorkflowsFromDirectory(workflowsConfig, stackConnectorId);
-  }
-
-  // Case 2: Array - registry references
-  if (Array.isArray(workflowsConfig)) {
-    if (!registry) {
-      throw new Error('WorkflowRegistry is required when using registry workflow references');
-    }
-    return loadWorkflowsFromRegistry(registry, workflowsConfig, stackConnectorId);
-  }
-
-  // Case 3: Object - mixed configuration
   const workflows: WorkflowInfo[] = [];
 
   // Load from directory if specified
