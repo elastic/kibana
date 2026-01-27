@@ -6,13 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
   EuiLink,
   EuiPanel,
   EuiSkeletonRectangle,
@@ -20,20 +19,17 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
-  copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ValuesType } from 'utility-types';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { useCloudForwarderFlow } from './use_cloudforwarder_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
-import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 const EDOT_CLOUD_FORWARDER_DOCS_URL =
   'https://www.elastic.co/docs/reference/opentelemetry/edot-cloud-forwarder/aws';
@@ -76,11 +72,37 @@ const CLOUDFORMATION_TEMPLATES = {
 type LogType = keyof typeof CLOUDFORMATION_TEMPLATES;
 
 /**
+ * Validates S3 bucket names according to AWS naming rules:
+ * - 3-63 characters long
+ * - Only lowercase letters, numbers, hyphens, and periods
+ * - Must start and end with a letter or number
+ * - Cannot contain consecutive periods
+ */
+const S3_BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
+
+function isValidS3BucketName(bucketName: string): boolean {
+  return S3_BUCKET_NAME_REGEX.test(bucketName) && !bucketName.includes('..');
+}
+
+/**
+ * Builds an S3 bucket ARN from a bucket name.
+ * Format: arn:aws:s3:::bucket-name
+ */
+function buildS3BucketArn(bucketName: string): string {
+  return `arn:aws:s3:::${bucketName}`;
+}
+
+/**
  * Builds a CloudFormation console URL with pre-filled parameters for deploying
  * the EDOT Cloud Forwarder. The URL includes the template URL, stack name, log type,
- * and OTLP endpoint as hash parameters for the AWS CloudFormation console.
+ * OTLP endpoint, API key, and S3 bucket ARN as hash parameters for the AWS CloudFormation console.
  */
-function buildCloudFormationUrl(logType: LogType, otlpEndpoint: string): string {
+function buildCloudFormationUrl(
+  logType: LogType,
+  otlpEndpoint: string,
+  apiKey: string,
+  s3BucketArn: string
+): string {
   const config = CLOUDFORMATION_TEMPLATES[logType];
   const url = new URL('https://console.aws.amazon.com/cloudformation/home');
   const params = new URLSearchParams({
@@ -90,6 +112,10 @@ function buildCloudFormationUrl(logType: LogType, otlpEndpoint: string): string 
     param_EdotCloudForwarderS3LogsType: config.logType,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     param_OTLPEndpoint: otlpEndpoint,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    param_ElasticAPIKey: apiKey,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    param_SourceS3BucketARN: s3BucketArn,
   });
 
   url.hash = `/stacks/create/review?${params.toString()}`;
@@ -112,7 +138,12 @@ export function CloudForwarderPanel() {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const [selectedLogType, setSelectedLogType] = useState<LogType>('vpcflow');
+  const [s3BucketName, setS3BucketName] = useState<string>('');
   const { data, status, error, refetch } = useCloudForwarderFlow();
+
+  const trimmedBucketName = s3BucketName.trim();
+  const isBucketNameInvalid =
+    trimmedBucketName.length > 0 && !isValidS3BucketName(trimmedBucketName);
   const { onPageReady } = usePerformanceContext();
 
   useEffect(() => {
@@ -201,9 +232,9 @@ export function CloudForwarderPanel() {
     },
     {
       title: i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.copyCredentialsTitle',
+        'xpack.observability_onboarding.cloudforwarderPanel.configureForwarderTitle',
         {
-          defaultMessage: 'Copy your OTLP credentials',
+          defaultMessage: 'Configure the Cloud Forwarder',
         }
       ),
       children: (
@@ -212,51 +243,63 @@ export function CloudForwarderPanel() {
             <>
               <EuiSkeletonText lines={2} />
               <EuiSpacer />
+              <EuiSkeletonRectangle width="100%" height="40px" />
+              <EuiSpacer size="m" />
               <EuiSkeletonText lines={1} />
-              <EuiSkeletonText lines={1} />
+              <EuiSpacer />
+              <EuiSkeletonRectangle width="100%" height="40px" />
             </>
           )}
           {status === FETCH_STATUS.SUCCESS && data !== undefined && (
             <>
-              <ManagedOtlpCallout />
               <EuiText>
                 <p>
                   <FormattedMessage
-                    id="xpack.observability_onboarding.cloudforwarderPanel.copyCredentialsDescription"
-                    defaultMessage="Copy the API key below. You'll need to enter it in the AWS CloudFormation console in the next step."
+                    id="xpack.observability_onboarding.cloudforwarderPanel.configureForwarderDescription"
+                    defaultMessage="Enter the name of the S3 bucket containing your AWS logs."
                   />
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              <CredentialsTable
-                managedOtlpServiceUrl={data.managedOtlpServiceUrl}
-                apiKeyEncoded={data.apiKeyEncoded}
-              />
-            </>
-          )}
-        </>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.launchStackTitle', {
-        defaultMessage: 'Deploy the EDOT Cloud Forwarder in AWS',
-      }),
-      children: (
-        <>
-          {status !== FETCH_STATUS.SUCCESS && (
-            <>
-              <EuiSkeletonText lines={3} />
-              <EuiSpacer />
-              <EuiSkeletonRectangle width="170px" height="40px" />
-            </>
-          )}
-          {status === FETCH_STATUS.SUCCESS && data !== undefined && (
-            <>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.observability_onboarding.cloudforwarderPanel.s3BucketNameLabel',
+                  {
+                    defaultMessage: 'S3 Bucket Name',
+                  }
+                )}
+                isInvalid={isBucketNameInvalid}
+                error={
+                  isBucketNameInvalid
+                    ? i18n.translate(
+                        'xpack.observability_onboarding.cloudforwarderPanel.s3BucketNameError',
+                        {
+                          defaultMessage:
+                            'Enter a valid S3 bucket name (3-63 lowercase characters, numbers, hyphens, or periods)',
+                        }
+                      )
+                    : undefined
+                }
+              >
+                <EuiFieldText
+                  data-test-subj="observabilityOnboardingCloudForwarderS3BucketNameInput"
+                  value={s3BucketName}
+                  onChange={(e) => setS3BucketName(e.target.value)}
+                  isInvalid={isBucketNameInvalid}
+                  placeholder={i18n.translate(
+                    'xpack.observability_onboarding.cloudforwarderPanel.s3BucketNamePlaceholder',
+                    {
+                      defaultMessage: 'my-logs-bucket',
+                    }
+                  )}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="l" />
               <EuiText>
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.cloudforwarderPanel.selectLogTypeDescription"
-                    defaultMessage="Select the type of AWS logs you want to forward, then click the button to launch the CloudFormation stack. The OTLP endpoint is pre-populated; you only need to enter the API key from the previous step."
+                    defaultMessage="Select the type of AWS logs you want to forward from your S3 bucket."
                   />
                 </p>
               </EuiText>
@@ -274,32 +317,54 @@ export function CloudForwarderPanel() {
                 onChange={(id) => setSelectedLogType(id as LogType)}
                 buttonSize="m"
               />
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.launchStackTitle', {
+        defaultMessage: 'Deploy the EDOT Cloud Forwarder in AWS',
+      }),
+      children: (
+        <>
+          {status !== FETCH_STATUS.SUCCESS && (
+            <>
+              <EuiSkeletonText lines={1} />
+              <EuiSpacer />
+              <EuiSkeletonRectangle width="170px" height="40px" />
+            </>
+          )}
+          {status === FETCH_STATUS.SUCCESS && data !== undefined && (
+            <>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.observability_onboarding.cloudforwarderPanel.launchStackDescription"
+                    defaultMessage="Launch the CloudFormation stack in AWS to deploy the EDOT Cloud Forwarder."
+                  />
+                </p>
+              </EuiText>
               <EuiSpacer size="l" />
               <EuiButton
                 data-test-subj="observabilityOnboardingCloudForwarderLaunchStackButton"
-                href={buildCloudFormationUrl(selectedLogType, data.managedOtlpServiceUrl)}
+                href={buildCloudFormationUrl(
+                  selectedLogType,
+                  data.managedOtlpServiceUrl,
+                  data.apiKeyEncoded,
+                  buildS3BucketArn(trimmedBucketName)
+                )}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
                 fill
+                isDisabled={!isValidS3BucketName(trimmedBucketName)}
               >
                 {i18n.translate(
                   'xpack.observability_onboarding.cloudforwarderPanel.launchStackButtonLabel',
                   { defaultMessage: 'Launch Stack in AWS' }
                 )}
               </EuiButton>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.observability_onboarding.cloudforwarderPanel.launchStackNote"
-                    defaultMessage="In the AWS Console, you'll need to paste the API key you copied above into the {paramName} field."
-                    values={{
-                      paramName: <code>ElasticAPIKey</code>,
-                    }}
-                  />
-                </p>
-              </EuiText>
             </>
           )}
         </>
@@ -351,112 +416,5 @@ export function CloudForwarderPanel() {
       <EuiSteps steps={steps} />
       <FeedbackButtons flow="cloudforwarder" />
     </EuiPanel>
-  );
-}
-
-function CredentialsTable({
-  managedOtlpServiceUrl,
-  apiKeyEncoded,
-}: {
-  managedOtlpServiceUrl: string;
-  apiKeyEncoded: string;
-}) {
-  const items = [
-    {
-      setting: i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.credentials.otlpEndpoint',
-        {
-          defaultMessage: 'OTLP Endpoint',
-        }
-      ),
-      value: managedOtlpServiceUrl,
-      description: i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.credentials.otlpEndpointDesc',
-        {
-          defaultMessage: 'Pre-populated in the CloudFormation URL',
-        }
-      ),
-    },
-    {
-      setting: i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.credentials.apiKey',
-        {
-          defaultMessage: 'API Key',
-        }
-      ),
-      value: apiKeyEncoded,
-      description: i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.credentials.apiKeyDesc',
-        {
-          defaultMessage: 'Copy and paste into AWS CloudFormation',
-        }
-      ),
-    },
-  ];
-
-  const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
-    {
-      field: 'setting',
-      width: '20%',
-      name: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.configSetting', {
-        defaultMessage: 'Setting',
-      }),
-    },
-    {
-      field: 'value',
-      width: '50%',
-      name: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.configValue', {
-        defaultMessage: 'Value',
-      }),
-      render: (_, item) => (
-        <>
-          <EuiText size="s" color="accent">
-            <code>{item.value}</code>
-          </EuiText>
-          {item.value && (
-            <EuiButtonIcon
-              data-test-subj={`cloudforwarderCredentialsCopyButton-${item.setting
-                .toLowerCase()
-                .replace(/\s+/g, '-')}`}
-              aria-label={i18n.translate(
-                'xpack.observability_onboarding.cloudforwarderPanel.copyIconText',
-                {
-                  defaultMessage: 'Copy to clipboard',
-                }
-              )}
-              color="text"
-              iconType="copy"
-              onClick={() => copyToClipboard(item.value)}
-            />
-          )}
-        </>
-      ),
-    },
-    {
-      field: 'description',
-      width: '30%',
-      name: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.configDescription', {
-        defaultMessage: 'Note',
-      }),
-      render: (_, { description }) => (
-        <EuiText size="s" color="subdued">
-          {description}
-        </EuiText>
-      ),
-    },
-  ];
-
-  return (
-    <EuiBasicTable
-      items={items}
-      columns={columns}
-      tableCaption={i18n.translate(
-        'xpack.observability_onboarding.cloudforwarderPanel.credentialsTableCaption',
-        {
-          defaultMessage: 'OTLP credentials for AWS CloudFormation deployment',
-        }
-      )}
-      data-test-subj="cloudforwarder-credentials-table"
-    />
   );
 }

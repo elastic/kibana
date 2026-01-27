@@ -12,23 +12,23 @@ import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
 
 export const CloudForwarderPage = () => (
-  <PageTemplate
-    customHeader={
-      <CustomHeader
-        logo="opentelemetry"
-        headlineCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.cloudforwarder.text',
-          {
-            defaultMessage: 'Set up EDOT Cloud Forwarder for AWS',
-          }
-        )}
-        captionCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.cloudforwarder.caption.description',
-          {
-            defaultMessage:
-              'Deploy the EDOT Cloud Forwarder as a Lambda function to forward logs from AWS S3 to Elastic.',
-          }
-        )}
+    <PageTemplate
+      customHeader={
+        <CustomHeader
+          logo="opentelemetry"
+          headlineCopy={i18n.translate(
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.cloudforwarder.text',
+            {
+              defaultMessage: 'Set up EDOT Cloud Forwarder for AWS',
+            }
+          )}
+          captionCopy={i18n.translate(
+            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.cloudforwarder.caption.description',
+            {
+              defaultMessage:
+                'Deploy the EDOT Cloud Forwarder as a Lambda function to forward logs from AWS S3 to Elastic.',
+            }
+          )}
       />
     }
   >
