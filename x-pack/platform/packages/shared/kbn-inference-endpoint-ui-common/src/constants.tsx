@@ -83,11 +83,9 @@ export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
 export const DEFAULT_MODELS: Partial<Record<ServiceProviderKeys, string>> = {
   // Providers with connector schema constants
   [ServiceProviderKeys.openai]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1'
-  [ServiceProviderKeys.azureopenai]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1'
   [ServiceProviderKeys.amazonbedrock]: BEDROCK_DEFAULT_MODEL, // 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'
   [ServiceProviderKeys.googlevertexai]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
   [ServiceProviderKeys.googleaistudio]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
-  [ServiceProviderKeys.azureaistudio]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1' - similar to Azure OpenAI
 };
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
