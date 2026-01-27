@@ -40,4 +40,7 @@ retry 5 15 run_check
 
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
+echo "Git status after the checks"
+git status
+
 check_for_changed_files "capture_oas_snapshot.sh" true
