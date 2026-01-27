@@ -314,7 +314,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     const validateConfig = useCallback(
       (
         updatedConfig: EndpointRunScriptActionRequestParams,
-        updatedScriptSelected: EndpointScript | undefined = scriptSelected
+        updatedScriptSelected: EndpointScript | undefined
       ): OsConfigValidationResult => {
         const validationResult: OsConfigValidationResult = {
           isValid: true,
@@ -345,25 +345,25 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
 
         return validationResult;
       },
-      [scriptSelected]
+      []
     );
 
     const currentValidationState = useMemo(() => {
-      return validateConfig(config);
-    }, [config, validateConfig]);
+      return validateConfig(config, scriptSelected);
+    }, [config, scriptSelected, validateConfig]);
 
     const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
       useCallback(
-        (selectedScript) => {
+        (newSelectedScript) => {
           const updatedConfig = {
             ...config,
-            scriptId: selectedScript?.id ?? '',
+            scriptId: newSelectedScript?.id ?? '',
             // reset script input ++ timeout if no script is selected
-            ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
+            ...(!newSelectedScript ? { scriptInput: '', timeout: undefined } : {}),
           };
-          const updatedConfigValidationResult = validateConfig(updatedConfig, selectedScript);
+          const updatedConfigValidationResult = validateConfig(updatedConfig, newSelectedScript);
 
-          if (selectedScript?.id !== config.scriptId) {
+          if (newSelectedScript?.id !== config.scriptId) {
             onChange({
               isValid: updatedConfigValidationResult.isValid,
               errors: updatedConfigValidationResult.errors,
@@ -371,7 +371,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             });
           }
 
-          setSelectedScript(selectedScript);
+          setSelectedScript(newSelectedScript);
         },
         [config, onChange, validateConfig]
       );
@@ -393,7 +393,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           ...config,
           scriptInput: ev.target.value ?? '',
         };
-        const { isValid, errors } = validateConfig(updatedConfig);
+        const { isValid, errors } = validateConfig(updatedConfig, scriptSelected);
 
         onChange({
           isValid,
@@ -401,7 +401,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           updatedConfig,
         });
       },
-      [config, onChange, validateConfig]
+      [config, onChange, scriptSelected, validateConfig]
     );
 
     const scriptTimeoutOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
@@ -411,7 +411,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           ...config,
           timeout: (userProvidedTimeoutValue as unknown as number) || undefined,
         };
-        const { isValid, errors, timeout } = validateConfig(updatedConfig);
+        const { isValid, errors, timeout } = validateConfig(updatedConfig, scriptSelected);
 
         // Now that we know the user's value is valid, convert it to a number since the API expects a number
         if (userProvidedTimeoutValue && timeout.isValid) {
@@ -424,7 +424,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           updatedConfig,
         });
       },
-      [config, onChange, validateConfig]
+      [config, onChange, scriptSelected, validateConfig]
     );
 
     return (
