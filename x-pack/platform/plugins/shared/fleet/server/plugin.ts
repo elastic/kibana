@@ -25,13 +25,13 @@ import type {
   SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -52,7 +52,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -163,6 +163,11 @@ import {
 } from './tasks/agentless/deployment_sync_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 import { registerAgentBuilderSkills } from './agent_builder/skills/register_skills';
+import {
+  type AgentlessPoliciesService,
+  AgentlessPoliciesServiceImpl,
+} from './services/agentless/agentless_policies';
+import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -268,6 +273,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  agentlessPoliciesService: AgentlessPoliciesService;
   runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   cloudConnectorService: CloudConnectorServiceInterface;
@@ -673,6 +679,7 @@ export class FleetPlugin
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
+    registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -867,7 +874,9 @@ export class FleetPlugin
         await backOff(
           async () => {
             await setupFleet(
-              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.savedObjects.getUnsafeInternalClient({
+                excludedExtensions: [SPACES_EXTENSION_ID],
+              }),
               core.elasticsearch.client.asInternalUser,
               { useLock: true }
             );
@@ -923,7 +932,9 @@ export class FleetPlugin
       }
     })();
 
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalSoClient = core.savedObjects.getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -942,6 +953,12 @@ export class FleetPlugin
       ),
       agentPolicyService,
       packagePolicyService,
+      agentlessPoliciesService: new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        internalSoClient,
+        core.elasticsearch.client.asInternalUser,
+        logger
+      ),
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
       },

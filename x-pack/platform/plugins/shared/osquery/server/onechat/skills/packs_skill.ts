@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getOneChatContext } from './utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';

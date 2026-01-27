@@ -14,6 +14,12 @@ export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
 export { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from './attack_discovery';
 
+/**
+ * Cases connector limits.
+ */
+export const MAX_OPEN_CASES = 20;
+export const DEFAULT_MAX_OPEN_CASES = 5;
+
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 
@@ -168,7 +174,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false },
+  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },

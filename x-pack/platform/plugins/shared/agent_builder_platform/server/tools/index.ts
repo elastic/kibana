@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -44,7 +44,7 @@ export const registerTools = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { onechat } = setupDeps;
+  const { agentBuilder } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
@@ -79,6 +79,6 @@ export const registerTools = ({
   }
 
   tools.forEach((tool) => {
-    onechat.tools.register(tool);
+    agentBuilder.tools.register(tool);
   });
 };

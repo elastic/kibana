@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getOpenAndAcknowledgedAlertsQuery } from '@kbn/elastic-assistant-common';
 
 const MIN_SIZE = 10;
 
-import { getAnonymizedAlerts } from '.';
+import { getAnonymizedAlerts, getAnonymizedAlertsWithDeduplication } from '.';
 import { mockOpenAndAcknowledgedAlertsQueryResults } from '../../../../mock/mock_open_and_acknowledged_alerts_query_results';
 
 jest.mock('@kbn/elastic-assistant-common', () => {
@@ -211,5 +212,278 @@ describe('getAnonymizedAlerts', () => {
     });
 
     expect(onNewReplacements).toHaveBeenCalledTimes(20); // 20 alerts in mockOpenAndAcknowledgedAlertsQueryResults
+  });
+});
+
+describe('getAnonymizedAlertsWithDeduplication', () => {
+  const alertsIndexPattern = '.alerts-security.alerts-default';
+  const mockAnonymizationFields = [
+    {
+      id: '9f95b649-f20e-4edf-bd76-1d21ab6f8e2e',
+      timestamp: '2024-05-06T22:16:48.489Z',
+      field: '_id',
+      allowed: true,
+      anonymized: false,
+      createdAt: '2024-05-06T22:16:48.489Z',
+      namespace: 'default',
+    },
+    {
+      id: '22f23471-4f6a-4cec-9b2a-cf270ffb53d5',
+      timestamp: '2024-05-06T22:16:48.489Z',
+      field: 'host.name',
+      allowed: true,
+      anonymized: true,
+      createdAt: '2024-05-06T22:16:48.489Z',
+      namespace: 'default',
+    },
+  ];
+  const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const mockReplacements = {
+    replacement1: 'SRVMAC08',
+    replacement2: 'SRVWIN01',
+    replacement3: 'SRVWIN02',
+  };
+  const size = 10;
+
+  const mockDeduplicationAggResponse = {
+    took: 10,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0 }, hits: [] },
+    aggregations: {
+      total_alerts: { value: 20 },
+      alert_groups: {
+        buckets: [
+          {
+            key: 'hash1|Malware Detection Alert|SRVMAC08',
+            doc_count: 8,
+            max_risk_score: { value: 99 },
+            top_alert: {
+              hits: {
+                hits: [
+                  {
+                    _index: '.internal.alerts-security.alerts-default-000001',
+                    _id: 'b6e883c29b32571aaa667fa13e65bbb4f95172a2b84bdfb85d6f16c72b2d2560',
+                    fields: {
+                      _id: ['b6e883c29b32571aaa667fa13e65bbb4f95172a2b84bdfb85d6f16c72b2d2560'],
+                      'host.name': ['SRVMAC08'],
+                    },
+                  },
+                ],
+              },
+            },
+            alert_ids: {
+              buckets: [
+                {
+                  key: 'b6e883c29b32571aaa667fa13e65bbb4f95172a2b84bdfb85d6f16c72b2d2560',
+                  doc_count: 1,
+                },
+                {
+                  key: '0215a6c5cc9499dd0290cd69a4947efb87d3ddd8b6385a766d122c2475be7367',
+                  doc_count: 1,
+                },
+              ],
+            },
+            field_file_hash_sha256: { buckets: [{ key: 'hash1', doc_count: 8 }] },
+            field_kibana_alert_rule_name: {
+              buckets: [{ key: 'Malware Detection Alert', doc_count: 8 }],
+            },
+            field_host_name: { buckets: [{ key: 'SRVMAC08', doc_count: 8 }] },
+          },
+          {
+            key: 'hash2|Malware Detection Alert|SRVWIN02',
+            doc_count: 10,
+            max_risk_score: { value: 99 },
+            top_alert: {
+              hits: {
+                hits: [
+                  {
+                    _index: '.internal.alerts-security.alerts-default-000001',
+                    _id: 'f465ca9fbfc8bc3b1871e965c9e111cac76ff3f4076fed6bc9da88d49fb43014',
+                    fields: {
+                      _id: ['f465ca9fbfc8bc3b1871e965c9e111cac76ff3f4076fed6bc9da88d49fb43014'],
+                      'host.name': ['SRVWIN02'],
+                    },
+                  },
+                ],
+              },
+            },
+            alert_ids: {
+              buckets: [
+                {
+                  key: 'f465ca9fbfc8bc3b1871e965c9e111cac76ff3f4076fed6bc9da88d49fb43014',
+                  doc_count: 1,
+                },
+                {
+                  key: 'aa283e6a13be77b533eceffb09e48254c8f91feeccc39f7eed80fd3881d053f4',
+                  doc_count: 1,
+                },
+              ],
+            },
+            field_file_hash_sha256: { buckets: [{ key: 'hash2', doc_count: 10 }] },
+            field_kibana_alert_rule_name: {
+              buckets: [{ key: 'Malware Detection Alert', doc_count: 10 }],
+            },
+            field_host_name: { buckets: [{ key: 'SRVWIN02', doc_count: 10 }] },
+          },
+          {
+            key: 'hash3|Malware Detection Alert|SRVWIN01',
+            doc_count: 2,
+            max_risk_score: { value: 99 },
+            top_alert: {
+              hits: {
+                hits: [
+                  {
+                    _index: '.internal.alerts-security.alerts-default-000001',
+                    _id: 'cdf3b5510bb5ed622e8cefd1ce6bedc52bdd99a4c1ead537af0603469e713c8b',
+                    fields: {
+                      _id: ['cdf3b5510bb5ed622e8cefd1ce6bedc52bdd99a4c1ead537af0603469e713c8b'],
+                      'host.name': ['SRVWIN01'],
+                    },
+                  },
+                ],
+              },
+            },
+            alert_ids: {
+              buckets: [
+                {
+                  key: 'cdf3b5510bb5ed622e8cefd1ce6bedc52bdd99a4c1ead537af0603469e713c8b',
+                  doc_count: 1,
+                },
+                {
+                  key: '6abe81eb6350fb08031761be029e7ab19f7e577a7c17a9c5ea1ed010ba1620e3',
+                  doc_count: 1,
+                },
+              ],
+            },
+            field_file_hash_sha256: { buckets: [{ key: 'hash3', doc_count: 2 }] },
+            field_kibana_alert_rule_name: {
+              buckets: [{ key: 'Malware Detection Alert', doc_count: 2 }],
+            },
+            field_host_name: { buckets: [{ key: 'SRVWIN01', doc_count: 2 }] },
+          },
+        ],
+      },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (mockEsClient.search as unknown as jest.Mock).mockResolvedValue(
+      mockDeduplicationAggResponse as unknown as SearchResponse
+    );
+  });
+
+  it('returns empty result when alertsIndexPattern is not provided', async () => {
+    const result = await getAnonymizedAlertsWithDeduplication({
+      esClient: mockEsClient,
+      size,
+    });
+
+    expect(result.anonymizedAlerts).toEqual([]);
+    expect(result.totalOriginalAlerts).toBe(0);
+    expect(result.deduplicationStats.duplicatesRemoved).toBe(0);
+  });
+
+  it('returns empty result when size is not provided', async () => {
+    const result = await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      esClient: mockEsClient,
+    });
+
+    expect(result.anonymizedAlerts).toEqual([]);
+    expect(result.totalOriginalAlerts).toBe(0);
+  });
+
+  it('returns empty result when size is out of range', async () => {
+    const outOfRange = MIN_SIZE - 1;
+
+    const result = await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      esClient: mockEsClient,
+      size: outOfRange,
+    });
+
+    expect(result.anonymizedAlerts).toEqual([]);
+    expect(result.totalOriginalAlerts).toBe(0);
+  });
+
+  it('returns deduplicated alerts with statistics', async () => {
+    const result = await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      anonymizationFields: mockAnonymizationFields,
+      esClient: mockEsClient,
+      replacements: mockReplacements,
+      size,
+    });
+
+    // Should return 3 representative alerts instead of 20
+    expect(result.anonymizedAlerts).toHaveLength(3);
+    expect(result.totalOriginalAlerts).toBe(20);
+    expect(result.deduplicationStats.duplicatesRemoved).toBe(17); // 20 - 3
+    expect(result.deduplicationStats.reductionPercentage).toBe(85); // 17/20 * 100
+  });
+
+  it('returns alert ID correlation map', async () => {
+    const result = await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      anonymizationFields: mockAnonymizationFields,
+      esClient: mockEsClient,
+      replacements: mockReplacements,
+      size,
+    });
+
+    expect(result.alertIdCorrelationMap).toBeInstanceOf(Map);
+    expect(result.alertIdCorrelationMap.size).toBe(3);
+  });
+
+  it('transforms deduplicated alerts correctly', async () => {
+    const result = await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      anonymizationFields: mockAnonymizationFields,
+      esClient: mockEsClient,
+      replacements: mockReplacements,
+      size,
+    });
+
+    // Check that anonymization worked
+    expect(result.anonymizedAlerts[0]).toContain('_id,');
+    expect(result.anonymizedAlerts[0]).toContain('host.name,');
+  });
+
+  it('calls onNewReplacements for each deduplicated alert', async () => {
+    const onNewReplacements = jest.fn();
+
+    await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      anonymizationFields: mockAnonymizationFields,
+      esClient: mockEsClient,
+      onNewReplacements,
+      replacements: mockReplacements,
+      size,
+    });
+
+    // Should be called 3 times (once per deduplicated group)
+    expect(onNewReplacements).toHaveBeenCalledTimes(3);
+  });
+
+  it('uses custom deduplication config when provided', async () => {
+    const customConfig = {
+      correlationFields: ['kibana.alert.rule.name', 'host.name'] as const,
+      maxGroups: 100,
+      maxAlertsPerGroup: 50,
+    };
+
+    await getAnonymizedAlertsWithDeduplication({
+      alertsIndexPattern,
+      anonymizationFields: mockAnonymizationFields,
+      deduplicationConfig: customConfig,
+      esClient: mockEsClient,
+      replacements: mockReplacements,
+      size,
+    });
+
+    // Verify ES search was called (deduplication module was invoked)
+    expect(mockEsClient.search).toHaveBeenCalled();
   });
 });

@@ -8,7 +8,7 @@
 import { createMiddleware, tool } from 'langchain';
 import { z as z3 } from 'zod/v3';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolHandlerContext } from '@kbn/onechat-server';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 
 /**
  * Helper function to extract all SkillTool objects from Skill objects
@@ -94,7 +94,7 @@ export function createSkillsMiddleware(options: SkillsMiddlewareOptions): Return
       const { skillId, params = {} } = input;
       const skills = getSkills();
       const allTools = getAllSkillTools(skills);
-      
+
       // Find the tool by ID
       let skillTool = allTools.find((tool) => tool.id === skillId);
 

@@ -6,7 +6,10 @@
  */
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -19,11 +22,11 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
-  onechat: OnechatPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
 }
 
 export interface PluginStartDependencies {
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
   llmTasks?: LlmTasksPluginStart;
   cases?: CasesServerStart;
   alerting?: AlertingPluginStart;

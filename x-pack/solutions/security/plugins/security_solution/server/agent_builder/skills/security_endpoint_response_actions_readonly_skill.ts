@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL: Skill = {
     namespace: 'security.endpoint_response_actions_readonly',

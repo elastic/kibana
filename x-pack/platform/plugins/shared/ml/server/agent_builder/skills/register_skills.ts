@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { ML_ANOMALY_DETECTION_JOBS_SKILL } from './ml_anomaly_detection_jobs_skill';
 import { ML_DATA_FRAME_ANALYTICS_SKILL } from './ml_data_frame_analytics_skill';
 

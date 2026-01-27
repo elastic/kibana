@@ -23,6 +23,7 @@
       "share",
       "security",
       "unifiedSearch",
+      "kql",
       "savedObjectsTagging",
       "taskManager",
       "files",
@@ -45,7 +46,8 @@
       "ingestPipelines",
       "automaticImport",
       "alerting",
-      "onechat"
+      "onechat",
+      "sloShared"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -53,7 +55,6 @@
       "logsShared",
       "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

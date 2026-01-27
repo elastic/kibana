@@ -15,6 +15,8 @@
       "label": "CloudConnectedPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,6 +31,8 @@
             "string | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -44,6 +48,8 @@
       "label": "CloudConnectedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -68,6 +74,8 @@
           "{ readonly enabled: boolean; readonly cloudUrl: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/cloud_connect/server/config.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,6 +90,8 @@
       "label": "CloudConnectedPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -96,6 +106,8 @@
       "label": "CloudConnectedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -117,6 +129,8 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cloud_connect/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

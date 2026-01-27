@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const OBSERVABILITY_SYNTHETICS_SKILL: Skill = {
     namespace: 'observability.synthetics',

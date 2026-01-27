@@ -8,7 +8,7 @@
 import { assetCriticalityRouteHelpersFactory } from '@kbn/test-suites-security-solution-apis/test_suites/entity_analytics/utils/asset_criticality';
 import { evaluate } from '../src/evaluate';
 import { cleanStandardListExceptAction } from '../src/helpers/saved_objects_cleanup';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
 
 const AGENT_ID = oneChatDefaultAgentId;
 

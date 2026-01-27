@@ -11,7 +11,6 @@ import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
 import { EsArchiver } from '@kbn/es-archiver';
 import { Client as QuickstartClient } from '@kbn/security-solution-plugin/common/api/quickstart_client.gen';
 import { KbnClient } from '@kbn/test';
-import { isAxiosError } from 'axios';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { SiemEntityAnalyticsEvaluationChatClient } from './chat_client';
 import type { EvaluateDataset } from './evaluate_dataset';
@@ -113,60 +112,39 @@ export const evaluate = base.extend<
       const predefinedConnector = (testInfo.project.use as unknown as { connector: AvailableConnectorWithId })
         .connector;
 
-      // Prefer using the preconfigured connector directly when available in this Kibana instance.
-      // This avoids creating ephemeral connectors that may not be resolvable by server-side consumers
-      // (e.g. agent_builder middleware) depending on how Actions/SO namespaces are wired.
-      const existingConnectors = (await fetch('/api/actions/connectors')) as Array<{
+      // Create (or reuse) a persistent connector saved object for this eval run.
+      //
+      // We intentionally DO NOT delete this connector in fixture teardown because evaluators may still
+      // call inference endpoints after the test body completes. Cleanup is handled in globalTeardown.
+      const testRunId = process.env.TEST_RUN_ID ?? 'local';
+      const desiredName = `security-solution-evals:${testRunId}:${spaceId}:connector:${predefinedConnector.id}`;
+
+      const existing = (await fetch('/api/actions/connectors')) as Array<{
         id: string;
+        name: string;
         is_preconfigured?: boolean;
       }>;
-      const matchingPreconfigured = existingConnectors.find(
-        (c) => c.id === predefinedConnector.id && c.is_preconfigured === true
-      );
-      if (matchingPreconfigured) {
-        log.info(
-          `Using preconfigured connector (space=${spaceId}): ${predefinedConnector.id} (no create/delete)`
-        );
-        await use(predefinedConnector);
+
+      const reusable = existing.find((c) => c.name === desiredName && !c.is_preconfigured);
+      if (reusable) {
+        log.info(`Reusing eval connector (space=${spaceId}): ${reusable.id} (${desiredName})`);
+        await use({ ...predefinedConnector, id: reusable.id, name: desiredName });
         return;
       }
 
-      async function deleteConnector(connectorId: string) {
-        await fetch({
-          path: `/api/actions/connector/${connectorId}`,
-          method: 'DELETE',
-        }).catch((error) => {
-          if (isAxiosError(error) && (error.status === 404 || error.response?.status === 404)) {
-            return;
-          }
-          if (typeof error?.message === 'string' && error.message.includes('Status: 404')) {
-            return;
-          }
-          throw error;
-        });
-      }
-
-      log.info(`Creating connector (space=${spaceId})`);
+      log.info(`Creating eval connector (space=${spaceId}): ${desiredName}`);
       const created = (await fetch({
         path: `/api/actions/connector`,
         method: 'POST',
         body: JSON.stringify({
           config: predefinedConnector.config,
           connector_type_id: predefinedConnector.actionTypeId,
-          name: `${predefinedConnector.name} (space=${spaceId})`,
+          name: desiredName,
           secrets: predefinedConnector.secrets,
         }),
       })) as { id: string };
 
-      const connectorWithCreatedId: AvailableConnectorWithId = {
-        ...predefinedConnector,
-        id: created.id,
-      };
-
-      await use(connectorWithCreatedId);
-
-      log.info(`Deleting connector (space=${spaceId}): ${connectorWithCreatedId.id}`);
-      await deleteConnector(connectorWithCreatedId.id);
+      await use({ ...predefinedConnector, id: created.id, name: desiredName });
     },
     { scope: 'worker' },
   ],
@@ -183,57 +161,37 @@ export const evaluate = base.extend<
         return;
       }
 
-      const existingConnectors = (await fetch('/api/actions/connectors')) as Array<{
+      const testRunId = process.env.TEST_RUN_ID ?? 'local';
+      const desiredName = `security-solution-evals:${testRunId}:${spaceId}:evaluationConnector:${predefinedEvaluationConnector.id}`;
+
+      const existing = (await fetch('/api/actions/connectors')) as Array<{
         id: string;
+        name: string;
         is_preconfigured?: boolean;
       }>;
-      const matchingPreconfigured = existingConnectors.find(
-        (c) => c.id === predefinedEvaluationConnector.id && c.is_preconfigured === true
-      );
-      if (matchingPreconfigured) {
+
+      const reusable = existing.find((c) => c.name === desiredName && !c.is_preconfigured);
+      if (reusable) {
         log.info(
-          `Using preconfigured evaluation connector (space=${spaceId}): ${predefinedEvaluationConnector.id} (no create/delete)`
+          `Reusing eval evaluationConnector (space=${spaceId}): ${reusable.id} (${desiredName})`
         );
-        await use(predefinedEvaluationConnector);
+        await use({ ...predefinedEvaluationConnector, id: reusable.id, name: desiredName });
         return;
       }
 
-      async function deleteConnector(connectorId: string) {
-        await fetch({
-          path: `/api/actions/connector/${connectorId}`,
-          method: 'DELETE',
-        }).catch((error) => {
-          if (isAxiosError(error) && (error.status === 404 || error.response?.status === 404)) {
-            return;
-          }
-          if (typeof error?.message === 'string' && error.message.includes('Status: 404')) {
-            return;
-          }
-          throw error;
-        });
-      }
-
-      log.info(`Creating evaluation connector (space=${spaceId})`);
+      log.info(`Creating eval evaluationConnector (space=${spaceId}): ${desiredName}`);
       const created = (await fetch({
         path: `/api/actions/connector`,
         method: 'POST',
         body: JSON.stringify({
           config: predefinedEvaluationConnector.config,
           connector_type_id: predefinedEvaluationConnector.actionTypeId,
-          name: `${predefinedEvaluationConnector.name} (space=${spaceId})`,
+          name: desiredName,
           secrets: predefinedEvaluationConnector.secrets,
         }),
       })) as { id: string };
 
-      const evaluationConnectorWithCreatedId: AvailableConnectorWithId = {
-        ...predefinedEvaluationConnector,
-        id: created.id,
-      };
-
-      await use(evaluationConnectorWithCreatedId);
-
-      log.info(`Deleting evaluation connector (space=${spaceId}): ${evaluationConnectorWithCreatedId.id}`);
-      await deleteConnector(evaluationConnectorWithCreatedId.id);
+      await use({ ...predefinedEvaluationConnector, id: created.id, name: desiredName });
     },
     { scope: 'worker' },
   ],

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import { tool } from '@langchain/core/tools';
 
 /**

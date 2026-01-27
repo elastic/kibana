@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
 import { evaluate } from '../src/evaluate';
 import { cleanStandardListExceptAction } from '../src/helpers/saved_objects_cleanup';
 

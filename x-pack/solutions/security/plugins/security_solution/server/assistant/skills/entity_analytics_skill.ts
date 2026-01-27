@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import { tool } from '@langchain/core/tools';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
-import { executeEsql } from '@kbn/onechat-genai-utils';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import DateMath from '@kbn/datemath';
 

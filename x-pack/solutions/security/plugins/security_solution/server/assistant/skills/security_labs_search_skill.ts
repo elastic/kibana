@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { Skill } from '@kbn/agent-builder-common/skills';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 
 /**

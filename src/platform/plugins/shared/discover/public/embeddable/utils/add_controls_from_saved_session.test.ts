@@ -9,20 +9,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { type ESQLControlState, type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { addControlsFromSavedSession } from './add_controls_from_saved_session';
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 
 describe('addControlsFromSavedSession', () => {
-  let mockContainer: CanAddNewPanel & { controlGroupApi$?: unknown; esqlVariables$?: unknown };
+  let mockContainer: CanAddNewPanel & PublishesESQLVariables & { controlGroupApi$?: unknown };
   let mockControlGroupApi: jest.Mocked<ControlGroupRendererApi>;
   let mockControlGroupApi$: BehaviorSubject<jest.Mocked<ControlGroupRendererApi>>;
   let mockEsqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
-  let savedObject: SavedObjectCommon<SavedSearchAttributes>;
 
   beforeEach(() => {
     mockControlGroupApi = {
@@ -40,114 +37,95 @@ describe('addControlsFromSavedSession', () => {
       esqlVariables$: mockEsqlVariables$,
       addNewPanel: jest.fn(),
     };
-
-    savedObject = {
-      id: 'test-saved-search',
-      attributes: {
-        title: 'Test Search',
-        columns: [],
-        sort: [],
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '{}',
-        },
-      },
-    } as unknown as SavedObjectCommon<SavedSearchAttributes>;
   });
 
   describe('when controlGroupJson is empty or missing', () => {
-    it('should return early when controlGroupJson is undefined', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
-      expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
-    });
-
-    it('should return early when controlGroupJson is empty string', () => {
-      savedObject.attributes.controlGroupJson = '';
-      addControlsFromSavedSession(mockContainer, savedObject);
-      expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
-    });
-
-    it('should return early when controlGroupJson parses to empty object', () => {
-      savedObject.attributes.controlGroupJson = '{}';
-      addControlsFromSavedSession(mockContainer, savedObject);
-      expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
+    it('should return early when controlGroupJson parses to empty object', async () => {
+      await addControlsFromSavedSession(mockContainer, '{}');
+      expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
     });
   });
 
   describe('when container does not support ESQL variables', () => {
-    it('should return early when container does not publish ESQL variables', () => {
+    it('should return early when container does not publish ESQL variables', async () => {
       const containerWithoutESQL = {
         addNewPanel: jest.fn(),
         controlGroupApi$: mockControlGroupApi$,
       };
 
-      savedObject.attributes.controlGroupJson = JSON.stringify({
-        panel1: { variableName: 'var1', type: 'control' },
-      });
+      await addControlsFromSavedSession(
+        containerWithoutESQL,
+        JSON.stringify({
+          panel1: { variableName: 'var1', type: 'control' },
+        })
+      );
+      expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
+    });
 
-      addControlsFromSavedSession(containerWithoutESQL, savedObject);
+    it('should return early when controlGroupJson is empty string', () => {
+      addControlsFromSavedSession(mockContainer, '');
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
 
-    it('should return early when container does not have controlGroupApi$', () => {
+    it('should return early when container does not have controlGroupApi$', async () => {
       const containerWithoutControlGroup = {
         addNewPanel: jest.fn(),
         esqlVariables$: mockEsqlVariables$,
       };
 
-      savedObject.attributes.controlGroupJson = JSON.stringify({
-        panel1: { variableName: 'var1', type: 'control' },
-      });
-
-      addControlsFromSavedSession(containerWithoutControlGroup, savedObject);
-      expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
+      await addControlsFromSavedSession(
+        containerWithoutControlGroup,
+        JSON.stringify({
+          panel1: { variableName: 'var1', type: 'control' },
+        })
+      );
+      expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
     });
   });
 
   describe('when adding controls', () => {
-    beforeEach(() => {
-      const controlsState = {
-        panel1: {
-          type: 'control',
-          order: 0,
-          variableName: 'var1',
-        },
-        panel2: {
-          type: 'control',
-          order: 1,
-          variableName: 'var2',
-        },
-        panel3: {
-          type: 'control',
-          order: 2,
-          variableName: 'nonExistentVar',
-        },
-      } as unknown as ControlPanelsState<ESQLControlState>;
-
-      savedObject.attributes.controlGroupJson = JSON.stringify(controlsState);
+    const controlGroupJson = JSON.stringify({
+      panel1: {
+        type: 'control',
+        order: 0,
+        variableName: 'var1',
+      },
+      panel2: {
+        type: 'control',
+        order: 1,
+        variableName: 'var2',
+      },
+      panel3: {
+        type: 'control',
+        order: 2,
+        variableName: 'nonExistentVar',
+      },
     });
 
-    it('should add controls only for variables that dont exist in esqlVariables', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
+    it('should add controls only for variables that dont exist in esqlVariables', async () => {
+      await addControlsFromSavedSession(mockContainer, controlGroupJson, 'test-uuid');
 
-      expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledTimes(1);
+      expect(mockContainer.addNewPanel).toHaveBeenCalledTimes(1);
 
-      expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledWith({
-        panelType: ESQL_CONTROL,
-        serializedState: {
-          rawState: {
+      expect(mockContainer.addNewPanel).toHaveBeenCalledWith(
+        {
+          panelType: ESQL_CONTROL,
+          serializedState: {
             variableName: 'nonExistentVar',
             type: 'control',
-            order: 2,
           },
         },
-      });
+        { beside: 'test-uuid', scrollToPanel: false }
+      );
     });
 
-    it('should not add controls for variables that do not exist in esqlVariables', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
+    it('should not add controls for variables that do not exist in esqlVariables', async () => {
+      await addControlsFromSavedSession(mockContainer, controlGroupJson);
 
-      const addedPanels = mockControlGroupApi.addNewPanel.mock.calls.map(
-        (call) => (call[0]?.serializedState?.rawState as { variableName?: string })?.variableName
+      const addedPanels = (
+        mockContainer.addNewPanel as jest.MockedFunction<CanAddNewPanel['addNewPanel']>
+      ).mock.calls.map(
+        (call) => (call[0]?.serializedState as { variableName?: string })?.variableName
       );
 
       expect(addedPanels).not.toContain(['var1', 'var2']);

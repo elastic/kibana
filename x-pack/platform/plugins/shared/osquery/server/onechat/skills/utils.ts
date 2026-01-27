@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 /**

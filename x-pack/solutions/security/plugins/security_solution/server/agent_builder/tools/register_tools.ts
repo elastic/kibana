@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
@@ -19,20 +19,20 @@ import { exceptionListsTool } from './exception_lists_tool';
 import { timelinesTool } from './timelines_tool';
 
 /**
- * Registers all security agent builder tools with the onechat plugin
+ * Registers all security agent builder tools with the agentBuilder plugin
  */
 export const registerTools = async (
-  onechat: OnechatPluginSetup,
+  agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   setupPlugins: SecuritySolutionPluginSetupDependencies
 ) => {
-  onechat.tools.register(entityRiskScoreTool(core, logger));
-  onechat.tools.register(attackDiscoverySearchTool(core, logger));
-  onechat.tools.register(securityLabsSearchTool(core, logger));
-  onechat.tools.register(alertsTool(core, logger));
-  onechat.tools.register(detectionRulesTool(core));
-  onechat.tools.register(casesTool(core));
-  onechat.tools.register(exceptionListsTool({ core, lists: setupPlugins.lists }));
-  onechat.tools.register(timelinesTool(core));
+  agentBuilder.tools.register(entityRiskScoreTool(core, logger));
+  agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
+  agentBuilder.tools.register(securityLabsSearchTool(core, logger));
+  agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(detectionRulesTool(core));
+  agentBuilder.tools.register(casesTool(core));
+  agentBuilder.tools.register(exceptionListsTool({ core, lists: setupPlugins.lists }));
+  agentBuilder.tools.register(timelinesTool(core));
 };

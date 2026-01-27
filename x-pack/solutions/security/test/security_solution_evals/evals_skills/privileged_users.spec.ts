@@ -8,7 +8,7 @@
 import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/utils';
 import { evaluate } from '../src/evaluate';
 import { cleanStandardListExceptAction } from '../src/helpers/saved_objects_cleanup';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
 
 const AGENT_ID = oneChatDefaultAgentId;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const OBSERVABILITY_SLOS_SKILL: Skill = {
   namespace: 'observability.slos',

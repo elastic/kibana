@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolType } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 import { timelineSavedObjectType } from '../../lib/timeline/saved_object_mappings/timelines';

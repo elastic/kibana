@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolResultType, ToolType, platformCoreTools } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolResultType, ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const findSchema = z.object({
     type: z.string().describe('Saved object type'),

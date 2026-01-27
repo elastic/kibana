@@ -6,7 +6,7 @@
  */
 
 import { getOneChatContext } from './utils';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 
 describe('getOneChatContext', () => {
   it('should extract context from config.configurable.onechat', () => {

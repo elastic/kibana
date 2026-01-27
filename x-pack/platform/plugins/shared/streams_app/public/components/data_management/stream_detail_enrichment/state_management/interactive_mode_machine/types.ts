@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { IToasts, NotificationsStart } from '@kbn/core/public';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangConditionBlock } from '@kbn/streamlang/types/streamlang';
-import type { DraftGrokExpression } from '@kbn/grok-ui';
-import type { IToasts, NotificationsStart } from '@kbn/core/public';
+import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { SimulationActorRef } from '../simulation_state_machine';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
+import type { SimulationActorRef } from '../simulation_state_machine';
 import type { StepActorRef } from '../steps_state_machine';
 import type { StreamPrivileges } from '../stream_enrichment_state_machine/types';
-import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 
 export interface InteractiveModeMachineDeps {
   streamsRepositoryClient: StreamsRepositoryClient;
@@ -62,6 +62,8 @@ export interface InteractiveModeContext {
   streamName: string;
   // AI suggested pipeline suggestion, if any.
   suggestedPipeline?: StreamlangDSL;
+  // Currently selected condition for filtering steps
+  selectedConditionId?: string;
 }
 
 export interface InteractiveModeInput {
@@ -95,8 +97,15 @@ export type InteractiveModeEvent =
       step: StreamlangConditionBlock;
     }
   | { type: 'step.change'; id: string }
+  | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   | {
       type: 'step.addProcessor';
       processor?: StreamlangProcessorDefinition;
@@ -108,6 +117,8 @@ export type InteractiveModeEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.duplicateProcessor'; processorStepId: string }
+  | { type: 'step.filterByCondition'; conditionId: string }
+  | { type: 'step.clearConditionFilter' }
   | {
       type: 'dataSource.activeChanged';
       simulationMode: DataSourceSimulationMode;

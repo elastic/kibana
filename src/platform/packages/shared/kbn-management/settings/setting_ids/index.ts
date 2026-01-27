@@ -60,7 +60,6 @@ export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
 // Agent builder settings
-export const AGENT_BUILDER_ENABLED_SETTING_ID = 'agentBuilder:enabled';
 export const AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID = 'agentBuilder:dashboardTools';
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 
@@ -75,8 +74,8 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
-// Data connectors settings
-export const DATA_CONNECTORS_ENABLED_SETTING_ID = 'dataConnectors:enabled';
+// Data sources settings
+export const DATA_SOURCES_ENABLED_SETTING_ID = 'dataSources:enabled';
 
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';

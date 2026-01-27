@@ -13,7 +13,7 @@
       "agentBuilderPlatform"
     ],
     "requiredPlugins": [
-      "onechat"
+      "agentBuilder"
     ],
     "requiredBundles": [],
     "optionalPlugins": [

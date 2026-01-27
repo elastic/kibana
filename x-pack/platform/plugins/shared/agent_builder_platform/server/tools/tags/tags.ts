@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType, platformCoreTools } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import { updateTagReferences } from '@kbn/saved-objects-tagging-plugin/common/references';
 

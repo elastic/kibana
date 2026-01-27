@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 
 const schema = z.object({
     executionId: z.string().describe('Workflow execution id'),

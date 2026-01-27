@@ -8,14 +8,13 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { DataSource } from '../../components/trace_metrics_grid';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 type TraceMetricsContextProps = {
-  dataSource: DataSource;
   indexes: string;
   filters: string[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+  actions: UnifiedMetricsGridProps['actions'];
 } & Pick<UnifiedMetricsGridProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;
 
 export const TraceMetricsContext = createContext<TraceMetricsContextProps | undefined>(undefined);

@@ -8,10 +8,10 @@
   "visibility": "private",
   "plugin": {
     "id": "observabilityAgentBuilder",
-    "browser": false,
+    "browser": true,
     "server": true,
     "requiredPlugins": [
-      "onechat",
+      "agentBuilder",
       "apmDataAccess",
       "logsDataAccess",
       "inference",
@@ -19,14 +19,18 @@
       "ruleRegistry",
       "dataViews",
       "metricsDataAccess",
-      "inference"
+      "inference",
+      "discoverShared",
+      "licensing"
     ],
     "optionalPlugins": [
       "ml",
-      "spaces",
-      "slo"
+      "spaces"
     ],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ],
     "extraPublicDirs": []
   }
 }

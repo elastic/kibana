@@ -20,6 +20,8 @@
           ">"
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ", \"authentication_provider\">"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -55,6 +59,8 @@
           "\nParameters for the bulk get API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +77,8 @@
               "Set<string>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,6 +95,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -103,6 +113,8 @@
           "\nParameters for the get user profile for the current user API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,6 +128,8 @@
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -130,6 +144,8 @@
         "label": "UserProfileService",
         "description": [],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +166,8 @@
               " | null>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -170,6 +188,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -194,6 +214,8 @@
               "<D>>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -211,6 +233,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -237,6 +261,8 @@
               "<D>[]>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -253,6 +279,8 @@
                   "UserProfileBulkGetParams"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -279,6 +307,8 @@
               "<D>[]>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -295,6 +325,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 67,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -312,6 +344,8 @@
                   "UserProfileSuggestParams"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 68,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -334,6 +368,8 @@
               ">(data: D) => Promise<void>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -350,6 +386,8 @@
                   "D"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 75,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -372,6 +410,8 @@
               ">>(data: D) => Promise<void>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -388,6 +428,8 @@
                   "D"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/service.ts",
+                "lineNumber": 81,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -408,6 +450,8 @@
           "\nSetup contract for Core's userProfile service.\n"
         ],
         "path": "src/core/packages/user-profile/browser/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,6 +470,8 @@
               ") => void"
             ],
             "path": "src/core/packages/user-profile/browser/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -440,6 +486,8 @@
                   "CoreUserProfileDelegateContract"
                 ],
                 "path": "src/core/packages/user-profile/browser/src/contracts.ts",
+                "lineNumber": 24,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -460,6 +508,8 @@
           "\nParameters for the suggest API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -473,6 +523,8 @@
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +541,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -505,6 +559,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -533,6 +589,8 @@
           "<boolean>; }"
         ],
         "path": "src/core/packages/user-profile/browser/src/api_provider.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -550,6 +608,8 @@
           "UserProfileService"
         ],
         "path": "src/core/packages/user-profile/browser/src/contracts.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

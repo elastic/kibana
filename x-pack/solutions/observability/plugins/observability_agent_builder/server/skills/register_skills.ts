@@ -17,15 +17,15 @@ import { OBSERVABILITY_SLOS_SKILL } from './observability_slos_skill';
 import { OBSERVABILITY_SYNTHETICS_SKILL } from './observability_synthetics_skill';
 
 export const registerSkills = (plugins: ObservabilityAgentBuilderPluginSetupDependencies) => {
-  plugins.onechat.skills.register(OBSERVABILITY_ALERTS_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_APM_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_LOGS_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_METRICS_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_SLOS_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_SYNTHETICS_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_CASES_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_ALERTS_EXECUTION_SKILL);
-  plugins.onechat.skills.register(OBSERVABILITY_SLO_READONLY_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_ALERTS_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_APM_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_LOGS_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_METRICS_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_SLOS_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_SYNTHETICS_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_CASES_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_ALERTS_EXECUTION_SKILL);
+  plugins.agentBuilder.skills.register(OBSERVABILITY_SLO_READONLY_SKILL);
 };
 
 

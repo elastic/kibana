@@ -48,7 +48,7 @@ import {
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
 import ECSSchema from '../../common/schemas/ecs/v9.2.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.20.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.19.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -570,8 +570,6 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
                 defaultMessage: 'Value',
               }
             )}
-            idAria={idAria}
-            helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
             data-test-subj="osqueryColumnValueSelect"
             options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}

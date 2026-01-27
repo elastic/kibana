@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const ML_ANOMALY_DETECTION_JOBS_SKILL: Skill = {
   namespace: 'ml.jobs_anomaly_detection',

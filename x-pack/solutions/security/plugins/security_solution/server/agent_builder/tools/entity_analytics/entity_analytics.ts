@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
@@ -89,28 +89,28 @@ const buildRiskScoreQuery = ({
       entityType === 'user'
         ? 'user.name, user.risk.calculated_score_norm, user.risk.calculated_level'
         : entityType === 'host'
-        ? 'host.name, host.risk.calculated_score_norm, host.risk.calculated_level'
-        : entityType === 'service'
-        ? 'service.name, service.risk.calculated_score_norm, service.risk.calculated_level'
-        : 'entity.name, entity.risk.calculated_score_norm, entity.risk.calculated_level';
+          ? 'host.name, host.risk.calculated_score_norm, host.risk.calculated_level'
+          : entityType === 'service'
+            ? 'service.name, service.risk.calculated_score_norm, service.risk.calculated_level'
+            : 'entity.name, entity.risk.calculated_score_norm, entity.risk.calculated_level';
 
     const where =
       entityType === 'user'
         ? 'user.name IS NOT NULL'
         : entityType === 'host'
-        ? 'host.name IS NOT NULL'
-        : entityType === 'service'
-        ? 'service.name IS NOT NULL'
-        : 'entity.name IS NOT NULL';
+          ? 'host.name IS NOT NULL'
+          : entityType === 'service'
+            ? 'service.name IS NOT NULL'
+            : 'entity.name IS NOT NULL';
 
     const sortField =
       entityType === 'user'
         ? 'user.risk.calculated_score_norm'
         : entityType === 'host'
-        ? 'host.risk.calculated_score_norm'
-        : entityType === 'service'
-        ? 'service.risk.calculated_score_norm'
-        : 'entity.risk.calculated_score_norm';
+          ? 'host.risk.calculated_score_norm'
+          : entityType === 'service'
+            ? 'service.risk.calculated_score_norm'
+            : 'entity.risk.calculated_score_norm';
 
     const limitClause = limit ? `\n| LIMIT ${limit}` : '';
 

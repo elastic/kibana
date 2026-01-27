@@ -29,7 +29,7 @@ dependsOn:
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/core-http-common'
   - '@kbn/ml-plugin'
-  - '@kbn/onechat-server'
+  - '@kbn/agent-builder-server'
 tags:
   - functional-tests
   - package

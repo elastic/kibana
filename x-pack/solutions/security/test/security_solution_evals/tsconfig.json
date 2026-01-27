@@ -2,14 +2,18 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "**/*",
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/evals",
     "@kbn/tooling-log",
@@ -22,7 +26,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-http-common",
     "@kbn/ml-plugin",
-    "@kbn/onechat-server"
+    "@kbn/agent-builder-server"
   ]
 }
-

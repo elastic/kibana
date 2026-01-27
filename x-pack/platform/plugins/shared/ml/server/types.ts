@@ -27,7 +27,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { RouteGuard } from './lib/route_guard';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';

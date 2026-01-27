@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType, platformCoreTools } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const schema = z.discriminatedUnion('operation', [
     z.object({ operation: z.literal('current_user'), params: z.object({}) }),

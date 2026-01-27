@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import { createToolProxy } from './utils/create_tool_proxy';
 
 export const SECURITY_TIMELINES_SKILL: Skill = {

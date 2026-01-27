@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolType } from '@kbn/onechat-common';
-import { createErrorResult } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';

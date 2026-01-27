@@ -128,13 +128,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       const getOsqueryContext = () => this.osqueryAppContext;
 
-      plugins.onechat.skills.register(getOsquerySkill(getOsqueryContext));
-      plugins.onechat.skills.register(getLiveQuerySkill(getOsqueryContext));
-      plugins.onechat.skills.register(getPacksSkill(getOsqueryContext));
-      plugins.onechat.skills.register(getSavedQueriesSkill(getOsqueryContext));
-      plugins.onechat.skills.register(getResultsSkill(getOsqueryContext));
-      plugins.onechat.skills.register(getSchemaSkill(getOsqueryContext));
-      plugins.onechat.skills.register(getStatusSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getOsquerySkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getLiveQuerySkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getPacksSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getSavedQueriesSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getResultsSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getSchemaSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getStatusSkill(getOsqueryContext));
     }
 
     return {

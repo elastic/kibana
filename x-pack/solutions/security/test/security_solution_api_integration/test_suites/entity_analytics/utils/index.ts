@@ -11,5 +11,9 @@ export * from './asset_criticality';
 export * from './entity_store';
 export * from './elastic_asset_checker';
 export * from './entity_analytics';
+<<<<<<< HEAD
 export * from './privmon_advanced_settings';
 export * from './data_view';
+=======
+export * from './privilege_monitoring';
+>>>>>>> c6dda133743206dc0701562c4c2e6f4d5172a9c7

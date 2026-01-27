@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { DynamicStructuredTool } from '@langchain/core/tools';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultStore'> | null => {

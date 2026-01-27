@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getOneChatContext } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const osquerySchema = require('../../../common/schemas/osquery/v5.20.0.json');
+const osquerySchema = require('../../../public/common/schemas/osquery/v5.20.0.json');
 
 const SCHEMA_SKILL: Omit<Skill, 'tools'> = {
   namespace: 'osquery.schema',

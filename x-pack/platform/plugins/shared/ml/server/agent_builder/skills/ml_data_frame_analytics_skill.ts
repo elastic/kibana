@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const ML_DATA_FRAME_ANALYTICS_SKILL: Skill = {
   namespace: 'ml.data_frame_analytics',

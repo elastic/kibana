@@ -152,6 +152,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'slo',
   'slo-settings',
+  'slo_template',
   'space',
   'spaces-usage-stats',
   'stream-prompts',
@@ -180,6 +181,7 @@ const previouslyRegisteredTypes = [
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
 ].sort();
 
 describe('SO type registrations', () => {

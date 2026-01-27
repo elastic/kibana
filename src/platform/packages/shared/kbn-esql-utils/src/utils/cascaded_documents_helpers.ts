@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import {
   BasicPrettyPrinter,
   Builder,
   EsqlQuery,
   isColumn,
-  isOptionNode,
   isFunctionExpression,
   isSubQuery,
   mutate,
@@ -21,26 +20,26 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLAstItem,
-  type ESQLCommandOption,
   type ESQLColumn,
   isBinaryExpression,
   Walker,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import type {
   StatsCommandSummary,
   StatsFieldSummary,
-} from '@kbn/esql-ast/src/ast/mutate/commands/stats';
+} from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
   ESQLLiteral,
-} from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
+import { getQuerySummaryPerCommandType } from './get_query_summary';
 
 type NodeType = 'group' | 'leaf';
 
@@ -86,15 +85,22 @@ export const isSupportedFieldType = (fieldType: unknown): fieldType is Supported
 
 // if value is a text or keyword field and it's not "aggregatable", we opt to use match phrase for the where command
 const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
-  const dataViewField = dataViewFields.getByName(fieldName);
+  let dataViewField = dataViewFields.getByName(fieldName);
+
+  const multiSubtype = dataViewField && getDataViewFieldSubtypeMulti(dataViewField);
+
+  if (multiSubtype) {
+    // if the field is a subtype, we want to use the parent field to determine wether to use the match phrase
+    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent);
+  }
 
   return (
-    (dataViewField?.esTypes?.includes('text') || dataViewField?.esTypes?.includes('keyword')) &&
-    !dataViewField?.aggregatable
+    !dataViewField?.aggregatable &&
+    (dataViewField?.esTypes?.includes('text') || dataViewField?.esTypes?.includes('keyword'))
   );
 };
 
-export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
+export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery) {
   if (esqlQuery.errors.length) {
     return null;
   }
@@ -107,12 +113,14 @@ export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSu
 
   // accounting for the possibility of multiple stats commands in the query,
   // we always want to operate on the last stats command
+  const lastStatsCommandIndex = statsCommands.length - 1;
+
   const summarizedStatsCommand = mutate.commands.stats.summarizeCommand(
     esqlQuery,
-    statsCommands[statsCommands.length - 1]
+    statsCommands[lastStatsCommandIndex]
   );
 
-  return summarizedStatsCommand;
+  return Object.assign(summarizedStatsCommand, { index: lastStatsCommandIndex });
 }
 
 function getESQLQueryDataSourceCommand(
@@ -128,7 +136,8 @@ function getESQLQueryDataSourceCommand(
  * Returns runtime fields that are created within the query by the STATS command in the query
  */
 function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
-  return Array.from(mutate.commands.stats.summarize(esqlQuery)).map((command) => command.newFields);
+  const querySummary = getQuerySummaryPerCommandType(esqlQuery.print(), 'stats');
+  return querySummary.map((command) => command.newColumns);
 }
 
 /**
@@ -179,6 +188,10 @@ export function getStatsGroupFieldType<
   ) as R;
 }
 
+/**
+ * This method is used to get the metadata on STATS command to drive the cascade experience from an ESQL query,
+ * if a valid STATS command is found information about the group by fields and applied functions is returned.
+ */
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
@@ -188,6 +201,10 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   const dataSourceCommand = getESQLQueryDataSourceCommand(esqlQuery);
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
+  const operatingStatsCommandIndex = esqlQuery.ast.commands.findIndex(
+    (cmd) => cmd.text === summarizedStatsCommand?.command.text
+  );
+
   if (
     dataSourceCommand?.args.some(isSubQuery) ||
     !summarizedStatsCommand ||
@@ -195,10 +212,6 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   ) {
     return { groupByFields, appliedFunctions };
   }
-
-  // get all the new fields created by the stats commands in the query,
-  // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
   const grouping = Object.values(summarizedStatsCommand.grouping);
 
@@ -210,29 +223,77 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       return { groupByFields: [], appliedFunctions: [] };
     }
 
+    // unnamed grouping functions are wrapped in backticks in the generated AST so we strip them off if they exist,
+    // so the value displayed in the UI is the same as the value used in the query
     const groupFieldName = removeBackticks(group.field);
+
+    // this is a placeholder for the index of the stats command that declared the group field
+    // we start off assuming it's index is the same as the stats command we are operating on,
+    // it however will be updated if the group field is determined to be declared by some other stats command
+    let groupDeclarationStatsCommandIndex = operatingStatsCommandIndex;
+
+    // this is a placeholder for the group field node,
+    // it will be updated to the actual definition of the group field if it was declared by a preceding stats command
     let groupFieldNode = group;
 
-    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-      field.has(groupFieldName)
-    );
+    const statsCommandsFields = getStatsCommandRuntimeFields(esqlQuery);
+    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
 
-    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+    if (!lastStatsCommandFields.has(groupFieldName)) {
+      // get all the new fields created by the stats commands in the query,
+      // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
+      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
-    if (
-      groupDeclarationCommandIndex >= 0 &&
-      (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
-        esqlQuery,
-        groupDeclarationCommandIndex
-      ))
-    ) {
-      // update the group field node to it's actual definition
-      groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
+      const groupDeclarationStatsCommandLookupIndex = statsCommandRuntimeFields.findIndex((field) =>
+        field.has(group.field)
+      );
+
+      let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+      if (
+        groupDeclarationStatsCommandLookupIndex >= 0 &&
+        (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+          esqlQuery,
+          groupDeclarationStatsCommandLookupIndex
+        ))
+      ) {
+        groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
+        // update the group field node to it's actual definition
+        groupFieldNode = groupDeclarationCommandSummary.grouping[group.field];
+      }
+    }
+
+    // given that keep commands strip fields from the resulting records,
+    // we need to ascertain that if a keep command exists after the operating stats command, it specifies the current group field
+    const offendingKeepCommand = esqlQuery.ast.commands
+      .slice(groupDeclarationStatsCommandIndex)
+      .reduce((acc, cmd) => {
+        if (cmd.name !== 'keep') {
+          return acc || false;
+        }
+
+        let offending = false;
+
+        Walker.walk(cmd, {
+          visitColumn: (node) => {
+            // if we don't find a node that targets the current group field,
+            // then we know the keep command is invalidating the possibility of grouping by the current group field
+            offending = node.name !== groupFieldName;
+          },
+        });
+
+        return acc || offending;
+      }, false);
+
+    if (offendingKeepCommand) {
+      // we found a keep command that strips the current group field from the resulting records,
+      // so we break out of the loop as that invalidates the possibility of grouping by the current group field
+      break;
     }
 
     // check if there is a where command after the operating stats command targeting any of it's grouping options
     const whereCommandGroupFieldSearch = esqlQuery.ast.commands
-      .slice(groupDeclarationCommandIndex)
+      .slice(groupDeclarationStatsCommandIndex)
       .find((cmd) => {
         if (cmd.name !== 'where') {
           return false;
@@ -241,7 +302,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
         let found = false;
 
         Walker.walk(cmd, {
-          visitIdentifier: (node) => {
+          visitColumn: (node) => {
             if (found) {
               return;
             }
@@ -274,11 +335,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       break;
     }
 
-    if (isFunctionExpression(groupFieldNode.definition)) {
-      const functionName = groupFieldNode.definition.name;
-      if (!isSupportedStatsFunction(functionName)) {
-        continue;
-      }
+    if (
+      isFunctionExpression(groupFieldNode.definition) &&
+      !isSupportedStatsFunction(groupFieldNode.definition.name)
+    ) {
+      continue;
     }
 
     groupByFields.push({
@@ -353,9 +414,11 @@ export const constructCascadeQuery = ({
 
     // we make an initial assumption that the field was declared by the stats command being operated on
     let fieldDeclarationCommandSummary = summarizedStatsCommand;
+    const statsCommandsFields = getStatsCommandRuntimeFields(EditorESQLQuery);
+    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
 
     // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
-    if (!fieldDeclarationCommandSummary.newFields.has(pathSegment)) {
+    if (!lastStatsCommandFields.has(pathSegment)) {
       const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
 
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
@@ -373,8 +436,12 @@ export const constructCascadeQuery = ({
         );
       }
 
-      fieldDeclarationCommandSummary =
-        groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
+      fieldDeclarationCommandSummary = groupDeclarationCommandSummary
+        ? {
+            ...groupDeclarationCommandSummary,
+            index: groupDeclarationCommandIndex,
+          }
+        : fieldDeclarationCommandSummary;
     }
 
     const groupValue =
@@ -440,20 +507,6 @@ function handleStatsByColumnLeafOperation(
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
-  // include all the existing commands up to the operating stats command in the cascade operation query
-  editorQuery.ast.commands.slice(0, operatingStatsCommandIndex + 1).forEach((cmd, idx, arr) => {
-    if (idx === arr.length - 1 && cmd.name === 'stats') {
-      // We know the operating stats command is the last command in the array,
-      // so we modify it into an INLINE STATS command
-      mutate.generic.commands.append(
-        cascadeOperationQuery.ast,
-        synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false })
-      );
-    } else {
-      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
-    }
-  });
-
   let operationColumnName = columnNode.definition.name;
 
   let operationColumnNameParamValue;
@@ -473,6 +526,42 @@ function handleStatsByColumnLeafOperation(
 
   const shouldUseMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
 
+  const commandsUpToOperatingStatsCommand = editorQuery.ast.commands.slice(
+    0,
+    operatingStatsCommandIndex + 1
+  );
+
+  // We traverse the query backwards
+  // because it's necessary to know if the last command is a stats command and
+  // if each preceding command is also a stats command
+  for (let idx = commandsUpToOperatingStatsCommand.length - 1; idx >= 0; idx--) {
+    const cmd = commandsUpToOperatingStatsCommand[idx];
+    const precedingCommandIsStats = commandsUpToOperatingStatsCommand[idx + 1]?.name === 'stats';
+
+    if (
+      cmd.name === 'stats' &&
+      (idx === commandsUpToOperatingStatsCommand.length - 1 || precedingCommandIsStats)
+    ) {
+      const hasAggregates = cmd.args.some(isFunctionExpression);
+
+      if (hasAggregates && !shouldUseMatchPhrase) {
+        // when we aren't using match phrase replace
+        // replace occurrence of stats command with inline stats
+        mutate.generic.commands.insert(
+          cascadeOperationQuery.ast,
+          synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false }),
+          0
+        );
+      } else {
+        // if the stats command does not have any aggregates, or will require a match phrase query,
+        // then we omit the STATS command to simply apply the where command to the query
+        continue;
+      }
+    } else {
+      mutate.generic.commands.insert(cascadeOperationQuery.ast, cmd, 0);
+    }
+  }
+
   // build a where command with match expressions for the selected column
   const filterCommand = Builder.command({
     name: 'where',
@@ -486,7 +575,8 @@ function handleStatsByColumnLeafOperation(
             Builder.expression.column({
               args: [Builder.identifier({ name: operationColumnName })],
             }),
-            Number.isNaN(Number(operationValue))
+            Number.isNaN(Number(operationValue)) ||
+            dataViewFields.getByName(operationColumnName)?.type === 'string'
               ? Builder.expression.literal.string(operationValue as string)
               : Builder.expression.literal.integer(Number(operationValue)),
           ]),
@@ -515,11 +605,12 @@ function handleStatsByCategorizeLeafOperation(
 
   // include all the existing commands right up until the operating stats command
   editorQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
-    if (idx === arr.length - 1 && cmd.name === 'stats') {
+    if (cmd.name === 'stats' || (idx === arr.length - 1 && cmd.name === 'sample')) {
       // however, when the last command is a stats command, we don't want to include it in the cascade operation query
-      // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
+      // since WHERE commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a STATS command
       // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
-      // as we would have already selected the definition of the field if our operation stats command references it
+      // as we would have already selected the definition of the field if our operation stats command references it.
+      // Similarly, when the last command is a SAMPLE command, we don't want to include it in the cascade operation query since we want all matching documents to be considered.
       return;
     }
 
@@ -588,96 +679,6 @@ function handleStatsByCategorizeLeafOperation(
 }
 
 /**
- * Modifies the provided ESQL query to only include the specified columns in the stats by option.
- */
-export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]): AggregateQuery {
-  const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
-
-  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
-
-  if (!dataSourceCommand) {
-    throw new Error('Query does not have a data source');
-  }
-
-  const statsCommands = Array.from(mutate.commands.stats.list(EditorESQLQuery.ast));
-
-  if (statsCommands.length === 0) {
-    throw new Error(`Query does not include a "stats" command`);
-  }
-
-  const { grouping: statsCommandToOperateOnGrouping, command: statsCommandToOperateOn } =
-    getStatsCommandToOperateOn(EditorESQLQuery) ?? {};
-
-  if (!statsCommandToOperateOn) {
-    throw new Error(`No valid "stats" command was found in the query`);
-  }
-
-  const isValidPick = pick.every(
-    (col) =>
-      Object.keys(statsCommandToOperateOnGrouping!).includes(col) ||
-      Object.keys(statsCommandToOperateOnGrouping!).includes(`\`${col}\``)
-  );
-
-  if (!isValidPick) {
-    // nothing to do, return query as is
-    return {
-      esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
-    };
-  }
-
-  // Create a modified stats command with only the specified column as args for the "by" option
-  const modifiedStatsCommand = Builder.command({
-    name: 'stats',
-    args: statsCommandToOperateOn.args.map((statsCommandArg) => {
-      if (isOptionNode(statsCommandArg) && statsCommandArg.name === 'by') {
-        return Builder.option({
-          name: statsCommandArg.name,
-          args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
-            if (isColumn(cur) && pick.includes(removeBackticks(cur.name))) {
-              acc.push(synth.exp(cur.text, { withFormatting: false }));
-            } else if (
-              isFunctionExpression(cur) &&
-              isSupportedStatsFunction(
-                cur.subtype === 'variadic-call'
-                  ? cur.name
-                  : (cur.args[1] as ESQLAstItem[]).find(isFunctionExpression)?.name ?? ''
-              ) &&
-              pick.includes(
-                cur.subtype === 'variadic-call'
-                  ? cur.text
-                  : removeBackticks(cur.args.find(isColumn)?.name ?? '')
-              )
-            ) {
-              acc.push(synth.exp(cur.text, { withFormatting: false }));
-            }
-
-            return acc;
-          }, []),
-        });
-      }
-
-      // leverage synth to clone the rest of the args since we'd want to use those parts as is
-      return synth.exp((statsCommandArg as ESQLCommandOption).text, { withFormatting: false });
-    }),
-  });
-
-  // Get the position of the original stats command
-  const statsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
-    (cmd) => cmd.text === statsCommandToOperateOn.text
-  );
-
-  // remove stats command
-  mutate.generic.commands.remove(EditorESQLQuery.ast, statsCommandToOperateOn);
-
-  // insert modified stats command at same position previous one was at
-  mutate.generic.commands.insert(EditorESQLQuery.ast, modifiedStatsCommand, statsCommandIndex);
-
-  return {
-    esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
-  };
-}
-
-/**
  * Handles the computation and appending of a filtering where clause,
  * for ES|QL query containing a stats command in the cascade layout experience
  */
@@ -694,65 +695,132 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 ) => {
   const ESQLQuery = EsqlQuery.fromSrc(query);
 
-  // we make an initial assumption that the filtering operation's target field was declared by the stats command driving the cascade experience
-  let fieldDeclarationCommandSummary = getStatsCommandToOperateOn(ESQLQuery)!;
+  // This is the STATS command driving the cascade experience for the query provided
+  const operatingStatsCommand = getStatsCommandToOperateOn(ESQLQuery)!;
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
+  const lastStatsCommandFields = statsCommandRuntimeFields[statsCommandRuntimeFields.length - 1];
 
-  // when the grouping option is an unnamed function, it's wrapped in backticks in the generated AST so we test for that first, else we assume this does not apply
-  let normalizedFieldName = fieldDeclarationCommandSummary.grouping[`\`${fieldName}\``]
+  // when the grouping option is an unnamed function,
+  // it's wrapped in backticks in the generated AST so we test for that first, else we assume this does not apply
+  const rawFieldName = operatingStatsCommand.grouping[`\`${fieldName}\``]
     ? `\`${fieldName}\``
     : fieldName;
 
-  const isFieldUsedInOperatingStatsCommand =
-    fieldDeclarationCommandSummary.grouping[normalizedFieldName];
+  const normalizedRawFieldName = removeBackticks(rawFieldName).replace(/\s+/g, '');
 
-  // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
+  // This is a placeholder for the normalized field name returned by the parser,
+  // and in the case where we received a field name that maps to a variable,
+  // it's value will be the field's variable value
+  let normalizedFieldName = rawFieldName;
+
+  // placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
   let insertionAnchorCommand: ESQLCommand;
 
-  // create placeholder for a flag to indicate if the field was declared in a stats command
-  let isFieldRuntimeDeclared = false;
+  // placeholder to indicate if the filtering target field points to a runtime field in the query
+  // Check both with/without backticks and with whitespace normalization
+  let filterTargetIsRuntimeField = Array.from(lastStatsCommandFields).some(
+    (field) => field === normalizedRawFieldName
+  );
 
   // placeholder for the computed expression of the filter operation that has been requested by the user
   let computedFilteringExpression: ESQLAstItem;
 
-  if (isFieldUsedInOperatingStatsCommand) {
-    // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
-    // so we set the flag to true and use the stats command as the insertion anchor command
-    if (fieldDeclarationCommandSummary.newFields.has(normalizedFieldName)) {
-      isFieldRuntimeDeclared = true;
-    } else {
-      // otherwise, we need to ascertain that the field was not created by a preceding stats command
-      // so we check the runtime fields created by the stats commands in the query to see if the field was declared in one of them
-      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
+  const isFieldUsedInOperatingStatsCommand = Boolean(operatingStatsCommand.grouping[rawFieldName]);
 
+  if (isFieldUsedInOperatingStatsCommand) {
+    // check all the used fields of the operating stats command,
+    // if any of the used fields are found in the stats runtime fields,
+    // we attempt to get it's index because we'd want to place our filtering operation
+    // before the command that declared the field used in the operating stats command.
+    // This approach would always return the index of the earliest
+    // stats command that's referenced in the operating stats command
+
+    // Collect all used fields from both aggregates and grouping in the operating stats
+    const allUsedFieldsInOperatingStats = new Set<string>();
+
+    // Add used fields from aggregates
+    Object.values(operatingStatsCommand.aggregates).forEach((aggregate) => {
+      aggregate.usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
+    });
+
+    // Add used fields from grouping
+    Object.values(operatingStatsCommand.grouping).forEach((group) => {
+      group.usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
+    });
+
+    // Find the earliest stats command that created any of the fields used by the operating stats
+    const operatingStatsCommandUsedFieldIndex = statsCommandRuntimeFields.findIndex((field) => {
+      return [...allUsedFieldsInOperatingStats].some((usedField) => field.has(usedField));
+    });
+
+    // We make an initial assumption that the filtering operation's target field
+    // was declared by the stats command driving the cascade experience
+    let fieldDeclarationCommandSummary = operatingStatsCommand;
+
+    // if the field name is not marked as a new field
+    // then we know it was declared by the stats command driving the cascade experience
+    const hasNormalizedField = Array.from(lastStatsCommandFields).some(
+      (field) => field === normalizedRawFieldName
+    );
+
+    if (!hasNormalizedField) {
       // attempt to find the index of the stats command that declared the field
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-        field.has(normalizedFieldName)
+        field.has(normalizedRawFieldName)
       );
 
-      // if the field was declared in a stats command, then we set the flag to true
-      isFieldRuntimeDeclared = groupDeclarationCommandIndex >= 0;
-
-      let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
-
-      if (isFieldRuntimeDeclared) {
-        groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
-          ESQLQuery,
-          groupDeclarationCommandIndex
-        );
+      if (
+        groupDeclarationCommandIndex >= 0 &&
+        fieldDeclarationCommandSummary.index !== groupDeclarationCommandIndex
+      ) {
+        filterTargetIsRuntimeField = true;
+        // update the field declaration command summary to the stats command
+        // that declared the field the filtering operation is targeting
+        fieldDeclarationCommandSummary = {
+          ...getStatsCommandAtIndexSummary(ESQLQuery, groupDeclarationCommandIndex)!,
+          index: groupDeclarationCommandIndex,
+        };
       }
-
-      fieldDeclarationCommandSummary =
-        groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
     }
 
-    insertionAnchorCommand = fieldDeclarationCommandSummary.command;
+    if (
+      operatingStatsCommandUsedFieldIndex >= 0 &&
+      operatingStatsCommandUsedFieldIndex !== operatingStatsCommand.index
+    ) {
+      insertionAnchorCommand = getStatsCommandAtIndexSummary(
+        ESQLQuery,
+        operatingStatsCommandUsedFieldIndex
+      )!.command;
+
+      // When we move the insertion anchor to an earlier stats command,
+      // we need to check if the filter target field is a runtime field relative to that command
+      // If it's not in the runtime fields up to this point, then it's a data source field
+      // and we should treat it as not being a runtime field
+      const runtimeFieldsUpToAnchor = statsCommandRuntimeFields.slice(
+        0,
+        operatingStatsCommandUsedFieldIndex + 1
+      );
+      const isRuntimeFieldAtAnchor = runtimeFieldsUpToAnchor.some((fields) =>
+        Array.from(fields).some((field) => field === normalizedRawFieldName)
+      );
+
+      // If the field is not a runtime field at the anchor point, we should insert before the anchor
+      if (!isRuntimeFieldAtAnchor) {
+        filterTargetIsRuntimeField = false;
+      }
+    } else {
+      // we default to the field declaration command summary as the insertion anchor command
+      insertionAnchorCommand = fieldDeclarationCommandSummary.command;
+    }
 
     let fieldNameParamValue;
+
+    const fieldDeclaration = fieldDeclarationCommandSummary.grouping[rawFieldName];
 
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        fieldDeclarationCommandSummary.grouping[normalizedFieldName].terminals,
+        fieldDeclaration.terminals,
         esqlVariables
       ))
     ) {
@@ -760,6 +828,15 @@ export const appendFilteringWhereClauseForCascadeLayout = <
         // we expect the field name parameter value to be a string, so we check for that and update the normalized field name to the param value if it is
         normalizedFieldName = fieldNameParamValue;
       }
+    } else {
+      // This corrects for scenarios in the initial query where the user doesn't adhere to the expected syntax for calling a function,
+      // especially when the function is unnamed for example if the user inputs "CATEGORIZE (message)" elasticsearch is able to understand this because the parser fixes it, and precisely because of that is why
+      // we can't use this as-is when constructing the filtering query, so we appropriately extract correct value from the parsed AST
+      normalizedFieldName =
+        isFunctionExpression(fieldDeclaration.arg) &&
+        fieldDeclaration.arg.subtype === 'variadic-call'
+          ? fieldDeclaration.definition.text
+          : fieldDeclaration.column.name;
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,
@@ -810,10 +887,11 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   );
 
   // since we can't anticipate the nature of the query we could be dealing with
-  // when its a runtime field or not used in the operating stats command, we need to insert the new where command right after the insertion anchor command
+  // when its a runtime field or not used in the operating stats command,
+  // we need to insert the new filtering "where" command right after the insertion anchor command
   // otherwise we insert it right before the insertion anchor command
   const commandsFollowingInsertionAnchor =
-    !isFieldUsedInOperatingStatsCommand || isFieldRuntimeDeclared
+    !isFieldUsedInOperatingStatsCommand || filterTargetIsRuntimeField
       ? ESQLQuery.ast.commands.slice(insertionAnchorCommandIndex, insertionAnchorCommandIndex + 2)
       : ESQLQuery.ast.commands.slice(
           insertionAnchorCommandIndex - 1,
@@ -836,7 +914,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       filteringWhereCommand,
       // when the field is a runtime field or not used in the operating stats command, we insert the new where command right after the insertion anchor command
       // otherwise we insert it right before the insertion anchor command
-      !isFieldUsedInOperatingStatsCommand || isFieldRuntimeDeclared
+      !isFieldUsedInOperatingStatsCommand || filterTargetIsRuntimeField
         ? insertionAnchorCommandIndex + 1
         : insertionAnchorCommandIndex
     );

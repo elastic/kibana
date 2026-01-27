@@ -197,17 +197,19 @@ export interface UseCaseAttachmentTabsReturnValue {
 export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
+  searchTerm,
 }: {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  searchTerm?: string;
 }): UseCaseAttachmentTabsReturnValue => {
   const { features } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
+    searchTerm,
   });
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
-
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
@@ -322,8 +324,8 @@ export const useCaseAttachmentTabs = ({
       activeTab,
       attackDiscoveriesCount,
       canShowObservableTabs,
-      caseData.totalAlerts,
-      caseData.totalEvents,
+      stats.totalAlerts,
+      stats.totalEvents,
       euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,

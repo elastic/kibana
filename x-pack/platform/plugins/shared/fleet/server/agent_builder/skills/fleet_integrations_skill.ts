@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 
 export const FLEET_INTEGRATIONS_SKILL: Skill = {
   namespace: 'fleet.integrations',

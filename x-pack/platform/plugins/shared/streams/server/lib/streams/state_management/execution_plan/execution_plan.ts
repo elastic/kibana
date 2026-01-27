@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import { groupBy, orderBy } from 'lodash';
+import { groupBy } from 'lodash';
+import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -52,9 +52,10 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
-  UnlinkFeaturesAction,
+  UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
+  UnlinkFeaturesAction,
 } from './types';
 
 /**
@@ -90,6 +91,7 @@ export class ExecutionPlan {
       update_data_stream_mappings: [],
       delete_queries: [],
       unlink_assets: [],
+      unlink_systems: [],
       unlink_features: [],
       update_ingest_settings: [],
     };
@@ -181,6 +183,7 @@ export class ExecutionPlan {
         update_failure_store,
         delete_queries,
         unlink_assets,
+        unlink_systems,
         unlink_features,
         update_ingest_settings,
         ...rest
@@ -223,6 +226,7 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
+        this.unlinkSystems(unlink_systems),
         this.unlinkFeatures(unlink_features),
       ]);
 
@@ -260,15 +264,25 @@ export class ExecutionPlan {
     );
   }
 
-  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
     if (actions.length === 0) {
       return;
     }
 
     return Promise.all(
       actions.map((action) =>
-        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
+        this.dependencies.systemClient.syncSystemList(action.request.name, [])
       )
+    );
+  }
+
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
     );
   }
 
@@ -362,17 +376,26 @@ export class ExecutionPlan {
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
     const actionWithStreamsDepth = actions.map((action) => ({
       ...action,
-      depth: action.stream.match(/\./g)?.length ?? 0,
+      depth: getSegments(action.stream).length - 1,
     }));
-    return Promise.all(
-      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action) =>
-        upsertIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          pipeline: action.request,
-        })
-      )
-    );
+
+    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
+    const depths = Object.keys(actionsByDepth)
+      .map(Number)
+      .sort((a, b) => b - a); // Sort descending: deepest (children) first
+
+    // Process each depth level sequentially, with pipelines at the same depth in parallel
+    for (const depth of depths) {
+      await Promise.all(
+        actionsByDepth[depth].map((action) =>
+          upsertIngestPipeline({
+            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+            logger: this.dependencies.logger,
+            pipeline: action.request,
+          })
+        )
+      );
+    }
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {

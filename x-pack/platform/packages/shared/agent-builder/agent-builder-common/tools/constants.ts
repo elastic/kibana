@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ToolType } from './definition';
+import { internalNamespaces } from '../base/namespaces';
+
+const platformCoreTool = (toolName: string) => {
+  return `${internalNamespaces.platformCore}.${toolName}`;
+};
+
+/**
+ * Ids of built-in agentBuilder tools
+ */
+export const platformCoreTools = {
+  indexExplorer: platformCoreTool('index_explorer'),
+  search: platformCoreTool('search'),
+  listIndices: platformCoreTool('list_indices'),
+  getIndexMapping: platformCoreTool('get_index_mapping'),
+  getDocumentById: platformCoreTool('get_document_by_id'),
+  generateEsql: platformCoreTool('generate_esql'),
+  executeEsql: platformCoreTool('execute_esql'),
+  createVisualization: platformCoreTool('create_visualization'),
+  getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  listWorkflows: platformCoreTool('list_workflows'),
+  getWorkflow: platformCoreTool('get_workflow'),
+  runWorkflow: platformCoreTool('run_workflow'),
+  getWorkflowExecutionLogs: platformCoreTool('get_workflow_execution_logs'),
+  productDocumentation: platformCoreTool('product_documentation'),
+  cases: platformCoreTool('cases'),
+  integrationKnowledge: platformCoreTool('integration_knowledge'),
+  savedObjects: platformCoreTool('saved_objects'),
+  dataViews: platformCoreTool('data_views'),
+  alertingRules: platformCoreTool('alerting_rules'),
+  connectors: platformCoreTool('connectors'),
+  uiSettings: platformCoreTool('ui_settings'),
+  spaces: platformCoreTool('spaces'),
+  privileges: platformCoreTool('privileges'),
+  tags: platformCoreTool('tags'),
+  // Attachment tools
+  attachmentRead: platformCoreTool('attachment_read'),
+  attachmentUpdate: platformCoreTool('attachment_update'),
+  attachmentAdd: platformCoreTool('attachment_add'),
+  attachmentList: platformCoreTool('attachment_list'),
+  attachmentDiff: platformCoreTool('attachment_diff'),
+} as const;
+
+/**
+ * List of tool types which can be created / edited by a user.
+ */
+export const editableToolTypes: ToolType[] = [
+  ToolType.esql,
+  ToolType.index_search,
+  ToolType.workflow,
+  ToolType.mcp,
+];
+
+export const defaultAgentToolIds = [
+  platformCoreTools.search,
+  platformCoreTools.listIndices,
+  platformCoreTools.getIndexMapping,
+  platformCoreTools.getDocumentById,
+  platformCoreTools.getWorkflowExecutionStatus,
+];
+
+/**
+ * The number of active tools that will trigger a warning in the UI.
+ * Agent will perform poorly if it has too many tools.
+ */
+export const activeToolsCountWarningThreshold = 24;

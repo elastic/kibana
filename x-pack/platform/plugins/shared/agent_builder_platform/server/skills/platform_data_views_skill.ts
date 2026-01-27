@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/onechat-common/skills';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { Skill } from '@kbn/agent-builder-common/skills';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { createToolProxy } from './utils/create_tool_proxy';
 
 export const PLATFORM_DATA_VIEWS_SKILL: Skill = {

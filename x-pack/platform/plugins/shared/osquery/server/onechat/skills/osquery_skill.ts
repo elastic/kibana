@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getLiveQuerySkill } from './live_query_skill';
 import { getPacksSkill } from './packs_skill';

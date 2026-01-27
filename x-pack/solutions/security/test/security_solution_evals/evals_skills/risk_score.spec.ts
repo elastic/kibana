@@ -12,7 +12,7 @@ import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/te
 import { createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
 
 import { evaluate } from '../src/evaluate';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
 
 const AGENT_ID = oneChatDefaultAgentId;
 

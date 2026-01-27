@@ -14,6 +14,8 @@
           "() => (inspectionEvent: InspectionEvent) => void"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,6 +43,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +59,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +80,8 @@
           "() => boolean | object"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -91,6 +99,8 @@
           "<ImplementationFactory extends (...factoryArgs: any[]) => any>(_implementationFactory: ImplementationFactory) => ReturnType<ImplementationFactory>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,6 +115,8 @@
               "ImplementationFactory"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +136,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -150,6 +164,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +182,8 @@
               "<TSentEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -188,6 +206,8 @@
               ">) => void"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -203,6 +223,8 @@
                   "<TContext, TEvent, TSentEvent | undefined>"
                 ],
                 "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+                "lineNumber": 16,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

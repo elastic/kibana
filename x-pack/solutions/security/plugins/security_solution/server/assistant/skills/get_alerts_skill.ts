@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/onechat-common/skills';
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import { tool } from '@langchain/core/tools';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { getSpaceIdFromRequest } from '../../agent_builder/tools/helpers';
 

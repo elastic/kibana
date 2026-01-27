@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { FLEET_AGENTS_SKILL } from './fleet_agents_skill';
 import { FLEET_INTEGRATIONS_SKILL } from './fleet_integrations_skill';
 

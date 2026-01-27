@@ -9,18 +9,19 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
-  legendVisibleSchema,
-  legendSizeSchema,
-  valueDisplaySchema,
-} from './partition_shared';
+} from '../shared';
+import { legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -47,7 +48,7 @@ export const waffleStateSharedSchema = {
         visible: legendVisibleSchema,
         size: legendSizeSchema,
       },
-      { meta: { description: 'Legend configuration for waffle chart' } }
+      { meta: { id: 'waffleLegend', description: 'Legend configuration for waffle chart' } }
     )
   ),
   value_display: valueDisplaySchema,
@@ -56,14 +57,14 @@ export const waffleStateSharedSchema = {
 /**
  * Color configuration for primary metric in waffle chart
  */
-const partitionStatePrimaryMetricOptionsSchema = schema.object({
+const partitionStatePrimaryMetricOptionsSchema = {
   color: schema.maybe(staticColorSchema),
-});
+};
 
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = schema.object({
+const partitionStateBreakdownByOptionsSchema = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, colorMappingSchema], {
       meta: {
@@ -72,11 +73,10 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
     })
   ),
   collapse_by: schema.maybe(collapseBySchema),
-});
+};
 
 function validateGroupings({
   metrics,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   group_by,
 }: {
   metrics: Array<{}>;
@@ -101,22 +101,31 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
     ),
   },
   {
-    meta: { description: 'Waffle chart configuration for standard queries' },
+    meta: { id: 'waffleNoESQL', description: 'Waffle chart configuration for standard queries' },
     validate: validateGroupings,
   }
 );
@@ -132,26 +141,19 @@ const waffleStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
-      schema.allOf(
-        [
-          schema.object(genericOperationOptionsSchema),
-          partitionStatePrimaryMetricOptionsSchema,
-          esqlColumnSchema,
-        ],
-        { meta: { description: 'ES|QL column reference for primary metric' } }
-      )
+      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      { maxSize: 100 }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(
-        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-          meta: { description: 'ES|QL column reference for breakdown dimension' },
-        }),
-        { minSize: 1, meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' } }
-      )
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
+      })
     ),
   },
   {
-    meta: { description: 'Waffle chart configuration for ES|QL queries' },
+    meta: { id: 'waffleESQL', description: 'Waffle chart configuration for ES|QL queries' },
     validate: validateGroupings,
   }
 );
@@ -160,7 +162,10 @@ const waffleStateSchemaESQL = schema.object(
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
-  meta: { description: 'Waffle chart configuration: DSL or ES|QL query based' },
+  meta: {
+    id: 'waffleChartSchema',
+    description: 'Waffle chart configuration: DSL or ES|QL query based',
+  },
 });
 
 export type WaffleState = TypeOf<typeof waffleStateSchema>;
