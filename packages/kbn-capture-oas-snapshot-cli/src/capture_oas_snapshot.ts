@@ -20,7 +20,6 @@ interface CaptureOasSnapshotArgs {
   log: ToolingLog;
   buildFlavour: 'serverless' | 'traditional';
   outputFile: string;
-  update: boolean;
   filters?: {
     pathStartsWith?: string[];
     excludePathsMatching?: string[];
@@ -34,7 +33,6 @@ export async function captureOasSnapshot({
   log,
   filters = {},
   buildFlavour,
-  update,
   outputFile,
 }: CaptureOasSnapshotArgs): Promise<void> {
   const { excludePathsMatching = [], pathStartsWith } = filters;
@@ -84,17 +82,9 @@ export async function captureOasSnapshot({
     });
 
     log.info(`Recieved OAS, writing to ${outputFile}...`);
-    if (update) {
-      await fs.writeFile(outputFile, sortAndPrettyPrint(currentOas));
-      const { size: sizeBytes } = await fs.stat(outputFile);
-      log.success(`OAS written to ${outputFile}. File size ~${twoDeci(sizeBytes / MB)} MB.`);
-    } else {
-      log.success(
-        `OAS recieved, not writing to file. Got OAS for ${
-          Object.keys(currentOas.paths).length
-        } paths.`
-      );
-    }
+    await fs.writeFile(outputFile, sortAndPrettyPrint(currentOas));
+    const { size: sizeBytes } = await fs.stat(outputFile);
+    log.success(`OAS written to ${outputFile}. File size ~${twoDeci(sizeBytes / MB)} MB.`);
   } catch (err) {
     log.error(`Failed to capture OAS: ${err}`);
     throw err;
