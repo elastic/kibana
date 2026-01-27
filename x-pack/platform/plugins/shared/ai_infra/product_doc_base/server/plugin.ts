@@ -75,8 +75,6 @@ export class ProductDocBasePlugin
   ): ProductDocBaseStartContract {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
-    // @TODO: remove
-    console.log(`--@@isServerless`, isServerless);
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );

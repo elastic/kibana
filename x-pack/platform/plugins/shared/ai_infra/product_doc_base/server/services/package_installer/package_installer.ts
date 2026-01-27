@@ -40,7 +40,7 @@ import {
   populateIndex,
 } from './steps';
 import { overrideInferenceSettings } from './steps/create_index';
-
+import { LATEST_PRODUCT_VERSION } from '../../../common/consts';
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -118,9 +118,10 @@ export class PackageInstaller {
       if (!availableVersions || !availableVersions.length) {
         return;
       }
-      const shouldInstallLatest = this.isServerless && availableVersions.includes('latest');
+      const shouldInstallLatest =
+        this.isServerless && availableVersions.includes(LATEST_PRODUCT_VERSION);
       const selectedVersion = shouldInstallLatest
-        ? 'latest'
+        ? LATEST_PRODUCT_VERSION
         : selectVersion(this.currentVersion, availableVersions);
       if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
         toUpdate.push({
@@ -155,9 +156,10 @@ export class PackageInstaller {
         continue;
       }
 
-      const shouldInstallLatest = this.isServerless && availableVersions.includes('latest');
+      const shouldInstallLatest =
+        this.isServerless && availableVersions.includes(LATEST_PRODUCT_VERSION);
       const selectedVersion = shouldInstallLatest
-        ? 'latest'
+        ? LATEST_PRODUCT_VERSION
         : selectVersion(this.currentVersion, availableVersions);
 
       await this.installPackage({
@@ -183,7 +185,7 @@ export class PackageInstaller {
       `Starting installing documentation for product [${productName}] and version [${productVersion}] with inference ID [${inferenceId}]`
     );
 
-    productVersion = this.isServerless ? 'latest' : majorMinor(productVersion);
+    productVersion = this.isServerless ? LATEST_PRODUCT_VERSION : majorMinor(productVersion);
 
     await this.uninstallPackage({ productName, inferenceId });
 
