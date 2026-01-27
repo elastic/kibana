@@ -66,7 +66,7 @@ import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../../common/slo_indicator_types';
-import { SloOverviewFlyout } from '../slo_overview_flyout';
+import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 type ServicesDetailedStatisticsAPIResponse =

@@ -47,11 +47,11 @@ import {
 import type { SloTabId, SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID, sloListLocatorID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import type { ApmPluginStartDeps } from '../../../plugin';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
