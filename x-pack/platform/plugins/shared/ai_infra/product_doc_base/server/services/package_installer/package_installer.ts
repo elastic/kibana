@@ -78,7 +78,7 @@ export class PackageInstaller {
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
-    this.isServerless = true; // --@@todo: renable isServerless;
+    this.isServerless = isServerless;
   }
 
   private async getInferenceInfo(inferenceId?: string) {
@@ -222,7 +222,6 @@ export class PackageInstaller {
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
-
       this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
       const artifactFullPath = await downloadToDisk(artifactUrl, artifactPathAtVolume);
 
@@ -240,7 +239,7 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
 
-      await createIndex({
+      const createdIndex = await createIndex({
         indexName,
         mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
         manifestVersion,
@@ -248,7 +247,7 @@ export class PackageInstaller {
         log: this.log,
       });
 
-      await populateIndex({
+      const populatedIndex = await populateIndex({
         indexName,
         manifestVersion,
         archive: zipArchive,

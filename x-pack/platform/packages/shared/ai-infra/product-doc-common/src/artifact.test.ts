@@ -63,6 +63,22 @@ describe('getArtifactName', () => {
       })
     ).toEqual('kb-product-doc-kibana-8.16.zip');
   });
+  it('generates a name with inference id for latest', () => {
+    expect(
+      getArtifactName({
+        productName: 'kibana',
+        productVersion: 'latest',
+        inferenceId: DEFAULT_ELSER,
+      })
+    ).toEqual('kb-product-doc-kibana-latest.zip');
+    expect(
+      getArtifactName({
+        productName: 'security',
+        productVersion: 'latest',
+        inferenceId: DEFAULT_ELSER,
+      })
+    ).toEqual('kb-product-doc-security-latest.zip');
+  });
 });
 
 describe('parseArtifactName', () => {
