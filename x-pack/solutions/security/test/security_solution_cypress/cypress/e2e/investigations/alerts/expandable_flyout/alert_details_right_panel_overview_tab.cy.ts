@@ -177,7 +177,7 @@ describe(
 
     describe('investigation section', () => {
       it('should display investigation section', () => {
-        toggleOverviewTabAboutSection(); // close About (optional)
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
 
         cy.log('header and content');
