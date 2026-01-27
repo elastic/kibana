@@ -251,7 +251,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole2)ln(6)oe(0)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(528a070f7bdd4fdac70ee28fbe835f04)oe(0)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -447,7 +447,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 12,
+            expectedCount: 15,
           });
 
           // Execute enrich policy to pick up entity data
@@ -481,7 +481,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 12,
+            expectedCount: 15,
           });
         });
 
