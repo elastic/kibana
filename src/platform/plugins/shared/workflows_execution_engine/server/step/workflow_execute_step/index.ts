@@ -8,4 +8,5 @@
  */
 
 export { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
+export { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 export { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';

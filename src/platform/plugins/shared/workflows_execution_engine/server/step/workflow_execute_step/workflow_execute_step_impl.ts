@@ -8,9 +8,15 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowExecuteStep, WorkflowRepository } from '@kbn/workflows';
-import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
+import type {
+  EsWorkflow,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
+  WorkflowRepository,
+} from '@kbn/workflows';
+import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { MAX_WORKFLOW_DEPTH } from './constants';
+import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
@@ -21,7 +27,7 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
 export interface WorkflowExecuteStepImplInit {
-  node: WorkflowExecuteGraphNode;
+  node: WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode;
   stepExecutionRuntime: StepExecutionRuntime;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   workflowRepository: WorkflowRepository;
@@ -35,11 +41,13 @@ export interface WorkflowExecuteStepImplInit {
 
 export class WorkflowExecuteStepImpl implements NodeImplementation {
   private syncExecutor: WorkflowExecuteSyncStrategy;
+  private asyncExecutor: WorkflowExecuteAsyncStrategy;
 
   constructor(private readonly init: WorkflowExecuteStepImplInit) {
     const {
       node: _node,
       stepExecutionRuntime,
+      workflowExecutionRuntime,
       workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRepository,
@@ -52,10 +60,17 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
       stepExecutionRuntime,
       workflowLogger
     );
+    this.asyncExecutor = new WorkflowExecuteAsyncStrategy(
+      workflowsExecutionEngine,
+      workflowExecutionRepository,
+      stepExecutionRuntime,
+      workflowExecutionRuntime,
+      workflowLogger
+    );
   }
 
   private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
-    const step = this.init.node.configuration as WorkflowExecuteStep;
+    const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
         step.with || {}
@@ -78,6 +93,9 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     // Persist resolved inputs for observability in the execution UI
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
     await stepExecutionRuntime.flushEventLogs();
+
+    // Determine if we should await based on step type
+    const shouldAwait = node.type === 'workflow.execute';
 
     try {
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
@@ -112,22 +130,31 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
         return;
       }
 
-      const result = await this.syncExecutor.execute(
-        targetWorkflow,
-        inputs,
-        this.init.spaceId,
-        this.init.request,
-        currentDepth
-      );
+      if (shouldAwait) {
+        const result = await this.syncExecutor.execute(
+          targetWorkflow,
+          inputs,
+          this.init.spaceId,
+          this.init.request,
+          currentDepth
+        );
 
-      if (result.status === 'completed') {
-        stepExecutionRuntime.finishStep(result.output);
-        workflowExecutionRuntime.navigateToNextNode();
-      } else if (result.status === 'failed') {
-        stepExecutionRuntime.failStep(result.error as Error);
-        workflowExecutionRuntime.navigateToNextNode();
+        if (result.status === 'completed') {
+          stepExecutionRuntime.finishStep(result.output);
+          workflowExecutionRuntime.navigateToNextNode();
+        } else if (result.status === 'failed') {
+          stepExecutionRuntime.failStep(result.error as Error);
+          workflowExecutionRuntime.navigateToNextNode();
+        }
+        // result.status === 'waiting': delay entered, no navigation
+      } else {
+        await this.asyncExecutor.execute(
+          targetWorkflow,
+          inputs,
+          this.init.spaceId,
+          this.init.request
+        );
       }
-      // result.status === 'waiting': delay entered, no navigation
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();

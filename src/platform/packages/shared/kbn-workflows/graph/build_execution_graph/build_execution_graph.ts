@@ -22,6 +22,7 @@ import type {
   StepWithOnFailure,
   TimeoutProp,
   WaitStep,
+  WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowOnFailure,
   WorkflowRetry,
@@ -54,6 +55,7 @@ import type {
   HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
+  WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraphType,
 } from '../types';
@@ -158,6 +160,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as WorkflowExecuteStep).type === 'workflow.execute') {
     return visitWorkflowExecuteStep(currentStep as WorkflowExecuteStep, context);
+  }
+
+  if ((currentStep as WorkflowExecuteAsyncStep).type === 'workflow.executeAsync') {
+    return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
   }
 
   return visitAtomicStep(currentStep, context);
@@ -277,6 +283,25 @@ export function visitWorkflowExecuteStep(
     },
   };
   graph.setNode(workflowExecuteNode.id, workflowExecuteNode);
+  return graph;
+}
+
+export function visitWorkflowExecuteAsyncStep(
+  currentStep: WorkflowExecuteAsyncStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowExecuteAsyncNode: WorkflowExecuteAsyncGraphNode = {
+    id: stepId,
+    type: 'workflow.executeAsync',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(workflowExecuteAsyncNode.id, workflowExecuteAsyncNode);
   return graph;
 }
 
