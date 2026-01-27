@@ -83,7 +83,7 @@ pivot:
     Operations: "Feature:license, Team:Operations"
     Platform: "Team:Core, Feature:Plugins, Feature:New Platform, Project:i18n, Feature:ExpressionLanguage, Feature:Saved Objects, Team:Stack Services, Feature:NP Migration, Feature:Task Manager, Team:Pulse"
     QA: "Team:QA"
-    "Querying and filtering, Feature:Query Bar, Feature:Courier, Feature:Filters, Feature:Timepicker, Feature:Highlight, Feature:KQL, Feature:Rollups, Feature:Search, Project:AsyncSearch"
+    "Querying and filtering": "Feature:Query Bar, Feature:Courier, Feature:Filters, Feature:Timepicker, Feature:Highlight, Feature:KQL, Feature:Rollups, Feature:Search, Project:AsyncSearch"
     Reporting: "Feature:Reporting, Team:Reporting Services"
     Search: "Team:Search"
     Sharing: "Feature:Embedding, Feature:SharingURLs"
