@@ -24,7 +24,7 @@ const defaultUiSettingsGet = (key: string) => {
   }
 };
 
-describe('to_esql', () => {
+describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
@@ -420,6 +420,7 @@ describe('to_esql', () => {
       expect(metricColumn.format).toEqual({
         id: 'currency',
         params: {
+          decimals: 2,
           pattern: '$0,0.00',
         },
       });

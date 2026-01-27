@@ -177,16 +177,13 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
-    const esqlLayer = generateEsqlQuery(
-      esAggEntries,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-      nowInstant
-    );
-    const isFormBasedEsqlMode = canUseESQL && isEsqlQuerySuccess(esqlLayer);
+    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL;
+
+    // Only generate ES|QL query when ES|QL mode is enabled
+    const esqlLayer = canUseESQL
+      ? generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant)
+      : undefined;
+    const isFormBasedEsqlMode = canUseESQL && !!esqlLayer && isEsqlQuerySuccess(esqlLayer);
 
     if (!isFormBasedEsqlMode) {
       esAggEntries.forEach(([colId, col], index) => {

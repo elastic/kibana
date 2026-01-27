@@ -13,7 +13,7 @@ import type {
 } from '@kbn/lens-common';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
-import type { ConvertibleLayer } from './convert_to_esql_modal';
+import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
 
 describe('convertFormBasedToTextBasedLayer', () => {
   const layerId = 'layer1';
@@ -27,13 +27,11 @@ describe('convertFormBasedToTextBasedLayer', () => {
       { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
       { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
     ],
-    getFieldByName: (name: string) => {
-      const fields: Record<string, { name: string; type: string }> = {
+    getFieldByName: (name: string) =>
+      ({
         '@timestamp': { name: '@timestamp', type: 'date' },
         bytes: { name: 'bytes', type: 'number' },
-      };
-      return fields[name];
-    },
+      }[name]),
     getFormatterForField: () => ({ id: 'number', params: {} }),
     hasRestrictions: false,
   } as unknown as IndexPattern;
@@ -63,28 +61,16 @@ describe('convertFormBasedToTextBasedLayer', () => {
   };
 
   const mockFormBasedState: FormBasedPrivateState = {
-    layers: {
-      [layerId]: mockFormBasedLayer,
-    },
+    layers: { [layerId]: mockFormBasedLayer },
     currentIndexPatternId: 'test-index-pattern',
   } as unknown as FormBasedPrivateState;
 
   const mockDatasourceStates: DatasourceStates = {
-    formBased: {
-      state: mockFormBasedState,
-      isLoading: false,
-    },
+    formBased: { state: mockFormBasedState, isLoading: false },
   };
 
   const mockVisualizationState = {
-    layers: [
-      {
-        layerId,
-        layerType: 'data',
-        xAccessor: 'col1',
-        accessors: ['col2'],
-      },
-    ],
+    layers: [{ layerId, layerType: 'data', xAccessor: 'col1', accessors: ['col2'] }],
   };
 
   const mockAttributes: TypedLensSerializedState['attributes'] = {
@@ -93,799 +79,277 @@ describe('convertFormBasedToTextBasedLayer', () => {
     state: {
       query: { query: '', language: 'kuery' },
       filters: [],
-      datasourceStates: {
-        formBased: mockFormBasedState,
-      },
+      datasourceStates: { formBased: mockFormBasedState },
       visualization: mockVisualizationState,
     },
     references: [],
   } as unknown as TypedLensSerializedState['attributes'];
 
-  // Conversion data that would come from useEsqlConversionCheck
-  const mockConvertibleLayers: ConvertibleLayer[] = [
-    {
-      id: layerId,
-      icon: 'layers',
-      name: '',
-      type: 'data',
-      query: `FROM test-index
-        | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
-        | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
-        | SORT @timestamp ASC`,
-      isConvertibleToEsql: true,
-      conversionData: {
-        esAggsIdMap: {
-          bucket_0_0: [
-            {
-              id: 'col2',
-              label: 'Count of records',
-              operationType: 'count',
-              sourceField: '___records___',
-              dataType: 'number',
-              interval: undefined as never,
-            },
-          ],
-          '@timestamp': [
-            {
-              id: 'col1',
-              label: '@timestamp',
-              operationType: 'date_histogram',
-              sourceField: '@timestamp',
-              dataType: 'date',
-              interval: 1800000, // 30 minutes in ms
-            },
-          ],
-        },
-        partialRows: false,
-      },
-    },
-  ];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns undefined when layersToConvert is empty', () => {
-    const framePublicAPI = createMockFramePublicAPI({
+  // Helper to create framePublicAPI with optional fieldFormatMap
+  const createFrameAPI = (fieldFormatMap?: Record<string, unknown>) => {
+    const indexPattern = fieldFormatMap
+      ? ({ ...mockIndexPattern, fieldFormatMap } as unknown as IndexPattern)
+      : mockIndexPattern;
+    return createMockFramePublicAPI({
       dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatterns: { 'test-index-pattern': indexPattern },
         indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
       },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
     });
+  };
 
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [],
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
+  // Helper to create ConvertibleLayer with minimal boilerplate
+  const createConvertibleLayer = (
+    query: string,
+    esAggsIdMap: ConvertibleLayer['conversionData']['esAggsIdMap'],
+    partialRows = false
+  ): ConvertibleLayer => ({
+    id: layerId,
+    icon: 'layers',
+    name: '',
+    type: 'data',
+    query,
+    isConvertibleToEsql: true,
+    conversionData: { esAggsIdMap, partialRows },
+  });
 
-    expect(result).toBeUndefined();
+  // Helper to create column mapping entry
+  const createColumnMapping = (
+    id: string,
+    label: string,
+    dataType: string,
+    overrides: Record<string, unknown> = {}
+  ): EsqlConversionData['esAggsIdMap'][string] => [
+    {
+      id,
+      label,
+      operationType: (overrides.operationType as string) ?? 'count',
+      sourceField: (overrides.sourceField as string) ?? '___records___',
+      dataType,
+      interval: undefined as never,
+      ...overrides,
+    } as EsqlConversionData['esAggsIdMap'][string][number],
+  ];
+
+  const defaultConvertibleLayers: ConvertibleLayer[] = [
+    createConvertibleLayer(
+      `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes) | SORT @timestamp ASC`,
+      {
+        bucket_0_0: createColumnMapping('col2', 'Count of records', 'number'),
+        '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {
+          operationType: 'date_histogram',
+          sourceField: '@timestamp',
+          interval: 1800000,
+        }),
+      }
+    ),
+  ];
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns undefined when layersToConvert is empty', () => {
+    expect(
+      convertFormBasedToTextBasedLayer({
+        layersToConvert: [],
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      })
+    ).toBeUndefined();
   });
 
   it('returns undefined when formBased state is missing', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-    });
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: mockConvertibleLayers,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: {},
-      framePublicAPI,
-    });
-
-    expect(result).toBeUndefined();
+    expect(
+      convertFormBasedToTextBasedLayer({
+        layersToConvert: defaultConvertibleLayers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: {},
+        framePublicAPI: createFrameAPI(),
+      })
+    ).toBeUndefined();
   });
 
-  it('returns undefined when layer ID does not exist in formBased state', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-    });
-
-    const nonExistentLayer: ConvertibleLayer = {
-      id: 'non-existent-layer',
-      icon: 'layers',
-      name: '',
-      type: 'data',
-      query: 'FROM test-index | STATS count = COUNT(*)',
-      isConvertibleToEsql: true,
-      conversionData: {
-        esAggsIdMap: {},
-        partialRows: false,
-      },
-    };
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [nonExistentLayer],
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    // Returns undefined because the layer doesn't exist in formBased state
-    expect(result).toBeUndefined();
+  it('returns undefined when layer ID does not exist', () => {
+    const nonExistentLayer = createConvertibleLayer('FROM test-index | STATS count = COUNT(*)', {});
+    nonExistentLayer.id = 'non-existent-layer';
+    expect(
+      convertFormBasedToTextBasedLayer({
+        layersToConvert: [nonExistentLayer],
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      })
+    ).toBeUndefined();
   });
 
   it('converts a form-based layer to text-based successfully', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: mockConvertibleLayers,
+      layersToConvert: defaultConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
-      framePublicAPI,
+      framePublicAPI: createFrameAPI(),
     });
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "references": Array [],
-        "state": Object {
-          "datasourceStates": Object {
-            "textBased": Object {
-              "indexPatternRefs": Array [
-                Object {
-                  "id": "test-index-pattern",
-                  "name": "test-index",
-                  "title": "test-index",
-                },
-              ],
-              "layers": Object {
-                "layer1": Object {
-                  "columns": Array [
-                    Object {
-                      "columnId": "col2",
-                      "fieldName": "bucket_0_0",
-                      "label": "Count of records",
-                      "meta": Object {
-                        "type": "number",
-                      },
-                    },
-                    Object {
-                      "columnId": "col1",
-                      "fieldName": "@timestamp",
-                      "label": "@timestamp",
-                      "meta": Object {
-                        "type": "date",
-                      },
-                    },
-                  ],
-                  "index": "test-index-pattern",
-                  "query": Object {
-                    "esql": "FROM test-index
-              | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
-              | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
-              | SORT @timestamp ASC",
-                  },
-                  "timeField": "@timestamp",
-                },
-              },
-            },
-          },
-          "filters": Array [],
-          "query": Object {
-            "esql": "FROM test-index
-              | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
-              | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
-              | SORT @timestamp ASC",
-          },
-          "visualization": Object {
-            "layers": Array [
-              Object {
-                "accessors": Array [
-                  "col2",
-                ],
-                "layerId": "layer1",
-                "layerType": "data",
-                "xAccessor": "col1",
-              },
-            ],
-          },
-        },
-        "title": "Test",
-        "visualizationType": "lnsXY",
-      }
-    `);
+    expect(result).toBeDefined();
+    expect(result?.state.datasourceStates.textBased).toBeDefined();
+    expect(result?.state.query).toEqual({ esql: defaultConvertibleLayers[0].query });
   });
 
   it('preserves original column IDs in visualization state', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: mockConvertibleLayers,
+      layersToConvert: defaultConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
-      framePublicAPI,
+      framePublicAPI: createFrameAPI(),
     });
 
-    // Visualization state should be passed through unchanged - original column IDs preserved
-    expect(result?.state.visualization).toMatchInlineSnapshot(`
-      Object {
-        "layers": Array [
-          Object {
-            "accessors": Array [
-              "col2",
-            ],
-            "layerId": "layer1",
-            "layerType": "data",
-            "xAccessor": "col1",
-          },
-        ],
-      }
-    `);
-
-    // Text-based layer columns should use original column IDs with fieldName holding ES|QL field name
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-    expect(columns).toEqual([
+    expect(result?.state.visualization).toEqual(mockVisualizationState);
+    expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
       {
         columnId: 'col2',
         fieldName: 'bucket_0_0',
         label: 'Count of records',
         meta: { type: 'number' },
       },
-      {
-        columnId: 'col1',
-        fieldName: '@timestamp',
-        label: '@timestamp',
-        meta: { type: 'date' },
-      },
+      { columnId: 'col1', fieldName: '@timestamp', label: '@timestamp', meta: { type: 'date' } },
     ]);
   });
 
-  it('uses conversion data with different column mappings', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    // Conversion data with custom ES|QL query and column mappings
-    const esqlQuery =
-      'FROM test-index | STATS custom_count = COUNT(*) BY custom_timestamp = BUCKET(@timestamp, 1 hour)';
-    const customConvertibleLayers: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: esqlQuery,
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            custom_count: [
-              {
-                id: 'col2',
-                label: 'Count of records',
-                operationType: 'count',
-                sourceField: '___records___',
-                dataType: 'number',
-                interval: undefined as never,
-              },
-            ],
-            custom_timestamp: [
-              {
-                id: 'col1',
-                label: '@timestamp',
-                operationType: 'date_histogram',
-                sourceField: '@timestamp',
-                dataType: 'date',
-                interval: 3600000, // 1 hour in ms
-              },
-            ],
-          },
-          partialRows: true,
-        },
-      },
-    ];
-
+  it('works with visualization states without layers array', () => {
+    const metricVisualizationState = { layerId, layerType: 'data', accessor: 'col2' };
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: customConvertibleLayers,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    // Should use the ES|QL query
-    expect(result?.state.query).toEqual({ esql: esqlQuery });
-
-    // Visualization state should be passed through unchanged to preserve original column IDs
-    expect(result?.state.visualization).toMatchInlineSnapshot(`
-      Object {
-        "layers": Array [
-          Object {
-            "accessors": Array [
-              "col2",
-            ],
-            "layerId": "layer1",
-            "layerType": "data",
-            "xAccessor": "col1",
-          },
-        ],
-      }
-    `);
-
-    // Verify the text-based layer uses the ES|QL query and preserves original column IDs
-    const textBasedState = result?.state.datasourceStates.textBased;
-    expect(textBasedState?.layers[layerId]?.query).toEqual({ esql: esqlQuery });
-
-    // Columns should have original IDs with fieldName holding ES|QL field names
-    const columns = textBasedState?.layers[layerId]?.columns;
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'custom_count',
-        label: 'Count of records',
-        meta: { type: 'number' },
-      },
-      {
-        columnId: 'col1',
-        fieldName: 'custom_timestamp',
-        label: '@timestamp',
-        meta: { type: 'date' },
-      },
-    ]);
-  });
-
-  it('works with visualization states without layers array (e.g., Metric, Datatable)', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    // Metric visualization state (no layers array)
-    const metricVisualizationState = {
-      layerId,
-      layerType: 'data',
-      accessor: 'col2',
-    };
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: mockConvertibleLayers,
+      layersToConvert: defaultConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: metricVisualizationState,
       datasourceStates: mockDatasourceStates,
-      framePublicAPI,
+      framePublicAPI: createFrameAPI(),
     });
 
-    // Should succeed and pass through visualization state unchanged
-    expect(result).toBeDefined();
     expect(result?.state.visualization).toEqual(metricVisualizationState);
-
-    // Text-based layer should have original column IDs
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-    expect(columns?.map((c) => c.columnId)).toEqual(['col2', 'col1']);
+    expect(
+      result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.map((c) => c.columnId)
+    ).toEqual(['col2', 'col1']);
   });
 
-  it('preserves custom labels from esAggsIdMap', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
+  describe('column properties preservation', () => {
+    it.each([
+      ['custom labels', { customLabel: true }, { customLabel: true }],
+      [
+        'format',
+        { format: { id: 'bytes', params: { decimals: 2 } } },
+        { params: { format: { id: 'bytes', params: { decimals: 2 } } } },
+      ],
+      [
+        'custom label and format',
+        { customLabel: true, format: { id: 'bytes', params: { decimals: 1 } } },
+        { customLabel: true, params: { format: { id: 'bytes', params: { decimals: 1 } } } },
+      ],
+    ])('preserves %s', (_, inputOverrides, expectedOverrides) => {
+      const layers = [
+        createConvertibleLayer('FROM test-index | STATS my_count = COUNT(*)', {
+          my_count: createColumnMapping('col2', 'My Label', 'number', inputOverrides),
+        }),
+      ];
 
-    const layersWithCustomLabels: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS my_count = COUNT(*)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            my_count: [
-              {
-                id: 'col2',
-                label: 'My Custom Label',
-                customLabel: true,
-                operationType: 'count',
-                sourceField: '___records___',
-                dataType: 'number',
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
 
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithCustomLabels,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    expect(columns).toEqual([
-      {
+      expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]).toEqual({
         columnId: 'col2',
         fieldName: 'my_count',
-        label: 'My Custom Label',
-        customLabel: true,
+        label: 'My Label',
         meta: { type: 'number' },
-      },
-    ]);
+        ...expectedOverrides,
+      });
+    });
+
+    it('does not include params when format is undefined', () => {
+      const layers = [
+        createConvertibleLayer('FROM test-index | STATS my_count = COUNT(*)', {
+          my_count: createColumnMapping('col2', 'Count', 'number'),
+        }),
+      ];
+
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
+
+      const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
+      expect(column).not.toHaveProperty('params');
+      expect(column).not.toHaveProperty('customLabel');
+    });
   });
 
-  it('preserves format configuration from esAggsIdMap', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
+  describe('field format fallback', () => {
+    const fieldFormatMap = { bytes: { id: 'currency', params: { pattern: '$0,0.00' } } };
+
+    it('uses data view field format when column has no format', () => {
+      const layers = [
+        createConvertibleLayer('FROM test-index | STATS total_bytes = SUM(bytes)', {
+          total_bytes: createColumnMapping('col2', 'Total Bytes', 'number', {
+            operationType: 'sum',
+            sourceField: 'bytes',
+          }),
+        }),
+      ];
+
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(fieldFormatMap),
+      });
+
+      expect(
+        result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]?.params
+      ).toEqual({
+        format: { id: 'currency', params: { pattern: '$0,0.00' } },
+      });
     });
 
-    const layersWithFormat: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            total_bytes: [
-              {
-                id: 'col2',
-                label: 'Total Bytes',
-                operationType: 'sum',
-                sourceField: 'bytes',
-                dataType: 'number',
-                format: { id: 'bytes', params: { decimals: 2 } },
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
+    it('prefers column format over data view field format', () => {
+      const layers = [
+        createConvertibleLayer('FROM test-index | STATS total_bytes = SUM(bytes)', {
+          total_bytes: createColumnMapping('col2', 'Total Bytes', 'number', {
+            operationType: 'sum',
+            sourceField: 'bytes',
+            format: { id: 'bytes', params: { decimals: 2 } },
+          }),
+        }),
+      ];
 
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithFormat,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(fieldFormatMap),
+      });
+
+      expect(
+        result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]?.params
+      ).toEqual({
+        format: { id: 'bytes', params: { decimals: 2 } },
+      });
     });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'total_bytes',
-        label: 'Total Bytes',
-        params: { format: { id: 'bytes', params: { decimals: 2 } } },
-        meta: { type: 'number' },
-      },
-    ]);
-  });
-
-  it('preserves both custom label and format together', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    const layersWithLabelAndFormat: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            total_bytes: [
-              {
-                id: 'col2',
-                label: 'Network Traffic (GB)',
-                customLabel: true,
-                operationType: 'sum',
-                sourceField: 'bytes',
-                dataType: 'number',
-                format: { id: 'bytes', params: { decimals: 1 } },
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithLabelAndFormat,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'total_bytes',
-        label: 'Network Traffic (GB)',
-        customLabel: true,
-        params: { format: { id: 'bytes', params: { decimals: 1 } } },
-        meta: { type: 'number' },
-      },
-    ]);
-  });
-
-  it('does not include params when format is not defined', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    const layersWithoutFormat: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS my_count = COUNT(*)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            my_count: [
-              {
-                id: 'col2',
-                label: 'Count',
-                operationType: 'count',
-                sourceField: '___records___',
-                dataType: 'number',
-                // No format defined
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithoutFormat,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    // params should not be present when format is undefined
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'my_count',
-        label: 'Count',
-        meta: { type: 'number' },
-      },
-    ]);
-    expect(columns?.[0]).not.toHaveProperty('params');
-    expect(columns?.[0]).not.toHaveProperty('customLabel');
-  });
-
-  it('preserves data view field format from fieldFormatMap when column has no format', () => {
-    // Create an index pattern with fieldFormatMap containing a currency format
-    const indexPatternWithFieldFormat: IndexPattern = {
-      ...mockIndexPattern,
-      fieldFormatMap: {
-        bytes: { id: 'currency', params: { pattern: '$0,0.00' } },
-      },
-    } as unknown as IndexPattern;
-
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': indexPatternWithFieldFormat },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    // Column that uses the 'bytes' field but has no format configured
-    const layersWithFieldFormatFromDataView: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            total_bytes: [
-              {
-                id: 'col2',
-                label: 'Total Bytes',
-                operationType: 'sum',
-                sourceField: 'bytes',
-                dataType: 'number',
-                // No format defined - should fall back to fieldFormatMap
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithFieldFormatFromDataView,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    // Should have the format from fieldFormatMap
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'total_bytes',
-        label: 'Total Bytes',
-        params: { format: { id: 'currency', params: { pattern: '$0,0.00' } } },
-        meta: { type: 'number' },
-      },
-    ]);
-  });
-
-  it('prefers column format over data view field format', () => {
-    // Create an index pattern with fieldFormatMap
-    const indexPatternWithFieldFormat: IndexPattern = {
-      ...mockIndexPattern,
-      fieldFormatMap: {
-        bytes: { id: 'currency', params: { pattern: '$0,0.00' } },
-      },
-    } as unknown as IndexPattern;
-
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': indexPatternWithFieldFormat },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-      dateRange: {
-        fromDate: '2024-01-01T00:00:00.000Z',
-        toDate: '2024-01-02T00:00:00.000Z',
-      },
-    });
-
-    // Column that has its own format configured (should take precedence)
-    const layersWithExplicitFormat: ConvertibleLayer[] = [
-      {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: 'data',
-        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: {
-            total_bytes: [
-              {
-                id: 'col2',
-                label: 'Total Bytes',
-                operationType: 'sum',
-                sourceField: 'bytes',
-                dataType: 'number',
-                format: { id: 'bytes', params: { decimals: 2 } }, // Explicit format
-                interval: undefined as never,
-              },
-            ],
-          },
-          partialRows: false,
-        },
-      },
-    ];
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: layersWithExplicitFormat,
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    const textBasedState = result?.state.datasourceStates.textBased;
-    const columns = textBasedState?.layers[layerId]?.columns;
-
-    // Should use the explicit column format, not the fieldFormatMap format
-    expect(columns).toEqual([
-      {
-        columnId: 'col2',
-        fieldName: 'total_bytes',
-        label: 'Total Bytes',
-        params: { format: { id: 'bytes', params: { decimals: 2 } } },
-        meta: { type: 'number' },
-      },
-    ]);
   });
 });

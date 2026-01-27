@@ -327,7 +327,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should display the ES|QL results table if query is ES|QL', async () => {
-    await renderConfigFlyout({});
+    await renderConfigFlyout({}, { esql: 'from index1 | limit 10' });
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
 
