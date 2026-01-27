@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runBuildApiDocsCli } from './build_api_docs_cli';
-export { runCheckPackageDocsCli } from './check_package_docs_cli';
+require('@kbn/setup-node-env');
+require('@kbn/docs-utils').runCheckPackageDocsCli();
