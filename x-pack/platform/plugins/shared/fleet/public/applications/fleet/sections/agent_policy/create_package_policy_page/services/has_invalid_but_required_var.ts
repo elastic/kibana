@@ -26,28 +26,30 @@ export const hasInvalidButRequiredVar = (
   varGroups?: RegistryVarGroup[],
   varGroupSelections?: VarGroupSelection
 ): boolean => {
-  if (!registryVars) {
-    return false;
-  }
-
-  if (!packagePolicyVars) {
-    // Check if there are any required vars that need validation
-    return registryVars.some((registryVar) => {
-      // If var_groups exist, only check visible vars
-      if (varGroups && varGroups.length > 0) {
+  // if registryVars is truthy (even empty array) and
+  // packagePolicyVars is falsy,
+  // return true to expand streams by default when creating new policies.
+  if (registryVars && !packagePolicyVars) {
+    // For packages with var_groups, check if there are any visible required vars
+    if (varGroups && varGroups.length > 0) {
+      return registryVars.some((registryVar) => {
         if (!shouldShowVar(registryVar.name, varGroups, varGroupSelections || {})) {
           return false;
         }
-        // Check if required by var_group
         const requiredByVarGroup = isVarRequiredByVarGroup(
           registryVar.name,
           varGroups,
           varGroupSelections || {}
         );
         return registryVar.required || requiredByVarGroup;
-      }
-      return registryVar.required;
-    });
+      });
+    }
+    // For packages without var_groups, maintain original behavior
+    return true;
+  }
+
+  if (!registryVars || !packagePolicyVars) {
+    return false;
   }
 
   return registryVars.some((registryVar) => {

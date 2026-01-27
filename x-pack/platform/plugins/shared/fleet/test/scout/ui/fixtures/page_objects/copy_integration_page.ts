@@ -15,14 +15,10 @@ export class CopyIntegrationPage {
   }
 
   async waitForPageToLoad() {
-    await this.page.waitForLoadingIndicatorHidden();
-  }
-
-  /**
-   * Click the "Change defaults" button to expand the streams section
-   */
-  async clickChangeDefaults() {
-    await this.page.locator('button:has-text("Change defaults")').click();
+    await this.page.testSubj.waitForSelector('createPackagePolicy_page', {
+      state: 'visible',
+      timeout: 20_000,
+    });
   }
 
   getPackagePolicyNameInput() {
