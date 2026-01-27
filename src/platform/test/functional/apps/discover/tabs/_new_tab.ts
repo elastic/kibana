@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1920, 1080);
     });
 
-    beforeEach(async () => {
+    afterEach(async () => {
       await discover.resetQueryMode();
     });
 
