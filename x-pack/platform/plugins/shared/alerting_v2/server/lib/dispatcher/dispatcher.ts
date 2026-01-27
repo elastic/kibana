@@ -100,7 +100,7 @@ export class DispatcherService {
     }
 
     this.logger.info({
-      message: () => `Dispatcher finished processing ${next} alert episodes.`,
+      message: () => `Dispatcher finished processing ${next.length} alert episodes.`,
     });
 
     return { startedAt };
@@ -108,7 +108,7 @@ export class DispatcherService {
 
   private async findPoliciesAttachedToRules(ruleIds: string[]): Promise<Map<RuleId, Policy>> {
     return ruleIds.reduce((acc, ruleId) => {
-      acc.set(ruleId, { id: `policy-${ruleId}`, name: `policy-name for rule ${ruleId}` });
+      acc.set(ruleId, { id: `policy-${ruleId}`, name: `policy-name-${ruleId}` });
       return acc;
     }, new Map<RuleId, Policy>());
   }
