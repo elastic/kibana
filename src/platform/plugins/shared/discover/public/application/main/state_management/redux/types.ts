@@ -216,8 +216,3 @@ export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
 }
-
-export interface UpdateCascadeGroupingActionPayload {
-  tabId: string;
-  groupingOrUpdater: string[] | ((prevGrouping: string[]) => string[]);
-}

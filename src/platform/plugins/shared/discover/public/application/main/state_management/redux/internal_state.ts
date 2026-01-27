@@ -270,6 +270,14 @@ export const internalStateSlice = createSlice({
         tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
       }),
 
+    setSelectedCascadeGroups: (
+      state,
+      actions: TabAction<Pick<TabState['cascadedDocumentsState'], 'selectedCascadeGroups'>>
+    ) =>
+      withTab(state, actions.payload, (tab) => {
+        tab.cascadedDocumentsState.selectedCascadeGroups = actions.payload.selectedCascadeGroups;
+      }),
+
     setEsqlVariables: (
       state,
       action: TabAction<{ esqlVariables: ESQLControlVariable[] | undefined }>

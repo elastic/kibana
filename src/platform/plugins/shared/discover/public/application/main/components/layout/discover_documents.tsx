@@ -70,7 +70,6 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
-  UpdateCascadeGroupingFn,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
@@ -324,14 +323,6 @@ function DiscoverDocumentsComponent({
     [dispatch, updateESQLQuery]
   );
 
-  const updateCascadeGrouping = useCurrentTabAction(internalStateActions.updateCascadeGrouping);
-  const onUpdateCascadeGrouping: UpdateCascadeGroupingFn = useCallback(
-    (groupingUpdater) => {
-      dispatch(updateCascadeGrouping({ groupingOrUpdater: groupingUpdater }));
-    },
-    [dispatch, updateCascadeGrouping]
-  );
-
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
@@ -489,23 +480,30 @@ function DiscoverDocumentsComponent({
   );
 
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const cascadedDocumentsState = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
+  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
+    (tab) => tab.cascadedDocumentsState
+  );
+  const setSelectedCascadeGroups = useCurrentTabAction(
+    internalStateActions.setSelectedCascadeGroups
+  );
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
-      !isCascadedDocumentsVisible(cascadedDocumentsState.availableCascadeGroups, query) ||
+      !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
       !isOfAggregateQueryType(query)
     ) {
       return undefined;
     }
 
     return {
-      availableCascadeGroups: cascadedDocumentsState.availableCascadeGroups,
-      selectedCascadeGroups: cascadedDocumentsState.selectedCascadeGroups,
+      availableCascadeGroups,
+      selectedCascadeGroups,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
-      cascadeGroupingChangeHandler: onUpdateCascadeGrouping,
+      cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
+        dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
+      },
       onUpdateESQLQuery,
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
       registerCascadeRequestsInspectorAdapter: (requestAdapter) => {
@@ -513,13 +511,14 @@ function DiscoverDocumentsComponent({
       },
     };
   }, [
-    cascadedDocumentsState,
+    availableCascadeGroups,
     dispatch,
     esqlVariables,
-    onUpdateCascadeGrouping,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
+    selectedCascadeGroups,
+    setSelectedCascadeGroups,
     stateContainer.dataState.inspectorAdapters,
     viewModeToggle,
   ]);
