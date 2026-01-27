@@ -82,12 +82,11 @@ export class UserActivityService
   private trackUserAction = ({ message, event, object }: TrackUserActionParams) => {
     if (!this.enabled) return;
 
-    if (!message) {
-      // TODO: update this when we can
-      message = `fill this with the values we are yet to obtain`;
-    }
-
     const injectedContext = this.getInjectedContext();
+
+    if (!message) {
+      message = `User ${injectedContext.user?.username} performed ${event.action} on ${object.name} (${object.id})`;
+    }
 
     this.logger.info(message, { message, event, object, ...injectedContext });
   };
