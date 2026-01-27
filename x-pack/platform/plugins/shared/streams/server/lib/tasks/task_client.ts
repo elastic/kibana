@@ -108,6 +108,10 @@ export class TaskClient<TaskType extends string> {
       },
       status: TaskStatus.InProgress,
       created_at: new Date().toISOString(),
+      last_completed_at: storedTask.last_completed_at,
+      last_acknowledged_at: storedTask.last_acknowledged_at,
+      last_canceled_at: storedTask.last_canceled_at,
+      last_failed_at: storedTask.last_failed_at,
     };
 
     try {
@@ -167,6 +171,7 @@ export class TaskClient<TaskType extends string> {
     const taskDoc = {
       ...task,
       status: TaskStatus.Acknowledged,
+      last_acknowledged_at: new Date().toISOString(),
     } satisfies PersistedTask<TParams, TPayload>;
 
     await this.update(taskDoc);
@@ -200,6 +205,7 @@ export class TaskClient<TaskType extends string> {
     await this.update<TParams, TPayload>({
       ...task,
       status: TaskStatus.Completed,
+      last_completed_at: new Date().toISOString(),
       task: {
         params,
         payload,
@@ -220,6 +226,7 @@ export class TaskClient<TaskType extends string> {
     await this.update<TParams>({
       ...task,
       status: TaskStatus.Failed,
+      last_failed_at: new Date().toISOString(),
       task: {
         params,
         error,
@@ -236,6 +243,7 @@ export class TaskClient<TaskType extends string> {
     await this.update({
       ...task,
       status: TaskStatus.Canceled,
+      last_canceled_at: new Date().toISOString(),
     });
   }
 }
