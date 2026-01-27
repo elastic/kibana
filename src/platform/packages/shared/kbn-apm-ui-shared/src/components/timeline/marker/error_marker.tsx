@@ -7,36 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useState } from 'react';
 import { asDuration } from '../../../utils/formatters';
 import type { ErrorMark } from '../../../types/mark';
-// import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
 import { Legend, Shape } from '../legend';
 
 interface Props {
   mark: ErrorMark;
-  // TODO:caue
-  query?: any; // TypeOf<ApmRoutes, '/services/{serviceName}/errors/{groupId}'>['query'];
 }
 
 const Popover = styled.div`
   max-width: 280px;
-`;
-
-// TODO:caue
-// const ErrorLink = styled(ErrorDetailLink)`
-const ErrorLink = styled.div`
-  display: block;
-  overflow-wrap: break-word;
 `;
 
 const Button = styled(Legend)`
@@ -55,7 +38,7 @@ function truncateMessage(errorMessage?: string) {
   }
 }
 
-export function ErrorMarker({ mark, query }: Props) {
+export function ErrorMarker({ mark }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -101,19 +84,7 @@ export function ErrorMarker({ mark, query }: Props) {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {mark.onClick === undefined && error.error.grouping_key && query ? (
-              <EuiText size="s">
-                <ErrorLink
-                  data-test-subj="errorLink"
-                  // serviceName={error.service.name}
-                  // errorGroupId={error.error.grouping_key}
-                  // query={query}
-                  // title={errorMessage}
-                >
-                  {truncatedErrorMessage}
-                </ErrorLink>
-              </EuiText>
-            ) : mark.onClick ? (
+            {mark.onClick ? (
               <EuiButtonEmpty
                 data-test-subj="apmTimelineErrorMarkerButton"
                 onClick={() => {

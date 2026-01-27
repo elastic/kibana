@@ -12,7 +12,6 @@ import styled from '@emotion/styled';
 import type { AgentMark, ErrorMark } from '../../../types/mark';
 import { AgentMarker } from './agent_marker';
 import { ErrorMarker } from './error_marker';
-import { ErrorMarkerWithLink } from './error_marker_with_link';
 
 interface Props {
   mark: ErrorMark | AgentMark;
@@ -28,15 +27,7 @@ export function Marker({ mark, x }: Props) {
   const legendWidth = 11;
   return (
     <MarkerContainer style={{ left: x - legendWidth / 2 }}>
-      {mark.type === 'errorMark' ? (
-        mark.onClick ? (
-          <ErrorMarker mark={mark} />
-        ) : (
-          <ErrorMarkerWithLink mark={mark} />
-        )
-      ) : (
-        <AgentMarker mark={mark} />
-      )}
+      {mark.type === 'errorMark' ? <ErrorMarker mark={mark} /> : <AgentMarker mark={mark} />}
     </MarkerContainer>
   );
 }
