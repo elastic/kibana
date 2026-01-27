@@ -30,15 +30,13 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   }, [globalQueries]);
 
+  const baseAttackProps = useMemo(() => {
+    return { attackId: attack.id, relatedAlertIds: attack.alertIds };
+  }, [attack.alertIds, attack.id]);
+
   const attacksWithAssignees = useMemo(() => {
-    return [
-      {
-        attackId: attack.id,
-        assignees: attack.assignees,
-        relatedAlertIds: attack.alertIds,
-      },
-    ];
-  }, [attack]);
+    return [{ ...baseAttackProps, assignees: attack.assignees }];
+  }, [attack.assignees, baseAttackProps]);
 
   const onSuccess = useCallback(() => {
     invalidateAttackDiscoveriesCache();
@@ -52,13 +50,9 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
 
   const attacksWithWorkflowStatus = useMemo(() => {
     return [
-      {
-        attackId: attack.id,
-        relatedAlertIds: attack.alertIds,
-        workflowStatus: attack.alertWorkflowStatus,
-      },
+      { ...baseAttackProps, workflowStatus: attack.alertWorkflowStatus },
     ] as AttackWithWorkflowStatus[];
-  }, [attack]);
+  }, [attack.alertWorkflowStatus, baseAttackProps]);
 
   const { items: workflowItems, panels: workflowPanels } = useAttackWorkflowStatusContextMenuItems({
     attacksWithWorkflowStatus,
@@ -66,14 +60,9 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
   });
 
   const attacksWithTags = useMemo(() => {
-    return [
-      {
-        attackId: attack.id,
-        relatedAlertIds: attack.alertIds,
-        tags: attack.tags,
-      },
-    ];
-  }, [attack]);
+    return [{ ...baseAttackProps, tags: attack.tags }];
+  }, [attack.tags, baseAttackProps]);
+
   const { items: tagsItems, panels: tagsPanels } = useAttackTagsContextMenuItems({
     attacksWithTags,
     onSuccess,
