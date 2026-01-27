@@ -38,7 +38,11 @@ export class AssetManager {
     this.namespace = deps.namespace;
   }
 
-  public async initEntity(request: KibanaRequest, type: EntityType, logExtractionParams?: LogExtractionBodyParams) {
+  public async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ) {
     await this.install(type, logExtractionParams); // TODO: async
     await this.start(request, type, logExtractionParams?.frequency);
   }
