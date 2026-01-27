@@ -19,6 +19,6 @@ export const getArtifactManifest = ({
   return {
     formatVersion,
     productName,
-    productVersion: stackVersion,
+    productVersion: stackVersion === 'latest' ? `latest-${Date.now()}` : stackVersion,
   };
 };

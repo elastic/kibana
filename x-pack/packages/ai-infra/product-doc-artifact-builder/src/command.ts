@@ -23,7 +23,12 @@ function options(y: yargs.Argv) {
     .option('stackVersion', {
       describe: 'The stack version to generate documentation for',
       string: true,
-      default: '8.16', // TODO: master is on 9.0 now, not sure we can default to version in package.json?
+      default: 'latest',
+    })
+    .option('sourceClusterApiKey', {
+      describe: 'The source cluster API key',
+      string: true,
+      default: process.env.KIBANA_SOURCE_CLUSTER_API_KEY,
     })
     .option('targetFolder', {
       describe: 'The folder to generate the artifacts in',
@@ -41,20 +46,21 @@ function options(y: yargs.Argv) {
       demandOption: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_URL,
     })
-    .option('sourceClusterApiKey', {
-      describe: 'The source cluster API key (alternative to username/password)',
-      string: true,
-      default: process.env.KIBANA_SOURCE_CLUSTER_API_KEY,
-    })
     .option('sourceClusterUsername', {
-      describe: 'The source cluster username (required if API key is not provided)',
+      describe: 'The source cluster username',
       string: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_USERNAME,
     })
     .option('sourceClusterPassword', {
-      describe: 'The source cluster password (required if API key is not provided)',
+      describe: 'The source cluster password',
       string: true,
       default: process.env.KIBANA_SOURCE_CLUSTER_PASSWORD,
+    })
+    .option('sourceClusterIndex', {
+      describe: 'The source cluster index',
+      string: true,
+      demandOption: true,
+      default: process.env.KIBANA_SOURCE_INDEX,
     })
     .option('embeddingClusterUrl', {
       describe: 'The embedding cluster url',
@@ -84,16 +90,6 @@ function options(y: yargs.Argv) {
 export function runScript() {
   yargs(process.argv.slice(2))
     .command('*', 'Build knowledge base artifacts', options, async (argv) => {
-      // Validate authentication: either API key or username/password must be provided
-      if (
-        !argv.sourceClusterApiKey &&
-        (!argv.sourceClusterUsername || !argv.sourceClusterPassword)
-      ) {
-        throw new Error(
-          'Either sourceClusterApiKey or both sourceClusterUsername and sourceClusterPassword must be provided'
-        );
-      }
-
       // argv contains additional entries - let's keep our input clear
       const taskConfig: TaskConfig = {
         productNames: argv.productName,
@@ -101,9 +97,10 @@ export function runScript() {
         buildFolder: argv.buildFolder,
         targetFolder: argv.targetFolder,
         sourceClusterUrl: argv.sourceClusterUrl!,
+        sourceClusterUsername: argv.sourceClusterUsername!,
+        sourceClusterPassword: argv.sourceClusterPassword!,
         sourceClusterApiKey: argv.sourceClusterApiKey,
-        sourceClusterUsername: argv.sourceClusterUsername,
-        sourceClusterPassword: argv.sourceClusterPassword,
+        sourceClusterIndex: argv.sourceClusterIndex!,
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
