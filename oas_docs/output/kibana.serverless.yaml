@@ -30883,7 +30883,7 @@ paths:
                     required:
                       - id
                       - type
-                  maxItems: 10000
+                  maxItems: 1000
                   type: array
               required:
                 - assetIds
