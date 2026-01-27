@@ -210,6 +210,7 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    const experimentalFeatures = this.experimentalFeatures;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -334,6 +335,7 @@ export class Plugin
           },
         });
       }
+
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -345,6 +347,10 @@ export class Plugin
             unknown
           ];
 
+          if (experimentalFeatures.unifiedRulesPage) {
+            await coreStart.application.navigateToApp('rules', { replace: true });
+            return () => {};
+          }
           const { renderApp } = await import('./application/rules_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
