@@ -35,11 +35,17 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
       await expect(viewConnectionDetailsLink).toBeVisible();
     });
 
+    await test.step('expands tutorial cards properly', async () => {
+      // Expect only 3 visible cards initially
+      expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
+      await pageObjects.gettingStarted.expandTutorialCards();
+      expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(5);
+      await pageObjects.gettingStarted.collapseTutorialCards();
+      expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
+    });
+
     await test.step('renders all tutorial cards and buttons', async () => {
-      await pageObjects.gettingStarted.clickTutorialExpandButton();
-      await expect(await pageObjects.gettingStarted.getTutorialExpandButton()).toContainText(
-        'Show less'
-      );
+      await pageObjects.gettingStarted.expandTutorialCards();
 
       const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
       await expect(searchBasicsCard).toBeVisible();
