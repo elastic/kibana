@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
@@ -28,7 +29,6 @@ import {
 import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
@@ -41,7 +41,6 @@ import type { StatsCommandSummary } from '@kbn/esql-language/src/ast/mutate/comm
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
-
 import type { ESQLDataGroupNode } from './types';
 import { internalStateActions, useInternalStateDispatch } from '../../../../state_management/redux';
 
@@ -56,7 +55,6 @@ interface RowClickActionContext {
   statsFieldSummary: StatsCommandSummary['grouping'] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
-  services: UnifiedDataTableProps['services'];
   closeActionMenu: () => void;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
   updateESQLQuery: UpdateESQLQueryFn;
@@ -175,14 +173,12 @@ interface ContextMenuProps
     | 'updateESQLQuery'
   > {
   row: RowContext;
-  services: UnifiedDataTableProps['services'];
   close: RowClickActionContext['closeActionMenu'];
 }
 
 const ContextMenu = React.memo(
   ({
     row,
-    services,
     editorQuery,
     statsFieldSummary,
     esqlVariables,
@@ -232,7 +228,6 @@ const ContextMenu = React.memo(
                   !row.groupValue,
                 onClick: action.onClick?.bind({
                   rowContext: row,
-                  services,
                   editorQuery,
                   esqlVariables,
                   dataView,
@@ -247,15 +242,14 @@ const ContextMenu = React.memo(
         },
       ];
     }, [
-      row,
-      groupType,
-      rowDataViewField,
-      services,
+      close,
+      dataView,
       editorQuery,
       esqlVariables,
-      dataView,
-      close,
+      groupType,
       openInNewTab,
+      row,
+      rowDataViewField,
       updateESQLQuery,
     ]);
 
@@ -274,16 +268,10 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   esqlVariables,
   editorQuery,
   statsFieldSummary,
-  services,
   updateESQLQuery,
 }: Pick<
   ContextMenuProps,
-  | 'dataView'
-  | 'esqlVariables'
-  | 'editorQuery'
-  | 'statsFieldSummary'
-  | 'services'
-  | 'updateESQLQuery'
+  'dataView' | 'esqlVariables' | 'editorQuery' | 'statsFieldSummary' | 'updateESQLQuery'
 >) => {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
@@ -340,7 +328,6 @@ export const useEsqlDataCascadeRowActionHelpers = ({
             editorQuery={editorQuery}
             esqlVariables={esqlVariables}
             row={popoverRowData}
-            services={services}
             dataView={dataView}
             statsFieldSummary={statsFieldSummary}
             openInNewTab={openInNewTab}
@@ -350,14 +337,13 @@ export const useEsqlDataCascadeRowActionHelpers = ({
       ) : null;
     },
     [
-      popoverRowData,
       closePopover,
+      dataView,
       editorQuery,
       esqlVariables,
-      services,
-      dataView,
-      statsFieldSummary,
       openInNewTab,
+      popoverRowData,
+      statsFieldSummary,
       updateESQLQuery,
     ]
   );

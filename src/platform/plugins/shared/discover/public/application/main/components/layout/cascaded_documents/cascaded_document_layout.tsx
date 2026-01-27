@@ -39,13 +39,25 @@ import {
 } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 
-export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
+export interface ESQLDataCascadeProps
+  extends Pick<
+    UnifiedDataTableProps,
+    | 'rows'
+    | 'columns'
+    | 'dataGridDensityState'
+    | 'showTimeCol'
+    | 'dataView'
+    | 'showKeyboardShortcuts'
+    | 'renderDocumentView'
+    | 'externalCustomRenderers'
+    | 'onUpdateDataGridDensity'
+  > {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
 }
 
 const ESQLDataCascade = React.memo(
-  ({ rows, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
+  ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
@@ -57,7 +69,7 @@ const ESQLDataCascade = React.memo(
       registerCascadeRequestsInspectorAdapter,
     } = useCascadedDocumentsContext();
     const { scopedProfilesManager } = useScopedServices();
-    const { expressions } = useDiscoverServices();
+    const { data, expressions } = useDiscoverServices();
 
     const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
 
@@ -75,7 +87,7 @@ const ESQLDataCascade = React.memo(
     const fetchCascadeData = useScopedESQLQueryFetchClient({
       query: esqlQuery,
       dataView,
-      data: props.services.data,
+      data,
       esqlVariables,
       expressions,
       timeRange,
@@ -97,7 +109,7 @@ const ESQLDataCascade = React.memo(
 
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
-      props.columns,
+      columns,
       togglePopover
     );
 
@@ -173,7 +185,6 @@ export const CascadedDocumentsLayout = React.memo(
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      services: props.services,
       updateESQLQuery: onUpdateESQLQuery,
     });
 

@@ -9,6 +9,4 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
-
-export type { ESQLDataGroupNode };
+export type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
