@@ -6,3 +6,7 @@
  */
 
 export * from './src/api-tutorials';
+export {
+  replaceConsoleTutorialStrings,
+  type ConsoleTutorialVariables,
+} from './src/utils/replace_template_strings';
