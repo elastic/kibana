@@ -20,14 +20,15 @@ import {
   EuiTitle,
   EuiFlexGroup,
 } from '@elastic/eui';
-import {
-  useAssistantContext,
-  useFetchAnonymizationFields,
-  useLoadConnectors,
-} from '@kbn/elastic-assistant';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
+import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
+import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -36,6 +37,7 @@ import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_detai
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import { useGradientStyles } from './entity_highlights_gradients';
+import { useLoadInferenceConnectors } from '../hooks/use_inference_connectors';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -43,21 +45,39 @@ export const EntityHighlightsAccordion: React.FC<{
 }> = ({ entityType, entityIdentifier }) => {
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
-  const { http, settings } = useAssistantContext();
-  const { data: aiConnectors } = useLoadConnectors({
+  const {
+    triggersActionsUi: { actionTypeRegistry },
     http,
-    settings,
-  });
-  const firstConnector = aiConnectors?.[0];
+  } = useKibana().services;
+  const { data: actionTypes } = useLoadActionTypes({ http });
+  const {
+    isLoading: isLoadingConnectors,
+    data: aiConnectors,
+    refetch: refetchAiConnectors,
+  } = useLoadInferenceConnectors();
   const spaceId = useSpaceId();
-  const [selectedConnectorId, setConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
-  const connectorId = selectedConnectorId ?? firstConnector?.id ?? '';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
+  const connectorId = useMemo(() => {
+    if (!aiConnectors || !aiConnectors.connectors) return '';
+    // try to find the stored connector id in the list of available connectors
+    const storedConnector = aiConnectors.connectors.find(
+      (c) => c.connectorId === storedConnectorId
+    );
+    const firstConnector = aiConnectors.connectors[0];
+    const cId = storedConnector?.connectorId ?? firstConnector?.connectorId ?? '';
+    return cId;
+  }, [aiConnectors, storedConnectorId]);
+
   const connectorName = useMemo(() => {
-    if (!aiConnectors || !connectorId) return '';
-    return aiConnectors.find((c) => c.id === connectorId)?.name ?? '';
+    if (!aiConnectors || !aiConnectors.connectors) return '';
+    const cName = aiConnectors.connectors.find((c) => c.connectorId === connectorId)?.name ?? '';
+    return cName;
   }, [aiConnectors, connectorId]);
-  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
+
+  const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
+  const { hasConnectorsReadPrivilege, hasAssistantPrivilege, isAssistantVisible } =
     useAssistantAvailability();
+  const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const {
     gradientPanelStyle,
@@ -66,6 +86,7 @@ export const EntityHighlightsAccordion: React.FC<{
     gradientSVG,
     buttonTextGradientStyle,
   } = useGradientStyles();
+  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState(false);
   const onChangeShowAnonymizedValues = useCallback(
@@ -87,6 +108,23 @@ export const EntityHighlightsAccordion: React.FC<{
     entityIdentifier,
   });
 
+  const onAddConnectorClick = useCallback(() => {
+    setIsConnectorModalVisible(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsConnectorModalVisible(false);
+  }, []);
+
+  const onSaveConnector = useCallback(
+    (connector: ActionConnector) => {
+      setStoredConnectorId(connector.id);
+      refetchAiConnectors();
+      closeModal();
+    },
+    [closeModal, setStoredConnectorId, refetchAiConnectors]
+  );
+
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -96,14 +134,28 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = useMemo(
-    () => !hasAssistantPrivilege || !isAssistantEnabled || !hasEntityHighlightsLicense,
-    [hasAssistantPrivilege, isAssistantEnabled, hasEntityHighlightsLicense]
-  );
+  const disabled = useMemo(() => {
+    if (!hasEntityHighlightsLicense) {
+      return true;
+    }
+
+    // if user does not have access to connectors, we cannot invoke the inference action
+    if (!hasConnectorsReadPrivilege) {
+      return true;
+    }
+
+    // if user does not have access to assistant or agent builder, disable entity highlights
+    return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
+  }, [
+    hasConnectorsReadPrivilege,
+    hasAgentBuilderPrivilege,
+    hasAssistantPrivilege,
+    hasEntityHighlightsLicense,
+  ]);
 
   const isLoading = useMemo(
-    () => isChatLoading || isAnonymizationFieldsLoading,
-    [isAnonymizationFieldsLoading, isChatLoading]
+    () => isChatLoading || isAnonymizationFieldsLoading || isLoadingConnectors,
+    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors]
   );
 
   const [dismissedError, setDismissedError] = useState<Error | null>(null);
@@ -135,21 +187,23 @@ export const EntityHighlightsAccordion: React.FC<{
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
-          <EntityHighlightsSettings
-            assistantResult={assistantResult}
-            showAnonymizedValues={showAnonymizedValues}
-            onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
-            setConnectorId={setConnectorId}
-            connectorId={connectorId}
-            connectorName={connectorName}
-            closePopover={closePopover}
-            openPopover={onButtonClick}
-            isLoading={isLoading}
-            isPopoverOpen={isPopoverOpen}
-            isAssistantVisible={isAssistantVisible}
-            entityType={entityType}
-            entityIdentifier={entityIdentifier}
-          />
+          aiConnectors?.hasConnectors && (
+            <EntityHighlightsSettings
+              assistantResult={assistantResult}
+              showAnonymizedValues={showAnonymizedValues}
+              onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
+              setConnectorId={setStoredConnectorId}
+              connectorId={connectorId}
+              connectorName={connectorName}
+              closePopover={closePopover}
+              openPopover={onButtonClick}
+              isLoading={isLoading}
+              isPopoverOpen={isPopoverOpen}
+              isAssistantVisible={isAssistantVisible}
+              entityType={entityType}
+              entityIdentifier={entityIdentifier}
+            />
+          )
         }
       >
         <EuiSpacer size="m" />
@@ -234,7 +288,7 @@ export const EntityHighlightsAccordion: React.FC<{
                   )}
                 </EuiText>
               </EuiFlexItem>
-              {connectorId && (
+              {aiConnectors?.hasConnectors ? (
                 <EuiFlexItem grow={1}>
                   <EuiButton
                     onClick={fetchEntityHighlights}
@@ -250,6 +304,32 @@ export const EntityHighlightsAccordion: React.FC<{
                     </div>
                   </EuiButton>
                 </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={1}>
+                  <EuiButton onClick={onAddConnectorClick} css={buttonGradientStyle} size="s">
+                    <div css={buttonTextGradientStyle}>
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.addConnectorButton"
+                        defaultMessage="Add connector"
+                      />
+                    </div>
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+
+              {isConnectorModalVisible && (
+                <Suspense fallback>
+                  <AddConnectorModal
+                    actionTypeRegistry={actionTypeRegistry}
+                    actionTypes={actionTypes}
+                    onClose={closeModal}
+                    onSaveConnector={onSaveConnector}
+                    onSelectActionType={(actionType: ActionType) =>
+                      setSelectedActionType(actionType)
+                    }
+                    selectedActionType={selectedActionType}
+                  />
+                </Suspense>
               )}
             </EuiFlexGroup>
           </div>

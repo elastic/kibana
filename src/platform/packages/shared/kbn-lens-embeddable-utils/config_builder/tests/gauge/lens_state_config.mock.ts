@@ -204,7 +204,7 @@ export const gaugeAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -302,7 +302,7 @@ export const gaugeAttributesWithPercentageColorMode: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -454,6 +454,6 @@ export const gaugeESQLAttributes: LensAttributes = {
       },
     },
   },
-  version: 1,
+  version: 2,
   references: [],
 };
