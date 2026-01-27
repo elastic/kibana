@@ -105,7 +105,7 @@ export const ALERTS_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
 export const ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE =
   'alerts-signal-update-deprecated-privilege' as const;
 export const ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE =
-  'edit_alerts_UPDATE_DEPRECATED_PRIVILEGE' as const;
+  'edit_alerts-update-deprecated-privilege' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

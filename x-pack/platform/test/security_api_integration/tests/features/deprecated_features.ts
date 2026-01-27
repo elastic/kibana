@@ -64,6 +64,19 @@ function getUserCredentials(username: string) {
   return `Basic ${Buffer.from(`${username}:changeme`).toString('base64')}`;
 }
 
+const deprecatedApiActions: Record<string, Set<string>> = {
+  'api:alerts-signal-update-deprecated-privilege': new Set([
+    'siem',
+    'siemV2',
+    'siemV3',
+    'siemV4',
+    'securitySolutionRulesV1',
+    'securitySolutionRulesV2'
+  ])
+}
+
+const isDeprecatedApiAction = ({ featureId, action }: { featureId: string, action: string }) => deprecatedApiActions[action]?.has(featureId) ?? false
+
 export default function ({ getService }: FtrProviderContext) {
   describe('deprecated features', function () {
     const supertest = getService('supertest');
@@ -259,10 +272,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         if (referencedFeaturesIds.size > 1) {
           throw new Error(
-            `Feature "${
-              feature.id
-            }" is deprecated and implicitly replaced by more than one feature: ${
-              referencedFeaturesIds.size
+            `Feature "${feature.id
+            }" is deprecated and implicitly replaced by more than one feature: ${referencedFeaturesIds.size
             } features: ${Array.from(referencedFeaturesIds).join(
               ', '
             )}. If it's intentional, please contact the AppEx Security team.`
@@ -324,6 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const deprecatedAction of deprecatedActions) {
             if (
               isReplaceableAction(deprecatedAction) &&
+              !isDeprecatedApiAction({ featureId: feature.id, action: deprecatedAction }) &&
               !replacementActions.delete(deprecatedAction)
             ) {
               throw new Error(
@@ -336,8 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
             Array.from(replacementActions).filter(isReplaceableAction);
           if (extraReplacementActions.length > 0) {
             log.warning(
-              `Replacement actions for the privilege "${privilegeId}" of the deprecated feature "${
-                feature.id
+              `Replacement actions for the privilege "${privilegeId}" of the deprecated feature "${feature.id
               }" grant more privileges than they were granting before: ${JSON.stringify(
                 extraReplacementActions
               )} via ${JSON.stringify(replacedBy)}.`
