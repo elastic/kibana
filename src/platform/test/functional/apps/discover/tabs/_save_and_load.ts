@@ -25,6 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('tabs saving and loading', function () {
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('legacy Discover sessions', () => {
       const legacySessionName = 'A Saved Search';
       const updatedSessionName = 'Updated legacy session';
