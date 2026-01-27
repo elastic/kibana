@@ -20947,7 +20947,7 @@
                       ],
                       "type": "object"
                     },
-                    "maxItems": 1000,
+                    "maxItems": 10000,
                     "type": "array"
                   }
                 },
