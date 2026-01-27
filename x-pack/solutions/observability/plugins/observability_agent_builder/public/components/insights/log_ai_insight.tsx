@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  createRepositoryClient,
-  type DefaultClientOptions,
-} from '@kbn/server-route-repository-client';
-import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
-import { useKibana } from '../../hooks/use_kibana';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
 } from '../../../common';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
+import { useApiClient } from '../../hooks/use_api_client';
 
 export interface LogAiInsightDocument {
   fields: {
@@ -38,14 +33,7 @@ const explainLogMessageButtonLabel = i18n.translate(
 );
 
 export function LogAiInsight({ doc }: LogAiInsightProps) {
-  const {
-    services: { http },
-  } = useKibana();
-
-  const apiClient = createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
+  const apiClient = useApiClient();
 
   const { index, id } = useMemo(() => {
     return {
@@ -54,25 +42,24 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     };
   }, [doc]);
 
+  const createStream = useCallback(
+    (signal: AbortSignal) => {
+      return apiClient.stream('POST /internal/observability_agent_builder/ai_insights/log', {
+        signal,
+        params: {
+          body: {
+            index: index as string,
+            id: id as string,
+          },
+        },
+      });
+    },
+    [apiClient, index, id]
+  );
+
   if (typeof index !== 'string' || typeof id !== 'string') {
     return null;
   }
-
-  const fetchInsight = async () => {
-    const response = await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/log',
-      {
-        signal: null,
-        params: {
-          body: {
-            index,
-            id,
-          },
-        },
-      }
-    );
-    return response;
-  };
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
     {
@@ -107,7 +94,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     <>
       <AiInsight
         title={explainLogMessageButtonLabel}
-        fetchInsight={fetchInsight}
+        createStream={createStream}
         buildAttachments={buildAttachments}
       />
       <EuiSpacer size="s" />

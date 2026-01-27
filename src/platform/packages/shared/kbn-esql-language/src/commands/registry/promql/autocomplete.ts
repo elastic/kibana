@@ -12,6 +12,7 @@ import type { ESQLAstAllCommands } from '../../../types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
+import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import {
   assignCompletionItem,
@@ -19,15 +20,15 @@ import {
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
+  promqlByCompleteItem,
   valuePlaceholderConstant,
 } from '../complete_items';
 import {
   areRequiredPromqlParamsPresent,
   getPromqlParam,
   getUsedPromqlParamNames,
+  isAfterCustomColumnAssignment,
   PromqlParamValueType,
-} from './utils';
-import {
   getPosition,
   getIndexAssignmentContext,
   isParamValueComplete,
@@ -48,11 +49,11 @@ export async function autocomplete(
   // truncate or include the wrong text. The first pipe is the only stable delimiter here for now.
   const pipeIndex = query.indexOf('|', commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
-  const position = getPosition(innerText, command);
+  const position = getPosition(innerText, command, commandText);
+  const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
 
   switch (position.type) {
     case 'after_command': {
-      // Scan full PROMQL command for used params.
       const usedParams = getUsedPromqlParamNames(commandText);
       const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
         (suggestion) => !usedParams.has(suggestion.label)
@@ -65,24 +66,20 @@ export async function autocomplete(
         ? getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
         : undefined;
 
-      const onComplete = [
-        commaCompleteItem,
+      const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
+        ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
       const indexSuggestions = suggestForIndexAssignment(
         innerCommandText,
         commandStart,
         context?.timeSeriesSources,
-        onComplete
+        [commaCompleteItem, ...baseSuggestions]
       );
 
-      if (indexSuggestions) {
-        return indexSuggestions;
-      }
-
-      return [...availableParamSuggestions, ...(columnSuggestion ? [columnSuggestion] : [])];
+      return indexSuggestions ?? baseSuggestions;
     }
 
     case 'after_param_keyword':
@@ -92,14 +89,38 @@ export async function autocomplete(
       if (isParamValueComplete(commandText, cursorPosition - commandStart, position.currentParam)) {
         return [];
       }
+
       return suggestParamValues(position.currentParam, context);
 
-    case 'inside_query':
-      // TODO: Add PromQL autocomplete suggestions (functions, metrics, labels)
+    case 'inside_grouping':
+      // Labels not yet supported - return empty suggestions
       return [];
 
-    case 'after_query':
-      return [pipeCompleteItem];
+    case 'inside_query':
+      return [];
+
+    case 'after_open_paren':
+      return wrapFunctionSuggestions(needsWrappedQuery);
+
+    case 'after_complete_expression':
+      // Future: suggest binary operators (+, -, *, /, etc.)
+      return [];
+
+    case 'inside_function_args':
+      return getPromqlFunctionSuggestions();
+
+    case 'before_grouping':
+      return [promqlByCompleteItem];
+
+    case 'after_query': {
+      const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+
+      if (position.canAddGrouping) {
+        suggestions.unshift(promqlByCompleteItem);
+      }
+
+      return suggestions;
+    }
 
     default:
       return [];
@@ -118,7 +139,7 @@ function suggestForIndexAssignment(
   sources: IndexAutocompleteItem[] | undefined,
   onComplete: ISuggestionItem[]
 ): ISuggestionItem[] | undefined {
-  const indexContext = getIndexAssignmentContext(commandText, 'index');
+  const indexContext = getIndexAssignmentContext(commandText);
   if (!indexContext) {
     return undefined;
   }
@@ -229,4 +250,18 @@ function suggestParamValues(
   }
 
   return [valuePlaceholderConstant];
+}
+
+/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
+function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
+  const suggestions = getPromqlFunctionSuggestions();
+
+  if (!wrap) {
+    return suggestions;
+  }
+
+  return suggestions.map((suggestion) => ({
+    ...suggestion,
+    text: `(${suggestion.text})`,
+  }));
 }
