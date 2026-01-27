@@ -79,7 +79,7 @@ export function metricsToApiOptions<T extends string>(
     aggregation: 'avg',
     groupBy: metricsQueryOptions.groupByField,
     metrics,
-    filterKuery: buildFilterKuery(metricsQueryOptions.sourceFilter, kuery),
+    kuery: buildFilterKuery(metricsQueryOptions.sourceFilter, kuery),
   };
 
   return {

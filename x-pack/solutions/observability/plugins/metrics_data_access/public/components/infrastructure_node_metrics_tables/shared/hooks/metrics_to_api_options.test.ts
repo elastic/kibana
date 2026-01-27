@@ -49,7 +49,7 @@ describe('metricsToApiOptions', () => {
     expect(options).toEqual({
       aggregation: 'avg',
       groupBy: 'test.node.type.groupingField',
-      filterKuery: `event.module: "test"`,
+      kuery: `event.module: "test"`,
       metrics: [
         {
           field: 'test.node.type.field1',
@@ -91,6 +91,6 @@ describe('metricsToApiOptions', () => {
   it("should join the source filter and the kuery when it's provided in the expected format", () => {
     const kuery = 'host.name: "my-host"';
     const { options } = metricsToApiOptions(testMetricsMapField1First, kuery);
-    expect(options.filterKuery).toBe(`(event.module: "test") AND (host.name: "my-host")`);
+    expect(options.kuery).toBe(`(event.module: "test") AND (host.name: "my-host")`);
   });
 });

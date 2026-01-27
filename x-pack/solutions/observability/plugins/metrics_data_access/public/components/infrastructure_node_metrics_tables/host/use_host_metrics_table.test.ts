@@ -42,7 +42,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterKuery: kueryWithEventModuleFilter,
+          kuery: kueryWithEventModuleFilter,
         }),
       })
     );
