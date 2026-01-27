@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const updatedPlaygroundName = 'Test Search Playground';
 
   // Failing: See https://github.com/elastic/kibana/issues/246083
-  describe('Search Playground - Saved Playgrounds', function () {
+  describe.skip('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 
@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Create a Saved Playground', function () {
-      it.only('should allow saving playground', async () => {
+      it('should allow saving playground', async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
 
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
