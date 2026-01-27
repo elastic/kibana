@@ -7,21 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
-import type { getDrilldownSchema, getDrilldownsSchema } from './schemas';
+
+export type DrilldownState = { label: string; triggers: string[]; type: string };
+
+export type DrilldownsState = {
+  drilldowns?: DrilldownState[];
+};
 
 export type DrilldownSetup<
-  StoredState extends { type: string } = { type: string },
-  State extends { type: string } = { type: string }
+  StoredState extends DrilldownState = DrilldownState,
+  State extends DrilldownState = DrilldownState
 > = {
   /**
-   * Schema for drilldown config state
+   * Schema for drilldown state
    */
-  schema: Type<State>;
+  schema: ObjectType<{ type: Type<string> }>;
   /**
    * List of triggers supported by this drilldown type
-   * Used to narrow registry schemas by intersection of (embeddable) supported triggers
+   * Used to
+   * 1) narrow registry schemas by intersection of (embeddable) supported triggers
+   * 2) populate triggers schema
    */
   supportedTriggers: string[];
   /**
@@ -37,10 +44,6 @@ export type DrilldownSetup<
   };
 };
 
-export type DrilldownsState = TypeOf<ReturnType<typeof getDrilldownsSchema>>;
-
-export type DrilldownState = TypeOf<ReturnType<typeof getDrilldownSchema>>;
-
-export type GetDrilldownsSchemaFnType = (
-  embeddableSupportedTriggers: string[]
-) => ReturnType<typeof getDrilldownsSchema>;
+export type GetDrilldownsSchemaFnType = (embeddableSupportedTriggers: string[]) => ObjectType<{
+  drilldowns: Type<DrilldownState[] | undefined>;
+}>;

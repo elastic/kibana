@@ -12,24 +12,22 @@ import { getTransformIn } from './get_transform_in';
 
 describe('getTransformIn', () => {
   const drilldown = {
-    config: {
-      dashboard_id: '5678',
-      type: 'dashboard_drilldown',
-    },
+    dashboard_id: '5678',
+    type: 'dashboard_drilldown',
     label: 'Go to dashboard',
     triggers: ['some_action'],
   };
   const transformDrilldownsIn = jest.fn((state) => {
+    const { dashboard_id, ...restOfDrilldown } = drilldown;
     return {
       state: {
         ...state,
         drilldowns: [
           {
-            ...drilldown,
-            config: {
-              dashboardRefName: 'someRef',
-              type: 'dashboard_drilldown',
-            },
+            ...restOfDrilldown,
+            // hardcoding reference extraction
+            // production code would get id from reference matching dashboardRefName
+            dashboardRefName: 'someRef',
           },
         ],
       },
@@ -72,14 +70,12 @@ describe('getTransformIn', () => {
           "state": Object {
             "drilldowns": Array [
               Object {
-                "config": Object {
-                  "dashboardRefName": "someRef",
-                  "type": "dashboard_drilldown",
-                },
+                "dashboardRefName": "someRef",
                 "label": "Go to dashboard",
                 "triggers": Array [
                   "some_action",
                 ],
+                "type": "dashboard_drilldown",
               },
             ],
             "timeRange": Object {
@@ -127,14 +123,12 @@ describe('getTransformIn', () => {
           "state": Object {
             "drilldowns": Array [
               Object {
-                "config": Object {
-                  "dashboardRefName": "someRef",
-                  "type": "dashboard_drilldown",
-                },
+                "dashboardRefName": "someRef",
                 "label": "Go to dashboard",
                 "triggers": Array [
                   "some_action",
                 ],
+                "type": "dashboard_drilldown",
               },
             ],
             "savedVis": Object {

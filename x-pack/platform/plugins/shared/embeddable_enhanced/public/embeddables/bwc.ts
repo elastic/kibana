@@ -22,9 +22,9 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
     dynamicActions: {
       events: state.drilldowns
         .map((drilldown) => {
-          if (drilldown.config.type === 'dashboard_drilldown') {
+          if (drilldown.type === 'dashboard_drilldown') {
             const { dashboard_id, open_in_new_tab, use_filters, use_time_range } =
-              drilldown.config as unknown as {
+              drilldown as unknown as {
                 dashboard_id: string;
                 open_in_new_tab?: boolean;
                 use_filters?: boolean;
@@ -46,8 +46,8 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
             };
           }
 
-          if (drilldown.config.type === 'discover_drilldown') {
-            const { open_in_new_tab } = drilldown.config as unknown as {
+          if (drilldown.type === 'discover_drilldown') {
+            const { open_in_new_tab } = drilldown as unknown as {
               open_in_new_tab?: boolean;
             };
             return {
@@ -63,8 +63,8 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
             };
           }
 
-          if (drilldown.config.type === 'url_drilldown') {
-            const { encode_url, open_in_new_tab, url } = drilldown.config as unknown as {
+          if (drilldown.type === 'url_drilldown') {
+            const { encode_url, open_in_new_tab, url } = drilldown as unknown as {
               encode_url?: boolean;
               open_in_new_tab?: boolean;
               url: string;
@@ -102,15 +102,13 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
         const { dashboardId, openInNewTab, useCurrentDateRange, useCurrentFilters } =
           event.action.config;
         return {
+          dashboard_id: dashboardId,
           label: event.action.name,
+          open_in_new_tab: openInNewTab ?? false,
           triggers: event.triggers,
-          config: {
-            type: 'dashboard_drilldown',
-            dashboard_id: dashboardId,
-            open_in_new_tab: openInNewTab ?? false,
-            use_time_range: useCurrentDateRange ?? true,
-            use_filters: useCurrentFilters ?? true,
-          },
+          type: 'dashboard_drilldown',
+          use_time_range: useCurrentDateRange ?? true,
+          use_filters: useCurrentFilters ?? true,
         };
       }
 
@@ -118,11 +116,9 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
         const { openInNewTab } = event.action.config;
         return {
           label: event.action.name,
+          open_in_new_tab: openInNewTab ?? false,
           triggers: event.triggers,
-          config: {
-            type: 'discover_drilldown',
-            open_in_new_tab: openInNewTab ?? false,
-          },
+          type: 'discover_drilldown',
         };
       }
 
@@ -134,13 +130,11 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
         };
         return {
           label: event.action.name,
+          encode_url: encodeUrl ?? true,
+          open_in_new_tab: openInNewTab ?? true,
           triggers: event.triggers,
-          config: {
-            type: 'url_drilldown',
-            encode_url: encodeUrl ?? true,
-            open_in_new_tab: openInNewTab ?? true,
-            url: url?.template ?? '',
-          },
+          type: 'url_drilldown',
+          url: url?.template ?? '',
         };
       }
     })

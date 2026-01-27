@@ -8,12 +8,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownsState } from '../../server';
+import type { DrilldownsState, DrilldownState } from '../../server';
 
 export function getTransformDrilldownsIn(
   getTranformIn: (type: string) =>
-    | ((state: { type: string }) => {
-        state: { type: string };
+    | ((state: DrilldownState) => {
+        state: DrilldownState;
         references?: Reference[];
       })
     | undefined
@@ -22,7 +22,7 @@ export function getTransformDrilldownsIn(
     const { drilldowns, ...restOfState } = state;
     if (!drilldowns) {
       return {
-        state: restOfState,
+        state,
         references: [],
       };
     }
@@ -32,21 +32,17 @@ export function getTransformDrilldownsIn(
       state: {
         ...restOfState,
         drilldowns: drilldowns.map((drilldownState) => {
-          const transformIn = getTranformIn(drilldownState.config.type);
+          const transformIn = getTranformIn(drilldownState.type);
           if (!transformIn) {
             return drilldownState;
           }
 
-          const { state: drilldownConfig, references: drilldownReferences } = transformIn(
-            drilldownState.config
-          );
+          const { state: storedDrilldownState, references: drilldownReferences } =
+            transformIn(drilldownState);
           if (drilldownReferences) {
             references.push(...drilldownReferences);
           }
-          return {
-            ...drilldownState,
-            config: drilldownConfig,
-          };
+          return storedDrilldownState;
         }),
       },
       references,

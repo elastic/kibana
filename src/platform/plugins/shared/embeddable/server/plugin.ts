@@ -26,7 +26,7 @@ import {
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
-import type { DrilldownSetup } from './drilldowns/types';
+import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
 import { getTransformsRegistry } from './embeddable_transforms/registry';
@@ -37,8 +37,8 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * Use registerDrilldown to register transforms and schema for a drilldown type.
    */
   registerDrilldown: <
-    StoredState extends { type: string } = { type: string },
-    State extends { type: string } = { type: string }
+    StoredState extends DrilldownState = DrilldownState,
+    State extends DrilldownState = DrilldownState
   >(
     type: string,
     drilldown: DrilldownSetup<StoredState, State>

@@ -12,12 +12,10 @@ import type { StoredVis } from './types';
 
 describe('getTransformOut', () => {
   const storedDrilldown = {
-    config: {
-      dashboardRefName: 'someRef',
-      type: 'dashboard_drilldown',
-    },
+    dashboardRefName: 'someRef',
+    type: 'dashboard_drilldown',
     label: 'Go to dashboard',
-    triggers: ['some_action'],
+    triggers: ['some_trigger'],
   };
   const drilldownReference = {
     id: '5678',
@@ -26,17 +24,15 @@ describe('getTransformOut', () => {
   };
 
   const transformEnhancementsOutMock = jest.fn((state, references) => {
+    const { dashboardRefName, ...restOfDrilldown } = storedDrilldown;
     return {
       ...state,
       drilldowns: [
         {
-          ...storedDrilldown,
-          config: {
-            // hardcoding reference injection
-            // production code would get id from reference matching dashboardRefName
-            dashboard_id: 'someRef',
-            type: 'dashboard_drilldown',
-          },
+          ...restOfDrilldown,
+          // hardcoding reference injection
+          // production code would get id from reference matching dashboardRefName
+          dashboard_id: 'someRef',
         },
       ],
     };
@@ -67,14 +63,12 @@ describe('getTransformOut', () => {
         Object {
           "drilldowns": Array [
             Object {
-              "config": Object {
-                "dashboard_id": "someRef",
-                "type": "dashboard_drilldown",
-              },
+              "dashboard_id": "someRef",
               "label": "Go to dashboard",
               "triggers": Array [
-                "some_action",
+                "some_trigger",
               ],
+              "type": "dashboard_drilldown",
             },
           ],
           "savedObjectId": "1234",
@@ -118,14 +112,12 @@ describe('getTransformOut', () => {
         Object {
           "drilldowns": Array [
             Object {
-              "config": Object {
-                "dashboard_id": "someRef",
-                "type": "dashboard_drilldown",
-              },
+              "dashboard_id": "someRef",
               "label": "Go to dashboard",
               "triggers": Array [
-                "some_action",
+                "some_trigger",
               ],
+              "type": "dashboard_drilldown",
             },
           ],
           "savedVis": Object {

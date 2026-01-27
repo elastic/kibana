@@ -52,15 +52,13 @@ function convertToDashboardDrilldown(event: SerializedEvent) {
   const { openInNewTab, useCurrentDateRange, useCurrentFilters } = event.action.config;
 
   return {
+    dashboardRefName: generateRefName(event.eventId),
     label: event.action.name,
+    open_in_new_tab: openInNewTab ?? false,
     triggers: event.triggers,
-    config: {
-      type: 'dashboard_drilldown',
-      dashboardRefName: generateRefName(event.eventId),
-      open_in_new_tab: openInNewTab ?? false,
-      use_time_range: useCurrentDateRange ?? true,
-      use_filters: useCurrentFilters ?? true,
-    },
+    type: 'dashboard_drilldown',
+    use_filters: useCurrentFilters ?? true,
+    use_time_range: useCurrentDateRange ?? true,
   };
 }
 
@@ -69,11 +67,9 @@ function convertToDiscoverDrilldown(event: SerializedEvent) {
 
   return {
     label: event.action.name,
+    open_in_new_tab: openInNewTab ?? false,
     triggers: event.triggers,
-    config: {
-      type: 'discover_drilldown',
-      open_in_new_tab: openInNewTab ?? false,
-    },
+    type: 'discover_drilldown',
   };
 }
 
@@ -85,12 +81,10 @@ function convertToUrlDrilldown(event: SerializedEvent) {
   };
   return {
     label: event.action.name,
+    encode_url: encodeUrl ?? true,
+    open_in_new_tab: openInNewTab ?? true,
     triggers: event.triggers,
-    config: {
-      type: 'url_drilldown',
-      encode_url: encodeUrl ?? true,
-      open_in_new_tab: openInNewTab ?? true,
-      url: url?.template ?? '',
-    },
+    type: 'url_drilldown',
+    url: url?.template ?? '',
   };
 }

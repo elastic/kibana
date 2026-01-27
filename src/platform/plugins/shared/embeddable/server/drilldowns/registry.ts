@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDrilldownsSchema } from './schemas';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { DrilldownSetup } from './types';
 import { getTransformDrilldownsIn } from '../../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../../common/drilldowns/transform_drilldowns_out';
 
 export function getDrilldownRegistry() {
   const registry: { [key: string]: DrilldownSetup } = {};
-
-  function getSchemasForSupportedTriggers(supportedTriggers: string[]) {
-    return Object.values(registry)
-      .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
-        return supportedTriggers.some((trigger) => drilldownSupportedTriggers.includes(trigger));
-      })
-      .map(({ schema }) => schema);
-  }
 
   function getTransformIn(type: string) {
     return registry[type]?.transformIn;
@@ -43,7 +36,37 @@ export function getDrilldownRegistry() {
       transformIn: getTransformDrilldownsIn(getTransformIn),
       transformOut: getTransformDrilldownsOut(getTransformOut),
     },
-    getSchema: (supportedTriggers: string[]) =>
-      getDrilldownsSchema(getSchemasForSupportedTriggers(supportedTriggers)),
+    getSchema: (supportedTriggers: string[]) => {
+      const drilldownSchemas = Object.values(registry)
+        .filter((drilldownSetup) => {
+          return supportedTriggers.some((trigger) =>
+            drilldownSetup.supportedTriggers.includes(trigger)
+          );
+        })
+        .map((drilldownSetup) =>
+          drilldownSetup.schema.extends({
+            label: schema.string(),
+            triggers: schema.arrayOf(
+              schema.oneOf(
+                drilldownSetup.supportedTriggers.map((trigger) => schema.literal(trigger)) as [
+                  Type<string>
+                ]
+              )
+            ),
+          })
+        );
+
+      return schema.object({
+        drilldowns: schema.maybe(
+          schema.arrayOf(
+            schema.oneOf(
+              drilldownSchemas as unknown as [
+                Type<Readonly<{} & { label: string; type: string; triggers: string[] }>>
+              ]
+            )
+          )
+        ),
+      });
+    },
   };
 }

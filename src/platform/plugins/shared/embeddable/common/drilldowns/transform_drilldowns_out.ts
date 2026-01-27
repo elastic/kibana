@@ -8,13 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownsState } from '../../server';
+import type { DrilldownsState, DrilldownState } from '../../server';
 import { transformEnhancementsOut } from '../bwc/enhancements/transform_enhancements_out';
 
 export function getTransformDrilldownsOut(
   getTranformOut: (
     type: string
-  ) => ((state: { type: string }, references?: Reference[]) => { type: string }) | undefined
+  ) => ((state: DrilldownState, references?: Reference[]) => DrilldownState) | undefined
 ) {
   function transformDrilldownsOut(state: DrilldownsState, references?: Reference[]) {
     const { drilldowns, ...restOfState } = transformEnhancementsOut(state);
@@ -22,13 +22,8 @@ export function getTransformDrilldownsOut(
       ? {
           ...restOfState,
           drilldowns: drilldowns.map((drilldownState) => {
-            const transformOut = getTranformOut(drilldownState.config.type);
-            return transformOut
-              ? {
-                  ...drilldownState,
-                  config: transformOut(drilldownState.config, references),
-                }
-              : drilldownState;
+            const transformOut = getTranformOut(drilldownState.type);
+            return transformOut ? transformOut(drilldownState, references) : drilldownState;
           }),
         }
       : restOfState;

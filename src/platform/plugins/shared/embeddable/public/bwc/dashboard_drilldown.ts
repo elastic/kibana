@@ -8,9 +8,10 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
+import type { DrilldownState } from '../../server';
 
 export function transformDashboardDrilldown(
-  urlState: { type: string; dashboardRefName?: string },
+  urlState: DrilldownState & { dashboardRefName?: string },
   references?: Reference[]
 ) {
   if (!urlState.dashboardRefName) {
