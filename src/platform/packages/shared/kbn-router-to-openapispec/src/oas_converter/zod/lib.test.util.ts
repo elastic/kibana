@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+
+const BooleanFromString = z.union([z.enum(['true', 'false']), z.boolean()]);
 
 export function createLargeSchema() {
   return z.object({
