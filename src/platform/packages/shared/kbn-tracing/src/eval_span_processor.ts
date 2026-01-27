@@ -10,28 +10,41 @@
 import type { Context } from '@opentelemetry/api';
 import { propagation } from '@opentelemetry/api';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { EVAL_RUN_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
 const noop = async () => {};
 
-/**
- * Copies the eval run id (when present in W3C baggage) onto *all* spans as an attribute.
- *
- * This enables correlating traces (`traces-*`) with eval score docs (`.kibana-evaluations*`)
- * by filtering on `attributes.kibana.evals.run_id`.
- */
-export class EvalRunIdSpanProcessor implements tracing.SpanProcessor {
-  onStart(span: tracing.Span, parentContext: Context): void {
-    const evalRunId = propagation
-      .getBaggage(parentContext)
-      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+export interface EvalBaggageField {
+  baggageKey: string;
+  attributeKey?: string;
+}
 
-    if (!evalRunId || !span.isRecording?.()) {
+/**
+ * Copies configured eval baggage fields onto spans as attributes.
+ *
+ * This enables correlating traces (`traces-*`) with eval score docs
+ * by filtering on `attributes.<attributeKey>`.
+ */
+export class EvalSpanProcessor implements tracing.SpanProcessor {
+  constructor(private readonly fields: EvalBaggageField[]) {}
+
+  onStart(span: tracing.Span, parentContext: Context): void {
+    if (!span.isRecording?.()) {
       return;
     }
 
-    // Use the same dotted key so it lands under `attributes.kibana.evals.run_id` in OTEL indices.
-    span.setAttribute(EVAL_RUN_ID_BAGGAGE_KEY, String(evalRunId));
+    const baggage = propagation.getBaggage(parentContext);
+    if (!baggage) {
+      return;
+    }
+
+    this.fields.forEach(({ baggageKey, attributeKey }) => {
+      const value = baggage.getEntry(baggageKey)?.value;
+      if (!value) {
+        return;
+      }
+
+      span.setAttribute(attributeKey ?? baggageKey, String(value));
+    });
   }
 
   onEnd(_span: tracing.ReadableSpan): void {}

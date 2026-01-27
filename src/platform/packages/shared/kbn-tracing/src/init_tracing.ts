@@ -8,7 +8,11 @@
  */
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
-import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
+import {
+  EVAL_RUN_ID_BAGGAGE_KEY,
+  LangfuseSpanProcessor,
+  PhoenixSpanProcessor,
+} from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
@@ -19,7 +23,7 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { HapiInstrumentation } from '@opentelemetry/instrumentation-hapi';
-import { EvalRunIdSpanProcessor } from './eval_run_id_span_processor';
+import { EvalSpanProcessor } from './eval_span_processor';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
 
@@ -75,10 +79,11 @@ export function initTracing({
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  const allSpanProcessors: tracing.SpanProcessor[] = [
-    new EvalRunIdSpanProcessor(),
-    lateBindingProcessor,
-  ];
+  lateBindingProcessor.register(
+    new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }])
+  );
+
+  const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 
   propagation.setGlobalPropagator(
     new core.CompositePropagator({
