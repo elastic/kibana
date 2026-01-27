@@ -25,6 +25,7 @@ export function EditRoutingStreamEntry({
 
   return (
     <EuiPanel
+      color="subdued"
       hasShadow={false}
       hasBorder
       paddingSize="m"

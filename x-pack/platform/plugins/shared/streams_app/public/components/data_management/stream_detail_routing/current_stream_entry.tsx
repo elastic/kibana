@@ -33,6 +33,7 @@ export function CurrentStreamEntry({
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel
+        color="subdued"
         hasShadow={false}
         hasBorder
         paddingSize="m"

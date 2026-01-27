@@ -18,6 +18,7 @@ export function SelectablePanel(props: EuiPanelProps & { isSelected: boolean }) 
   return (
     <EuiPanel
       {...rest}
+      color="subdued"
       hasBorder
       className={
         isSelected

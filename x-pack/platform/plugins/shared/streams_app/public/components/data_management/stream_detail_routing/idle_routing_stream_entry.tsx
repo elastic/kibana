@@ -53,6 +53,7 @@ export function IdleRoutingStreamEntry({
 
   return (
     <EuiPanel
+      color="subdued"
       hasShadow={false}
       hasBorder
       data-test-subj={`routingRule-${routingRule.destination}`}

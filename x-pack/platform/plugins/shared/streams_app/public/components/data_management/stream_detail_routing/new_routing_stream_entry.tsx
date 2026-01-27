@@ -34,7 +34,7 @@ export function NewRoutingStreamEntry() {
 
   return (
     <div ref={panelRef}>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiPanel color="subdued" hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m" direction="column">
           <StreamNameFormRow
             onChange={(value) => changeRuleDebounced({ destination: value })}
