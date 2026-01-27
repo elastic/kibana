@@ -63,6 +63,8 @@ export const fetchArtifactVersions = async ({
         }
       });
 
+      console.log('--@@record', JSON.stringify(record, null, 2));
+
       resolve(record);
     });
   });

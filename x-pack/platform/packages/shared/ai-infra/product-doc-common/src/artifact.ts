@@ -48,7 +48,7 @@ export const parseArtifactName = (artifactName: string) => {
   }
 
   // match the main pattern kb-product-doc-<product>-<version>
-  const match = name.match(/^kb-product-doc-([a-z]+)-([0-9]+\.[0-9]+)$/);
+  const match = name.match(/^kb-product-doc-([a-z]+)-([0-9]+\.[0-9]+|latest)$/);
   if (!match) return;
 
   const productName = match[1].toLowerCase() as ProductName;

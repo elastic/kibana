@@ -79,6 +79,17 @@ describe('parseArtifactName', () => {
       productVersion: '8.17',
     });
   });
+  it('parses an artifact name latest', () => {
+    expect(parseArtifactName('kb-product-doc-kibana-latest')).toEqual({
+      productName: 'kibana',
+      productVersion: 'latest',
+    });
+
+    expect(parseArtifactName('kb-product-doc-security-latest')).toEqual({
+      productName: 'security',
+      productVersion: 'latest',
+    });
+  });
 
   it('returns undefined if the provided string does not match the artifact name pattern', () => {
     expect(parseArtifactName('some-wrong-name')).toEqual(undefined);

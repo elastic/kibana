@@ -44,6 +44,8 @@ export class ProductDocBasePlugin
     coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
     { taskManager }: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const getServices = () => {
       if (!this.internalServices) {
         throw new Error('getServices called before #start');
@@ -71,12 +73,17 @@ export class ProductDocBasePlugin
     core: CoreStart,
     { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
+    // @TODO: remove
+    console.log(`--@@isServerless`, isServerless);
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
     const productDocClient = new ProductDocInstallClient({
       soClient,
       log: this.logger,
+      isServerless,
     });
 
     const packageInstaller = new PackageInstaller({
@@ -87,11 +94,13 @@ export class ProductDocBasePlugin
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
+      isServerless,
     });
 
     const searchService = new SearchService({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger.get('search-service'),
+      isServerless,
     });
 
     const documentationManager = new DocumentationManager({
@@ -101,6 +110,7 @@ export class ProductDocBasePlugin
       taskManager,
       auditService: core.security.audit,
       packageInstaller,
+      isServerless,
     });
 
     this.internalServices = {

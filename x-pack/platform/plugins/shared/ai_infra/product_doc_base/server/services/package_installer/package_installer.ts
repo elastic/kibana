@@ -59,6 +59,7 @@ export class PackageInstaller {
   private readonly artifactRepositoryUrl: string;
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
+  private readonly isServerless: boolean;
 
   constructor({
     artifactsFolder,
@@ -68,6 +69,7 @@ export class PackageInstaller {
     artifactRepositoryUrl,
     elserInferenceId,
     kibanaVersion,
+    isServerless,
   }: PackageInstallerOpts) {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
@@ -76,6 +78,7 @@ export class PackageInstaller {
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
+    this.isServerless = true; // --@@todo: renable isServerless;
   }
 
   private async getInferenceInfo(inferenceId?: string) {
@@ -115,7 +118,10 @@ export class PackageInstaller {
       if (!availableVersions || !availableVersions.length) {
         return;
       }
-      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
+      const shouldInstallLatest = this.isServerless && availableVersions.includes('latest');
+      const selectedVersion = shouldInstallLatest
+        ? 'latest'
+        : selectVersion(this.currentVersion, availableVersions);
       if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
         toUpdate.push({
           productName: productName as ProductName,
@@ -143,11 +149,16 @@ export class PackageInstaller {
 
     for (const productName of allProducts) {
       const availableVersions = repositoryVersions[productName];
+
       if (!availableVersions || !availableVersions.length) {
         this.log.warn(`No version found for product [${productName}]`);
         continue;
       }
-      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
+
+      const shouldInstallLatest = this.isServerless && availableVersions.includes('latest');
+      const selectedVersion = shouldInstallLatest
+        ? 'latest'
+        : selectVersion(this.currentVersion, availableVersions);
 
       await this.installPackage({
         productName,
@@ -172,7 +183,7 @@ export class PackageInstaller {
       `Starting installing documentation for product [${productName}] and version [${productVersion}] with inference ID [${inferenceId}]`
     );
 
-    productVersion = majorMinor(productVersion);
+    productVersion = this.isServerless ? 'latest' : majorMinor(productVersion);
 
     await this.uninstallPackage({ productName, inferenceId });
 
