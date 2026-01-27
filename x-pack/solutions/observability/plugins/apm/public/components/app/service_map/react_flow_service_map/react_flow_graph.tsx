@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -13,20 +13,52 @@ import {
   ReactFlowProvider,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  type Node,
+  type Edge,
 } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import '@xyflow/react/dist/style.css';
+import { applyDagreLayout } from './layout';
 
 interface ReactFlowGraphProps {
   height: number;
+  nodes: Node[];
+  edges: Edge[];
 }
 
-function ReactFlowGraphInner({ height }: ReactFlowGraphProps) {
+function ReactFlowGraphInner({
+  height,
+  nodes: initialNodes,
+  edges: initialEdges,
+}: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
-  const [nodes, , onNodesChange] = useNodesState([]);
-  const [edges, , onEdgesChange] = useEdgesState([]);
+  const { fitView } = useReactFlow();
+
+  // Apply layout to nodes - edges already have styling from transformElements
+  const layoutedNodes = useMemo(
+    () => applyDagreLayout(initialNodes, initialEdges),
+    [initialNodes, initialEdges]
+  );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Update nodes and edges when props change
+  React.useEffect(() => {
+    setNodes(layoutedNodes);
+    setEdges(initialEdges);
+
+    // Fit view after nodes are updated
+    if (layoutedNodes.length > 0) {
+      // Small delay to allow React Flow to render nodes first
+      requestAnimationFrame(() => {
+        fitView({ padding: 0.2, duration: 200 });
+      });
+    }
+  }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView]);
 
   const containerStyle = useMemo(
     () => ({
@@ -51,6 +83,12 @@ function ReactFlowGraphInner({ height }: ReactFlowGraphProps) {
     [height, euiTheme]
   );
 
+  const onInit = useCallback(() => {
+    if (layoutedNodes.length > 0) {
+      fitView({ padding: 0.2, duration: 200 });
+    }
+  }, [fitView, layoutedNodes.length]);
+
   return (
     <div css={css(containerStyle)} data-test-subj="reactFlowServiceMap">
       <ReactFlow
@@ -58,6 +96,7 @@ function ReactFlowGraphInner({ height }: ReactFlowGraphProps) {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onInit={onInit}
         fitView
         fitViewOptions={{ padding: 0.2, duration: 200 }}
         minZoom={0.2}
