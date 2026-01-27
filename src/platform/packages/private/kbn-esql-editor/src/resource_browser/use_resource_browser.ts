@@ -11,7 +11,7 @@ import { useCallback, useRef, useState } from 'react';
 import type * as monaco from 'monaco-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { correctQuerySyntax } from '@kbn/esql-language/src/commands/definitions/utils/ast';
-import { Parser } from '@kbn/esql-language';
+import { Parser, suggest } from '@kbn/esql-language';
 import { getCursorContext } from '@kbn/esql-language/src/language/shared/get_cursor_context';
 import { getQueryForFields } from '@kbn/esql-language/src/language/shared/get_query_for_fields';
 import { getColumnsByTypeRetriever } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
@@ -41,6 +41,10 @@ export function useResourceBrowser({
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
   const browserCursorPositionRef = useRef<monaco.Position | null>(null);
   const fieldsBrowserQueryStringRef = useRef<string>('');
+  // Store the suggested field names from autocomplete to filter the fields browser display
+  const suggestedFieldNamesRef = useRef<Set<string>>(new Set());
+  // Store the suggested source names from autocomplete to filter the data source browser display
+  const suggestedSourceNamesRef = useRef<Set<string>>(new Set());
 
   const handleResourceBrowserSelect = useCallback(
     (newResourceNames: string, oldLength: number) => {
@@ -107,10 +111,28 @@ export function useResourceBrowser({
     }
   }, [editorRef]);
 
-  const openIndicesBrowser = useCallback(() => {
+  const openIndicesBrowser = useCallback(async () => {
+    if (editorRef.current && editorModel.current) {
+      const position = editorRef.current.getPosition();
+      if (position) {
+        const fullText = editorModel.current.getValue() || '';
+        const offset = editorModel.current.getOffsetAt(position) || 0;
+
+        // Call suggest() to get the same source suggestions as autocomplete
+        // This ensures the data source browser shows only the contextually relevant sources
+        const suggestions = await suggest(fullText, offset, esqlCallbacks);
+        // Extract source names from suggestions (sources have kind: 'Issue' or 'Class')
+        const sourceNames = new Set(
+          suggestions
+            .filter((s) => s.kind === 'Issue' || s.kind === 'Class')
+            .map((s) => s.label)
+        );
+        suggestedSourceNamesRef.current = sourceNames;
+      }
+    }
     updateResourceBrowserPosition();
     setIsDataSourceBrowserOpen(true);
-  }, [updateResourceBrowserPosition]);
+  }, [updateResourceBrowserPosition, editorRef, editorModel, esqlCallbacks]);
 
   const openFieldsBrowser = useCallback(async () => {
     if (editorRef.current && editorModel.current) {
@@ -134,6 +156,15 @@ export function useResourceBrowser({
           esqlCallbacks
         );
 
+        // Call suggest() to get the same field suggestions as autocomplete
+        // This ensures the fields browser shows only the contextually relevant fields
+        const suggestions = await suggest(fullText, offset, esqlCallbacks);
+        // Extract field names from suggestions (fields have kind: 'Variable')
+        const fieldNames = new Set(
+          suggestions.filter((s) => s.kind === 'Variable').map((s) => s.label)
+        );
+        suggestedFieldNamesRef.current = fieldNames;
+
         // Store the getColumnMap function in a ref so it can be used by the popup
         fieldsBrowserGetColumnMapRef.current = getColumnMap;
       }
@@ -150,6 +181,8 @@ export function useResourceBrowser({
     browserPopoverPosition,
     fieldsBrowserGetColumnMapRef,
     fieldsBrowserQueryStringRef,
+    suggestedFieldNamesRef,
+    suggestedSourceNamesRef,
     handleResourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,

@@ -64,6 +64,8 @@ interface DataSourceBrowserProps {
   onClose: () => void;
   onSelect: (dataSourceName: string, oldLength: number) => void;
   position?: { top?: number; left?: number };
+  // Source names suggested by autocomplete - used to filter the displayed sources
+  suggestedSourceNames?: Set<string>;
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
@@ -71,6 +73,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   onClose,
   onSelect,
   position,
+  suggestedSourceNames,
 }) => {
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -97,8 +100,13 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [isOpen]);
 
   const fetchData = useCallback(async () => {
-    return getESQLSources(core, esql?.getLicense);
-  }, [core, esql?.getLicense]);
+    const allSources = await getESQLSources(core, esql?.getLicense);
+    // If suggestedSourceNames is provided and non-empty, filter to only include suggested sources
+    if (suggestedSourceNames && suggestedSourceNames.size > 0) {
+      return allSources.filter((source) => suggestedSourceNames.has(source.name));
+    }
+    return allSources;
+  }, [core, esql?.getLicense, suggestedSourceNames]);
 
   const getTypeKey = useCallback((source: ESQLSourceResult) => {
     return getSourceTypeKey(source.type);

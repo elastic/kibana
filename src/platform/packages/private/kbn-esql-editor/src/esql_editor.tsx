@@ -770,6 +770,8 @@ const ESQLEditorInternal = function ESQLEditor({
     browserPopoverPosition,
     fieldsBrowserGetColumnMapRef,
     fieldsBrowserQueryStringRef,
+    suggestedFieldNamesRef,
+    suggestedSourceNamesRef,
     handleResourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,
@@ -1476,6 +1478,7 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={() => setIsDataSourceBrowserOpen(false)}
             onSelect={handleResourceBrowserSelect}
             position={browserPopoverPosition}
+            suggestedSourceNames={suggestedSourceNamesRef.current}
           />
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
@@ -1485,6 +1488,7 @@ const ESQLEditorInternal = function ESQLEditor({
             position={browserPopoverPosition}
             queryString={fieldsBrowserQueryStringRef.current}
             activeSolutionId={activeSolutionId ?? undefined}
+            suggestedFieldNames={suggestedFieldNamesRef.current}
           />
         </>
       )}

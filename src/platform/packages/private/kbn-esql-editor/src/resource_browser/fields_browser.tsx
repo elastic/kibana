@@ -59,6 +59,8 @@ interface FieldsBrowserProps {
   position?: { top?: number; left?: number };
   queryString?: string;
   activeSolutionId?: SolutionId | null;
+  // Field names suggested by autocomplete - used to filter the displayed fields
+  suggestedFieldNames?: Set<string>;
 }
 
 export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
@@ -69,6 +71,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   position,
   queryString = '',
   activeSolutionId,
+  suggestedFieldNames,
 }) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { http } = kibana.services;
@@ -116,10 +119,18 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
     const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
     // Convert ESQLColumnData map to ESQLFieldWithMetadata array
     // Filter out user-defined columns and only keep fields with metadata
+    // Also filter by suggested field names if provided (from autocomplete)
     return Array.from(columnMap.values())
       .filter((column: ESQLColumnData): column is ESQLFieldWithMetadata => {
         // Only include fields that are not user-defined (i.e., ESQLFieldWithMetadata)
-        return column.userDefined === false;
+        if (column.userDefined !== false) {
+          return false;
+        }
+        // If suggestedFieldNames is provided, only include fields that are in the set
+        if (suggestedFieldNames && suggestedFieldNames.size > 0) {
+          return suggestedFieldNames.has(column.name);
+        }
+        return true;
       })
       .map((column: ESQLFieldWithMetadata) => ({
         name: column.name,
@@ -128,7 +139,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
         userDefined: false as const,
         metadata: column.metadata,
       }));
-  }, [getColumnMap]);
+  }, [getColumnMap, suggestedFieldNames]);
 
   // Fetch data when popover opens
   useEffect(() => {
