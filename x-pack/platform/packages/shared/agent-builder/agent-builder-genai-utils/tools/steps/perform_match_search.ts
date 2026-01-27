@@ -38,17 +38,89 @@ export const performMatchSearch = async ({
   const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
   const allSearchableFields = [...textFields, ...semanticTextFields];
 
-  // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch`
+  const retrievers: any[] = [];
+
+  if (textFields.length > 0) {
+    const textRetriever = {
+      standard: {
+        query: {
+          bool: {
+            must: [
+              { 
+                bool: {
+                 should: [
+                  {
+                    multi_match: {
+                      query: term,
+                      minimum_should_match: '1<-1 3<49%',
+                      type: 'cross_fields',
+                      fields: textFields.map((field) => field.path),
+                      boost: 1.5,
+                    },
+                  },
+                  {
+                    multi_match: {
+                      query: term,
+                      minimum_should_match: '1<-1 3<49%',
+                      type: 'best_fields',
+                      fuzziness: 'AUTO',
+                      prefix_length: 2,
+                      fields: textFields.map((field) => field.path),
+                      boost: 2.0,
+                    },
+                  },
+                  {
+                    multi_match: {
+                      query: term,
+                      type: 'phrase',
+                      slop: 3,
+                      fields: textFields.map((field) => field.path),
+                      boost: 3.0,
+                    },
+                  },
+                  {
+                    multi_match: {
+                      query: term,
+                      minimum_should_match: '1',
+                      type: 'cross_fields',
+                      fields: textFields.map((field) => field.path),
+                      boost: 0.6,
+                    },
+                  }
+                 ]
+                }
+              }
+            ]
+          }
+        },
+      },
+    };
+    retrievers.push(textRetriever);
+  }
+
+  if (semanticTextFields.length > 0) {
+    const semanticRetriever = {
+      rrf: {
+        fields: semanticTextFields.map((field) => field.path),
+        query: term,
+        rank_window_size: size * 2,
+      },
+    };
+    retrievers.push(semanticRetriever);
+  }
+
   const searchRequest: any = {
     index,
     size,
-    retriever: {
-      rrf: {
-        rank_window_size: size * 2,
-        query: term,
-        fields: allSearchableFields.map((field) => field.path),
-      },
-    },
+    retriever:
+      retrievers.length > 1
+        ? {
+          rrf: {
+            rank_window_size: size * 2,
+            retrievers,
+          },
+        }
+        : retrievers[0],
     highlight: {
       number_of_fragments: 5,
       fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
