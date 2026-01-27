@@ -8,14 +8,26 @@
  */
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
-import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
+import {
+  getPromqlFunctionSuggestions,
+  getPromqlFunctionSuggestionsForReturnTypes,
+  getPromqlParamTypesForFunction,
+} from '../../definitions/utils/promql';
+import { getFunctionParamIndexAtCursor } from './utils';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
+import { SuggestionCategory } from '../../../shared/sorting';
+import {
+  ESQL_NUMBER_TYPES,
+  ESQL_STRING_TYPES,
+  type PromQLFunctionParamType,
+} from '../../definitions/types';
 import {
   assignCompletionItem,
+  buildAddValuePlaceholder,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
@@ -33,6 +45,7 @@ import {
   getIndexAssignmentContext,
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
+  resolveFunctionAtCursor,
 } from './utils';
 
 export async function autocomplete(
@@ -51,7 +64,6 @@ export async function autocomplete(
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
   const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
-
   switch (position.type) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
@@ -69,6 +81,7 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
+        ...(canSuggestColumn ? suggestMetrics(context, needsWrappedQuery, ESQL_NUMBER_TYPES) : []),
         ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
@@ -93,21 +106,52 @@ export async function autocomplete(
       return suggestParamValues(position.currentParam, context);
 
     case 'inside_grouping':
-      // Labels not yet supported - return empty suggestions
-      return [];
+      return suggestLabels(context);
 
     case 'inside_query':
       return [];
 
     case 'after_open_paren':
-      return wrapFunctionSuggestions(needsWrappedQuery);
+    case 'inside_function_args': {
+      const promqlCommand = command as ESQLAstPromqlCommand;
+
+      const { functionNode, fallback } = resolveFunctionAtCursor(
+        promqlCommand,
+        commandText,
+        cursorPosition
+      );
+      const functionName = functionNode?.name ?? fallback?.name;
+      const astParamIndex = functionNode
+        ? getFunctionParamIndexAtCursor(promqlCommand, commandText, cursorPosition, functionNode)
+        : 0;
+      const paramIndex =
+        fallback && fallback.name === functionName && fallback.paramIndex > astParamIndex
+          ? fallback.paramIndex
+          : astParamIndex;
+
+      const signatureTypes = getPromqlParamTypesForFunction(functionName, paramIndex);
+      const { types, useRangeVector } = getMetricSuggestionConfig(functionName, signatureTypes);
+
+      const expectsOnlyScalar = isScalarOnlyParam(signatureTypes);
+      const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
+
+      const metrics = expectsOnlyScalar
+        ? []
+        : suggestMetrics(context, needsWrappedQuery, types, useRangeVector);
+
+      const functions = expectsOnlyScalar
+        ? []
+        : wrapFunctionSuggestions(
+            needsWrappedQuery,
+            getPromqlFunctionSuggestionsForReturnTypes(signatureTypes)
+          );
+
+      return [...scalarValues, ...metrics, ...functions];
+    }
 
     case 'after_complete_expression':
       // Future: suggest binary operators (+, -, *, /, etc.)
       return [];
-
-    case 'inside_function_args':
-      return getPromqlFunctionSuggestions();
 
     case 'before_grouping':
       return [promqlByCompleteItem];
@@ -252,10 +296,15 @@ function suggestParamValues(
   return [valuePlaceholderConstant];
 }
 
-/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
-function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
-  const suggestions = getPromqlFunctionSuggestions();
+// ============================================================================
+// Field Suggestions
+// ============================================================================
 
+/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
+function wrapFunctionSuggestions(
+  wrap: boolean,
+  suggestions: ISuggestionItem[] = getPromqlFunctionSuggestions()
+): ISuggestionItem[] {
   if (!wrap) {
     return suggestions;
   }
@@ -264,4 +313,96 @@ function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
     ...suggestion,
     text: `(${suggestion.text})`,
   }));
+}
+
+/* Converts PromQL metric fields from context into autocomplete suggestions. */
+function suggestMetrics(
+  context: ICommandContext | undefined,
+  wrap: boolean | undefined,
+  types: readonly string[],
+  useRangeVector?: boolean
+): ISuggestionItem[] {
+  return buildFieldSuggestions(context, types, wrap ? 'wrap' : 'plain', useRangeVector);
+}
+
+/* Converts label field types into autocomplete suggestions. */
+function suggestLabels(context?: ICommandContext): ISuggestionItem[] {
+  return buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+}
+
+/** Formats metric suggestion text, adding a range selector when needed. */
+function buildMetricSuggestionText(name: string, useRangeVector: boolean): string {
+  return useRangeVector ? `${name}[\${0:5m}]` : name;
+}
+
+function buildFieldSuggestions(
+  context: ICommandContext | undefined,
+  types: readonly string[],
+  wrap: 'wrap' | 'plain',
+  useRangeVector: boolean = false
+): ISuggestionItem[] {
+  if (!context?.columns) {
+    return [];
+  }
+
+  return Array.from(context.columns.values())
+    .filter((column) => !column.userDefined && types.includes(column.type))
+    .map((column) => ({
+      label: column.name,
+      text:
+        wrap === 'wrap'
+          ? `(${buildMetricSuggestionText(column.name, useRangeVector)})`
+          : buildMetricSuggestionText(column.name, useRangeVector),
+      asSnippet: useRangeVector,
+      kind: 'Field',
+      detail: column.type,
+      category: SuggestionCategory.FIELD,
+    }));
+}
+
+// ============================================================================
+// Function Argument Configuration
+// ============================================================================
+
+function isScalarOnlyParam(types: PromQLFunctionParamType[]): boolean {
+  return types.length > 0 && types.every((type) => type === 'scalar');
+}
+
+/* Maps PromQL function signature types to ESQL field types for metric suggestions. */
+const PROMQL_PARAM_TYPE_TO_ESQL_TYPES: Record<PromQLFunctionParamType, readonly string[]> = {
+  instant_vector: ESQL_NUMBER_TYPES,
+  range_vector: ESQL_NUMBER_TYPES,
+  scalar: ESQL_NUMBER_TYPES,
+  string: ESQL_STRING_TYPES,
+};
+const COUNTER_TYPES = ['counter_integer', 'counter_long', 'counter_double'] as const;
+const COUNTER_ONLY_FUNCTIONS = new Set(['rate', 'irate', 'increase']);
+
+/** Derives metric suggestion types and range-vector formatting from function signatures. */
+function getMetricSuggestionConfig(
+  name: string | undefined,
+  signatureTypes: PromQLFunctionParamType[]
+): { types: readonly string[]; useRangeVector: boolean } {
+  const isCounterOnly = name ? COUNTER_ONLY_FUNCTIONS.has(name.toLowerCase()) : false;
+  const expectsRangeVector = signatureTypes.includes('range_vector');
+  const expectsInstantVector = signatureTypes.includes('instant_vector');
+
+  if (!signatureTypes.length) {
+    return {
+      types: isCounterOnly ? COUNTER_TYPES : ESQL_NUMBER_TYPES,
+      useRangeVector: false,
+    };
+  }
+
+  const types = signatureTypes.flatMap((paramType) => PROMQL_PARAM_TYPE_TO_ESQL_TYPES[paramType]);
+  const uniqueTypes = Array.from(new Set(types));
+  const baseTypes = uniqueTypes.length ? uniqueTypes : ESQL_NUMBER_TYPES;
+  const filteredTypes = isCounterOnly
+    ? baseTypes.filter((type) => COUNTER_TYPES.includes(type as (typeof COUNTER_TYPES)[number]))
+    : baseTypes;
+
+  return {
+    types: filteredTypes,
+    useRangeVector: expectsRangeVector && !expectsInstantVector,
+  };
 }
