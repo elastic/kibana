@@ -11,7 +11,7 @@ import { useToasts } from '../../common/lib/kibana';
 import type { ServerError } from '../../types';
 import { MOCK_TEMPLATES } from './sample_data';
 import type { Template } from './sample_data';
-import * as i18n from './translations';
+import * as i18n from '../templates/translations';
 // TODO: Uncomment when API is available
 // import { KibanaServices } from '../../common/lib/kibana';
 // import { CASES_URL } from '../../../common/constants';

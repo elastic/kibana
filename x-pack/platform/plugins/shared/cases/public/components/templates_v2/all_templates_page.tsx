@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from './translations';
+import * as i18n from '../templates/translations';
 import { LinkButton } from '../links';
 import { useCasesCreateTemplateNavigation } from '../../common/navigation';
 import type { Template } from './sample_data';
@@ -49,10 +49,15 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
     totalItemCount: data?.total ?? 0,
   });
 
-  const { handleEdit, handleDelete } = useTemplatesActions();
+  const { handleEdit, handleClone, handleSetAsDefault, handleExport, handlePreview, handleDelete } =
+    useTemplatesActions();
 
   const { columns } = useTemplatesColumns({
     onEdit: handleEdit,
+    onClone: handleClone,
+    onSetAsDefault: handleSetAsDefault,
+    onExport: handleExport,
+    onPreview: handlePreview,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,
   });

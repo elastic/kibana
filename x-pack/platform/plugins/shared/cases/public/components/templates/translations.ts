@@ -134,6 +134,25 @@ export const EDIT_TEMPLATE = i18n.translate('xpack.cases.templates.editTemplate'
   defaultMessage: 'Edit',
 });
 
+export const CLONE_TEMPLATE = i18n.translate('xpack.cases.templates.cloneTemplate', {
+  defaultMessage: 'Clone',
+});
+
+export const SET_AS_DEFAULT_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.setAsDefaultTemplate',
+  {
+    defaultMessage: 'Set as default',
+  }
+);
+
+export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTemplate', {
+  defaultMessage: 'Export',
+});
+
+export const PREVIEW_TEMPLATE = i18n.translate('xpack.cases.templates.previewTemplate', {
+  defaultMessage: 'Preview',
+});
+
 export const DELETE_TEMPLATE = i18n.translate('xpack.cases.templates.deleteTemplate', {
   defaultMessage: 'Delete',
 });
