@@ -15,7 +15,6 @@ import { css } from '@emotion/react';
 import type { Dimension, MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allMetricFields: MetricField[];
