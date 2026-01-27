@@ -20,6 +20,7 @@ interface PromptComponentProps {
   isValid: boolean;
   onSendMessage: () => void;
   isAiRuleCreationInProgress: boolean;
+  isDisabled: boolean;
 }
 
 export const PromptComponent: React.FC<PromptComponentProps> = ({
@@ -30,6 +31,7 @@ export const PromptComponent: React.FC<PromptComponentProps> = ({
   isValid,
   onSendMessage,
   isAiRuleCreationInProgress,
+  isDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -51,7 +53,7 @@ export const PromptComponent: React.FC<PromptComponentProps> = ({
             onPromptSubmit={handlePromptSubmit}
             setUserPrompt={setPromptValue}
             value={promptValue}
-            isDisabled={isLoading || isAiRuleCreationInProgress}
+            isDisabled={isDisabled || isLoading || isAiRuleCreationInProgress}
           />
         </EuiFlexItem>
         <EuiFlexItem
