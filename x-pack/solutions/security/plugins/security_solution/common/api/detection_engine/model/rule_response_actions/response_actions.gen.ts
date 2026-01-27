@@ -112,11 +112,16 @@ export const RunScriptOsConfigValues = z.object({
   timeout: z.number().int().optional(),
 });
 
+/**
+  * > warn
+> Run script response action will only be available with v9.4.0
+
+  */
 export type RunscriptParams = z.infer<typeof RunscriptParams>;
 export const RunscriptParams = z.object({
   command: z.literal('runscript').optional(),
   /**
-   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
+   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Collect data"
    */
   comment: z.string().optional(),
   config: z
