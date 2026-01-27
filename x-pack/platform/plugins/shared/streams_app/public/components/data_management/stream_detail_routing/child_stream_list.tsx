@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React from 'react';
-import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
+import React, { useMemo } from 'react';
+import { MAX_NESTING_LEVEL, getSegments, Streams, isChildOf } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -35,7 +35,11 @@ import { EditRoutingStreamEntry } from './edit_routing_stream_entry';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  useIsQueryModeCreating,
 } from './state_management/stream_routing_state_machine';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
@@ -347,12 +351,124 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 }
 
 function QueryModeChildrenList() {
+  const { euiTheme } = useEuiTheme();
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const isCreating = useIsQueryModeCreating();
+  const { createQueryStream } = useStreamRoutingEvents();
+  const canManage = definition.privileges.manage;
+
+  // Fetch all streams to find child query streams
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal });
+    },
+    [streamsRepositoryClient, definition]
+  );
+
+  // Filter for child query streams of the current stream
+  const childQueryStreams = useMemo(() => {
+    if (!streamsListFetch.value?.streams) return [];
+
+    return streamsListFetch.value.streams.filter(
+      (stream): stream is Streams.QueryStream.Definition =>
+        Streams.QueryStream.Definition.is(stream) &&
+        isChildOf(definition.stream.name, stream.name)
+    );
+  }, [streamsListFetch.value?.streams, definition.stream.name]);
+
+  const isLoading = streamsListFetch.loading;
+
   return (
-    <div>
-      {i18n.translate('xpack.streams.queryModeChildrenList.div.queryModeChildrenListLabel', {
-        defaultMessage: 'Query mode children list',
-      })}
-    </div>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={css`
+        overflow: auto;
+      `}
+    >
+      {/* Scrollable query streams container */}
+      <EuiFlexItem
+        grow={false}
+        className={css`
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          max-height: calc(100% - 80px);
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          {childQueryStreams.map((streamDef, index) => (
+            <EuiFlexItem key={streamDef.name} grow={false}>
+              <IdleQueryStreamEntry
+                streamDefinition={streamDef}
+                isFirst={index === 0}
+                isLast={index === childQueryStreams.length - 1 && !isCreating}
+              />
+            </EuiFlexItem>
+          ))}
+
+          {isCreating && (
+            <EuiFlexItem grow={false}>
+              <CreatingQueryStreamEntry parentStreamName={definition.stream.name} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      {/* Create button */}
+      {!isCreating && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            className={css`
+              padding: ${euiTheme.size.l};
+              padding-bottom: ${euiTheme.size.xxl};
+              flex-grow: 1;
+              min-height: 80px;
+            `}
+            wrap
+          >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="bottom"
+                content={
+                  !canManage
+                    ? i18n.translate(
+                      'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
+                      {
+                        defaultMessage:
+                          "You don't have sufficient privileges to create query streams.",
+                      }
+                    )
+                    : undefined
+                }
+              >
+                <EuiButton
+                  size="s"
+                  data-test-subj="streamsAppQueryModeCreateButton"
+                  onClick={createQueryStream}
+                  disabled={!canManage || isLoading}
+                  isLoading={isLoading}
+                >
+                  {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
+                    defaultMessage: 'Create query stream',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 }
 

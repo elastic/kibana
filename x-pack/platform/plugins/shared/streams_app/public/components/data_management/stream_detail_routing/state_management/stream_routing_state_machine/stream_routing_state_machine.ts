@@ -17,13 +17,17 @@ import type {
   StreamRoutingInput,
   StreamRoutingServiceDependencies,
 } from './types';
+import type { SampleDocument } from '@kbn/streams-schema';
 import {
   createUpsertStreamActor,
   createStreamFailureNofitier,
   createStreamSuccessNofitier,
   createForkStreamActor,
   createDeleteStreamActor,
+  createQueryStreamActor,
+  createQueryStreamSuccessNotifier,
 } from './stream_actors';
+import { createQueryStreamSamplesActor } from './query_stream_samples_actor';
 import { routingConverter } from '../../utils';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
@@ -46,6 +50,8 @@ export const streamRoutingMachine = setup({
     forkStream: getPlaceholderFor(createForkStreamActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     routingSamplesMachine: getPlaceholderFor(() => routingSamplesMachine),
+    createQueryStream: getPlaceholderFor(createQueryStreamActor),
+    queryStreamSamples: getPlaceholderFor(createQueryStreamSamplesActor),
   },
   actions: {
     notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
@@ -125,6 +131,68 @@ export const streamRoutingMachine = setup({
     })),
     setRefreshing: assign(() => ({ isRefreshing: true })),
     clearRefreshing: assign(() => ({ isRefreshing: false })),
+    // Query stream form actions
+    initQueryStreamForm: assign(({ context }) => {
+      // Query from parent's ES|QL view (stream.{parentName})
+      const parentViewName = `stream.${context.definition.stream.name}`;
+      return {
+        queryStreamForm: {
+          name: '',
+          esqlQuery: `FROM ${parentViewName}`,
+        },
+        queryStreamSamples: {
+          esqlQuery: `FROM ${parentViewName}`,
+          documents: [],
+          documentsError: undefined,
+          isLoading: false,
+        },
+      };
+    }),
+    updateQueryStreamName: assign(({ context }, params: { name: string }) => ({
+      queryStreamForm: context.queryStreamForm
+        ? { ...context.queryStreamForm, name: params.name }
+        : null,
+    })),
+    updateQueryStreamEsql: assign(({ context }, params: { esqlQuery: string }) => ({
+      queryStreamForm: context.queryStreamForm
+        ? { ...context.queryStreamForm, esqlQuery: params.esqlQuery }
+        : null,
+      queryStreamSamples: {
+        ...context.queryStreamSamples,
+        esqlQuery: params.esqlQuery,
+      },
+    })),
+    resetQueryStreamForm: assign(() => ({
+      queryStreamForm: null,
+      queryStreamSamples: {
+        esqlQuery: '',
+        documents: [],
+        documentsError: undefined,
+        isLoading: false,
+      },
+    })),
+    storeQueryStreamSamples: assign(({ context }, params: { documents: SampleDocument[] }) => ({
+      queryStreamSamples: {
+        ...context.queryStreamSamples,
+        documents: params.documents,
+        documentsError: undefined,
+        isLoading: false,
+      },
+    })),
+    storeQueryStreamSamplesError: assign(({ context }, params: { error: Error }) => ({
+      queryStreamSamples: {
+        ...context.queryStreamSamples,
+        documentsError: params.error,
+        isLoading: false,
+      },
+    })),
+    setQueryStreamSamplesLoading: assign(({ context }) => ({
+      queryStreamSamples: {
+        ...context.queryStreamSamples,
+        isLoading: true,
+      },
+    })),
+    notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
@@ -152,6 +220,16 @@ export const streamRoutingMachine = setup({
 
       return isChildOf(currentStream.name, currentRule.destination);
     },
+    // Query stream guards
+    canCreateQueryStream: ({ context }) => {
+      if (!context.queryStreamForm) return false;
+      const { name, esqlQuery } = context.queryStreamForm;
+      if (!name || name.trim() === '') return false;
+      if (!esqlQuery || esqlQuery.trim() === '') return false;
+      // Check that the stream name follows child naming convention
+      const fullName = `${context.definition.stream.name}.${name}`;
+      return isChildOf(context.definition.stream.name, fullName);
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGVNkwBDAWwDo9sdSAbbALzygGIBtABgF1FQADqli1sqXPxAAPRAFYATABoQAT0TyuANk2UuATlld9hzQGZNAdgC+V5WiysiJCpWcQVbWMTJUSAYzBsADdIbj4kECERHHFJGQQARllzSj0EgA5tZPSuC1N0i2U1BHMLABZKWU10hU0y-IT5cxs7DBx8Jx9XMnc2e3bCCgF6OEpYMEwAEVQ-dHIwXEwAWVJMPwALADFsekwwZDDJKNFYiPiEsrLZVLqasvT8h9MlVURTC009SnT6pvT-ixpBItED9RzeFxuDywdBQGBeMS4SgCEhBbBgADuhwixxiEjOiASeh0ZVyslkaT0XCeZUKrwQGnkFkoFnJ8k0sgsCS48gMmhBYI6EN8PQ8gqgACV0CNumjMQRYfC9hBsYJhCd8aBzsTKKTWRSidTTKZaUV1Jp2al6oDTFx8rl0gK2uDnCLSL0YXC4HjKJBaKrIuq8XFCTq9eTKUaTXTis8tJRPgorgZzPUnQ4ha7uu6VNQICM+s78FKZX5nHsA7jESHEpYdBYtEDOfIKWbEtyvrSLLzZJcElyyumBp1IaK8wXxSWwL6IP7eEcg9WCQz4+GDVSaTG5FwEqlZOkNJ9SeyLUOXV0oeOwIWM5LpdOSKhkBB9pXF6ctYgytUE5od1d5DKBJ+1kNteX+XQyl5fsCnkJIz0zC8xzLMgBgAOUxKdKA2Uh8FYG8BiwvxcICeg32iJdPwZTldz-eRMhqdkDVA+kLm-XRynZKkG0+TRgVsUEi0IYVs3cbDy1YDCMSI9ZcKgfDJ3vbDZPwMByI1Gt+2AllG2A5tW1Y2pUhqBJTGST5+z0awBPFEc3TElDVkkzClJwvD8AI1gsL9TB1ODZdD11Ml1yjU1WP+a4+IsB5qT0NJTxsoS7NE3NHPQlzSxU+SPMUmUADMnwAaz8yjpFDDRUmeJlzBqUwklMNsEiPFk9EAuq4IeUz+US29ksvNLnOkpSCuQQr8IgcRpzwIJUEK6cRsKuyAEE-EwJ8So-MrqK5BMeQY2pmMavj0iC5I0kBXJ2UdHrhxE-qJPwKSsIW-D9jQZBkXoVYRqoBbltW9b5xxd9NS2jQLl0LhZCSVrWQKBrWLoyoMis-JSSg7rWl6u6xx8rzXKyhShKI8s1KBtUKM284qsoEDyjq+p93ZRqyji2mtGAg8ufkFsEOErNLzx4sCbkonbyIkiwDI8nA0p0HqZ52nWXpi4zIPTQ2zqa5jDqECLiMeQ+b63HZ0IkX3PYXLpzcmANvl9QakoE0zHSNImTgrlGvyUwnaaxouueKp+Kx26BZN0Rhcy0WcuJpSfLtzTjXkJXOXqVWmY1+kPh0PQaihxoN0xwTsbDnMZwju8o4tzzI+neOEnCCmNICoCgv1SNN0a+iTq4ICW37Ulc9do2cbLoXK+twmY-FpSSHIVAQgT5dORO6He-Alte70BHikaJkWRNd51YKP9TBH0uxPHmTo8t2OZVgUhF5lqsqbkaLkfX3PN9ZnfCXML4nj5AMK7d4tJz5ITHqbfGMo54L2gdeCauApq4BmnNSgL4Rh7H+mtA4z8QaJyginFWjN1ZtkyMnFscUNBpHaqycBo5IEVywrAtEtc2BvSfJ9b6T4qAYImGAbBgNG6y2blRLkq8oIGGJByA8ZRGoZC4KkfQrVobmChqzeh9lcxXyUugAQEAnJsMQcg1B049HjGQJgQRuDhEv3tokMyyc6ZpxIczekBgKjJCqsBDIyReyaJSuXM2Mo9EGOCdeDhH1hjcOQFQcx+wrHChWjgpeYj+yUDgrSbecVWochYrvJkzIqhGBAQ8Yk1kQ7ngYWJR8z59jwNgN0J8L5kBi3CU0upNiFxyxrIYH22h-xJmAqyMCxodBMjrBoKG5hyQBMvLUlpDSOmLOnu04iuBSKpK2vrHQvZ6i0h5tSS4egwLu10HBVGFoKRzLHAs+ptdGl3Naas+BYxH5k1sfg5cDZk7Q32eULx28wKGGZL8BsmQoJ9huWXJ5SzQmGP5j4NgxjqAoNmmYgQFjEmumSUI7pojtmkl2ZcaMhyfiszAkBZkeRMhmX-FZPQ0KalgGafciejT4WhyRZErhmAfqUHiZY6xWz4g5F3PuY0udcgciZCc+kgEki0wpKSH47w7TNBulUrRsp0QYgVF6LwkBmFgDlBiNpryFoisQGYH2toNAWEBFcbk3YwKZEUWZLJTM4rklkEy3MqJdX6qVEa2eJrdXmtrthSW0tPk9OXI0B4qRuyWCZLS0h8qLQVD0NaBQ9FiT7j9Tq+UipvQhvykVcak1UWmMoH9JJAMunAzjVRBNPsrLsm7NFF2bjiiFMUQMoC0r0imUHJqxC1T-VhuLQa5Uz0K0eR5dEvlPDa1FWFXg5tW1k1O3KLnaoGhaR1DAh8Huw6MhciMICUyhbx5BtLRAbyUCPKeiVIiZSckwBoQoB8-F-kqJARJEyO0PNLhVFZnI+kh8dD-A6lBQwBoz5jsRROoJjgS2GofXHJ97AX3ejfTbMAABhcQUDxBWoQMeWmacahmHJA6iDsYTS0VyLSBR1Je43uw3ejDj6K41wnu+1S5H6g6CJAaV2w68gGVjIBHQSc6IwXMr6pDxtGHDnQ7OrDfGrZRo2VLcjDYKi0lMK1UyO53gtjbMaK4lQ-wWlZIBYdDxOMV245pmU49PAabfQ-EIbnEQGd7rqPIpnbSmW7Pkt44HdBaw+LnC4XIbACVwKgF88AIi2WFL+0q8QAC0mdij5YCTQOgjAWD4Gy6-CjLxijDqdjzVqTqqg8zyH6yr9iLjXDXB3azW4SiK2HYBXIPIrImELdgfMYB2s1notDFkUzqiXRBX1+1PcoJQy5ESFGo7Knju1QNR6GUptNoJecbQPseJNgi3KgpKQaNJGqNyV2cFC0HagE9c22UoDTfjayftdori90cVUSLtZ96UJ+NFFGlhXsPXe0d1do1WA-aojzRW0UHW9ipIe3IR0mpOwPFyBQ9G0gufCSj7Z2824RkNJ3ViPJFEfCSJkC4Fl2Rk9eTbZHJ2-1bWeBUQC9E9IyMAn1i4iaKRaGzqSKo7wOeRpYfAin8Rs27mioYKyTqk5i62+zRoFIqp2flwJzlSuec5cQKrlkedNeqOeGL40Psplxj-HcIumWL6TtZc89lyuvzkl-IMhVIFTk8lpoBaG-cdzXpU6PZl3ulmwoq+bqr2RaZNT2dSaGoO2q7NUf2eiHbEO7eQ9qpP7KBX6IRXZP3iQeSieSA2JIs2UyUt5Oc20XJ6Lq+c7Hz3Ra9UabLcdpuvP4hXEin+TrweRkZpyCyfcT3njPCpMX4uXKUMBuncGzDMCp1muT6Pi3CA+mB+n0BEP8roqdjyJvDQMVt6Fq34Pmdw-EdjUPyIsfluzJKvbk1CfOCY9OrbNQwdeEdAwY3NzYfWvD1KjOqGjMyTkcoKzYCJxMVAwNeHIHbdfLVQJW9IfXfOubDWve4fpfsQEfcYnJIb8KzRvJVaocpIwd4RlJLIAA */
@@ -165,6 +243,14 @@ export const streamRoutingMachine = setup({
     editingSuggestionIndex: null,
     editedSuggestion: null,
     isRefreshing: false,
+    // Query stream mode context
+    queryStreamForm: null,
+    queryStreamSamples: {
+      esqlQuery: '',
+      documents: [],
+      documentsError: undefined,
+      isLoading: false,
+    },
   }),
   initial: 'initializing',
   states: {
@@ -293,7 +379,7 @@ export const streamRoutingMachine = setup({
               }),
             },
           },
-          states:{
+          states: {
             idle: {
               id: 'idle',
               on: {
@@ -351,7 +437,7 @@ export const streamRoutingMachine = setup({
                     'routingRule.change': {
                       actions: enqueueActions(({ enqueue, event }) => {
                         enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
-    
+
                         // Trigger samples collection only on condition change
                         if (event.routingRule.where) {
                           enqueue.sendTo('routingSamplesMachine', {
@@ -378,7 +464,7 @@ export const streamRoutingMachine = setup({
                     src: 'forkStream',
                     input: ({ context }) => {
                       const currentRoutingRule = selectCurrentRule(context);
-    
+
                       return {
                         definition: context.definition,
                         where: currentRoutingRule.where,
@@ -563,12 +649,12 @@ export const streamRoutingMachine = setup({
                     src: 'forkStream',
                     input: ({ context, event }) => {
                       assertEvent(event, 'routingRule.fork');
-    
+
                       const { routingRule } = event;
                       if (!routingRule) {
                         throw new Error('No routing rule to fork');
                       }
-    
+
                       return {
                         definition: context.definition,
                         destination: routingRule.destination,
@@ -605,7 +691,7 @@ export const streamRoutingMachine = setup({
                           type: 'updateEditedSuggestion',
                           params: { updates: { name: event.name } },
                         });
-    
+
                         // Update the preview name (without triggering refetch)
                         enqueue.sendTo('routingSamplesMachine', {
                           type: 'routingSamples.updatePreviewName',
@@ -619,7 +705,7 @@ export const streamRoutingMachine = setup({
                           type: 'updateEditedSuggestion',
                           params: { updates: { condition: event.condition } },
                         });
-    
+
                         // Update the condition for preview (triggers refetch)
                         enqueue.sendTo('routingSamplesMachine', {
                           type: 'routingSamples.updateCondition',
@@ -634,7 +720,7 @@ export const streamRoutingMachine = setup({
                             type: 'updateEditedSuggestion',
                             params: { updates: { condition: event.routingRule.where } },
                           });
-    
+
                           enqueue.sendTo('routingSamplesMachine', {
                             type: 'routingSamples.updateCondition',
                             condition: event.routingRule.where,
@@ -667,7 +753,7 @@ export const streamRoutingMachine = setup({
                 },
               },
             },
-          }
+          },
         },
         queryMode: {
           id: 'queryMode',
@@ -675,11 +761,99 @@ export const streamRoutingMachine = setup({
           on: {
             'childStreams.mode.changeToIngestMode': {
               target: '#ingestMode',
+              actions: [{ type: 'resetQueryStreamForm' }],
             },
           },
-          states:{
-            idle: {},
-          }
+          states: {
+            idle: {
+              id: 'queryModeIdle',
+              on: {
+                'queryStream.create': {
+                  guard: 'hasManagePrivileges',
+                  target: 'creating',
+                  actions: [{ type: 'initQueryStreamForm' }],
+                },
+              },
+            },
+            creating: {
+              id: 'queryModeCreating',
+              initial: 'editing',
+              invoke: {
+                id: 'queryStreamSamplesActor',
+                src: 'queryStreamSamples',
+                input: ({ context }) => ({
+                  esqlQuery: context.queryStreamSamples.esqlQuery,
+                }),
+              },
+              on: {
+                'queryStream.samplesReceived': {
+                  actions: [
+                    {
+                      type: 'storeQueryStreamSamples',
+                      params: ({ event }) => event,
+                    },
+                  ],
+                },
+                'queryStream.samplesError': {
+                  actions: [
+                    {
+                      type: 'storeQueryStreamSamplesError',
+                      params: ({ event }) => event,
+                    },
+                  ],
+                },
+                'queryStream.samplesLoading': {
+                  actions: [{ type: 'setQueryStreamSamplesLoading' }],
+                },
+              },
+              states: {
+                editing: {
+                  on: {
+                    'queryStream.cancel': {
+                      target: '#queryModeIdle',
+                      actions: [{ type: 'resetQueryStreamForm' }],
+                    },
+                    'queryStream.updateName': {
+                      actions: [{ type: 'updateQueryStreamName', params: ({ event }) => event }],
+                    },
+                    'queryStream.updateEsql': {
+                      // Restart the actor by transitioning out and back in
+                      target: 'editing',
+                      actions: [{ type: 'updateQueryStreamEsql', params: ({ event }) => event }],
+                      reenter: true,
+                    },
+                    'queryStream.save': {
+                      guard: 'canCreateQueryStream',
+                      target: 'saving',
+                    },
+                  },
+                },
+                saving: {
+                  invoke: {
+                    id: 'createQueryStreamActor',
+                    src: 'createQueryStream',
+                    input: ({ context }) => ({
+                      name: `${context.definition.stream.name}.${context.queryStreamForm!.name}`,
+                      esqlQuery: context.queryStreamForm!.esqlQuery,
+                    }),
+                    onDone: {
+                      target: '#queryModeIdle',
+                      actions: [
+                        { type: 'notifyQueryStreamSuccess' },
+                        { type: 'resetQueryStreamForm' },
+                        { type: 'setRefreshing' },
+                        { type: 'refreshDefinition' },
+                      ],
+                    },
+                    onError: {
+                      target: 'editing',
+                      actions: [{ type: 'notifyStreamFailure' }],
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -710,6 +884,8 @@ export const createStreamRoutingMachineImplementations = ({
         telemetryClient,
       })
     ),
+    createQueryStream: createQueryStreamActor({ streamsRepositoryClient }),
+    queryStreamSamples: createQueryStreamSamplesActor({ data, timeState$ }),
   },
   actions: {
     refreshDefinition,
@@ -717,6 +893,9 @@ export const createStreamRoutingMachineImplementations = ({
       toasts: core.notifications.toasts,
     }),
     notifyStreamFailure: createStreamFailureNofitier({
+      toasts: core.notifications.toasts,
+    }),
+    notifyQueryStreamSuccess: createQueryStreamSuccessNotifier({
       toasts: core.notifications.toasts,
     }),
   },

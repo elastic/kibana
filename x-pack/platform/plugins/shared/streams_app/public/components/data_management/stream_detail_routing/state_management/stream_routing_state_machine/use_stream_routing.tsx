@@ -129,6 +129,22 @@ export const useStreamRoutingEvents = () => {
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
       },
+      // Query stream events
+      createQueryStream: () => {
+        service.send({ type: 'queryStream.create' });
+      },
+      cancelQueryStreamCreation: () => {
+        service.send({ type: 'queryStream.cancel' });
+      },
+      updateQueryStreamName: (name: string) => {
+        service.send({ type: 'queryStream.updateName', name });
+      },
+      updateQueryStreamEsql: (esqlQuery: string) => {
+        service.send({ type: 'queryStream.updateEsql', esqlQuery });
+      },
+      saveQueryStream: () => {
+        service.send({ type: 'queryStream.save' });
+      },
     };
   }, [service]);
 };
@@ -185,4 +201,25 @@ export const useStreamSamplesSelector = <T,>(
   }
 
   return useSelector(routingSamplesRef, selector);
+};
+
+// Query stream selectors
+export const useQueryStreamForm = () => {
+  return useStreamsRoutingSelector((state) => state.context.queryStreamForm);
+};
+
+export const useQueryStreamSamples = () => {
+  return useStreamsRoutingSelector((state) => state.context.queryStreamSamples);
+};
+
+export const useIsQueryModeCreating = () => {
+  return useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: 'creating' } })
+  );
+};
+
+export const useIsQueryModeSaving = () => {
+  return useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: { creating: 'saving' } } })
+  );
 };
