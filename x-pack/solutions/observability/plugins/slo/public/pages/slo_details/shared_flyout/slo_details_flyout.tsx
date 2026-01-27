@@ -22,7 +22,7 @@ import {
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -39,6 +39,18 @@ export interface SLODetailsFlyoutProps {
   session?: 'start' | 'inherit';
   initialTabId?: SloTabId;
 }
+
+const TITLES = {
+  error: i18n.translate('xpack.slo.sloDetailsFlyout.errorTitle', {
+    defaultMessage: 'Unable to load SLO',
+  }),
+  notFound: i18n.translate('xpack.slo.sloDetailsFlyout.notFoundTitle', {
+    defaultMessage: 'SLO not found',
+  }),
+  loading: i18n.translate('xpack.slo.sloDetailsFlyout.loadingTitle', {
+    defaultMessage: 'Loading SLO...',
+  }),
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function SLODetailsFlyout({
@@ -75,21 +87,15 @@ export default function SLODetailsFlyout({
         ?.getRedirectUrl({ sloId: slo.id, instanceId: slo.instanceId })
     : undefined;
 
-  const getTitle = () => {
+  const title = useMemo(() => {
     if (isError) {
-      return i18n.translate('xpack.slo.sloDetailsFlyout.errorTitle', {
-        defaultMessage: 'Unable to load SLO',
-      });
+      return TITLES.error;
     }
     if (isNotFound) {
-      return i18n.translate('xpack.slo.sloDetailsFlyout.notFoundTitle', {
-        defaultMessage: 'SLO not found',
-      });
+      return TITLES.notFound;
     }
     if (isLoading) {
-      return i18n.translate('xpack.slo.sloDetailsFlyout.loadingTitle', {
-        defaultMessage: 'Loading SLO...',
-      });
+      return TITLES.loading;
     }
     if (slo && sloDetailsUrl) {
       return (
@@ -99,9 +105,9 @@ export default function SLODetailsFlyout({
       );
     }
     return slo?.name ?? '';
-  };
+  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl]);
 
-  const renderBody = () => {
+  const renderBody = useCallback(() => {
     if (isError) {
       return (
         <p>
@@ -152,9 +158,9 @@ export default function SLODetailsFlyout({
     }
 
     return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} />;
-  };
+  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId]);
 
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {
       return (
         <EuiButton data-test-subj="sloDetailsFlyoutCloseButton" onClick={onClose}>
@@ -166,13 +172,13 @@ export default function SLODetailsFlyout({
     }
 
     return <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />;
-  };
+  }, [isError, isNotFound, isLoading, slo, onClose]);
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size={size} session={session}>
       <EuiFlyoutHeader hasBorder={!slo}>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{getTitle()}</h2>
+          <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
