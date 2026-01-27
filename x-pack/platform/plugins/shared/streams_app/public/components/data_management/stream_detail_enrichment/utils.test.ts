@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { ALWAYS_CONDITION, convertUIStepsToDSL } from '@kbn/streamlang';
 import type { Streams } from '@kbn/streams-schema';
@@ -43,8 +43,7 @@ describe('utils', () => {
       });
 
       if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns).toEqual([{ value: '' }]);
       } else {
         throw new Error('Result does not contain patterns');
       }
@@ -73,8 +72,7 @@ describe('utils', () => {
       });
 
       if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns).toEqual([{ value: '' }]);
       } else {
         throw new Error('Result does not contain patterns');
       }
@@ -106,8 +104,7 @@ describe('utils', () => {
       });
 
       if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns).toEqual([{ value: '' }]);
       } else {
         throw new Error('Result does not contain patterns');
       }
@@ -139,8 +136,7 @@ describe('utils', () => {
       });
 
       if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns).toEqual([{ value: '' }]);
       } else {
         throw new Error('Result does not contain patterns');
       }

@@ -6,7 +6,7 @@
  */
 
 import type { AnyActorRef } from 'xstate5';
-import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
@@ -26,26 +26,20 @@ export interface StepInput {
   step: StreamlangStepWithUIAttributes;
   isNew?: boolean;
   isUpdated?: boolean;
+  grokCollection: GrokCollection;
 }
 
 export type StepParentActor = Omit<AnyActorRef, 'send'> & {
   send: (event: StepToParentEvent) => void;
 };
 
-export interface GrokProcessorResources {
-  grokExpressions: DraftGrokExpression[];
-}
-
-export type ProcessorResources = GrokProcessorResources;
-
 export interface StepContext {
   parentRef: StepParentActor;
   previousStep: StreamlangStepWithUIAttributes;
   step: StreamlangStepWithUIAttributes;
-  // Additional resources to interact with the processor, these aren't persisted but facilitate certain UI functionality.
-  resources?: ProcessorResources;
   isNew: boolean;
   isUpdated?: boolean;
+  grokCollection: GrokCollection;
 }
 
 export type StepEvent =
@@ -53,7 +47,6 @@ export type StepEvent =
   | {
       type: 'step.changeProcessor';
       step: StreamlangProcessorDefinition;
-      resources?: ProcessorResources;
     }
   | {
       type: 'step.changeCondition';

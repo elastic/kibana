@@ -10,6 +10,7 @@ import {
   isConditionBlock,
   type StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
+import type { GrokCollection } from '@kbn/grok-ui';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
 import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
@@ -29,6 +30,7 @@ export const spawnStep = (
   step: StreamlangStepWithUIAttributes,
   parentRef: StepParentActor,
   spawn: StepSpawner,
+  grokCollection: GrokCollection,
   options?: { isNew: boolean; isUpdated?: boolean }
 ) => {
   return spawn('stepMachine', {
@@ -38,6 +40,7 @@ export const spawnStep = (
       step,
       isNew: options?.isNew ?? false,
       isUpdated: options?.isUpdated,
+      grokCollection,
     },
   });
 };
