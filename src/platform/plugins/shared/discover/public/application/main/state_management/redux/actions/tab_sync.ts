@@ -309,7 +309,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       timefilerUnsubscribe.unsubscribe();
     };
 
-    tabRuntimeState.onSubscribe({ unsubscribeFn });
+    tabRuntimeState.unsubscribeFn$.next(unsubscribeFn);
   };
 
 /**
@@ -318,5 +318,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function stopSyncingThunkFn(dispatch, getState, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    tabRuntimeState.unsubscribe();
+    const unsubscribeFn = tabRuntimeState.unsubscribeFn$.getValue();
+    unsubscribeFn?.();
+    tabRuntimeState.unsubscribeFn$.next(undefined);
   };

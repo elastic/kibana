@@ -38,6 +38,7 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
+  unsubscribeFn: (() => void) | undefined;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -46,10 +47,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'> & {
-  onSubscribe: ({ unsubscribeFn }: { unsubscribeFn: () => void }) => void;
-  unsubscribe: () => void;
-};
+export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -84,7 +82,6 @@ export const createTabRuntimeState = ({
   };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = ebtManager.createScopedEBTManager();
-  let unsubscribeFn: (() => void) | undefined;
 
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
@@ -100,13 +97,7 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    onSubscribe: ({ unsubscribeFn: fn }: { unsubscribeFn: () => void }) => {
-      unsubscribeFn = fn;
-    },
-    unsubscribe: () => {
-      unsubscribeFn?.();
-      unsubscribeFn = undefined;
-    },
+    unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
 

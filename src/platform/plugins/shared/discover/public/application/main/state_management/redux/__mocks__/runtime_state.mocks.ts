@@ -22,8 +22,6 @@ import {
 export function getTabRuntimeStateMock(
   attrs: Partial<ReactiveTabRuntimeState> = {}
 ): ReactiveTabRuntimeState {
-  let unsubscribeFn: (() => void) | undefined;
-
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
@@ -33,14 +31,8 @@ export function getTabRuntimeStateMock(
     scopedProfilesManager$: new BehaviorSubject({} as ScopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
-    onSubscribe: ({ unsubscribeFn: fn }: { unsubscribeFn: () => void }) => {
-      unsubscribeFn = fn;
-    },
-    unsubscribe: () => {
-      unsubscribeFn?.();
-      unsubscribeFn = undefined;
-    },
   };
 }
 

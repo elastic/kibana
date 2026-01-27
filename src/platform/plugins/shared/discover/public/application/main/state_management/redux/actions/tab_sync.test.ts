@@ -21,19 +21,21 @@ describe('tab_sync actions', () => {
 
   describe('initializeAndSync', () => {
     it('should initialize and sync tab state', async () => {
+      const previousUnsubscribeFn = jest.fn();
       const { tabId, initializeSingleTab, runtimeStateManager } = await createReduxTestSetup();
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      tabRuntimeState.unsubscribeFn$.next(previousUnsubscribeFn);
+
       const initializeAndSyncSpy = jest.spyOn(tabSyncApi, 'initializeAndSync');
-      const unsubscribeSpy = jest.spyOn(tabRuntimeState, 'unsubscribe');
-      const onSubscribeSpy = jest.spyOn(tabRuntimeState, 'onSubscribe');
+      const stopSyncingSpy = jest.spyOn(tabSyncApi, 'stopSyncing');
 
       await initializeSingleTab({ tabId });
 
       expect(initializeAndSyncSpy).toHaveBeenCalledWith({ tabId });
-      expect(unsubscribeSpy).toHaveBeenCalled();
-      expect(onSubscribeSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ unsubscribeFn: expect.any(Function) })
-      );
+      expect(stopSyncingSpy).toHaveBeenCalledWith({ tabId });
+      expect(previousUnsubscribeFn).toHaveBeenCalled();
+      expect(tabRuntimeState.unsubscribeFn$.getValue()).toStrictEqual(expect.any(Function));
+      expect(tabRuntimeState.unsubscribeFn$.getValue()).not.toBe(previousUnsubscribeFn);
     });
 
     it('should throw error when state container is not initialized', async () => {
@@ -58,11 +60,9 @@ describe('tab_sync actions', () => {
 
       const tabRuntimeState = getTabRuntimeStateMock();
       runtimeStateManager.tabs.byId[tabId] = tabRuntimeState;
-      const unsubscribeSpy = jest.spyOn(tabRuntimeState, 'unsubscribe');
 
       const mockUnsubscribe = jest.fn();
-
-      tabRuntimeState.onSubscribe({ unsubscribeFn: mockUnsubscribe });
+      tabRuntimeState.unsubscribeFn$.next(mockUnsubscribe);
 
       internalState.dispatch(
         stopSyncing({
@@ -70,8 +70,8 @@ describe('tab_sync actions', () => {
         })
       );
 
-      expect(unsubscribeSpy).toHaveBeenCalled();
       expect(mockUnsubscribe).toHaveBeenCalled();
+      expect(tabRuntimeState.unsubscribeFn$.getValue()).toBeUndefined();
     });
   });
 });
