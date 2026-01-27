@@ -14,6 +14,7 @@ import type {
   FramePublicAPI,
   VisualizationState,
   SupportedDatasourceId,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -31,11 +32,13 @@ import { operationDefinitionMap } from '../../../datasources/form_based/operatio
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector } from '../../../state_management';
+import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 interface EsqlConversionSettings {
   isConvertToEsqlButtonDisabled: boolean;
   convertToEsqlButtonTooltip: string;
   convertibleLayers: ConvertibleLayer[];
+  attributes?: TypedLensSerializedState['attributes'];
 }
 
 const getEsqlConversionDisabledSettings = (
@@ -49,11 +52,13 @@ const getEsqlConversionDisabledSettings = (
 export const useEsqlConversionCheck = (
   showConvertToEsqlButton: boolean,
   {
+    attributes,
     datasourceId,
     layerIds,
     visualization,
     activeVisualization,
   }: {
+    attributes: TypedLensSerializedState['attributes'] | undefined;
     datasourceId: SupportedDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
@@ -75,11 +80,7 @@ export const useEsqlConversionCheck = (
   return useMemo(() => {
     const datasourceState = datasourceStates[datasourceId]?.state as FormBasedPrivateState;
 
-    if (!showConvertToEsqlButton) {
-      return getEsqlConversionDisabledSettings();
-    }
-
-    if (!activeVisualization || !visualization?.state) {
+    if (!showConvertToEsqlButton || !activeVisualization || !visualization?.state || !attributes) {
       return getEsqlConversionDisabledSettings();
     }
 
@@ -149,33 +150,48 @@ export const useEsqlConversionCheck = (
       return getEsqlConversionDisabledSettings(tooltipMessage);
     }
 
+    const convertibleLayers: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: layerTypes.DATA,
+        query: esqlLayer.esql,
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: esqlLayer.esAggsIdMap,
+          partialRows: esqlLayer.partialRows,
+        },
+      },
+    ];
+
+    const newAttributes = convertFormBasedToTextBasedLayer({
+      layersToConvert: convertibleLayers,
+      attributes,
+      visualizationState: visualization.state,
+      datasourceStates,
+      framePublicAPI,
+    });
+
+    if (newAttributes === undefined) {
+      return getEsqlConversionDisabledSettings();
+    }
+
     return {
       isConvertToEsqlButtonDisabled: false,
       convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
         defaultMessage: 'Convert visualization to ES|QL',
       }),
-      convertibleLayers: [
-        {
-          id: layerId,
-          icon: 'layers',
-          name: '',
-          type: layerTypes.DATA,
-          query: esqlLayer.esql,
-          isConvertibleToEsql: true,
-          conversionData: {
-            esAggsIdMap: esqlLayer.esAggsIdMap,
-            partialRows: esqlLayer.partialRows,
-          },
-        },
-      ],
+      convertibleLayers,
+      attributes: newAttributes,
     };
   }, [
     activeVisualization,
+    attributes,
     coreStart.uiSettings,
     datasourceId,
     datasourceStates,
-    framePublicAPI.dataViews.indexPatterns,
-    framePublicAPI.dateRange,
+    framePublicAPI,
     layerIds,
     showConvertToEsqlButton,
     startDependencies.data.nowProvider,

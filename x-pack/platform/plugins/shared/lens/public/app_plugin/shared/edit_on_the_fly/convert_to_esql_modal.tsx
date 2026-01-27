@@ -76,9 +76,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
    * Callback invoked when user confirms the conversion.
-   * @param params - Object containing array of ConvertibleLayer objects selected for conversion
    */
-  onConfirm: (params: { layersToConvert: ConvertibleLayer[] }) => void;
+  onConfirm: () => void;
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -220,15 +219,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
         defaultMessage: 'Cancel',
       })}
-      onConfirm={() => {
-        let layersToConvert: ConvertibleLayer[] = [];
-        if (layers.length === 1 && layers[0].isConvertibleToEsql) {
-          layersToConvert = [layers[0]];
-        } else if (layers.length > 1 && selectedItems.length > 0) {
-          layersToConvert = selectedItems;
-        }
-        onConfirm({ layersToConvert });
-      }}
+      onConfirm={onConfirm}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
         defaultMessage: 'Switch to query mode',
       })}

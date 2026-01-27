@@ -48,9 +48,8 @@ import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
-import { ConvertToEsqlModal, type ConvertibleLayer } from './convert_to_esql_modal';
+import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
-import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -194,10 +193,11 @@ export function LensEditConfigurationFlyout({
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
-  const currentAttributes = useCurrentAttributes({
-    textBasedMode,
-    initialAttributes: attributes,
-  });
+  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
+    useCurrentAttributes({
+      textBasedMode,
+      initialAttributes: attributes,
+    });
 
   const onApply = useCallback(() => {
     if (visualization.activeId == null || !currentAttributes) {
@@ -322,50 +322,37 @@ export function LensEditConfigurationFlyout({
     return isDevMode && !textBasedMode;
   }, [isDevMode, textBasedMode]);
 
-  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
-    useEsqlConversionCheck(
-      showConvertToEsqlButton,
-      { datasourceId, layerIds, visualization, activeVisualization },
-      { framePublicAPI, coreStart, startDependencies }
-    );
+  const {
+    isConvertToEsqlButtonDisabled,
+    convertToEsqlButtonTooltip,
+    convertibleLayers,
+    attributes: esqlConvertAttributes,
+  } = useEsqlConversionCheck(
+    showConvertToEsqlButton,
+    { attributes: currentAttributes, datasourceId, layerIds, visualization, activeVisualization },
+    { framePublicAPI, coreStart, startDependencies }
+  );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const closeModal = useCallback(() => setIsModalVisible(false), []);
   const showModal = useCallback(() => setIsModalVisible(true), []);
 
-  const handleConvertToEsql = useCallback(
-    ({ layersToConvert }: { layersToConvert: ConvertibleLayer[] }) => {
-      const newAttributes = convertFormBasedToTextBasedLayer({
-        layersToConvert,
-        attributes,
-        visualizationState: visualization.state,
-        datasourceStates,
-        framePublicAPI,
-      });
+  const handleConvertToEsql = useCallback(() => {
+    closeModal();
 
-      closeModal();
+    // This is just to satisfy TS, in practice we don't make the handler available
+    // unless esqlConvertAttributes is defined
+    if (!esqlConvertAttributes) return;
 
-      if (newAttributes) {
-        // Update local attributes state - this triggers re-render of get_edit_lens_configuration
-        // which will derive the new datasourceId ('textBased') from the updated attributes
-        // and recreate the Redux store with the correct datasource
-        setCurrentAttributes?.(newAttributes);
+    // Update local attributes state - this triggers re-render of get_edit_lens_configuration
+    // which will derive the new datasourceId ('textBased') from the updated attributes
+    // and recreate the Redux store with the correct datasource
+    setCurrentAttributes?.(esqlConvertAttributes);
 
-        // Also update the embeddable's attributes for persistence
-        updateSuggestion?.(newAttributes);
-      }
-    },
-    [
-      attributes,
-      closeModal,
-      datasourceStates,
-      framePublicAPI,
-      setCurrentAttributes,
-      updateSuggestion,
-      visualization.state,
-    ]
-  );
+    // Also update the embeddable's attributes for persistence
+    updateSuggestion?.(esqlConvertAttributes);
+  }, [closeModal, setCurrentAttributes, updateSuggestion, esqlConvertAttributes]);
 
   if (isLoading) return null;
 
@@ -613,7 +600,7 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {isModalVisible ? (
+          {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal
               layers={convertibleLayers}
               onCancel={closeModal}
