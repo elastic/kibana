@@ -8,9 +8,10 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
+import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import type { PromptLayoutVariant } from '../../common/prompt/layout';
 
 export interface AddLlmConnectionPromptProps {
   variant?: PromptLayoutVariant;
@@ -45,26 +46,14 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
     </EuiButtonEmpty>
   );
 
+  const brainImage =
+    colorMode === 'LIGHT' ? `${assetBasePath}/brain_light.svg` : `${assetBasePath}/brain_dark.svg`;
+
   return (
-    <PromptLayout
+    <ErrorPrompt
       variant={variant}
-      imageSrc={
-        colorMode === 'LIGHT'
-          ? `${assetBasePath}/brain_light.svg`
-          : `${assetBasePath}/brain_dark.svg`
-      }
-      title={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.addLlm.title"
-          defaultMessage="No Large Language Model detected"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.addLlm.description"
-          defaultMessage="Select a model to integrate with your chat experience. You can also set up your connection."
-        />
-      }
+      errorType="ADD_LLM_CONNECTION"
+      imageSrc={brainImage}
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}
     />

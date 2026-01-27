@@ -16,6 +16,7 @@ import type {
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
+import { LogsExtractionClient } from './domain/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -31,9 +32,16 @@ export async function createRequestHandlerContext({
   request,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [_, startPlugins] = await coreSetup.getStartServices();
+  const [, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
+
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+
+  const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+    core.savedObjects.client,
+    core.elasticsearch.client.asInternalUser,
+    request
+  );
 
   return {
     core,
@@ -50,5 +58,11 @@ export async function createRequestHandlerContext({
       namespace,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    logsExtractionClient: new LogsExtractionClient(
+      logger,
+      namespace,
+      core.elasticsearch.client.asCurrentUser,
+      dataViewsService
+    ),
   };
 }

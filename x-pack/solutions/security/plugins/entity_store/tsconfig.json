@@ -27,5 +27,9 @@
     "@kbn/logging-mocks",
     "@kbn/spaces-plugin",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/data-views-plugin",
+    "@kbn/es-types",
+    "@kbn/security-plugin-types-server",
+    "@kbn/encrypted-saved-objects-plugin",
   ]
 }
