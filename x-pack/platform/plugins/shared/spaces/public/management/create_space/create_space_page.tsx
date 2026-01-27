@@ -145,7 +145,7 @@ export class CreateSpacePage extends Component<Props, State> {
   }
 
   private canEditProjectRouting(): boolean {
-    return this.props.capabilities.management?.kibana?.read_project_routing ?? false;
+    return this.props.capabilities.project_routing?.manage_space_default ?? false;
   }
 
   public render() {
