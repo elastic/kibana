@@ -653,6 +653,23 @@ describe('registerRoutes', () => {
         },
       ]);
 
+      const mockDataSourcesForBulkDelete = [
+        { id: 'ds-1', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+        { id: 'ds-2', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+      ];
+      const mockFinder = {
+        find: jest.fn().mockImplementation(async function* () {
+          yield {
+            saved_objects: mockDataSourcesForBulkDelete,
+            total: 2,
+            page: 1,
+            per_page: 1000,
+          };
+        }),
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+      mockSavedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder as any);
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.delete.mock.calls[0][1];
@@ -666,6 +683,7 @@ describe('registerRoutes', () => {
           taskType: 'data-sources:bulk-delete-task',
           scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
         }),
         expect.objectContaining({
           request: expect.any(Object),
@@ -733,6 +751,23 @@ describe('registerRoutes', () => {
         },
       ]);
 
+      const mockDataSourcesForBulkDelete = [
+        { id: 'ds-1', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+        { id: 'ds-2', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+      ];
+      const mockFinder = {
+        find: jest.fn().mockImplementation(async function* () {
+          yield {
+            saved_objects: mockDataSourcesForBulkDelete,
+            total: 2,
+            page: 1,
+            per_page: 1000,
+          };
+        }),
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+      mockSavedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder as any);
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.delete.mock.calls[0][1];
@@ -741,6 +776,12 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
+        }),
+        expect.any(Object)
+      );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -917,9 +958,28 @@ describe('DELETE /api/data_sources', () => {
       },
     ]);
 
+    const mockDataSourcesForBulkDelete = [
+      { id: 'ds-1', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+      { id: 'ds-2', type: DATA_SOURCE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+    ];
+    const mockFinder = {
+      find: jest.fn().mockImplementation(async function* () {
+        yield {
+          saved_objects: mockDataSourcesForBulkDelete,
+          total: 2,
+          page: 1,
+          per_page: 1000,
+        };
+      }),
+      close: jest.fn().mockResolvedValue(undefined),
+    };
     context = {
       core: Promise.resolve({
-        savedObjects: { client: {} },
+        savedObjects: {
+          client: {
+            createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder as any),
+          },
+        },
       }),
     } as unknown as jest.Mocked<RequestHandlerContext>;
 
@@ -957,6 +1017,7 @@ describe('DELETE /api/data_sources', () => {
           taskType: 'data-sources:bulk-delete-task',
           scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
         }),
         expect.objectContaining({
           request: expect.any(Object),
@@ -982,9 +1043,12 @@ describe('DELETE /api/data_sources', () => {
 
       await routeHandler(context, mockRequest, mockResponse);
 
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(expect.any(Object), {
-        request: mockRequest,
-      });
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
+        }),
+        { request: mockRequest }
+      );
     });
   });
 
@@ -1018,10 +1082,15 @@ describe('DELETE /api/data_sources', () => {
 
       await routeHandler(context, httpServerMock.createKibanaRequest(), mockResponse);
 
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
+        }),
+        expect.any(Object)
+      );
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to schedule bulk delete task')
       );
-
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {

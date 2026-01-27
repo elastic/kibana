@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { BulkDeleteTask, TYPE, type BulkDeleteTaskState } from './bulk_delete_task';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
@@ -94,22 +95,15 @@ describe('BulkDeleteTask', () => {
     };
   };
 
-  const createMockPointInTimeFinder = (dataSources: any[]) => {
-    const mockFinder = {
-      find: jest.fn().mockImplementation(async function* () {
-        yield {
-          saved_objects: dataSources,
-          total: dataSources.length,
-          page: 1,
-          per_page: 100,
-        };
-      }),
-      close: jest.fn().mockResolvedValue(undefined),
-    };
-
-    mockSavedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder as any);
-
-    return mockFinder;
+  const mockGetForDataSources = (dataSources: any[]) => {
+    const byId = new Map(dataSources.map((ds) => [ds.id, ds]));
+    mockSavedObjectsClient.get = jest.fn().mockImplementation((type: string, id: string) => {
+      const ds = byId.get(id);
+      if (!ds) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return Promise.resolve(ds);
+    });
   };
 
   beforeEach(() => {
@@ -145,7 +139,10 @@ describe('BulkDeleteTask', () => {
     let mockTaskInstance: any;
     let mockFakeRequest: any;
 
-    const setupTaskRunner = (initialState?: Partial<BulkDeleteTaskState>) => {
+    const setupTaskRunner = (
+      initialState?: Partial<BulkDeleteTaskState>,
+      params: { dataSourceIds: string[] } = { dataSourceIds: [] }
+    ) => {
       const { mockCoreSetup } = createMockCoreSetup();
       const mockTaskManager = createMockTaskManager();
 
@@ -162,6 +159,7 @@ describe('BulkDeleteTask', () => {
       mockTaskInstance = {
         id: 'test-task-id',
         state: initialState || { isDone: false, deletedCount: 0, errors: [] },
+        params,
       };
 
       mockFakeRequest = httpServerMock.createKibanaRequest();
@@ -194,8 +192,8 @@ describe('BulkDeleteTask', () => {
           ['ksc-2']
         );
 
-        createMockPointInTimeFinder([dataSource1, dataSource2]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource1, dataSource2]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1', 'ds-2'] });
 
         mockDeleteDataSourceAndRelatedResources
           .mockResolvedValueOnce({
@@ -249,8 +247,8 @@ describe('BulkDeleteTask', () => {
       it('should delete tools via deleteDataSourceAndRelatedResources', async () => {
         const dataSource = createMockDataSource('ds-1', 'Source 1', 'github', [], ['tool-1'], []);
 
-        createMockPointInTimeFinder([dataSource]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1'] });
 
         mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
           success: true,
@@ -277,8 +275,8 @@ describe('BulkDeleteTask', () => {
           []
         );
 
-        createMockPointInTimeFinder([dataSource]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1'] });
 
         mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
           success: true,
@@ -298,8 +296,8 @@ describe('BulkDeleteTask', () => {
       it('should delete stack connectors via deleteDataSourceAndRelatedResources', async () => {
         const dataSource = createMockDataSource('ds-1', 'Source 1', 'github', [], [], ['ksc-1']);
 
-        createMockPointInTimeFinder([dataSource]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1'] });
 
         mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
           success: true,
@@ -331,8 +329,8 @@ describe('BulkDeleteTask', () => {
           ['ksc-1', 'ksc-2', 'ksc-3']
         );
 
-        createMockPointInTimeFinder([dataSource]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1'] });
 
         mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
           success: true,
@@ -374,8 +372,8 @@ describe('BulkDeleteTask', () => {
           ['ksc-2']
         );
 
-        createMockPointInTimeFinder([dataSource1, dataSource2]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource1, dataSource2]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1', 'ds-2'] });
 
         mockDeleteDataSourceAndRelatedResources
           .mockResolvedValueOnce({
@@ -411,8 +409,8 @@ describe('BulkDeleteTask', () => {
       it('should handle errors when deleteDataSourceAndRelatedResources throws', async () => {
         const dataSource = createMockDataSource('ds-1', 'Source 1', 'github', [], [], []);
 
-        createMockPointInTimeFinder([dataSource]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1'] });
 
         const error = new Error('Deletion failed');
         mockDeleteDataSourceAndRelatedResources.mockRejectedValue(error);
@@ -435,8 +433,8 @@ describe('BulkDeleteTask', () => {
         const dataSource1 = createMockDataSource('ds-1', 'Source 1', 'github', [], [], []);
         const dataSource2 = createMockDataSource('ds-2', 'Source 2', 'notion', [], [], []);
 
-        createMockPointInTimeFinder([dataSource1, dataSource2]);
-        setupTaskRunner();
+        mockGetForDataSources([dataSource1, dataSource2]);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1', 'ds-2'] });
 
         mockDeleteDataSourceAndRelatedResources
           .mockRejectedValueOnce(new Error('Error 1'))
@@ -456,15 +454,15 @@ describe('BulkDeleteTask', () => {
     });
 
     describe('batch processing', () => {
-      it('should process multiple data sources in a batch', async () => {
+      it('should process multiple data sources by id', async () => {
         const dataSources = [
           createMockDataSource('ds-1', 'Source 1', 'github', [], [], []),
           createMockDataSource('ds-2', 'Source 2', 'notion', [], [], []),
           createMockDataSource('ds-3', 'Source 3', 'github', [], [], []),
         ];
 
-        createMockPointInTimeFinder(dataSources);
-        setupTaskRunner();
+        mockGetForDataSources(dataSources);
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1', 'ds-2', 'ds-3'] });
 
         mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
           success: true,
@@ -477,59 +475,17 @@ describe('BulkDeleteTask', () => {
         expect(result.state.deletedCount).toBe(3);
       });
 
-      it('should process multiple batches from point-in-time finder', async () => {
-        const batch1 = [
-          createMockDataSource('ds-1', 'Source 1', 'github', [], [], []),
-          createMockDataSource('ds-2', 'Source 2', 'notion', [], [], []),
-        ];
-        const batch2 = [createMockDataSource('ds-3', 'Source 3', 'github', [], [], [])];
-
-        const mockFinder = {
-          find: jest.fn().mockImplementation(async function* () {
-            yield {
-              saved_objects: batch1,
-              total: 3,
-              page: 1,
-              per_page: 100,
-            };
-            yield {
-              saved_objects: batch2,
-              total: 3,
-              page: 2,
-              per_page: 100,
-            };
-          }),
-          close: jest.fn().mockResolvedValue(undefined),
-        };
-
-        mockSavedObjectsClient.createPointInTimeFinder = jest
-          .fn()
-          .mockReturnValue(mockFinder as any);
-
-        setupTaskRunner();
-
-        mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
-          success: true,
-          fullyDeleted: true,
-        });
-
-        const result = await taskRunner.run();
-
-        expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(3);
-        expect(result.state.deletedCount).toBe(3);
-        expect(mockFinder.close).toHaveBeenCalled();
-      });
     });
 
     describe('edge cases', () => {
-      it('should handle empty data sources list', async () => {
-        createMockPointInTimeFinder([]);
-        setupTaskRunner();
+      it('should handle empty data source ids list', async () => {
+        setupTaskRunner(undefined, { dataSourceIds: [] });
 
         const result = await taskRunner.run();
 
+        expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
         expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
-        expect(result.state).toEqual({
+        expect(result!.state).toEqual({
           isDone: true,
           deletedCount: 0,
           errors: [],
@@ -537,7 +493,10 @@ describe('BulkDeleteTask', () => {
       });
 
       it('should return early if task is already done', async () => {
-        setupTaskRunner({ isDone: true, deletedCount: 5, errors: [] });
+        setupTaskRunner(
+          { isDone: true, deletedCount: 5, errors: [] },
+          { dataSourceIds: ['ds-1'] }
+        );
 
         const result = await taskRunner.run();
 
@@ -564,6 +523,7 @@ describe('BulkDeleteTask', () => {
           taskInstance: {
             id: 'test-task-id',
             state: { isDone: false, deletedCount: 0, errors: [] },
+            params: { dataSourceIds: ['ds-1'] },
           },
           fakeRequest: undefined,
           abortController: new AbortController(),
@@ -575,17 +535,37 @@ describe('BulkDeleteTask', () => {
         expect(result).toBeUndefined();
       });
 
-      it('should close point-in-time finder even if errors occur', async () => {
-        const dataSource = createMockDataSource('ds-1', 'Source 1', 'github', [], [], []);
-        const mockFinder = createMockPointInTimeFinder([dataSource]);
+      it('should skip id when get returns 404 (already deleted)', async () => {
+        const dataSource1 = createMockDataSource('ds-1', 'Source 1', 'github', [], [], []);
+        mockGetForDataSources([dataSource1]);
+        mockSavedObjectsClient.get = jest.fn().mockImplementation((type: string, id: string) => {
+          if (id === 'ds-1') return Promise.resolve(dataSource1);
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        });
 
-        setupTaskRunner();
+        setupTaskRunner(undefined, { dataSourceIds: ['ds-1', 'ds-2'] });
 
-        mockDeleteDataSourceAndRelatedResources.mockRejectedValue(new Error('Deletion failed'));
+        mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
+          success: true,
+          fullyDeleted: true,
+        });
 
-        await taskRunner.run();
+        const result = await taskRunner.run();
 
-        expect(mockFinder.close).toHaveBeenCalled();
+        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'ds-1'
+        );
+        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'ds-2'
+        );
+        expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(1);
+        expect(result!.state).toEqual({
+          isDone: true,
+          deletedCount: 1,
+          errors: [],
+        });
       });
     });
   });

@@ -309,6 +309,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
     },
     async (context, request, response) => {
       try {
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
         const [, plugins] = await getStartServices();
         const taskManager = plugins.taskManager;
 
@@ -322,6 +325,24 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
+        // Snapshot all data source IDs at queue time so the task only deletes these;
+        // any datasource created after the user clicks "delete all" is left intact.
+        const dataSourceIds: string[] = [];
+        const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+          fields: [],
+        });
+        try {
+          for await (const response of finder.find()) {
+            for (const so of response.saved_objects) {
+              dataSourceIds.push(so.id);
+            }
+          }
+        } finally {
+          await finder.close();
+        }
+
         const taskId = v4();
         await taskManager.ensureScheduled(
           {
@@ -330,7 +351,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
             scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
             state: { isDone: false, deletedCount: 0, errors: [] },
             runAt: new Date(Date.now() + 3 * 1000),
-            params: {},
+            params: { dataSourceIds },
           },
           { request }
         );

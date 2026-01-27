@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
   DataSourcesServerSetupDependencies,
@@ -21,6 +22,10 @@ import {
 } from '../../common/constants';
 
 export const TYPE = 'data-sources:bulk-delete-task';
+
+export interface BulkDeleteTaskParams {
+  dataSourceIds: string[];
+}
 
 export interface BulkDeleteTaskState {
   isDone: boolean;
@@ -66,6 +71,20 @@ export class BulkDeleteTask {
                 return;
               }
 
+              const params = taskInstance.params as BulkDeleteTaskParams;
+              const dataSourceIds = params?.dataSourceIds ?? [];
+              if (dataSourceIds.length === 0) {
+                this.logger.debug('Bulk delete task has no data source IDs to delete');
+                return {
+                  runAt: new Date(Date.now() + 60 * 60 * 1000),
+                  state: {
+                    isDone: true,
+                    deletedCount: 0,
+                    errors: [],
+                  } satisfies BulkDeleteTaskState,
+                };
+              }
+
               const [coreStart, pluginStart] = await core.getStartServices();
 
               const savedObjectsClient = coreStart.savedObjects.getScopedClient(fakeRequest);
@@ -80,55 +99,44 @@ export class BulkDeleteTask {
               const errors: Array<{ dataSourceId: string; error: string }> = [];
 
               try {
-                const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
-                  type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-                  perPage: 100,
-                });
-
-                try {
-                  for await (const response of finder.find()) {
-                    const dataSources = response.saved_objects;
-
-                    // Process each data source individually to handle partial failures
-                    for (const dataSource of dataSources) {
-                      try {
-                        const result = await deleteDataSourceAndRelatedResources({
-                          dataSource,
-                          savedObjectsClient,
-                          actionsClient,
-                          toolRegistry,
-                          workflowManagement,
-                          request: fakeRequest,
-                          logger: this.logger,
-                        });
-
-                        if (result.fullyDeleted) {
-                          deletedCount++;
-                        } else {
-                          // Partial deletion - saved object was updated with remaining resources
-                          errors.push({
-                            dataSourceId: dataSource.id,
-                            error: PARTIALLY_DELETED_ERROR,
-                          });
-                        }
-                      } catch (error) {
-                        const errorMessage = (error as Error).message;
-                        this.logger.error(
-                          `Failed to delete data source ${dataSource.id}: ${errorMessage}`
-                        );
-                        errors.push({
-                          dataSourceId: dataSource.id,
-                          error: errorMessage,
-                        });
-                      }
-                    }
-
-                    this.logger.debug(
-                      `Processed batch: ${deletedCount} fully deleted, ${errors.length} errors`
+                for (const id of dataSourceIds) {
+                  try {
+                    const dataSource = await savedObjectsClient.get<DataSourceAttributes>(
+                      DATA_SOURCE_SAVED_OBJECT_TYPE,
+                      id
                     );
+
+                    const result = await deleteDataSourceAndRelatedResources({
+                      dataSource,
+                      savedObjectsClient,
+                      actionsClient,
+                      toolRegistry,
+                      workflowManagement,
+                      request: fakeRequest,
+                      logger: this.logger,
+                    });
+
+                    if (result.fullyDeleted) {
+                      deletedCount++;
+                    } else {
+                      errors.push({
+                        dataSourceId: id,
+                        error: PARTIALLY_DELETED_ERROR,
+                      });
+                    }
+                  } catch (error) {
+                    if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+                      // Already deleted (e.g. by another process); skip
+                      this.logger.debug(`Data source ${id} not found, skipping`);
+                      continue;
+                    }
+                    const errorMessage = (error as Error).message;
+                    this.logger.error(`Failed to delete data source ${id}: ${errorMessage}`);
+                    errors.push({
+                      dataSourceId: id,
+                      error: errorMessage,
+                    });
                   }
-                } finally {
-                  await finder.close();
                 }
 
                 this.logger.info(
