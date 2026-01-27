@@ -79,9 +79,7 @@ export function initTracing({
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  lateBindingProcessor.register(
-    new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }])
-  );
+  lateBindingProcessor.register(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
 
   const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 
