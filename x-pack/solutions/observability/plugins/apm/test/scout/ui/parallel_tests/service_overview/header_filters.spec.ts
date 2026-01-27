@@ -61,6 +61,9 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
         testData.SERVICE_OPBEANS_NODE
       );
+      await expect(page.getByTestId('instanceActionsButton_opbeans-node-prod-1')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     await test.step('Filter by service.name with special characters', async () => {
@@ -75,6 +78,10 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
     await test.step('Verify URL contains special service name', async () => {
       await expect(page.getByTestId('querySubmitButton')).toHaveText('Refresh');
+
+      await expect(
+        page.getByTestId('transactionBreakdownChart').getByText('No data to display')
+      ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
 
       await page.waitForURL(
         (url) => {
