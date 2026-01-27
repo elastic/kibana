@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import { type FtrConfigProviderContext, type GenericFtrProviderContext } from '@kbn/test';
+import { defineDockerServersConfig, dockerRegistryPort, packageRegistryDocker } from '@kbn/test';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -52,6 +53,18 @@ export default async function createTestConfig({
 
         return logsEsClient;
       },
+    },
+    dockerServers: defineDockerServersConfig({
+      registry: packageRegistryDocker,
+    }),
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...(dockerRegistryPort
+          ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+          : []),
+      ],
     },
     pageObjects,
   };
