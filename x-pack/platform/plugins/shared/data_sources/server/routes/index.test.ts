@@ -153,7 +153,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { page: 1, per_page: DEFAULT_ITEMS_PER_PAGE },
+        query: { from: 0, size: DEFAULT_ITEMS_PER_PAGE },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -182,7 +182,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { page: 1, per_page: DEFAULT_ITEMS_PER_PAGE },
+        query: { from: 0, size: DEFAULT_ITEMS_PER_PAGE },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -215,7 +215,7 @@ describe('registerRoutes', () => {
         updated_at: '2024-01-01T00:00:00.000Z',
       });
 
-      it('should use provided page and per_page values', async () => {
+      it('should use provided from and size values', async () => {
         const mockFindResult = {
           page: 2,
           per_page: 10,
@@ -232,7 +232,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 2, per_page: 10 },
+          query: { from: 10, size: 10 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -252,7 +252,7 @@ describe('registerRoutes', () => {
         });
       });
 
-      it('should handle page=1 (first page)', async () => {
+      it('should handle from=0 (first page)', async () => {
         const mockFindResult = {
           page: 1,
           per_page: 5,
@@ -266,7 +266,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 1, per_page: 5 },
+          query: { from: 0, size: 5 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -279,7 +279,7 @@ describe('registerRoutes', () => {
         });
       });
 
-      it('should paginate with per_page=1 across multiple pages', async () => {
+      it('should paginate with size=1 across multiple pages', async () => {
         const totalDataSources = 3;
 
         // First page - should return first data source
@@ -296,7 +296,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 1, per_page: 1 },
+          query: { from: 0, size: 1 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -333,7 +333,7 @@ describe('registerRoutes', () => {
         mockResponse.ok.mockClear();
 
         const mockRequestPage2 = httpServerMock.createKibanaRequest({
-          query: { page: 2, per_page: 1 },
+          query: { from: 1, size: 1 },
         });
 
         await routeHandler(createMockContext(), mockRequestPage2, mockResponse);
@@ -372,7 +372,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 1, per_page: 20 },
+          query: { from: 0, size: 20 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -406,7 +406,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 1, per_page: 20 },
+          query: { from: 0, size: 20 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -428,7 +428,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 1, per_page: 20 },
+          query: { from: 0, size: 20 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 

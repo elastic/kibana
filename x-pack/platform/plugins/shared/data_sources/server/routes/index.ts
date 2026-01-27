@@ -71,12 +71,15 @@ export function registerRoutes(dependencies: RouteDependencies) {
       path: API_BASE_PATH,
       validate: {
         query: schema.object({
-          per_page: schema.number({
+          from: schema.number({
+            min: 0,
+            defaultValue: 0,
+          }),
+          size: schema.number({
             min: 1,
             defaultValue: DEFAULT_ITEMS_PER_PAGE,
             max: Math.max(...PAGINATION_ITEMS_PER_PAGE_OPTIONS),
           }),
-          page: schema.number({ min: 1, defaultValue: 1 }),
         }),
       },
       security: {
@@ -97,8 +100,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const findResult: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            perPage: query.per_page,
-            page: query.page,
+            perPage: query.size,
+            page: Math.floor(query.from / query.size) + 1,
           });
 
         const dataSources = findResult.saved_objects.map((savedObject) => {
