@@ -459,16 +459,15 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
       );
     }
 
-    // Warn if too many new secondary items per section
-    item.sections?.forEach((section) => {
-      const sectionNewItems = section.items.filter(isNew);
-      if (sectionNewItems.length > maxNewItemsPerLevel) {
-        const hiddenSecondary = getHiddenItems(sectionNewItems);
-        warnOnce(
-          `Too many new secondary items in "${item.label}". The following will not show new badges: ${hiddenSecondary}.`
-        );
-      }
-    });
+    // Warn if too many new secondary items per parent
+    const newSecondaryItems =
+      item.sections?.flatMap((section) => section.items.filter(isNew)) ?? [];
+    if (newSecondaryItems.length > maxNewItemsPerLevel) {
+      const hiddenItems = getHiddenItems(newSecondaryItems);
+      warnOnce(
+        `Too many new secondary items in "${item.label}". The following will not show new badges: ${hiddenItems}.`
+      );
+    }
   });
 }
 
