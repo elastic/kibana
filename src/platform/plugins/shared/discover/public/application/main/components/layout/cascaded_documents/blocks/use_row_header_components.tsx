@@ -385,12 +385,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
       if (type && /categorize/i.test(type)) {
         return (
           <div data-test-subj={`${rowData.id}-dscCascadeRowTitlePatternCellRenderer`}>
-            {getPatternCellRenderer(
-              // @ts-expect-error - necessary to match the data shape expectation
-              { flattened: rowData },
-              rowGroup,
-              false
-            )}
+            {getPatternCellRenderer(rowData.groupValue, false)}
           </div>
         );
       }
@@ -400,10 +395,10 @@ export function useEsqlDataCascadeRowHeaderComponents(
           <EuiTextTruncate
             truncation="end"
             text={
-              (rowData[rowGroup] ||
-                i18n.translate('discover.dataCascade.row.action.noValue', {
-                  defaultMessage: '(blank)',
-                })) as string
+              rowData.groupValue ||
+              i18n.translate('discover.dataCascade.row.action.noValue', {
+                defaultMessage: '(blank)',
+              })
             }
           >
             {(truncatedText) => {
@@ -437,7 +432,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
                 defaultMessage="<bold>{selectedColumn}: </bold><badge>{selectedColumnValue}</badge>"
                 values={{
                   selectedColumn,
-                  selectedColumnValue: rowData[selectedColumn] as string,
+                  selectedColumnValue: rowData.aggregatedValues[selectedColumn],
                   bold: (chunks) => (
                     <EuiFlexItem grow={false} css={textSlotStyles.textWrapper}>
                       <span css={textSlotStyles.textInner}>{chunks}</span>
@@ -468,7 +463,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
   >(
     ({ rowData, nodePath }) => {
       const groupId = nodePath[nodePath.length - 1];
-      const groupValue = rowData[groupId] as string;
+      const groupValue = rowData.groupValue;
 
       return [
         {

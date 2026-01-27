@@ -23,6 +23,7 @@ import {
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { v5 as uuidv5 } from 'uuid';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
@@ -32,6 +33,8 @@ interface UseGroupedCascadeDataProps
     Pick<CascadedDocumentsContext, 'selectedCascadeGroups' | 'esqlVariables'> {
   queryMeta: ESQLStatsQueryMeta;
 }
+
+const NODE_ID_NAMESPACE = '5a14c15b-0999-49a6-84f5-2bad4f24c45a';
 
 /**
  * Function returns the data for the cascade group.
@@ -44,61 +47,65 @@ export const useGroupedCascadeData = ({
 }: UseGroupedCascadeDataProps) => {
   return useMemo(
     () =>
-      selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
-        let dataAccessorKey: string = cur;
+      selectedCascadeGroups.reduce<ESQLDataGroupNode[]>((allGroups, groupColumn, groupDepth) => {
+        let resolvedGroupColumn: string = groupColumn;
 
-        const selectedGroupVariable = esqlVariables?.find(
-          (variable) => variable.key === cur.replace(/^\?\?/, '')
+        const matchingGroupVariable = esqlVariables?.find(
+          (variable) => variable.key === groupColumn.replace(/^\?\?/, '')
         );
 
-        if (selectedGroupVariable) {
-          dataAccessorKey = selectedGroupVariable.value as string;
+        if (matchingGroupVariable) {
+          resolvedGroupColumn = matchingGroupVariable.value.toString();
         }
 
-        const groupMatch = Object.groupBy(
-          rows ?? [],
-          // @ts-expect-error - we know that the data accessor key is a string
-          (datum) => datum.flattened[dataAccessorKey]
+        const rowsGroupedByValue = Object.groupBy(rows ?? [], (row) =>
+          String(row.flattened[resolvedGroupColumn])
         );
 
-        Object.entries(groupMatch).forEach(([key, value], idx) => {
+        Object.entries(rowsGroupedByValue).forEach(([groupValue, groupRows = []]) => {
           // skip undefined and null values
-          if (key === 'undefined' || key === 'null') {
+          if (groupValue === 'undefined' || groupValue === 'null') {
             return;
           }
 
-          const record = {
-            id: String(idx),
-            [cur]: key,
-            ...value?.reduce((derivedColumns, datum) => {
-              queryMeta.appliedFunctions.forEach(({ identifier }) => {
-                if (datum.flattened[identifier]) {
-                  derivedColumns[identifier] =
-                    (derivedColumns[identifier] ?? 0) + Number(datum.flattened[identifier]);
-                }
-              });
-              return derivedColumns;
-            }, {} as Record<string, number>),
+          const groupNode: ESQLDataGroupNode = {
+            id: uuidv5(`${groupColumn}-${groupValue}`, NODE_ID_NAMESPACE),
+            // While we use explicit properties for better typing, the document_data_cascade package
+            // requires `[groupColumn]: groupValue` to be populated in order to build its `nodePathMap`
+            [groupColumn]: groupValue,
+            groupColumn,
+            groupValue,
+            aggregatedValues: groupRows.reduce<ESQLDataGroupNode['aggregatedValues']>(
+              (allValues, row) => {
+                queryMeta.appliedFunctions.forEach(({ identifier }) => {
+                  if (row.flattened[identifier]) {
+                    allValues[identifier] =
+                      (allValues[identifier] ?? 0) + Number(row.flattened[identifier]);
+                  }
+                });
+                return allValues;
+              },
+              {}
+            ),
           };
 
-          if (levelIdx === 0) {
-            acc.push(record);
+          if (groupDepth === 0) {
+            allGroups.push(groupNode);
           } else {
-            // we need to find the record in acc that has the same value for the previous level of cascade grouping
-            const previousLevelRecord = acc.find(
-              (r: ESQLDataGroupNode) =>
-                r[selectedCascadeGroups[levelIdx - 1]] ===
-                record[selectedCascadeGroups[levelIdx - 1]]
+            // we need to find the node in allGroups that has the same value for the previous level of cascade grouping
+            const previousLevelColumn = selectedCascadeGroups[groupDepth - 1];
+            const previousLevelNode = allGroups.find(
+              (otherNode) => otherNode.groupColumn === previousLevelColumn
             );
 
-            if (previousLevelRecord) {
-              // TODO: insert the record as a child of the previous level record
+            if (previousLevelNode) {
+              // TODO: insert the node as a child of the previous level node
             }
           }
         });
 
-        return acc;
-      }, [] as ESQLDataGroupNode[]),
+        return allGroups;
+      }, []),
     [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]
   );
 };

@@ -38,7 +38,11 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getPatternCellRenderer(props.row, props.columnId, props.isDetails, rowHeight),
+                getPatternCellRenderer(
+                  props.row.flattened[props.columnId],
+                  props.isDetails,
+                  rowHeight
+                ),
             }),
           {}
         );

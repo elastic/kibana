@@ -109,10 +109,10 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current[0].category).toBe('A');
-      expect(result.current[0].count).toBe(15); // 10 + 5 aggregated
-      expect(result.current[1].category).toBe('B');
-      expect(result.current[1].count).toBe(20);
+      expect(result.current[0].groupValue).toBe('A');
+      expect(result.current[0].aggregatedValues.count).toBe(15); // 10 + 5 aggregated
+      expect(result.current[1].groupValue).toBe('B');
+      expect(result.current[1].aggregatedValues.count).toBe(20);
     });
 
     it('should skip undefined and null values in grouping', () => {
@@ -133,8 +133,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current.find((r) => r.category === 'A')).toBeDefined();
-      expect(result.current.find((r) => r.category === 'B')).toBeDefined();
+      expect(result.current.find((r) => r.groupValue === 'A')).toBeDefined();
+      expect(result.current.find((r) => r.groupValue === 'B')).toBeDefined();
     });
 
     it('should aggregate multiple applied functions', () => {
@@ -161,8 +161,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].count).toBe(15);
-      expect(result.current[0].sum).toBe(150);
+      expect(result.current[0].aggregatedValues.count).toBe(15);
+      expect(result.current[0].aggregatedValues.sum).toBe(150);
     });
 
     it('should resolve esql variable for group key', () => {
@@ -186,8 +186,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]['??myVar']).toBe('X');
-      expect(result.current[1]['??myVar']).toBe('Y');
+      expect(result.current[0].groupValue).toBe('X');
+      expect(result.current[1].groupValue).toBe('Y');
     });
   });
 
@@ -376,7 +376,9 @@ describe('data_fetching related hooks', () => {
 
     const createMockRowData = (): ESQLDataGroupNode => ({
       id: '1',
-      category: 'A',
+      groupColumn: 'category',
+      groupValue: 'A',
+      aggregatedValues: {},
     });
 
     it('should return all four expansion handlers', () => {
