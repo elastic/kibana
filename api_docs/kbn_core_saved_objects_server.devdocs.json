@@ -11274,6 +11274,10 @@
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/server/saved_objects/slo.ts"
+              },
+              {
                 "plugin": "apm",
                 "path": "x-pack/solutions/observability/plugins/apm/server/saved_objects/apm_service_groups.ts"
               },
@@ -11284,10 +11288,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/sources/saved_object_type.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "synthetics",

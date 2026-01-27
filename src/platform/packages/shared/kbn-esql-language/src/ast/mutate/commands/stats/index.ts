@@ -64,19 +64,6 @@ export interface StatsCommandSummary {
    * Summary of the "BY" arguments of the "STATS" command.
    */
   grouping: Record<string, StatsFieldSummary>;
-
-  /**
-   * A formatted list of field names which were newly created by the
-   * STATS command.
-   */
-  newFields: Set<string>;
-
-  /**
-   * De-duplicated list all of field names, which were used to as-is or to
-   * construct new fields. The fields are correctly formatted according to
-   * ES|QL column formatting rules.
-   */
-  usedFields: Set<string>;
 }
 
 /**
@@ -193,16 +180,12 @@ const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummar
 export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsCommandSummary => {
   const aggregates: StatsCommandSummary['aggregates'] = {};
   const grouping: StatsCommandSummary['grouping'] = {};
-  const newFields: StatsCommandSummary['newFields'] = new Set();
-  const usedFields: StatsCommandSummary['usedFields'] = new Set();
 
   // Process main arguments, the "aggregates" part of the command.
   new Visitor()
     .on('visitExpression', (ctx) => {
       const summary = summarizeField(query, ctx.node);
       aggregates[summary.field] = summary;
-      newFields.add(summary.field);
-      for (const field of summary.usedFields) usedFields.add(field);
     })
     .on('visitCommand', () => {})
     .on('visitStatsCommand', (ctx) => {
@@ -215,13 +198,6 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
     .on('visitExpression', (ctx) => {
       const node = ctx.node;
       const summary = summarizeField(query, node);
-
-      if (isFunctionExpression(summary.arg)) {
-        // only mark as new field if the arg is a function expression
-        newFields.add(summary.field);
-      }
-
-      for (const field of summary.usedFields) usedFields.add(field);
       grouping[summary.field] = summary;
     })
     .on('visitCommandOption', (ctx) => {
@@ -238,8 +214,6 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
     command,
     aggregates,
     grouping,
-    newFields,
-    usedFields,
   };
 
   return summary;
