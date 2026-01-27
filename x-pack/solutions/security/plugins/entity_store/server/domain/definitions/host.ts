@@ -19,7 +19,6 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     calculated: true,
     defaultIdField: 'host.entity.id',
     defaultIdFieldMapping: { type: 'keyword' },
-    typeToAppendToGeneratedId: 'host',
     requiresOneOfFields: ['host.id', 'host.name', 'host.hostname'],
 
     /*

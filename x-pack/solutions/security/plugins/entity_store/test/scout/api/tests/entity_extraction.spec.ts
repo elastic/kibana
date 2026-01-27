@@ -91,6 +91,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'a3872e401531d41f50a187fa61fbfffe',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.id': 'host-123',
           'entity.name': 'host:host-123',
           'entity.type': 'Host',
@@ -104,6 +105,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'c51b57fc40995ed530907fcdf981ced9',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-01',
           'host.domain': 'example.com',
           'entity.name': 'host:server-01.example.com',
@@ -118,6 +120,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '1260e35e2450159f1676fedb4b67ce46',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
           'host.hostname': 'workstation-05',
           'entity.name': 'host:workstation-05.corp.local',
@@ -132,6 +135,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'b3f4c3355bd6bec40156867ae5ddb158',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.hostname': 'laptop-01',
           'entity.name': 'host:laptop-01',
           'entity.type': 'Host',
@@ -142,14 +146,15 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
       },
       {
         _index: '.entities.v2.latest.security_host_default',
-        _id: 'b4e080fc942d57409f595db694ab98ae',
+        _id: '5e72f85ad33f4e4cf981dcff134c050c',
         _score: 1,
         _source: {
-          'entity.name': 'non-generated-host',
+          'entity.EngineMetadata.Type': 'host',
+          'entity.name': 'host:non-generated-host',
           'entity.type': 'Host',
           '@timestamp': '2026-01-20T12:05:04.000Z',
-          'entity.id': 'non-generated-host',
-          'host.entity.id': 'non-generated-host',
+          'entity.id': 'host:non-generated-host',
+          'host.entity.id': 'host:non-generated-host',
         },
       },
       {
@@ -157,6 +162,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'cb20977f0b08562677a022f7362b3e9a',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'desktop-02',
           'entity.name': 'host:desktop-02',
           'entity.type': 'Host',
@@ -170,6 +176,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '0074d60e067281b4286ec527953c8e7b',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-02',
           'host.domain': 'example.com',
           'host.id': 'host-456',
@@ -185,6 +192,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '7ce02ea9458bb0c3adccc71ea36acced',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
           'host.hostname': 'workstation-10',
           'host.id': 'host-789',
@@ -200,6 +208,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '180b7320d4ce161699c962c956c9bb46',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-03',
           'host.domain': 'test.com',
           'host.hostname': 'backup-server',
@@ -215,6 +224,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '8b261663c77543e6a4544fc85cdc62ef',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-04',
           'host.domain': 'example.org',
           'host.id': '',
@@ -230,6 +240,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'b4e5db4fb8eb7f13d284ee386210b26e',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-05',
           'host.domain': 'test.net',
           'entity.name': 'host:server-05.test.net',
@@ -244,6 +255,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '40b5875887d5e812570327b9604425a6',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
           'host.hostname': 'workstation-20',
           'entity.name': 'host:workstation-20.corp.local',
@@ -258,6 +270,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'a5d3d8b58538b9ee1ca73b50d15d4b52',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-06',
           'host.domain': '',
           'entity.name': 'host:server-06',
@@ -272,6 +285,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '68c7ffbdcf9404e4494ac43a83719ef5',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-07',
           'entity.name': 'host:server-07',
           'entity.type': 'Host',
@@ -285,6 +299,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'f69c44458b36688926b09ed388c8b5be',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-08',
           'host.domain': 'corp.local',
           'host.hostname': 'laptop-02',
@@ -300,6 +315,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '1fba7560b67c8b51827bac3b6c86fce1',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'host',
           'host.hostname': 'workstation-30',
           'entity.name': 'host:workstation-30',
           'entity.type': 'Host',
@@ -415,15 +431,15 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
       },
       {
         _index: '.entities.v2.latest.security_user_default',
-        _id: 'd21d3cc5ca462fa168d3365cf151c1b2',
+        _id: '025d1e3fbf1982fba259d37978ee5709',
         _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
-          'entity.name': 'non-generated-user',
+          'entity.name': 'user:non-generated-user',
           'entity.type': 'Identity',
           '@timestamp': '2026-01-20T12:05:04.000Z',
-          'entity.id': 'non-generated-user',
-          'user.entity.id': 'non-generated-user',
+          'entity.id': 'user:non-generated-user',
+          'user.entity.id': 'user:non-generated-user',
         },
       },
       {
@@ -669,15 +685,15 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     expect(entities.hits.hits).toMatchObject([
       {
         _index: '.entities.v2.latest.security_service_default',
-        _id: 'a0dfa1f1ee31c53378f0ffe1cd168deb',
+        _id: '15b621f577206d843980a40d38554c70',
         _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'service',
-          'entity.name': 'non-generated-service-id',
+          'entity.name': 'service:non-generated-service-id',
           'entity.type': 'Service',
           '@timestamp': '2026-01-20T12:05:04.000Z',
-          'entity.id': 'non-generated-service-id',
-          'service.entity.id': 'non-generated-service-id',
+          'entity.id': 'service:non-generated-service-id',
+          'service.entity.id': 'service:non-generated-service-id',
         },
       },
       {

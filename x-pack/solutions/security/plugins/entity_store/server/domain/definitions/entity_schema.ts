@@ -33,11 +33,6 @@ const calculatedIdentityFieldLogic = z.object({
   defaultIdField: z.string(),
   defaultIdFieldMapping: mappingSchema,
 
-  // The type to append to the generated id (non default id)
-  // This is present because the `generic` definition don't need to append
-  // (we assume that the id is globally unique)
-  typeToAppendToGeneratedId: z.string().optional(),
-
   // Filter to be applied before evaluating the evaluation logic
   requiresOneOfFields: z.array(z.string()),
 
@@ -53,7 +48,6 @@ const calculatedIdentityFieldLogic = z.object({
 
 const identityFieldSchema = z.object({
   field: z.string(),
-  typeToAppendToGeneratedId: z.string().optional(),
   mapping: mappingSchema,
   calculated: z.literal(false).optional(),
 });

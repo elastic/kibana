@@ -17,7 +17,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     calculated: true,
     defaultIdField: 'user.entity.id',
     defaultIdFieldMapping: { type: 'keyword' },
-    typeToAppendToGeneratedId: 'user',
     requiresOneOfFields: ['user.id', 'user.name', 'user.email'],
 
     /*

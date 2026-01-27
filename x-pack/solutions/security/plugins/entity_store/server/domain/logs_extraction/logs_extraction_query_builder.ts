@@ -208,20 +208,12 @@ function getIdFieldName(identityField: EntityIdentity): string {
 function entityFieldEvaluation(identityField: EntityIdentity, type: EntityType) {
   const idFieldName = getIdFieldName(identityField);
   if (identityField.calculated) {
-    // If we append type to generated id, it is only when the default id is not available
-    if (identityField.typeToAppendToGeneratedId) {
-      return `| EVAL ${recentData(idFieldName)} = CASE(
-        ${esqlIsNotNullOrEmpty(idFieldName)},
-        ${idFieldName},
-        CONCAT("${identityField.typeToAppendToGeneratedId}:", ${identityField.esqlEvaluation})
+    return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", 
+      CASE(
+        ${esqlIsNotNullOrEmpty(idFieldName)}, ${idFieldName},
+        ${identityField.esqlEvaluation}
+      )
     )`;
-    }
-
-    return `| EVAL ${recentData(idFieldName)} = CASE(
-      ${esqlIsNotNullOrEmpty(idFieldName)},
-      ${idFieldName},
-      ${identityField.esqlEvaluation}
-  )`;
   }
 
   return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", ${idFieldName})`;

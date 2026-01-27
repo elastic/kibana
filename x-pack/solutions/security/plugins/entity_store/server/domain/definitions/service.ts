@@ -17,7 +17,6 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     calculated: true,
     defaultIdField: 'service.entity.id',
     defaultIdFieldMapping: { type: 'keyword' },
-    typeToAppendToGeneratedId: 'service',
     requiresOneOfFields: ['service.name'],
 
     /*
