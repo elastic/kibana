@@ -14,6 +14,7 @@ import type { CloudConnectApiKey } from '../types';
 jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
 jest.mock('../lib/cluster_info');
+jest.mock('../lib/update_default_llm_actions');
 
 describe('Authentication Routes', () => {
   let mockRouter: jest.Mocked<IRouter>;
@@ -76,9 +77,26 @@ describe('Authentication Routes', () => {
 
   describe('GET /internal/cloud_connect/config', () => {
     let routeHandler: Function;
+    let mockActionsClient: { getAll: jest.Mock };
 
     beforeEach(() => {
-      const mockGetStartServices = jest.fn();
+      mockActionsClient = {
+        getAll: jest.fn().mockResolvedValue([]),
+      };
+
+      const mockGetStartServices = jest.fn().mockResolvedValue([
+        {}, // coreStart (not used in config endpoint)
+        {
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+          },
+        },
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { hasAnyDefaultLLMConnectors } = require('../lib/update_default_llm_actions');
+      hasAnyDefaultLLMConnectors.mockResolvedValue(false);
+
       const hasEncryptedSOEnabled = true;
 
       registerAuthenticateRoute({
@@ -119,6 +137,7 @@ describe('Authentication Routes', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           hasEncryptedSOEnabled: true,
+          hasAnyDefaultLLMConnectors: false,
           license: {
             type: 'platinum',
             uid: 'license-uid-123',

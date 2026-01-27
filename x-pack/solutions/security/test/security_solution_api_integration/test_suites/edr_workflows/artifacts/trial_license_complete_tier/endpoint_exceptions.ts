@@ -178,6 +178,13 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    after(async () => {
+      const promises = ALL_ENDPOINT_ARTIFACT_LIST_IDS.map((listId) =>
+        endpointArtifactTestResources.deleteList(listId)
+      );
+      await Promise.all(promises);
+    });
+
     describe(`and using Import API`, function () {
       const buildImportBuffer = (
         listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]

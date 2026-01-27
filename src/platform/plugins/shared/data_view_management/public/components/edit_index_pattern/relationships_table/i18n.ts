@@ -44,3 +44,10 @@ export const managedBadge = i18n.translate(
     defaultMessage: 'Managed',
   }
 );
+
+export const relationshipsTableCaption = i18n.translate(
+  'indexPatternManagement.relationshipsTable.tableCaption',
+  {
+    defaultMessage: 'Saved object relationships',
+  }
+);
