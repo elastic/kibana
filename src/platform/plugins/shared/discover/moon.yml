@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
+  - '@kbn/es-query-constants'
 tags:
   - plugin
   - prod
