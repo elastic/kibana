@@ -87,25 +87,7 @@ export const DEFAULT_MODELS: Partial<Record<ServiceProviderKeys, string>> = {
   [ServiceProviderKeys.amazonbedrock]: BEDROCK_DEFAULT_MODEL, // 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'
   [ServiceProviderKeys.googlevertexai]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
   [ServiceProviderKeys.googleaistudio]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
-
-  // Major LLM providers with established default models
-  [ServiceProviderKeys.anthropic]: 'claude-3-5-sonnet-20241022',
-  [ServiceProviderKeys.cohere]: 'command-r-plus',
-  [ServiceProviderKeys.mistral]: 'mistral-large-latest',
   [ServiceProviderKeys.azureaistudio]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1' - similar to Azure OpenAI
-  [ServiceProviderKeys.groq]: 'llama-3.3-70b-versatile',
-  [ServiceProviderKeys.deepseek]: 'deepseek-chat',
-
-  // Additional providers with model_id field for completion/chat
-  [ServiceProviderKeys.ai21]: 'jamba-1.5-large', // AI21's latest Jamba model
-  [ServiceProviderKeys.watsonxai]: 'ibm/granite-13b-chat-v2', // IBM watsonx default
-  [ServiceProviderKeys.llama]: 'meta-llama/Llama-3.3-70B-Instruct', // Meta Llama Stack
-  [ServiceProviderKeys.contextualai]: 'contextual-ai/rag-1', // Contextual AI default
-
-  // Embedding service providers with model_id field
-  [ServiceProviderKeys.jinaai]: 'jina-embeddings-v3', // Jina AI's default embedding model
-  [ServiceProviderKeys.voyageai]: 'voyage-4', // Voyage AI's latest default embedding model
-  [ServiceProviderKeys.elasticsearch]: '.elser_model_2', // Elasticsearch default (also set in provider config)
 };
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint

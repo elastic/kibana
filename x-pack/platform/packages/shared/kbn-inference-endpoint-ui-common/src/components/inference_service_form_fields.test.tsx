@@ -123,16 +123,16 @@ describe('Inference Services', () => {
     );
   });
 
-  it('populates default model_id when selecting anthropic provider', async () => {
+  it('populates default model_id when selecting openai provider', async () => {
     renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
-    await userEvent.click(screen.getByText('Anthropic'));
+    await userEvent.click(screen.getByText('OpenAI'));
 
-    expect(screen.getByTestId('provider-select')).toHaveValue('Anthropic');
+    expect(screen.getByTestId('provider-select')).toHaveValue('OpenAI');
     const modelIdInput = screen.getByTestId('model_id-input');
-    // Use the default from DEFAULT_MODELS constant for anthropic
-    expect(modelIdInput).toHaveValue(DEFAULT_MODELS.anthropic);
+    // Use the default from DEFAULT_MODELS constant (defined in kbn-connector-schemas/openai)
+    expect(modelIdInput).toHaveValue(DEFAULT_MODELS.openai);
   });
 
   describe('isProviderForSolutions', () => {
