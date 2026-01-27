@@ -6,7 +6,7 @@
  */
 
 export { Streams } from './src/models/streams';
-export { IngestBase } from './src/models/ingest/base';
+export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';

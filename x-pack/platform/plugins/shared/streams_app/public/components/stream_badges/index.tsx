@@ -22,7 +22,6 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useStreamTSDBMode } from '../../hooks/use_stream_tsdb_mode';
 
 import { truncateText } from '../../util/truncate_text';
 
@@ -172,7 +171,7 @@ export function DiscoverBadgeButton({
 }: {
   definition: Streams.ingest.all.GetResponse;
   isWiredStream: boolean;
-  /** When provided, skips the expensive hook call to determine TSDB mode */
+  /** When provided from listing data, uses this instead of definition.index_mode */
   isTSDBMode?: boolean;
 }) {
   const {
@@ -180,11 +179,8 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
-  // Use prop if provided, otherwise fall back to hook (for detail views where listing data isn't available)
-  const { isTSDBMode: isTSDBModeFromHook } = useStreamTSDBMode(
-    isTSDBModeProp === undefined ? definition.stream.name : ''
-  );
-  const isTSDBMode = isTSDBModeProp ?? isTSDBModeFromHook;
+  // Use prop if provided (from listing data), otherwise use index_mode from definition (API response)
+  const isTSDBMode = isTSDBModeProp ?? definition.index_mode === 'time_series';
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
   const indexPatterns = getIndexPatternsForStream(definition.stream);

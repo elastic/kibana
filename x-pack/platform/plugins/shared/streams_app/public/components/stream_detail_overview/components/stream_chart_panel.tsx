@@ -25,7 +25,6 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { executeEsqlQuery } from '../../../hooks/use_execute_esql_query';
-import { useStreamTSDBMode } from '../../../hooks/use_stream_tsdb_mode';
 
 interface StreamChartPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -55,7 +54,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
     [data, timeState.asAbsoluteTimeRange]
   );
 
-  const { isTSDBMode } = useStreamTSDBMode(definition.stream.name);
+  // Use index_mode from API response instead of expensive DataView check
+  const isTSDBMode = definition.index_mode === 'time_series';
 
   const queries = useMemo(() => {
     if (!indexPatterns) {

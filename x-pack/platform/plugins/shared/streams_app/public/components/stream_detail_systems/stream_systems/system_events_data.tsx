@@ -14,7 +14,7 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamTSDBMode } from '../../../hooks/use_stream_tsdb_mode';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SystemEventsSparklineLast24hrs } from './system_events_sparkline';
 
 export const SystemEventsData = ({
@@ -29,7 +29,11 @@ export const SystemEventsData = ({
       start: { share },
     },
   } = useKibana();
-  const { isTSDBMode } = useStreamTSDBMode(definition.name);
+  // Get index_mode from the stream detail context (API response)
+  const { definition: fullDefinition } = useStreamDetail();
+  const isTSDBMode =
+    Streams.ingest.all.GetResponse.is(fullDefinition) &&
+    fullDefinition.index_mode === 'time_series';
   const useUrl = share.url.locators.useUrl;
 
   const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
