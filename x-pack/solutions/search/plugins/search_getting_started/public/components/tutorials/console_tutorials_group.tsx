@@ -98,7 +98,7 @@ export const ConsoleTutorialsGroup = () => {
           defaultMessage: 'Time series data streams',
         }),
         dataTestSubj: 'console_tutorials_tsds',
-        description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+        description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsDescription', {
           defaultMessage:
             'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
         }),
@@ -208,11 +208,17 @@ export const ConsoleTutorialsGroup = () => {
           color="text"
           onClick={toggleExpand}
         >
-          <FormattedMessage
-            id="xpack.searchGettingStarted.consoleTutorials.expand"
-            defaultMessage="{expandText}"
-            values={{ expandText: expanded ? 'Show less' : 'Show more' }}
-          />
+          {expanded ? (
+            <FormattedMessage
+              id="xpack.searchGettingStarted.consoleTutorials.showLess"
+              defaultMessage="Show less"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.searchGettingStarted.consoleTutorials.showMore"
+              defaultMessage="Show more"
+            />
+          )}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
