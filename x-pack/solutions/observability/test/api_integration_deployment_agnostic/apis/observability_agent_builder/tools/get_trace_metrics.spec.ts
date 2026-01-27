@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { timerange } from '@kbn/synthtrace-client';
-import { orderBy } from 'lodash/fp';
+import { orderBy } from 'lodash';
 import {
   type ApmSynthtraceEsClient,
   generateTraceMetricsData,
@@ -222,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns values sorted by latency descending by default', () => {
-        expect(resultData.items).to.eql(orderBy('latency', 'desc', resultData.items));
+        expect(resultData.items).to.eql(orderBy(resultData.items, 'latency', 'desc'));
       });
 
       describe('when sorting by metrics', () => {
@@ -238,15 +238,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 sortBy: metric,
               },
             });
-            expect(results.length).to.be.greaterThan(0);
             const { items } = results[0].data;
-            expect(items).to.eql(orderBy(metric, 'desc', items));
+            expect(items).to.eql(orderBy(items, metric, 'desc'));
           });
         }
       });
 
       describe('when sorting by latency with different latency types', () => {
-        const latencyTypes = ['avg', 'p95', 'p99'];
+        const latencyTypes = ['avg', 'p95', 'p99'] as const;
         for (const latencyType of latencyTypes) {
           it(`returns values sorted by average latency descending when latencyType=${latencyType}`, async () => {
             const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
@@ -255,12 +254,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 start: START,
                 end: END,
                 sortBy: 'latency',
-                latencyType: latencyType as 'avg' | 'p95' | 'p99',
+                latencyType,
               },
             });
-            expect(results.length).to.be.greaterThan(0);
             const { items } = results[0].data;
-            expect(items).to.eql(orderBy('latency', 'desc', items));
+            expect(items).to.eql(orderBy(items, 'latency', 'desc'));
           });
         }
       });
