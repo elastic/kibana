@@ -935,3 +935,159 @@ describe('Dynamic validation system behavior', () => {
     });
   });
 });
+
+describe('Nested step support', () => {
+  beforeEach(() => {
+    mockGetAllConnectors.mockReset();
+    clearErrorMessageCache();
+  });
+
+  it('should enrich errors for steps nested in foreach', () => {
+    mockGetAllConnectors.mockReturnValue([
+      {
+        type: 'elasticsearch.index',
+        paramsSchema: z.object({
+          index: z.string(),
+          document: z.object({}),
+        }),
+      },
+    ] as any);
+
+    const yamlDocument = parseDocument(`
+steps:
+  - name: foreachStep
+    type: foreach
+    foreach: "{{ items }}"
+    steps:
+      - name: indexDoc
+        type: elasticsearch.index
+        with:
+`);
+    const mockError = {
+      issues: [
+        {
+          code: 'invalid_type' as const,
+          path: ['steps', 0, 'steps', 0, 'with'],
+          message: 'Incorrect type. Expected "object"',
+        },
+      ],
+    };
+    const dummySchema = z.object({ steps: z.array(z.any()) });
+    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    expect(result.message).toContain('should be an object with properties: index, document');
+  });
+
+  it('should enrich errors for steps in if-else branches', () => {
+    mockGetAllConnectors.mockReturnValue([
+      {
+        type: 'slack',
+        paramsSchema: z.object({
+          channel: z.string(),
+          message: z.string(),
+        }),
+      },
+    ] as any);
+
+    const yamlDocument = parseDocument(`
+steps:
+  - name: conditionalStep
+    type: if
+    condition: "{{ shouldNotify }}"
+    steps:
+      - name: notifySuccess
+        type: slack
+        with:
+    else:
+      - name: notifyFailure
+        type: slack
+        with:
+`);
+    // Test error in the 'else' branch
+    const mockError = {
+      issues: [
+        {
+          code: 'invalid_type' as const,
+          path: ['steps', 0, 'else', 0, 'with'],
+          message: 'Incorrect type. Expected "object"',
+        },
+      ],
+    };
+    const dummySchema = z.object({ steps: z.array(z.any()) });
+    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    expect(result.message).toContain('should be an object with properties: channel, message');
+  });
+
+  it('should enrich errors for steps in parallel branches', () => {
+    mockGetAllConnectors.mockReturnValue([
+      {
+        type: 'http',
+        paramsSchema: z.object({
+          url: z.string(),
+          method: z.string().optional(),
+        }),
+      },
+    ] as any);
+
+    const yamlDocument = parseDocument(`
+steps:
+  - name: parallelStep
+    type: parallel
+    branches:
+      - name: branch1
+        steps:
+          - name: callApi
+            type: http
+            with:
+`);
+    const mockError = {
+      issues: [
+        {
+          code: 'invalid_type' as const,
+          path: ['steps', 0, 'branches', 0, 'steps', 0, 'with'],
+          message: 'Incorrect type. Expected "object"',
+        },
+      ],
+    };
+    const dummySchema = z.object({ steps: z.array(z.any()) });
+    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    expect(result.message).toContain('should be an object with properties: url');
+  });
+
+  it('should enrich errors for deeply nested steps', () => {
+    mockGetAllConnectors.mockReturnValue([
+      {
+        type: 'console',
+        paramsSchema: z.object({
+          message: z.string(),
+        }),
+      },
+    ] as any);
+
+    const yamlDocument = parseDocument(`
+steps:
+  - name: outerForeach
+    type: foreach
+    foreach: "{{ outerItems }}"
+    steps:
+      - name: innerForeach
+        type: foreach
+        foreach: "{{ innerItems }}"
+        steps:
+          - name: logItem
+            type: console
+            with:
+`);
+    const mockError = {
+      issues: [
+        {
+          code: 'invalid_type' as const,
+          path: ['steps', 0, 'steps', 0, 'steps', 0, 'with'],
+          message: 'Incorrect type. Expected "object"',
+        },
+      ],
+    };
+    const dummySchema = z.object({ steps: z.array(z.any()) });
+    const result = formatZodError(mockError as any, dummySchema, yamlDocument);
+    expect(result.message).toContain('should be an object with properties: message');
+  });
+});
