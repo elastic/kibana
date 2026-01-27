@@ -52,7 +52,9 @@ describe('TraceWaterfall', () => {
   });
 
   it('wraps EmbeddableRenderer with CSS override for proper layout', () => {
-    const { container } = render(<TraceWaterfall traceId="test-trace" dataView={dataView} />);
+    const { container } = render(
+      <TraceWaterfall traceId="test-trace" dataView={dataView} docId="test-doc" />
+    );
 
     const embeddable = container.querySelector('[data-test-subj="embeddable-renderer"]');
     expect(embeddable).toBeInTheDocument();

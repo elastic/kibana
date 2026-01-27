@@ -12,11 +12,9 @@ import type {
   RouteRepositoryClient,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { createCallApmApi as createCallApmApiShared } from '@kbn/apm-api-client';
 import type { FetchOptions } from '../../../common/fetch_options';
-import type { CallApi } from './call_api';
-import { callApi } from './call_api';
 import type { APMServerRouteRepository, APIEndpoint } from '../../../server';
 
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
@@ -54,20 +52,21 @@ export let callApmApi: APMClient = () => {
 };
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {
-  callApmApi = ((endpoint, options) => {
-    const { params } = options as unknown as {
-      params?: Partial<Record<string, any>>;
-    };
+  callApmApi = createCallApmApiShared(core);
+  // ((endpoint, options) => {
+  //   const { params } = options as unknown as {
+  //     params?: Partial<Record<string, any>>;
+  //   };
 
-    const { method, pathname, version } = formatRequest(endpoint, params?.path);
+  //   const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
-    return callApi(core, {
-      ...options,
-      method,
-      pathname,
-      body: params?.body,
-      query: params?.query,
-      version,
-    } as unknown as Parameters<CallApi>[1]);
-  }) as APMClient;
+  //   return callApi(core, {
+  //     ...options,
+  //     method,
+  //     pathname,
+  //     body: params?.body,
+  //     query: params?.query,
+  //     version,
+  //   } as unknown as Parameters<CallApi>[1]);
+  // }) as APMClient;
 }

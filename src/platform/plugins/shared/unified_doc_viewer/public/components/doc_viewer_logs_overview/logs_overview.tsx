@@ -102,6 +102,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       []
     );
 
+    const docId = parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD];
+
     return (
       <FieldActionsProvider
         columns={columns}
@@ -141,10 +143,10 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                 dataView={dataView}
               />
             )}
-            {traceId && showTraceWaterfall ? (
+            {traceId && showTraceWaterfall && docId ? (
               <TraceWaterfall
                 traceId={traceId}
-                docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                docId={docId}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 dataView={dataView}
               />

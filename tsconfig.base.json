@@ -108,6 +108,8 @@
       "@kbn/analytics-ftr-helpers-plugin/*": ["src/platform/test/analytics/plugins/analytics_ftr_helpers/*"],
       "@kbn/analytics-plugin-a-plugin": ["src/platform/test/analytics/plugins/analytics_plugin_a"],
       "@kbn/analytics-plugin-a-plugin/*": ["src/platform/test/analytics/plugins/analytics_plugin_a/*"],
+      "@kbn/apm-api-client": ["x-pack/solutions/observability/packages/kbn-apm-api-client"],
+      "@kbn/apm-api-client/*": ["x-pack/solutions/observability/packages/kbn-apm-api-client/*"],
       "@kbn/apm-config-loader": ["src/platform/packages/private/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["src/platform/packages/private/kbn-apm-config-loader/*"],
       "@kbn/apm-data-access-plugin": ["x-pack/solutions/observability/plugins/apm_data_access"],

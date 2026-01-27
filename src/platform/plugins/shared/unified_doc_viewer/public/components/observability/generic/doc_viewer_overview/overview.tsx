@@ -80,7 +80,7 @@ export function Overview({
             onRemoveColumn={onRemoveColumn}
           />
           <EuiSpacer size="m" />
-          {showWaterfall ? (
+          {showWaterfall && docId ? (
             <TraceWaterfall
               dataView={dataView}
               traceId={traceId}

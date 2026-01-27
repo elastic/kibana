@@ -100,7 +100,6 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
-
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
 

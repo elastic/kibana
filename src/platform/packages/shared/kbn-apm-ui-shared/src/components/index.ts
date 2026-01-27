@@ -12,5 +12,7 @@ export * from './duration_distribution_chart';
 export * from './http_status_code';
 export * from './span_icon';
 export * from './timestamp';
+export * from './focused_trace_waterfall';
+export * from './full_trace_waterfall';
 
 export { getSpanIcon } from './span_icon/get_span_icon';

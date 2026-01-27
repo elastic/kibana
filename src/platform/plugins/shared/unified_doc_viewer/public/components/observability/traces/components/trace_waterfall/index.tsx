@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
 import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FocusedTraceWaterfallFetcher } from '@kbn/apm-ui-shared';
+import { i18n } from '@kbn/i18n';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useState } from 'react';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -20,7 +20,7 @@ import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 
 interface Props {
   traceId: string;
-  docId?: string;
+  docId: string;
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
 }
@@ -38,24 +38,11 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
   defaultMessage: 'Trace',
 });
 
+const actionId = 'traceWaterfallFullScreenAction';
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
-  const { data } = getUnifiedDocViewerServices();
+  const { data, callApmApi } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        traceId,
-        rangeFrom,
-        rangeTo,
-        docId,
-        mode: 'summary',
-      }),
-    }),
-    [docId, rangeFrom, rangeTo, traceId]
-  );
-
-  const actionId = 'traceWaterfallFullScreenAction';
 
   return (
     <>
@@ -99,10 +86,12 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             }
           `}
         >
-          <EmbeddableRenderer
-            type="APM_TRACE_WATERFALL_EMBEDDABLE"
-            getParentApi={getParentApi}
-            hidePanelChrome
+          <FocusedTraceWaterfallFetcher
+            callApmApi={callApmApi}
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
           />
         </div>
         <EuiDelayRender delay={500}>

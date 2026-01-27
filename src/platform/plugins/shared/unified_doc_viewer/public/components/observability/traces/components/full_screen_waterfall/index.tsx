@@ -16,15 +16,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
+import { FullTraceWaterfallFetcher } from '@kbn/apm-ui-shared';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
 import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
 import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
 import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
 
@@ -45,6 +46,7 @@ export const FullScreenWaterfall = ({
   serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
+  const { callApmApi } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
   const [docId, setDocId] = useState<string | null>(null);
   const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
@@ -85,50 +87,44 @@ export const FullScreenWaterfall = ({
     }
   }, []);
 
-  const getParentApi = useCallback(() => {
-    return {
-      getSerializedStateForChild: () => ({
-        traceId,
-        rangeFrom,
-        rangeTo,
-        serviceName,
-        scrollElement,
-        onErrorClick: (params: {
-          traceId: string;
-          docId: string;
-          errorCount: number;
-          errorDocId?: string;
-          docIndex?: string;
-        }) => {
-          if (params.errorCount > 1) {
-            setActiveFlyoutId(spanFlyoutId);
-            setActiveSection('errors-table');
-            setDocId(params.docId);
-            setDocIndex(undefined);
-          } else if (params.errorDocId) {
-            setActiveFlyoutId(logsFlyoutId);
-            setDocId(params.errorDocId);
-            setDocIndex(params.docIndex);
-          }
-        },
-        onNodeClick: (nodeSpanId: string) => {
-          setActiveSection(undefined);
-          setDocId(nodeSpanId);
-          setDocIndex(undefined);
-          setActiveFlyoutId(spanFlyoutId);
-        },
-        mode: 'full',
-      }),
-    };
-  }, [traceId, rangeFrom, rangeTo, serviceName, scrollElement]);
-
-  function handleCloseFlyout() {
+  const handleCloseFlyout = useCallback(() => {
     setActiveFlyoutId(null);
     setActiveSection(undefined);
     setDocId(null);
     setDocIndex(undefined);
-  }
+  }, [setActiveFlyoutId, setActiveSection, setDocId, setDocIndex]);
 
+  const handleNodeClick = useCallback(
+    (nodeSpanId: string) => {
+      setActiveSection(undefined);
+      setDocId(nodeSpanId);
+      setDocIndex(undefined);
+      setActiveFlyoutId(spanFlyoutId);
+    },
+    [setActiveSection, setDocId, setDocIndex, setActiveFlyoutId]
+  );
+
+  const handleErrorClick = useCallback(
+    (params: {
+      traceId: string;
+      docId: string;
+      errorCount: number;
+      errorDocId?: string;
+      docIndex?: string;
+    }) => {
+      if (params.errorCount > 1) {
+        setActiveFlyoutId(spanFlyoutId);
+        setActiveSection('errors-table');
+        setDocId(params.docId);
+        setDocIndex(undefined);
+      } else if (params.errorDocId) {
+        setActiveFlyoutId(logsFlyoutId);
+        setDocId(params.errorDocId);
+        setDocIndex(params.docIndex);
+      }
+    },
+    [setActiveFlyoutId, setActiveSection, setDocId, setDocIndex]
+  );
   return (
     <EuiFlyout
       session="start"
@@ -162,11 +158,16 @@ export const FullScreenWaterfall = ({
             }
           `}
         >
-          {scrollElement ? (
-            <EmbeddableRenderer
-              type="APM_TRACE_WATERFALL_EMBEDDABLE"
-              getParentApi={getParentApi}
-              hidePanelChrome
+          {scrollElement && serviceName ? (
+            <FullTraceWaterfallFetcher
+              callApmApi={callApmApi}
+              serviceName={serviceName}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              traceId={traceId}
+              scrollElement={scrollElement}
+              onNodeClick={handleNodeClick}
+              onErrorClick={handleErrorClick}
             />
           ) : null}
         </div>

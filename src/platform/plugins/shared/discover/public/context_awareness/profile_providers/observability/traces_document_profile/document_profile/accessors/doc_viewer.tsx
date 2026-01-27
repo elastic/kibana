@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { i18n } from '@kbn/i18n';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import React from 'react';
 import type { DocumentProfileProvider } from '../../../../../profiles';
-import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
+import type { DocViewerExtension, DocViewerExtensionParams } from '../../../../../types';
 
 export const createGetDocViewer =
   (indexes: ObservabilityIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>

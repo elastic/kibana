@@ -20,6 +20,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { createCallApmApi } from '@kbn/apm-api-client';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -106,6 +107,7 @@ export class UnifiedDocViewerPublicPlugin
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
     };
+    const callApmApi = createCallApmApi(core);
     const services = {
       analytics,
       data,
@@ -118,6 +120,7 @@ export class UnifiedDocViewerPublicPlugin
       share,
       core,
       discoverShared,
+      callApmApi,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;
