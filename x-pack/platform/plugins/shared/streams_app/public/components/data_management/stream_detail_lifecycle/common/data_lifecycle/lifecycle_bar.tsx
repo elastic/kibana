@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { LifecyclePhase } from './data_lifecycle_summary';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
 
@@ -27,6 +28,11 @@ export const LifecycleBar = ({
 
   return (
     <>
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.streams.dataLifecycleSummary.panelLabel', {
+          defaultMessage: 'Data phases',
+        })}
+      </EuiText>
       <EuiSpacer size="xs" />
       <EuiPanel
         hasShadow={false}

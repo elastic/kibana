@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiPanel, EuiSkeletonRectangle, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiPanel,
+  EuiSkeletonRectangle,
+  EuiSpacer,
+  EuiText,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { DataLifecycleTimeline } from './data_lifecycle_timeline';
 import {
@@ -68,40 +75,37 @@ export const DataLifecycleSummary = ({
         </EuiPanel>
 
         <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
-          {showSkeleton ? (
-            <EuiSkeletonRectangle
-              width="100%"
-              height={50}
-              borderRadius="s"
-              css={{ marginBottom: 35 }}
-              data-test-subj="dataLifecycleSummary-skeleton"
-            />
-          ) : (
-            <>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.streams.dataLifecycleSummary.panelLabel', {
-                  defaultMessage: 'Data phases',
-                })}
-              </EuiText>
-              <LifecycleBar
-                phases={phases}
-                gridTemplateColumns={gridTemplateColumns}
-                phaseColumnSpans={phaseColumnSpans}
-                onPhaseClick={onPhaseClick}
+          <EuiFlexGroup direction="column" justifyContent="center" css={{ height: '100%' }}>
+            {showSkeleton ? (
+              <EuiSkeletonRectangle
+                width="100%"
+                height={50}
+                borderRadius="s"
+                css={{ marginBottom: 35 }}
+                data-test-subj="dataLifecycleSummary-skeleton"
               />
-              <DownsamplingBar
-                segments={downsamplingSegments}
-                gridTemplateColumns={gridTemplateColumns}
-              />
-              <EuiSpacer size="xs" />
-              <DataLifecycleTimeline
-                phases={phases}
-                isRetentionInfinite={isRetentionInfinite}
-                timelineSegments={timelineSegments}
-                gridTemplateColumns={gridTemplateColumns}
-              />
-            </>
-          )}
+            ) : (
+              <EuiFlexItem grow={false}>
+                <LifecycleBar
+                  phases={phases}
+                  gridTemplateColumns={gridTemplateColumns}
+                  phaseColumnSpans={phaseColumnSpans}
+                  onPhaseClick={onPhaseClick}
+                />
+                <DownsamplingBar
+                  segments={downsamplingSegments}
+                  gridTemplateColumns={gridTemplateColumns}
+                />
+                <EuiSpacer size="xs" />
+                <DataLifecycleTimeline
+                  phases={phases}
+                  isRetentionInfinite={isRetentionInfinite}
+                  timelineSegments={timelineSegments}
+                  gridTemplateColumns={gridTemplateColumns}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexGroup>
     </EuiPanel>
