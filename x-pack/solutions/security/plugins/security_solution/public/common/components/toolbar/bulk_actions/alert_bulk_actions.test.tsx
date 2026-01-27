@@ -39,7 +39,7 @@ function renderAlertBulkActions(props?: Partial<StatefulAlertBulkActionsProps>) 
 
 describe('AlertBulkActionsComponent', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('it renders', async () => {
