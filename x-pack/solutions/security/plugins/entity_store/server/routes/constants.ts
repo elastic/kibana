@@ -7,6 +7,7 @@
 
 import type { AuthzEnabled } from '@kbn/core/server';
 import { z } from '@kbn/zod';
+import { LogExtractionState } from '../domain/definitions/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -22,28 +23,16 @@ export const API_VERSIONS = {
 };
 
 export type LogExtractionBodyParams = z.infer<typeof LogExtractionBodyParams>;
-export const LogExtractionBodyParams = z.object({
-  filter: z.string().optional(),
-  fieldHistoryLength: z.number().int().optional().default(10),
-  additionalIndexPattern: z.string().optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('3h'),
-  // timeout: z
-  //   .string()
-  //   .regex(/[smdh]$/)
-  //   .optional(),
-  // TODO: add timeout once we have a way to set it as a task override param
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('1m'),
-  docsLimit: z.number().int().optional().default(10000),
-});
+// timeout: intentionally excluded from LogExtractionBodyParams
+// TODO: add timeout once we have a way to set it as a task override param
+export const LogExtractionBodyParams = LogExtractionState.pick({
+  filter: true,
+  fieldHistoryLength: true,
+  additionalIndexPattern: true,
+  lookbackPeriod: true,
+  frequency: true,
+  delay: true,
+  docsLimit: true,
+}).partial();
+
+

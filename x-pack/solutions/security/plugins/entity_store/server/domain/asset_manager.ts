@@ -14,6 +14,7 @@ import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extra
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
 import type { LogExtractionBodyParams } from '../routes/constants';
+import { ENGINE_STATUS } from './constants';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -74,7 +75,7 @@ export class AssetManager {
     try {
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
       const definition = getEntityDefinition(type, this.namespace);
-      const initialState = this.calculateInitialState(logExtractionParams);
+      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
 
       await Promise.all([
         this.engineDescriptorClient.init(type, initialState),
@@ -85,6 +86,8 @@ export class AssetManager {
           namespace: this.namespace,
         }),
       ]);
+
+      await this.engineDescriptorClient.update(type, {status: ENGINE_STATUS.STARTED});
 
       this.logger.debug(`Installed definition: ${type}`);
 
@@ -117,31 +120,4 @@ export class AssetManager {
     }
   }
 
-  private calculateInitialState(
-    logExtractionParams?: LogExtractionBodyParams
-  ): Partial<LogExtractionState> {
-    if (!logExtractionParams) {
-      return {};
-    }
-
-    const fieldsToExtract: Array<keyof LogExtractionBodyParams> = [
-      'filter',
-      'fieldHistoryLength',
-      'additionalIndexPattern',
-      'lookbackPeriod',
-      'delay',
-      'docsLimit',
-      'frequency',
-    ];
-
-    const result: Partial<LogExtractionState> = {};
-    for (const key of fieldsToExtract) {
-      const value = logExtractionParams[key];
-      if (value !== undefined) {
-        (result as Record<string, unknown>)[key] = value;
-      }
-    }
-
-    return result;
-  }
 }

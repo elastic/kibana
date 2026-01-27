@@ -81,8 +81,19 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
 };
 
 const engineDescriptorAttributesSchema = {
-  type: schema.string(),
-  status: schema.string(),
+  type: schema.oneOf([
+    schema.literal('user'),
+    schema.literal('host'),
+    schema.literal('service'),
+    schema.literal('generic'),
+  ]),
+  status: schema.oneOf([
+    schema.literal('installing'),
+    schema.literal('started'),
+    schema.literal('stopped'),
+    schema.literal('updating'),
+    schema.literal('error'),
+  ]),
   logExtractionState: schema.object({
     filter: schema.string(),
     additionalIndexPattern: schema.string(),
@@ -102,8 +113,8 @@ const engineDescriptorAttributesSchema = {
     })
   ),
   versionState: schema.object({
-    version: schema.number(),
-    state: schema.string(),
+    version: schema.oneOf([schema.literal(1), schema.literal(2)]),
+    state: schema.oneOf([schema.literal('running'), schema.literal('migrating')]),
     isMigratedFromV1: schema.boolean(),
   }),
 };
@@ -124,4 +135,5 @@ export const EngineDescriptorType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
   modelVersions: { 1: version1 },
+  hiddenFromHttpApis: true
 };
