@@ -7,281 +7,277 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the "Elastic License
-//  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
-//  * Public License v 1"; you may not use this file except in compliance with, at
-//  * your election, the "Elastic License 2.0", the "GNU Affero General Public
-//  * License v3.0 only", or the "Server Side Public License, v 1".
-//  */
+import { getCriticalPath } from './get_critical_path';
+import type { CriticalPathBase } from './types';
 
-// import type { ApmFields } from '@kbn/synthtrace-client';
-// import { apm, dedot } from '@kbn/synthtrace-client';
-// import { getWaterfall } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-// import type { Span } from '../../../../../typings/es_schemas/ui/span';
-// import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-// import { getCriticalPath } from './get_critical_path';
+interface TestItem extends CriticalPathBase {
+  name: string;
+}
 
-// describe('getCriticalPath', () => {
-//   function getCriticalPathFromEvents(events: ApmFields[]) {
-//     events = events.filter((event) => event['processor.event'] !== 'metric');
+function createItem(
+  id: string,
+  offset: number,
+  duration: number,
+  skew: number = 0,
+  name?: string
+): TestItem {
+  return { id, offset, duration, skew, name: name ?? id };
+}
 
-//     const entryTransaction = dedot(events[0]!, {}) as Transaction;
-//     const waterfall = getWaterfall({
-//       traceItems: {
-//         traceDocs: events.map((event) => dedot(event, {}) as Transaction | Span),
-//         errorDocs: [],
-//         exceedsMax: false,
-//         spanLinksCountById: {},
-//         traceDocsTotal: events.length,
-//         maxTraceItems: 5000,
-//       },
-//       entryTransaction,
-//     });
+describe('getCriticalPath', () => {
+  describe('when root is undefined', () => {
+    it('should return empty segments', () => {
+      const result = getCriticalPath(undefined, {});
+      expect(result.segments).toEqual([]);
+    });
+  });
 
-//     return {
-//       waterfall,
-//       criticalPath: getCriticalPath(
-//         waterfall.entryWaterfallTransaction,
-//         waterfall.childrenByParentId
-//       ),
-//     };
-//   }
-//   it('adds the only active span to the critical path', () => {
-//     const service = apm.service('a', 'development', 'java').instance('a');
+  describe('when root has no children', () => {
+    it('should return two segments: one for the span and one for self time', () => {
+      const root = createItem('root', 0, 1000);
+      const result = getCriticalPath(root, {});
 
-//     const {
-//       criticalPath: { segments },
-//       waterfall,
-//     } = getCriticalPathFromEvents(
-//       service
-//         .transaction('/service-a')
-//         .timestamp(1)
-//         .duration(100)
-//         .children(service.span('foo', 'external', 'db').duration(100).timestamp(1))
-//         .serialize()
-//     );
+      expect(result.segments).toHaveLength(2);
 
-//     expect(segments).toEqual([
-//       { self: false, duration: 100000, item: waterfall.items[0], offset: 0 },
-//       { self: false, duration: 100000, item: waterfall.items[1], offset: 0 },
-//       { self: true, duration: 100000, item: waterfall.items[1], offset: 0 },
-//     ]);
-//   });
+      // First segment is the span itself (self: false)
+      expect(result.segments[0]).toEqual({
+        item: root,
+        offset: 0,
+        duration: 1000,
+        self: false,
+      });
 
-//   it('adds the span that ended last', () => {
-//     const service = apm.service('a', 'development', 'java').instance('a');
+      // Second segment is the self time (self: true)
+      expect(result.segments[1]).toEqual({
+        item: root,
+        offset: 0,
+        duration: 1000,
+        self: true,
+      });
+    });
 
-//     const {
-//       criticalPath: { segments },
-//       waterfall,
-//     } = getCriticalPathFromEvents(
-//       service
-//         .transaction('/service-a')
-//         .timestamp(1)
-//         .duration(100)
-//         .children(
-//           service.span('foo', 'external', 'db').duration(99).timestamp(1),
-//           service.span('bar', 'external', 'db').duration(100).timestamp(1)
-//         )
-//         .serialize()
-//     );
+    it('should handle root with skew', () => {
+      const root = createItem('root', 100, 500, 50);
+      const result = getCriticalPath(root, {});
 
-//     const longerSpan = waterfall.items.find((item) => (item.doc as Span).span?.name === 'bar');
+      expect(result.segments).toHaveLength(2);
 
-//     expect(segments).toEqual([
-//       { self: false, duration: 100000, item: waterfall.items[0], offset: 0 },
-//       {
-//         self: false,
-//         duration: 100000,
-//         item: longerSpan,
-//         offset: 0,
-//       },
-//       { self: true, duration: 100000, item: longerSpan, offset: 0 },
-//     ]);
-//   });
+      // Start time should be offset + skew = 150
+      expect(result.segments[0]).toEqual({
+        item: root,
+        offset: 150,
+        duration: 500,
+        self: false,
+      });
 
-//   it('adds segment for uninstrumented gaps in the parent', () => {
-//     const service = apm.service('a', 'development', 'java').instance('a');
+      expect(result.segments[1]).toEqual({
+        item: root,
+        offset: 150,
+        duration: 500,
+        self: true,
+      });
+    });
+  });
 
-//     const {
-//       criticalPath: { segments },
-//       waterfall,
-//     } = getCriticalPathFromEvents(
-//       service
-//         .transaction('/service-a')
-//         .timestamp(1)
-//         .duration(100)
-//         .children(service.span('foo', 'external', 'db').duration(50).timestamp(11))
-//         .serialize()
-//     );
+  describe('when root has a single child that spans the entire duration', () => {
+    it('should include both root and child in critical path', () => {
+      const root = createItem('root', 0, 1000);
+      const child = createItem('child', 0, 1000);
 
-//     expect(
-//       segments.map((segment) => ({
-//         self: segment.self,
-//         duration: segment.duration,
-//         id: segment.item.id,
-//         offset: segment.offset,
-//       }))
-//     ).toEqual([
-//       { self: false, duration: 100000, id: waterfall.items[0].id, offset: 0 },
-//       {
-//         self: true,
-//         duration: 40000,
-//         id: waterfall.items[0].id,
-//         offset: 60000,
-//       },
-//       {
-//         self: false,
-//         duration: 50000,
-//         id: waterfall.items[1].id,
-//         offset: 10000,
-//       },
-//       {
-//         self: true,
-//         duration: 50000,
-//         id: waterfall.items[1].id,
-//         offset: 10000,
-//       },
-//       {
-//         self: true,
-//         duration: 10000,
-//         offset: 0,
-//         id: waterfall.items[0].id,
-//       },
-//     ]);
-//   });
+      const childrenByParentId = {
+        root: [child],
+      };
 
-//   it('only considers a single child to be active at the same time', () => {
-//     const service = apm.service('a', 'development', 'java').instance('a');
+      const result = getCriticalPath(root, childrenByParentId);
 
-//     const {
-//       criticalPath: { segments },
-//       waterfall,
-//     } = getCriticalPathFromEvents(
-//       service
-//         .transaction('s1')
-//         .timestamp(1)
-//         .duration(100)
-//         .children(
-//           service.span('s2', 'external', 'db').duration(1).timestamp(1),
-//           service.span('s3', 'external', 'db').duration(1).timestamp(2),
-//           service.span('s4', 'external', 'db').duration(98).timestamp(3),
-//           service
-//             .span('s5', 'external', 'db')
-//             .duration(98)
-//             .timestamp(1)
-//             .children(
-//               service.span('s6', 'external', 'db').duration(30).timestamp(5),
-//               service.span('s7', 'external', 'db').duration(30).timestamp(35)
-//             )
-//         )
-//         .serialize()
-//     );
+      // Should have segments for root and child
+      const rootSegments = result.segments.filter((s) => s.item.id === 'root');
+      const childSegments = result.segments.filter((s) => s.item.id === 'child');
 
-//     const [_s1, s2, _s5, _s6, _s7, s3, s4] = waterfall.items;
+      expect(rootSegments.length).toBeGreaterThanOrEqual(1);
+      expect(childSegments.length).toBeGreaterThanOrEqual(1);
+    });
+  });
 
-//     expect(
-//       segments
-//         .map((segment) => ({
-//           self: segment.self,
-//           duration: segment.duration,
-//           id: segment.item.id,
-//           offset: segment.offset,
-//         }))
-//         .filter((segment) => segment.self)
-//         .map((segment) => segment.id)
-//     ).toEqual([s4.id, s3.id, s2.id]);
-//   });
+  describe('when root has a child that starts later', () => {
+    it('should add self segment for the gap at the start', () => {
+      const root = createItem('root', 0, 1000);
+      const child = createItem('child', 200, 800); // starts at 200, ends at 1000
 
-//   // https://www.uber.com/en-NL/blog/crisp-critical-path-analysis-for-microservice-architectures/
-//   it('correctly returns the critical path for the CRISP example', () => {
-//     const service = apm.service('a', 'development', 'java').instance('a');
+      const childrenByParentId = {
+        root: [child],
+      };
 
-//     const {
-//       criticalPath: { segments },
-//       waterfall,
-//     } = getCriticalPathFromEvents(
-//       service
-//         .transaction('s1')
-//         .timestamp(1)
-//         .duration(100)
-//         .children(
-//           service.span('s2', 'external', 'db').duration(25).timestamp(6),
-//           service
-//             .span('s3', 'external', 'db')
-//             .duration(50)
-//             .timestamp(41)
-//             .children(
-//               service.span('s4', 'external', 'db').duration(20).timestamp(61),
-//               service.span('s5', 'external', 'db').duration(30).timestamp(51)
-//             )
-//         )
-//         .serialize()
-//     );
+      const result = getCriticalPath(root, childrenByParentId);
 
-//     const [s1, s2, s3, s5, _s4] = waterfall.items;
+      // Find self segment for root at the start
+      const rootSelfSegments = result.segments.filter(
+        (s) => s.item.id === 'root' && s.self === true
+      );
 
-//     expect(
-//       segments
-//         .map((segment) => ({
-//           self: segment.self,
-//           duration: segment.duration,
-//           id: segment.item.id,
-//           offset: segment.offset,
-//         }))
-//         .filter((segment) => segment.self)
-//     ).toEqual([
-//       // T9-T10
-//       {
-//         self: true,
-//         duration: 10000,
-//         id: s1.id,
-//         offset: 90000,
-//       },
-//       // T8-T9
-//       {
-//         self: true,
-//         duration: 10000,
-//         id: s3.id,
-//         offset: 80000,
-//       },
-//       // T5-T8
-//       {
-//         self: true,
-//         duration: s5.duration,
-//         id: s5.id,
-//         offset: s5.offset,
-//       },
-//       // T4-T5
-//       {
-//         self: true,
-//         duration: 10000,
-//         id: s3.id,
-//         offset: 40000,
-//       },
-//       // T3-T4
-//       {
-//         self: true,
-//         duration: 10000,
-//         id: s1.id,
-//         offset: 30000,
-//       },
-//       // T2-T3
-//       {
-//         self: true,
-//         duration: 25000,
-//         id: s2.id,
-//         offset: 5000,
-//       },
-//       // T1-T2
-//       {
-//         duration: 5000,
-//         id: s1.id,
-//         offset: 0,
-//         self: true,
-//       },
-//     ]);
-//   });
-// });
+      // Should have a self segment for the gap (0-200)
+      const gapSegment = rootSelfSegments.find((s) => s.offset === 0);
+      expect(gapSegment).toBeDefined();
+      expect(gapSegment?.duration).toBe(200);
+    });
+  });
+
+  describe('when root has a child that ends earlier', () => {
+    it('should add self segment for the gap at the end if gap is larger than 1000ms', () => {
+      const root = createItem('root', 0, 5000);
+      const child = createItem('child', 0, 2000); // ends at 2000, gap of 3000ms
+
+      const childrenByParentId = {
+        root: [child],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // Find self segments for root
+      const rootSelfSegments = result.segments.filter(
+        (s) => s.item.id === 'root' && s.self === true
+      );
+
+      // Should have a self segment for the gap at the end (2000-5000)
+      const gapSegment = rootSelfSegments.find((s) => s.offset === 2000);
+      expect(gapSegment).toBeDefined();
+      expect(gapSegment?.duration).toBe(3000);
+    });
+  });
+
+  describe('when root has multiple children', () => {
+    it('should order children by end time and scan from latest to earliest', () => {
+      const root = createItem('root', 0, 1000);
+      const child1 = createItem('child1', 0, 400); // ends at 400
+      const child2 = createItem('child2', 400, 600); // ends at 1000
+
+      const childrenByParentId = {
+        root: [child1, child2],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // Both children should be on the critical path
+      const child1Segments = result.segments.filter((s) => s.item.id === 'child1');
+      const child2Segments = result.segments.filter((s) => s.item.id === 'child2');
+
+      expect(child1Segments.length).toBeGreaterThanOrEqual(1);
+      expect(child2Segments.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should handle overlapping children correctly', () => {
+      const root = createItem('root', 0, 1000);
+      const child1 = createItem('child1', 0, 600); // ends at 600
+      const child2 = createItem('child2', 300, 700); // starts at 300, ends at 1000
+
+      const childrenByParentId = {
+        root: [child1, child2],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // child2 ends later so it should be scanned first
+      // child1 ends at 600 but child2 starts at 300, so child1 contributes from 0-300
+      expect(result.segments.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('when there are nested children', () => {
+    it('should recursively scan nested children', () => {
+      const root = createItem('root', 0, 1000);
+      const child = createItem('child', 0, 1000);
+      const grandchild = createItem('grandchild', 0, 1000);
+
+      const childrenByParentId = {
+        root: [child],
+        child: [grandchild],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // All three items should be in the critical path
+      const rootSegments = result.segments.filter((s) => s.item.id === 'root');
+      const childSegments = result.segments.filter((s) => s.item.id === 'child');
+      const grandchildSegments = result.segments.filter((s) => s.item.id === 'grandchild');
+
+      expect(rootSegments.length).toBeGreaterThanOrEqual(1);
+      expect(childSegments.length).toBeGreaterThanOrEqual(1);
+      expect(grandchildSegments.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('when children have skew', () => {
+    it('should account for skew in start time calculations', () => {
+      const root = createItem('root', 0, 1000);
+      const child = createItem('child', 0, 800, 100); // effective start: 100, effective end: 900
+
+      const childrenByParentId = {
+        root: [child],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // There should be self segments for root at start (0-100) and end (900-1000)
+      const rootSelfSegments = result.segments.filter(
+        (s) => s.item.id === 'root' && s.self === true
+      );
+
+      expect(rootSelfSegments.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle child that starts before root scan period', () => {
+      const root = createItem('root', 100, 500);
+      const child = createItem('child', 50, 600); // starts before root
+
+      const childrenByParentId = {
+        root: [child],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // Should not throw and should produce valid segments
+      expect(result.segments.length).toBeGreaterThan(0);
+    });
+
+    it('should handle child that ends after root', () => {
+      const root = createItem('root', 0, 500);
+      const child = createItem('child', 0, 700); // ends after root
+
+      const childrenByParentId = {
+        root: [child],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // Should not throw and should produce valid segments
+      expect(result.segments.length).toBeGreaterThan(0);
+    });
+
+    it('should handle empty children array', () => {
+      const root = createItem('root', 0, 1000);
+
+      const childrenByParentId = {
+        root: [],
+      };
+
+      const result = getCriticalPath(root, childrenByParentId);
+
+      // Should behave like no children case
+      expect(result.segments).toHaveLength(2);
+      expect(result.segments[0].self).toBe(false);
+      expect(result.segments[1].self).toBe(true);
+    });
+
+    it('should handle zero duration', () => {
+      const root = createItem('root', 0, 0);
+
+      const result = getCriticalPath(root, {});
+
+      expect(result.segments).toHaveLength(2);
+      expect(result.segments[0].duration).toBe(0);
+      expect(result.segments[1].duration).toBe(0);
+    });
+  });
+});

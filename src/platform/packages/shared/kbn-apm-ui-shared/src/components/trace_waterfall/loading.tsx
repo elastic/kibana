@@ -19,10 +19,9 @@ export function Loading() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText>
-          {i18n.translate(
-            'xpack.apm.traceWaterfallEmbeddable.loadingTraceWaterfallSkeletonTextLabel',
-            { defaultMessage: 'Loading trace waterfall summary' }
-          )}
+          {i18n.translate('xpack.apm.traceWaterfall.loadingTraceWaterfallSkeletonTextLabel', {
+            defaultMessage: 'Loading trace waterfall',
+          })}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
