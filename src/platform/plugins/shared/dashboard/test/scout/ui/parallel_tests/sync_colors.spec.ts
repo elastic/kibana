@@ -40,6 +40,7 @@ const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
   return JSON.parse(debugState) as DebugState;
 };
 
+// FTR-equivalent test was failing: See https://github.com/elastic/kibana/issues/235883
 // eslint-disable-next-line playwright/no-skipped-test
 spaceTest.describe.skip('Sync colors', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {

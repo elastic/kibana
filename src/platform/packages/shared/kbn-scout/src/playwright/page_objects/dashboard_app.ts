@@ -706,7 +706,6 @@ export class DashboardApp {
   /**
    * Clones a panel on the dashboard.
    * The cloned panel becomes a "by value" panel (not linked to library).
-   * Matches FTR's clonePanel(title) + the extra waits FTR does in tests.
    */
   async clonePanel(title?: string) {
     const panels = this.page.testSubj.locator('embeddablePanel');
@@ -718,7 +717,6 @@ export class DashboardApp {
         document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
       initialCount
     );
-    await this.waitForRenderComplete();
   }
 
   /**

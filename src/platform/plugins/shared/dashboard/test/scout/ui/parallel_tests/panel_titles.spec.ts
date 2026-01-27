@@ -55,12 +55,10 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.ESS_ONLY }, () => {
 
   const addLensPanelFromLibrary = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
-    await pageObjects.dashboard.waitForRenderComplete();
   };
 
   const addMarkdownPanelByValue = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
-    await pageObjects.dashboard.waitForRenderComplete();
   };
 
   const getClonedPanelTitle = async (pageObjects: PageObjects) => {
@@ -69,6 +67,16 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.ESS_ONLY }, () => {
     expect(clonedTitle, 'Cloned panel title not found after duplicating').toBeTruthy();
     return clonedTitle!;
   };
+
+  spaceTest('new panel by value has empty title', async ({ pageObjects }) => {
+    await spaceTest.step('add markdown panel by value', async () => {
+      await addMarkdownPanelByValue(pageObjects);
+    });
+
+    await spaceTest.step('verify title is empty', async () => {
+      await expect(pageObjects.dashboard.getPanelTitlesLocator()).toHaveCount(0);
+    });
+  });
 
   spaceTest('blank title clears unsaved changes', async ({ page, pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {

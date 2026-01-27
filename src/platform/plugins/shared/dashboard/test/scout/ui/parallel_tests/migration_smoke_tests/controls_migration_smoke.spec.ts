@@ -113,6 +113,13 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.ESS_ONLY }, (
         const selectionString = await getSelectionsString(page, speakerControlId);
         expect(selectionString).toBe('HAMLET, ROMEO, JULIET, BRUTUS');
       });
+
+      await spaceTest.step('verify pie chart reflects selected options', async () => {
+        const partitionChart = page.testSubj.locator('partitionVisChart');
+        await expect(partitionChart).toBeVisible();
+        const legendItems = partitionChart.locator('.echLegendItem__label');
+        await expect.poll(async () => await legendItems.count()).toBe(4);
+      });
     }
   );
 });
