@@ -95,11 +95,14 @@ export interface EmbeddableConversationFlyoutProps {
   onClose: () => void;
   ariaLabelledBy: string;
   /**
-   * Callback to register a function that will receive prop updates.
-   * Used internally to update flyout props without recreating it.
+   * Callback to register flyout control methods.
+   * Used internally to update flyout props and clear browser API tools.
    * @internal
    */
-  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
+  onRegisterCallbacks?: (callbacks: {
+    updateProps: (props: EmbeddableConversationProps) => void;
+    resetBrowserApiTools: () => void;
+  }) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

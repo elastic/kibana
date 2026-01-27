@@ -15,12 +15,13 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type {
   CreateRuleParams,
   FindRulesParams,
@@ -54,24 +55,25 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    try {
-      createRuleDataSchema.validate(params.data);
-    } catch (error) {
-      throw Boom.badRequest(`Error validating create rule data - ${(error as Error).message}`);
+    const parsed = createRuleDataSchema.safeParse(params.data);
+    if (!parsed.success) {
+      throw Boom.badRequest(
+        `Error validating create rule data - ${stringifyZodError(parsed.error)}`
+      );
     }
 
     const username = await this.getUserName();
     const nowIso = new Date().toISOString();
 
     const ruleAttributes: RuleSavedObjectAttributes = {
-      name: params.data.name,
-      tags: params.data.tags ?? [],
-      schedule: params.data.schedule,
-      enabled: params.data.enabled,
-      query: params.data.query,
-      timeField: params.data.timeField,
-      lookbackWindow: params.data.lookbackWindow,
-      groupingKey: params.data.groupingKey ?? [],
+      name: parsed.data.name,
+      tags: parsed.data.tags,
+      schedule: parsed.data.schedule,
+      enabled: parsed.data.enabled,
+      query: parsed.data.query,
+      timeField: parsed.data.timeField,
+      lookbackWindow: parsed.data.lookbackWindow,
+      groupingKey: parsed.data.groupingKey,
       createdBy: username,
       createdAt: nowIso,
       updatedBy: username,
@@ -122,10 +124,11 @@ export class RulesClient {
   }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    try {
-      updateRuleDataSchema.validate(data);
-    } catch (error) {
-      throw Boom.badRequest(`Error validating update rule data - ${(error as Error).message}`);
+    const parsed = updateRuleDataSchema.safeParse(data);
+    if (!parsed.success) {
+      throw Boom.badRequest(
+        `Error validating update rule data - ${stringifyZodError(parsed.error)}`
+      );
     }
 
     const username = await this.getUserName();
@@ -145,11 +148,12 @@ export class RulesClient {
     }
 
     const wasEnabled = Boolean(existingAttrs.enabled);
-    const willBeEnabled = data.enabled !== undefined ? Boolean(data.enabled) : wasEnabled;
+    const willBeEnabled =
+      parsed.data.enabled !== undefined ? Boolean(parsed.data.enabled) : wasEnabled;
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
-      ...data,
+      ...parsed.data,
       updatedBy: username,
       updatedAt: nowIso,
     };

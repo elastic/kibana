@@ -15,6 +15,7 @@ import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { createRuleDataSchema, type CreateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
@@ -36,7 +37,7 @@ export class CreateRuleRoute implements RouteHandler {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: createRuleDataSchema,
+      body: buildRouteValidationWithZod(createRuleDataSchema),
       params: createRuleParamsSchema,
     },
   } as const;
