@@ -25,7 +25,6 @@ describe('buildLifecyclePhases', () => {
       retentionPeriod: '30d',
       deletePhaseDescription: 'Delete phase description',
       deletePhaseColor: '#000000',
-      deletePhaseColorHover: '#111111',
     });
 
     expect(phases).toHaveLength(2);
@@ -46,7 +45,6 @@ describe('buildLifecyclePhases', () => {
       min_age: '30d',
       description: 'Delete phase description',
       color: '#000000',
-      colorHover: '#111111',
     });
   });
 
