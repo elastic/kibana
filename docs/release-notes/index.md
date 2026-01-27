@@ -248,6 +248,10 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes MSI commands for installing Elastic Agent and Fleet Server [#236994]({{kib-pull}}236994).
 
 **Discover**:
+* Fixes an issue with the "Search entire time range" option that could exclude some results if the time field was set to date nanos [#248495]({{kib-pull}}248495).
+* Fixes an issue where document viewer tabs were unnecessarily re-mounting on every refresh, leading to degraded performance [#248203]({{kib-pull}}248203).
+* Fixes an issue causing query drafts to be lost when switching between tabs without running the query first in {{esql}} mode [#247968]({{kib-pull}}247968).
+* Fixes an issue with {{esql}} tabs not loading properly [#246941]({{kib-pull}}246941).
 * Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting [#246664]({{kib-pull}}246664).
 * Fixes an issue with Discover tabs that occurs when navigating to a different tab while the previous tab is still initializing [#245752]({{kib-pull}}245752).
 * Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
