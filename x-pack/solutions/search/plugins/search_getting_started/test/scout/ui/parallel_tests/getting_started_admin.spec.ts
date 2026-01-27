@@ -139,6 +139,7 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
   });
 
   test('Tutorial cards open embedded console', async ({ pageObjects }) => {
+    await pageObjects.gettingStarted.expandTutorialCards();
     await test.step('search basics card opens console', async () => {
       await pageObjects.gettingStarted.clickTutorialCard('search_basics');
 
