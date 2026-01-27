@@ -225,30 +225,25 @@ export class TaskStore {
     // If a task with an API key is updated with a request
     if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
-      const apiKeyIdsToRemove: string[] = [];
+      const apiKeyIdsToRemoveMap = new Map<string, string>();
 
       docs.forEach((taskInstance) => {
         const { apiKey, userScope } = taskInstance;
         if (apiKey && userScope) {
           docsWithApiKeys.push(taskInstance);
           if (!userScope.apiKeyCreatedByUser) {
-            apiKeyIdsToRemove.push(userScope.apiKeyId);
+            apiKeyIdsToRemoveMap.set(taskInstance.id, userScope.apiKeyId);
           }
         }
       });
 
-      // we should invalidate the old API keys
-      if (apiKeyIdsToRemove.length) {
-        await bulkMarkApiKeysForInvalidation({
-          apiKeyIds: apiKeyIdsToRemove,
-          logger: this.logger,
-          savedObjectsClient: this.savedObjectsRepository,
-        });
-      }
-
       // and create new API keys using the new request
       if (docsWithApiKeys.length) {
-        return this.getApiKeyFromRequest(docsWithApiKeys, options.request);
+        const apiKeyAndUserScopeMap = await this.getApiKeyFromRequest(
+          docsWithApiKeys,
+          options.request
+        );
+        return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
       }
     }
 
@@ -586,8 +581,9 @@ export class TaskStore {
     { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
-    const apiKeyAndUserScopeMap =
-      (await this.regenerateApiKeyFromRequest(docs, options)) || new Map();
+    const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
+    const apiKeyAndUserScopeMap = regenerateResult?.apiKeyAndUserScopeMap || new Map();
+    const apiKeyIdsToRemoveMap = regenerateResult?.apiKeyIdsToRemoveMap || new Map();
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -635,7 +631,8 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map((updatedSavedObject) => {
+    const apiKeyIdsToRemove: string[] = [];
+    const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
           type: 'task',
@@ -654,8 +651,23 @@ export class TaskStore {
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate,
       });
+      const oldApiKey = apiKeyIdsToRemoveMap.get(updatedSavedObject.id);
+      if (oldApiKey) {
+        apiKeyIdsToRemove.push(oldApiKey);
+      }
       return asOk(result);
     });
+
+    // after successful updates we should invalidate the old API keys
+    if (apiKeyIdsToRemove.length) {
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
+      });
+    }
+
+    return updates;
   }
 
   public async bulkPartialUpdate(

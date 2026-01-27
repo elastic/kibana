@@ -1430,7 +1430,7 @@ describe('TaskStore', () => {
         bulkUpdate: jest.fn().mockResolvedValue({
           saved_objects: [
             {
-              id: '324242',
+              id: 'task:324242',
               type: 'task',
               attributes: {
                 ...bulkUpdateTask,
@@ -1492,7 +1492,19 @@ describe('TaskStore', () => {
     test('bulk update task with regenerated API key when api key, user scope, request, and regenerate api key flag are available', async () => {
       const mockScopedClient = {
         bulkUpdate: jest.fn().mockResolvedValue({
-          saved_objects: [],
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
         }),
       };
       mockGetScopedClient.mockReturnValue(mockScopedClient);
@@ -1569,7 +1581,19 @@ describe('TaskStore', () => {
     test('bulk update task with regenerated API key when api key but do not invalidate user created api keys', async () => {
       const mockScopedClient = {
         bulkUpdate: jest.fn().mockResolvedValue({
-          saved_objects: [],
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
         }),
       };
       mockGetScopedClient.mockReturnValue(mockScopedClient);
@@ -1655,11 +1679,119 @@ describe('TaskStore', () => {
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
+    test('bulk update task with regenerated API key when api key but do not invalidate api key if the update fails', async () => {
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+              error: {
+                type: 'document_missing_exception',
+                reason: '[5]: document missing',
+                index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+                shard: '0',
+                index: '.kibana_task_manager_8.16.0_001',
+              },
+            },
+          ],
+        }),
+      };
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      const mockUpdatedApiKey = Buffer.from('apiKeyIdUpdated:apiKey').toString('base64');
+
+      const mockUpdatedUserScope = {
+        apiKeyId: 'apiKeyIdUpdated',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task:324242', {
+        apiKey: mockUpdatedApiKey,
+        userScope: mockUpdatedUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      await store.bulkUpdate(
+        [
+          {
+            ...bulkUpdateTask,
+            apiKey: mockApiKey,
+            userScope: mockUserScope,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        }
+      );
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        {
+          ...bulkUpdateTask,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+        },
+        {
+          validate: false,
+        }
+      );
+
+      expect(mockGetScopedClient).toHaveBeenCalledWith(mockRequest, {
+        includedHiddenTypes: ['task'],
+        excludedExtensions: ['security', 'spaces'],
+      });
+
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [
+          {
+            ...bulkUpdateTask,
+            apiKey: mockApiKey,
+            userScope: mockUserScope,
+          },
+        ],
+        mockRequest,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockUpdatedApiKey,
+              userScope: mockUpdatedUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(logger.debug).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
     test('bulk update task with no API key changes when api key, user scope are not available and request and regenerate api key flag are available', async () => {
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
-            id: '324242',
+            id: 'task:324242',
             type: 'task',
             attributes: {
               ...bulkUpdateTask,
