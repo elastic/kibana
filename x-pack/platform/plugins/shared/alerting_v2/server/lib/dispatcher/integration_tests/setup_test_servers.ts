@@ -6,6 +6,7 @@
  */
 
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import { waitForAlertingVTwoSetup } from './helpers/wait';
 
 export async function setupTestServers(settings = {}) {
   const { startES } = createTestServers({
@@ -19,19 +20,27 @@ export async function setupTestServers(settings = {}) {
 
   const esServer = await startES();
 
-  const root = createRootWithCorePlugins(settings, { oss: false });
+  const startKibana = async () => {
+    const root = createRootWithCorePlugins(settings, { oss: false });
 
-  await root.preboot();
-  const coreSetup = await root.setup();
-  const coreStart = await root.start();
+    await root.preboot();
+    const coreSetup = await root.setup();
+    const coreStart = await root.start();
 
-  return {
-    esServer,
-    kibanaServer: {
+    return {
       root,
       coreSetup,
       coreStart,
       stop: async () => await root.shutdown(),
-    },
+    };
+  };
+
+  const kbnServer = await startKibana();
+
+  await waitForAlertingVTwoSetup(kbnServer.root);
+
+  return {
+    esServer,
+    kibanaServer: kbnServer,
   };
 }

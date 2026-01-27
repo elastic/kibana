@@ -7,23 +7,12 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { LoggerService } from '../../services/logger_service/logger_service';
 import { createMockLoggerService } from '../../services/logger_service/logger_service.mock';
 import { StorageService } from '../../services/storage_service/storage_service';
 import { DispatcherService } from '../dispatcher';
 import { setupTestServers } from './setup_test_servers';
-
-const TOTAL_FIELDS_LIMIT = 2500;
-
-interface TestKibanaServer extends TestKibanaUtils {
-  root: TestKibanaUtils['root'];
-  coreSetup: TestKibanaUtils['coreSetup'];
-  coreStart: TestKibanaUtils['coreStart'];
-  stop: () => Promise<void>;
-}
 
 /**
  * Test dataset representing alert events for a single rule with multiple episodes:
@@ -129,7 +118,7 @@ const ALERT_EVENTS_TEST_DATA = [
 
 describe('DispatcherService integration tests', () => {
   let esServer: TestElasticsearchUtils;
-  let kibanaServer: TestKibanaServer;
+  let kibanaServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;
   let dispatcherService: DispatcherService;
   let storageService: StorageService;
@@ -138,12 +127,8 @@ describe('DispatcherService integration tests', () => {
   beforeAll(async () => {
     const servers = await setupTestServers();
     esServer = servers.esServer;
-    kibanaServer = servers.kibanaServer as TestKibanaServer;
+    kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
-
-    // Create data streams
-    await createAlertEventsDataStream(esClient);
-    await createAlertActionsDataStream(esClient);
   });
 
   afterAll(async () => {
@@ -161,10 +146,7 @@ describe('DispatcherService integration tests', () => {
 
     // Setup services
     mockLoggerService = createMockLoggerService();
-    const logger = loggerMock.create();
-    const loggerService = new LoggerService(logger);
-    storageService = new StorageService(esClient, loggerService);
-
+    storageService = new StorageService(esClient, mockLoggerService.loggerService);
     dispatcherService = new DispatcherService(
       esClient,
       mockLoggerService.loggerService,
@@ -388,7 +370,7 @@ async function seedAlertEvents(
   events: Array<Record<string, any>>
 ): Promise<void> {
   const operations = events.flatMap((doc) => [
-    { index: { _index: ALERT_EVENTS_DATA_STREAM } },
+    { create: { _index: ALERT_EVENTS_DATA_STREAM } },
     doc,
   ]);
 
@@ -403,116 +385,12 @@ async function seedAlertActions(
   actions: Array<Record<string, any>>
 ): Promise<void> {
   const operations = actions.flatMap((doc) => [
-    { index: { _index: ALERT_ACTIONS_DATA_STREAM } },
+    { create: { _index: ALERT_ACTIONS_DATA_STREAM } },
     doc,
   ]);
 
   await esClient.bulk({
     operations,
     refresh: 'wait_for',
-  });
-}
-
-async function createAlertEventsDataStream(esClient: ElasticsearchClient): Promise<void> {
-  const componentTemplateName = `${ALERT_EVENTS_DATA_STREAM}-schema@component`;
-  const indexTemplateName = `${ALERT_EVENTS_DATA_STREAM}-schema@index-template`;
-
-  await esClient.cluster.putComponentTemplate({
-    name: componentTemplateName,
-    template: {
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': { type: 'date' },
-          type: { type: 'keyword' },
-          rule: {
-            properties: {
-              id: { type: 'keyword' },
-            },
-          },
-          source: { type: 'keyword' },
-          status: { type: 'keyword' },
-          group_hash: { type: 'keyword' },
-          episode_id: { type: 'keyword' },
-          episode_status: { type: 'keyword' },
-          episode_status_count: { type: 'long' },
-        },
-      },
-    },
-    _meta: {
-      managed: true,
-      description: `${ALERT_EVENTS_DATA_STREAM} schema component template`,
-    },
-  });
-
-  await esClient.indices.putIndexTemplate({
-    name: indexTemplateName,
-    index_patterns: [ALERT_EVENTS_DATA_STREAM],
-    data_stream: { hidden: true },
-    composed_of: [componentTemplateName],
-    priority: 500,
-    template: {
-      settings: {
-        'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-      },
-    },
-    _meta: {
-      managed: true,
-      description: `${ALERT_EVENTS_DATA_STREAM} index template`,
-    },
-  });
-
-  await esClient.indices.createDataStream({
-    name: ALERT_EVENTS_DATA_STREAM,
-  });
-}
-
-async function createAlertActionsDataStream(esClient: ElasticsearchClient): Promise<void> {
-  const componentTemplateName = `${ALERT_ACTIONS_DATA_STREAM}-schema@component`;
-  const indexTemplateName = `${ALERT_ACTIONS_DATA_STREAM}-schema@index-template`;
-
-  await esClient.cluster.putComponentTemplate({
-    name: componentTemplateName,
-    template: {
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': { type: 'date' },
-          group_hash: { type: 'keyword' },
-          last_series_event_timestamp: { type: 'date' },
-          expiry: { type: 'date' },
-          actor: { type: 'keyword' },
-          action_type: { type: 'keyword' },
-          episode_id: { type: 'keyword' },
-          rule_id: { type: 'keyword' },
-          source: { type: 'keyword' },
-        },
-      },
-    },
-    _meta: {
-      managed: true,
-      description: `${ALERT_ACTIONS_DATA_STREAM} schema component template`,
-    },
-  });
-
-  await esClient.indices.putIndexTemplate({
-    name: indexTemplateName,
-    index_patterns: [ALERT_ACTIONS_DATA_STREAM],
-    data_stream: { hidden: true },
-    composed_of: [componentTemplateName],
-    priority: 500,
-    template: {
-      settings: {
-        'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-      },
-    },
-    _meta: {
-      managed: true,
-      description: `${ALERT_ACTIONS_DATA_STREAM} index template`,
-    },
-  });
-
-  await esClient.indices.createDataStream({
-    name: ALERT_ACTIONS_DATA_STREAM,
   });
 }

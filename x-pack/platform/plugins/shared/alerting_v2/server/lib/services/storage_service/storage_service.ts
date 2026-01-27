@@ -43,7 +43,7 @@ export class StorageService implements StorageServiceContract {
     }
 
     const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc, i) => [
-      { index: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
+      { create: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
       doc,
     ]);
 
