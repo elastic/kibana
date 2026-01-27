@@ -68,6 +68,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    configurationOverrides,
   },
   context
 ) => {
@@ -192,6 +193,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
+  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
@@ -201,6 +205,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       modelProvider,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
+      configurationOverrides: effectiveOverrides,
     }),
     evictInternalEvents(),
     shareReplay()
