@@ -47,6 +47,7 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const { euiTheme } = useEuiTheme();
   const [docId, setDocId] = useState<string | null>(null);
+  const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
   const [activeFlyoutId, setActiveFlyoutId] = useState<
     typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
   >(null);
@@ -97,19 +98,23 @@ export const FullScreenWaterfall = ({
           docId: string;
           errorCount: number;
           errorDocId?: string;
+          docIndex?: string;
         }) => {
           if (params.errorCount > 1) {
             setActiveFlyoutId(spanFlyoutId);
             setActiveSection('errors-table');
             setDocId(params.docId);
+            setDocIndex(undefined);
           } else if (params.errorDocId) {
             setActiveFlyoutId(logsFlyoutId);
             setDocId(params.errorDocId);
+            setDocIndex(params.docIndex);
           }
         },
         onNodeClick: (nodeSpanId: string) => {
           setActiveSection(undefined);
           setDocId(nodeSpanId);
+          setDocIndex(undefined);
           setActiveFlyoutId(spanFlyoutId);
         },
         mode: 'full',
@@ -121,6 +126,7 @@ export const FullScreenWaterfall = ({
     setActiveFlyoutId(null);
     setActiveSection(undefined);
     setDocId(null);
+    setDocIndex(undefined);
   }
 
   return (
@@ -152,7 +158,7 @@ export const FullScreenWaterfall = ({
           css={css`
             width: 100%;
             & .embPanel__content {
-              display: block;
+              display: block !important;
             }
           `}
         >
@@ -176,7 +182,12 @@ export const FullScreenWaterfall = ({
             activeSection={activeSection}
           />
         ) : (
-          <LogsFlyout onCloseFlyout={handleCloseFlyout} id={docId} dataView={dataView} />
+          <LogsFlyout
+            onCloseFlyout={handleCloseFlyout}
+            id={docId}
+            index={docIndex}
+            dataView={dataView}
+          />
         )
       ) : null}
     </EuiFlyout>
