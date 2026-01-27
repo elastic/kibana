@@ -53,9 +53,6 @@ const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWith
         remaining: 0.5,
         isEstimated: false,
       },
-      fiveMinuteBurnRate: 0,
-      oneHourBurnRate: 0,
-      oneDayBurnRate: 0,
     },
     ...overrides,
   } as SLOWithSummaryResponse);
@@ -159,6 +156,9 @@ describe('SloOverviewFlyout', () => {
           status: 'HEALTHY',
           sliValue: 0.995,
           errorBudget: { initial: 0.01, consumed: 0.5, remaining: 0.5, isEstimated: false },
+          fiveMinuteBurnRate: 0.2,
+          oneHourBurnRate: 0.15,
+          oneDayBurnRate: 0.12,
         },
       }),
       createMockSlo({
@@ -168,6 +168,9 @@ describe('SloOverviewFlyout', () => {
           status: 'VIOLATED',
           sliValue: 0.85,
           errorBudget: { initial: 0.01, consumed: 1.5, remaining: -0.5, isEstimated: false },
+          fiveMinuteBurnRate: 0.3,
+          oneHourBurnRate: 0.25,
+          oneDayBurnRate: 0.22,
         },
       }),
     ];
