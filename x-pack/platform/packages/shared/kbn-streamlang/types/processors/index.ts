@@ -557,6 +557,51 @@ export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ConcatProcessor>;
 
+/**
+ * Network direction processor
+ */
+
+interface NetworkDirectionWithInternalNetworks {
+  internal_networks: string[];
+}
+
+const networkDirectionWithInternalNetworksSchema = z.object({
+  internal_networks: z.array(z.string()),
+}) satisfies z.Schema<NetworkDirectionWithInternalNetworks>;
+
+interface NetworkDirectionWithInternalNetworksField {
+  internal_networks_field: string;
+}
+
+const networkDirectionWithInternalNetworksFieldSchema = z.object({
+  internal_networks_field: StreamlangSourceField,
+}) satisfies z.Schema<NetworkDirectionWithInternalNetworksField>;
+
+interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
+  action: 'network_direction';
+  source_ip: string;
+  destination_ip: string;
+  ignore_missing?: boolean;
+}
+
+const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('network_direction'),
+  source_ip: StreamlangSourceField,
+  destination_ip: StreamlangSourceField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<NetworkDirectionCommonFields>;
+
+export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
+  (NetworkDirectionWithInternalNetworks | NetworkDirectionWithInternalNetworksField);
+
+export const networkDirectionProcessorSchema = z.intersection(
+  networkDirectionCommonFieldsSchema,
+  z.union([
+    networkDirectionWithInternalNetworksSchema,
+    networkDirectionWithInternalNetworksFieldSchema,
+  ])
+) satisfies z.Schema<NetworkDirectionProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -576,6 +621,7 @@ export type StreamlangProcessorDefinition =
   | TrimProcessor
   | JoinProcessor
   | ConcatProcessor
+  | NetworkDirectionProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -597,6 +643,7 @@ export const streamlangProcessorSchema = z.union([
   joinProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
+  networkDirectionProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
