@@ -36,11 +36,13 @@ export class EntityStorePlugin
   }
 
   public setup(core: EntityStoreCoreSetup, plugins: EntityStoreSetupPlugins) {
+    plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
+
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) =>
-        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger })
+        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger, request })
     );
 
     registerTasks(plugins.taskManager, this.logger, core);
@@ -53,6 +55,16 @@ export class EntityStorePlugin
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
     this.logger.info('Initializing plugin');
+
+    plugins.taskManager.registerEncryptedSavedObjectsClient(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: ['task'],
+      })
+    );
+
+    plugins.taskManager.registerApiKeyInvalidateFn(
+      plugins.security?.authc.apiKeys.invalidateAsInternalUser
+    );
   }
 
   public stop() {

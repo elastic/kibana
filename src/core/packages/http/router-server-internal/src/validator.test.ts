@@ -95,9 +95,15 @@ describe('Router validator', () => {
     expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
       /Invalid input: expected string, received number/
     );
-    expect(() => schemaValidation.getParams({})).toThrowError(/Invalid input: expected string, received undefined/);
-    expect(() => schemaValidation.getParams(undefined)).toThrowError(/Invalid input: expected object, received undefined/);
-    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(/Invalid input: expected string, received undefined/);
+    expect(() => schemaValidation.getParams({})).toThrowError(
+      /Invalid input: expected string, received undefined/
+    );
+    expect(() => schemaValidation.getParams(undefined)).toThrowError(
+      /Invalid input: expected object, received undefined/
+    );
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
+      /Invalid input: expected string, received undefined/
+    );
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
