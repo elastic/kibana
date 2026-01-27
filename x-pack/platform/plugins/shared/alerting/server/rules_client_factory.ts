@@ -245,7 +245,7 @@ export class RulesClientFactory {
           return false;
         }
         const user = securityService.authc.getCurrentUser(request);
-        return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
+        return (user && user.authentication_type === 'api_key') || request.isFakeRequest;
       },
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
