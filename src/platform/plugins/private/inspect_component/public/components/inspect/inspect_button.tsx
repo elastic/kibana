@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiHeaderSectionItemButton,
-  EuiShowFor,
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
@@ -77,7 +76,7 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
   const ButtonComponent = buttonLocation === 'header' ? EuiHeaderSectionItemButton : EuiButtonIcon;
 
   return (
-    <EuiShowFor sizes={['m', 'l', 'xl']}>
+    <>
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
       <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
         <ButtonComponent
@@ -104,6 +103,6 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
           setIsInspecting={setIsInspecting}
         />
       )}
-    </EuiShowFor>
+    </>
   );
 };
