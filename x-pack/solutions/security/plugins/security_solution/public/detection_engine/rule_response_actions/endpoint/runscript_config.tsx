@@ -56,6 +56,10 @@ const SCRIPT_TIMEOUT_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.scriptTimeoutLabel',
   { defaultMessage: 'Timeout' }
 );
+const SCRIPT_TIMEOUT_HELP = i18n.translate(
+  'xpack.securitySolution.runscriptConfig.scriptTimeoutValueTip',
+  { defaultMessage: 'In seconds' }
+);
 const OPTIONAL_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.optionalFieldLabel',
   { defaultMessage: 'optional' }
@@ -175,6 +179,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
           isDisabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
+        <EuiSpacer size="l" />
       </>
     );
   }
@@ -232,7 +237,7 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
             (osType, index) => {
               return (
                 <div key={osType}>
-                  <EuiSpacer size="s" />
+                  <EuiSpacer size="m" />
                   <RunScriptOsTypeConfig
                     platform={osType}
                     showFieldLabels={index === 0}
@@ -404,14 +409,13 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         const userProvidedTimeoutValue = ev.target.value;
         const updatedConfig = {
           ...config,
-          timeout: userProvidedTimeoutValue ? Number(userProvidedTimeoutValue) : undefined,
+          timeout: (userProvidedTimeoutValue as unknown as number) || undefined,
         };
         const { isValid, errors, timeout } = validateConfig(updatedConfig);
 
-        // IF timeout validation failed, then continue to display the exact value the user
-        // entered, so that they have an opportunity to correct it.
-        if (userProvidedTimeoutValue && !timeout.isValid) {
-          updatedConfig.timeout = userProvidedTimeoutValue as unknown as number;
+        // Now that we know the user's value is valid, convert it to a number since the API expects a number
+        if (userProvidedTimeoutValue && timeout.isValid) {
+          updatedConfig.timeout = Number(userProvidedTimeoutValue);
         }
 
         onChange({
@@ -452,7 +456,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
             helpText={
@@ -468,7 +472,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
             labelAppend={
@@ -498,6 +502,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           <EuiFormRow
             isInvalid={!currentValidationState.timeout.isValid}
             error={currentValidationState.timeout.errors?.join('; ')}
+            helpText={
+              currentValidationState.timeout.isValid && config.scriptId
+                ? SCRIPT_TIMEOUT_HELP
+                : undefined
+            }
             label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
             labelAppend={
               showFieldLabels ? (
