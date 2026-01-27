@@ -77,6 +77,7 @@ export interface ObservabilityLogsFetchDocumentByIdFeature {
   fetchLogDocumentById: (
     params: {
       id: string;
+      index?: string;
     },
     signal: AbortSignal
   ) => Promise<
