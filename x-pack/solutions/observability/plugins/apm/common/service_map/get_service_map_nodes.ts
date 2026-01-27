@@ -27,8 +27,7 @@ import type {
 
 import { groupResourceNodes } from './group_resource_nodes';
 import { getEdgeId, getExitSpanNodeId, isExitSpan } from './utils';
-
-export const FORBIDDEN_SERVICE_NAMES = ['constructor'];
+import { FORBIDDEN_SERVICE_NAMES } from './constants';
 
 // Exports helper functions for use in React Flow transformation
 

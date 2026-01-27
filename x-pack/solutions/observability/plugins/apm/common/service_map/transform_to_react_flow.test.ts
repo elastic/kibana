@@ -11,8 +11,7 @@ import { transformToReactFlow } from './transform_to_react_flow';
 import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { ServiceNodeData, GroupedNodeData } from './react_flow_types';
-
-const DEFAULT_EDGE_COLOR = '#98A2B3';
+import { DEFAULT_EDGE_COLOR } from './constants';
 
 // Helper to create a minimal raw response
 function createMockRawResponse(

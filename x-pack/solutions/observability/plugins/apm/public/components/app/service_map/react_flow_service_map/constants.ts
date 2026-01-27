@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// Re-export shared constants from common
-export { DEFAULT_EDGE_COLOR } from '../../../../../common/service_map/constants';
-
 /**
  * Layout constants for the React Flow service map (client-side only)
  */

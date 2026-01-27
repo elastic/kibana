@@ -13,8 +13,7 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
 } from './react_flow_types';
-
-const DEFAULT_EDGE_COLOR = '#98A2B3';
+import { DEFAULT_EDGE_COLOR } from './constants';
 
 // Note: 'db' and 'cache' types with 'all' are NOT groupable per NONGROUPED_SPANS config.
 // Use 'external' with 'http' subtype are groupable nodes.

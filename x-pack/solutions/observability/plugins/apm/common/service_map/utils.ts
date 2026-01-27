@@ -23,20 +23,12 @@ import {
   SPAN_TYPE,
 } from '../es_fields/apm';
 import type { ConnectionNodeLegacy, ServiceMapExitSpan, ServiceMapService } from './types';
-import { DEFAULT_EDGE_COLOR, DEFAULT_MARKER_SIZE } from './constants';
+import { DEFAULT_EDGE_COLOR, DEFAULT_MARKER_SIZE, NONGROUPED_SPANS } from './constants';
 
 export const invalidLicenseMessage = i18n.translate('xpack.apm.serviceMap.invalidLicenseMessage', {
   defaultMessage:
     "In order to access Service maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
 });
-
-const NONGROUPED_SPANS: Record<string, string[]> = {
-  aws: ['servicename'],
-  cache: ['all'],
-  db: ['all'],
-  external: ['graphql', 'grpc', 'websocket'],
-  template: ['handlebars'],
-};
 
 export function isSpanGroupingSupported(type?: string, subtype?: string) {
   if (!type || !(type in NONGROUPED_SPANS)) {
@@ -117,8 +109,6 @@ export function getEdgeId(sourceId: string, destinationId: string) {
 export function getExitSpanNodeId(span: ExternalConnectionNode) {
   return `>${span[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
 }
-
-export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';
 
 /**
  * Create an edge marker with the specified color
