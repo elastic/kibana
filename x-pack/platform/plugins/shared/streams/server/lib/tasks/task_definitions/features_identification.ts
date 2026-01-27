@@ -14,7 +14,7 @@ import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { getFeatureId } from '../../streams/feature/feature_client';
+import { getFeatureId, MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -81,12 +81,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   systemPrompt: featurePromptOverride,
                 });
 
-                const now = new Date().toISOString();
+                const now = Date.now();
                 const features = baseFeatures.map((feature) => ({
                   ...feature,
                   status: 'active' as const,
-                  last_seen: now,
+                  last_seen: new Date(now).toISOString(),
                   id: getFeatureId(stream.name, feature),
+                  expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
                 }));
 
                 await featureClient.bulk(
