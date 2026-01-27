@@ -16,7 +16,7 @@ export function ServiceGroupSaveButton() {
 
   const {
     query: { serviceGroup },
-  } = useAnyOfApmParams('/service-groups', '/services', '/service-map');
+  } = useAnyOfApmParams('/service-groups', '/services', '/service-map', '/react-flow-service-map');
 
   const isGroupEditMode = !!serviceGroup;
 

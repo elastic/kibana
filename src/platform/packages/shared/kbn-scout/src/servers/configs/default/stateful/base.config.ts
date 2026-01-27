@@ -181,6 +181,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       '--xpack.profiling.enabled=true',
+      // APM feature flags
+      '--xpack.apm.featureFlags.serviceMapUseReactFlow=true',
       // Fleet configuration
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {

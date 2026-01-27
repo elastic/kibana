@@ -34,6 +34,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
 
   const { query } = useAnyOfApmParams(
     '/service-map',
+    '/react-flow-service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
