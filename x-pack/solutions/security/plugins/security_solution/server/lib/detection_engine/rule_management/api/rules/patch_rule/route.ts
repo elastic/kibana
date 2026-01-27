@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../create_rule/utils';
+import { validateRuleResponseActions } from '../response_actions_validations';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,

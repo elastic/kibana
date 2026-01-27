@@ -45,7 +45,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
   ({ osType, selectedScriptId, onChange, onScriptsLoaded, 'data-test-subj': dataTestSubj }) => {
     const hasAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data, isLoading, error } = useGetCustomScripts<EndpointScript>(
+    const { data, isLoading, isFetched, error } = useGetCustomScripts<EndpointScript>(
       'endpoint',
       { osType },
       {
@@ -59,6 +59,19 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         },
       }
     );
+
+    const displayError = useMemo(() => {
+      if (error) {
+        return error.message;
+      }
+
+      if (isFetched && data?.length === 0) {
+        return i18n.translate(
+          'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
+          { defaultMessage: 'No scripts found' }
+        );
+      }
+    }, [data?.length, error, isFetched]);
 
     const clearCurrentSelectionHandler = useCallback(
       (ev: React.MouseEvent) => {
@@ -135,8 +148,8 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         valueOfSelected={selectedScript}
         fullWidth
         isLoading={isLoading}
-        isInvalid={!!error}
-        placeholder={error ? error.message : SELECT_INPUT_PLACEHOLDER}
+        isInvalid={!!displayError}
+        placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}
         onChange={handleScriptSelectorOnChange}
         aria-label={SELECT_INPUT_PLACEHOLDER}
       />
