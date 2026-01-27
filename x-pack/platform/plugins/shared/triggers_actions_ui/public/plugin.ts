@@ -30,7 +30,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -348,8 +348,25 @@ export class Plugin
           ];
 
           if (experimentalFeatures.unifiedRulesPage) {
-            await coreStart.application.navigateToApp('rules', { replace: true });
-            return () => {};
+            const currentLocation = params.history.location;
+            const search = currentLocation.search;
+
+            const [, page, id] = currentLocation.pathname.split('/');
+
+            switch (page) {
+              case 'rule':
+                await coreStart.application.navigateToApp('rules', {
+                  path: getRulesAppDetailsRoute(id),
+                  replace: true,
+                });
+                break;
+              default:
+                await coreStart.application.navigateToApp('rules', {
+                  path: currentLocation.pathname + search,
+                  replace: true,
+                });
+                break;
+            }
           }
           const { renderApp } = await import('./application/rules_app');
 
