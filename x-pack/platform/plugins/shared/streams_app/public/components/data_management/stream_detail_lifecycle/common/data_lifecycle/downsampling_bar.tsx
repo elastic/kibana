@@ -109,10 +109,10 @@ export const DownsamplingBar = ({ segments, gridTemplateColumns }: DownsamplingB
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
-        paddingSize="xs"
         style={{
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           borderRadius: '8px',
+          padding: '4px 2px',
         }}
       >
         <EuiFlexGrid

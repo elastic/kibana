@@ -37,10 +37,10 @@ export const LifecycleBar = ({
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
-        paddingSize="xs"
         css={{
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           borderRadius: '8px',
+          padding: '4px 2px',
         }}
       >
         <EuiFlexGrid
