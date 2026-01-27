@@ -8365,6 +8365,9 @@ components:
             "timeout": 60
           type: integer
     RunscriptParams:
+      description: |
+        > warn
+        > Run script response action will only be available with v9.4.0
       type: object
       properties:
         command:
@@ -8375,7 +8378,7 @@ components:
           description: >-
             Add a note that explains or describes the action. You can find your
             comment in the response actions history log. Example: "comment":
-            "Check processes"
+            "Collect data"
           type: string
         config:
           type: object
