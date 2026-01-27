@@ -501,6 +501,7 @@ export function StreamsTreeTable({
                 } as Streams.ingest.all.GetResponse
               }
               isWiredStream={item.type === 'wired'}
+              isTSDBMode={item.data_stream?.index_mode === 'time_series'}
             />
           ),
         },
