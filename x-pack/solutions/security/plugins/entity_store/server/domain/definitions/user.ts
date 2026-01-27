@@ -10,8 +10,6 @@ import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './commo
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect } from './field_retention_operations';
 
-export const USER_IDENTITY_FIELD = 'user.name';
-
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,

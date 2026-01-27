@@ -636,17 +636,29 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
-    expect(extractionResponse.body.count).toBe(1);
+    expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_service_default',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(1);
+    expect(entities.hits.hits).toHaveLength(2);
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject([
+      {
+        _index: '.entities.v2.latest.security_service_default',
+        _id: 'a0dfa1f1ee31c53378f0ffe1cd168deb',
+        _score: 1,
+        _source: {
+          'entity.name': 'non-generated-service-id',
+          'entity.type': 'Service',
+          '@timestamp': '2026-01-20T12:05:04.000Z',
+          'entity.id': 'non-generated-service-id',
+          'service.entity.id': 'non-generated-service-id',
+        },
+      },
       {
         _index: '.entities.v2.latest.security_service_default',
         _id: '0f9d5fcd02e63ca500ca9515f76ce174',
@@ -656,7 +668,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
           'entity.type': 'Service',
           '@timestamp': '2026-01-20T12:05:05.000Z',
           'entity.id': 'service:service-name',
-          'service.name': 'service:service-name',
+          'service.entity.id': 'service:service-name',
         },
       },
     ]);

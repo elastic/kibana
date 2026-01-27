@@ -363,7 +363,7 @@
       "@timestamp": "2026-01-20T12:05:04Z",
       "service": {
         "entity": {
-          "id": "service"
+          "id": "non-generated-service-id"
         }
       }
     }
