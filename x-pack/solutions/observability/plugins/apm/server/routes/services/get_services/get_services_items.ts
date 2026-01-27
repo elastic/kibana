@@ -19,7 +19,6 @@ import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
@@ -29,7 +28,6 @@ export interface ServicesItemsResponse {
   items: MergedServiceStat[];
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
-  sortField: ServiceInventoryFieldName;
 }
 
 export async function getServicesItems({
@@ -125,28 +123,10 @@ export async function getServicesItems({
         sloStats,
       }) ?? [];
 
-    // Determine the highest priority sort field based on available data
-    // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
-    const hasAlerts = alertCounts.length > 0;
-    const hasSlos = sloStats.length > 0;
-    const hasHealthStatuses = healthStatuses.length > 0;
-
-    let sortField: ServiceInventoryFieldName;
-    if (hasAlerts) {
-      sortField = ServiceInventoryFieldName.AlertsCount;
-    } else if (hasSlos) {
-      sortField = ServiceInventoryFieldName.SloStatus;
-    } else if (hasHealthStatuses) {
-      sortField = ServiceInventoryFieldName.HealthStatus;
-    } else {
-      sortField = ServiceInventoryFieldName.Throughput;
-    }
-
     return {
       items,
       maxCountExceeded,
       serviceOverflowCount,
-      sortField,
     };
   });
 }

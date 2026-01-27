@@ -11,7 +11,6 @@ import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { mergeServiceStats } from './merge_service_stats';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { Logger } from '@kbn/logging';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -173,56 +172,6 @@ describe('getServicesItems', () => {
     });
   });
 
-  describe('sort field priority', () => {
-    it('returns AlertsCount as sortField when alerts exist', async () => {
-      mockGetServicesAlerts.mockResolvedValue(mockAlertCounts);
-      mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
-      mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
-
-      const result = await getServicesItems({
-        ...baseParams,
-      });
-
-      expect(result.sortField).toBe(ServiceInventoryFieldName.AlertsCount);
-    });
-
-    it('returns SloStatus as sortField when no alerts but SLOs exist', async () => {
-      mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
-      mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
-
-      const result = await getServicesItems({
-        ...baseParams,
-      });
-
-      expect(result.sortField).toBe(ServiceInventoryFieldName.SloStatus);
-    });
-
-    it('returns HealthStatus as sortField when no alerts or SLOs but health statuses exist', async () => {
-      mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSloStats.mockResolvedValue([]);
-      mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
-
-      const result = await getServicesItems({
-        ...baseParams,
-      });
-
-      expect(result.sortField).toBe(ServiceInventoryFieldName.HealthStatus);
-    });
-
-    it('returns Throughput as sortField when no alerts, SLOs, or health statuses exist', async () => {
-      mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSloStats.mockResolvedValue([]);
-      mockGetHealthStatuses.mockResolvedValue([]);
-
-      const result = await getServicesItems({
-        ...baseParams,
-      });
-
-      expect(result.sortField).toBe(ServiceInventoryFieldName.Throughput);
-    });
-  });
-
   describe('error handling', () => {
     it('returns empty array and logs debug when getHealthStatuses fails', async () => {
       const error = new Error('Health status error');
@@ -286,7 +235,6 @@ describe('getServicesItems', () => {
         items: mockMergedItems,
         maxCountExceeded: false,
         serviceOverflowCount: 0,
-        sortField: ServiceInventoryFieldName.AlertsCount,
       });
     });
 

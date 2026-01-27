@@ -46,6 +46,48 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   },
 };
 
+/**
+ * Determines the default sort field based on available data in service items.
+ * Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+ */
+export function getAvailableFields(items: ServiceListItem[]) {
+  const hasAlerts = items.some((item) => item.alertsCount !== undefined && item.alertsCount > 0);
+  const hasSlos = items.some((item) => item.sloStatus !== undefined);
+  const hasHealthStatuses = items.some((item) => item.healthStatus !== undefined);
+
+  const availableFields = {
+    hasAlerts,
+    hasSlos,
+    hasHealthStatuses,
+  };
+
+  if (hasAlerts) {
+    return {
+      sortField: ServiceInventoryFieldName.AlertsCount,
+      ...availableFields,
+    };
+  }
+
+  if (hasSlos) {
+    return {
+      sortField: ServiceInventoryFieldName.SloStatus,
+      ...availableFields,
+    };
+  }
+
+  if (hasHealthStatuses) {
+    return {
+      sortField: ServiceInventoryFieldName.HealthStatus,
+      ...availableFields,
+    };
+  }
+
+  return {
+    sortField: ServiceInventoryFieldName.Throughput,
+    ...availableFields,
+  };
+}
+
 export function orderServiceItems({
   items,
   sortField,

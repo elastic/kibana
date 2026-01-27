@@ -7,7 +7,7 @@
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { SloStatus } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
-import { orderServiceItems } from './order_service_items';
+import { getAvailableFields, orderServiceItems } from './order_service_items';
 
 describe('orderServiceItems', () => {
   describe('default multi-level sorting (isDefaultSort=true)', () => {
@@ -241,6 +241,93 @@ describe('orderServiceItems', () => {
         'beta-service',
         'zebra-service',
       ]);
+    });
+  });
+});
+
+describe('getAvailableFields', () => {
+  it('returns AlertsCount sortField and correct flags when any service has alerts', () => {
+    const result = getAvailableFields([
+      { serviceName: 'service-a', alertsCount: 0 },
+      { serviceName: 'service-b', alertsCount: 5 },
+      { serviceName: 'service-c', sloStatus: 'violated' as SloStatus },
+    ]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.AlertsCount,
+      hasAlerts: true,
+      hasSlos: true,
+      hasHealthStatuses: false,
+    });
+  });
+
+  it('returns SloStatus sortField when no alerts but services have SLO status', () => {
+    const result = getAvailableFields([
+      { serviceName: 'service-a', alertsCount: 0 },
+      { serviceName: 'service-b', sloStatus: 'healthy' as SloStatus },
+      { serviceName: 'service-c', healthStatus: ServiceHealthStatus.critical },
+    ]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.SloStatus,
+      hasAlerts: false,
+      hasSlos: true,
+      hasHealthStatuses: true,
+    });
+  });
+
+  it('returns HealthStatus sortField when no alerts or SLOs but services have health status', () => {
+    const result = getAvailableFields([
+      { serviceName: 'service-a', alertsCount: 0 },
+      { serviceName: 'service-b', healthStatus: ServiceHealthStatus.healthy },
+      { serviceName: 'service-c', throughput: 100 },
+    ]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.HealthStatus,
+      hasAlerts: false,
+      hasSlos: false,
+      hasHealthStatuses: true,
+    });
+  });
+
+  it('returns Throughput sortField when no alerts, SLOs, or health statuses', () => {
+    const result = getAvailableFields([
+      { serviceName: 'service-a', throughput: 100 },
+      { serviceName: 'service-b', latency: 50 },
+    ]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.Throughput,
+      hasAlerts: false,
+      hasSlos: false,
+      hasHealthStatuses: false,
+    });
+  });
+
+  it('returns Throughput sortField for empty array', () => {
+    const result = getAvailableFields([]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.Throughput,
+      hasAlerts: false,
+      hasSlos: false,
+      hasHealthStatuses: false,
+    });
+  });
+
+  it('ignores alertsCount of 0 when determining alerts presence', () => {
+    const result = getAvailableFields([
+      { serviceName: 'service-a', alertsCount: 0 },
+      { serviceName: 'service-b', alertsCount: 0 },
+      { serviceName: 'service-c', sloStatus: 'degrading' as SloStatus },
+    ]);
+
+    expect(result).toEqual({
+      sortField: ServiceInventoryFieldName.SloStatus,
+      hasAlerts: false,
+      hasSlos: true,
+      hasHealthStatuses: false,
     });
   });
 });

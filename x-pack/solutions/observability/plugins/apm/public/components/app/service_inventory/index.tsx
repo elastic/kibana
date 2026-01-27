@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -28,7 +28,7 @@ import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
-import { orderServiceItems } from './service_list/order_service_items';
+import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
 import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
@@ -39,7 +39,6 @@ const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
   items: [],
   serviceOverflowCount: 0,
   maxCountExceeded: false,
-  sortField: ServiceInventoryFieldName.Throughput,
 };
 
 function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
@@ -181,19 +180,16 @@ export function ServiceInventory() {
     query: { rangeFrom, rangeTo, sortField },
   } = useApmParams('/services');
 
-  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
-
-  const displaySlos = mainStatisticsData.items.some((item) => 'sloStatus' in item);
-
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
-  const displayAlerts = mainStatisticsData.items.some(
-    (item) => ServiceInventoryFieldName.AlertsCount in item
-  );
-
-  // Use the sort field from the API response, which is based on available data
+  // Determine the default sort field based on available data in service items
   // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
-  const initialSortField = mainStatisticsData.sortField ?? ServiceInventoryFieldName.Throughput;
+  const {
+    sortField: initialSortField,
+    hasAlerts,
+    hasSlos,
+    hasHealthStatuses,
+  } = getAvailableFields(mainStatisticsData.items);
 
   const initialSortDirection = 'desc';
 
@@ -304,9 +300,9 @@ export function ServiceInventory() {
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
-            displayHealthStatus={displayHealthStatus}
-            displayAlerts={displayAlerts}
-            displaySlos={displaySlos}
+            displayHealthStatus={hasHealthStatuses}
+            displayAlerts={hasAlerts}
+            displaySlos={hasSlos}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
             sortFn={sortFn}
