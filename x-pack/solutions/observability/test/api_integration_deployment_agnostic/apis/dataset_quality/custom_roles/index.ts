@@ -38,10 +38,29 @@ const datasetQualityMonitorUserRole: KibanaRoleDescriptors = {
   kibana: [],
 };
 
-type CustomRoleNames = 'noAccessUserRole' | 'readUserRole' | 'datasetQualityMonitorUserRole';
+// Role with monitor privilege but NOT view_index_metadata
+// Used to test that canMonitor works with just monitor privilege
+const monitorOnlyUserRole: KibanaRoleDescriptors = {
+  elasticsearch: {
+    indices: [
+      {
+        names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
+        privileges: ['monitor', 'read'],
+      },
+    ],
+  },
+  kibana: [],
+};
+
+type CustomRoleNames =
+  | 'noAccessUserRole'
+  | 'readUserRole'
+  | 'datasetQualityMonitorUserRole'
+  | 'monitorOnlyUserRole';
 
 export const customRoles: Record<CustomRoleNames, KibanaRoleDescriptors> = {
   noAccessUserRole,
   readUserRole,
   datasetQualityMonitorUserRole,
+  monitorOnlyUserRole,
 };

@@ -80,6 +80,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Monitor only user', () => {
+      let supertestMonitorOnlyWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.monitorOnlyUserRole);
+        supertestMonitorOnlyWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('returns canMonitor true for user with only monitor privilege (not view_index_metadata)', async () => {
+        const resp = await callApiAs(supertestMonitorOnlyWithCookieCredentials, ['logs']);
+
+        // User has monitor privilege but not view_index_metadata, should still get canMonitor: true
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canMonitor).to.eql(true);
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canRead).to.eql(true);
+        // Should not have failure store privileges since view_index_metadata is not granted
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canReadFailureStore).to.eql(false);
+        expect(resp.body.datasetTypesPrivileges['logs-*-*'].canManageFailureStore).to.eql(false);
+      });
+    });
+
     describe('Admin user', () => {
       let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 

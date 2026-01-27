@@ -81,7 +81,7 @@ class DatasetQualityPrivileges {
         index,
         {
           canRead: privileges.read,
-          canMonitor: privileges.view_index_metadata,
+          canMonitor: privileges.view_index_metadata || privileges.monitor,
           canReadFailureStore: privileges[FAILURE_STORE_PRIVILEGE],
           canManageFailureStore: privileges[MANAGE_FAILURE_STORE_PRIVILEGE],
         },
