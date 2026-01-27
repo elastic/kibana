@@ -129,7 +129,6 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/zod'
   - '@kbn/cps'
-  - '@kbn/controls-renderer'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
