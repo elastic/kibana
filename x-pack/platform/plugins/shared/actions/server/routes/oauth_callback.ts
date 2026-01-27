@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import startCase from 'lodash/startCase';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
@@ -19,6 +20,12 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
+import { getTokenExtractor } from '../lib/oauth_token_extractors';
+
+// Build a map of connector specs by their metadata.id for quick lookup
+const connectorSpecsById = new Map(
+  Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
+);
 
 const querySchema = schema.object({
   code: schema.maybe(schema.string()),
@@ -286,12 +293,26 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
+          const actionTypeId = rawAction.attributes.actionTypeId;
+
+          // Look up connector spec defaults for OAuth authorization code auth type
+          const connectorSpec = connectorSpecsById.get(actionTypeId);
+          const oauthAuthType = connectorSpec?.auth?.types?.find(
+            (authType) =>
+              typeof authType === 'object' && authType.type === 'oauth_authorization_code'
+          );
+          const specDefaults = (oauthAuthType as { defaults?: Record<string, unknown> })?.defaults;
 
           // Extract OAuth config - for connector specs, secrets are stored directly
+          // Priority: secrets > config > spec defaults
           const clientId = secrets.clientId || config?.clientId;
           const clientSecret = secrets.clientSecret;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
           const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true; // Default to true (OAuth 2.0 recommended practice)
+
+          // Get token extractor from spec defaults, fall back to default extractor
+          const tokenExtractorName = specDefaults?.tokenExtractor as string | undefined;
+          const tokenExtractor = getTokenExtractor(tokenExtractorName);
 
           if (!clientId || !clientSecret || !tokenUrl) {
             throw new Error(
@@ -313,7 +334,8 @@ export const oauthCallbackRoute = (
               clientSecret,
             },
             configurationUtilities,
-            useBasicAuth
+            useBasicAuth,
+            tokenExtractor
           );
 
           // Store tokens

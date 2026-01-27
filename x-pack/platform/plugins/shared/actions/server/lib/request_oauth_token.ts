@@ -13,6 +13,7 @@ import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
 import { getBasicAuthHeader } from './get_basic_auth_header';
+import { type OAuthTokenExtractor, defaultTokenExtractor } from './oauth_token_extractors';
 
 export interface OAuthTokenResponse {
   tokenType: string;
@@ -28,7 +29,8 @@ export async function requestOAuthToken<T>(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   bodyRequest: AsApiContract<T>,
-  useBasicAuth: boolean = false
+  useBasicAuth: boolean = false,
+  tokenExtractor: OAuthTokenExtractor = defaultTokenExtractor
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
@@ -60,13 +62,7 @@ export async function requestOAuthToken<T>(
   });
 
   if (res.status === 200) {
-    return {
-      tokenType: res.data.token_type,
-      accessToken: res.data.access_token,
-      expiresIn: res.data.expires_in,
-      refreshToken: res.data.refresh_token,
-      refreshTokenExpiresIn: res.data.refresh_token_expires_in,
-    };
+    return tokenExtractor(res.data);
   } else {
     const errString = stringify(res.data);
     logger.warn(`error thrown getting the access token from ${tokenUrl}: ${errString}`);

@@ -10,6 +10,10 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { OAuthTokenResponse } from './request_oauth_token';
 import { requestOAuthToken } from './request_oauth_token';
 import type { AsApiContract } from '../../common';
+import {
+  type OAuthTokenExtractor,
+  defaultTokenExtractor,
+} from './oauth_token_extractors';
 
 export const OAUTH_AUTHORIZATION_CODE_GRANT_TYPE = 'authorization_code';
 
@@ -39,7 +43,8 @@ export async function requestOAuthAuthorizationCodeToken(
   logger: Logger,
   params: AuthorizationCodeOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities,
-  useBasicAuth: boolean = true // Default to true (OAuth 2.0 recommended practice)
+  useBasicAuth: boolean = true, // Default to true (OAuth 2.0 recommended practice)
+  tokenExtractor: OAuthTokenExtractor = defaultTokenExtractor
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<AuthorizationCodeOAuthRequestParams>(
     tokenUrl,
@@ -47,6 +52,7 @@ export async function requestOAuthAuthorizationCodeToken(
     configurationUtilities,
     logger,
     rewriteBodyRequest(params),
-    useBasicAuth
+    useBasicAuth,
+    tokenExtractor
   );
 }

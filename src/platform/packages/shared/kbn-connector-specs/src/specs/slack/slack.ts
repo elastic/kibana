@@ -40,6 +40,7 @@ export const Slack: ConnectorSpec = {
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope: 'search:read',
           scopeQueryParam: 'user_scope', // Slack OAuth v2 uses 'user_scope' for user token scopes
+          tokenExtractor: 'slackUserToken', // Slack returns user tokens nested in authed_user
           useBasicAuth: false, // Slack uses POST body for client credentials
         },
         overrides: {
