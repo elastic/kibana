@@ -20,8 +20,8 @@ import { registerGetRoute } from './register_get_route';
 import { registerCreateRoute } from './register_create_route';
 import { registerPostIndexDocCountRoute } from './register_post_index_doc_count';
 
-import { registerIndicesGet } from './indices_get';
-import { registerIndicesStats } from './indices_stats';
+import { registerIndicesGetRoute } from './indices_get';
+import { registerIndicesStatsRoute } from './indices_stats';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerClearCacheRoute(dependencies);
@@ -36,6 +36,6 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerGetRoute(dependencies);
   registerCreateRoute(dependencies);
   registerPostIndexDocCountRoute(dependencies);
-  registerIndicesGet(dependencies);
-  registerIndicesStats(dependencies);
+  registerIndicesGetRoute(dependencies);
+  registerIndicesStatsRoute(dependencies);
 }

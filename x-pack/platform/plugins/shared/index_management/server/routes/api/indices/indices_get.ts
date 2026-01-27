@@ -10,7 +10,7 @@ import { addBasePath } from '..';
 import type { MeteringStatsResponse } from '../../../lib/types';
 import type { Index } from '../../../../common/types/indices';
 
-export function registerIndicesGet({ router, lib: { handleEsError }, config }: RouteDependencies) {
+export function registerIndicesGetRoute({ router, lib: { handleEsError }, config }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/indices_get'),

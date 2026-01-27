@@ -7,7 +7,7 @@
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-export function registerIndicesStats({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerIndicesStatsRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/indices_stats'),
