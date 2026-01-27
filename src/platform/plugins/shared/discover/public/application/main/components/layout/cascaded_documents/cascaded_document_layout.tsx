@@ -47,7 +47,8 @@ export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'>
 const ESQLDataCascade = React.memo(
   ({ rows, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
     const {
-      cascadedDocumentsState,
+      availableCascadeGroups,
+      selectedCascadeGroups,
       esqlQuery,
       esqlVariables,
       timeRange,
@@ -65,7 +66,7 @@ const ESQLDataCascade = React.memo(
     }, [registerCascadeRequestsInspectorAdapter]);
 
     const cascadeGroupData = useGroupedCascadeData({
-      cascadedDocumentsState,
+      selectedCascadeGroups,
       rows,
       queryMeta,
       esqlVariables,
@@ -122,8 +123,8 @@ const ESQLDataCascade = React.memo(
         size="s"
         overscan={25}
         data={cascadeGroupData}
-        cascadeGroups={cascadedDocumentsState.availableCascadeGroups}
-        initialGroupColumn={cascadedDocumentsState.selectedCascadeGroups}
+        cascadeGroups={availableCascadeGroups}
+        initialGroupColumn={selectedCascadeGroups}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>

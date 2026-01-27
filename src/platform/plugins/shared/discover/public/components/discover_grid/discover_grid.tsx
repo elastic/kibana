@@ -85,8 +85,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       return getColumnsConfigurationAccessor(() => ({}))();
     }, [getColumnsConfigurationAccessor]);
 
-    const cascadedDocumentsState = cascadedDocumentsContext?.cascadedDocumentsState;
-
     const cascadeGroupingChangeHandler = useCallback(
       (cascadeGrouping: string[]) => {
         return cascadedDocumentsContext?.cascadeGroupingChangeHandler(cascadeGrouping);
@@ -101,10 +99,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     const externalAdditionalControls = useMemo(() => {
       const additionalControls = [
         customExternalAdditionalControls,
-        cascadedDocumentsState?.availableCascadeGroups.length && props.isPlainRecord
+        cascadedDocumentsContext?.availableCascadeGroups.length && props.isPlainRecord
           ? groupBySelectorRenderer(
-              cascadedDocumentsState.availableCascadeGroups,
-              cascadedDocumentsState.selectedCascadeGroups
+              cascadedDocumentsContext.availableCascadeGroups,
+              cascadedDocumentsContext.selectedCascadeGroups
             )
           : null,
       ].filter(Boolean);
@@ -113,13 +111,13 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         <React.Fragment>{additionalControls}</React.Fragment>
       ) : null;
     }, [
-      cascadedDocumentsState,
+      cascadedDocumentsContext,
       customExternalAdditionalControls,
       groupBySelectorRenderer,
       props.isPlainRecord,
     ]);
 
-    return props.isPlainRecord && !!cascadedDocumentsState?.selectedCascadeGroups.length ? (
+    return props.isPlainRecord && !!cascadedDocumentsContext?.selectedCascadeGroups.length ? (
       <CascadedDocumentsProvider value={cascadedDocumentsContext}>
         <LazyCascadedDocumentsLayout {...props} />
       </CascadedDocumentsProvider>

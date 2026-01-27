@@ -130,7 +130,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
   const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
-    isCascadedDocumentsVisible(tab.cascadedDocumentsState, tab.appState.query)
+    isCascadedDocumentsVisible(
+      tab.cascadedDocumentsState.availableCascadeGroups,
+      tab.appState.query
+    )
   );
 
   const fetchCounter = useRef<number>(0);

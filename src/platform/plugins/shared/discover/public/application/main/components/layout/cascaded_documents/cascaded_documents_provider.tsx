@@ -19,8 +19,8 @@ import type {
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 
-export interface CascadedDocumentsContext {
-  cascadedDocumentsState: CascadedDocumentsState;
+export interface CascadedDocumentsContext
+  extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
@@ -38,14 +38,13 @@ export const CascadedDocumentsProvider = cascadedDocumentsContext.Provider;
 const SUPPORTED_CASCADE_GROUPING_COUNT = 1;
 
 export const isCascadedDocumentsVisible = (
-  cascadedDocumentsState: CascadedDocumentsState | undefined,
+  availableCascadeGroups: CascadedDocumentsContext['availableCascadeGroups'],
   query: DiscoverAppState['query']
-): cascadedDocumentsState is CascadedDocumentsState => {
+) => {
   const isEsqlQuery = isOfAggregateQueryType(query);
   const isValidState = Boolean(
-    cascadedDocumentsState &&
-      cascadedDocumentsState.availableCascadeGroups.length > 0 &&
-      cascadedDocumentsState.availableCascadeGroups.length <= SUPPORTED_CASCADE_GROUPING_COUNT
+    availableCascadeGroups.length > 0 &&
+      availableCascadeGroups.length <= SUPPORTED_CASCADE_GROUPING_COUNT
   );
 
   return isEsqlQuery && isValidState;
@@ -54,7 +53,7 @@ export const isCascadedDocumentsVisible = (
 export const useCascadedDocumentsContext = () => {
   const context = useContext(cascadedDocumentsContext);
 
-  if (!isCascadedDocumentsVisible(context?.cascadedDocumentsState, context?.esqlQuery)) {
+  if (!context || !isCascadedDocumentsVisible(context.availableCascadeGroups, context.esqlQuery)) {
     throw new Error(
       'useCascadedDocumentsContext must be used with a valid CascadedDocumentsContext'
     );

@@ -8,7 +8,6 @@
  */
 
 import { useRef, useEffect } from 'react';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import {
@@ -26,26 +25,26 @@ import {
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { type ESQLDataGroupNode } from '../blocks';
-import type { CascadedDocumentsState } from '../../../../state_management/redux';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 
-interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'> {
-  cascadedDocumentsState: CascadedDocumentsState;
+interface UseGroupedCascadeDataProps
+  extends Pick<UnifiedDataTableProps, 'rows'>,
+    Pick<CascadedDocumentsContext, 'selectedCascadeGroups' | 'esqlVariables'> {
   queryMeta: ESQLStatsQueryMeta;
-  esqlVariables: ESQLControlVariable[] | undefined;
 }
 
 /**
  * Function returns the data for the cascade group.
  */
 export const useGroupedCascadeData = ({
-  cascadedDocumentsState,
+  selectedCascadeGroups,
   rows,
   queryMeta,
   esqlVariables,
 }: UseGroupedCascadeDataProps) => {
   return useMemo(
     () =>
-      cascadedDocumentsState.selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
+      selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
         let dataAccessorKey: string = cur;
 
         const selectedGroupVariable = esqlVariables?.find(
@@ -88,8 +87,8 @@ export const useGroupedCascadeData = ({
             // we need to find the record in acc that has the same value for the previous level of cascade grouping
             const previousLevelRecord = acc.find(
               (r: ESQLDataGroupNode) =>
-                r[cascadedDocumentsState.selectedCascadeGroups[levelIdx - 1]] ===
-                record[cascadedDocumentsState.selectedCascadeGroups[levelIdx - 1]]
+                r[selectedCascadeGroups[levelIdx - 1]] ===
+                record[selectedCascadeGroups[levelIdx - 1]]
             );
 
             if (previousLevelRecord) {
@@ -100,7 +99,7 @@ export const useGroupedCascadeData = ({
 
         return acc;
       }, [] as ESQLDataGroupNode[]),
-    [cascadedDocumentsState.selectedCascadeGroups, esqlVariables, queryMeta, rows]
+    [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]
   );
 };
 

@@ -492,14 +492,15 @@ function DiscoverDocumentsComponent({
   const cascadedDocumentsState = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
-      !isCascadedDocumentsVisible(cascadedDocumentsState, query) ||
+      !isCascadedDocumentsVisible(cascadedDocumentsState.availableCascadeGroups, query) ||
       !isOfAggregateQueryType(query)
     ) {
       return undefined;
     }
 
     return {
-      cascadedDocumentsState,
+      availableCascadeGroups: cascadedDocumentsState.availableCascadeGroups,
+      selectedCascadeGroups: cascadedDocumentsState.selectedCascadeGroups,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
