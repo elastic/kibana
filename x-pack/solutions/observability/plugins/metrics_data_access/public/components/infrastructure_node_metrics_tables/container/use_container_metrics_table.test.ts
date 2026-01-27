@@ -21,17 +21,7 @@ describe('useContainerMetricsTable hook', () => {
   >;
 
   it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ terms: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.dataset': 'kubernetes.container' } }, { ...filterClauseDsl }],
-      },
-    };
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -42,15 +32,17 @@ describe('useContainerMetricsTable hook', () => {
     renderHook(() =>
       useContainerMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
       })
     );
 
+    const kueryWithEventModuleFilter = `(event.dataset: "kubernetes.container") AND (${kuery})`;
+
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          filterKuery: kueryWithEventModuleFilter,
         }),
       })
     );

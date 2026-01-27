@@ -13,11 +13,7 @@ describe('metricsToApiOptions', () => {
   type TestNodeTypeMetricsField = 'test.node.type.field1' | 'test.node.type.field2';
 
   const testMetricsMapField1First: MetricsQueryOptions<TestNodeTypeMetricsField> = {
-    sourceFilter: {
-      term: {
-        'event.module': 'test',
-      },
-    },
+    sourceFilter: `event.module: "test"`,
     groupByField: 'test.node.type.groupingField',
     metricsMap: {
       'test.node.type.field1': {
@@ -32,11 +28,7 @@ describe('metricsToApiOptions', () => {
   };
 
   const testMetricsMapField1Second: MetricsQueryOptions<TestNodeTypeMetricsField> = {
-    sourceFilter: {
-      term: {
-        'event.module': 'test',
-      },
-    },
+    sourceFilter: `event.module: "test"`,
     groupByField: 'test.node.type.groupingField',
     metricsMap: {
       'test.node.type.field2': {
@@ -57,7 +49,7 @@ describe('metricsToApiOptions', () => {
     expect(options).toEqual({
       aggregation: 'avg',
       groupBy: 'test.node.type.groupingField',
-      filterQuery: JSON.stringify({ bool: { filter: [{ term: { 'event.module': 'test' } }] } }),
+      filterKuery: `event.module: "test"`,
       metrics: [
         {
           field: 'test.node.type.field1',
