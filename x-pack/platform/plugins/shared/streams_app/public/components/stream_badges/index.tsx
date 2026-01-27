@@ -167,20 +167,16 @@ export function LifecycleBadge({
 export function DiscoverBadgeButton({
   definition,
   isWiredStream,
-  isTSDBMode: isTSDBModeProp,
 }: {
   definition: Streams.ingest.all.GetResponse;
   isWiredStream: boolean;
-  /** When provided from listing data, uses this instead of definition.index_mode */
-  isTSDBMode?: boolean;
 }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  // Use prop if provided (from listing data), otherwise use index_mode from definition (API response)
-  const isTSDBMode = isTSDBModeProp ?? definition.index_mode === 'time_series';
+  const isTSDBMode = definition.index_mode === 'time_series';
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
   const indexPatterns = getIndexPatternsForStream(definition.stream);
