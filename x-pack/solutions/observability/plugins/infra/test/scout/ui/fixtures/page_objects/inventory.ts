@@ -214,4 +214,24 @@ export class InventoryPage {
   public async clickNoDataPageAddDataButton() {
     await this.noDataPageActionButton.click();
   }
+
+  public async filterByQueryBar(query: string) {
+    const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.clear();
+    await queryBar.fill(query);
+    await queryBar.press('Enter');
+    await this.waitForNodesToLoad();
+  }
+
+  public async selectPalette(
+    palette: 'status' | 'temperature' | 'cool' | 'warm' | 'positive' | 'negative'
+  ) {
+    await this.page.getByTestId('openLegendControlsButton').click();
+    await this.page.getByTestId('legendControlsPalette').selectOption(palette);
+    await this.page.getByTestId('applyLegendControlsButton').click();
+    await this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Legend Options' })
+      .waitFor({ state: 'hidden' });
+  }
 }
