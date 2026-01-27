@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createDashboardTool } from './create_dashboard';
-export { createVisualizationsTool } from './create_visualizations';
 export { manageDashboardTool } from './manage_dashboard';

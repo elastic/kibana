@@ -23,6 +23,11 @@ import {
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import {
+  type AttachmentPanel,
+  isLensAttachmentPanel,
+  isGenericAttachmentPanel,
+} from '@kbn/dashboard-agent-common';
+import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
   LARGE_PANEL_WIDTH,
@@ -72,39 +77,145 @@ export const getMarkdownPanelHeight = (content: string): number =>
   calculateMarkdownPanelHeight(content);
 
 /**
- * Normalizes panel configurations (visualization attachment IDs) to the correct DashboardPanel format.
- * @param visualizationIds - Array of visualization attachment IDs
+ * Normalizes panel configurations to the correct DashboardPanel format.
+ * Handles two panel types:
+ * - LensAttachmentPanel: Lens panels with visualization config in API format (LensApiSchemaType)
+ * - GenericAttachmentPanel: Non-Lens panels with raw config (type is the actual embeddable type)
+ *
+ * @param panels - Array of panel entries
  * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
- * @param attachments - The attachment state manager to resolve visualization configs from
  */
 export const normalizePanels = (
-  visualizationIds: string[] | undefined,
-  yOffset: number = 0,
-  attachments: AttachmentStateManager
+  panels: AttachmentPanel[] | undefined,
+  yOffset: number = 0
 ): DashboardPanel[] => {
-  const panelIds = visualizationIds ?? [];
+  const panelList = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
   let currentY = yOffset;
 
-  for (const attachmentId of panelIds) {
-    const config = resolveLensConfigFromAttachment(attachmentId, attachments);
-    const w = getPanelWidth(config.type);
+  for (const panel of panelList) {
+    let dashboardPanel: DashboardPanel | null = null;
 
-    // Check if panel fits in current row, if not move to next row
-    if (currentX + w > DASHBOARD_GRID_COLUMN_COUNT) {
-      currentX = 0;
-      currentY += DEFAULT_PANEL_HEIGHT;
+    if (isLensAttachmentPanel(panel)) {
+      // Lens panel: convert from API format to LensAttributes
+      const config = panel.visualization as LensApiSchemaType;
+      const w = getPanelWidth(config.type);
+
+      if (currentX + w > DASHBOARD_GRID_COLUMN_COUNT) {
+        currentX = 0;
+        currentY += DEFAULT_PANEL_HEIGHT;
+      }
+
+      dashboardPanel = buildLensPanelFromApi(config, {
+        x: currentX,
+        y: currentY,
+        w,
+        h: DEFAULT_PANEL_HEIGHT,
+      });
+      currentX += w;
+    } else if (isGenericAttachmentPanel(panel)) {
+      // Generic panel: build from raw configuration (type is the actual embeddable type)
+      dashboardPanel = buildPanelFromRawConfig(panel.type, panel.rawConfig, panel.title, {
+        currentX,
+        currentY,
+      });
+
+      if (dashboardPanel) {
+        currentX += dashboardPanel.grid.w;
+        if (currentX >= DASHBOARD_GRID_COLUMN_COUNT) {
+          currentX = 0;
+          currentY += DEFAULT_PANEL_HEIGHT;
+        }
+      }
     }
 
-    dashboardPanels.push(
-      buildLensPanelFromApi(config, { x: currentX, y: currentY, w, h: DEFAULT_PANEL_HEIGHT })
-    );
-
-    currentX += w;
+    if (dashboardPanel) {
+      dashboardPanels.push(dashboardPanel);
+    }
   }
 
   return dashboardPanels;
+};
+
+/**
+ * Builds a dashboard panel from raw configuration.
+ * Handles different embeddable types (lens, markdown, etc.)
+ */
+const buildPanelFromRawConfig = (
+  embeddableType: string,
+  rawConfig: Record<string, unknown>,
+  title: string | undefined,
+  position: { currentX: number; currentY: number }
+): DashboardPanel | null => {
+  const { currentX, currentY } = position;
+
+  if (embeddableType === 'lens') {
+    // For Lens panels, rawConfig is LensAttributes
+    const lensAttributes = rawConfig as LensAttributes;
+
+    // Determine panel width based on visualization type
+    const visType = lensAttributes.visualizationType;
+    const isSmallChart =
+      visType === 'lnsMetric' || visType === 'lnsLegacyMetric' || visType === 'lnsGauge';
+    const w = isSmallChart ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
+
+    // Check if panel fits in current row
+    let x = currentX;
+    let y = currentY;
+    if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+      x = 0;
+      y += DEFAULT_PANEL_HEIGHT;
+    }
+
+    const lensConfig: LensSerializedAPIConfig = {
+      title: title ?? lensAttributes.title ?? 'Panel',
+      attributes: lensAttributes,
+    };
+
+    return {
+      type: 'lens',
+      grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
+      config: lensConfig,
+    };
+  } else if (embeddableType === MARKDOWN_EMBEDDABLE_TYPE) {
+    // For markdown panels
+    const content = (rawConfig as { content?: string }).content ?? '';
+    const h = Math.max(
+      MARKDOWN_MIN_HEIGHT,
+      Math.min(MARKDOWN_MAX_HEIGHT, content.split('\n').length + 2)
+    );
+    const w = MARKDOWN_PANEL_WIDTH;
+
+    let x = currentX;
+    let y = currentY;
+    if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+      x = 0;
+      y += DEFAULT_PANEL_HEIGHT;
+    }
+
+    return {
+      type: MARKDOWN_EMBEDDABLE_TYPE,
+      grid: { x, y, w, h },
+      config: { content },
+    };
+  }
+
+  // For other embeddable types, try to build a generic panel
+  // This is a fallback that may not work for all panel types
+  const w = LARGE_PANEL_WIDTH;
+  let x = currentX;
+  let y = currentY;
+  if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+    x = 0;
+    y += DEFAULT_PANEL_HEIGHT;
+  }
+
+  return {
+    type: embeddableType,
+    grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
+    config: rawConfig,
+  };
 };
 
 /**

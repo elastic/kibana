@@ -5,32 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-
-/** Attachment type identifier for dashboard state */
-export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
-
-export const dashboardAttachmentDataSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  markdownContent: z.string(),
-  visualizationIds: z.array(z.string()),
-});
-
-/**
- * Data for a dashboard attachment.
- */
-export interface DashboardAttachmentData {
-  /** dashboard title */
-  title: string;
-  /** dashboard description */
-  description: string;
-  /** markdown content for the summary panel */
-  markdownContent: string;
-  /** array of visualization attachment IDs */
-  visualizationIds: string[];
-}
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  dashboardAttachmentDataSchema,
+  type DashboardAttachmentData,
+} from '@kbn/dashboard-agent-common';
 
 /**
  * Creates the definition for the `dashboard` attachment type.
@@ -61,8 +41,17 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
 };
 
 const formatDashboardAttachment = (data: DashboardAttachmentData): string => {
-  const vizCount = data.visualizationIds.length;
-  return `Dashboard: "${data.title}" - ${data.description} (${vizCount} visualization${
-    vizCount !== 1 ? 's' : ''
-  })`;
+  // Count top-level panels plus panels in all sections
+  const sectionPanelCount = (data.sections ?? []).reduce(
+    (acc, section) => acc + section.panels.length,
+    0
+  );
+  const panelCount = data.panels.length + sectionPanelCount;
+  const sectionCount = data.sections?.length ?? 0;
+  const sectionInfo =
+    sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
+
+  return `Dashboard: "${data.title}" - ${data.description} (${panelCount} panel${
+    panelCount !== 1 ? 's' : ''
+  }${sectionInfo})`;
 };

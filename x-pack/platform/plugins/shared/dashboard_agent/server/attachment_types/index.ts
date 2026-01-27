@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export {
-  createDashboardAttachmentType,
-  DASHBOARD_ATTACHMENT_TYPE,
-  dashboardAttachmentDataSchema,
-  type DashboardAttachmentData,
-} from './dashboard';
+export { createDashboardAttachmentType } from './dashboard';

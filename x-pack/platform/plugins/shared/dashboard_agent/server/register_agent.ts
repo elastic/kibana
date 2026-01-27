@@ -6,15 +6,12 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
-import {
-  dashboardElement,
-  visualizationElement,
-  SupportedChartType,
-} from '@kbn/agent-builder-common/tools/tool_result';
+import { dashboardElement, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { DASHBOARD_AGENT_ID } from '@kbn/dashboard-agent-common';
 import { dashboardTools } from '../common';
 
-export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
+export { DASHBOARD_AGENT_ID };
 
 export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
   agentBuilder.agents.register({
@@ -25,15 +22,9 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
     avatar_icon: 'dashboardApp',
     configuration: {
       research: {
-        instructions: `## Dashboard Tools
+        instructions: `## Dashboard Tool
 
-- ${
-          dashboardTools.createVisualizations
-        }: Creates multiple visualization configurations in a single batch operation
-- ${dashboardTools.createDashboard}: Creates an in-memory dashboard with visualization panels
-- ${
-          dashboardTools.manageDashboard
-        }: Updates an existing in-memory dashboard (add/remove panels, update metadata)
+- ${dashboardTools.manageDashboard}: Create or update an in-memory dashboard with visualizations
 
 ## Creating a Dashboard
 
@@ -44,65 +35,56 @@ When the user asks to create a dashboard:
    - Use ${platformCoreTools.getIndexMapping} to discover actual field names
    - If no relevant data exists, inform the user and suggest what data IS available
 
-2. **Create visualizations in batch** - Call ${
-          dashboardTools.createVisualizations
-        } with an array of visualization descriptions:
-   - Each visualization should have a \`query\` that references actual index names and field names you discovered
-   - Example query: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
-   - Pass \`index\` when you know the target index pattern to improve performance
-   - Pass \`esql\` if you have a pre-generated query to improve performance
-   - Pass \`chartType\` (${Object.values(SupportedChartType).join(
-     ', '
-   )}) to skip chart type detection
-   - The tool returns an array of results, each with an \`attachment_id\` for use in dashboard creation
-   - Example input:
-     \`\`\`
-     {
-       "visualizations": [
-         { "query": "Show total CPU usage as a metric", "index": "metrics-*", "chartType": "Metric" },
-         { "query": "Show memory usage over time", "index": "metrics-*", "chartType": "XY" }
-       ]
-     }
-     \`\`\`
-
-3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
-   - \`title\`: Dashboard title
-   - \`description\`: Dashboard description
-   - \`visualizations\`: Array of \`attachment_id\` values from the ${
-     dashboardTools.createVisualizations
-   } call
-   - \`markdownContent\`: A markdown summary displayed at the top of the dashboard
+2. **Create the dashboard with visualizations** - Call ${dashboardTools.manageDashboard} with:
+   - \`title\`: Dashboard title (required for new dashboards)
+   - \`description\`: Dashboard description (required for new dashboards)
+   - \`addVisualizations\`: Array of visualization configurations to create inline:
+     - Each item should have a \`query\` that references actual index names and field names you discovered
+     - Example query: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
+     - Pass \`index\` when you know the target index pattern to improve performance
+     - Pass \`esql\` if you have a pre-generated query to improve performance
+     - Pass \`chartType\` (${Object.values(SupportedChartType).join(
+       ', '
+     )}) to skip chart type detection
+   - \`markdownContent\`: (optional) A markdown summary displayed at the top of the dashboard
      - Should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text)
      - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends\\n- **Memory usage** patterns"
 
+   Example input:
+   \`\`\`
+   {
+     "title": "Server Metrics Dashboard",
+     "description": "Overview of server performance metrics",
+     "addVisualizations": [
+       { "query": "Show total CPU usage as a metric", "index": "metrics-*", "chartType": "Metric" },
+       { "query": "Show memory usage over time", "index": "metrics-*", "chartType": "XY" }
+     ],
+     "markdownContent": "### Server Metrics\\n\\nThis dashboard shows key performance indicators."
+   }
+   \`\`\`
+
 The dashboard is created as an **in-memory dashboard** (not saved automatically). The user can review and save it using the dashboard UI.
 
-
 **CRITICAL RULES:**
-- NEVER call ${dashboardTools.createVisualizations} without first discovering what data exists
+- NEVER call ${dashboardTools.manageDashboard} without first discovering what data exists
 - NEVER invent index names or field names - only use indices/fields you found via ${
           platformCoreTools.listIndices
         } and ${platformCoreTools.getIndexMapping}
-- When creating a dashboard: ALWAYS call ${dashboardTools.createDashboard} to complete the request
-
 
 ## Updating a Dashboard
 
 When the user wants to modify an existing in-memory dashboard:
 
-1. **Get the previous dashboard's dashboardAttachmentId** - This was returned by ${
-          dashboardTools.createDashboard
-        } or a previous ${dashboardTools.manageDashboard} call
+1. **Get the previous dashboard's dashboardAttachmentId** - This was returned by a previous ${
+          dashboardTools.manageDashboard
+        } call
 
-2. **Create any new visualizations** - If adding new panels, call ${
-          dashboardTools.createVisualizations
-        } first
-
-3. **Call ${dashboardTools.manageDashboard}** with:
-   - \`dashboardAttachmentId\`: The \`dashboardAttachmentId\` from the previous dashboard operation
-   - \`visualizationsToAdd\`: (optional) Array of \`attachment_id\` values for new visualizations to add
-   - \`visualizationsToRemove\`: (optional) Array of visualization \`attachment_id\` values to remove from the dashboard
+2. **Call ${dashboardTools.manageDashboard}** with:
+   - \`dashboardAttachmentId\`: The ID from the previous operation
+   - \`addVisualizations\`: (optional) Array of new visualization configs to add
+   - \`addVisualizationAttachments\`: (optional) Array of existing visualization attachment IDs to add
+   - \`removePanelIds\`: (optional) Array of panel IDs to remove from the dashboard
    - \`title\`: (optional) Updated dashboard title
    - \`description\`: (optional) Updated dashboard description
    - \`markdownContent\`: (optional) Updated markdown summary
@@ -111,19 +93,23 @@ The tool updates the dashboard attachment and returns the same \`dashboardAttach
 
 **Example workflow:**
 1. User: "Create a dashboard with CPU metrics"
-   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping} -> ${
-          dashboardTools.createVisualizations
-        } -> ${dashboardTools.createDashboard}
+   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping}
+   -> ${dashboardTools.manageDashboard}({ title: "...", addVisualizations: [...] })
    -> Returns dashboard with \`dashboardAttachmentId: "dash-abc123"\`
 
 2. User: "Add memory metrics to that dashboard"
-   -> ${
-     dashboardTools.createVisualizations
-   } (for memory viz) -> Returns \`attachment_id: "viz-456"\`
-   -> ${
-     dashboardTools.manageDashboard
-   }({ dashboardAttachmentId: "dash-abc123", visualizationsToAdd: ["viz-456"] })
+   -> ${dashboardTools.manageDashboard}({
+        dashboardAttachmentId: "dash-abc123",
+        addVisualizations: [{ query: "Show memory usage over time", ... }]
+      })
    -> Returns updated dashboard (same \`dashboardAttachmentId\`, new version)
+
+3. User: "Remove the first panel"
+   -> ${dashboardTools.manageDashboard}({
+        dashboardAttachmentId: "dash-abc123",
+        removePanelIds: ["panel-id-to-remove"]
+      })
+   -> Returns updated dashboard with panel removed
 `,
       },
       answer: {
@@ -132,8 +118,6 @@ The tool updates the dashboard attachment and returns the same \`dashboardAttach
       tools: [
         {
           tool_ids: [
-            dashboardTools.createDashboard,
-            dashboardTools.createVisualizations,
             dashboardTools.manageDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,
@@ -150,7 +134,6 @@ The tool updates the dashboard attachment and returns the same \`dashboardAttach
 function renderDashboardResultPrompt() {
   const { dashboard } = ToolResultType;
   const { tagName, attributes } = dashboardElement;
-  const { tagName: visualizationTagName } = visualizationElement;
 
   return `### RENDERING DASHBOARDS (REQUIRED)
 
@@ -160,9 +143,6 @@ When a tool call returns a result of type "${dashboard}", you MUST render the da
 
 **Critical rules (highest priority)**
 * If one or more "${dashboard}" tool results exist in the conversation, your response MUST include exactly ONE \`<${tagName}>\` element for the MOST RECENT "${dashboard}" tool result.
-* When the user asked to create/update a dashboard, you MUST NOT render intermediate visualizations:
-  - Do NOT emit any \`<${visualizationTagName}>\` elements.
-  - Do NOT paste visualization JSON/configs in your message.
 * Never wrap the \`<${tagName}>\` element in backticks or code blocks. Emit it as plain text on its own line.
 
 **Rules**
@@ -185,7 +165,10 @@ Tool response includes:
     "description": "Dashboard showing metrics",
     "markdownContent": "## Overview\\nThis dashboard shows...",
     "panelCount": 3,
-    "visualizationIds": ["viz1", "viz2"]
+    "panels": [
+      { "type": "inline", "panelId": "panel-1", "title": "CPU Usage", "chartType": "Metric" },
+      { "type": "inline", "panelId": "panel-2", "title": "Memory Usage", "chartType": "XY" }
+    ]
   }
 }
 

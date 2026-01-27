@@ -33,6 +33,7 @@ import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/ur
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
+import { useDashboardAgentContext } from './hooks/use_dashboard_agent_context';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -106,6 +107,10 @@ export function DashboardApp({
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useObservabilityAIAssistantContext({
+    dashboardApi,
+  });
+
+  useDashboardAgentContext({
     dashboardApi,
   });
 
