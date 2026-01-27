@@ -230,11 +230,6 @@ export class SLOPlugin
       createSLOFlyout: getCreateSLOFormFlyout,
     });
 
-    plugins.discoverShared.features.registry.register({
-      id: 'observability-slo-details',
-      sloDetailsFlyout: getSLODetailsFlyout,
-    });
-
     return {
       getCreateSLOFormFlyout,
       getSLODetailsFlyout,
