@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/data-views-plugin'
-  - '@kbn/deeplinks-observability'
   - '@kbn/slo-schema'
 tags:
   - plugin
