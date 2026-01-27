@@ -81,6 +81,22 @@ export function generateBuiltInStepSnippet(
         with: { duration: '5s' },
       };
       break;
+    case 'workflow.execute':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
+      };
+      break;
+    case 'workflow.executeAsync':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
+      };
+      break;
     default:
       parameters = {
         with: { '# Add parameters here': '' },

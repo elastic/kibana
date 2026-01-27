@@ -15,6 +15,7 @@ import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
+import type { WorkflowsResponse } from '../../model/types';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
@@ -37,6 +38,8 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
+  workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
