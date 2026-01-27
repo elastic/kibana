@@ -89,6 +89,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const initialVisInstance = await createVisInstance(runtimeState.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
+    let initialProjectRoutingOverrides: ProjectRoutingOverrides;
+    if (initialVisInstance.type.getProjectRoutingOverrides) {
+      initialProjectRoutingOverrides = await initialVisInstance.type.getProjectRoutingOverrides(
+        initialVisInstance.params
+      );
+    }
+    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+      initialProjectRoutingOverrides
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -159,17 +169,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
         initialVisInstance.params
       );
     }
-
-    // Track project routing overrides
-    let initialProjectRoutingOverrides: ProjectRoutingOverrides;
-    if (initialVisInstance.type.getProjectRoutingOverrides) {
-      initialProjectRoutingOverrides = await initialVisInstance.type.getProjectRoutingOverrides(
-        initialVisInstance.params
-      );
-    }
-    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
-      initialProjectRoutingOverrides
-    );
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
