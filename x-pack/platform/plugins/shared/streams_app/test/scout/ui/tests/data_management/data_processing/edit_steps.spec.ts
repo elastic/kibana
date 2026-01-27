@@ -124,4 +124,28 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     // Edit button should be disabled or show tooltip
     await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
   });
+
+  test('should delete a condition and persist after save', async ({ page, pageObjects }) => {
+    // Verify condition exists before deletion
+    await expect(page.getByTestId('streamsAppConditionBlock')).toBeVisible();
+    expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+    // Delete the condition
+    await pageObjects.streams.removeCondition(0);
+    await pageObjects.streams.confirmDeleteInModal();
+
+    // Verify condition is removed from the UI
+    expect(await pageObjects.streams.getConditionsListItemsFast()).toHaveLength(0);
+
+    // Save the changes
+    await pageObjects.streams.saveStepsListChanges();
+
+    // Wait for save to complete and verify condition remains deleted
+    // Reload the page to verify the deletion persisted
+    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+
+    // Verify condition is still gone after reload
+    expect(await pageObjects.streams.getConditionsListItemsFast()).toHaveLength(0);
+    await expect(page.getByTestId('streamsAppConditionBlock')).toBeHidden();
+  });
 });

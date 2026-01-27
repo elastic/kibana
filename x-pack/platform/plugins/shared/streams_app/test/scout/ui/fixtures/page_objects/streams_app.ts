@@ -644,6 +644,11 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
+  async removeCondition(pos: number) {
+    await this.clickEditCondition(pos);
+    await this.page.getByRole('button', { name: 'Delete condition' }).click();
+  }
+
   async waitForModifiedFieldsDetection() {
     const badge = this.page.getByTestId('streamsAppModifiedFieldsBadge');
     await expect(badge).toBeVisible({ timeout: 30_000 });

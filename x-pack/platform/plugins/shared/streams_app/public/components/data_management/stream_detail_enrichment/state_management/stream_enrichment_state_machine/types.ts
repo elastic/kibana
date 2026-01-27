@@ -75,6 +75,8 @@ export interface StreamEnrichmentContextType {
   // Validation errors for processors (namespace, reserved fields, type mismatches)
   validationErrors: Map<string, StreamlangValidationError[]>;
   fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
+  // Whether a save operation is in progress (used to prevent stream.received from interrupting save)
+  isSaving: boolean;
 }
 
 export type StreamEnrichmentEvent =
