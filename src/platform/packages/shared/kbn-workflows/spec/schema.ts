@@ -405,7 +405,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
-// Base schema for workflow.execute step
+// Base schema shared by both workflow.execute and workflow.executeAsync
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: z.object({
     'workflow-id': z.string().min(1),
@@ -421,6 +421,11 @@ export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
 });
 export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
@@ -545,6 +550,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     MergeStepSchema,
     WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -559,6 +565,7 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -749,7 +756,6 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
-  output: z.object({}),
   consts: z.object({}),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;

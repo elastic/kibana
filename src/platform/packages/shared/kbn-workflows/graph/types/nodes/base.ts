@@ -14,6 +14,7 @@ import {
   HttpStepSchema,
   KibanaStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
 } from '../../../spec/schema';
 
@@ -76,3 +77,10 @@ export const WorkflowExecuteGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WorkflowExecuteStepSchema,
 });
 export type WorkflowExecuteGraphNode = z.infer<typeof WorkflowExecuteGraphNodeSchema>;
+
+export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.executeAsync'),
+  configuration: WorkflowExecuteAsyncStepSchema,
+});
+export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
