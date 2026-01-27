@@ -10,6 +10,8 @@
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
+
+// Matchers
 export { expect } from './expect';
 
 // Types for Playwright options

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect } from '../../../../../src/playwright';
+import { apiTest } from '../../../../../src/playwright';
 import { createCasePayload } from '../../../fixtures/constants';
+import { expect } from '../../../../../api';
 
 apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   let caseId: string;
@@ -20,7 +21,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       ...createCasePayload,
       owner: caseOwner,
     });
-    expect(createdResponse.status).toBe(200);
+    expect(createdResponse).toHaveStatusCode(200);
     expect(createdResponse.data.owner).toBe(caseOwner);
     expect(createdResponse.data.status).toBe('open');
     caseId = createdResponse.data.id;
@@ -29,13 +30,13 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.cases.delete([caseId]);
     const fetchedResponse = await apiServices.cases.get(caseId);
-    expect(fetchedResponse.status).toBe(404);
+    expect(fetchedResponse).toHaveStatusCode(404);
     caseId = '';
   });
 
   apiTest(`should fetch case with 'cases.get'`, async ({ apiServices }) => {
     const fetchedResponse = await apiServices.cases.get(caseId);
-    expect(fetchedResponse.status).toBe(200);
+    expect(fetchedResponse).toHaveStatusCode(200);
   });
 
   apiTest(`should update case with 'cases.update'`, async ({ apiServices }) => {
@@ -49,7 +50,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
         severity: 'medium',
       },
     ]);
-    expect(updatedResponse.status).toBe(200);
+    expect(updatedResponse).toHaveStatusCode(200);
     expect(updatedResponse.data).toHaveLength(1);
     expect(updatedResponse.data[0].severity).toBe('medium');
   });
