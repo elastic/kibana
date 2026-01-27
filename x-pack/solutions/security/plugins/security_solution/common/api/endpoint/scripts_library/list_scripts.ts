@@ -24,6 +24,7 @@ export const ListScriptsRequestSchema = {
           schema.literal('createdBy'),
           schema.literal('updatedAt'),
           schema.literal('updatedBy'),
+          schema.literal('fileSize'),
         ])
       ),
       sortDirection: schema.maybe(
