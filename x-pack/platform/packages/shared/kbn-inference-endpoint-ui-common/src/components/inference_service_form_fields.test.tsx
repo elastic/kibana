@@ -131,7 +131,6 @@ describe('Inference Services', () => {
 
     expect(screen.getByTestId('provider-select')).toHaveValue('OpenAI');
     const modelIdInput = screen.getByTestId('model_id-input');
-    // Use the default from DEFAULT_MODELS constant (defined in kbn-connector-schemas/openai)
     expect(modelIdInput).toHaveValue(DEFAULT_MODELS.openai);
   });
 
