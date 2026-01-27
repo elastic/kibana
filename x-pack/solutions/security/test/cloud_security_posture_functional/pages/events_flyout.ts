@@ -465,7 +465,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // The labelNodeId is the document ID since there's only one document
           const labelNodeId =
             'label(google.iam.admin.v1.MvExpandTest)ln(MvExpandBugTest123)oe(0)oa(0)';
-          await expandedFlyoutGraph.assertGraphNodeExists(labelNodeId);
+          await expandedFlyoutGraph.assertNodeExists(labelNodeId);
         });
       };
 
