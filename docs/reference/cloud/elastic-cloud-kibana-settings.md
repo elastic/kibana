@@ -72,6 +72,9 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 ### UI Settings [ec_ui_settings]
 
 #### Version 9.4+ [ec_ui_version_9_4]
+```{applies_to}
+stack: ga 9.4+
+```
 
 `uiSettings.globalOverrides.hideAnnouncements`
 :   Set to `true` to stop showing messages and tours that highlight new features. **Default: `false`**
