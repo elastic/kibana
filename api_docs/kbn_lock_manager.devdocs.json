@@ -28,6 +28,8 @@
           " extends Error"
         ],
         "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_client.ts",
+        "lineNumber": 347,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_client.ts",
+            "lineNumber": 348,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_client.ts",
+                "lineNumber": 348,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,6 +80,8 @@
         "label": "LockManagerService",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,6 +96,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -103,6 +113,8 @@
                   "<any, unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +136,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 15,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -144,6 +158,8 @@
               "<T>(lockId: string, callback: () => Promise<T>, { metadata, }?: { metadata?: Record<string, any> | undefined; }) => Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +174,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -173,6 +191,8 @@
                   "() => Promise<T>"
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -185,6 +205,8 @@
                 "label": "{\n      metadata,\n    }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -199,6 +221,8 @@
                       "Record<string, any> | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                    "lineNumber": 34,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -220,6 +244,8 @@
               " | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -234,6 +260,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_service.ts",
+                "lineNumber": 44,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,6 +285,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_client.ts",
+        "lineNumber": 282,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -271,6 +301,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-lock-manager/src/lock_manager_client.ts",
+            "lineNumber": 282,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

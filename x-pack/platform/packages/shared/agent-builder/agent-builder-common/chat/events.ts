@@ -9,6 +9,7 @@ import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -216,6 +217,10 @@ export interface RoundCompleteEventData {
   resumed?: boolean;
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
+  /**
+   * Updated conversation-level attachments after this round.
+   **/
+  attachments?: VersionedAttachment[];
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;

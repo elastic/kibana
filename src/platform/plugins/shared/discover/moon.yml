@@ -77,7 +77,6 @@ dependsOn:
   - '@kbn/no-data-page-plugin'
   - '@kbn/global-search-plugin'
   - '@kbn/resizable-layout'
-  - '@kbn/unsaved-changes-badge'
   - '@kbn/rule-data-utils'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-plugins-server'
@@ -122,14 +121,18 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/file-upload-plugin'
   - '@kbn/timerange'
-  - '@kbn/unified-metrics-grid'
+  - '@kbn/unified-chart-section-viewer'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
+  - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/controls-schemas'
   - '@kbn/zod'
   - '@kbn/cps'
   - '@kbn/controls-renderer'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/core-chrome-app-menu'
 tags:
   - plugin
   - prod

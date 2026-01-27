@@ -23,6 +23,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+            "lineNumber": 29,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "lineNumber": 14,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,6 +111,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +127,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 26,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +155,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +171,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 14,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,6 +199,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,6 +215,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 20,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -223,6 +243,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,6 +259,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 33,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,6 +287,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +303,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,6 +331,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -317,6 +347,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 28,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -345,6 +377,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,6 +393,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "lineNumber": 20,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,6 +421,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -399,6 +437,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 41,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -426,6 +466,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -440,6 +482,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -466,6 +510,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -480,6 +526,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 82,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -507,6 +555,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -521,6 +571,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,6 +600,8 @@
           "<unknown>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -562,6 +616,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 67,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -588,6 +644,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -602,6 +660,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -630,6 +690,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -644,6 +706,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+            "lineNumber": 28,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -670,6 +734,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -684,6 +750,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "lineNumber": 17,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -715,6 +783,8 @@
           "<{ uuid: string; hasUnsavedChanges: boolean; }[]>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -736,6 +806,8 @@
               "<{ [key: string]: Api; }>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -757,6 +829,8 @@
           "<PublishingSubjectType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -771,6 +845,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -786,6 +862,8 @@
               "keyof ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -801,6 +879,8 @@
               "(api: unknown) => api is ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -816,6 +896,8 @@
               "PublishingSubjectType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -831,6 +913,8 @@
               "((array: PublishingSubjectType[]) => PublishingSubjectType) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -858,6 +942,8 @@
           "<unknown> | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 95,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -872,6 +958,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -916,6 +1004,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -927,6 +1017,8 @@
             "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n  checkRefEquality,\n}",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -938,6 +1030,8 @@
                 "label": "uuid",
                 "description": [],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -952,6 +1046,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -967,6 +1063,8 @@
                   "<void>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -981,6 +1079,8 @@
                   "() => StateType"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1005,6 +1105,8 @@
                   "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1021,6 +1123,8 @@
                   "Partial<StateType> | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1043,6 +1147,8 @@
                   "<void>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 35,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1057,6 +1163,8 @@
                       "StateType | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                    "lineNumber": 35,
+                    "columnNumber": 13,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -1075,6 +1183,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "lineNumber": 36,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1095,6 +1205,8 @@
           "<ApiType extends unknown>(parent: unknown, isCompatible: (api: unknown) => api is ApiType, apiFound: (api: ApiType | undefined) => void | (() => void)) => () => void"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 103,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1109,6 +1221,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1124,6 +1238,8 @@
               "(api: unknown) => api is ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1139,6 +1255,8 @@
               "(api: ApiType | undefined) => void | (() => void)"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1159,6 +1277,8 @@
           "\nThis API can add a new panel as a child."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1181,6 +1301,8 @@
               "<StateType>, options?: { displaySuccessMessage?: boolean | undefined; scrollToPanel?: boolean | undefined; beside?: string | undefined; } | undefined) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1202,6 +1324,8 @@
                   "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1214,6 +1338,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1228,6 +1354,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1242,6 +1370,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                    "lineNumber": 20,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1256,6 +1386,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
+                    "lineNumber": 21,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1275,6 +1407,8 @@
         "label": "CanAddNewSection",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1289,6 +1423,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1305,6 +1441,8 @@
         "label": "CanDuplicatePanels",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1319,6 +1457,8 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1333,6 +1473,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 14,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1351,6 +1493,8 @@
         "label": "CanExpandPanels",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1365,6 +1509,8 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1379,6 +1525,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 24,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1547,6 +1695,8 @@
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1563,6 +1713,8 @@
           "\nThis API can focus a child panel"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1577,6 +1729,8 @@
               "(panelId?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1591,6 +1745,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_focus_panel.ts",
+                "lineNumber": 14,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1609,6 +1765,8 @@
         "label": "CanPinPanels",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1623,6 +1781,8 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1637,6 +1797,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 33,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1655,6 +1817,8 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1669,6 +1833,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 34,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1687,6 +1853,8 @@
               "(panelId: string) => boolean"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1701,6 +1869,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 35,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1727,6 +1897,8 @@
               "<StateType>) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1748,6 +1920,8 @@
                   "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1776,6 +1950,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1792,6 +1968,8 @@
               "<SerializedState | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1806,6 +1984,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+                "lineNumber": 13,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1824,6 +2004,8 @@
               "(childId: string) => SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1838,6 +2020,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
+                "lineNumber": 14,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1873,6 +2057,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1887,6 +2073,8 @@
               "(uuid: string) => string | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1901,6 +2089,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 78,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1921,6 +2111,8 @@
               "<string | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1935,6 +2127,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 79,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1963,6 +2157,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1977,6 +2173,8 @@
               "(childId: string) => SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1991,6 +2189,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
+                "lineNumber": 11,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2009,6 +2209,8 @@
         "label": "IsCustomizable",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2020,6 +2222,8 @@
             "label": "isCustomizable",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2034,6 +2238,8 @@
         "label": "IsDuplicable",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2045,6 +2251,8 @@
             "label": "isDuplicable",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2059,6 +2267,8 @@
         "label": "IsExpandable",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2070,6 +2280,8 @@
             "label": "isExpandable",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2084,6 +2296,8 @@
         "label": "IsPinnable",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2095,6 +2309,8 @@
             "label": "isPinnable",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2119,6 +2335,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2130,6 +2348,8 @@
             "label": "panelType",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2144,6 +2364,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2160,6 +2382,8 @@
               "SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2176,6 +2400,8 @@
           "\nAllows the Presentation Container to provide generic untyped context to its children.\n\nFor example, alerting page links to dashboards.\nLinked dashboard panels should show the alert from alerting page.\nThe alerting page can use passThroughContext to pass '{ alert }' state to embeddables.\nEmbeddables can access passThroughContext from 'parentApi.getPassThroughContext()'\nand use the state to show the alert from the alerting page."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2198,6 +2424,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/pass_through_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2231,6 +2459,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2247,6 +2477,8 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2261,6 +2493,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 32,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2281,6 +2515,8 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2307,6 +2543,8 @@
               "<SerializedState>) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2321,6 +2559,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2343,6 +2583,8 @@
                   "<SerializedState>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2363,6 +2605,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2381,6 +2625,8 @@
               "(uuid: string) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2395,6 +2641,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "lineNumber": 56,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2565,6 +2813,8 @@
               "; }; toPromise: { (): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: ApiType; } | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2579,6 +2829,8 @@
         "label": "PublishesSettings",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2601,6 +2853,8 @@
               "<boolean | undefined>; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2615,6 +2869,8 @@
         "label": "TrackContentfulRender",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2631,6 +2887,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2683,6 +2941,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_capabilities.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

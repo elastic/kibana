@@ -8,7 +8,6 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import {
-  TaskStatus,
   getStreamTypeFromDefinition,
   type SignificantEventsQueriesGenerationResult,
   type System,
@@ -27,6 +26,7 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   systems?: System[];
   sampleDocsSize?: number;
+  streamName: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -43,17 +43,24 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, systems, sampleDocsSize, _task } = runContext
-                .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
-              const { stream: name } = _task;
+              const { connectorId, start, end, systems, sampleDocsSize, streamName, _task } =
+                runContext.taskInstance
+                  .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
-              const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                scopedClusterClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+                featureClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
-                const stream = await streamsClient.getStream(name);
+                const stream = await streamsClient.getStream(streamName);
+                const { hits: features } = await featureClient.getFeatures(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -84,7 +91,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           end,
                           system,
                           sampleDocsSize,
-                          systemPromptOverride: significantEventsPromptOverride,
+                          features,
+                          systemPrompt: significantEventsPromptOverride,
                         },
                         {
                           inferenceClient,
@@ -118,23 +126,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   output_tokens_used: combinedResults.tokensUsed.completion,
                 });
 
-                await taskClient.update<
+                await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >({
-                  ..._task,
-                  status: TaskStatus.Completed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                      systems,
-                      sampleDocsSize,
-                    },
-                    payload: combinedResults,
-                  },
-                });
+                >(
+                  _task,
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
+                  combinedResults
+                );
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -154,20 +153,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<SignificantEventsQueriesGenerationTaskParams>({
-                  ..._task,
-                  status: TaskStatus.Failed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                      systems,
-                      sampleDocsSize,
-                    },
-                    error: errorMessage,
-                  },
-                });
+                await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
+                  _task,
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
+                  errorMessage
+                );
               }
             },
             runContext,

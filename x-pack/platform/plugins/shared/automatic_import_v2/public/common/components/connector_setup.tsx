@@ -23,7 +23,7 @@ import {
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '..';
 import * as i18n from './translations';
 
 const ALLOWED_ACTION_TYPE_IDS = ['.bedrock', '.gen-ai', '.gemini', '.inference'];

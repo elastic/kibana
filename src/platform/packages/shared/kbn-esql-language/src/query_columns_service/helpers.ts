@@ -13,12 +13,20 @@ import {
   isSource,
   mutate,
   synth,
+  TRANSFORMATIONAL_COMMANDS,
+  Walker,
   type ESQLAstCommand,
 } from '../..';
-import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
+import {
+  UnmappedFieldsStrategy,
+  type ESQLColumnData,
+  type ESQLPolicy,
+} from '../commands/registry/types';
 import type { ESQLAstQueryExpression } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
+import { columnIsPresent } from '../commands/definitions/utils/columns';
+import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -87,6 +95,53 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 }
 
 /**
+ * After KEEP or STATS, no new unmapped fields are added as they were erased by those destructive commands.
+ */
+export function areNewUnmappedFieldsAllowed(previousCommands: ESQLAstCommand[]): boolean {
+  return !previousCommands.find((cmd) =>
+    TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())
+  );
+}
+
+export function getUnmappedFields(
+  command: ESQLAstCommand,
+  previousCommands: ESQLAstCommand[],
+  previousPipeFields: ESQLColumnData[],
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+): ESQLColumnData[] {
+  // Not collect unmmaped fields if the strategy is FAIL or undefined
+  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.FAIL) {
+    return [];
+  }
+
+  // No unmaped fields can be collected after certain commands
+  if (!areNewUnmappedFieldsAllowed(previousCommands)) {
+    return [];
+  }
+
+  const unmappedFields: ESQLColumnData[] = [];
+  const columsSet = new Set(previousPipeFields.map((col) => col.name));
+
+  Walker.walk(command, {
+    visitColumn: (node) => {
+      if (
+        !columnIsPresent(node, columsSet) &&
+        unmappedFields.findIndex((f) => f.name === node.name) === -1
+      ) {
+        unmappedFields.push({
+          name: node.parts.join('.'),
+          type: getUnmappedFieldType(unmappedFieldsStrategy),
+          isUnmappedField: true,
+          userDefined: false,
+        });
+      }
+    },
+  });
+
+  return unmappedFields;
+}
+
+/**
  * @param query, the ES|QL query
  * @param commands, the AST commands
  * @param previousPipeFields, the fields from the previous pipe
@@ -97,16 +152,14 @@ export async function getCurrentQueryAvailableColumns(
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
-  originalQueryText: string
+  originalQueryText: string,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
   }
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
-  if (!commandDef?.methods.columnsAfter) {
-    return previousPipeFields;
-  }
 
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
@@ -118,13 +171,24 @@ export async function getCurrentQueryAvailableColumns(
     fromFrom: getFromFields,
   };
 
+  const previousCommands = commands.slice(0, -1);
+  const unmappedFields = getUnmappedFields(
+    lastCommand,
+    previousCommands,
+    previousPipeFields,
+    unmappedFieldsStrategy
+  );
+
+  const fields = [...previousPipeFields, ...unmappedFields];
+
   if (commandDef?.methods.columnsAfter) {
     return commandDef.methods.columnsAfter(
       lastCommand,
-      previousPipeFields,
+      fields,
       originalQueryText,
-      additionalFields
+      additionalFields,
+      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.FAIL
     );
   }
-  return previousPipeFields;
+  return fields;
 }

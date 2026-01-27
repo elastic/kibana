@@ -10,6 +10,8 @@
         "label": "PrivilegesAPIClientPublicContract",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+                "lineNumber": 20,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,6 +87,8 @@
         "label": "AuthenticationServiceSetup",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,6 +107,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -117,6 +127,8 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -133,6 +145,8 @@
         "label": "AuthorizationServiceSetup",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -149,6 +163,8 @@
               "() => boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -173,6 +189,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +213,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,6 +229,8 @@
         "label": "BulkUpdatePayload",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,6 +252,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -244,6 +268,8 @@
         "label": "BulkUpdateRoleResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -258,6 +284,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -272,6 +300,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -286,6 +316,8 @@
               "Record<string, { type: string; reason: string; }> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -308,6 +340,8 @@
           ">"
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -327,6 +361,8 @@
               ", \"authentication_provider\">"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -341,6 +377,8 @@
         "label": "PrivilegesAPIClientGetAllArgs",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -352,6 +390,8 @@
             "label": "includeActions",
             "description": [],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,6 +403,8 @@
             "label": "respectLicenseLevel",
             "description": [],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -377,6 +419,8 @@
         "label": "RolePutPayload",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -397,6 +441,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -411,6 +457,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -425,6 +473,8 @@
         "label": "RolesAPIClient",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -447,6 +497,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -471,6 +523,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -485,6 +539,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "lineNumber": 26,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -503,6 +559,8 @@
               "(roleName: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -517,6 +575,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "lineNumber": 27,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -543,6 +603,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -563,6 +625,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "lineNumber": 28,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -597,6 +661,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -617,6 +683,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "lineNumber": 29,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -635,6 +703,8 @@
         "label": "SecurityNavControlServiceStart",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -661,6 +731,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -687,6 +759,8 @@
               "[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -708,6 +782,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+                "lineNumber": 31,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -726,6 +802,8 @@
         "label": "SecurityPluginSetup",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -750,6 +828,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -778,6 +858,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,6 +882,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -814,6 +898,8 @@
         "label": "SecurityPluginStart",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -836,6 +922,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -860,6 +948,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -904,6 +994,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,6 +1024,8 @@
               "<boolean>; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -996,6 +1090,8 @@
         "label": "UserMenuLink",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1007,6 +1103,8 @@
             "label": "label",
             "description": [],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1021,6 +1119,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,6 +1132,8 @@
             "label": "href",
             "description": [],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1046,6 +1148,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,6 +1164,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1076,6 +1182,8 @@
               "React.ReactNode | ((args: { closePopover: () => void; }) => React.ReactNode)"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1092,6 +1200,8 @@
           "\nParameters for the bulk get API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1108,6 +1218,8 @@
               "Set<string>"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1124,6 +1236,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1140,6 +1254,8 @@
           "\nParameters for the get user profile for the current user API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1153,6 +1269,8 @@
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1169,6 +1287,8 @@
           "\nParameters for the suggest API."
         ],
         "path": "src/core/packages/user-profile/browser/src/service.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1182,6 +1302,8 @@
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1198,6 +1320,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1214,6 +1338,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/browser/src/service.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1242,6 +1368,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1265,6 +1393,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1277,6 +1407,8 @@
         "label": "SecurityLicense",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/license/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1302,6 +1434,8 @@
           "<boolean>; }"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

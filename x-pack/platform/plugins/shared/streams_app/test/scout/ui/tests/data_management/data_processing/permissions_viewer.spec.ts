@@ -42,9 +42,11 @@ test.describe(
     test('should NOT allow viewer to add processors (requires simulate privilege)', async ({
       page,
     }) => {
-      // Verify the "Create step" button is not visible (requires simulate)
-      const createStepButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-      await expect(createStepButton).toBeHidden();
+      // Verify the "Create processor" button is not visible (requires simulate)
+      const createProcessorButton = page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
+      );
+      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should NOT allow viewer to edit existing processors (requires simulate privilege)', async ({
@@ -89,9 +91,11 @@ test.describe(
     test('should NOT allow viewer to add conditions (requires simulate privilege)', async ({
       page,
     }) => {
-      // Verify the create step button is not visible (requires simulate)
-      const createStepButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-      await expect(createStepButton).toBeHidden();
+      // Verify the create condition button is not visible (requires simulate)
+      const createConditionButton = page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateConditionButton'
+      );
+      await expect(createConditionButton).toBeHidden();
     });
 
     test('should NOT show save changes button for viewer (requires manage privilege)', async ({

@@ -26,6 +26,8 @@
           ", void>"
         ],
         "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 56,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -80,6 +86,8 @@
               "; }"
             ],
             "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -94,6 +102,8 @@
                   "PrebootDeps"
                 ],
                 "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 60,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,6 +130,8 @@
               "; }"
             ],
             "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -134,6 +146,8 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 67,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -152,6 +166,8 @@
               "() => void"
             ],
             "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -168,6 +184,8 @@
               "() => void"
             ],
             "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

@@ -17,6 +17,8 @@
           "{}"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -42,6 +44,8 @@
           "<{ lastInteractedInterceptId: number | null; } | { lastInteractedInterceptId: null; }>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -59,6 +63,8 @@
           "[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_api.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -83,6 +89,8 @@
           "{}"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/server/plugin.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -100,6 +108,8 @@
           ") => { triggerAfter: string | null; isRecurrent?: boolean | undefined; }) => Promise<void>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/server/plugin.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

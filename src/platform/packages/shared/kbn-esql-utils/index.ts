@@ -52,6 +52,8 @@ export {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
   getESQLSources,
   getEsqlColumns,
   getEsqlPolicies,
@@ -62,6 +64,8 @@ export {
   hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
+  isComputedColumn,
+  getQuerySummary,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

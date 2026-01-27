@@ -69,22 +69,22 @@ export function QueriesTable() {
       ),
     },
     {
-      field: 'query.stream_name',
+      field: 'stream_name',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
         defaultMessage: 'Stream',
       }),
       render: (_: unknown, item: SignificantEventItem) => (
-        <EuiBadge color="hollow">{item.query.stream_name || '--'}</EuiBadge>
+        <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
       ),
     },
     {
       field: 'query.feature',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.featuresColumn', {
-        defaultMessage: 'Features',
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.systemsColumn', {
+        defaultMessage: 'Systems',
       }),
       render: (_: unknown, item: SignificantEventItem) => {
-        const featureName = item.query.feature?.name;
-        return featureName ? <EuiBadge color="hollow">{featureName}</EuiBadge> : '--';
+        const systemName = item.query.feature?.name;
+        return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
       },
     },
     {

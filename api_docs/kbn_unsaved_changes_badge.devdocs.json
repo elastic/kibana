@@ -47,6 +47,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 33,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,6 +102,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +124,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 45,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,6 +146,8 @@
           "\nParams for getTopNavUnsavedChangesBadge"
         ],
         "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -152,6 +162,8 @@
               "() => Promise<unknown>"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -168,6 +180,8 @@
               "(() => Promise<unknown>) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,6 +196,8 @@
               "(() => Promise<unknown>) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -198,6 +214,8 @@
           "\nProps for UnsavedChangesBadge"
         ],
         "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -212,6 +230,8 @@
               "() => Promise<unknown>"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -228,6 +248,8 @@
               "(() => Promise<unknown>) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -244,6 +266,8 @@
               "(() => Promise<unknown>) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -257,6 +281,8 @@
             "label": "badgeText",
             "description": [],
             "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

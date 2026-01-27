@@ -20,18 +20,18 @@ import { SecurityError } from '../streams/errors/security_error';
 import type { QueryLink } from '../../../common/queries';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name?: string; from: Date; to: Date; bucketSize: string; query?: string },
+  params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { name, from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(name, query)
-    : await queryClient.getQueryLinks(name);
+    ? await queryClient.findQueries(streamNames, query)
+    : await queryClient.getQueryLinks(streamNames);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };

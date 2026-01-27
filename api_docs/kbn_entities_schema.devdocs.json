@@ -34,6 +34,8 @@
           ", string, string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+            "lineNumber": 51,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "({\n  type,\n  dataset,\n}: AliasPatternOptions<TDataset>) => `entities-${string}-${TDataset}`"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +87,8 @@
               "AliasPatternOptions<TDataset>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+            "lineNumber": 52,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -100,6 +108,8 @@
           "({\n  schemaVersion,\n  dataset,\n  definitionId,\n}: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.*.${string}`"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +124,8 @@
               "IndexPatternOptions<TDataset>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+            "lineNumber": 44,
+            "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -133,6 +145,8 @@
           "({\n  schemaVersion,\n  dataset,\n  definitionId,\n}: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.${string}`"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,6 +161,8 @@
               "IndexPatternOptions<TDataset>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+            "lineNumber": 35,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,6 +181,8 @@
         "label": "MetadataRecord",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -186,6 +204,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,6 +222,8 @@
         "label": "BasicAggregations",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -214,6 +236,8 @@
         "label": "EntityStoreCapability",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -231,6 +255,8 @@
           "\"entities\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -246,6 +272,8 @@
           "\"history\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -261,6 +289,8 @@
           "\"latest\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -276,6 +306,8 @@
           "\"reset\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,6 +323,8 @@
           "\"v1\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -306,6 +340,8 @@
           "\"updates\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -337,6 +373,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -368,6 +406,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -383,6 +423,8 @@
           "{ entity: { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; } & Metadata"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -398,6 +440,8 @@
           "Metadata"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -413,6 +457,8 @@
           "{ page?: number | undefined; perPage?: number | undefined; includeState?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/get.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -436,6 +482,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -451,6 +499,8 @@
           "{ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -474,6 +524,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -494,6 +546,8 @@
           ", \"many\">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -518,6 +572,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -570,6 +626,8 @@
           "; filter?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -594,6 +652,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 184,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -616,6 +676,8 @@
           ", { installOnly?: any; }, { installOnly?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/create.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -636,6 +698,8 @@
           ", { id: string; }, { id: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/delete.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -658,6 +722,8 @@
           ", { deleteData?: any; }, { deleteData?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/delete.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -684,6 +750,8 @@
           ", { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }, { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -699,6 +767,8 @@
           "ZodString"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -755,6 +825,8 @@
           ", { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }, { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1113,6 +1185,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1479,6 +1553,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1547,6 +1623,8 @@
           ", Metadata>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1565,6 +1643,8 @@
           ", Metadata>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1583,6 +1663,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1613,6 +1695,8 @@
           ", { page?: number | undefined; perPage?: number | undefined; includeState?: any; }, { page?: number | undefined; perPage?: number | undefined; includeState?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/get.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1665,6 +1749,8 @@
           ", { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; lookbackPeriod?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; lookbackPeriod?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 160,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1693,6 +1779,8 @@
           ", { field: string; optional: boolean; }, string>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1801,6 +1889,8 @@
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1851,6 +1941,8 @@
           ", { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1925,6 +2017,8 @@
           ", { source: string; destination: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string>]>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2007,6 +2101,8 @@
           ", { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2037,6 +2133,8 @@
           ", { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2057,6 +2155,8 @@
           ", { id: string; }, { id: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/reset.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2075,6 +2175,8 @@
           ", string, string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
+        "lineNumber": 155,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
