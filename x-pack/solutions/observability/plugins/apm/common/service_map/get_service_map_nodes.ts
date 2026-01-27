@@ -219,6 +219,8 @@ function mapEdges({
   allConnections: Connection[];
   nodes: Map<string, ConnectionNode>;
 }) {
+  const resourcesMap = new Map<string, Set<string>>();
+
   const connections = allConnections.reduce((acc, connection) => {
     const sourceData = nodes.get(connection.source.id);
     const targetData = nodes.get(connection.destination.id);
@@ -230,10 +232,11 @@ function mapEdges({
     const id = getEdgeId(sourceData.id, targetData.id);
     const resource = targetData[SPAN_DESTINATION_SERVICE_RESOURCE] as string | undefined;
 
-    // Check if edge already exists (multiple resources can map to the same edge - e.g. two load balancers serving the same service)
     const existingEdge = acc.get(id);
     if (existingEdge) {
-      if (resource && !existingEdge.resources?.includes(resource)) {
+      const resourceSet = resourcesMap.get(id);
+      if (resource && resourceSet && !resourceSet.has(resource)) {
+        resourceSet.add(resource);
         existingEdge.resources?.push(resource);
       }
       return acc;
@@ -242,6 +245,8 @@ function mapEdges({
     const label = `${
       sourceData[SERVICE_NAME] || sourceData[SPAN_DESTINATION_SERVICE_RESOURCE]
     } to ${targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+
+    resourcesMap.set(id, new Set(resource ? [resource] : []));
 
     acc.set(id, {
       source: sourceData.id,
