@@ -749,6 +749,7 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
