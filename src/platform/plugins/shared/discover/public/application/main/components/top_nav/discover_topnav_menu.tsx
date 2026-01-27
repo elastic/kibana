@@ -13,18 +13,17 @@ import React, {
   useContext,
   useState,
   useLayoutEffect,
+  useEffect,
 } from 'react';
-import {
-  TopNavMenu,
-  type TopNavMenuBadgeProps,
-  type TopNavMenuData,
-} from '@kbn/navigation-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import useUnmount from 'react-use/lib/useUnmount';
-import { css } from '@emotion/css';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
+import useObservable from 'react-use/lib/useObservable';
 import type { useDiscoverTopNav } from './use_discover_topnav';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { getReadOnlyBadge } from '../../../discover_router';
 
 /**
  * We handle the top nav menu this way because we need to render it higher in the tree than
@@ -34,39 +33,42 @@ import type { useDiscoverTopNav } from './use_discover_topnav';
  */
 
 const createTopNavMenuContext = () => ({
-  topNavMenu$: new BehaviorSubject<TopNavMenuData[] | undefined>(undefined),
-  topNavBadges$: new BehaviorSubject<TopNavMenuBadgeProps[] | undefined>(undefined),
+  topNavMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
+  topNavBadges$: new BehaviorSubject<ChromeBreadcrumbsBadge[] | undefined>(undefined),
 });
 
 type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
 
-const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
+export const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
   createTopNavMenuContext()
 );
 
-// If there are no menu items to render yet, we render a placeholder
-// item to ensure the menu still displays and to prevent flickering
-const PLACEHOLDER_MENU_ITEMS: TopNavMenuData[] = [
-  {
-    label: '',
-    run: () => {},
-    className: css({ display: 'none' }),
-  },
-];
-
-export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
-  const { setHeaderActionMenu } = useDiscoverServices();
+export const DiscoverTopNavMenuProvider = ({
+  customizationContext,
+  children,
+}: PropsWithChildren<{ customizationContext: DiscoverCustomizationContext }>) => {
+  const { chrome, capabilities } = useDiscoverServices();
   const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
-
-  const topNavMenu = useObservable(
-    topNavMenuContext.topNavMenu$,
-    topNavMenuContext.topNavMenu$.getValue()
-  );
 
   const topNavBadges = useObservable(
     topNavMenuContext.topNavBadges$,
     topNavMenuContext.topNavBadges$.getValue()
   );
+
+  useEffect(() => {
+    if (customizationContext.displayMode === 'embedded') {
+      return;
+    }
+
+    const readOnlyBadge = getReadOnlyBadge({ capabilities });
+    const badges = readOnlyBadge ? [readOnlyBadge] : [];
+
+    if (topNavBadges) {
+      badges.push(...topNavBadges);
+    }
+
+    chrome.setBreadcrumbsBadges(badges);
+  }, [capabilities, chrome, customizationContext.displayMode, topNavBadges]);
 
   useUnmount(() => {
     topNavMenuContext.topNavBadges$.next(undefined);
@@ -74,18 +76,9 @@ export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
   });
 
   return (
-    <>
-      <TopNavMenu
-        appName="discover"
-        badges={topNavBadges}
-        config={topNavMenu && topNavMenu.length > 0 ? topNavMenu : PLACEHOLDER_MENU_ITEMS}
-        gutterSize="xxs"
-        setMenuMountPoint={setHeaderActionMenu}
-      />
-      <discoverTopNavMenuContext.Provider value={topNavMenuContext}>
-        {children}
-      </discoverTopNavMenuContext.Provider>
-    </>
+    <discoverTopNavMenuContext.Provider value={topNavMenuContext}>
+      {children}
+    </discoverTopNavMenuContext.Provider>
   );
 };
 

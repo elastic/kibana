@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover URL state', () => {
@@ -216,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await discover.getHitCount()).to.be(totalHitsForTwoFilters);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await discover.ensureHasUnsavedChangesIndicator();
 
       await browser.refresh();
 
@@ -225,7 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await discover.getHitCount()).to.be(totalHitsForTwoFilters);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await discover.ensureHasUnsavedChangesIndicator();
     });
   });
 }

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 
@@ -28,10 +27,7 @@ export async function getToolHandler({
   rangeStart,
   rangeEnd,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   mlClient: Ml;
   request: KibanaRequest;
