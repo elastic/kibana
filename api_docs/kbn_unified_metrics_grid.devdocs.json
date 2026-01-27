@@ -93,23 +93,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/unified-metrics-grid",
-        "id": "def-public.DataSource",
-        "type": "Type",
-        "tags": [],
-        "label": "DataSource",
-        "description": [],
-        "signature": [
-          "\"apm\" | \"otel\""
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/index.tsx",
-        "lineNumber": 22,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-metrics-grid",
         "id": "def-public.UnifiedMetricsGridRestorableState",
         "type": "Type",
         "tags": [],

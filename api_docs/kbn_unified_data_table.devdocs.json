@@ -928,7 +928,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1456,
+        "lineNumber": 1471,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2224,7 +2224,7 @@
         "label": "DataLoadingState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 127,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2453,7 +2453,7 @@
           "[string, string]"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 125,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2519,7 +2519,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1458,
+        "lineNumber": 1473,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
