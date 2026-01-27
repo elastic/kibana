@@ -14,6 +14,7 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamTSDBMode } from '../../../hooks/use_stream_tsdb_mode';
 import { SystemEventsSparklineLast24hrs } from './system_events_sparkline';
 
 export const SystemEventsData = ({
@@ -28,9 +29,11 @@ export const SystemEventsData = ({
       start: { share },
     },
   } = useKibana();
+  const { isTSDBMode } = useStreamTSDBMode(definition.name);
   const useUrl = share.url.locators.useUrl;
 
-  const esqlQuery = `FROM ${getIndexPatternsForStream(definition).join(',')}
+  const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
+  const esqlQuery = `${sourceCommand} ${getIndexPatternsForStream(definition).join(',')}
       | WHERE ${conditionToESQL(system.filter)}`;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(

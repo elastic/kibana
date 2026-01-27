@@ -22,6 +22,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamTSDBMode } from '../../hooks/use_stream_tsdb_mode';
 
 import { truncateText } from '../../util/truncate_text';
 
@@ -176,11 +177,13 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
+  const { isTSDBMode } = useStreamTSDBMode(definition.stream.name);
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
   const indexPatterns = getIndexPatternsForStream(definition.stream);
+  const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
   const esqlQuery = indexPatterns
-    ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
+    ? `${sourceCommand} ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
     : undefined;
   const useUrl = share.url.locators.useUrl;
 

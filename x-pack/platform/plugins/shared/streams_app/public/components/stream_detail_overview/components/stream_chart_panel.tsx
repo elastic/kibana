@@ -25,6 +25,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { executeEsqlQuery } from '../../../hooks/use_execute_esql_query';
+import { useStreamTSDBMode } from '../../../hooks/use_stream_tsdb_mode';
 
 interface StreamChartPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -54,12 +55,15 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
     [data, timeState.asAbsoluteTimeRange]
   );
 
+  const { isTSDBMode } = useStreamTSDBMode(definition.stream.name);
+
   const queries = useMemo(() => {
     if (!indexPatterns) {
       return undefined;
     }
 
-    const baseQuery = `FROM ${indexPatterns.join(', ')}`;
+    const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
+    const baseQuery = `${sourceCommand} ${indexPatterns.join(', ')}`;
 
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize})`;
 
@@ -67,7 +71,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       baseQuery,
       histogramQuery,
     };
-  }, [bucketSize, indexPatterns]);
+  }, [bucketSize, indexPatterns, isTSDBMode]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {

@@ -30,6 +30,7 @@ import {
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamTSDBMode } from '../../hooks/use_stream_tsdb_mode';
 
 export interface StreamTree {
   name: string;
@@ -178,6 +179,8 @@ function StreamNode({
     [share.url.locators]
   );
 
+  const { isTSDBMode } = useStreamTSDBMode(node.name);
+
   const discoverUrl = useMemo(() => {
     const indexPatterns = getIndexPatternsForStream(node.stream);
 
@@ -185,12 +188,13 @@ function StreamNode({
       return undefined;
     }
 
+    const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
     return discoverLocator.getRedirectUrl({
       query: {
-        esql: `FROM ${indexPatterns.join(', ')}`,
+        esql: `${sourceCommand} ${indexPatterns.join(', ')}`,
       },
     });
-  }, [discoverLocator, node]);
+  }, [discoverLocator, node, isTSDBMode]);
 
   return (
     <EuiFlexGroup
