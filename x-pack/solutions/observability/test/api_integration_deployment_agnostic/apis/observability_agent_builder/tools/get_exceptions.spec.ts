@@ -100,10 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       logsSynthtraceEsClient = clients.logsEsClient;
     });
 
-    // after(async () => {
-    //   await apmSynthtraceEsClient.clean();
-    //   await logsSynthtraceEsClient.clean();
-    // });
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+      await logsSynthtraceEsClient.clean();
+    });
 
     it('returns error groups with expected structure', async () => {
       const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
