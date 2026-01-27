@@ -9,6 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../create_rule/utils';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -53,6 +54,21 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+
+          if (params.response_actions) {
+            const ruleResponseActionsError = await validateRuleResponseActions({
+              ruleResponseActions: request.body.response_actions,
+              endpointService: (await context.securitySolution).getEndpointService(),
+            });
+
+            if (ruleResponseActionsError) {
+              return siemResponse.error({
+                statusCode: ruleResponseActionsError.statusCode,
+                body: ruleResponseActionsError,
+              });
+            }
+          }
+
           const rulesClient = await (await context.alerting).getRulesClient();
           const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
