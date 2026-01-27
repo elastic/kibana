@@ -11,24 +11,20 @@ import type {
   WorkflowInfo,
   WorkflowsConfig,
 } from '@kbn/data-catalog-plugin/common/data_source_spec';
-import type { WorkflowRegistry } from './workflow_registry';
-import { loadWorkflowsFromRegistry } from './workflow_registry';
 
 /**
  * Loads workflow YAML files from a directory and converts them to WorkflowInfo objects.
  *
- * @param workflowsDir - Absolute path to the directory containing workflow YAML files
- * @param stackConnectorId - Stack connector ID to substitute in workflow templates
+ * @param config - Workflow configuration containing directory path and template inputs
  * @returns Array of WorkflowInfo objects
  *
  * @throws Error if the directory doesn't exist or can't be read
  */
-export async function loadWorkflowsFromDirectory(
-  workflowsDir: string,
-  stackConnectorId?: string
-): Promise<WorkflowInfo[]> {
+export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowInfo[]> {
+  const { directory, templateInputs } = config;
+
   try {
-    const files = await fs.readdir(workflowsDir);
+    const files = await fs.readdir(directory);
 
     // Filter for YAML files
     const yamlFiles = files.filter((file) => {
@@ -37,18 +33,22 @@ export async function loadWorkflowsFromDirectory(
     });
 
     if (yamlFiles.length === 0) {
-      throw new Error(`No YAML workflow files found in directory: ${workflowsDir}`);
+      throw new Error(`No YAML workflow files found in directory: ${directory}`);
     }
 
     // Load and process each YAML file
     return await Promise.all(
       yamlFiles.map(async (file) => {
-        const filePath = join(workflowsDir, file);
+        const filePath = join(directory, file);
         let content = await fs.readFile(filePath, 'utf-8');
+
         // Replace template variables
-        if (stackConnectorId) {
-          content = content.replace(/\{\{stackConnectorId\}\}/g, stackConnectorId);
+        if (templateInputs) {
+          for (const [key, value] of Object.entries(templateInputs)) {
+            content = content.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+          }
         }
+
         const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {
@@ -60,9 +60,9 @@ export async function loadWorkflowsFromDirectory(
   } catch (error) {
     if (error instanceof Error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        throw new Error(`Workflows directory does not exist: ${workflowsDir}`, { cause: error });
+        throw new Error(`Workflows directory does not exist: ${directory}`, { cause: error });
       }
-      throw new Error(`Failed to load workflows from ${workflowsDir}: ${error.message}`, {
+      throw new Error(`Failed to load workflows from ${directory}: ${error.message}`, {
         cause: error,
       });
     }
@@ -91,40 +91,4 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
   ];
 
   return tagPatterns.some((pattern) => pattern.test(yamlContent));
-}
-
-export async function loadWorkflows(
-  workflowsConfig: WorkflowsConfig,
-  registry: WorkflowRegistry | undefined,
-  stackConnectorId?: string
-): Promise<WorkflowInfo[]> {
-  const workflows: WorkflowInfo[] = [];
-
-  // Load from directory if specified
-  if (workflowsConfig.directory) {
-    const directoryWorkflows = await loadWorkflowsFromDirectory(
-      workflowsConfig.directory,
-      stackConnectorId
-    );
-    workflows.push(...directoryWorkflows);
-  }
-
-  // Load from registry if specified
-  if (workflowsConfig.registry && workflowsConfig.registry.length > 0) {
-    if (!registry) {
-      throw new Error('WorkflowRegistry is required when using registry workflow references');
-    }
-    const registryWorkflows = await loadWorkflowsFromRegistry(
-      registry,
-      workflowsConfig.registry,
-      stackConnectorId
-    );
-    workflows.push(...registryWorkflows);
-  }
-
-  if (workflows.length === 0) {
-    throw new Error('No workflows configured: specify either directory or registry');
-  }
-
-  return workflows;
 }

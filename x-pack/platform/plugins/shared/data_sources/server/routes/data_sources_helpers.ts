@@ -15,7 +15,6 @@ import type { DataSource, WorkflowInfo } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { loadWorkflows } from '../workflow_loader';
-import type { WorkflowRegistry } from '../workflow_registry';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -35,11 +34,6 @@ interface CreateDataSourceAndResourcesParams {
   actions: DataSourcesServerStartDependencies['actions'];
   dataSource: DataSource;
   agentBuilder: DataSourcesServerStartDependencies['agentBuilder'];
-  /**
-   * Optional workflow registry for loading workflows from a third-party source.
-   * Required if the data connector uses registry-based workflows.
-   */
-  workflowRegistry?: WorkflowRegistry;
 }
 
 function slugify(input: string): string {
@@ -73,7 +67,6 @@ export async function createDataSourceAndRelatedResources(
     actions,
     dataSource,
     agentBuilder,
-    workflowRegistry,
   } = params;
 
   const workflowIds: string[] = [];
@@ -110,11 +103,15 @@ export async function createDataSourceAndRelatedResources(
   // Load workflows
   let workflowInfos: WorkflowInfo[];
   if (dataSource.workflows) {
-    workflowInfos = await loadWorkflows(
-      dataSource.workflows,
-      workflowRegistry,
-      finalStackConnectorId
-    );
+    // Merge stackConnectorId into templateInputs
+    const templateInputs = {
+      ...dataSource.workflows.templateInputs,
+      stackConnectorId: finalStackConnectorId,
+    };
+    workflowInfos = await loadWorkflows({
+      directory: dataSource.workflows.directory,
+      templateInputs,
+    });
   } else {
     workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
   }

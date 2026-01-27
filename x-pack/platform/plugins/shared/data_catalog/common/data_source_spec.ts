@@ -38,24 +38,6 @@ export interface WorkflowInfo {
 }
 
 /**
- * Reference to a workflow in a third-party workflow registry
- */
-export interface WorkflowReference {
-  /** Unique identifier of the workflow in the registry */
-  // assuming referencing by ID makes the most sense, at least for now;
-  // not sure if we'd want to reference by a tag or a collection of some sort in the future
-  id: string;
-  /** Optional version of the workflow to use; defaults to latest */
-  version?: string;
-  /**
-   * Optional override to control AB tool generation.
-   * If not specified, the registry's default behavior will be used,
-   * which relies on whether there is an ` agent-builder-tool ` tag or not.
-   */
-  shouldGenerateABTool?: boolean;
-}
-
-/**
  * Configuration for OAuth authentication using EARS (Elastic-owned OAuth apps)
  */
 export interface EARSOAuthConfiguration {
@@ -82,17 +64,14 @@ export interface StackConnectorConfig {
 }
 
 /**
- * Workflow configuration for a data type.
- * Supports three approaches:
- * 1. Local directory: { directory: '/path/to/workflows' }
- * 2. Registry references: { registry: [{ id: 'workflow-1' }, { id: 'workflow-2' }] }
- * 3. Mixed: { directory: '/path', registry: [...] }
+ * Workflow configuration for a data source.
+ * Workflows are loaded from YAML files in the specified directory.
  */
 export interface WorkflowsConfig {
-  /** Path to a directory containing local workflow YAML files */
-  directory?: string;
-  /** Array of workflow references from a third-party registry */
-  registry?: WorkflowReference[];
+  /** Absolute path to directory containing workflow YAML files (use join(__dirname, 'workflows')) */
+  directory: string;
+  /** Template variables to inject into workflow YAMLs (replaces {{key}} patterns) */
+  templateInputs?: Record<string, string>;
 }
 
 /**

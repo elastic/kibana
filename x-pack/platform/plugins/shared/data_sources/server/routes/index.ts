@@ -18,7 +18,6 @@ import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
 } from './data_sources_helpers';
-import { createSampleWorkflowRegistry } from '../sample_workflow_registry';
 import type { DataSourceAttributes } from '../saved_objects';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
@@ -59,8 +58,6 @@ export interface RouteDependencies {
 export function registerRoutes(dependencies: RouteDependencies) {
   const { router, logger, getStartServices, workflowManagement } = dependencies;
 
-  // TODO: Replace with real workflow registry implementation when available
-  const workflowRegistry = createSampleWorkflowRegistry();
   // List all data sources
   router.get(
     {
@@ -192,7 +189,6 @@ export function registerRoutes(dependencies: RouteDependencies) {
           actions,
           dataSource,
           agentBuilder,
-          workflowRegistry,
         });
 
         return response.ok({
