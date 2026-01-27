@@ -44,8 +44,8 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
-  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
+  private inMemoryConnectors: InMemoryConnector[];
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
@@ -54,6 +54,10 @@ export class ActionTypeRegistry {
     this.licenseState = constructorParams.licenseState;
     this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
+  }
+
+  public updateInMemoryConnectors(connectors: InMemoryConnector[]) {
+    this.inMemoryConnectors.push(...connectors);
   }
 
   /**
