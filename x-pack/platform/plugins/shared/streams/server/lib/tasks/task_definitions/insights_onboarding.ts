@@ -15,7 +15,10 @@ import { convertGetResponseIntoUpsertRequest, TaskStatus } from '@kbn/streams-sc
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
-import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import {
+  type InsightsOnboardingResult,
+  InsightsOnboardingStep,
+} from '@kbn/streams-schema/src/insights';
 import type { GenerateDescriptionResult } from '@kbn/streams-schema/src/api/description_generation';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import type { StreamsTaskType, TaskContext } from '.';
@@ -48,6 +51,7 @@ export interface InsightsOnboardingTaskParams {
   streamName: string;
   from: number;
   to: number;
+  steps: InsightsOnboardingStep[];
 }
 
 export const STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE = 'streams_insights_onboarding';
@@ -67,7 +71,7 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, from, to, _task } = runContext.taskInstance
+              const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsOnboardingTaskParams>;
 
               const {
@@ -82,79 +86,98 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
               });
 
               try {
-                const descriptionTaskId = await scheduleDescriptionGenerationTask(
-                  {
-                    connectorId,
-                    start: from,
-                    end: to,
-                    streamName,
-                  },
-                  taskClient,
-                  runContext.fakeRequest
-                );
+                let descriptionTaskResult: TaskResult<GenerateDescriptionResult> | undefined;
+                let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
+                let queriesTaskResult:
+                  | TaskResult<SignificantEventsQueriesGenerationResult>
+                  | undefined;
 
-                const descriptionTaskResult = await waitForSubtask<
-                  DescriptionGenerationTaskParams,
-                  GenerateDescriptionResult
-                >(descriptionTaskId, runContext.taskInstance.id, taskClient);
+                for (const step of steps) {
+                  switch (step) {
+                    case InsightsOnboardingStep.DescriptionGeneration:
+                      const descriptionTaskId = await scheduleDescriptionGenerationTask(
+                        {
+                          connectorId,
+                          start: from,
+                          end: to,
+                          streamName,
+                        },
+                        taskClient,
+                        runContext.fakeRequest
+                      );
 
-                if (descriptionTaskResult.status !== TaskStatus.Completed) {
-                  return;
+                      descriptionTaskResult = await waitForSubtask<
+                        DescriptionGenerationTaskParams,
+                        GenerateDescriptionResult
+                      >(descriptionTaskId, runContext.taskInstance.id, taskClient);
+
+                      if (descriptionTaskResult.status !== TaskStatus.Completed) {
+                        return;
+                      }
+
+                      await saveDescription(descriptionTaskResult.description, streamName, {
+                        streamsClient,
+                        queryClient,
+                        attachmentClient,
+                        scopedClusterClient,
+                      });
+                      break;
+
+                    case InsightsOnboardingStep.FeaturesIdentification:
+                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
+                        {
+                          connectorId,
+                          start: from,
+                          end: to,
+                          streamName,
+                        },
+                        taskClient,
+                        runContext.fakeRequest
+                      );
+
+                      featuresTaskResult = await waitForSubtask<
+                        FeaturesIdentificationTaskParams,
+                        IdentifyFeaturesResult
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
+
+                      if (featuresTaskResult.status !== TaskStatus.Completed) {
+                        return;
+                      }
+                      break;
+
+                    case InsightsOnboardingStep.QueriesGeneration:
+                      const queriesTaskId = await scheduleQueriesGenerationTask(
+                        {
+                          connectorId,
+                          start: from,
+                          end: to,
+                          streamName,
+                        },
+                        taskClient,
+                        runContext.fakeRequest
+                      );
+
+                      queriesTaskResult = await waitForSubtask<
+                        SignificantEventsQueriesGenerationTaskParams,
+                        SignificantEventsQueriesGenerationResult
+                      >(queriesTaskId, runContext.taskInstance.id, taskClient);
+
+                      if (queriesTaskResult.status !== TaskStatus.Completed) {
+                        return;
+                      }
+
+                      await saveQueries(streamName, queriesTaskResult.queries, { queryClient });
+                      break;
+
+                    default:
+                      throw new Error(`No implementation for "${step}" insights onboarding step.`);
+                  }
                 }
-
-                await saveDescription(descriptionTaskResult.description, streamName, {
-                  streamsClient,
-                  queryClient,
-                  attachmentClient,
-                  scopedClusterClient,
-                });
-
-                const featuresTaskId = await scheduleFeaturesIdentificationTask(
-                  {
-                    connectorId,
-                    start: from,
-                    end: to,
-                    streamName,
-                  },
-                  taskClient,
-                  runContext.fakeRequest
-                );
-
-                const featuresTaskResult = await waitForSubtask<
-                  FeaturesIdentificationTaskParams,
-                  IdentifyFeaturesResult
-                >(featuresTaskId, runContext.taskInstance.id, taskClient);
-
-                if (featuresTaskResult.status !== TaskStatus.Completed) {
-                  return;
-                }
-
-                const queriesTaskId = await scheduleQueriesGenerationTask(
-                  {
-                    connectorId,
-                    start: from,
-                    end: to,
-                    streamName,
-                  },
-                  taskClient,
-                  runContext.fakeRequest
-                );
-
-                const queriesTaskResult = await waitForSubtask<
-                  SignificantEventsQueriesGenerationTaskParams,
-                  SignificantEventsQueriesGenerationResult
-                >(queriesTaskId, runContext.taskInstance.id, taskClient);
-
-                if (queriesTaskResult.status !== TaskStatus.Completed) {
-                  return;
-                }
-
-                await saveQueries(streamName, queriesTaskResult.queries, { queryClient });
 
                 await taskClient.complete<InsightsOnboardingTaskParams, InsightsOnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to },
-                  { descriptionTaskResult }
+                  { connectorId, streamName, from, to, steps },
+                  { descriptionTaskResult, featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
                 // Get connector info for error enrichment
@@ -183,6 +206,7 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
                     streamName,
                     from,
                     to,
+                    steps,
                   },
                   errorMessage
                 );

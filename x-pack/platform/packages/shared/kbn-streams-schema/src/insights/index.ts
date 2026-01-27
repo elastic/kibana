@@ -34,7 +34,13 @@ export interface InsightsResult {
 }
 
 export interface InsightsOnboardingResult {
-  descriptionTaskResult: TaskResult<GenerateDescriptionResult>;
+  descriptionTaskResult?: TaskResult<GenerateDescriptionResult>;
   featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
   queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
+}
+
+export enum InsightsOnboardingStep {
+  DescriptionGeneration = 'description_generation',
+  FeaturesIdentification = 'features_identification',
+  QueriesGeneration = 'queries_generation',
 }

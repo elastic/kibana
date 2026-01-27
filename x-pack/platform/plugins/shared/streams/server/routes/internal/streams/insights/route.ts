@@ -8,7 +8,10 @@
 import type { InsightsResult } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
-import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import {
+  InsightsOnboardingStep,
+  type InsightsOnboardingResult,
+} from '@kbn/streams-schema/src/insights';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
@@ -53,6 +56,17 @@ const insightsOnboardingTaskRoute = createServerRoute({
           .optional()
           .describe(
             'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+        steps: z
+          .array(z.nativeEnum(InsightsOnboardingStep))
+          .optional()
+          .default([
+            InsightsOnboardingStep.DescriptionGeneration,
+            InsightsOnboardingStep.FeaturesIdentification,
+            InsightsOnboardingStep.QueriesGeneration,
+          ])
+          .describe(
+            'Optional list of step to perform as part of the stream insights onboarding in the specified sequence. By default it will execute all step.'
           ),
       }),
       z.object({
@@ -101,6 +115,7 @@ const insightsOnboardingTaskRoute = createServerRoute({
                   streamName,
                   from: body.from,
                   to: body.to,
+                  steps: body.steps,
                 };
               })(),
               request,
