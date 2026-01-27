@@ -92,7 +92,7 @@ function exampleState(): XYState {
         layerId: 'first',
         layerType: layerTypes.DATA,
         seriesType: 'area',
-        splitAccessor: 'd',
+        splitAccessors: ['d'],
         xAccessor: 'a',
         accessors: ['b', 'c'],
       },
@@ -663,7 +663,7 @@ describe('xy_visualization', () => {
             layerId: 'second',
             layerType: layerTypes.DATA,
             seriesType: 'area',
-            splitAccessor: 'e',
+            splitAccessors: ['e'],
             xAccessor: 'f',
             accessors: ['g', 'h'],
           },
@@ -2132,7 +2132,7 @@ describe('xy_visualization', () => {
           [
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
             },
           ],
@@ -2143,12 +2143,12 @@ describe('xy_visualization', () => {
             {
               ...baseState.layers[0],
               accessors: ['a'],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
             },
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: 'd',
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
@@ -2175,7 +2175,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -2198,7 +2198,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
           ],
         ],
@@ -2209,13 +2209,13 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
             {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -2232,7 +2232,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -2274,7 +2274,7 @@ describe('xy_visualization', () => {
           [
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [
                 { forAccessor: 'a', axisMode: 'left' },
@@ -2290,7 +2290,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               xAccessor: undefined,
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
             },
@@ -2298,7 +2298,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['b'],
               xAccessor: undefined,
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
             },
@@ -2333,7 +2333,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
               accessors: ['a'],
             },
@@ -2636,7 +2636,7 @@ describe('xy_visualization', () => {
           name: 'custom',
           params: {},
         };
-        (state.layers[0] as XYDataLayerConfig).splitAccessor = 'd';
+        (state.layers[0] as XYDataLayerConfig).splitAccessors = ['d'];
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -2689,7 +2689,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: 'a',
               accessors: ['b'],
             },
@@ -2731,7 +2731,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 ...baseState.layers[0],
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 ...layerConfigOverride,
               } as XYLayerConfig,
             ],
@@ -2842,7 +2842,7 @@ describe('xy_visualization', () => {
       it('should show disable icon for splitted series', () => {
         const accessorConfig = callConfigAndFindYConfig(
           {
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
           },
           'b'
         );
@@ -2855,7 +2855,7 @@ describe('xy_visualization', () => {
         (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
-          splitAccessor: 'd',
+          splitAccessors: ['d'],
         });
         const accessorConfig = breakdownConfig!.accessors[0];
         expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
@@ -2973,7 +2973,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: ['a'],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2990,7 +2990,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -3006,7 +3006,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'second',
@@ -3014,7 +3014,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -3066,7 +3066,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'third',
@@ -3074,7 +3074,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -3108,7 +3108,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'third',
@@ -3116,7 +3116,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -3174,7 +3174,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'], // just use a single accessor to avoid too much noise
                 },
@@ -3223,7 +3223,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'],
                 },
@@ -3231,7 +3231,7 @@ describe('xy_visualization', () => {
                   layerId: 'second',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'e',
                   accessors: ['b'],
                 },
@@ -3280,7 +3280,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'],
                 },
@@ -3288,7 +3288,7 @@ describe('xy_visualization', () => {
                   layerId: 'second',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'e',
                   accessors: ['b'],
                 },
@@ -3313,7 +3313,7 @@ describe('xy_visualization', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 xAccessor: DATE_HISTORGRAM_COLUMN_ID,
                 accessors: ['b'],
               },
@@ -3365,7 +3365,7 @@ describe('xy_visualization', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 xAccessor: undefined, // important
                 accessors: ['b'],
               },
@@ -3571,7 +3571,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: DATE_HISTORGRAM_COLUMN_ID,
               accessors: ['b'],
             },

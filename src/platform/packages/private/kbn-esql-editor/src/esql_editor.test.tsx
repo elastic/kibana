@@ -11,6 +11,7 @@ import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
@@ -67,6 +68,9 @@ describe('ESQLEditor', () => {
     return Promise.resolve([]);
   });
 
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings,
     settings: {
@@ -74,6 +78,7 @@ describe('ESQLEditor', () => {
     },
     core: corePluginMock,
     data: dataPluginMock.createStartContract(),
+    kql: kqlMock,
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
@@ -99,6 +104,8 @@ describe('ESQLEditor', () => {
           webkitBackingStorePixelRatio: 1,
         } as unknown as RenderingContext)
     );
+
+    localStorage.clear();
   });
 
   afterAll(() => {
@@ -371,6 +378,24 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is hidden
+        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+      });
+    });
+
+    it('should not open the visor if user has previously dismissed it', async () => {
+      // Simulate user having dismissed the visor in a previous session
+      localStorage.setItem('esql:visorAutoOpenDismissed', 'true');
+
+      const newProps = {
+        ...props,
+        query: { esql: 'FROM test_index' },
+        openVisorOnSourceCommands: true,
+      };
+      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+
+      await waitFor(() => {
+        const visor = getByTestId('ESQLEditor-quick-search-visor');
+        expect(visor).toBeInTheDocument();
         expect(visor.firstChild).toHaveStyle({ opacity: 0 });
       });
     });
