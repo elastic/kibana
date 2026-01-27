@@ -24,6 +24,7 @@ import { getFullOtelCollectorConfig } from './get_otel_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
+import { createDataView } from './util/create_data_view';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -149,6 +150,14 @@ export async function ensureOtelDemo({
 
   // Enable streams in Kibana (sets up the logs index)
   await enableStreams({
+    kibanaUrl,
+    username: elasticsearchUsername,
+    password: elasticsearchPassword,
+    log,
+  });
+
+  // Create a data view for logs (useful for Discover and dashboards)
+  await createDataView({
     kibanaUrl,
     username: elasticsearchUsername,
     password: elasticsearchPassword,

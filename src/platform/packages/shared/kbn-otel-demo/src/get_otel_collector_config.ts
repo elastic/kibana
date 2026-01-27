@@ -9,7 +9,8 @@
 
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
- * Collects both OTLP telemetry and container logs from Kubernetes nodes.
+ * Collects container logs from Kubernetes nodes and forwards them to Elasticsearch.
+ * OTLP traces and metrics are accepted but only exported to debug (not Elasticsearch).
  * Uses k8sattributes processor for proper pod/container metadata enrichment.
  */
 export function getFullOtelCollectorConfig({
@@ -229,9 +230,6 @@ processors:
       log_record:
         - 'true'
 
-connectors:
-  spanmetrics: {}
-
 exporters:
   debug:
     verbosity: basic
@@ -271,14 +269,16 @@ service:
       receivers: [filelog/k8s]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
+    # Accept traces but only export to debug (not Elasticsearch)
     traces:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [elasticsearch, spanmetrics, debug]
+      exporters: [debug]
+    # Accept metrics but only export to debug (not Elasticsearch)
     metrics:
-      receivers: [otlp, spanmetrics]
+      receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [elasticsearch, debug]
+      exporters: [debug]
 `;
 
   return configYaml
