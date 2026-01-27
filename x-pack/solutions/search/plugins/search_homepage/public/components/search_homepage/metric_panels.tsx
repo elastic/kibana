@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiImage,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
@@ -176,46 +176,21 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
       hasBorder
       onClick={() => onPanelClick && onPanelClick({ share, application })}
       data-test-subj={dataTestSubj}
-      css={css({ height: '100%' })}
     >
-      <EuiSplitPanel.Inner
-        grow
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          minHeight: `${euiTheme.base * 7}px`,
-        })}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          gutterSize="s"
-          css={{ height: '100%' }}
-        >
-          <EuiFlexItem grow={true}>
-            <div>
-              <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner color="subdued" paddingSize="l">
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+          <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        css={css({
-          minHeight: `${euiTheme.base * 8}px`,
-        })}
-      >
+      <EuiSplitPanel.Inner css={css({ height: '100%' })}>
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{metricTitle}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <p>{metricDescription}</p>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{metricTitle}</h4>
+          </EuiTitle>
+          <EuiText color="subdued" size="s">
+            <p>{metricDescription}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -236,9 +211,7 @@ export const MetricPanels = () => {
   return (
     <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
       {panels.map((panel, index) => (
-        <EuiFlexItem key={panel.type + '-' + index}>
-          <MetricPanelEmpty panel={panel} />
-        </EuiFlexItem>
+        <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
       ))}
     </EuiFlexGrid>
   );
