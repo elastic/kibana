@@ -26,8 +26,8 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
       Implements the following rank
       1. host.entity.id           --> implemented as the default id field
       2. host.id
-      3. host.name @ host.domain
-      4. host.hostname @ host.domain
+      3. host.name . host.domain
+      4. host.hostname . host.domain
       5. host.name
       6. host.hostname
     */
