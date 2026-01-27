@@ -8,10 +8,16 @@
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
 import { parse } from 'yaml';
+import Mustache from 'mustache';
 import type {
   WorkflowInfo,
   WorkflowsConfig,
 } from '@kbn/data-catalog-plugin/common/data_source_spec';
+
+function hasAgentBuilderToolTag(yamlContent: string): boolean {
+  const parsed = parse(yamlContent);
+  return parsed?.tags?.includes('agent-builder-tool') ?? false;
+}
 
 /**
  * Loads workflow YAML files from a directory and converts them to WorkflowInfo objects.
@@ -39,17 +45,10 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
 
     // Load and process each YAML file
     return await Promise.all(
-      yamlFiles.map(async (file) => {
-        const filePath = join(directory, file);
-        let content = await fs.readFile(filePath, 'utf-8');
-
-        // Replace template variables
-        if (templateInputs) {
-          for (const [key, value] of Object.entries(templateInputs)) {
-            content = content.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
-          }
-        }
-
+      yamlFiles.map(async (fileName) => {
+        const filePath = join(directory, fileName);
+        const rawContent = await fs.readFile(filePath, 'utf-8');
+        const content = Mustache.render(rawContent, templateInputs);
         const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {
@@ -69,10 +68,4 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
     }
     throw error;
   }
-}
-
-function hasAgentBuilderToolTag(yamlContent: string): boolean {
-  const parsed = parse(yamlContent);
-  const tags = parsed?.tags;
-  return tags.length > 0 && 'agent-builder-tool' in tags;
 }
