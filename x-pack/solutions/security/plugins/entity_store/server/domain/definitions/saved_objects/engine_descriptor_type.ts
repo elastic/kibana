@@ -135,5 +135,5 @@ export const EngineDescriptorType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
   modelVersions: { 1: version1 },
-  hiddenFromHttpApis: true
+  hiddenFromHttpApis: true,
 };

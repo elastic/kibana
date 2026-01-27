@@ -91,7 +91,7 @@ export class AssetManager {
         }),
       ]);
 
-      await this.engineDescriptorClient.update(type, {status: ENGINE_STATUS.STARTED});
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
       this.logger.debug(`Installed definition: ${type}`);
 
@@ -123,5 +123,4 @@ export class AssetManager {
       throw error;
     }
   }
-
 }
