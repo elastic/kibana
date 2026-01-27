@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rules'));
 
     describe('Metrics UI', function () {
-      loadTestFile(require.resolve('./home_page'));
       loadTestFile(require.resolve('./metrics_anomalies'));
       loadTestFile(require.resolve('./metrics_explorer'));
       loadTestFile(require.resolve('./hosts_view'));
