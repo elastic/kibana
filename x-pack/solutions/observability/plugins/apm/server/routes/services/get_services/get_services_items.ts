@@ -46,9 +46,6 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
-  includeSloStatus = true,
-  includeAlerts = true,
-  includeHealthStatus = true,
 }: {
   environment: string;
   kuery: string;
@@ -65,9 +62,6 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
-  includeSloStatus?: boolean;
-  includeAlerts?: boolean;
-  includeHealthStatus?: boolean;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -90,30 +84,24 @@ export async function getServicesItems({
           ...commonParams,
           apmEventClient,
         }),
-        includeHealthStatus
-          ? getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
-              logger.debug(err);
-              return [];
-            })
-          : [],
-        includeAlerts
-          ? getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
-              logger.debug(err);
-              return [];
-            })
-          : [],
-      ]);
-
-    const sloStats = includeSloStatus
-      ? await getServicesSloStats({
-          ...commonParams,
-          serviceNames: serviceStats.map(({ serviceName }) => serviceName),
-          sloClient,
-        }).catch((err) => {
+        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
           logger.debug(err);
           return [];
-        })
-      : [];
+        }),
+        getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+          logger.debug(err);
+          return [];
+        }),
+      ]);
+
+    const sloStats = await getServicesSloStats({
+      ...commonParams,
+      serviceNames: serviceStats.map(({ serviceName }) => serviceName),
+      sloClient,
+    }).catch((err) => {
+      logger.debug(err);
+      return [];
+    });
 
     const items =
       mergeServiceStats({

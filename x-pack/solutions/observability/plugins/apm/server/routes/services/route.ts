@@ -117,16 +117,6 @@ const servicesRoute = createApmServerRoute({
 
     const coreStart = await core.start();
 
-    const [sloCapabilities, apmCapabilities, mlCapabilities] = await Promise.all([
-      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'slo.*' }),
-      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'apm.*' }),
-      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'ml.*' }),
-    ]);
-
-    const canReadSlos = Boolean(sloCapabilities.slo?.read);
-    const canReadAlerts = Boolean(apmCapabilities.apm?.['alerting:show']);
-    const canReadMlJobs = Boolean(mlCapabilities.ml?.canGetJobs);
-
     const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
@@ -155,9 +145,6 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
-      includeSloStatus: canReadSlos,
-      includeAlerts: canReadAlerts,
-      includeHealthStatus: canReadMlJobs,
     });
   },
 });

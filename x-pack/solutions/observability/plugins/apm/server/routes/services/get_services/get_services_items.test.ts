@@ -84,13 +84,10 @@ describe('getServicesItems', () => {
     mockMergeServiceStats.mockReturnValue(mockMergedItems);
   });
 
-  describe('conditional data fetching', () => {
-    it('fetches all data when all include flags are true', async () => {
+  describe('data fetching', () => {
+    it('fetches all data sources', async () => {
       const result = await getServicesItems({
         ...baseParams,
-        includeAlerts: true,
-        includeHealthStatus: true,
-        includeSloStatus: true,
       });
 
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
@@ -98,77 +95,6 @@ describe('getServicesItems', () => {
       expect(mockGetServicesAlerts).toHaveBeenCalled();
       expect(mockGetServicesSloStats).toHaveBeenCalled();
       expect(result.items).toEqual(mockMergedItems);
-    });
-
-    it('skips health statuses when includeHealthStatus is false', async () => {
-      await getServicesItems({
-        ...baseParams,
-        includeAlerts: true,
-        includeHealthStatus: false,
-        includeSloStatus: true,
-      });
-
-      expect(mockGetServiceTransactionStats).toHaveBeenCalled();
-      expect(mockGetHealthStatuses).not.toHaveBeenCalled();
-      expect(mockGetServicesAlerts).toHaveBeenCalled();
-      expect(mockGetServicesSloStats).toHaveBeenCalled();
-
-      expect(mockMergeServiceStats).toHaveBeenCalledWith(
-        expect.objectContaining({
-          healthStatuses: [],
-        })
-      );
-    });
-
-    it('skips alerts when includeAlerts is false', async () => {
-      await getServicesItems({
-        ...baseParams,
-        includeAlerts: false,
-        includeHealthStatus: true,
-        includeSloStatus: true,
-      });
-
-      expect(mockGetServiceTransactionStats).toHaveBeenCalled();
-      expect(mockGetHealthStatuses).toHaveBeenCalled();
-      expect(mockGetServicesAlerts).not.toHaveBeenCalled();
-      expect(mockGetServicesSloStats).toHaveBeenCalled();
-
-      expect(mockMergeServiceStats).toHaveBeenCalledWith(
-        expect.objectContaining({
-          alertCounts: [],
-        })
-      );
-    });
-
-    it('skips SLOs when includeSloStatus is false', async () => {
-      await getServicesItems({
-        ...baseParams,
-        includeAlerts: true,
-        includeHealthStatus: true,
-        includeSloStatus: false,
-      });
-
-      expect(mockGetServiceTransactionStats).toHaveBeenCalled();
-      expect(mockGetHealthStatuses).toHaveBeenCalled();
-      expect(mockGetServicesAlerts).toHaveBeenCalled();
-      expect(mockGetServicesSloStats).not.toHaveBeenCalled();
-
-      expect(mockMergeServiceStats).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sloStats: [],
-        })
-      );
-    });
-
-    it('skips SLOs when sloClient is not provided', async () => {
-      await getServicesItems({
-        ...baseParams,
-        sloClient: undefined,
-        includeSloStatus: true,
-      });
-
-      // getServicesSloStats is still called, but it returns [] internally when sloClient is undefined
-      expect(mockGetServicesSloStats).toHaveBeenCalled();
     });
   });
 
