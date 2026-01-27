@@ -86,7 +86,7 @@ export interface StatsFieldSummary {
    * A `column` or param AST node, which represents the field name. If no column
    * AST node was found, a new one "virtual" column node is created.
    */
-  column: ESQLColumn | ESQLParamLiteral;
+  // column: ESQLColumn | ESQLParamLiteral;
 
   /**
    * The definition of the field, which is the right-hand side of the `=`

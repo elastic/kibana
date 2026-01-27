@@ -17,14 +17,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type {
-  ESQLColumn,
-  ESQLList,
-  ESQLLiteral,
-  ESQLLocation,
-  ESQLParamLiteral,
-  ESQLProperNode,
-} from '../../types';
+import type { ESQLColumn, ESQLList, ESQLLiteral, ESQLLocation, ESQLProperNode } from '../../types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../shared/sorting/types';
@@ -162,12 +155,6 @@ export interface FieldSummary {
    * The field name, correctly formatted, extracted from the AST.
    */
   field: string;
-
-  /**
-   * A `column` or param AST node, which represents the field name. If no column
-   * AST node was found, a new one "virtual" column node is created.
-   */
-  column: ESQLColumn | ESQLParamLiteral;
 
   /**
    * The definition of the field, which is the right-hand side of the `=`

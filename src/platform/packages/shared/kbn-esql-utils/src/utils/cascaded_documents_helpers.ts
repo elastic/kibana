@@ -647,7 +647,7 @@ function handleStatsByCategorizeLeafOperation(
     }
   }
 
-  const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.column.name)];
+  const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
 
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
@@ -833,10 +833,10 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       // especially when the function is unnamed for example if the user inputs "CATEGORIZE (message)" elasticsearch is able to understand this because the parser fixes it, and precisely because of that is why
       // we can't use this as-is when constructing the filtering query, so we appropriately extract correct value from the parsed AST
       normalizedFieldName =
-        isFunctionExpression(fieldDeclaration.definition) &&
-        fieldDeclaration.definition.subtype === 'variadic-call'
-          ? fieldDeclaration.definition.text
-          : fieldDeclaration.column.name;
+        isFunctionExpression(fieldDeclaration.arg) &&
+        fieldDeclaration.arg.subtype === 'variadic-call'
+          ? fieldDeclaration.arg.text
+          : fieldDeclaration.field;
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,
