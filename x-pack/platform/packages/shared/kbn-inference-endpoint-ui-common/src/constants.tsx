@@ -78,10 +78,7 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
 
-// Default model mappings for each service provider using already defined constants
-// Note: Only include providers that have a 'model_id' field for completion/chat tasks
 export const DEFAULT_MODELS: Partial<Record<ServiceProviderKeys, string>> = {
-  // Providers with connector schema constants
   [ServiceProviderKeys.openai]: OPENAI_DEFAULT_MODEL, // 'gpt-4.1'
   [ServiceProviderKeys.amazonbedrock]: BEDROCK_DEFAULT_MODEL, // 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'
   [ServiceProviderKeys.googlevertexai]: GEMINI_DEFAULT_MODEL, // 'gemini-2.5-pro'
