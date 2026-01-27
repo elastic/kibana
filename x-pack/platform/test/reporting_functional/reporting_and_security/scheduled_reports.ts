@@ -22,8 +22,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/244651
-  describe.skip('Scheduled Reports Flyout', () => {
+  describe('Scheduled Reports Flyout', () => {
     const hasFocus = async (element: WebElementWrapper) => {
       const activeElement = await find.activeElement();
       return (await element._webElement.getId()) === (await activeElement._webElement.getId());
@@ -230,27 +229,25 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       });
     });
 
-    describe('without reporting management privileges', async () => {
-      it('disables and hides the email recipient fields', async () => {
-        await reportingFunctional.loginReportingUser();
-        await openFlyout();
+    it('without reporting management privileges disables and hides the email recipient fields', async () => {
+      await reportingFunctional.loginReportingUser();
+      await openFlyout();
 
-        // Enable email
-        await testSubjects.click('sendByEmailToggle');
+      // Enable email
+      await testSubjects.click('sendByEmailToggle');
 
-        // Non-managers can only email the reports to themselves so the `To` field should be
-        // pre-filled and disabled
-        const emailToField = await (
-          await testSubjects.find('emailRecipientsCombobox')
-        ).findByTestSubject('comboBoxSearchInput');
-        expect(await emailToField.isEnabled()).to.equal(false);
-        expect((await comboBox.getComboBoxSelectedOptions('emailRecipientsCombobox'))[0]).to.equal(
-          'reportinguser@example.com'
-        );
-        // and the Cc and Bcc fields should be hidden
-        await testSubjects.missingOrFail('emailCcRecipientsCombobox');
-        await testSubjects.missingOrFail('emailBccRecipientsCombobox');
-      });
+      // Non-managers can only email the reports to themselves so the `To` field should be
+      // pre-filled and disabled
+      const emailToField = await (
+        await testSubjects.find('emailRecipientsCombobox')
+      ).findByTestSubject('comboBoxSearchInput');
+      expect(await emailToField.isEnabled()).to.equal(false);
+      expect((await comboBox.getComboBoxSelectedOptions('emailRecipientsCombobox'))[0]).to.equal(
+        'reportinguser@example.com'
+      );
+      // and the Cc and Bcc fields should be hidden
+      await testSubjects.missingOrFail('emailCcRecipientsCombobox');
+      await testSubjects.missingOrFail('emailBccRecipientsCombobox');
     });
   });
 }
