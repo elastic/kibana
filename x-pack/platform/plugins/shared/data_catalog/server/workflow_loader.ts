@@ -38,18 +38,15 @@ export async function loadWorkflowsFromDirectory(
     }
 
     // Load and process each YAML file
-    const workflows = await Promise.all(
+    return await Promise.all(
       yamlFiles.map(async (file) => {
         const filePath = join(workflowsDir, file);
         let content = await fs.readFile(filePath, 'utf-8');
-
-        // Check if the workflow has the 'agent-builder-tool' tag
-        const shouldGenerateABTool = hasAgentBuilderToolTag(content);
-
         // Replace template variables
         if (stackConnectorId) {
           content = content.replace(/\{\{stackConnectorId\}\}/g, stackConnectorId);
         }
+        const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {
           content,
@@ -57,14 +54,14 @@ export async function loadWorkflowsFromDirectory(
         };
       })
     );
-
-    return workflows;
   } catch (error) {
     if (error instanceof Error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        throw new Error(`Workflows directory does not exist: ${workflowsDir}`);
+        throw new Error(`Workflows directory does not exist: ${workflowsDir}`, { cause: error });
       }
-      throw new Error(`Failed to load workflows from ${workflowsDir}: ${error.message}`);
+      throw new Error(`Failed to load workflows from ${workflowsDir}: ${error.message}`, {
+        cause: error,
+      });
     }
     throw error;
   }
@@ -94,25 +91,6 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
 }
 
 /**
- * Resolves the workflows directory path.
- * If workflowsDir is provided, uses it directly.
- * Otherwise, defaults to a 'workflows' directory relative to the caller's location.
- *
- * @param workflowsDir - Optional explicit workflows directory path
- * @param defaultBaseDir - Default base directory (usually __dirname of the caller)
- * @returns Resolved absolute path to workflows directory
- */
-export function resolveWorkflowsDir(
-  workflowsDir: string | undefined,
-  defaultBaseDir: string
-): string {
-  if (workflowsDir) {
-    return workflowsDir;
-  }
-  return join(defaultBaseDir, 'workflows');
-}
-
-/**
  * Loads workflows from various sources based on the configuration format.
  * Supports:
  * - String: directory path
@@ -124,7 +102,7 @@ export function resolveWorkflowsDir(
  * @param stackConnectorId - Stack connector ID to substitute in workflow templates
  * @returns Array of WorkflowInfo objects
  *
- * @throws Error if configuration is invalid or registry is required but not provided
+ * @throws Error if configuration is invalid, or registry is required but not provided
  */
 export async function loadWorkflows(
   workflowsConfig: string | WorkflowReference[] | WorkflowsConfig,

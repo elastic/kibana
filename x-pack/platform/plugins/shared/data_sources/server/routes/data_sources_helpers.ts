@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-catalog-plugin';
+import type { DataSource, WorkflowInfo } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/server/workflow_loader';
@@ -108,18 +108,23 @@ export async function createDataSourceAndRelatedResources(
   const spaceId = getSpaceId(savedObjectsClient);
 
   // Load workflows
-  const workflowInfos = await loadWorkflows(
-    dataSource.workflows,
-    workflowRegistry,
-    finalStackConnectorId
-  );
+  let workflowInfos: WorkflowInfo[];
+  if (dataSource.workflows) {
+    workflowInfos = await loadWorkflows(
+      dataSource.workflows,
+      workflowRegistry,
+      finalStackConnectorId
+    );
+  } else {
+    workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+  }
 
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
-    // Extract original workflow name from YAML and prefix it with the data source name
+    // Extract the original workflow name from YAML and prefix it with the data source name
     const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
     const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
     const prefixedName = `${slugify(name)}.${originalName}`;

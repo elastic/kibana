@@ -84,7 +84,7 @@ export interface StackConnectorConfig {
  * 3. Mixed: { directory: '/path', registry: [...] }
  */
 export interface WorkflowsConfig {
-  /** Path to directory containing local workflow YAML files */
+  /** Path to a directory containing local workflow YAML files */
   directory?: string;
   /** Array of workflow references from a third-party registry */
   registry?: WorkflowReference[];

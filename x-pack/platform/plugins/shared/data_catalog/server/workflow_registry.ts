@@ -32,13 +32,6 @@ export interface RegistryWorkflow {
  */
 export interface WorkflowRegistry {
   /**
-   * Fetches a single workflow by ID
-   * @param workflowId - Unique identifier of the workflow
-   * @returns The workflow definition or undefined if not found
-   */
-  getWorkflow(workflowId: string): Promise<RegistryWorkflow | undefined>;
-
-  /**
    * Fetches multiple workflows by their IDs
    * @param workflowIds - Array of workflow identifiers
    * @returns Array of workflow definitions (missing workflows are excluded)
