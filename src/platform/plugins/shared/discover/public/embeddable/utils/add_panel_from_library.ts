@@ -14,13 +14,13 @@ import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiHasUniqueId, apiPublishesEditablePauseFetch } from '@kbn/presentation-publishing';
 import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 
-type OnAddParams = Parameters<RegistryItem<SavedSearchAttributes>['onAdd']>;
+type OnAddParams = Parameters<RegistryItem['onAdd']>;
 
 export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = async (
   container,
   savedObject
 ) => {
-  const savedSessionAttributes = savedObject.attributes;
+  const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
   const mightHaveVariables =
     apiPublishesESQLVariables(container) &&
     savedSessionAttributes.controlGroupJson &&
