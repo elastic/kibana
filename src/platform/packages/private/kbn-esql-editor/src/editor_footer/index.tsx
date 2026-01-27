@@ -24,7 +24,8 @@ import {
   LanguageDocumentationFlyout,
   LanguageDocumentationInline,
 } from '@kbn/language-documentation';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
@@ -33,6 +34,7 @@ import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_star
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import { ESQLQueryStats } from './query_stats';
+import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -43,6 +45,9 @@ interface EditorFooterProps {
     historyContainer: Interpolation<Theme>;
   };
   code: string;
+  errors?: MonacoMessage[];
+  warnings?: MonacoMessage[];
+  onErrorClick: (error: MonacoMessage) => void;
   onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   onPrettifyQuery: () => void;
   isHistoryOpen: boolean;
@@ -81,12 +86,18 @@ export const EditorFooter = memo(function EditorFooter({
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
+  errors,
+  warnings,
+  onErrorClick,
   dataErrorsControl,
   queryStats,
   toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
+
+  const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
+  const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
   const toggleHistoryComponent = useCallback(() => {
     setIsHistoryOpen(!isHistoryOpen);
@@ -119,6 +130,35 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
+              {errors && errors.length > 0 && (
+                <ErrorsWarningsFooterPopover
+                  isPopoverOpen={isErrorPopoverOpen}
+                  items={errors}
+                  type="error"
+                  setIsPopoverOpen={(isOpen) => {
+                    if (isOpen) {
+                      setIsWarningPopoverOpen(false);
+                    }
+                    setIsErrorPopoverOpen(isOpen);
+                  }}
+                  onErrorClick={onErrorClick}
+                  dataErrorsControl={dataErrorsControl}
+                />
+              )}
+              {warnings && warnings.length > 0 && (
+                <ErrorsWarningsFooterPopover
+                  isPopoverOpen={isWarningPopoverOpen}
+                  items={warnings}
+                  type="warning"
+                  setIsPopoverOpen={(isOpen) => {
+                    if (isOpen) {
+                      setIsErrorPopoverOpen(false);
+                    }
+                    setIsWarningPopoverOpen(isOpen);
+                  }}
+                  onErrorClick={onErrorClick}
+                />
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

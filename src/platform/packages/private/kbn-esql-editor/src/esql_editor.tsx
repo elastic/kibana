@@ -1003,6 +1003,19 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
+    if (!editorRef.current) {
+      return;
+    }
+
+    editorRef.current.focus();
+    editorRef.current.setPosition({
+      lineNumber: startLineNumber,
+      column: startColumn,
+    });
+    editorRef.current.revealLine(startLineNumber);
+  }, []);
+
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const disposablesMap = editorCommandDisposables.current;
@@ -1365,6 +1378,8 @@ const ESQLEditorInternal = function ESQLEditor({
         toggleVisor={onToggleVisor}
         hideQuickSearch={hideQuickSearch}
         queryStats={queryStats}
+        {...editorMessages}
+        onErrorClick={onErrorClick}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
