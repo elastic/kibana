@@ -160,6 +160,7 @@ export class SearchAPI {
                   abortSignal: this.abortSignal,
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
+                  projectRouting: this.projectRouting,
                 }
               )
               .pipe(

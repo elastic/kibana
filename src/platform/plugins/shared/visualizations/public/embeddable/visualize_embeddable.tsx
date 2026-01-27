@@ -34,6 +34,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
@@ -100,6 +101,15 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const vis = await createVisInstance(serializedVis);
           vis.uiState.on('change', onUiStateChange);
           vis$.next(vis);
+
+          // Update project routing overrides when vis changes
+          if (vis.type.getProjectRoutingOverrides) {
+            const newOverrides = await vis.type.getProjectRoutingOverrides(vis.params);
+            if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
+              projectRoutingOverrides$.next(newOverrides);
+            }
+          }
+
           const { params, abortController } = await getExpressionParams();
           return { params, abortController };
         })
@@ -149,6 +159,17 @@ export const getVisualizeEmbeddableFactory: (deps: {
         initialVisInstance.params
       );
     }
+
+    // Track project routing overrides
+    let initialProjectRoutingOverrides: ProjectRoutingOverrides;
+    if (initialVisInstance.type.getProjectRoutingOverrides) {
+      initialProjectRoutingOverrides = await initialVisInstance.type.getProjectRoutingOverrides(
+        initialVisInstance.params
+      );
+    }
+    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+      initialProjectRoutingOverrides
+    );
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
@@ -235,6 +256,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       defaultTitle$,
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      projectRoutingOverrides$,
       rendered$: hasRendered$,
       supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER],
       serializeState: () => {
