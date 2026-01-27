@@ -18,7 +18,6 @@ import type { AiInsightResult, ContextEvent } from './types';
 export interface GetLogAiInsightsParams {
   index: string;
   id: string;
-  spaceId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
