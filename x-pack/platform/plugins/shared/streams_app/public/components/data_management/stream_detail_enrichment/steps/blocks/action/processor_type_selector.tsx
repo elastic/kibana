@@ -458,7 +458,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.joinHelpText"
-          defaultMessage="Use {joinLink} to combine multiple fields into a single field by inserting a delimiter (for example: , or | ) between their values."
+          defaultMessage="{joinLink} into a single field by inserting a delimiter (for example: {example1} or {example2}) between the field values."
           values={{
             joinLink: (
               <EuiLink
@@ -468,9 +468,19 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.join}
               >
                 {i18n.translate('xpack.streams.availableProcessors.joinLinkLabel', {
-                  defaultMessage: 'Join',
+                  defaultMessage: 'Join multiple fields',
                 })}
               </EuiLink>
+            ),
+            example1: (
+              <>
+                <EuiCode>,</EuiCode>
+              </>
+            ),
+            example2: (
+              <>
+                <EuiCode>|</EuiCode>
+              </>
             ),
           }}
         />
