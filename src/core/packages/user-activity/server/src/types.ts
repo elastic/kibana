@@ -16,7 +16,8 @@ export interface ObjectParams {
 
 export interface EventParams {
   action: string;
-  // type should be a fixed list of possibilities, not any string, we should fix that later
+  // type should be a fixed list of possibilities, not any string, we should fix that later:
+  // https://www.elastic.co/guide/en/ecs/1.12/ecs-allowed-values-event-type.html
   type: string;
 }
 
