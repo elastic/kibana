@@ -82,17 +82,12 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
   }
 
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    // Note: The ES|QL view is created by the route handler before calling this.
+    // The definition only stores the view reference, not the actual esql.
     return [
       {
         type: 'upsert_dot_streams_document',
         request: this._definition,
-      },
-      {
-        type: 'upsert_esql_view',
-        request: {
-          name: getEsqlViewName(this._definition.name),
-          query: this._definition.query.esql,
-        },
       },
     ];
   }
@@ -102,6 +97,8 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     startingState: State,
     startingStateStream: QueryStream
   ): Promise<ElasticsearchAction[]> {
+    // Note: The ES|QL view is updated by the route handler before calling this.
+    // The view name in the definition is derived from the stream name and doesn't change.
     const actions: ElasticsearchAction[] = [];
     const definitionChanged = !isEqual(startingStateStream.definition, this._definition);
 
@@ -109,17 +106,6 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       actions.push({
         type: 'upsert_dot_streams_document',
         request: this._definition,
-      });
-    }
-
-    const queryChanged = startingStateStream.definition.query.esql !== this._definition.query.esql;
-    if (queryChanged) {
-      actions.push({
-        type: 'upsert_esql_view',
-        request: {
-          name: getEsqlViewName(this._definition.name),
-          query: this._definition.query.esql,
-        },
       });
     }
 

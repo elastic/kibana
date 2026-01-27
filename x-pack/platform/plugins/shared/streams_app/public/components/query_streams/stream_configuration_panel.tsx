@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -30,6 +29,7 @@ export function StreamConfigurationPanel({
   refreshDefinition,
 }: StreamConfigurationPanelProps) {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+
   const esqlQuery = definition.stream.query.esql;
 
   return (
@@ -53,7 +53,7 @@ export function StreamConfigurationPanel({
                 paddingSize="m"
                 isCopyable
                 css={css`
-                  min-height: 200px;
+                  min-height: 100px;
                 `}
               >
                 {esqlQuery}

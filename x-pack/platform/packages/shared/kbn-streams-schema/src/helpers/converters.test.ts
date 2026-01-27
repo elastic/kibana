@@ -53,6 +53,25 @@ describe('Converter Helpers', () => {
 
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
+
+    it('converts query streams', () => {
+      const request: Streams.QueryStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          query: {
+            view: 'stream.my-query-stream',
+          },
+        },
+      };
+
+      const definition = convertUpsertRequestIntoDefinition('my-query-stream', request);
+
+      expect(Streams.QueryStream.Definition.is(definition)).toEqual(true);
+      expect((definition as Streams.QueryStream.Definition).query.view).toEqual(
+        'stream.my-query-stream'
+      );
+    });
   });
 
   describe('convertGetResponseIntoUpsertRequest', () => {
@@ -139,6 +158,30 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+    });
+
+    it('converts query streams', () => {
+      const getResponse: Streams.QueryStream.GetResponse = {
+        stream: {
+          name: 'my-query-stream',
+          description: '',
+          updated_at: new Date().toISOString(),
+          query: {
+            view: 'stream.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
+          },
+        },
+        inherited_fields: {},
+        sub_query_streams: [],
+        ...emptyAssets,
+      };
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
+
+      expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect(
+        (upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view
+      ).toEqual('stream.my-query-stream');
     });
   });
 });

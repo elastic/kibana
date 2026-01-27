@@ -6,13 +6,37 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { upsertEsqlView, deleteEsqlView } from './manage_esql_views';
+import { getEsqlView, upsertEsqlView, deleteEsqlView } from './manage_esql_views';
 
 describe('manage_esql_views', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getEsqlView', () => {
+    it('should call GET /_query/view/{name} and return the view', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockResponse = {
+        name: 'stream.my-query-stream',
+        query: 'FROM logs-* | LIMIT 100',
+      };
+      esClient.transport.request.mockResolvedValueOnce(mockResponse);
+
+      const result = await getEsqlView({
+        esClient,
+        logger,
+        name: 'stream.my-query-stream',
+      });
+
+      expect(esClient.transport.request).toHaveBeenCalledTimes(1);
+      expect(esClient.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_query/view/stream.my-query-stream',
+      });
+      expect(result).toEqual(mockResponse);
+    });
   });
 
   describe('upsertEsqlView', () => {
@@ -97,4 +121,3 @@ describe('manage_esql_views', () => {
     });
   });
 });
-

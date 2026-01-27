@@ -15,7 +15,7 @@ describe('QueryStream', () => {
         name: 'query-stream',
         description: '',
         query: {
-          esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+          view: 'stream.query-stream',
         },
       },
     ])('is valid', (val) => {
@@ -28,7 +28,7 @@ describe('QueryStream', () => {
         name: 'query-stream',
         description: null,
         query: {
-          esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+          view: 'stream.query-stream',
         },
       },
       {
@@ -40,7 +40,7 @@ describe('QueryStream', () => {
         name: 'query-stream',
         description: '',
         query: {
-          esql: null,
+          view: null,
         },
       },
     ])('is not valid', (val) => {
@@ -55,7 +55,8 @@ describe('QueryStream', () => {
           name: 'query-stream',
           description: '',
           query: {
-            esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+            view: 'stream.query-stream',
+            esql: 'FROM logs | WHERE service.name == "query-child"',
           },
         },
         inherited_fields: {},
@@ -72,7 +73,8 @@ describe('QueryStream', () => {
         stream: {
           description: '',
           query: {
-            esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+            view: 'stream.query-stream',
+            esql: 'FROM logs',
           },
         },
         dashboards: [],
@@ -82,7 +84,8 @@ describe('QueryStream', () => {
         stream: {
           description: '',
           query: {
-            esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+            view: 'stream.query-stream',
+            esql: 'FROM logs',
           },
         },
         dashboards: [],
@@ -105,7 +108,7 @@ describe('QueryStream', () => {
         stream: {
           description: '',
           query: {
-            esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+            view: 'stream.query-stream',
           },
         },
         ...emptyAssets,
@@ -121,7 +124,7 @@ describe('QueryStream', () => {
         queries: [],
         stream: {
           query: {
-            esql: [],
+            view: [],
           },
         },
       },
@@ -139,7 +142,7 @@ describe('QueryStream', () => {
           name: 'my-name',
           description: '',
           query: {
-            esql: 'FROM logs.query-child | WHERE service.name == "query-child"',
+            view: 'stream.query-stream',
           },
         },
       },

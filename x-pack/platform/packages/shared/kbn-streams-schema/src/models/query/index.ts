@@ -13,14 +13,22 @@ import { modelValidation } from '../validation/model_validation';
 import type { InheritedFieldDefinition } from '../../fields';
 import { inheritedFieldDefinitionSchema } from '../../fields';
 
+/**
+ * Query definition stored in the stream schema.
+ * References an ES|QL view by name - the view is the source of truth for the actual query.
+ */
 export interface Query {
+  view: string;
+}
+
+export interface QueryWithEsql extends Query {
   esql: string;
 }
 
 export const Query: Validation<unknown, Query> = validation(
   z.unknown(),
   z.object({
-    esql: z.string(),
+    view: z.string(),
   })
 );
 
@@ -40,6 +48,9 @@ export namespace QueryStream {
   export type Source = BaseStream.Source<QueryStream.Definition>;
 
   export interface GetResponse extends BaseStream.GetResponse<Definition> {
+    stream: Omit<Definition, 'query'> & {
+      query: QueryWithEsql;
+    };
     inherited_fields: InheritedFieldDefinition;
     sub_query_streams: string[];
   }
@@ -55,6 +66,14 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
       query: Query.right,
     }),
     GetResponse: z.object({
+      stream: z
+        .object({
+          query: z.object({
+            view: z.string(),
+            esql: z.string(),
+          }),
+        })
+        .passthrough(),
       inherited_fields: inheritedFieldDefinitionSchema,
       sub_query_streams: z.array(z.string()),
     }),

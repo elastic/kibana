@@ -6,6 +6,39 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export interface EsqlViewResponse {
+  views: EsqlView[];
+}
+
+export async function getEsqlView({
+  esClient,
+  logger,
+  name,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  name: string;
+}): Promise<EsqlView> {
+  logger.debug(`Getting ES|QL view: ${name}`);
+
+  const response = await esClient.transport.request<EsqlViewResponse>({
+    method: 'GET',
+    path: `/_query/view/${name}`,
+  });
+
+  if (isEmpty(response.views)) {
+    throw new Error(`ES|QL view "${name}" not found.`);
+  }
+
+  return response.views[0];
+}
 
 export async function upsertEsqlView({
   esClient,
@@ -48,4 +81,3 @@ export async function deleteEsqlView({
     }
   );
 }
-

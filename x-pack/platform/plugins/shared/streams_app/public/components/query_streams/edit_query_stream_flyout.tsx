@@ -62,11 +62,11 @@ export function EditQueryStreamFlyout({
 
   const { timeState } = useTimefilter();
   const streamName = definition.stream.name;
-  const initialQuery = definition.stream.query.esql;
+  const resolvedEsql = definition.stream.query.esql;
 
   const { formState, register, handleSubmit, setValue, watch } = useForm<FormState>({
     defaultValues: {
-      esqlQuery: initialQuery,
+      esqlQuery: '',
     },
   });
 
@@ -129,12 +129,17 @@ export function EditQueryStreamFlyout({
   );
 
   useEffect(() => {
-    // Execute query on mount to show initial preview
+    if (resolvedEsql) {
+      setValue('esqlQuery', resolvedEsql, { shouldValidate: true });
+    }
+  }, [resolvedEsql, setValue]);
+
+  useEffect(() => {
+    // Execute query when it changes to show initial preview
     if (esqlQuery) {
       handleQuerySubmit({ esql: esqlQuery });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleQuerySubmit]);
+  }, [handleQuerySubmit, esqlQuery]);
 
   return (
     <EuiFlyout size="l" onClose={onClose} aria-labelledby="edit-query-stream-flyout-title">
@@ -254,7 +259,7 @@ export function EditQueryStreamFlyout({
           <EuiButton
             data-test-subj="streamsAppEditQueryStreamFlyoutSaveButton"
             isLoading={formState.isSubmitting}
-            disabled={(formState.isSubmitted && !formState.isValid) || !!documentsError}
+            disabled={(formState.isSubmitted && !formState.isValid) || !!documentsError || isLoadingQuery}
             onClick={handleQueryStreamUpdate}
           >
             {i18n.translate('xpack.streams.editQueryStreamFlyout.saveButtonLabel', {

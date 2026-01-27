@@ -227,8 +227,8 @@ const getESQLQuery = (stream: Streams.all.Definition, hasDataStream: boolean, is
   }
 
   if (Streams.QueryStream.Definition.is(stream)) {
-    // TODO: replace with ESQL view name
-    return stream.query.esql;
+    // Use the ES|QL view name as the query source
+    return `FROM ${stream.query.view}`;
   }
 
   return undefined;

@@ -7,16 +7,26 @@
 
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
-import { Query, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
-import type { QueryAsset } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { getEsqlView, upsertEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
+import { getEsqlViewName } from '../../../lib/streams/esql_views/view_name';
+
+/**
+ * Schema for API request body - accepts esql for UX simplicity.
+ * This is different from the stored Query schema which uses { view: string }.
+ */
+const queryRequestBodySchema = z.object({
+  esql: z.string(),
+});
 
 export interface QueryStreamObjectGetResponse {
-  query: Streams.QueryStream.Definition['query'];
+  /** The view reference stored in the definition */
+  query: Streams.QueryStream.Definition['query'] & { esql: string };
 }
 
 const readQueryStreamRoute = createServerRoute({
@@ -37,8 +47,13 @@ const readQueryStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<QueryStreamObjectGetResponse> => {
-    const { streamsClient } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<QueryStreamObjectGetResponse> => {
+    const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
 
@@ -46,11 +61,24 @@ const readQueryStreamRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(name);
 
-    if (Streams.QueryStream.Definition.is(definition)) {
-      return { query: definition.query };
+    if (!Streams.QueryStream.Definition.is(definition)) {
+      throw badRequest(`Stream is not a query stream`);
     }
 
-    throw badRequest(`Stream is not a query stream`);
+    // Fetch the actual esql from the ES|QL view
+    const viewName = definition.query.view;
+    const esqlView = await getEsqlView({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+      name: viewName,
+    });
+
+    return {
+      query: {
+        ...definition.query,
+        esql: esqlView.query,
+      },
+    };
   },
 });
 
@@ -74,13 +102,15 @@ const upsertQueryStreamRoute = createServerRoute({
       name: z.string(),
     }),
     body: z.object({
-      query: Query.right,
+      // API accepts esql for UX simplicity, not the stored query format
+      query: queryRequestBodySchema,
     }),
   }),
-  handler: async ({ params, request, getScopedClients, context }) => {
-    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({ params, request, getScopedClients, context, logger }) => {
+    const { streamsClient, queryClient, attachmentClient, scopedClusterClient } =
+      await getScopedClients({
+        request,
+      });
 
     const core = await context.core;
     const queryStreamsEnabled = await core.uiSettings.client.get(
@@ -92,14 +122,30 @@ const upsertQueryStreamRoute = createServerRoute({
     }
 
     const { name } = params.path;
-    const { query } = params.body;
+    const { esql } = params.body.query;
+
+    // Generate the view name from the stream name
+    const viewName = getEsqlViewName(name);
+
+    // Create/update the ES|QL view first (source of truth for the query)
+    await upsertEsqlView({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+      name: viewName,
+      query: esql,
+    });
+
+    // The query reference to store in the definition
+    const queryReference: Streams.QueryStream.Definition['query'] = {
+      view: viewName,
+    };
 
     let definition: Streams.all.Definition;
     try {
       definition = await streamsClient.getStream(name);
     } catch (error) {
       if (error instanceof DefinitionNotFoundError) {
-        return await streamsClient.createQueryStream({ name, query });
+        return await streamsClient.createQueryStream({ name, query: queryReference });
       }
       throw error;
     }
@@ -122,7 +168,7 @@ const upsertQueryStreamRoute = createServerRoute({
       .map((attachment) => attachment.id);
 
     const queries = assets
-      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+      .filter((asset) => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
 
     // Remove name and updated_at from definition - these are not allowed in UpsertRequest
@@ -132,7 +178,7 @@ const upsertQueryStreamRoute = createServerRoute({
       dashboards,
       stream: {
         ...stream,
-        query,
+        query: queryReference,
       },
       queries,
       rules,

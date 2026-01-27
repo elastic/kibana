@@ -55,8 +55,8 @@ export const QueryStreamSchemaEditor = ({
           defaultColumns={defaultColumns}
           stream={definition.stream}
           onRefreshData={refreshFields}
-          onFieldUpdate={() => {}}
-          onFieldSelection={() => {}}
+          onFieldUpdate={() => { }}
+          onFieldSelection={() => { }}
           fieldSelection={[]}
         />
       </EuiFlexItem>
@@ -66,6 +66,7 @@ export const QueryStreamSchemaEditor = ({
 
 const useQueryStreamSchemaFields = ({ definition }: QueryStreamSchemaEditorProps) => {
   const { data } = useKibana().dependencies.start;
+  const esqlQuery = definition.stream.query.esql;
 
   const {
     value = [],
@@ -73,8 +74,11 @@ const useQueryStreamSchemaFields = ({ definition }: QueryStreamSchemaEditorProps
     refresh,
   } = useAbortableAsync(
     async ({ signal }) => {
+      if (!esqlQuery) {
+        return [] as SchemaEditorField[];
+      }
       const columns = await getESQLQueryColumns({
-        esqlQuery: definition.stream.query.esql,
+        esqlQuery,
         search: data.search.search,
         signal,
       });
@@ -86,7 +90,7 @@ const useQueryStreamSchemaFields = ({ definition }: QueryStreamSchemaEditorProps
         status: 'mapped',
       })) as SchemaEditorField[];
     },
-    [data.search, definition.stream.query.esql, definition.stream.name]
+    [data.search, esqlQuery, definition.stream.name]
   );
 
   return {

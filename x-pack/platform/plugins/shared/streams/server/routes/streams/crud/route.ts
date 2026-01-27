@@ -41,6 +41,7 @@ export const readStreamRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<Streams.all.GetResponse> => {
     const { queryClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
@@ -53,6 +54,7 @@ export const readStreamRoute = createServerRoute({
       attachmentClient,
       scopedClusterClient,
       streamsClient,
+      logger,
     });
 
     return body;
