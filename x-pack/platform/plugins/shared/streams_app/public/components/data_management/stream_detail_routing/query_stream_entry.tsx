@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 
 // Local implementation since getEsqlViewName is not exported from client-side schema
