@@ -168,7 +168,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           http={http}
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
-          filteredRuleTypes={filteredRuleTypes}
+          filteredRuleTypes={[]}
         />
       )}
     </>
