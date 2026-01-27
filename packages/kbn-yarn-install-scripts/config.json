@@ -7,12 +7,6 @@
       "reason": "Creates config in home directory"
     },
     {
-      "path": "chromedriver",
-      "lifecycle": "install",
-      "required": true,
-      "reason": "Downloads chromedriver binary required for functional tests"
-    },
-    {
       "path": "core-js",
       "lifecycle": "postinstall",
       "required": false,
