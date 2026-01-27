@@ -30,8 +30,7 @@ interface LayerConversionData {
 }
 
 /**
- * Retrieves conversion data for a form-based layer using pre-computed data.
- * The pre-computed data is required - if missing, it indicates a bug in the conversion flow.
+ * Retrieves conversion data for a form-based layer.
  */
 function getLayerConversionData(
   layerId: string,
@@ -56,7 +55,7 @@ function getLayerConversionData(
 
 /**
  * Builds the text-based datasource state.
- * Uses pre-computed conversion data from the passed ConvertibleLayer objects.
+ * Uses data from the passed ConvertibleLayer objects.
  * Preserves original column IDs so visualizations can still reference them.
  * The fieldName property holds the ES|QL field name.
  */
@@ -149,7 +148,7 @@ function buildTextBasedState(
 interface ConvertToEsqlParams {
   /**
    * The ConvertibleLayer objects selected for conversion.
-   * Contains the pre-computed ES|QL query and column mappings from useEsqlConversionCheck.
+   * Contains the ES|QL query and column mappings from useEsqlConversionCheck.
    */
   layersToConvert: ConvertibleLayer[];
   attributes: TypedLensSerializedState['attributes'];
@@ -161,14 +160,6 @@ interface ConvertToEsqlParams {
 /**
  * Converts form-based layers to text-based (ES|QL) and returns new attributes.
  * Returns undefined if conversion fails or no layers to convert.
- *
- * Uses pre-computed conversionData from the passed ConvertibleLayer objects to avoid
- * duplicate calls to generateEsqlQuery. The conversion data is computed once in
- * useEsqlConversionCheck and passed directly here.
- *
- * Preserves original column IDs in the text-based layer so visualizations can still
- * reference them. This approach works with all visualization types (XY, Datatable,
- * Metric, etc.) without needing to understand their different state structures.
  */
 export function convertFormBasedToTextBasedLayer({
   layersToConvert,

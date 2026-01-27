@@ -101,7 +101,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     references: [],
   } as unknown as TypedLensSerializedState['attributes'];
 
-  // Pre-computed conversion data that would normally come from useEsqlConversionCheck
+  // Conversion data that would come from useEsqlConversionCheck
   const mockConvertibleLayers: ConvertibleLayer[] = [
     {
       id: layerId,
@@ -216,7 +216,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(result).toBeUndefined();
   });
 
-  it('converts a form-based layer to text-based successfully using pre-computed data', () => {
+  it('converts a form-based layer to text-based successfully', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -362,7 +362,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     ]);
   });
 
-  it('uses custom pre-computed conversion data with different column mappings', () => {
+  it('uses conversion data with different column mappings', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -374,8 +374,8 @@ describe('convertFormBasedToTextBasedLayer', () => {
       },
     });
 
-    // Pre-computed conversion data with custom ES|QL query and column mappings
-    const preComputedEsql =
+    // Conversion data with custom ES|QL query and column mappings
+    const esqlQuery =
       'FROM test-index | STATS custom_count = COUNT(*) BY custom_timestamp = BUCKET(@timestamp, 1 hour)';
     const customConvertibleLayers: ConvertibleLayer[] = [
       {
@@ -383,7 +383,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
         icon: 'layers',
         name: '',
         type: 'data',
-        query: preComputedEsql,
+        query: esqlQuery,
         isConvertibleToEsql: true,
         conversionData: {
           esAggsIdMap: {
@@ -421,10 +421,10 @@ describe('convertFormBasedToTextBasedLayer', () => {
       framePublicAPI,
     });
 
-    // Should use the pre-computed ES|QL query
-    expect(result?.state.query).toEqual({ esql: preComputedEsql });
+    // Should use the ES|QL query
+    expect(result?.state.query).toEqual({ esql: esqlQuery });
 
-    // Visualization state should be passed through unchanged - original column IDs preserved
+    // Visualization state should be passed through unchanged to preserve original column IDs
     expect(result?.state.visualization).toMatchInlineSnapshot(`
       Object {
         "layers": Array [
@@ -440,9 +440,9 @@ describe('convertFormBasedToTextBasedLayer', () => {
       }
     `);
 
-    // Verify the text-based layer uses the pre-computed query and preserves original column IDs
+    // Verify the text-based layer uses the ES|QL query and preserves original column IDs
     const textBasedState = result?.state.datasourceStates.textBased;
-    expect(textBasedState?.layers[layerId]?.query).toEqual({ esql: preComputedEsql });
+    expect(textBasedState?.layers[layerId]?.query).toEqual({ esql: esqlQuery });
 
     // Columns should have original IDs with fieldName holding ES|QL field names
     const columns = textBasedState?.layers[layerId]?.columns;

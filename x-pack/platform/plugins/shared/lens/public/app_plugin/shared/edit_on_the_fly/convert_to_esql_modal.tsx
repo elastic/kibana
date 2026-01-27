@@ -36,8 +36,7 @@ import { layerTypes } from '../../..';
 type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
 
 /**
- * Pre-computed conversion data from generateEsqlQuery.
- * This allows the conversion to be performed without regenerating the ES|QL query.
+ * Conversion data from generateEsqlQuery.
  */
 export interface EsqlConversionData {
   esAggsIdMap: Record<string, OriginalColumn[]>;
@@ -51,10 +50,6 @@ export interface ConvertibleLayer {
   type: LayerType;
   query: string;
   isConvertibleToEsql: boolean;
-  /**
-   * Pre-computed conversion data from the initial ES|QL query generation.
-   * This data is reused during conversion to avoid duplicate query generation.
-   */
   conversionData: EsqlConversionData;
 }
 

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { EsqlToolFieldType } from '@kbn/agent-builder-common';
 import { defer } from 'lodash';
 import React, { useCallback } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
@@ -56,7 +56,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
           : {
               name: inferredParamName,
               description: '',
-              type: ES_FIELD_TYPES.TEXT,
+              type: EsqlToolFieldType.STRING,
               source: EsqlParamSource.Inferred,
               optional: false,
             };
@@ -158,7 +158,7 @@ export const EsqlParams = () => {
       appendParamField({
         name: name ?? '',
         description: '',
-        type: ES_FIELD_TYPES.TEXT,
+        type: EsqlToolFieldType.STRING,
         source: EsqlParamSource.Custom,
         optional: false,
       });

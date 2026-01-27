@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/247211
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint List API (deprecated): RBAC and Validation', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint List API (deprecated): RBAC and Validation', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     let t1AnalystSupertest: TestAgent;
