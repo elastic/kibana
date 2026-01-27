@@ -34,6 +34,7 @@ import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
+import { registerGrokSuggestion, clearGrokSuggestion } from '../../../../dev_console_helpers';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -66,6 +67,22 @@ export const GrokPatternAISuggestions = ({
         )
     );
   }, [previewDocuments, fieldValue]);
+
+  // Register/clear suggestion in dev console helper
+  React.useEffect(() => {
+    if (suggestionsState.value) {
+      registerGrokSuggestion({
+        grokProcessor: suggestionsState.value.grokProcessor,
+        simulationResult: suggestionsState.value.simulationResult,
+      });
+    } else {
+      clearGrokSuggestion();
+    }
+
+    return () => {
+      clearGrokSuggestion();
+    };
+  }, [suggestionsState.value]);
 
   // Show inline message when LLM couldn't generate suggestions
   if (

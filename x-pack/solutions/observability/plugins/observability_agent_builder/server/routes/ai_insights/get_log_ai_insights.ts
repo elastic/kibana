@@ -9,6 +9,7 @@ import { MessageRole, type InferenceClient } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, CoreSetup, Logger } from '@kbn/core/server';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
+import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getLogDocumentById } from './get_log_document_by_id';
 import type {
@@ -22,6 +23,7 @@ import {
   DEFAULT_LOG_SOURCE_FIELDS,
 } from '../../tools/get_correlated_logs/constants';
 import { isWarningOrAbove } from './get_log_severity';
+import type { AiInsightResult, ContextEvent } from './types';
 
 export interface GetLogAiInsightsParams {
   index: string;
@@ -47,10 +49,11 @@ export async function getLogAiInsights({
   dataRegistry,
   inferenceClient,
   connectorId,
-  core,
-  plugins,
-  logger,
-}: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
+}: GetLogAiInsightsParams): Promise<AiInsightResult> {
+  const systemPrompt = dedent(`
+    You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
+    Using the provided data produce a concise, action-oriented response.`);
+
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
@@ -184,7 +187,7 @@ export async function getLogAiInsights({
     context += contextPartsStrings.join('\n\n');
   }
 
-  const response = await inferenceClient.chatComplete({
+  const events$ = inferenceClient.chatComplete({
     connectorId,
     system: systemPrompt,
     messages: [
@@ -199,7 +202,13 @@ export async function getLogAiInsights({
         `),
       },
     ],
+    stream: true,
   });
 
-  return { summary: response.content, context };
+  const streamWithContext$ = concat(of<ContextEvent>({ type: 'context', context }), events$);
+
+  return {
+    events$: streamWithContext$,
+    context,
+  };
 }
