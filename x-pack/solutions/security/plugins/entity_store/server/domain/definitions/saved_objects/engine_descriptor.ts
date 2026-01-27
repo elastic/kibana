@@ -23,10 +23,6 @@ export class EngineDescriptorClient {
         private readonly logger: Logger
     ) { }
 
-    getSavedObjectId(entityType: EntityType) {
-        return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
-    }
-
     async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
         return this.soClient.find<EngineDescriptor>({
             type: EngineDescriptorTypeName,
@@ -65,6 +61,8 @@ export class EngineDescriptorClient {
     }
 
     async update(entityType: EntityType, state: Partial<EngineDescriptor>): Promise<Partial<EngineDescriptor>> {
+        await this.ensureEntityExists(entityType);
+
         const id = this.getSavedObjectId(entityType);
         const { attributes } = await this.soClient.update<EngineDescriptor>(
             EngineDescriptorTypeName,
@@ -77,14 +75,22 @@ export class EngineDescriptorClient {
     }
 
     async delete(entityType: EntityType) {
-        const engineDescriptor = await this.find(entityType);
-
-        if (engineDescriptor.total === 0) {
-            throw SavedObjectsErrorHelpers.createBadRequestError(`No engine descriptor found for entity type ${entityType}`);
-        }
+        await this.ensureEntityExists(entityType);
 
         const id = this.getSavedObjectId(entityType);
         this.logger.debug(`Deleting engine descriptor with id ${id}`);
         await this.soClient.delete(EngineDescriptorTypeName, id);
+    }
+
+    private async ensureEntityExists(entityType: EntityType) {
+        const engineDescriptor = await this.find(entityType);
+
+        if (engineDescriptor.total === 0) {
+            throw SavedObjectsErrorHelpers.createGenericNotFoundError(`No engine descriptor found for entity type ${entityType}`);
+        }
+    }
+
+    private getSavedObjectId(entityType: EntityType): string {
+        return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
     }
 }
