@@ -41,6 +41,7 @@ Object {
     "user_agent.version",
     "kubernetes.pod.uid",
     "host.hostname",
+    "host.name",
     "container.id",
   ],
   "query": Object {

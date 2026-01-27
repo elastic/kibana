@@ -9,10 +9,11 @@ import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/src';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { EXPAND_ATTACK_BUTTON_TEST_ID, TABLE_SECTION_TEST_ID, TableSection } from './table_section';
+import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
@@ -21,7 +22,9 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_configs';
+import { EmptyResultsPrompt } from './empty_results_prompt';
 
+jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
@@ -30,6 +33,9 @@ jest.mock('../../alerts_table/alerts_grouping', () => ({
   ...jest.requireActual('../../alerts_table/alerts_grouping'),
   GroupedAlertsTable: jest.fn(),
 }));
+jest.mock('./empty_results_prompt', () => ({
+  EmptyResultsPrompt: jest.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
+}));
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 const dataView: DataView = createStubDataView({ spec: dataViewSpec });
@@ -37,12 +43,16 @@ const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as jest.Mock;
 const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
+const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
+const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
   pageFilters: [],
   statusFilter: [],
   dataView,
+  selectedConnectorNames: [],
+  openSchedulesFlyout: jest.fn(),
 };
 
 describe('<TableSection />', () => {
@@ -59,8 +69,12 @@ describe('<TableSection />', () => {
         {props.additionalToolbarControls?.map((control: React.ReactNode, index: number) => (
           <React.Fragment key={index}>{control}</React.Fragment>
         ))}
+        {props.emptyGroupingComponent}
       </div>
     ));
+    mockUseExpandableFlyoutApi.mockReturnValue({
+      openFlyout: jest.fn(),
+    });
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -122,6 +136,23 @@ describe('<TableSection />', () => {
       expect(props.defaultGroupingOptions).toEqual(groupingOptions);
       expect(props.settings).toEqual(groupingSettings);
     });
+  });
+
+  it('should pass EmptyResultsPrompt to GroupedAlertsTable', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('mock-empty-results-prompt')).toBeInTheDocument();
+    });
+
+    expect(mockEmptyResultsPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ openSchedulesFlyout: defaultProps.openSchedulesFlyout }),
+      expect.anything()
+    );
   });
 
   it('should call useGetDefaultGroupTitleRenderers with attackIds from onAggregationsChange when groupingLevel is 0', async () => {
@@ -250,6 +281,22 @@ describe('<TableSection />', () => {
     });
   });
 
+  it('should pass correct sort object to GroupedAlertsTable', async () => {
+    (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
+    (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      expect(props.sort).toEqual([{ latestTimestamp: { order: 'desc' } }]);
+    });
+  });
+
   describe('showAnonymizedSwitch', () => {
     beforeEach(() => {
       (useUserData as jest.Mock).mockReturnValue([
@@ -346,6 +393,7 @@ describe('<TableSection />', () => {
           getAttack: expect.any(Function),
           showAnonymized: false,
           isLoading: false,
+          openAttackDetailsFlyout: expect.any(Function),
         });
       });
     });
@@ -362,6 +410,7 @@ describe('<TableSection />', () => {
           getAttack: expect.any(Function),
           showAnonymized: false,
           isLoading: false,
+          openAttackDetailsFlyout: expect.any(Function),
         });
       });
 
@@ -378,6 +427,7 @@ describe('<TableSection />', () => {
           getAttack: expect.any(Function),
           showAnonymized: true,
           isLoading: false,
+          openAttackDetailsFlyout: expect.any(Function),
         });
       });
     });
@@ -403,6 +453,7 @@ describe('<TableSection />', () => {
           getAttack: expect.any(Function),
           showAnonymized: true,
           isLoading: false,
+          openAttackDetailsFlyout: expect.any(Function),
         });
       });
 
@@ -416,6 +467,7 @@ describe('<TableSection />', () => {
           getAttack: expect.any(Function),
           showAnonymized: false,
           isLoading: false,
+          openAttackDetailsFlyout: expect.any(Function),
         });
       });
     });
@@ -439,119 +491,6 @@ describe('<TableSection />', () => {
           enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });
-    });
-  });
-
-  describe('getAdditionalActionButtons', () => {
-    it('should return an empty array for null group buckets', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(GroupedAlertsTable).toHaveBeenCalled();
-      });
-
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
-      const { getAdditionalActionButtons } = props;
-
-      const groupingBucket = {
-        key: ['some-key'],
-        doc_count: 10,
-        selectedGroup: 'some-group',
-        key_as_string: 'some-key',
-        isNullGroup: true,
-      };
-
-      expect(getAdditionalActionButtons('some-key', groupingBucket)).toEqual([]);
-    });
-
-    it('should return an expand button for non-null grouping buckets', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(GroupedAlertsTable).toHaveBeenCalled();
-      });
-
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
-      const { getAdditionalActionButtons } = props;
-
-      const groupingBucket = {
-        key: ['some-key'],
-        doc_count: 10,
-        selectedGroup: 'some-group',
-        key_as_string: 'some-key',
-        isNullGroup: false,
-      };
-
-      const buttons = getAdditionalActionButtons('some-key', groupingBucket);
-      expect(buttons).toHaveLength(1);
-      expect(buttons[0].props['data-test-subj']).toBe(EXPAND_ATTACK_BUTTON_TEST_ID);
-    });
-
-    it('should return an empty array for non-grouping buckets', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(GroupedAlertsTable).toHaveBeenCalled();
-      });
-
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
-      const { getAdditionalActionButtons } = props;
-
-      // Case 1: Not a grouping bucket (missing selectedGroup or key is not array)
-      const bucket1 = { key: 'k', doc_count: 1 };
-      const buttons1 = getAdditionalActionButtons('k', bucket1);
-      expect(buttons1).toEqual([]);
-    });
-
-    it('should call getAttack when expand button is clicked', async () => {
-      const getAttackMock = jest.fn();
-      mockUseAttackGroupHandler.mockReturnValue({
-        getAttack: getAttackMock,
-        isLoading: false,
-      });
-
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(GroupedAlertsTable).toHaveBeenCalled();
-      });
-
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
-      const { getAdditionalActionButtons } = props;
-
-      const groupingBucket = {
-        key: ['some-key'],
-        doc_count: 10,
-        selectedGroup: 'some-group',
-        key_as_string: 'some-key',
-        isNullGroup: false,
-      };
-
-      const buttons = getAdditionalActionButtons('some-key', groupingBucket);
-      const { getByTestId } = render(<div>{buttons}</div>);
-
-      const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
-      await act(async () => {
-        button.click();
-      });
-
-      expect(getAttackMock).toHaveBeenCalledWith('some-key', groupingBucket);
     });
   });
 });

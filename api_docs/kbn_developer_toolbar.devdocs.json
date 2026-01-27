@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "lineNumber": 66,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           ") => null"
         ],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "lineNumber": 37,
+            "columnNumber": 75,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -109,6 +117,8 @@
         "label": "DeveloperToolbarItemProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "\nUnique identifier for this item.\nUsed as user-facing identifier in settings and data-test-subj attributes."
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +150,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,6 +168,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -168,6 +184,8 @@
         "label": "DeveloperToolbarProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,6 +201,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,6 +217,8 @@
               "((height: number) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -211,6 +233,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
+                "lineNumber": 38,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

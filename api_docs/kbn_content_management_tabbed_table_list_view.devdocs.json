@@ -14,6 +14,8 @@
           "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, }: TabbedTableListViewProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "TabbedTableListViewProps"
             ],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 32,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -56,6 +60,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +73,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,6 +86,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +110,8 @@
               "<T>) => React.ReactNode | Promise<React.ReactNode>"
             ],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -121,6 +133,8 @@
                   "<T>"
                 ],
                 "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -145,6 +159,8 @@
           "{ onFetchSuccess: () => void; setPageDataTestSubject: (subject: string) => void; }"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

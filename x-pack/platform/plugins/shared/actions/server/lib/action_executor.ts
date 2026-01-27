@@ -12,7 +12,7 @@ import {
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -20,7 +20,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -88,6 +88,10 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   relatedSavedObjects?: RelatedSavedObjects;
   request: KibanaRequest;
+  /**
+   * Optional space override. When provided, Action execution will be scoped to this spaceId.
+   */
+  spaceId?: string;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -148,6 +152,7 @@ export class ActionExecutor {
     request,
     params,
     relatedSavedObjects,
+    spaceId: spaceIdOverride,
     source,
     taskInfo,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
@@ -160,7 +165,7 @@ export class ActionExecutor {
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     const authorization = getActionsAuthorizationWithRequest(request);
     const currentUser = security?.authc.getCurrentUser(request);
@@ -255,6 +260,7 @@ export class ActionExecutor {
     taskInfo,
     consumer,
     actionExecutionId,
+    spaceId: spaceIdOverride,
   }: {
     actionId: string;
     actionExecutionId: string;
@@ -264,10 +270,11 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
+    spaceId?: string;
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
@@ -698,6 +705,16 @@ export interface ActionInfo {
   actionId: string;
   isInMemory?: boolean;
   rawAction: RawAction;
+}
+
+function getErrorSource(error: Error): TaskErrorSource | undefined {
+  const SOCKET_DISCONNECTED_ERROR_MESSAGE = 'Client network socket disconnected';
+
+  if (startsWith(error.message, SOCKET_DISCONNECTED_ERROR_MESSAGE)) {
+    return TaskErrorSource.USER;
+  }
+
+  return getTaskManagerErrorSource(error);
 }
 
 function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
