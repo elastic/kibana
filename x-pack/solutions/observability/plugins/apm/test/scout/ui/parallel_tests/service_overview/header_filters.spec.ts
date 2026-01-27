@@ -79,9 +79,9 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
     await test.step('Verify URL contains special service name', async () => {
       await expect(page.getByTestId('querySubmitButton')).toHaveText('Refresh');
 
-      await expect(
-        page.getByTestId('transactionBreakdownChart').getByText('No data to display')
-      ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(page.getByTestId('transactionBreakdownChart')).toHaveText('No data to display', {
+        timeout: EXTENDED_TIMEOUT,
+      });
 
       await page.waitForURL(
         (url) => {
