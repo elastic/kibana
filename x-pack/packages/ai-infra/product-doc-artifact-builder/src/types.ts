@@ -13,8 +13,9 @@ export interface TaskConfig {
   buildFolder: string;
   targetFolder: string;
   sourceClusterUrl: string;
-  sourceClusterUsername: string;
-  sourceClusterPassword: string;
+  sourceClusterUsername?: string;
+  sourceClusterPassword?: string;
+  sourceClusterApiKey?: string;
   embeddingClusterUrl: string;
   embeddingClusterUsername: string;
   embeddingClusterPassword: string;

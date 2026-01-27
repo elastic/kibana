@@ -30,14 +30,18 @@ import type { TaskConfig } from './types';
 import { getSemanticTextMapping } from './tasks/create_index';
 
 const getSourceClient = (config: TaskConfig) => {
+  const auth = config.sourceClusterApiKey
+    ? { apiKey: config.sourceClusterApiKey }
+    : {
+        username: config.sourceClusterUsername!,
+        password: config.sourceClusterPassword!,
+      };
+
   return new ElasticsearchClient8({
     compression: true,
     nodes: [config.sourceClusterUrl],
     sniffOnStart: false,
-    auth: {
-      username: config.sourceClusterUsername,
-      password: config.sourceClusterPassword,
-    },
+    auth,
     Connection: Elasticsearch8HttpConnection,
     requestTimeout: 30_000,
   });

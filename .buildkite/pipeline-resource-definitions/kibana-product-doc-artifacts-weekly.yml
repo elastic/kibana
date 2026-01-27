@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-product-doc-artifacts-weekly
+  description: Weekly build of product documentation artifacts for knowledge base
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-product-doc-artifacts-weekly'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / product-doc-artifacts / weekly
+      description: Weekly build of product documentation artifacts for knowledge base
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#appex-ai-infra-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/product_doc_artifacts_weekly.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Weekly build:
+          cronline: 0 2 * * 1 America/New_York  # Monday 2 AM EST
+          message: Weekly product documentation artifacts build
+          branch: main
+          env:
+            STACK_VERSION: ''
+      tags:
+        - kibana
+        - ai-infra
+        - product-docs
