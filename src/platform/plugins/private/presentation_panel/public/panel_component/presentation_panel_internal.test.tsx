@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiThemeProvider } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
