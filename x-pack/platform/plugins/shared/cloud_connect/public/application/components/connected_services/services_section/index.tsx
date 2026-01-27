@@ -93,7 +93,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       region: services.auto_ops?.config?.region_id ?? undefined,
       description: i18n.translate('xpack.cloudConnect.services.autoOps.description', {
         defaultMessage:
-          'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
+          'Simplify cluster management with real-time issue detection, performance recommendations, and resource utilization insights.',
       }),
       learnMoreUrl: services.auto_ops?.metadata?.documentation_url,
       serviceUrl: services.auto_ops?.metadata?.service_url,
