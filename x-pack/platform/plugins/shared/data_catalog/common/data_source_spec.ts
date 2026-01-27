@@ -42,7 +42,11 @@ export interface WorkflowInfo {
  */
 export interface WorkflowReference {
   /** Unique identifier of the workflow in the registry */
+  // assuming referencing by ID makes the most sense, at least for now;
+  // not sure if we'd want to reference by a tag or a collection of some sort in the future
   id: string;
+  /** Optional version of the workflow to use; defaults to latest */
+  version?: string;
   /**
    * Optional override to control AB tool generation.
    * If not specified, the registry's default behavior will be used,

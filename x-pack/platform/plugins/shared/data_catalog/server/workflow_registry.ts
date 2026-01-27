@@ -32,11 +32,11 @@ export interface RegistryWorkflow {
  */
 export interface WorkflowRegistry {
   /**
-   * Fetches multiple workflows by their IDs
-   * @param workflowIds - Array of workflow identifiers
+   * Fetches multiple workflows by their IDs and optional versions
+   * @param workflowRefs - Array of workflow references containing id and optional version
    * @returns Array of workflow definitions (missing workflows are excluded)
    */
-  getWorkflows(workflowIds: string[]): Promise<RegistryWorkflow[]>;
+  getWorkflows(workflowRefs: WorkflowReference[]): Promise<Map<string, RegistryWorkflow>>;
 }
 
 /**
@@ -52,22 +52,17 @@ export async function loadWorkflowsFromRegistry(
   references: WorkflowReference[],
   stackConnectorId?: string
 ): Promise<WorkflowInfo[]> {
-  const workflowIds = references.map((ref) => ref.id);
-  const registryWorkflows = await registry.getWorkflows(workflowIds);
-
-  // Create a map for quick lookup
-  const workflowMap = new Map(registryWorkflows.map((wf) => [wf.id, wf]));
-  const refMap = new Map(references.map((ref) => [ref.id, ref]));
+  const registryWorkflows = await registry.getWorkflows(references);
 
   // Convert to WorkflowInfo, preserving order and handling missing workflows
   const workflowInfos: WorkflowInfo[] = [];
-  for (const workflowId of workflowIds) {
-    const registryWorkflow = workflowMap.get(workflowId);
+  for (const reference of references) {
+    const registryWorkflow = registryWorkflows.get(reference.id);
     if (!registryWorkflow) {
-      throw new Error(`Workflow '${workflowId}' not found in registry`);
+      const versionInfo = reference.version ? ` (version: ${reference.version})` : '';
+      throw new Error(`Workflow '${reference.id}'${versionInfo} not found in registry`);
     }
 
-    const reference = refMap.get(workflowId)!;
     let content = registryWorkflow.content;
 
     // Replace template variables

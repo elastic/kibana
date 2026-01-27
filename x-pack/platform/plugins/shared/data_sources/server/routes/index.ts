@@ -188,6 +188,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
           actions,
           dataSource,
           agentBuilder,
+          // TODO: mock registry
+          // workflowRegistry,
         });
 
         return response.ok({
