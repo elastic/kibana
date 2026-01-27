@@ -56,7 +56,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await dashboard.loadSavedDashboard('Ecom Dashboard');
       await testSubjects.click('exportTopNavButton');
       await testSubjects.click('scheduleExport');
-      await testSubjects.existOrFail('exportItemDetailsFlyout');
+      await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
     };
 
     const fillInSchedule = async () => {
@@ -68,6 +68,8 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Close the date picker to prevent it from blocking other fields
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.setValue('timezoneCombobox', 'UTC');
+      // Close the timezone picker to prevent it from blocking other fields
+      await browser.pressKeys(browser.keys.ESCAPE);
     };
 
     before(async () => {
@@ -81,7 +83,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('exportItemDetailsFlyout')) {
+      if (await testSubjects.exists('exportDerivativeFlyout-scheduledReports')) {
         await testSubjects.click('euiFlyoutCloseButton');
       }
       await toasts.dismissAll();
@@ -107,7 +109,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Verify past date validation error appears, retrying to wait for validation
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportItemDetailsFlyout')
+          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
         ).includes('Start date must be in the future')
       );
 
@@ -136,16 +138,16 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await testSubjects.click('scheduleExportSubmitButton');
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportItemDetailsFlyout')
+          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
         ).includes('Provide at least one recipient')
       );
 
       // Add invalid email - should show validation warning
       await testSubjects.setValue('emailRecipientsCombobox', 'invalid-email');
       await testSubjects.click('scheduleExportSubmitButton');
-      expect(await testSubjects.getVisibleText('exportItemDetailsFlyout')).to.contain(
-        'Email address invalid-email is not valid'
-      );
+      expect(
+        await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
+      ).to.contain('Email address invalid-email is not valid');
 
       // Add valid email with subject and message containing template variables
       await testSubjects.setValue('emailRecipientsCombobox', 'user@example.com');
@@ -192,7 +194,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       expect(subject).to.equal(`${subjectPrefix}${expectedInterpolation}${subjectSuffix}`);
       // Check that focus was restored to the subject field
       // and the caret was placed after the inserted variable
-      expect(await hasFocus(subjectField)).to.be(true);
+      await retry.waitFor('subject field to have focus', () => hasFocus(subjectField));
       let selection = await getSelection(subjectField);
       let expectedPosition = subjectPrefix.length + expectedInterpolation.length;
       expect(selection.start).to.equal(expectedPosition);
@@ -215,7 +217,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       expect(message).to.equal(`${messagePrefix}${expectedInterpolation}${messageSuffix}`);
       // Check that focus was restored to the message field
       // and the caret was placed after the inserted variable
-      expect(await hasFocus(messageField)).to.be(true);
+      await retry.waitFor('message field to have focus', () => hasFocus(messageField));
       selection = await getSelection(messageField);
       expectedPosition = messagePrefix.length + expectedInterpolation.length;
       expect(selection.start).to.equal(expectedPosition);
