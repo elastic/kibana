@@ -28,7 +28,6 @@ export interface AddRuleAttachmentToChatButtonProps {
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
   size?: 'xs' | 's' | 'm';
-  showOnlyWhenEnabled?: boolean;
 }
 
 export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
@@ -38,7 +37,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   actionsStepData,
   actionTypeRegistry,
   size = 's',
-  showOnlyWhenEnabled = false,
 }) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
@@ -62,10 +60,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   }, [defineStepData, aboutStepData, scheduleStepData, actionsStepData, actionTypeRegistry]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
-
-  if (showOnlyWhenEnabled && !isAgentChatExperienceEnabled) {
-    return null;
-  }
 
   if (!isAgentChatExperienceEnabled) {
     return null;

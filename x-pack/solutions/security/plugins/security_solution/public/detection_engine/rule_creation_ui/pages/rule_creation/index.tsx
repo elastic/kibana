@@ -864,7 +864,6 @@ const CreateRulePageComponent: React.FC<{
                               actionsStepData={actionsStepData}
                               actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
                               size="s"
-                              showOnlyWhenEnabled
                             />
                           ) : undefined
                         }

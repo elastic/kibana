@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { AddRuleAttachmentToChatButton } from './ask_ai_assistant_button';
-export type { AddRuleAttachmentToChatButtonProps } from './ask_ai_assistant_button';
+export { AddRuleAttachmentToChatButton } from './add_rule_attachment_to_chat_button';
+export type { AddRuleAttachmentToChatButtonProps } from './add_rule_attachment_to_chat_button';
