@@ -20,6 +20,7 @@ export const PlaygroundDeprecationNotice = () => {
       })}
       color="warning"
       heading="h4"
+      data-test-subj="playgroundDeprecationNotice"
       announceOnMount
     >
       <FormattedMessage
