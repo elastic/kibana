@@ -254,7 +254,7 @@ function mapEdges({
     });
 
     return acc;
-  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
+  }, new Map<string, ConnectionEdge>());
 
   return [...connections.values()];
 }
@@ -301,7 +301,7 @@ export function getServiceMapNodes({
     .flatMap((connection) => [connection.sourceData, connection.targetData])
     .concat(...allServices.values())
     .reduce((acc, node) => {
-      if (!acc.has(node.id)) {
+      if (node && !acc.has(node.id)) {
         acc.set(node.id, node);
       }
       return acc;
