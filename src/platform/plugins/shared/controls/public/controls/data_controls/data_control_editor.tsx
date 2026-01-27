@@ -31,7 +31,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
-import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer';
 import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
