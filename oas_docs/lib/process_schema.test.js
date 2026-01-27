@@ -364,7 +364,9 @@ describe('createProcessSchema', () => {
   });
 
   it('should extract additionalProperties objects as components', () => {
-    processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog);
+    processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog, {
+      extractEmpty: false,
+    });
     const schema = {
       type: 'object',
       additionalProperties: {
@@ -383,7 +385,9 @@ describe('createProcessSchema', () => {
   });
 
   it('should skip empty objects (no properties)', () => {
-    processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog);
+    processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog, {
+      extractEmpty: false,
+    });
     const schema = {
       type: 'object',
       properties: {
@@ -427,7 +431,7 @@ describe('createProcessSchema', () => {
     expect(schema.properties.data).toHaveProperty('$ref'); // Nested object extracted
   });
 
-  describe('Phase 2: Extract objects with structural fields', () => {
+  describe('Extract objects with structural fields', () => {
     beforeEach(() => {
       processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog);
     });
@@ -510,6 +514,9 @@ describe('createProcessSchema', () => {
         },
       };
       const context = { operationId: 'test', responseCode: '200' };
+      processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog, {
+        extractEmpty: false,
+      });
       processSchema(schema, context);
 
       expect(mockStats.schemasExtracted).toBe(0);
@@ -531,6 +538,9 @@ describe('createProcessSchema', () => {
         },
       };
       const context = { operationId: 'test', responseCode: '200' };
+      processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog, {
+        extractEmpty: false,
+      });
       processSchema(schema, context);
 
       expect(mockStats.schemasExtracted).toBe(0);

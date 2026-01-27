@@ -13,8 +13,6 @@ const yaml = require('js-yaml');
 const { set } = require('@kbn/safer-lodash-set');
 const { componentizeObjectSchemas } = require('./componentize');
 
-// initial test cases
-// TODO: add test cases for failed extractions, naming strategy, edge cases, etc.
 describe('componentizeObjectSchemas', () => {
   let tempDir;
   let mockLog;
@@ -221,6 +219,16 @@ describe('componentizeObjectSchemas', () => {
         type: 'object',
         properties: { y: { type: 'number' } },
       });
+      set(
+        expectedDoc,
+        'paths["/api/test"].post.responses["201"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ApiTest_Post_Response_201',
+        }
+      );
+      set(expectedDoc, 'components.schemas.ApiTest_Post_Response_201', {
+        type: 'object',
+      });
 
       await componentizeObjectSchemas(testFile, { log: mockLog });
 
@@ -228,6 +236,9 @@ describe('componentizeObjectSchemas', () => {
 
       expect(result).toEqual(expectedDoc);
     });
+    // it.todo('should handle nested anyOf in properties', async () => {
+    //   // Similar to the oneOf nested test, but for anyOf
+    // });
   });
 
   describe('allOf composition extraction', () => {
@@ -282,6 +293,563 @@ describe('componentizeObjectSchemas', () => {
       set(expectedDoc, 'components.schemas.ApiTest_Get_Response_200_2', {
         type: 'object',
         properties: { extended: { type: 'number' } },
+      });
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+    // it.todo('should handle nested allOf in properties', async () => {
+    //   // Similar to the oneOf nested test, but for allOf
+    // });
+  });
+
+  describe('top-level schema extraction', () => {
+    it('should extract top-level response schema and nested properties', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/actions/connector/{id}': {
+            get: {
+              operationId: 'get-actions-connector-id',
+              parameters: [
+                {
+                  description: 'An identifier for the connector.',
+                  in: 'path',
+                  name: 'id',
+                  required: true,
+                  schema: { type: 'string' },
+                },
+              ],
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        additionalProperties: false,
+                        type: 'object',
+                        properties: {
+                          config: {
+                            additionalProperties: {},
+                            default: {},
+                            type: 'object',
+                            properties: {
+                              from: { type: 'string' },
+                              host: { type: 'string' },
+                            },
+                          },
+                          connector_type_id: {
+                            description: 'The connector type identifier.',
+                            type: 'string',
+                          },
+                          id: {
+                            description: 'The connector ID.',
+                            type: 'string',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+      set(
+        expectedDoc,
+        'paths["/api/actions/connector/{id}"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200',
+        }
+      );
+      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200', {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          config: {
+            $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200_Config',
+          },
+          connector_type_id: {
+            type: 'string',
+            description: 'The connector type identifier.',
+          },
+          id: {
+            type: 'string',
+            description: 'The connector ID.',
+          },
+        },
+      });
+      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200_Config', {
+        type: 'object',
+        additionalProperties: {},
+        default: {},
+        properties: {
+          from: { type: 'string' },
+          host: { type: 'string' },
+        },
+      });
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+
+    it('should extract top-level request schema', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/cases': {
+            post: {
+              operationId: 'create-case',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['title'],
+                      properties: {
+                        title: { type: 'string' },
+                        settings: {
+                          type: 'object',
+                          properties: {
+                            syncAlerts: { type: 'boolean' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                201: {
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+      set(expectedDoc, 'paths["/api/cases"].post.requestBody.content["application/json"].schema', {
+        $ref: '#/components/schemas/ApiCases_Post_Request',
+      });
+      set(expectedDoc, 'components.schemas.ApiCases_Post_Request', {
+        type: 'object',
+        required: ['title'],
+        properties: {
+          settings: { $ref: '#/components/schemas/ApiCases_Post_Request_Settings' },
+          title: { type: 'string' },
+        },
+      });
+      set(expectedDoc, 'components.schemas.ApiCases_Post_Request_Settings', {
+        type: 'object',
+        properties: { syncAlerts: { type: 'boolean' } },
+      });
+      set(
+        expectedDoc,
+        'paths["/api/cases"].post.responses["201"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ApiCases_Post_Response_201',
+        }
+      );
+      set(expectedDoc, 'components.schemas.ApiCases_Post_Response_201', {
+        type: 'object',
+      });
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+
+    it('should not extract schemas that are already references', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/ExistingSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            ExistingSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc; // Expect doc to remain completely unchanged.
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+
+    it('should handle schemas without properties gracefully', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/empty': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+      const expectedDoc = testDoc; // Expect doc to remain completely unchanged.
+      set(
+        expectedDoc,
+        'paths["/api/empty"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ApiEmpty_Get_Response_200',
+        }
+      );
+      set(expectedDoc, 'components.schemas.ApiEmpty_Get_Response_200', {
+        type: 'object',
+      });
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+      expect(result).toEqual(expectedDoc);
+    });
+  });
+
+  describe('schemas with empty object properties', () => {
+    it('should extract empty object properties to components', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          emptyObj: { type: 'object', properties: {} },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+
+      set(
+        expectedDoc,
+        'paths["/api/test"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ApiTest_Get_Response_200',
+        }
+      );
+      set(expectedDoc, 'components.schemas.ApiTest_Get_Response_200', {
+        type: 'object',
+        properties: {
+          emptyObj: {
+            $ref: '#/components/schemas/ApiTest_Get_Response_200_EmptyObj',
+          },
+        },
+      });
+      set(expectedDoc, 'components.schemas.ApiTest_Get_Response_200_EmptyObj', {
+        type: 'object',
+        properties: {},
+      });
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+  });
+
+  describe('existing components with predefined names', () => {
+    it('should process existing component with nested object properties', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/PredefinedSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            PredefinedSchema: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                config: {
+                  type: 'object',
+                  properties: {
+                    url: { type: 'string' },
+                    apiKey: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+      set(
+        expectedDoc,
+        'paths["/api/test"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/PredefinedSchema',
+        }
+      );
+      set(expectedDoc, 'components.schemas.PredefinedSchema', {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          config: { $ref: '#/components/schemas/PredefinedSchema_Config' },
+        },
+      });
+      set(expectedDoc, 'components.schemas.PredefinedSchema.properties.config', {
+        $ref: '#/components/schemas/PredefinedSchema_Config',
+      });
+      set(expectedDoc, 'components.schemas.PredefinedSchema_Config', {
+        type: 'object',
+        properties: {
+          url: { type: 'string' },
+          apiKey: { type: 'string' },
+        },
+      });
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      expect(result).toEqual(expectedDoc);
+    });
+
+    it('should process existing component with composition types', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/PredefinedUnion',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            PredefinedUnion: {
+              oneOf: [
+                { type: 'object', properties: { a: { type: 'string' } } },
+                { type: 'object', properties: { b: { type: 'number' } } },
+              ],
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+      set(
+        expectedDoc,
+        'paths["/api/test"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/PredefinedUnion',
+        }
+      );
+      set(expectedDoc, 'components.schemas.PredefinedUnion', {
+        oneOf: [
+          { $ref: '#/components/schemas/PredefinedUnion_1' },
+          { $ref: '#/components/schemas/PredefinedUnion_2' },
+        ],
+      });
+      set(expectedDoc, 'components.schemas.PredefinedUnion_1', {
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+      set(expectedDoc, 'components.schemas.PredefinedUnion_2', {
+        type: 'object',
+        properties: { b: { type: 'number' } },
+      });
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+      expect(result).toEqual(expectedDoc);
+    });
+
+    it('should handle existing component referencing another existing component', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/ExtendedSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            BaseSchema: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+              },
+            },
+            ExtendedSchema: {
+              allOf: [
+                { $ref: '#/components/schemas/BaseSchema' },
+                {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    metadata: {
+                      type: 'object',
+                      properties: {
+                        created: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      const expectedDoc = testDoc;
+      set(
+        expectedDoc,
+        'paths["/api/test"].get.responses["200"].content["application/json"].schema',
+        {
+          $ref: '#/components/schemas/ExtendedSchema', // overwrites the base schemas
+        }
+      );
+      set(expectedDoc, 'components.schemas.ExtendedSchema', {
+        allOf: [
+          { $ref: '#/components/schemas/BaseSchema' },
+          { $ref: '#/components/schemas/ExtendedSchema_2' },
+        ],
+      });
+      set(expectedDoc, 'components.schemas.ExtendedSchema_2', {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          metadata: { $ref: '#/components/schemas/ExtendedSchema_Metadata' },
+        },
+      });
+      set(expectedDoc, 'components.schemas.ExtendedSchema_Metadata', {
+        type: 'object',
+        properties: {
+          created: { type: 'string' },
+        },
       });
 
       await componentizeObjectSchemas(testFile, { log: mockLog });
@@ -553,510 +1121,6 @@ describe('componentizeObjectSchemas', () => {
       expect(result.components.schemas).toHaveProperty('ApiTest_Get_Response_200_1');
       expect(result.components.schemas).toHaveProperty('ApiTest_Post_Response_200');
       expect(result.components.schemas).toHaveProperty('ApiTest_Post_Response_200_1');
-    });
-  });
-
-  describe('top-level schema extraction (from componentization example)', () => {
-    it('should extract top-level response schema and nested properties', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/actions/connector/{id}': {
-            get: {
-              operationId: 'get-actions-connector-id',
-              parameters: [
-                {
-                  description: 'An identifier for the connector.',
-                  in: 'path',
-                  name: 'id',
-                  required: true,
-                  schema: { type: 'string' },
-                },
-              ],
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        additionalProperties: false,
-                        type: 'object',
-                        properties: {
-                          config: {
-                            additionalProperties: {},
-                            default: {},
-                            type: 'object',
-                            properties: {
-                              from: { type: 'string' },
-                              host: { type: 'string' },
-                            },
-                          },
-                          connector_type_id: {
-                            description: 'The connector type identifier.',
-                            type: 'string',
-                          },
-                          id: {
-                            description: 'The connector ID.',
-                            type: 'string',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      const expectedDoc = testDoc;
-      set(
-        expectedDoc,
-        'paths["/api/actions/connector/{id}"].get.responses["200"].content["application/json"].schema',
-        {
-          $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200',
-        }
-      );
-      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200', {
-        type: 'object',
-        properties: {
-          config: { $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200_Config' },
-        },
-      });
-      set(expectedDoc, 'components.schemas.ApiActionsConnector_Get_Response_200_Config', {
-        type: 'object',
-        properties: {
-          from: { type: 'string' },
-          host: { type: 'string' },
-        },
-      });
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      expect(result).toEqual(expectedDoc);
-    });
-
-    it('should extract top-level request schema', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/cases': {
-            post: {
-              operationId: 'create-case',
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      required: ['title'],
-                      properties: {
-                        title: { type: 'string' },
-                        settings: {
-                          type: 'object',
-                          properties: {
-                            syncAlerts: { type: 'boolean' },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              responses: {
-                201: {
-                  content: {
-                    'application/json': {
-                      schema: { type: 'object' },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      const expectedDoc = testDoc;
-      set(expectedDoc, 'paths["/api/cases"].post.requestBody.content["application/json"].schema', {
-        $ref: '#/components/schemas/ApiCases_Post_Request',
-      });
-      set(expectedDoc, 'components.schemas.ApiCases_Post_Request', {
-        type: 'object',
-        required: ['title'],
-        properties: { settings: { $ref: '#/components/schemas/ApiCases_Post_Request_Settings' } },
-      });
-      set(expectedDoc, 'components.schemas.ApiCases_Post_Request_Settings', {
-        type: 'object',
-        properties: { syncAlerts: { type: 'boolean' } },
-      });
-      set(expectedDoc, 'components.schemas.ApiCases_Post_Response_201', {
-        type: 'object',
-      });
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      expect(result).toEqual(expectedDoc);
-    });
-
-    it('should not extract schemas that are already references', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/test': {
-            get: {
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/ExistingSchema',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        components: {
-          schemas: {
-            ExistingSchema: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-              },
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      const expectedDoc = testDoc; // Expect doc to remain completely unchanged.
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      expect(result).toEqual(expectedDoc);
-    });
-  });
-
-  // TODO: refactor these tests in the style above
-  describe.skip('existing components with predefined names (Phase 3)', () => {
-    it('should process existing component with nested object properties', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/test': {
-            get: {
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/PredefinedSchema',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        components: {
-          schemas: {
-            PredefinedSchema: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                config: {
-                  type: 'object',
-                  properties: {
-                    url: { type: 'string' },
-                    apiKey: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      // PredefinedSchema should still exist with same name
-      expect(result.components.schemas.PredefinedSchema).toBeDefined();
-
-      // config property should now be a reference
-      expect(result.components.schemas.PredefinedSchema.properties.config).toEqual({
-        $ref: '#/components/schemas/PredefinedSchema_Config',
-      });
-
-      // Extracted config component should exist with parent name as prefix
-      expect(result.components.schemas.PredefinedSchema_Config).toEqual({
-        type: 'object',
-        properties: {
-          url: { type: 'string' },
-          apiKey: { type: 'string' },
-        },
-      });
-
-      // Simple property should remain inline
-      expect(result.components.schemas.PredefinedSchema.properties.id).toEqual({ type: 'string' });
-    });
-
-    it('should process existing component with composition types', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/test': {
-            get: {
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/PredefinedUnion',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        components: {
-          schemas: {
-            PredefinedUnion: {
-              oneOf: [
-                { type: 'object', properties: { a: { type: 'string' } } },
-                { type: 'object', properties: { b: { type: 'number' } } },
-              ],
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      // PredefinedUnion should still exist with same name
-      expect(result.components.schemas.PredefinedUnion).toBeDefined();
-
-      // oneOf items should be extracted with parent name as prefix
-      expect(result.components.schemas.PredefinedUnion.oneOf).toEqual([
-        { $ref: '#/components/schemas/PredefinedUnion_1' },
-        { $ref: '#/components/schemas/PredefinedUnion_2' },
-      ]);
-
-      // Extracted oneOf items should exist
-      expect(result.components.schemas.PredefinedUnion_1).toEqual({
-        type: 'object',
-        properties: { a: { type: 'string' } },
-      });
-      expect(result.components.schemas.PredefinedUnion_2).toEqual({
-        type: 'object',
-        properties: { b: { type: 'number' } },
-      });
-    });
-
-    it('should handle multiple existing components without name collisions', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/test': {
-            get: {
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/SchemaA',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        components: {
-          schemas: {
-            SchemaA: {
-              type: 'object',
-              properties: {
-                config: {
-                  type: 'object',
-                  properties: {
-                    urlA: { type: 'string' },
-                  },
-                },
-              },
-            },
-            SchemaB: {
-              type: 'object',
-              properties: {
-                config: {
-                  type: 'object',
-                  properties: {
-                    urlB: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      // Both schemas should exist with original names
-      expect(result.components.schemas.SchemaA).toBeDefined();
-      expect(result.components.schemas.SchemaB).toBeDefined();
-
-      // Each should have extracted config with unique names (parent name prefix prevents collision)
-      expect(result.components.schemas.SchemaA.properties.config).toEqual({
-        $ref: '#/components/schemas/SchemaA_Config',
-      });
-      expect(result.components.schemas.SchemaB.properties.config).toEqual({
-        $ref: '#/components/schemas/SchemaB_Config',
-      });
-
-      // Both config components should exist with different content
-      expect(result.components.schemas.SchemaA_Config).toEqual({
-        type: 'object',
-        properties: {
-          urlA: { type: 'string' },
-        },
-      });
-      expect(result.components.schemas.SchemaB_Config).toEqual({
-        type: 'object',
-        properties: {
-          urlB: { type: 'string' },
-        },
-      });
-
-      // Verify no collision - should have 4 components total
-      expect(Object.keys(result.components.schemas).length).toBe(4);
-    });
-
-    it('should handle existing component referencing another existing component', async () => {
-      const testDoc = {
-        openapi: '3.0.3',
-        info: { title: 'Test', version: '1.0.0' },
-        paths: {
-          '/api/test': {
-            get: {
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/ExtendedSchema',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        components: {
-          schemas: {
-            BaseSchema: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-              },
-            },
-            ExtendedSchema: {
-              allOf: [
-                { $ref: '#/components/schemas/BaseSchema' },
-                {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    metadata: {
-                      type: 'object',
-                      properties: {
-                        created: { type: 'string' },
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      };
-
-      const testFile = path.join(tempDir, 'test.yaml');
-      fs.writeFileSync(testFile, yaml.dump(testDoc));
-
-      await componentizeObjectSchemas(testFile, { log: mockLog });
-
-      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
-
-      // Both original components should exist
-      expect(result.components.schemas.BaseSchema).toBeDefined();
-      expect(result.components.schemas.ExtendedSchema).toBeDefined();
-
-      // Reference to BaseSchema should be preserved
-      expect(result.components.schemas.ExtendedSchema.allOf[0]).toEqual({
-        $ref: '#/components/schemas/BaseSchema',
-      });
-
-      // The second allOf item (inline object) should be extracted
-      expect(result.components.schemas.ExtendedSchema.allOf[1]).toEqual({
-        $ref: '#/components/schemas/ExtendedSchema_2',
-      });
-
-      // Extracted allOf item should have metadata extracted
-      const extractedAllOf = result.components.schemas.ExtendedSchema_2;
-      expect(extractedAllOf.properties.name).toEqual({ type: 'string' });
-      expect(extractedAllOf.properties.metadata).toEqual({
-        $ref: '#/components/schemas/ExtendedSchema_Metadata',
-      });
-
-      // Nested metadata component should exist
-      expect(result.components.schemas.ExtendedSchema_Metadata).toEqual({
-        type: 'object',
-        properties: {
-          created: { type: 'string' },
-        },
-      });
     });
   });
 });

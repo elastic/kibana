@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const { STRATEGY_DEFAULTS } = require('./strategy_defaults');
+
 const MAX_RECURSION_DEPTH = 100;
 
 /**
@@ -163,17 +165,18 @@ function stripMetadata(schema) {
  * // Result: schema.oneOf items replaced with $ref, components populated
  * // schema.oneOf = [{ $ref: '#/components/schemas/...' }, { $ref: '#/components/schemas/...' }]
  */
-const createProcessSchema = (components, nameGenerator, stats, log, options = {}) => {
+const createProcessSchema = (
+  components,
+  nameGenerator,
+  stats,
+  log,
+  options = { ...STRATEGY_DEFAULTS }
+) => {
   if (!components || !nameGenerator || !stats || !log) {
     throw new Error('components, nameGenerator, stats, and log are required');
   }
 
-  const {
-    extractPrimitives = false,
-    removeProperties = false,
-    preserveMetadata = true,
-    extractEmpty = false,
-  } = options;
+  const { extractPrimitives, removeProperties, preserveMetadata, extractEmpty } = options;
 
   function processSchema(schema, context, depth = 0) {
     // base case: not a schema or the schema isn't an object
@@ -191,7 +194,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
       return;
     }
 
-    // Process each composition type, we could extract this to a helper function if needed
+    // Process each composition type, we could extract this to a helper function if needed (e.g. handleCompositionTypes)
     ['oneOf', 'anyOf', 'allOf'].forEach((compType) => {
       if (schema[compType] && Array.isArray(schema[compType])) {
         log.debug(
@@ -211,7 +214,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
             log.warn(`Component name collision: ${name} - appending counter`);
           }
 
-          // Apply metadata stripping if needed
+          // Apply metadata stripping if needed, TODO: remove
           const itemToStore = preserveMetadata ? item : stripMetadata(item);
           components[name] = itemToStore;
           // Update stats
@@ -232,7 +235,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
       }
     });
 
-    // Recurse into properties
+    // Recurse into properties, turn into helper, e.g handleProperties
     if (schema.properties && typeof schema.properties === 'object') {
       const propertiesToRemove = [];
       Object.entries(schema.properties).forEach(([propName, propSchema]) => {
@@ -293,7 +296,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
       }
     }
 
-    // Recurse into array items
+    // Recurse into array items, turn into helper, e.g. handleArrayItems
     if (schema.items) {
       const itemContext = {
         ...context,
@@ -318,7 +321,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
         if (components[name]) {
           log.warn(`Component name already exists: ${name} - appending counter`);
         }
-        // Apply metadata stripping if needed
+        // Apply metadata stripping if needed, TODO: remove
         const itemToStore = preserveMetadata ? { ...schema.items } : stripMetadata(schema.items);
         components[name] = itemToStore;
         stats.schemasExtracted++;
@@ -356,7 +359,7 @@ const createProcessSchema = (components, nameGenerator, stats, log, options = {}
         if (components[name]) {
           log.warn(`Component name already exists: ${name} - appending counter`);
         }
-        // Apply metadata stripping if needed
+        // Apply metadata stripping if needed, TODO: remove
         const addlPropToStore = preserveMetadata
           ? { ...schema.additionalProperties }
           : stripMetadata(schema.additionalProperties);

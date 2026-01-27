@@ -11,28 +11,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const yaml = require('js-yaml');
+const cloneDeep = require('lodash/cloneDeep');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { createComponentNameGenerator } = require('./component_name_generator');
 const { createProcessSchema, stripMetadata } = require('./process_schema');
+const { STRATEGY_DEFAULTS } = require('./strategy_defaults');
 
-/**
- * Deep clone helper to avoid mutating original object
- */
-const deepClone = (obj) => {
-  if (obj === null || typeof obj !== 'object') return obj;
-  if (obj instanceof Date) return new Date(obj.getTime());
-  if (obj instanceof Array) return obj.map((item) => deepClone(item));
-  if (obj instanceof Object) {
-    const clonedObj = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        clonedObj[key] = deepClone(obj[key]);
-      }
-    }
-    return clonedObj;
-  }
-};
-
+// TODO: extract to constants file
+const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
 /**
  * Main componentization function
  * Traverses an OpenAPI document and extracts inline schemas into reusable components.
@@ -70,10 +56,10 @@ const componentizeObjectSchemas = async (
   relativeFilePath,
   {
     log = console,
-    extractPrimitives = false,
-    removeProperties = false,
-    preserveMetadata = true,
-    extractEmpty = false,
+    extractPrimitives = STRATEGY_DEFAULTS.extractPrimitives,
+    removeProperties = STRATEGY_DEFAULTS.removeProperties,
+    preserveMetadata = STRATEGY_DEFAULTS.preserveMetadata,
+    extractEmpty = STRATEGY_DEFAULTS.extractEmpty,
   } = {}
 ) => {
   const absPath = path.resolve(REPO_ROOT, relativeFilePath);
@@ -84,7 +70,7 @@ const componentizeObjectSchemas = async (
     const originalDoc = yaml.load(fs.readFileSync(absPath, 'utf8'));
 
     // Work on a deep copy to avoid mutations
-    const oasDoc = deepClone(originalDoc);
+    const oasDoc = cloneDeep(originalDoc);
 
     // Initialize components if needed
     if (!oasDoc.components) {
@@ -135,7 +121,7 @@ const componentizeObjectSchemas = async (
 
       for (const [method, methodValue] of Object.entries(pathValue)) {
         // Only process HTTP method operations (skip path-level properties)
-        const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
+
         if (!HTTP_METHODS.includes(method.toLowerCase())) {
           continue;
         }
@@ -160,9 +146,11 @@ const componentizeObjectSchemas = async (
 
                 // Extract top-level schema if it's an object with properties or has composition types
                 // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
+                // Also extract empty objects if extractEmpty is true
                 if (
                   !schema.$ref &&
                   ((schema.type === 'object' && schema.properties) ||
+                    (extractEmpty && schema.type === 'object') ||
                     schema.oneOf ||
                     schema.anyOf ||
                     schema.allOf)
@@ -179,8 +167,8 @@ const componentizeObjectSchemas = async (
 
                   // Apply metadata stripping if needed
                   const schemaToStore = strategyOptions.preserveMetadata
-                    ? deepClone(schema)
-                    : stripMetadata(deepClone(schema));
+                    ? cloneDeep(schema)
+                    : stripMetadata(cloneDeep(schema));
                   components[name] = schemaToStore;
                   stats.schemasExtracted++;
                   log.debug(`Extracted top-level request schema ${name}`);
@@ -220,9 +208,11 @@ const componentizeObjectSchemas = async (
 
                   // Extract top-level schema if it's an object with properties or has composition types
                   // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
+                  // Also extract empty objects if extractEmpty is true
                   if (
                     !schema.$ref &&
                     ((schema.type === 'object' && schema.properties) ||
+                      (extractEmpty && schema.type === 'object') ||
                       schema.oneOf ||
                       schema.anyOf ||
                       schema.allOf)
@@ -238,10 +228,10 @@ const componentizeObjectSchemas = async (
                       log.warn(`Component name collision: ${name} - appending counter`);
                     }
 
-                    // Apply metadata stripping if needed
+                    // Apply metadata stripping if needed TODO: remove
                     const schemaToStore = strategyOptions.preserveMetadata
-                      ? deepClone(schema)
-                      : stripMetadata(deepClone(schema));
+                      ? cloneDeep(schema)
+                      : stripMetadata(cloneDeep(schema));
                     components[name] = schemaToStore;
                     stats.schemasExtracted++;
                     log.debug(`Extracted top-level response schema ${name}`);
@@ -275,7 +265,7 @@ const componentizeObjectSchemas = async (
       }
     }
 
-    // Process pre-existing components (e.g., from overlays or manual additions)
+    // Process pre-existing components (e.g., manual additions)
     // Track which components existed before componentization to avoid infinite loops
     log.info('Processing existing components...');
     const preExistingComponentNames = Object.keys(components);
