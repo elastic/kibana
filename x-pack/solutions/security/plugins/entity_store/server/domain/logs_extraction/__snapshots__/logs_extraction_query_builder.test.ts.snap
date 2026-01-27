@@ -285,10 +285,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.host.entity.id = CASE(
-        host.entity.id IS NOT NULL AND host.entity.id != \\"\\",
-        host.entity.id,
-        CONCAT(\\"host:\\", COALESCE(
+  | EVAL recent.host.entity.id = CONCAT(\\"host:\\", 
+      CASE(
+        host.entity.id IS NOT NULL AND host.entity.id != \\"\\", host.entity.id,
+        COALESCE(
                 CASE(host.id IS NOT NULL AND host.id != \\"\\", host.id, NULL),
                 CASE(host.domain IS NOT NULL AND host.domain != \\"\\",
                   CASE(
@@ -301,7 +301,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
                 CASE(host.hostname IS NOT NULL AND host.hostname != \\"\\", host.hostname, NULL),
                 CASE(host.name IS NOT NULL AND host.name != \\"\\", host.name, NULL),
                 NULL
-              ))
+              )
+      )
     )
   | STATS
     recent.timestamp = MAX(@timestamp),
@@ -470,10 +471,11 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.service.entity.id = CASE(
-        service.entity.id IS NOT NULL AND service.entity.id != \\"\\",
-        service.entity.id,
-        CONCAT(\\"service:\\", CASE(service.name IS NOT NULL AND service.name != \\"\\", service.name, NULL))
+  | EVAL recent.service.entity.id = CONCAT(\\"service:\\", 
+      CASE(
+        service.entity.id IS NOT NULL AND service.entity.id != \\"\\", service.entity.id,
+        CASE(service.name IS NOT NULL AND service.name != \\"\\", service.name, NULL)
+      )
     )
   | STATS
     recent.timestamp = MAX(@timestamp),
@@ -639,10 +641,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.user.entity.id = CASE(
-        user.entity.id IS NOT NULL AND user.entity.id != \\"\\",
-        user.entity.id,
-        CONCAT(\\"user:\\", COALESCE(
+  | EVAL recent.user.entity.id = CONCAT(\\"user:\\", 
+      CASE(
+        user.entity.id IS NOT NULL AND user.entity.id != \\"\\", user.entity.id,
+        COALESCE(
                 CASE(user.name IS NOT NULL AND user.name != \\"\\",
                   CASE(
                     host.entity.id IS NOT NULL AND host.entity.id != \\"\\", CONCAT(user.name, \\"@\\", host.entity.id),
@@ -661,7 +663,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
                 ),  
                 CASE(user.name IS NOT NULL AND user.name != \\"\\", user.name, NULL),
                 NULL
-              ))
+              )
+      )
     )
   | STATS
     recent.timestamp = MAX(@timestamp),
