@@ -180,6 +180,26 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
+      '--xpack.profiling.enabled=true',
+      // Fleet configuration
+      `--xpack.fleet.fleetServerHosts=${JSON.stringify([
+        {
+          id: 'default-fleet-server',
+          name: 'Default Fleet Server',
+          is_default: true,
+          host_urls: ['https://localhost:8220'],
+        },
+      ])}`,
+      `--xpack.fleet.outputs=${JSON.stringify([
+        {
+          id: 'es-default-output',
+          name: 'Default Output',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+          hosts: ['https://localhost:9200'],
+        },
+      ])}`,
       // SAML configuration
       ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
