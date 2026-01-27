@@ -44,6 +44,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * are present in the conversation.
    */
   getAgentDescription?: () => string;
+  /**
+   * Whether attachments of this type are read-only. Defaults to true.
+   */
+  isReadonly?: boolean;
 }
 
 /**

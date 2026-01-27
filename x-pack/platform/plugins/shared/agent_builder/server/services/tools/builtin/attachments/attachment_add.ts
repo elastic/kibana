@@ -25,6 +25,7 @@ const attachmentAddSchema = z.object({
  */
 export const createAttachmentAddTool = ({
   attachmentManager,
+  attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentAddSchema> => ({
   id: platformCoreTools.attachmentAdd,
   type: ToolType.builtin,
@@ -33,6 +34,20 @@ export const createAttachmentAddTool = ({
   schema: attachmentAddSchema,
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {
+    const definition = attachmentsService?.getTypeDefinition(type);
+    const isReadonly = definition?.isReadonly ?? true;
+    if (isReadonly) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: `Attachment type '${type}' is read-only` },
+          },
+        ],
+      };
+    }
+
     // Check for duplicate ID if provided
     if (id && attachmentManager.get(id)) {
       return {

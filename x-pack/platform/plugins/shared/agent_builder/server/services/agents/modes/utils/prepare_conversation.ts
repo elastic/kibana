@@ -193,6 +193,10 @@ export const prepareConversation = async ({
       }
 
       try {
+        const isReadonly = attachment.readonly ?? definition.isReadonly ?? true;
+        if (!isReadonly) {
+          return undefined;
+        }
         const formatted = await definition.format(
           {
             id: attachment.id,
@@ -205,9 +209,7 @@ export const prepareConversation = async ({
           return undefined;
         }
         const representation = await formatted.getRepresentation();
-        return representation.type === 'text'
-          ? representation.value
-          : JSON.stringify(representation);
+        return representation.type === 'text' ? representation.value : undefined;
       } catch {
         return undefined;
       }
