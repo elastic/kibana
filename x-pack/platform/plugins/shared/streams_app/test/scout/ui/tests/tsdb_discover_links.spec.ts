@@ -147,8 +147,6 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      // Poll until the TSDB mode hook resolves and the link shows 'TS'
-      // The hook is async so we need to wait for it to complete
       await expect
         .poll(
           async () => {
@@ -165,8 +163,6 @@ test.describe(
     test('should use FROM source command for regular stream Discover link', async ({
       pageObjects,
     }) => {
-      // Regular streams should already use 'FROM' without needing to wait for async resolution
-      // But we poll to handle any initial loading states
       await expect
         .poll(
           async () => {
