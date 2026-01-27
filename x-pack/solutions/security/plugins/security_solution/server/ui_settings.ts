@@ -480,9 +480,8 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
         {
-          defaultMessage: `
-          When configured, only events from the specified data stream namespaces are searched during rule execution.
-          <br/>Expected JSON format: { "meta": { "negate": false }, "query": { "bool": { "filter": { "terms": { "data_stream.namespace": ["namespace1", "namespace2"] } } } } }`,
+          defaultMessage:
+            'When configured, only events from the specified data stream namespaces are searched during rule execution.',
         }
       ),
       type: 'json',
