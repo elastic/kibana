@@ -41,7 +41,6 @@ const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
 
 const DATA_COVERAGE_CREATE_CASE_TAGS = ['siem-readiness', 'data-coverage'];
-const DATA_COVERAGE_VIEW_CASE_TAGS = ['data-coverage'];
 
 interface CategoryCoverageData {
   category: string;
@@ -76,7 +75,7 @@ export const DataCoveragePanel: React.FC = () => {
   const { getReadinessCategories } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { euiTheme } = useEuiTheme();
-  const casesByTagsQuery = useSiemReadinessCasesByTags(DATA_COVERAGE_VIEW_CASE_TAGS);
+  const casesByTagsQuery = useSiemReadinessCasesByTags(DATA_COVERAGE_CREATE_CASE_TAGS);
 
   const getCategoryIntegrationUrl = useCallback(
     (category: string): string => {
@@ -134,7 +133,7 @@ export const DataCoveragePanel: React.FC = () => {
   }, [openNewCaseFlyout, caseDescription]);
 
   const handleViewCases = useCallback(() => {
-    navigateToCasesWithTagsFilter(basePath, DATA_COVERAGE_VIEW_CASE_TAGS);
+    navigateToCasesWithTagsFilter(basePath, DATA_COVERAGE_CREATE_CASE_TAGS);
   }, [basePath]);
 
   const columns: Array<EuiBasicTableColumn<CategoryCoverageData>> = [

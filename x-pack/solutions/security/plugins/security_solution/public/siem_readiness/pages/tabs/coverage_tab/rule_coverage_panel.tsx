@@ -36,7 +36,6 @@ const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
 
 const RULE_COVERAGE_CREATE_CASE_TAGS = ['siem-readiness', 'data-rule-coverage'];
-const RULE_COVERAGE_VIEW_CASE_TAGS = ['data-rule-coverage'];
 
 const buildMissingIntegrationDescription = (
   missingIntegration: string[],
@@ -73,7 +72,7 @@ export const RuleCoveragePanel: React.FC = () => {
   const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
   const { euiTheme } = useEuiTheme();
-  const casesByTagsQuery = useSiemReadinessCasesByTags(RULE_COVERAGE_VIEW_CASE_TAGS);
+  const casesByTagsQuery = useSiemReadinessCasesByTags(RULE_COVERAGE_CREATE_CASE_TAGS);
 
   const getInstalledIntegrations =
     getIntegrations?.data?.items?.filter(
@@ -106,7 +105,7 @@ export const RuleCoveragePanel: React.FC = () => {
   }, [openNewCaseFlyout, caseDescription]);
 
   const handleViewCases = useCallback(() => {
-    navigateToCasesWithTagsFilter(basePath, RULE_COVERAGE_VIEW_CASE_TAGS);
+    navigateToCasesWithTagsFilter(basePath, RULE_COVERAGE_CREATE_CASE_TAGS);
   }, [basePath]);
 
   const toggleButtons = [
