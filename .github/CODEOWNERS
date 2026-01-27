@@ -453,7 +453,7 @@ src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-presentation-team
-src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
@@ -1151,6 +1151,7 @@ x-pack/solutions/observability/packages/alert-details @elastic/actionable-obs-te
 x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
+x-pack/solutions/observability/packages/kbn-apm-api-client @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
