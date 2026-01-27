@@ -474,7 +474,6 @@ describe('BulkDeleteTask', () => {
         expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(3);
         expect(result.state.deletedCount).toBe(3);
       });
-
     });
 
     describe('edge cases', () => {
@@ -493,10 +492,7 @@ describe('BulkDeleteTask', () => {
       });
 
       it('should return early if task is already done', async () => {
-        setupTaskRunner(
-          { isDone: true, deletedCount: 5, errors: [] },
-          { dataSourceIds: ['ds-1'] }
-        );
+        setupTaskRunner({ isDone: true, deletedCount: 5, errors: [] }, { dataSourceIds: ['ds-1'] });
 
         const result = await taskRunner.run();
 
