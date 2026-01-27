@@ -9298,6 +9298,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-chart-section-viewer@link:src/platform/packages/shared/kbn-unified-chart-section-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""
@@ -9323,10 +9327,6 @@
   uid ""
 
 "@kbn/unified-histogram@link:src/platform/packages/shared/kbn-unified-histogram":
-  version "0.0.0"
-  uid ""
-
-"@kbn/unified-metrics-grid@link:src/platform/packages/shared/kbn-unified-metrics-grid":
   version "0.0.0"
   uid ""
 
@@ -14657,10 +14657,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@4.35.4":
-  version "4.35.4"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.35.4.tgz#e114ab972641597e8dcbe1a18e60ff4e70051f60"
-  integrity sha512-hZFsK0dt/2PA5eLrFOJwkoTBpPXtaKnln7NCtg3pMAPwg7DXG6kTilHoAw8KzsQeDFLJ0mYcL6dPSMt1Qk7eSw==
+"@types/selenium-webdriver@4.35.5":
+  version "4.35.5"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.35.5.tgz#6683f422ae6cd3e37f9467a06d71cafc50b4b140"
+  integrity sha512-wCQCjWmahRkUAO7S703UAvBFkxz4o/rjX4T2AOSWKXSi0sTQPsrXxR0GjtFUT0ompedLkYH4R5HO5Urz0hyeog==
   dependencies:
     "@types/node" "*"
     "@types/ws" "*"
@@ -17438,10 +17438,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@143.0.1:
-  version "143.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.1.tgz#d1328faa18a06d42759b8c867fbcc5f95adc68ba"
-  integrity sha512-qR0DKGV7C3r5Fo6WJD2bqQ1ny9THrJTL4X8JeArBQ6m5Cq6sHXAhIrVgsTZuKi9tL/YUcFoELMI3UTg6dMiKWA==
+chromedriver@143.0.4:
+  version "143.0.4"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.4.tgz#0ede0354f2970d8d650a6befc6b458d9cd8d32b9"
+  integrity sha512-mE++40DprY2n4d3OPxzW7ujIFRY9eLYwJf4uBgQtMaJQkapSVXRzUrLzSMcRaybrt47Y1t8xW5AKoaUIL3aYZw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.12.0"
@@ -29172,10 +29172,10 @@ qs@6.13.0:
   dependencies:
     side-channel "^1.0.6"
 
-qs@6.14.0, qs@^6.11.0, qs@^6.12.3, qs@^6.14.0, qs@^6.9.7:
-  version "6.14.0"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.0.tgz#c63fa40680d2c5c941412a0e899c89af60c0a930"
-  integrity sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==
+qs@6.14.1, qs@^6.11.0, qs@^6.12.3, qs@^6.14.0, qs@^6.9.7:
+  version "6.14.1"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.1.tgz#a41d85b9d3902f31d27861790506294881871159"
+  integrity sha512-4EK3+xJl8Ts67nLYNwqw/dsFVnCf+qR7RgXSK9jEEm9unao3njwMDdmsdvoKBKHzxd7tCYz5e5M+SnMjdtXGQQ==
   dependencies:
     side-channel "^1.1.0"
 
