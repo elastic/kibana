@@ -23,7 +23,6 @@ import { SuggestionOrderingEngine } from '../../shared';
 import {
   getCommandAutocompleteDefinitions,
   createIndicesBrowserSuggestion,
-  createFieldsBrowserSuggestion,
 } from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
@@ -156,17 +155,6 @@ export async function suggest(
 
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-
-      // Add indices browser suggestion if enabled and we have source command suggestions
-      if (sourceCommandsSuggestions.length > 0 && resourceRetriever?.isResourceBrowserEnabled) {
-        return [
-          createIndicesBrowserSuggestion(),
-          ...headerCommandsSuggestions,
-          ...sourceCommandsSuggestions,
-          ...recommendedQueriesSuggestions,
-        ];
-      }
-
       return [
         ...headerCommandsSuggestions,
         ...sourceCommandsSuggestions,
@@ -296,6 +284,7 @@ async function getSuggestionsWithinCommandExpression(
       getKqlSuggestions: callbacks?.getKqlSuggestions,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       isServerless: callbacks?.isServerless,
+      isResourceBrowserEnabled: callbacks?.isResourceBrowserEnabled,
     },
     context,
     offset
@@ -306,26 +295,11 @@ async function getSuggestionsWithinCommandExpression(
   const commandName = astContext.command.name.toLowerCase();
   const sourceCommands = new Set(esqlCommandRegistry.getSourceCommandNames().map((name) => name.toLowerCase()));
   const isSourceCommand = sourceCommands.has(commandName);
-  // STATS and inline stats don't primarily suggest field names, they suggest aggregation functions
-  const isStatsCommand = commandName === 'stats' || commandName === 'inline stats';
-
-  // Check if we have field suggestions (kind 'Variable' indicates fields)
-  const hasFieldSuggestions = suggestions.some((suggestion) => suggestion.kind === 'Variable');
 
   // Add prepended resource browser suggestion if enabled
   // Show indices browser when in FROM/TS commands (where indices are suggested)
   if (isSourceCommand && callbacks?.isResourceBrowserEnabled) {
     suggestions.unshift(createIndicesBrowserSuggestion());
-  }
-
-  // Show fields browser when we have field suggestions and we're not in a source command or stats command
-  if (
-    !isSourceCommand &&
-    !isStatsCommand &&
-    hasFieldSuggestions &&
-    callbacks?.isResourceBrowserEnabled
-  ) {
-    suggestions.unshift(createFieldsBrowserSuggestion());
   }
 
   // Apply context-aware ordering

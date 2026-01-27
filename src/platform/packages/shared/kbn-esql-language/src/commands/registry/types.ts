@@ -159,6 +159,7 @@ export interface ICommandCallbacks {
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
+  isResourceBrowserEnabled?: boolean;
 }
 
 export interface ICommandContext {

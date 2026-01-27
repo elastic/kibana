@@ -133,6 +133,7 @@ export async function autocomplete(
           addSpaceAfterField: false,
           openSuggestions: false,
           promoteToTop: true,
+          isFieldsBrowserEnabled: callbacks?.isResourceBrowserEnabled,
         }))
       );
 

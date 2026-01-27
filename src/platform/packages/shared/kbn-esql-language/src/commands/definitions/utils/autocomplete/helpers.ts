@@ -31,6 +31,7 @@ import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } fro
 import { SuggestionCategory } from '../../../../shared/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
+import { createFieldsBrowserSuggestion } from '../../../registry/complete_items';
 
 export const shouldBeQuotedText = (
   text: string,
@@ -149,6 +150,7 @@ interface FieldSuggestionsOptions {
   addComma?: boolean;
   promoteToTop?: boolean;
   canBeMultiValue?: boolean;
+  isFieldsBrowserEnabled?: boolean;
 }
 
 export async function getFieldsSuggestions(
@@ -164,6 +166,7 @@ export async function getFieldsSuggestions(
     addComma = false,
     promoteToTop = true,
     canBeMultiValue = false,
+    isFieldsBrowserEnabled = false,
   } = options;
 
   const variableType = (() => {
@@ -178,6 +181,10 @@ export async function getFieldsSuggestions(
     addComma,
     variableType,
   });
+
+  if (isFieldsBrowserEnabled) {
+    suggestions.unshift(createFieldsBrowserSuggestion());
+  }
 
   return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
 }
