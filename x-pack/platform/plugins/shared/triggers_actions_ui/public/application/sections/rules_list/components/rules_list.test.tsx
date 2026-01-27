@@ -30,9 +30,6 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
-import { CreateRuleButton } from './create_rule_button';
-import { RulesListDocLink } from './rules_list_doc_link';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 
 import {
   mockedRulesData,
@@ -436,38 +433,7 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('setHeaderActions', () => {
-    it('should not render the Create Rule button', async () => {
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
-    });
-
-    it('should set header actions correctly when the user is authorized to create rules', async () => {
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
-    });
-
-    it('should set header actions correctly when the user is not authorized to creat rules', async () => {
-      getRuleTypes.mockResolvedValueOnce([]);
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      // Do not render the create rule button since the user is not authorized
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
-    });
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/149061
-  describe.skip('rules_list component with items', () => {
+  describe('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
       await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));

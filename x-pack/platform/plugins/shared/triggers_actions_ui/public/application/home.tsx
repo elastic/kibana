@@ -12,8 +12,16 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { Section, routeToRules, routeToLogs } from './constants';
+import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
+import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
+import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
+import type { Section } from './constants';
+import { routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 
@@ -37,14 +45,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const {
     chrome,
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    ruleTypeRegistry,
+    application: { navigateToApp },
   } = useKibana().services;
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
@@ -75,25 +84,33 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     history.push(`/${newSection}`);
   };
 
+  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
+
+  const openRuleTypeModal = useCallback(() => {
+    setRuleTypeModalVisibility(true);
+  }, []);
+
+  const headerActions = [
+    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
+    <RulesSettingsLink
+      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+    />,
+    <RulesListDocLink />,
+  ];
+
   const renderRulesList = useCallback(() => {
     return suspendedComponentWithProps(
       RulesList,
       'xl'
     )({
       showCreateRuleButtonInPrompt: true,
-      setHeaderActions,
     });
   }, []);
 
   const renderLogsList = useCallback(() => {
     return (
       <EuiPageTemplate.Section grow={false} paddingSize="none">
-        {suspendedComponentWithProps(
-          LogsList,
-          'xl'
-        )({
-          setHeaderActions,
-        })}
+        <LogsList />
       </EuiPageTemplate.Section>
     );
   }, []);
@@ -138,6 +155,28 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           </Routes>
         </HealthCheck>
       </HealthContextProvider>
+
+      {ruleTypeModalVisible && (
+        <RuleTypeModal
+          onClose={() => setRuleTypeModalVisibility(false)}
+          onSelectRuleType={(ruleTypeId) => {
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+            });
+          }}
+          onSelectTemplate={(templateId) => {
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                encodeURIComponent(templateId)
+              )}`,
+            });
+          }}
+          http={http}
+          toasts={toasts}
+          registeredRuleTypes={ruleTypeRegistry.list()}
+          filteredRuleTypes={[]}
+        />
+      )}
     </>
   );
 };
