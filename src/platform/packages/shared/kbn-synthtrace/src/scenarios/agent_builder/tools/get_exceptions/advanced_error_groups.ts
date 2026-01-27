@@ -17,7 +17,6 @@
  * - Inventory workers emit background errors not tied to transactions.
  *
  * This scenario is designed to validate:
- * - groupBy: service.name, error.exception.type, error.culprit, service.environment, host.name
  * - kqlFilter: environment, host, labels, handled/unhandled, service.version
  *
  * Validate via:
