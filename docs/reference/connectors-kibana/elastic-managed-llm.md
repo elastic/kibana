@@ -43,7 +43,7 @@ Details of the currently used model are available in the [model card](https://as
 
 ## Region and hosting
 
-The Preconfigured AI Connectors use third party service providers for {{infer}}. See [the elastic inference service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
+The Preconfigured AI Connectors use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
 
 ## Data protection
 
