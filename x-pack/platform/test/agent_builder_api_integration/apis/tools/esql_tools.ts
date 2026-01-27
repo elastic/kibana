@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       tags: ['test'],
       configuration: {
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: { case_id: { type: 'keyword', description: 'Case ID' } },
+        params: { case_id: { type: 'string', description: 'Case ID' } },
       },
     };
 
