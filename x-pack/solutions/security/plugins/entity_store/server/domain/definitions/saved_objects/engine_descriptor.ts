@@ -6,8 +6,8 @@
  */
 
 import type {
-    SavedObjectsClientContract,
-    SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityType } from '../entity_schema';
@@ -17,80 +17,87 @@ import { EngineDescriptorTypeName } from './engine_descriptor_type';
 import { ENGINE_STATUS } from '../../constants';
 
 export class EngineDescriptorClient {
-    constructor(
-        private readonly soClient: SavedObjectsClientContract,
-        private readonly namespace: string,
-        private readonly logger: Logger
-    ) { }
+  constructor(
+    private readonly soClient: SavedObjectsClientContract,
+    private readonly namespace: string,
+    private readonly logger: Logger
+  ) {}
 
-    async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
-        return this.soClient.find<EngineDescriptor>({
-            type: EngineDescriptorTypeName,
-            filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
-            namespaces: [this.namespace],
-        });
+  async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
+    return this.soClient.find<EngineDescriptor>({
+      type: EngineDescriptorTypeName,
+      filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
+      namespaces: [this.namespace],
+    });
+  }
+
+  async init(
+    entityType: EntityType,
+    initialState: Partial<LogExtractionState>
+  ): Promise<EngineDescriptor> {
+    const engineDescriptor = await this.find(entityType);
+
+    if (engineDescriptor.total > 0) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Found existing engine descriptor for entity type ${entityType}`
+      );
     }
 
-    async init(
-        entityType: EntityType,
-        initialState: Partial<LogExtractionState>
-    ): Promise<EngineDescriptor> {
-        const engineDescriptor = await this.find(entityType);
+    const id = this.getSavedObjectId(entityType);
+    this.logger.debug(`Creating engine descriptor with id ${id}`);
 
-        if (engineDescriptor.total > 0) {
-            throw SavedObjectsErrorHelpers.createBadRequestError(`Found existing engine descriptor for entity type ${entityType}`);
-        }
+    const logExtractionState = LogExtractionState.parse(initialState);
+    const defaultVersionState = VersionState.parse({});
+    const { attributes } = await this.soClient.create<EngineDescriptor>(
+      EngineDescriptorTypeName,
+      {
+        status: ENGINE_STATUS.INSTALLING,
+        type: entityType,
+        logExtractionState,
+        versionState: defaultVersionState,
+      },
+      { id }
+    );
 
-        const id = this.getSavedObjectId(entityType);
-        this.logger.debug(`Creating engine descriptor with id ${id}`);
+    return attributes;
+  }
 
-        const logExtractionState = LogExtractionState.parse(initialState);
-        const defaultVersionState = VersionState.parse({});
-        const { attributes } = await this.soClient.create<EngineDescriptor>(
-            EngineDescriptorTypeName,
-            {
-                status: ENGINE_STATUS.INSTALLING,
-                type: entityType,
-                logExtractionState,
-                versionState: defaultVersionState,
-            },
-            { id }
-        );
+  async update(
+    entityType: EntityType,
+    state: Partial<EngineDescriptor>
+  ): Promise<Partial<EngineDescriptor>> {
+    await this.ensureEntityExists(entityType);
 
-        return attributes;
+    const id = this.getSavedObjectId(entityType);
+    const { attributes } = await this.soClient.update<EngineDescriptor>(
+      EngineDescriptorTypeName,
+      id,
+      state,
+      { refresh: 'wait_for' }
+    );
+
+    return attributes;
+  }
+
+  async delete(entityType: EntityType) {
+    await this.ensureEntityExists(entityType);
+
+    const id = this.getSavedObjectId(entityType);
+    this.logger.debug(`Deleting engine descriptor with id ${id}`);
+    await this.soClient.delete(EngineDescriptorTypeName, id);
+  }
+
+  private async ensureEntityExists(entityType: EntityType) {
+    const engineDescriptor = await this.find(entityType);
+
+    if (engineDescriptor.total === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        `No engine descriptor found for entity type ${entityType}`
+      );
     }
+  }
 
-    async update(entityType: EntityType, state: Partial<EngineDescriptor>): Promise<Partial<EngineDescriptor>> {
-        await this.ensureEntityExists(entityType);
-
-        const id = this.getSavedObjectId(entityType);
-        const { attributes } = await this.soClient.update<EngineDescriptor>(
-            EngineDescriptorTypeName,
-            id,
-            state,
-            { refresh: 'wait_for' }
-        );
-
-        return attributes;
-    }
-
-    async delete(entityType: EntityType) {
-        await this.ensureEntityExists(entityType);
-
-        const id = this.getSavedObjectId(entityType);
-        this.logger.debug(`Deleting engine descriptor with id ${id}`);
-        await this.soClient.delete(EngineDescriptorTypeName, id);
-    }
-
-    private async ensureEntityExists(entityType: EntityType) {
-        const engineDescriptor = await this.find(entityType);
-
-        if (engineDescriptor.total === 0) {
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(`No engine descriptor found for entity type ${entityType}`);
-        }
-    }
-
-    private getSavedObjectId(entityType: EntityType): string {
-        return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
-    }
+  private getSavedObjectId(entityType: EntityType): string {
+    return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
+  }
 }
