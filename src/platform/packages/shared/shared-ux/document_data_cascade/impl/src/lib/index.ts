@@ -13,3 +13,8 @@ export {
   getCascadeRowLeafDataCacheKey,
   getLeafIdFromCacheKey,
 } from './utils';
+
+export {
+  useStickyHeaderPortal,
+  type StickyHeaderPortalContextValue,
+} from './core/sticky_header_portal';

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
+import { StickyHeaderPortalProvider } from '../../../lib/core/sticky_header_portal';
 import { isCascadeGroupRowNode } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
@@ -53,6 +54,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
+  // helps create a reference to the header to support rendering items into the row header conditionally
+  const headerPortalRenderRef = useRef<HTMLDivElement | null>(null);
+
+  const setHeaderPortalRenderRef = useCallback((ref: HTMLDivElement) => {
+    headerPortalRenderRef.current = ref;
+  }, []);
+
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
   const styles = useMemo(() => {
@@ -80,49 +88,54 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       />
     );
   }, [
-    RowTitleSlot,
-    enableRowSelection,
-    enableSecondaryExpansionAction,
     isGroupNode,
-    onCascadeGroupNodeExpanded,
-    onCascadeGroupNodeCollapsed,
-    rowHeaderActions,
+    RowTitleSlot,
     rowHeaderMetaSlots,
+    rowHeaderActions,
     rowInstance,
     size,
+    enableRowSelection,
+    enableSecondaryExpansionAction,
+    onCascadeGroupNodeExpanded,
+    onCascadeGroupNodeCollapsed,
   ]);
 
   return (
-    <div
-      {...treeGridRowARIAAttributes}
-      data-index={virtualRow.index}
-      data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
-      ref={innerRef}
-      style={virtualRowStyle}
-      {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
-      css={styles.rowWrapper}
-    >
-      <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
-        <React.Fragment>
-          {isActiveSticky && activeStickyRenderSlotRef.current
-            ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
-                activeStickyRenderSlotRef.current,
-                `${rowId}-sticky-header`
-              )
-            : null}
-        </React.Fragment>
-        <EuiFlexItem>{rowHeader}</EuiFlexItem>
-        <React.Fragment>
-          {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
-            <EuiFlexItem role="gridcell">
-              {rowVisibleCells.map((cell) => (
-                <TableCellRender key={cell.id} cell={cell} />
-              ))}
-            </EuiFlexItem>
-          )}
-        </React.Fragment>
-      </EuiFlexGroup>
-    </div>
+    <StickyHeaderPortalProvider portalRef={headerPortalRenderRef} isActiveSticky={isActiveSticky}>
+      <div
+        {...treeGridRowARIAAttributes}
+        data-index={virtualRow.index}
+        data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
+        ref={innerRef}
+        style={virtualRowStyle}
+        {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
+        css={styles.rowWrapper}
+      >
+        <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
+          <React.Fragment>
+            {isActiveSticky && activeStickyRenderSlotRef.current
+              ? createPortal(
+                  <div css={styles.rowStickyHeaderInner}>
+                    <>{rowHeader}</>
+                    <div ref={setHeaderPortalRenderRef} />
+                  </div>,
+                  activeStickyRenderSlotRef.current,
+                  `${rowId}-sticky-header`
+                )
+              : null}
+          </React.Fragment>
+          <EuiFlexItem>{rowHeader}</EuiFlexItem>
+          <React.Fragment>
+            {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
+              <EuiFlexItem role="gridcell">
+                {rowVisibleCells.map((cell) => (
+                  <TableCellRender key={cell.id} cell={cell} />
+                ))}
+              </EuiFlexItem>
+            )}
+          </React.Fragment>
+        </EuiFlexGroup>
+      </div>
+    </StickyHeaderPortalProvider>
   );
 }

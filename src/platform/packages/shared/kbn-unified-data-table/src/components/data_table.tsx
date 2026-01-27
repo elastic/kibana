@@ -28,6 +28,7 @@ import type {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiDataGridCustomToolbarProps,
 } from '@elastic/eui';
 import {
   EuiDataGrid,
@@ -130,6 +131,14 @@ export enum DataLoadingState {
   loading = 'loading',
   loadingMore = 'loadingMore',
   loaded = 'loaded',
+}
+
+export interface UnifiedDataTableCustomGridBodyContext {
+  /**
+   * Renders the toolbar with actual EUI DataGrid controls.
+   * Call this inside your custom grid body to render the toolbar.
+   */
+  renderToolbar?: (toolbarProps: EuiDataGridCustomToolbarProps) => React.ReactNode;
 }
 
 /**
@@ -384,7 +393,10 @@ interface InternalUnifiedDataTableProps {
    * allowing hooks, context, and other React concepts to be used.
    * It receives #EuiDataGridCustomBodyProps as its only argument.
    */
-  renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  renderCustomGridBody?: (
+    args: EuiDataGridCustomBodyProps,
+    context: UnifiedDataTableCustomGridBodyContext
+  ) => React.ReactNode;
   /**
    * Optional render for the grid toolbar
    * @param toolbarProps
@@ -1168,6 +1180,16 @@ const InternalUnifiedDataTable = React.forwardRef<
       [renderCustomToolbar, additionalControls, inTableSearchControl]
     );
 
+    const wrappedRenderCustomGridBody = useMemo(() => {
+      if (!renderCustomGridBody) return undefined;
+
+      return (euiCustomGridBodyProps: EuiDataGridCustomBodyProps) => {
+        return renderCustomGridBody(euiCustomGridBodyProps, {
+          renderToolbar: renderCustomToolbarFn,
+        });
+      };
+    }, [renderCustomGridBody, renderCustomToolbarFn]);
+
     const showDisplaySelector = useMemo(():
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
       | undefined => {
@@ -1406,7 +1428,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 toolbarVisibility={toolbarVisibility}
                 rowHeightsOptions={rowHeightsOptions}
                 gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
+                renderCustomGridBody={wrappedRenderCustomGridBody}
                 renderCustomToolbar={renderCustomToolbarFn}
                 trailingControlColumns={trailingControlColumns}
                 cellContext={cellContextWithInTableSearchSupport}

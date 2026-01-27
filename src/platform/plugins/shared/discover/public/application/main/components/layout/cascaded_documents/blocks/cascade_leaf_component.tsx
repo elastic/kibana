@@ -8,7 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
+import { createPortal } from 'react-dom';
+import { useStickyHeaderPortal } from '@kbn/shared-ux-document-data-cascade';
+import {
+  EuiPanel,
+  EuiText,
+  type EuiDataGridCustomBodyProps,
+  useEuiTheme,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -52,6 +60,7 @@ interface CustomCascadeGridBodyProps
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
+  renderCustomToolbarElements?: ReturnType<typeof getRenderCustomToolbarWithElements>;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -77,6 +86,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
+  renderCustomToolbarElements,
 }: CustomCascadeGridBodyProps) {
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -85,6 +95,8 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
+
+  const stickyHeaderPortal = useStickyHeaderPortal();
 
   const customCascadeGridBodyStyle = useMemo(
     () => getCustomCascadeGridBodyStyle(euiTheme),
@@ -151,7 +163,27 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <>{headerRow}</>
+      <>
+        {stickyHeaderPortal?.isActiveSticky && stickyHeaderPortal.portalRef.current
+          ? createPortal(
+              <>
+                {renderCustomToolbarElements({
+                  // toolbarProps: {
+                  //   hasRoomForGridControls: true,
+                  //   columnControl: true,
+                  //   columnSortingControl: true,
+                  //   fullScreenControl: true,
+                  //   keyboardShortcutsControl: true,
+                  //   displayControl: true,
+                  // },
+                  // gridProps: {},
+                })}
+                {headerRow}
+              </>,
+              stickyHeaderPortal.portalRef.current
+            )
+          : headerRow}
+      </>
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -249,15 +281,18 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
     >(
-      ({
-        Cell,
-        visibleColumns,
-        visibleRowData,
-        setCustomGridBodyProps,
-        gridWidth,
-        headerRow,
-        footerRow,
-      }) => (
+      (
+        {
+          Cell,
+          visibleColumns,
+          visibleRowData,
+          setCustomGridBodyProps,
+          gridWidth,
+          headerRow,
+          footerRow,
+        },
+        context
+      ) => (
         <CustomCascadeGridBodyMemoized
           key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
           Cell={Cell}
@@ -273,6 +308,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           preventSizeChangePropagation={preventSizeChangePropagation}
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
+          renderCustomToolbarElements={context?.renderToolbar}
         />
       ),
       [
