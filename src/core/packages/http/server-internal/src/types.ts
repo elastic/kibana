@@ -26,6 +26,35 @@ import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 import type { RateLimiterConfig } from './rate_limiter';
 
+/**
+ * Augment the @hapi/hapi Request interface to include the cookie auth decorators
+ * that are added by the @hapi/cookie plugin when strategies are registered with
+ * requestDecoratorName options.
+ */
+declare module '@hapi/hapi' {
+  interface Request {
+    /**
+     * Cookie authentication decorator for the 'security-cookie' strategy.
+     * Added by @hapi/cookie plugin with requestDecoratorName: 'cookieAuth'
+     */
+    defaultCookieAuth: {
+      set: (value: any) => void;
+      clear: () => void;
+      h: import('@hapi/hapi').ResponseToolkit;
+    };
+
+    /**
+     * Cookie authentication decorator for the 'intermediate' strategy.
+     * Added by @hapi/cookie plugin with requestDecoratorName: 'intermediateCookieAuth'
+     */
+    intermediateCookieAuth: {
+      set: (value: any) => void;
+      clear: () => void;
+      h: import('@hapi/hapi').ResponseToolkit;
+    };
+  }
+}
+
 /** @internal */
 export interface InternalHttpServicePreboot
   extends Pick<

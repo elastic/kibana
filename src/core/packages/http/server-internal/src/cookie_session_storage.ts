@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request, ResponseToolkit, Server } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -27,18 +27,33 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   constructor(
     private readonly log: Logger,
     private readonly server: Server,
-    private readonly request: Request,
-    private readonly cookieOptions: SessionStorageCookieOptions<T>
+    private readonly request: Request
   ) {}
 
-  private getResponseToolkit(): ResponseToolkit {
-    return (this.request.cookieAuth as unknown as { h: ResponseToolkit }).h;
-  }
-
   public async get(): Promise<T | null> {
-    try {
-      const session = await this.server.auth.test('security-cookie', this.request);
+    let session;
 
+    try {
+      session = await this.server.auth.test('security-cookie', this.request);
+    } catch (e) {
+      /* empty */
+    }
+
+    if (!session) {
+      try {
+        session = await this.server.auth.test('intermediate', this.request);
+      } catch (e) {
+        this.log.debug(String(e));
+        return null;
+      }
+    }
+
+    // This is to keep TypeScript happy
+    if (!session) {
+      return null;
+    }
+
+    try {
       // A browser can send several cookies, if it's not an array, just return the session value
       if (!Array.isArray(session.credentials)) {
         return session.credentials as T;
@@ -83,22 +98,16 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   public set(sessionValue: T, options?: SessionStorageSetOptions) {
     if (options) {
       // Use custom cookie options
-      const h = this.getResponseToolkit();
-      const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
-      const sameSite = options?.sameSite ?? this.cookieOptions.sameSite;
-
-      h.state(this.cookieOptions.name, sessionValue, {
-        isSecure,
-        isSameSite: sameSite,
-      });
+      return this.request.intermediateCookieAuth.set(sessionValue);
     } else {
       // Use default cookie auth
-      return this.request.cookieAuth.set(sessionValue);
+      return this.request.defaultCookieAuth.set(sessionValue);
     }
   }
 
   public clear() {
-    return this.request.cookieAuth.clear();
+    this.request.intermediateCookieAuth.clear();
+    this.request.defaultCookieAuth.clear();
   }
 }
 
@@ -147,10 +156,34 @@ export async function createCookieSessionStorageFactory<T extends object>(
       path: basePath === undefined ? '/' : basePath,
       clearInvalid: false,
       isHttpOnly: true,
+
       isSameSite: cookieOptions.sameSite ?? false,
       isPartitioned:
         cookieOptions.sameSite === 'None' && cookieOptions.isSecure && !disableEmbedding,
     },
+    requestDecoratorName: 'defaultCookieAuth',
+    validate: async (req: Request, session: T | T[]) => {
+      const result = cookieOptions.validate(session);
+      if (!result.isValid) {
+        clearInvalidCookie(req, result.path);
+      }
+      return { isValid: result.isValid };
+    },
+  });
+
+  server.auth.strategy('intermediate', 'cookie', {
+    cookie: {
+      name: 'intermediate',
+      password: cookieOptions.encryptionKey,
+      isSecure: true,
+      path: basePath === undefined ? '/' : basePath,
+      clearInvalid: false,
+      isHttpOnly: true,
+      isSameSite: 'None',
+      isPartitioned:
+        cookieOptions.sameSite === 'None' && cookieOptions.isSecure && !disableEmbedding,
+    },
+    requestDecoratorName: 'intermediateCookieAuth',
     validate: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
@@ -162,12 +195,7 @@ export async function createCookieSessionStorageFactory<T extends object>(
 
   return {
     asScoped(request: KibanaRequest) {
-      return new ScopedCookieSessionStorage<T>(
-        log,
-        server,
-        ensureRawRequest(request),
-        cookieOptions
-      );
+      return new ScopedCookieSessionStorage<T>(log, server, ensureRawRequest(request));
     },
   };
 }
