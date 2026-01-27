@@ -48,10 +48,8 @@ export function initializeDynamicActionsManager(
   return {
     api: { ...api, enhancements: { dynamicActions } },
     comparators: {
-      enhancements: (a, b) => {
-        return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
-      },
-      drilldowns: 'skip',
+      enhancements: 'skip',
+      drilldowns: (a, b) => deepEqual(a, b),
     } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
