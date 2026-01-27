@@ -10,10 +10,25 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
+
+type AppendersType = TypeOf<typeof appendersSchema>;
+
+const defaultAppender: Map<string, AppendersType> = new Map([
+  [
+    'console_json_default_appender',
+    {
+      type: 'console',
+      layout: { type: 'json' },
+    },
+  ],
+]);
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  file: schema.maybe(schema.string()),
+  appenders: schema.mapOf(schema.string(), appendersSchema, {
+    defaultValue: defaultAppender,
+  }),
 });
 
 export type UserActivityConfigType = TypeOf<typeof configSchema>;

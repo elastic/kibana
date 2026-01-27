@@ -9,9 +9,8 @@
 
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { map } from 'rxjs';
-import type { ConsoleAppenderConfig, FileAppenderConfig } from '@kbn/core-logging-server';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams } from '@kbn/core-user-activity-server';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
@@ -50,22 +49,16 @@ export class UserActivityService
     logging.configure(
       ['user_activity'],
       config$.pipe(
-        map((config) => {
-          const userActivityJsonFileAppender = getUserActivityAppender(config.file);
-
-          return {
-            appenders: {
-              user_activity_json_file: userActivityJsonFileAppender,
+        map((config) => ({
+          appenders: config.appenders,
+          loggers: [
+            {
+              name: 'event',
+              level: 'info',
+              appenders: [...config.appenders.keys()],
             },
-            loggers: [
-              {
-                name: 'event',
-                level: 'info',
-                appenders: ['user_activity_json_file'],
-              },
-            ],
-          };
-        })
+          ],
+        }))
       )
     );
 
@@ -115,23 +108,5 @@ export class UserActivityService
 
   private getInjectedContext = () => {
     return this.injectedContextAsyncStorage.getStore() ?? {};
-  };
-}
-
-function getUserActivityAppender(
-  fileName: string | undefined
-): ConsoleAppenderConfig | FileAppenderConfig {
-  // TODO: we should allow rolling appender and other layouts but json default
-  if (fileName) {
-    return {
-      type: 'file',
-      layout: { type: 'json' },
-      fileName,
-    };
-  }
-
-  return {
-    type: 'console',
-    layout: { type: 'json' },
   };
 }

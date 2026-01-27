@@ -6106,6 +6106,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-activity-server@link:src/core/packages/user-activity/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-profile-browser-internal@link:src/core/packages/user-profile/browser-internal":
   version "0.0.0"
   uid ""
