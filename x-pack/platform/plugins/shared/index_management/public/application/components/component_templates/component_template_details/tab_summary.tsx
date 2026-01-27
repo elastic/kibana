@@ -47,6 +47,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
       {!templateIsInUse && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateDetails.summaryTab.notInUseTitle"

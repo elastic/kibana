@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import type { Visualization } from '../../../types';
-import type { FrameMock } from '../../../mocks';
-import {
-  createMockVisualization,
-  createMockFramePublicAPI,
-  renderWithReduxStore,
-} from '../../../mocks';
+import type { Visualization, LensAppState } from '@kbn/lens-common';
+import { createMockVisualization, renderWithReduxStore } from '../../../mocks';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import type { LensAppState } from '../../../state_management';
 import { updateVisualizationState } from '../../../state_management';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import type { LensInspector } from '../../../lens_inspector_service';
 import { act, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
@@ -26,8 +19,6 @@ import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
-  let mockFrameAPI: FrameMock;
-  const ToolbarComponentMock = jest.fn(() => null);
 
   const renderWorkspacePanelWrapper = (
     propsOverrides = {},
@@ -36,16 +27,12 @@ describe('workspace_panel_wrapper', () => {
     const { store, ...rtlRender } = renderWithReduxStore(
       <EditorFrameServiceProvider
         visualizationMap={{
-          myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
+          myVis: { ...mockVisualization },
         }}
         datasourceMap={{}}
       >
         <WorkspacePanelWrapper
-          framePublicAPI={mockFrameAPI}
-          visualizationId="myVis"
-          datasourceStates={{}}
           isFullscreen={false}
-          lensInspector={{} as unknown as LensInspector}
           getUserMessages={() => []}
           children={<span />}
           displayOptions={undefined}
@@ -97,33 +84,12 @@ describe('workspace_panel_wrapper', () => {
 
   beforeEach(() => {
     mockVisualization = createMockVisualization();
-    mockFrameAPI = createMockFramePublicAPI();
-    ToolbarComponentMock.mockClear();
   });
 
   it('should render its children', async () => {
     const customElementText = faker.word.words();
     renderWorkspacePanelWrapper({ children: <span>{customElementText}</span> });
     expect(screen.getByText(customElementText)).toBeInTheDocument();
-  });
-
-  it('should call the toolbar renderer if provided', async () => {
-    const visState = { internalState: 123 };
-    renderWorkspacePanelWrapper(
-      {},
-      {
-        preloadedState: {
-          visualization: { activeId: 'myVis', state: visState },
-          datasourceStates: {},
-        },
-      }
-    );
-
-    expect(ToolbarComponentMock).toHaveBeenCalledWith({
-      state: visState,
-      frame: mockFrameAPI,
-      setState: expect.anything(),
-    });
   });
 
   describe('auto-apply controls', () => {
@@ -148,14 +114,14 @@ describe('workspace_panel_wrapper', () => {
         editVisualization();
       });
 
-      // // simulate workspace panel behavior
+      // simulate workspace panel behavior
       act(() => {
         store.dispatch(setChangesApplied(false));
       });
 
       expect(getApplyChangesToolbar()).not.toBeDisabled();
 
-      // // simulate workspace panel behavior
+      // simulate workspace panel behavior
       act(() => {
         store.dispatch(setChangesApplied(true));
       });

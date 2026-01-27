@@ -8,11 +8,15 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { parsedExecuteTimeout } from '../lib/utils';
+import type { ParsedCommandInput } from '../../console/service/types';
 import { RunscriptActionResult } from '../../runscript_action_result';
 import type { ArgSelectorState, SupportedArguments } from '../../console';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
-import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
+import type {
+  EndpointRunScriptActionRequestParams,
+  RunScriptActionRequestBody,
+} from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionRunScriptOutputContent,
@@ -21,17 +25,17 @@ import type {
 import type { ActionRequestComponentProps } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 
-export interface CrowdStrikeRunScriptActionParameters {
-  Raw?: string[];
-  HostPath?: string[];
-  CloudFile?: string[];
-  CommandLine?: string[];
-  Timeout?: number[];
+export interface CrowdStrikeRunScriptActionParameters extends SupportedArguments {
+  Raw: string;
+  HostPath: string;
+  CloudFile: string;
+  CommandLine: string;
+  Timeout: string;
 }
 
-export interface MicrosoftDefenderEndpointRunScriptActionParameters {
-  ScriptName: string[];
-  Args?: string[];
+export interface MicrosoftDefenderEndpointRunScriptActionParameters extends SupportedArguments {
+  ScriptName: string;
+  Args: string;
 }
 
 export interface SentinelOneRunScriptActionParameters extends SupportedArguments {
@@ -39,11 +43,18 @@ export interface SentinelOneRunScriptActionParameters extends SupportedArguments
   inputParams: string;
 }
 
+export interface EndpointRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+  timeout: string;
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
     | CrowdStrikeRunScriptActionParameters
     | MicrosoftDefenderEndpointRunScriptActionParameters
-    | SentinelOneRunScriptActionParameters,
+    | SentinelOneRunScriptActionParameters
+    | EndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -61,7 +72,8 @@ export const RunScriptActionResult = memo<
       const args = command.args.args;
 
       if (agentType === 'microsoft_defender_endpoint') {
-        const msDefenderArgs = args as MicrosoftDefenderEndpointRunScriptActionParameters;
+        const msDefenderArgs =
+          args as ParsedCommandInput<MicrosoftDefenderEndpointRunScriptActionParameters>['args'];
 
         return {
           scriptName: msDefenderArgs.ScriptName?.[0],
@@ -70,7 +82,7 @@ export const RunScriptActionResult = memo<
       }
 
       if (agentType === 'crowdstrike') {
-        const csArgs = args as CrowdStrikeRunScriptActionParameters;
+        const csArgs = args as ParsedCommandInput<CrowdStrikeRunScriptActionParameters>['args'];
 
         return {
           raw: csArgs.Raw?.[0],
@@ -81,16 +93,30 @@ export const RunScriptActionResult = memo<
         };
       }
 
-      if (agentType === 'sentinel_one') {
-        const { inputParams } = args as SentinelOneRunScriptActionParameters;
+      if (agentType === 'sentinel_one' || agentType === 'endpoint') {
+        const { inputParams, timeout } = args as ParsedCommandInput<
+          SentinelOneRunScriptActionParameters | EndpointRunScriptActionParameters
+        >['args'];
         const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
           command.argState?.script;
 
         if (scriptSelectionState && scriptSelectionState?.[0].store?.selectedOption?.id) {
-          return {
+          const params: RunScriptActionRequestBody['parameters'] = {
             scriptId: scriptSelectionState[0].store.selectedOption.id,
             scriptInput: inputParams?.[0],
           };
+
+          if (agentType === 'endpoint') {
+            const timeoutInSeconds = parsedExecuteTimeout(timeout?.[0] as string);
+
+            if (timeoutInSeconds) {
+              (
+                params as RunScriptActionRequestBody<EndpointRunScriptActionRequestParams>['parameters']
+              ).timeout = timeoutInSeconds;
+            }
+          }
+
+          return params;
         }
       }
 
@@ -133,25 +159,11 @@ export const RunScriptActionResult = memo<
         { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      {command.commandDefinition?.meta?.agentType === 'sentinel_one' ? (
-        <RunscriptActionResult
-          action={completedActionDetails}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          data-test-subj="sentinelOneRunscriptResult"
-        />
-      ) : (
-        <ExecuteActionHostResponse
-          action={completedActionDetails}
-          canAccessFileDownloadLink={true}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          textSize="s"
-          data-test-subj="console"
-          // Currently file is not supported for CrowdStrike
-          hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-          showPasscode={false}
-          hideContext={true}
-        />
-      )}
+      <RunscriptActionResult
+        action={completedActionDetails}
+        data-test-subj="runscriptResult"
+        textSize="s"
+      />
     </ResultComponent>
   );
 });

@@ -17,7 +17,7 @@ import {
   useFetchContext,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -40,23 +40,21 @@ export const getAlertsTableEmbeddableFactory = (
 ): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const timeRangeManager = initializeTimeRangeManager(initialState?.rawState);
-    const titleManager = initializeTitleManager(initialState?.rawState ?? {});
+    const timeRangeManager = initializeTimeRangeManager(initialState);
+    const titleManager = initializeTitleManager(initialState ?? {});
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const services = {
       ...coreServices,
       ...deps,
     };
 
-    const initialTableConfig = initialState.rawState.tableConfig;
+    const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
     const serializeState = () => ({
-      rawState: {
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        tableConfig: tableConfig$.getValue(),
-      },
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      tableConfig: tableConfig$.getValue(),
     });
 
     const unsavedChangesApi = initializeUnsavedChanges({
@@ -74,8 +72,8 @@ export const getAlertsTableEmbeddableFactory = (
         tableConfig: 'deepEquality',
       }),
       onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved?.rawState);
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
+        titleManager.reinitializeState(lastSaved);
+        timeRangeManager.reinitializeState(lastSaved);
       },
     });
 

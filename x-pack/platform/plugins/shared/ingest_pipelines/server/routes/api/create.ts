@@ -39,7 +39,6 @@ export const registerCreateRoute = ({
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const pipeline = req.body as Pipeline;
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { name, description, processors, version, on_failure, _meta } = pipeline;
 
       try {

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
   filterDataErrors,
-  getIndicesList,
-  getRemoteIndicesList,
+  filterOutWarningsOverlappingWithErrors,
   parseErrors,
   parseWarning,
+  filterDuplicatedWarnings,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -276,120 +275,6 @@ describe('helpers', function () {
     });
   });
 
-  describe('getIndicesList', function () {
-    it('should return also system indices with hidden flag on', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: '.system1',
-            title: 'system1',
-          },
-          {
-            name: 'logs',
-            title: 'logs',
-          },
-        ]),
-      };
-      const indices = await getIndicesList(updatedDataViewsMock);
-      expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true, type: 'Index' },
-        { name: 'logs', hidden: false, type: 'Index' },
-      ]);
-    });
-
-    it('should type correctly the aliases', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'alias1',
-            title: 'system1',
-            tags: [
-              {
-                name: 'Alias',
-                type: 'alias',
-              },
-            ],
-          },
-          {
-            name: 'logs',
-            title: 'logs',
-          },
-        ]),
-      };
-      const indices = await getIndicesList(updatedDataViewsMock);
-      expect(indices).toStrictEqual([
-        { name: 'alias1', hidden: false, type: 'Alias' },
-        { name: 'logs', hidden: false, type: 'Index' },
-      ]);
-    });
-  });
-
-  describe('getRemoteIndicesList', function () {
-    it('should filter out aliases and hidden indices', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'remote: alias1',
-            item: {
-              indices: ['index1'],
-            },
-          },
-          {
-            name: 'remote:.system1',
-            item: {
-              name: 'system',
-            },
-          },
-          {
-            name: 'remote:logs',
-            item: {
-              name: 'logs',
-              timestamp_field: '@timestamp',
-            },
-          },
-        ]),
-      };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock, true);
-      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
-    });
-
-    it('should not suggest ccs indices if not allowed', async function () {
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const updatedDataViewsMock = {
-        ...dataViewsMock,
-        getIndices: jest.fn().mockResolvedValue([
-          {
-            name: 'remote: alias1',
-            item: {
-              indices: ['index1'],
-            },
-          },
-          {
-            name: 'remote:.system1',
-            item: {
-              name: 'system',
-            },
-          },
-          {
-            name: 'remote:logs',
-            item: {
-              name: 'logs',
-              timestamp_field: '@timestamp',
-            },
-          },
-        ]),
-      };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock, false);
-      expect(indices).toStrictEqual([]);
-    });
-  });
-
   describe('filterDataErrors', function () {
     it('should return an empty array if no errors are provided', function () {
       expect(filterDataErrors([])).toEqual([]);
@@ -403,6 +288,62 @@ describe('helpers', function () {
       ] as MonacoMessage[];
 
       expect(filterDataErrors(errors)).toEqual([{ code: 'other' }]);
+    });
+  });
+
+  describe('filterOutWarningsOverlappingWithErrors', function () {
+    const createMessage = (
+      type: 'error' | 'warning',
+      [startLine, startCol, endLine, endCol]: readonly [number, number, number, number]
+    ): MonacoMessage => ({
+      message: type === 'error' ? 'Error' : 'Warning',
+      severity: 1,
+      code: type,
+      startLineNumber: startLine,
+      startColumn: startCol,
+      endLineNumber: endLine,
+      endColumn: endCol,
+    });
+
+    it.each([
+      ['filter out warning with exactly matching ranges', [1, 5, 1, 10], [1, 5, 1, 10], true],
+      ['filter out warning inside error', [1, 1, 1, 20], [1, 5, 1, 10], true],
+      ['filter out warning ending inside error', [1, 5, 1, 15], [1, 1, 1, 6], true],
+      ['filter out warning starting inside error', [1, 5, 1, 15], [1, 14, 1, 20], true],
+      ['filter out warning containing error', [1, 5, 1, 10], [1, 1, 1, 15], true],
+      ['NOT filter out warning with different lines', [1, 5, 1, 10], [2, 5, 2, 10], false],
+      ['NOT filter out warning before error', [1, 10, 1, 20], [1, 1, 1, 5], false],
+      ['NOT filter out warning after error', [1, 10, 1, 20], [1, 25, 1, 30], false],
+    ] as const)(`should %s`, (description, errorRange, warningRange, shouldFilter) => {
+      const errors = [createMessage('error', errorRange)];
+      const warnings = [createMessage('warning', warningRange)];
+
+      const result = filterOutWarningsOverlappingWithErrors(errors, warnings);
+      expect(result).toHaveLength(shouldFilter ? 0 : 1);
+    });
+  });
+
+  describe('filterDuplicatedUnmappedColumnWarnings', function () {
+    const createMessage = (code: string, message: string): MonacoMessage & { code: string } => ({
+      message,
+      code,
+      severity: 1,
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 1,
+    });
+
+    it('should filter duplicated warning messages', function () {
+      const warnings = [
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ];
+      expect(filterDuplicatedWarnings(warnings)).toEqual([
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ]);
     });
   });
 });

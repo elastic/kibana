@@ -7,6 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
+
+import {
   transformESToConversation,
   transformESSearchToConversations,
   transformESToConversations,
@@ -43,6 +48,15 @@ const getEsConversationMock = (): EsConversationSchema => {
               id: 'oQ5xL',
               type: 'SecurityAlertsPage',
             },
+          },
+          interrupt_value: {
+            type: 'INPUT_TEXT',
+            threadId: 'thread-1',
+            description: 'Ask user for text input',
+          },
+          interrupt_resume_value: {
+            type: 'INPUT_TEXT',
+            value: 'User provided string',
           },
         },
         '@timestamp': '2025-08-19T10:49:57.398Z',
@@ -106,6 +120,32 @@ describe('transforms', () => {
   });
 
   describe('transformESToConversation', () => {
+    it('should correctly transform ES conversation with mapped connector ID', () => {
+      const esConversation = getEsConversationMock();
+
+      const message = transformESToConversation({
+        ...esConversation,
+        api_config: {
+          ...esConversation.api_config,
+          connector_id: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        } as EsConversationSchema['api_config'],
+      });
+      expect(message.apiConfig?.connectorId).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+    });
+
+    it('should correctly transform ES conversation with unmapped connector ID', () => {
+      const esConversation = getEsConversationMock();
+
+      const message = transformESToConversation({
+        ...esConversation,
+        api_config: {
+          ...esConversation.api_config,
+          connector_id: 'some-other-id',
+        } as EsConversationSchema['api_config'],
+      });
+      expect(message.apiConfig?.connectorId).toBe('some-other-id');
+    });
+
     it('should correctly transform ES conversation', () => {
       const esConversation = getEsConversationMock();
       const conversation = transformESToConversation(esConversation);
@@ -127,7 +167,15 @@ describe('transforms', () => {
             timestamp: '2025-08-19T10:49:57.398Z',
             content: 'You currently have 61 open alerts in your environment. {reference(oQ5xL)}',
             role: 'assistant',
-            metadata: { contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } } },
+            metadata: {
+              contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+              interruptValue: {
+                type: 'INPUT_TEXT',
+                threadId: 'thread-1',
+                description: 'Ask user for text input',
+              },
+              interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
+            },
             traceData: {
               traceId: 'f44d01b6095d35dce15aa8137df76e29',
               transactionId: 'ee432e8be6ad3f9c',
@@ -167,6 +215,12 @@ describe('transforms', () => {
               role: 'assistant',
               metadata: {
                 contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+                interruptValue: {
+                  type: 'INPUT_TEXT',
+                  threadId: 'thread-1',
+                  description: 'Ask user for text input',
+                },
+                interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
               },
               traceData: {
                 traceId: 'f44d01b6095d35dce15aa8137df76e29',
@@ -208,6 +262,12 @@ describe('transforms', () => {
               role: 'assistant',
               metadata: {
                 contentReferences: { oQ5xL: { id: 'oQ5xL', type: 'SecurityAlertsPage' } },
+                interruptValue: {
+                  type: 'INPUT_TEXT',
+                  threadId: 'thread-1',
+                  description: 'Ask user for text input',
+                },
+                interruptResumeValue: { type: 'INPUT_TEXT', value: 'User provided string' },
               },
               traceData: {
                 traceId: 'f44d01b6095d35dce15aa8137df76e29',

@@ -12,14 +12,21 @@ import {
   useFieldSettingsContext,
 } from './settings_context';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Subject } from 'rxjs';
 
 describe('settings_context', () => {
   const setupSettingsContext = () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      logger: {
+        log: () => {},
+        warn: () => {},
+        error: () => {},
+      },
+    });
+    const updateSubject = new Subject<{ key: string }>();
     const set = jest.fn().mockResolvedValue(undefined);
 
     const rendered = renderHook(() => useSettingsContext(), {
@@ -34,6 +41,7 @@ describe('settings_context', () => {
             },
             settings: {
               client: {
+                getUpdate$: () => updateSubject,
                 getUpdateErrors$: () => new Subject(),
                 isOverridden: () => false,
                 isCustom: () => false,
@@ -61,7 +69,7 @@ describe('settings_context', () => {
       ),
     });
 
-    return { result: rendered.result, set };
+    return { result: rendered.result, set, queryClient, updateSubject };
   };
 
   it('should provide the correct initial state', async () => {
@@ -82,6 +90,41 @@ describe('settings_context', () => {
     expect(result.current.cleanUnsavedChanges).toBeInstanceOf(Function);
     expect(result.current.saveSingleSetting).toBeInstanceOf(Function);
     expect(result.current.setValidationErrors).toBeInstanceOf(Function);
+  });
+
+  it('should subscribe to settings updates and invalidate queries for tracked settings', async () => {
+    const { result, queryClient, updateSubject } = setupSettingsContext();
+    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    await waitFor(() => {
+      expect(result.current.fields).toBeDefined();
+    });
+
+    invalidateQueriesSpy.mockClear();
+
+    act(() => {
+      updateSubject.next({ key: 'genAiSettings:defaultAIConnector' });
+    });
+
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [
+        'settingsFields',
+        expect.arrayContaining([
+          'genAiSettings:defaultAIConnector',
+          'genAiSettings:defaultAIConnectorOnly',
+        ]),
+      ],
+    });
+
+    invalidateQueriesSpy.mockClear();
+
+    act(() => {
+      updateSubject.next({ key: 'some:otherSetting' });
+    });
+
+    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+
+    invalidateQueriesSpy.mockRestore();
   });
 
   it('should handle updating unsaved changes', async () => {
@@ -289,6 +332,7 @@ describe('settings_context', () => {
                 },
                 settings: {
                   client: {
+                    getUpdate$: () => new Subject(),
                     getUpdateErrors$: () => new Subject(),
                     isOverridden: () => false,
                     isCustom: () => false,
@@ -392,6 +436,7 @@ describe('settings_context', () => {
               },
               settings: {
                 client: {
+                  getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),
                   isOverridden: () => false,
                   isCustom: () => false,
@@ -429,6 +474,7 @@ describe('settings_context', () => {
               },
               settings: {
                 client: {
+                  getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),
                   isOverridden: () => false,
                   isCustom: () => false,

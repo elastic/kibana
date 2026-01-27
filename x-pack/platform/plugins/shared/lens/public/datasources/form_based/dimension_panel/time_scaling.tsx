@@ -8,11 +8,9 @@
 import { EuiIconTip, EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { GenericIndexPatternColumn } from '../operations';
+import type { GenericIndexPatternColumn, TimeScaleUnit, FormBasedLayer } from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
-import type { TimeScaleUnit } from '../../../../common/expressions';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
-import type { FormBasedLayer } from '../types';
 
 export function setTimeScaling(
   columnId: string,
@@ -53,6 +51,9 @@ export interface TimeScalingProps {
 
 export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: TimeScalingProps) {
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
+  const timeScaleLabel = i18n.translate('xpack.lens.indexPattern.timeScale.label', {
+    defaultMessage: 'Normalize by unit',
+  });
 
   if (!selectedOperation.timeScalingMode || selectedOperation.timeScalingMode === 'disabled') {
     return null;
@@ -64,9 +65,7 @@ export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: Ti
       fullWidth
       label={
         <span>
-          {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-            defaultMessage: 'Normalize by unit',
-          })}{' '}
+          {timeScaleLabel}{' '}
           <EuiIconTip
             type="question"
             color="subdued"
@@ -103,6 +102,7 @@ export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: Ti
               const value = e.target.value || undefined;
               updateLayer(setTimeScaling(columnId, layer, value as TimeScaleUnit));
             }}
+            aria-label={timeScaleLabel}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

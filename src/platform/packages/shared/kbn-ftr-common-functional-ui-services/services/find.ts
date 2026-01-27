@@ -10,6 +10,7 @@
 import type { WebDriver, WebElement } from 'selenium-webdriver';
 import { By, until } from 'selenium-webdriver';
 
+import { delay } from '@kbn/test-jest-helpers';
 import type { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';
@@ -415,13 +416,14 @@ export class FindService extends FtrService {
   public async clickByCssSelector(
     selector: string,
     timeout: number = this.defaultFindTimeout,
-    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
-        // await element.moveMouseTo();
+        await delay(preclickDelay); // give React enough time to bind the click handler to the element
         await element.click(topOffsetOrOptions);
       } else {
         throw new Error(`Element with css='${selector}' is not found`);

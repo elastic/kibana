@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
+import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/synthtrace';
+import { log, syntheticsMonitor, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';

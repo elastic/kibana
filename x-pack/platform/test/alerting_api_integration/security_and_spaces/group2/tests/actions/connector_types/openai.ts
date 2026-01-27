@@ -147,8 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]\n- [2.apiProvider]: expected at least one defined value but got [undefined]',
+              message: `error validating connector type config: 2 errors:\n [1]: Field \"apiProvider\": Required, Required, Required;\n [2]: Field \"defaultModel\": Required`,
             });
           });
       });
@@ -168,8 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]\n- [2.apiProvider]: expected value to equal [Other]',
+              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiProvider\": Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI', Invalid enum value. Expected 'Other', received 'OpenAI';\n [2]: Field \"apiUrl\": Required, Required, Required;\n [3]: Field \"defaultModel\": Required`,
             });
           });
       });
@@ -193,7 +191,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -213,7 +211,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+                'error validating connector type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -238,7 +236,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Certificate data must be provided for PKI',
+                'error validating connector type secrets: Certificate data must be provided for PKI',
             });
           });
       });
@@ -263,7 +261,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Private key data must be provided for PKI',
+                'error validating connector type secrets: Private key data must be provided for PKI',
             });
           });
       });
@@ -288,7 +286,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
+                'error validating connector type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
             });
           });
       });
@@ -313,7 +311,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
+                'error validating connector type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
             });
           });
       });
@@ -417,8 +415,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -649,8 +646,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: Field \"subAction\": Required`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

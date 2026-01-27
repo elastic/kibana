@@ -18,9 +18,8 @@ import {
 import { LayerHeader } from './layer_header';
 import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
-import type { LensAppState } from '../../../state_management';
+import type { DatasourceMap, LensAppState, VisualizationMap } from '@kbn/lens-common';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
 
 interface RenderLayerSettingsOptions {
   propsOverrides?: Partial<React.ComponentProps<typeof LayerHeader>>;
@@ -79,6 +78,7 @@ describe('LayerHeader', () => {
           visualization: {
             activeId: 'visA',
             state: 'state from a',
+            selectedLayerId: null,
           },
           datasourceStates: mockDatasourceStates(),
           activeDatasourceId: 'testDatasource',

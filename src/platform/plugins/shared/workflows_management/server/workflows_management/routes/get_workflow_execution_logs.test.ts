@@ -9,13 +9,15 @@
 
 import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_logs';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
+
+jest.mock('../lib/with_license_check');
 
 describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
   let workflowsApi: WorkflowsManagementApi;
@@ -27,38 +29,6 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the workflow execution logs route with correct configuration', () => {
-      registerGetWorkflowExecutionLogsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getLogsCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflowExecutions/{workflowExecutionId}/logs'
-      );
-
-      expect(getLogsCall).toBeDefined();
-      expect(getLogsCall[0]).toMatchObject({
-        path: '/api/workflowExecutions/{workflowExecutionId}/logs',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(getLogsCall[0].validate).toBeDefined();
-      expect(getLogsCall[0].validate.params).toBeDefined();
-      expect(getLogsCall[0].validate.query).toBeDefined();
-      expect(getLogsCall[1]).toEqual(expect.any(Function));
-    });
   });
 
   describe('handler logic', () => {
@@ -125,8 +95,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
           },
         ],
         total: 2,
-        limit: 100,
-        offset: 0,
+        size: 100,
+        page: 1,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -135,8 +105,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
         query: {
-          limit: 100,
-          offset: 0,
+          size: 100,
+          page: 1,
           sortField: 'timestamp',
           sortOrder: 'desc',
         },
@@ -147,17 +117,15 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-123',
-          limit: 100,
-          offset: 0,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
-          stepExecutionId: undefined,
-        },
-        'default'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-123',
+        size: 100,
+        page: 1,
+        sortField: 'timestamp',
+        sortOrder: 'desc',
+        stepExecutionId: undefined,
+        spaceId: 'default',
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 
@@ -188,8 +156,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockLogs = {
         logs: [],
         total: 0,
-        limit: 100,
-        offset: 0,
+        size: 100,
+        page: 1,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -206,12 +174,15 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-456',
-        },
-        'custom-space'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-456',
+        spaceId: 'custom-space',
+        page: undefined,
+        size: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+        stepExecutionId: undefined,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 
@@ -241,8 +212,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
           },
         ],
         total: 1,
-        limit: 10,
-        offset: 20,
+        size: 10,
+        page: 3,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -251,8 +222,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
         query: {
-          limit: 10,
-          offset: 20,
+          size: 10,
+          page: 3,
           sortField: 'level',
           sortOrder: 'asc',
         },
@@ -263,16 +234,14 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-123',
-          limit: 10,
-          offset: 20,
-          sortField: 'level',
-          sortOrder: 'asc',
-        },
-        'default'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-123',
+        size: 10,
+        page: 3,
+        sortField: 'level',
+        sortOrder: 'asc',
+        spaceId: 'default',
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 

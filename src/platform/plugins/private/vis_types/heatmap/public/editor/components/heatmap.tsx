@@ -30,7 +30,7 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';

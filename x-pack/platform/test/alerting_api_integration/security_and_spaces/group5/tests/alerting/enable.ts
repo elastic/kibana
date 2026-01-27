@@ -6,8 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { RULE_SAVED_OBJECT_TYPE, RuleNotifyWhen } from '@kbn/alerting-plugin/server';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { SearchHit } from '@kbn/es-types';
+import type { Alert } from '@kbn/alerts-as-data-utils/src/schemas';
+import {
+  SuperuserAtSpace1,
+  UserAtSpaceScenarios,
+  EnableDisableOnlyUserAtSpace1,
+} from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
@@ -17,6 +25,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
+  resetRulesSettings,
 } from '../../../../common/lib';
 
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
@@ -38,7 +47,9 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       return scheduledTask._source!;
     }
 
-    for (const scenario of UserAtSpaceScenarios) {
+    const ScenariosToTest = [...UserAtSpaceScenarios, EnableDisableOnlyUserAtSpace1];
+
+    for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
       const alertUtils = new AlertUtils({ user, space, supertestWithoutAuth });
 
@@ -102,6 +113,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               });
               break;
             case 'superuser at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -154,6 +166,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
@@ -214,6 +227,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
                 statusCode: 403,
               });
               break;
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -254,6 +268,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               });
               break;
             case 'superuser at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -307,6 +322,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               });
               break;
             case 'superuser at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -356,6 +372,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'superuser at space1':
+            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -371,5 +388,113 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         });
       });
     }
+
+    describe('Clearing flapping tests', () => {
+      const { user, space } = SuperuserAtSpace1;
+      const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
+      const TEST_CACHE_EXPIRATION_TIME = 12000;
+
+      const queryForAlertDocs = async <T>(ruleId: string): Promise<Array<SearchHit<T>>> => {
+        const searchResult = await es.search({
+          index: alertsAsDataIndex,
+          sort: [{ '@timestamp': 'desc' }],
+          query: {
+            bool: {
+              must: {
+                term: { [ALERT_RULE_UUID]: { value: ruleId } },
+              },
+            },
+          },
+          size: 25,
+        });
+        return searchResult.hits.hits as Array<SearchHit<T>>;
+      };
+
+      const runSoon = async (id: String) => {
+        return supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${id}/_run_soon`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      };
+
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: alertsAsDataIndex,
+          query: {
+            match_all: {},
+          },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        await objectRemover.removeAll();
+        await resetRulesSettings(supertest, space.id);
+      });
+
+      it('should clear flapping history when enabling rules', async () => {
+        const params = { pattern: { alertA: [true, false, true, false, true, false, true] } };
+
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .auth('superuser', 'superuser')
+          .send({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 2,
+          })
+          .expect(200);
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+        const rule = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.patternFiringAad',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params,
+              actions: [],
+              notify_when: RuleNotifyWhen.CHANGE,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+
+        for (let i = 0; i < 4; i++) {
+          await retry.try(async () => {
+            const alertDocs = await queryForAlertDocs<Alert>(rule.body.id);
+            expect(alertDocs[0]?._source[ALERT_FLAPPING_HISTORY]?.length).eql(i + 1);
+            if (i === 3) {
+              return;
+            }
+            await runSoon(rule.body.id);
+          });
+        }
+
+        let alertDocs = await queryForAlertDocs<Alert>(rule.body.id);
+        expect(alertDocs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([true, true, true, true]);
+        expect(alertDocs[0]?._source[ALERT_FLAPPING]).eql(true);
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${rule.body.id}/_disable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send()
+          .expect(204);
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${rule.body.id}/_enable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send()
+          .expect(204);
+
+        alertDocs = await queryForAlertDocs<Alert>(rule.body.id);
+        expect(alertDocs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([]);
+        expect(alertDocs[0]?._source[ALERT_FLAPPING]).eql(false);
+      });
+    });
   });
 }

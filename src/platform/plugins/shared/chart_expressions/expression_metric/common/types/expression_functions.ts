@@ -23,14 +23,12 @@ import type {
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import type {
-  ExpressionValueVisDimension,
-  prepareLogTable,
-} from '@kbn/visualizations-plugin/common';
-import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { prepareLogTable } from '@kbn/visualizations-common';
 import type { VisParams, visType } from './expression_renderers';
 import type {
   EXPRESSION_METRIC_NAME,

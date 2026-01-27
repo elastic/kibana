@@ -239,6 +239,7 @@ const HeaderLinkFeedbackButtonRoute = ({
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={path}
         />
       )}
     />

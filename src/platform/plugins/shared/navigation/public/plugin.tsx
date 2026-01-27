@@ -30,10 +30,6 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
-import { registerNavigationEventTypes } from './analytics';
-
-import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
-
 export class NavigationPublicPlugin
   implements
     Plugin<
@@ -53,12 +49,7 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    registerNavigationEventTypes(core);
-
-    const cloudTrialEndDate = deps.cloud?.trialEndDate;
-    if (cloudTrialEndDate) {
-      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
-    }
+    this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
@@ -80,15 +71,9 @@ export class NavigationPublicPlugin
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
-    /*
-     *
-     *  This helps clients of navigation to create
-     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
-     *
-     *  Useful in creating multiple stateful SearchBar in the same app without affecting
-     *  global filters
-     *
-     * */
+    /**
+     * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+     */
     const createCustomTopNav = (
       /*
        * Custom instance of unified search if it needs to be overridden
@@ -105,6 +90,12 @@ export class NavigationPublicPlugin
         isServerless,
         activeSpace,
       });
+
+      const feedbackUrlParams = this.buildFeedbackUrlParams(
+        isServerless,
+        cloud?.isCloudEnabled ?? false
+      );
+      chrome.project.setFeedbackUrlParams(feedbackUrlParams);
 
       if (!this.isSolutionNavEnabled) return;
 
@@ -125,25 +116,19 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (spaces && this.isSolutionNavEnabled) {
-      const hideAnnouncements = core.settings.client.get('hideAnnouncements', false);
-      if (!hideAnnouncements) {
-        const { project } = core.chrome as InternalChromeStart;
-        const tourManager = new SolutionNavigationTourManager({
-          navigationTourManager: project.navigationTourManager,
-          spacesSolutionViewTourManager: spaces.solutionViewTourManager,
-          userProfile: core.userProfile,
-          capabilities: core.application.capabilities,
-          featureFlags: core.featureFlags,
-        });
-        void tourManager.startTour();
-      }
-    }
-
     return {
       ui: {
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         TopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
@@ -199,6 +184,15 @@ export class NavigationPublicPlugin
   private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
+  }
+
+  private buildFeedbackUrlParams(isServerless: boolean, isCloudEnabled: boolean) {
+    const version = this.initializerContext.env.packageInfo.version;
+    const type = isServerless ? 'serverless' : isCloudEnabled ? 'ech' : 'local';
+    return new URLSearchParams({
+      version,
+      type,
+    });
   }
 }
 

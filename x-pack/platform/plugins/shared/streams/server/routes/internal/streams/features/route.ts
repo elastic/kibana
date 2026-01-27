@@ -6,68 +6,74 @@
  */
 
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema, featureSchema, type Feature } from '@kbn/streams-schema';
-import type {
-  StorageClientBulkResponse,
-  StorageClientDeleteResponse,
-  StorageClientIndexResponse,
-} from '@kbn/storage-adapter';
-import { conditionSchema } from '@kbn/streamlang';
-import { generateStreamDescription } from '@kbn/streams-ai';
-import type { Observable } from 'rxjs';
-import { from, map } from 'rxjs';
+import { baseFeatureSchema, type Feature } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { runFeatureIdentification } from '../../../../lib/streams/feature/run_feature_identification';
-import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
+import {
+  type IdentifyFeaturesResult,
+  type FeaturesIdentificationTaskParams,
+  getFeaturesIdentificationTaskId,
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+} from '../../../../lib/tasks/task_definitions/features_identification';
+import type { TaskResult } from '../../../../lib/tasks/types';
+import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-export const getFeatureRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/{featureName}',
+export const upsertFeatureRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features',
   options: {
     access: 'internal',
-    summary: 'Get a feature for a stream',
-    description: 'Fetches the specified feature',
+    summary: 'Upserts a feature for a stream',
+    description: 'Upserts the specified feature',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), featureName: streamObjectNameSchema }),
+    path: z.object({ name: z.string() }),
+    body: baseFeatureSchema,
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ feature: Feature }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const { name, featureName } = params.path;
+    await featureClient.bulk(params.path.name, [
+      {
+        index: {
+          feature: {
+            ...params.body,
+            status: 'active' as const,
+            last_seen: new Date().toISOString(),
+            id: getFeatureId(params.path.name, params.body),
+          },
+        },
+      },
+    ]);
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
-
-    const feature = await featureClient.getFeature(name, featureName);
-
-    return { feature };
+    return { acknowledged: true };
   },
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{featureName}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
-    summary: 'Delete a feature for a stream',
+    summary: 'Deletes a feature for a stream',
     description: 'Deletes the specified feature',
   },
   security: {
@@ -76,81 +82,24 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), featureName: streamObjectNameSchema }),
+    path: z.object({ name: z.string(), id: z.string() }),
   }),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
-  }): Promise<StorageClientDeleteResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name, featureName } = params.path;
-
-    const { write } = await checkAccess({ name, scopedClusterClient });
-
-    if (!write) {
-      throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
-    }
-
-    return await featureClient.deleteFeature(name, featureName);
-  },
-});
-
-export const updateFeatureRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/{name}/features/{featureName}',
-  options: {
-    access: 'internal',
-    summary: 'Updates a feature for a stream',
-    description: 'Updates the specified feature',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string(), featureName: streamObjectNameSchema }),
-    body: z.object({
-      description: z.string(),
-      filter: conditionSchema,
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<StorageClientIndexResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name, featureName },
-      body: { description, filter },
-    } = params;
-
-    const { write } = await checkAccess({ name, scopedClusterClient });
-
-    if (!write) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
-
-    return await featureClient.updateFeature(name, {
-      name: featureName,
-      description,
-      filter,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
     });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
+
+    await featureClient.deleteFeature(params.path.name, params.path.id);
+
+    return { acknowledged: true };
   },
 });
 
@@ -168,6 +117,11 @@ export const listFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
+    query: z.optional(
+      z.object({
+        type: z.string().optional(),
+      })
+    ),
   }),
   handler: async ({
     params,
@@ -175,22 +129,16 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const { name } = params.path;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
-
-    const { hits: features } = await featureClient.getFeatures(name);
+    const { hits: features } = await featureClient.getFeatures(params.path.name, {
+      type: params.query?.type ? [params.query.type] : [],
+    });
 
     return {
       features,
@@ -198,12 +146,15 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_bulk',
+export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
+
+export const featuresStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
     access: 'internal',
-    summary: 'Bulk changes to features',
-    description: 'Add or delete features in bulk for a given stream',
+    summary: 'Check the status of feature identification',
+    description:
+      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
   },
   security: {
     authz: {
@@ -212,72 +163,62 @@ export const bulkFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: z.object({
-              feature: featureSchema,
-            }),
-          }),
-          z.object({
-            delete: z.object({
-              feature: z.object({
-                name: streamObjectNameSchema,
-              }),
-            }),
-          }),
-        ])
-      ),
-    }),
   }),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
-  }): Promise<StorageClientBulkResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const {
-      path: { name },
-      body: { operations },
-    } = params;
+    const { name } = params.path;
+    await streamsClient.ensureStream(name);
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
-
-    if (!write) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
-
-    return await featureClient.bulk(name, operations);
+    return await taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+      getFeaturesIdentificationTaskId(name)
+    );
   },
 });
 
-export const identifyFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify',
+export const featuresTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_task',
   options: {
     access: 'internal',
     summary: 'Identify features in a stream',
-    description: 'Identify features in a stream with an LLM',
+    description:
+      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z.string(),
-      from: dateFromString,
-      to: dateFromString,
-    }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule'),
+        from: dateFromString,
+        to: dateFromString,
+        connector_id: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel'),
+      }),
+      z.object({
+        action: z.literal('acknowledge'),
+      }),
+    ]),
   }),
   handler: async ({
     params,
@@ -285,15 +226,8 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<IdentifiedFeaturesEvent> => {
-    const {
-      featureClient,
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-    } = await getScopedClients({
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
@@ -301,110 +235,49 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      body,
     } = params;
+    await streamsClient.ensureStream(name);
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const taskId = getFeaturesIdentificationTaskId(name);
 
-    if (!write) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connector_id,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                  streamName: name,
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
 
-    const [{ hits }, stream] = await Promise.all([
-      featureClient.getFeatures(name),
-      streamsClient.getStream(name),
-    ]);
-
-    const { features } = await runFeatureIdentification({
-      start: start.getTime(),
-      end: end.getTime(),
-      esClient: scopedClusterClient.asCurrentUser,
-      inferenceClient: inferenceClient.bindTo({ connectorId }),
-      logger,
-      stream,
-      features: hits,
+    return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({
+      taskClient,
+      taskId,
+      ...actionParams,
     });
-
-    return {
-      type: 'identified_features',
-      features,
-    };
-  },
-});
-
-export const describeStreamRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_describe_stream',
-  options: {
-    access: 'internal',
-    summary: 'Generate a stream description',
-    description: 'Generate a stream description based on data in the stream',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z.string(),
-      from: dateFromString,
-      to: dateFromString,
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<Observable<StreamDescriptionEvent>> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
-      await getScopedClients({
-        request,
-      });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name },
-      query: { connectorId, from: start, to: end },
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(
-        `Cannot generate stream description for ${name}, insufficient privileges`
-      );
-    }
-
-    const stream = await streamsClient.getStream(name);
-
-    return from(
-      generateStreamDescription({
-        stream,
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
-        start: start.valueOf(),
-        end: end.valueOf(),
-      })
-    ).pipe(
-      map((description) => {
-        return {
-          type: 'stream_description',
-          description,
-        };
-      })
-    );
   },
 });
 
 export const featureRoutes = {
-  ...getFeatureRoute,
+  ...upsertFeatureRoute,
   ...deleteFeatureRoute,
-  ...updateFeatureRoute,
   ...listFeaturesRoute,
-  ...bulkFeaturesRoute,
-  ...identifyFeaturesRoute,
-  ...describeStreamRoute,
+  ...featuresStatusRoute,
+  ...featuresTaskRoute,
 };

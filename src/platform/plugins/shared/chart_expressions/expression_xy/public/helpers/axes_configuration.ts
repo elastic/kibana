@@ -9,7 +9,7 @@
 
 import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { FormatFactory } from '../types';
 import type {
   CommonXYDataLayerConfig,

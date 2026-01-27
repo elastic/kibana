@@ -76,6 +76,15 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       return await tabs.findByXpath(`//span[text()="${TAB_TYPES.KUBERNETES}"]`);
     },
 
+    finishTourIfExists: async () => {
+      await retry.tryForTime(10000, async () => {
+        const tourShown = await testSubjects.exists('finishTourButton');
+        if (tourShown) {
+          await testSubjects.click('finishTourButton');
+        }
+      });
+    },
+
     clickTab: async (tab: (typeof TAB_TYPES)[keyof typeof TAB_TYPES]) => {
       if (tab === TAB_TYPES.CLOUD) {
         const cloudTab = await dashboard.getCloudTab();

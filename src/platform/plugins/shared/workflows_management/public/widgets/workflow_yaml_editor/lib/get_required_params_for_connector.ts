@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { isEnhancedInternalConnector, type ConnectorTypeInfo } from '@kbn/workflows';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { type ConnectorTypeInfo, isInternalConnector } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import { getCachedAllConnectors } from './connectors_cache';
 
 export interface RequiredParamForConnector {
@@ -32,7 +34,7 @@ export function getRequiredParamsForConnector(
 
   if (connector && connector.paramsSchema) {
     try {
-      if (isEnhancedInternalConnector(connector) && connector.examples?.params) {
+      if (isInternalConnector(connector) && connector.examples && connector.examples.params) {
         // Use examples directly from enhanced connector
         const exampleParams = connector.examples.params;
         // Using enhanced examples
@@ -131,11 +133,12 @@ function extractRequiredParamsFromSchema(
 
       // Skip common non-parameter fields
       if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
+        // eslint-disable-next-line no-continue
         continue;
       }
 
-      // Check if field is required (not optional)
-      const isOptional = zodField instanceof z.ZodOptional;
+      // Recommended way to check if field is required (not optional)
+      const isOptional = zodField.safeParse(undefined).success;
       const isRequired = !isOptional;
 
       // Extract description for examples
@@ -191,12 +194,12 @@ function extractBodyExample(bodySchema: z.ZodType): any {
     // Handle ZodOptional wrapper
     let schema = bodySchema;
     if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
+      schema = bodySchema.unwrap() as z.ZodType;
     }
 
     // If it's a ZodObject, try to extract its shape and build YAML-compatible example
     if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
+      const shape = schema.shape;
       const example: any = {};
 
       // Extract examples from each field

@@ -20,6 +20,7 @@ export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
   VALUES = 'values',
+  MULTI_VALUES = 'multi_values',
   FUNCTIONS = 'functions',
 }
 
@@ -35,8 +36,14 @@ export enum EsqlControlType {
 
 export interface ESQLControlVariable {
   key: string;
-  value: string | number;
+  value: string | number | (string | number)[];
   type: ESQLVariableType;
+  meta?: {
+    // `controlledBy` is the ID of the control that publishes the variable
+    controlledBy?: string;
+    // `group` allows grouping of variables
+    group?: string;
+  };
 }
 
 export interface PublishesESQLVariable {
@@ -46,8 +53,7 @@ export interface PublishesESQLVariable {
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
 
 export interface ESQLControlState {
-  grow?: boolean;
-  width?: ControlWidthOptions;
+  singleSelect?: boolean;
   title: string;
   selectedOptions: string[];
   variableName: string;

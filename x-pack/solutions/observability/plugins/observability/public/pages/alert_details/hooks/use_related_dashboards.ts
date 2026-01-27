@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
 
 export const fetchRelatedDashboards = async ({

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 import type { DimensionsVisParam, MetricVisParam } from '../../common';
 import type { FormatOverrides } from './helpers';

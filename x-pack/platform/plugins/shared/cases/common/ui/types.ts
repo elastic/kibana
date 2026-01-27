@@ -54,7 +54,13 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
@@ -74,11 +80,6 @@ export interface CasesUiConfigType {
   };
   stack: {
     enabled: boolean;
-  };
-  resilient: {
-    additionalFields: {
-      enabled: boolean;
-    };
   };
   incrementalId: {
     enabled: boolean;
@@ -191,6 +192,8 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;

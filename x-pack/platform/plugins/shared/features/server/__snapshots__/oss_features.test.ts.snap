@@ -1087,6 +1087,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1261,6 +1263,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1423,6 +1427,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1577,6 +1583,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1928,6 +1936,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2083,6 +2093,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2224,6 +2236,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2398,6 +2412,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2560,6 +2576,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2714,6 +2732,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3065,6 +3085,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3220,6 +3242,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },

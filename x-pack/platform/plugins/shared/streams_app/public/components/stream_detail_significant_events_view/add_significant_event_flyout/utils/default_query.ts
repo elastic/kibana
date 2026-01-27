@@ -18,5 +18,3 @@ export function defaultQuery(): StreamQueryKql {
     feature: undefined,
   };
 }
-
-export const NO_FEATURE = { filter: { always: {} }, name: '_NO_FEATURE' };

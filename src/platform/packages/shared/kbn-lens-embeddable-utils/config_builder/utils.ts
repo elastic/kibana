@@ -14,11 +14,9 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Reference } from '@kbn/content-management-utils';
@@ -37,6 +35,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
+import type { DatasetType } from './schema/dataset';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -127,7 +126,8 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
 // Getting the spec from a data view is a heavy operation, that's why the result is cached.
 export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   let adHocDataViews = {};
-  [...new Set(Object.values(dataviews))].forEach((d) => {
+
+  [...Array.from(new Set(Object.values(dataviews)))].forEach((d) => {
     adHocDataViews = {
       ...adHocDataViews,
       ...getAdhocDataView(d),
@@ -359,4 +359,10 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   return (
     typeof config === 'object' && config !== null && 'state' in config && 'references' in config
   );
+}
+
+export function isEsqlTableTypeDataset(
+  dataset: DatasetType
+): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
+  return dataset.type === 'esql' || dataset.type === 'table';
 }

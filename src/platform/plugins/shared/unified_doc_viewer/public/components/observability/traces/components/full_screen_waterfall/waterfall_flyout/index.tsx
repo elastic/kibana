@@ -17,8 +17,9 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -88,25 +89,30 @@ export function WaterfallFlyout({
   flyoutId,
 }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlyout
+      size="s"
       includeFixedHeadersInFocusTrap={false}
-      ownFocus={false}
-      css={{ zIndex: (euiTheme.levels.mask as number) + 1, top: '0' }}
       onClose={onCloseFlyout}
-      aria-labelledby={flyoutId}
+      aria-labelledby={flyoutTitleId}
       id={flyoutId}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
         </EuiSkeletonTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={css`
+          & .euiFlyoutBody__overflow {
+            overflow-y: hidden;
+          }
+        `}
+      >
         {loading || !hit ? (
           <EuiSkeletonText lines={5} />
         ) : (

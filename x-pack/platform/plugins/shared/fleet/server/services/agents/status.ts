@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { agentStatusesToSummary } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
@@ -41,6 +42,7 @@ export async function getAgentStatusById(
 ): Promise<AgentStatus> {
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
+const AGENT_STATUS_TIMEOUT = '3s';
 
 /**
  * getAgentStatusForAgentPolicy
@@ -70,7 +72,11 @@ export async function getAgentStatusForAgentPolicy(
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(toElasticsearchQuery(fromKueryExpression(DEFAULT_NAMESPACES_FILTER)));
     } else {
-      clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));
+      clauses.push(
+        toElasticsearchQuery(
+          fromKueryExpression(`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`)
+        )
+      );
     }
   }
 
@@ -141,6 +147,7 @@ export async function getAgentStatusForAgentPolicy(
             },
           },
           ignore_unavailable: true,
+          timeout: AGENT_STATUS_TIMEOUT,
         }),
       { logger }
     );

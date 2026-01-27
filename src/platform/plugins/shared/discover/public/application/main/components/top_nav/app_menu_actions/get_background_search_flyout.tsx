@@ -7,26 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconBackgroundTask } from '@kbn/background-search';
-import { AppMenuActionId, AppMenuActionType, type AppMenuItemPrimary } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuRunAction } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getBackgroundSearchFlyout = ({
   onClick,
 }: {
-  onClick: () => void;
-}): AppMenuItemPrimary => {
+  onClick: DiscoverAppMenuRunAction;
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.backgroundsearch,
-    type: AppMenuActionType.primary,
-    controlProps: {
-      label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
-        defaultMessage: 'Background searches',
-      }),
-      // TODO: Replace when the backgroundTask icon is available in EUI
-      iconType: EuiIconBackgroundTask,
-      testId: 'openBackgroundSearchFlyoutButton',
-      onClick,
-    },
+    order: 6,
+    label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
+      defaultMessage: 'Background searches',
+    }),
+    iconType: 'backgroundTask',
+    testId: 'openBackgroundSearchFlyoutButton',
+    run: onClick,
   };
 };

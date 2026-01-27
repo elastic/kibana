@@ -143,6 +143,44 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
       },
+      subFeatures: [
+        {
+          name: 'Manual run',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Manual run',
+                  id: 'manual_run',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { manual_run: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Enable and disable rules',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Enable and disable rules',
+                  id: 'enable_disable',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { enable: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     defineActionTypes(core, { actions });

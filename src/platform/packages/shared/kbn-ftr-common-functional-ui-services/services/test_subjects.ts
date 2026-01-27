@@ -163,13 +163,15 @@ export class TestSubjects extends FtrService {
   public async click(
     selector: string,
     timeout: number = this.FIND_TIME,
-    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`TestSubjects.click(${selector})`);
     await this.findService.clickByCssSelector(
       testSubjSelector(selector),
       timeout,
-      topOffsetOrOptions
+      topOffsetOrOptions,
+      preclickDelay
     );
   }
 

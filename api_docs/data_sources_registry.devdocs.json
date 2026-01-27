@@ -15,6 +15,8 @@
       "label": "DataSourcesRegistryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "DataSourcesRegistryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -48,6 +52,8 @@
         "label": "DataCatalog",
         "description": [],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,14 +68,16 @@
               "(dataTypeId: string) => ",
               {
                 "pluginId": "dataSourcesRegistry",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibDataSourcesRegistryPluginApi",
-                "section": "def-server.DataTypeDefinition",
+                "section": "def-common.DataTypeDefinition",
                 "text": "DataTypeDefinition"
               },
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,6 +92,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "lineNumber": 10,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -102,14 +112,16 @@
               "() => ",
               {
                 "pluginId": "dataSourcesRegistry",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibDataSourcesRegistryPluginApi",
-                "section": "def-server.DataTypeDefinition",
+                "section": "def-common.DataTypeDefinition",
                 "text": "DataTypeDefinition"
               },
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -126,14 +138,16 @@
               "(dataType: ",
               {
                 "pluginId": "dataSourcesRegistry",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibDataSourcesRegistryPluginApi",
-                "section": "def-server.DataTypeDefinition",
+                "section": "def-common.DataTypeDefinition",
                 "text": "DataTypeDefinition"
               },
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -147,69 +161,21 @@
                 "signature": [
                   {
                     "pluginId": "dataSourcesRegistry",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibDataSourcesRegistryPluginApi",
-                    "section": "def-server.DataTypeDefinition",
+                    "section": "def-common.DataTypeDefinition",
                     "text": "DataTypeDefinition"
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "lineNumber": 12,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataSourcesRegistry",
-        "id": "def-server.DataTypeDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataTypeDefinition",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataSourcesRegistry",
-            "id": "def-server.DataTypeDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataSourcesRegistry",
-            "id": "def-server.DataTypeDefinition.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataSourcesRegistry",
-            "id": "def-server.DataTypeDefinition.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -226,6 +192,8 @@
       "label": "DataSourcesRegistryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -240,14 +208,16 @@
             "(dataType: ",
             {
               "pluginId": "dataSourcesRegistry",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibDataSourcesRegistryPluginApi",
-              "section": "def-server.DataTypeDefinition",
+              "section": "def-common.DataTypeDefinition",
               "text": "DataTypeDefinition"
             },
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "lineNumber": 12,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -261,13 +231,15 @@
               "signature": [
                 {
                   "pluginId": "dataSourcesRegistry",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibDataSourcesRegistryPluginApi",
-                  "section": "def-server.DataTypeDefinition",
+                  "section": "def-common.DataTypeDefinition",
                   "text": "DataTypeDefinition"
                 }
               ],
               "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+              "lineNumber": 12,
+              "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -287,9 +259,37 @@
       "label": "DataSourcesRegistryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "dataSourcesRegistry",
+          "id": "def-server.DataSourcesRegistryPluginStart.getCatalog",
+          "type": "Function",
+          "tags": [],
+          "label": "getCatalog",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "dataSourcesRegistry",
+              "scope": "server",
+              "docId": "kibDataSourcesRegistryPluginApi",
+              "section": "def-server.DataCatalog",
+              "text": "DataCatalog"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -297,9 +297,480 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
+    "interfaces": [
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.CustomOAuthConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomOAuthConfiguration",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.CustomOAuthConfiguration.initiatePath",
+            "type": "string",
+            "tags": [],
+            "label": "initiatePath",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.CustomOAuthConfiguration.fetchSecretsPath",
+            "type": "string",
+            "tags": [],
+            "label": "fetchSecretsPath",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.DataTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataTypeDefinition",
+        "description": [
+          "\nAbstraction defining a federated data source (\"fetcher\").\nThis defines:\n- Connectivity (OAuth) configuration\n- What workflows should be created\n- How to interact with data stored in third-party systems\n"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for the data type"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Display name for the data type"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Optional description of the data type"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.generateWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "generateWorkflows",
+            "description": [
+              "\nGenerates workflows for interacting with the third-party data source.\nWorkflows are the only model for \"taking action\" against the third party."
+            ],
+            "signature": [
+              "(stackConnectorId?: string | undefined) => ",
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "common",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-common.WorkflowInfo",
+                "text": "WorkflowInfo"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataSourcesRegistry",
+                "id": "def-common.DataTypeDefinition.generateWorkflows.$1",
+                "type": "string",
+                "tags": [],
+                "label": "stackConnectorId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+                "lineNumber": 72,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.stackConnector",
+            "type": "Object",
+            "tags": [],
+            "label": "stackConnector",
+            "description": [
+              "\nStack connector configuration.\nStack connectors are the only model for executing workflow actions against the third party."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "common",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-common.StackConnectorConfig",
+                "text": "StackConnectorConfig"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.DataTypeDefinition.oauthConfiguration",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "oauthConfiguration",
+            "description": [
+              "OAuth configuration for authentication"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "common",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-common.EARSOAuthConfiguration",
+                "text": "EARSOAuthConfiguration"
+              },
+              " | ",
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "common",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-common.CustomOAuthConfiguration",
+                "text": "CustomOAuthConfiguration"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.EARSOAuthConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "EARSOAuthConfiguration",
+        "description": [
+          "\nConfiguration for OAuth authentication using EARS (Elastic-owned OAuth apps)"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.EARSOAuthConfiguration.provider",
+            "type": "Enum",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "common",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-common.EARSSupportedOAuthProvider",
+                "text": "EARSSupportedOAuthProvider"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.EARSOAuthConfiguration.scopes",
+            "type": "Array",
+            "tags": [],
+            "label": "scopes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.EARSOAuthConfiguration.initiatePath",
+            "type": "string",
+            "tags": [],
+            "label": "initiatePath",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.EARSOAuthConfiguration.fetchSecretsPath",
+            "type": "string",
+            "tags": [],
+            "label": "fetchSecretsPath",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.EARSOAuthConfiguration.oauthBaseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "oauthBaseUrl",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.StackConnectorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "StackConnectorConfig",
+        "description": [
+          "\nConfiguration for a stack connector associated with a data source type"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.StackConnectorConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.StackConnectorConfig.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.WorkflowInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowInfo",
+        "description": [
+          "\nRepresents a workflow that can be generated for a data source type"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.WorkflowInfo.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "Complete workflow content including references to any required stack connector IDs"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-common.WorkflowInfo.shouldGenerateABTool",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldGenerateABTool",
+            "description": [
+              "Whether an Agent Builder tool should be generated for this workflow"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.EARSSupportedOAuthProvider",
+        "type": "Enum",
+        "tags": [],
+        "label": "EARSSupportedOAuthProvider",
+        "description": [
+          "\nOAuth providers supported by EARS"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/data_sources_registry\""
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"dataSourcesRegistry\""
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"dataSourcesRegistry\""
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

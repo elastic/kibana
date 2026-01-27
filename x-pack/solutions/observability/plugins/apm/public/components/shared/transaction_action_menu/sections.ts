@@ -69,7 +69,7 @@ export const getSections = ({
 }) => {
   if (!transaction) return [];
 
-  const hostName = transaction.host?.hostname;
+  const hostName = transaction.host?.name || transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 

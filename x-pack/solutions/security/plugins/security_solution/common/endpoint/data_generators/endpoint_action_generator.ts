@@ -8,7 +8,11 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { isProcessesAction } from '../service/response_actions/type_guards';
+import {
+  isMemoryDumpAction,
+  isProcessesAction,
+  isRunScriptAction,
+} from '../service/response_actions/type_guards';
 import {
   ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -450,6 +454,49 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
     }
 
+    if (isMemoryDumpAction(details)) {
+      if (!details.outputs) {
+        details.outputs = {};
+      }
+
+      for (const agentId of details.agents) {
+        details.outputs[agentId] = {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump-success',
+            path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
+            file_size: 23895729,
+            disk_free_space: 1234567000,
+          },
+        };
+      }
+    }
+
+    if (isRunScriptAction(details)) {
+      if (details.isCompleted) {
+        if (!details.outputs) {
+          details.outputs = {};
+        }
+
+        if (details.agentType === 'endpoint') {
+          if (!details.parameters) {
+            details.parameters = {
+              scriptId: 'script-123',
+              scriptInput: 'foo',
+            };
+          }
+
+          for (const agentId of details.agents) {
+            details.outputs[agentId] = this.generateExecuteActionResponseOutput({
+              content: {
+                output_file_id: getFileDownloadId(details, agentId),
+              },
+            });
+          }
+        }
+      }
+    }
+
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
       TOutputContent,
       TParameters
@@ -458,6 +505,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomGetFileFailureCode(): string {
     return this.randomChoice([
+      'ra_get-file_error_canceled',
       'ra_get-file_error_not-found',
       'ra_get-file_error_is-directory',
       'ra_get-file_error_invalid-input',
@@ -468,14 +516,18 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-api-unreachable',
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
+      'ra_get-file_error_not-enough-free-space',
     ]);
   }
 
   randomScanFailureCode(): string {
     return this.randomChoice([
-      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_canceled',
+      'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
-      'ra_scan_error_scan-queue-quota',
+      'ra_scan_error_queue-quota',
+      'ra_scan_error_processing',
+      'ra_scan_error_processing-interrupted',
     ]);
   }
 

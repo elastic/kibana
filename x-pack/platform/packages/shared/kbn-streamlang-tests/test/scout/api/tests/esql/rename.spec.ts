@@ -131,22 +131,19 @@ apiTest.describe('Streamlang to ES|QL - Rename Processor', { tag: ['@ess', '@svl
     expect(esqlResult.documentsOrdered[1]['host.renamed']).toBe('new-host'); // Should rename as host.original exists
   });
 
-  apiTest(
-    'should reject Mustache template syntax {{ and {{{ in field names',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'rename',
-            from: '{{source.field}}',
-            to: '{{{target.field}}}',
-            override: true,
-          } as RenameProcessor,
-        ],
-      };
-      expect(() => transpile(streamlangDSL)).toThrow(
-        'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
-      ); // Should throw validation error for Mustache templates
-    }
-  );
+  apiTest('should reject Mustache template syntax {{ and {{{ in field names', async ({}) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'rename',
+          from: '{{source.field}}',
+          to: '{{{target.field}}}',
+          override: true,
+        } as RenameProcessor,
+      ],
+    };
+    expect(() => transpile(streamlangDSL)).toThrow(
+      'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+    ); // Should throw validation error for Mustache templates
+  });
 });

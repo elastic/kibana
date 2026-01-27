@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { validate as validateUuid } from 'uuid';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
-  constructor(private actionsClient: IUnsecuredActionsClient) {}
+  constructor(private actionsClient: ActionsClient) {}
 
   public async execute(
     connectorType: string,
@@ -38,7 +41,7 @@ export class ConnectorExecutor {
     // This is a workaround for the fact that connectors do not natively support cancellation.
     // In the future, if connectors support cancellation, we can remove this logic.
     await Promise.race([abortPromise, runConnectorPromise]);
-    return await runConnectorPromise;
+    return runConnectorPromise;
   }
 
   private async runConnector(
@@ -46,26 +49,25 @@ export class ConnectorExecutor {
     connectorParams: Record<string, any>,
     spaceId: string
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    let connectorId: string;
+    const connectorId = await this.resolveConnectorId(connectorName, spaceId);
 
-    if (validateUuid(connectorName)) {
-      connectorId = connectorName;
-    } else {
-      const allConnectors = await this.actionsClient.getAll('default');
-      const connector = allConnectors.find((c) => c.name === connectorName);
+    return (this.actionsClient as ActionsClient).execute({
+      actionId: connectorId,
+      params: connectorParams,
+    });
+  }
 
-      if (!connector) {
-        throw new Error(`Connector with name ${connectorName} not found`);
-      }
+  private async resolveConnectorId(connectorName: string, spaceId: string): Promise<string> {
+    const allConnectors = await (this.actionsClient as ActionsClient).getAll();
 
-      connectorId = connector?.id;
+    const connector = allConnectors.find(
+      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
+    );
+
+    if (!connector) {
+      throw new Error(`Connector ${connectorName} not found`);
     }
 
-    return await this.actionsClient.execute({
-      id: connectorId,
-      params: connectorParams,
-      spaceId,
-      requesterId: 'background_task', // This is a custom ID for testing purposes
-    });
+    return connector.id;
   }
 }

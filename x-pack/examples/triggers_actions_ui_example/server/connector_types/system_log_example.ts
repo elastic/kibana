@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import type { LogMeta } from '@kbn/core/server';
 import type {
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
 
 // see: https://en.wikipedia.org/wiki/Unicode_control_characters
 // but don't include tabs (0x09), they're fine
@@ -36,11 +36,13 @@ export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ZParamsSchema>;
 
-const ParamsSchema = schema.object({
-  message: schema.string(),
-});
+const ZParamsSchema = z
+  .object({
+    message: z.string(),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.system-log-example';
 // connector type definition
@@ -54,16 +56,19 @@ export function getConnectorType(): ServerLogConnectorType {
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
-        schema: ParamsSchema,
+        schema: ZParamsSchema,
       },
     },
     executor,
   };
 }
 
+const ParamsSchema = schema.object({
+  message: schema.string(),
+});
 export const connectorAdapter: ConnectorAdapter<{ message: string }, { message: string }> = {
   connectorTypeId: ConnectorTypeId,
   ruleActionParamsSchema: ParamsSchema,

@@ -31,9 +31,7 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
-  createTracesContextService,
-  createApmErrorsContextService,
-  createMetricsContextService,
+  createApmContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -45,6 +43,10 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getAvailableResourceFields,
+  getLogLevelFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
+  getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
@@ -71,15 +73,7 @@ export {
   severityOrder,
 } from './src';
 
-export type {
-  LogsContextService,
-  TracesContextService,
-  ApmErrorsContextService,
-  MetricsContextService,
-  SortOrder,
-  SortInput,
-  SortPair,
-} from './src';
+export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';
 

@@ -18,19 +18,21 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
+import { useGraphCallout } from '../../hooks/use_graph_callout';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
-import { useEventDetailsPopover } from './use_event_details_popover';
+import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
-import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
+import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
@@ -40,11 +42,13 @@ const useGraphPopovers = ({
   searchFilters,
   setSearchFilters,
   nodeDetailsClickHandler,
+  onOpenNetworkPreview,
 }: {
   dataViewId: string;
   searchFilters: Filter[];
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   nodeDetailsClickHandler?: (node: NodeProps) => void;
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -82,10 +86,18 @@ const useGraphPopovers = ({
 
   const createIpClickHandler = useCallback(
     (ips: string[]) => (e: React.MouseEvent<HTMLElement>) => {
-      setCurrentIps(ips);
-      openPopoverCallback(ipPopover.onIpClick, e);
+      if (!onOpenNetworkPreview) return;
+
+      // For single IP, open preview panel directly
+      if (ips.length === 1) {
+        onOpenNetworkPreview(ips[0], GRAPH_SCOPE_ID);
+      } else {
+        // For multiple IPs, show popover
+        setCurrentIps(ips);
+        openPopoverCallback(ipPopover.onIpClick, e);
+      }
     },
-    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick]
+    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick, onOpenNetworkPreview]
   );
 
   const createCountryClickHandler = useCallback(
@@ -176,6 +188,12 @@ export interface GraphInvestigationProps {
   onOpenEventPreview?: (node: NodeViewModel) => void;
 
   /**
+   * Callback when IP address is clicked to open network preview panel.
+   * If not provided, multi-IP popover will be shown.
+   */
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+
+  /**
    * Whether to show investigate in timeline action button. Defaults value is false.
    */
   showInvestigateInTimeline?: boolean;
@@ -208,6 +226,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showToggleSearch = false,
     onInvestigateInTimeline,
     onOpenEventPreview,
+    onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -311,6 +330,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       searchFilters,
       setSearchFilters,
       nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      onOpenNetworkPreview,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
@@ -385,6 +405,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
+
+    // Get callout state based on current graph state
+    const calloutState = useGraphCallout(nodes);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
@@ -477,6 +500,18 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
+              interactiveBottomRightContent={
+                calloutState.shouldShowCallout ? (
+                  <EuiFlexItem grow={false}>
+                    <Callout
+                      title={calloutState.config.title}
+                      message={calloutState.config.message}
+                      links={calloutState.config.links}
+                      onDismiss={calloutState.onDismiss}
+                    />
+                  </EuiFlexItem>
+                ) : null
+              }
             >
               <Panel position="top-right">
                 <Actions

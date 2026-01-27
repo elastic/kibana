@@ -18,6 +18,8 @@ import type {
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
   UpdatePackagePolicyResponse,
+  CreateAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import type {
   GetEnrollmentAPIKeysResponse,
@@ -40,6 +42,10 @@ import type {
   PostFleetServerHostsResponse,
   PostOutputRequest,
   GetOneOutputResponse,
+  GetSettingsResponse,
+  PutSettingsRequest,
+  CreateAgentlessPolicyResponse,
+  PutDownloadSourceRequest,
 } from '@kbn/fleet-plugin/common/types';
 import type {
   GetUninstallTokenResponse,
@@ -86,10 +92,12 @@ export class SpaceTestApiClient {
   // Agent policies
   async createAgentPolicy(
     spaceId?: string,
-    data: Partial<CreateAgentPolicyRequest['body']> = {}
+    data: Partial<CreateAgentPolicyRequest['body']> = {},
+    opts: CreateAgentPolicyRequest['query'] = {}
   ): Promise<CreateAgentPolicyResponse> {
+    const queryString = opts.sys_monitoring ? `?sys_monitoring=true` : '';
     const res = await this.supertest
-      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies${queryString}`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({
@@ -104,6 +112,50 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+
+  async createAgentlessPolicy(
+    data: CreateAgentlessPolicyRequest['body'],
+    spaceId?: string
+  ): Promise<CreateAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async syncAgentlessPolicies(data: { dryRun?: boolean } = {}, spaceId?: string) {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/agentless_policies/_sync`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async deleteAgentlessPolicy(
+    policyId: string,
+    spaceId?: string
+  ): Promise<DeleteAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send();
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
   async createPackagePolicy(
     spaceId?: string,
     data: Partial<SimplifiedPackagePolicy & { package: { name: string; version: string } }> = {}
@@ -129,6 +181,7 @@ export class SpaceTestApiClient {
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
+
     expectStatusCode200(res);
 
     return res.body;
@@ -165,6 +218,7 @@ export class SpaceTestApiClient {
   ): Promise<GetOnePackagePolicyResponse> {
     const res = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .auth(this.auth.username, this.auth.password)
       .send();
 
     expectStatusCode200(res);
@@ -467,6 +521,27 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+  // Settings
+  async getSettings(spaceId?: string): Promise<GetSettingsResponse> {
+    const res = await this.supertest.get(`${this.getBaseUrl(spaceId)}/api/fleet/settings`);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+  async putSettings(
+    data: PutSettingsRequest['body'],
+    spaceId?: string
+  ): Promise<GetSettingsResponse> {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/settings`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
   // Space Settings
   async getSpaceSettings(spaceId?: string): Promise<GetSpaceSettingsResponse> {
     const res = await this.supertest.get(`${this.getBaseUrl(spaceId)}/api/fleet/space_settings`);
@@ -653,6 +728,15 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+  async putDownloadSource(data: PutDownloadSourceRequest['body'], id: string, spaceId?: string) {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources/${id}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+    expectStatusCode200(res);
+
+    return res.body;
+  }
   // Fleet server hosts
   async deleteFleetServerHosts(id: string, spaceId?: string) {
     const res = await this.supertest
@@ -692,6 +776,7 @@ export class SpaceTestApiClient {
   ): Promise<GetOneOutputResponse> {
     const res = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/outputs`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
 

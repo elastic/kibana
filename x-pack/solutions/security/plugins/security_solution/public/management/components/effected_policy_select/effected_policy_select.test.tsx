@@ -220,7 +220,6 @@ describe('when using EffectedPolicySelect component', () => {
     const unAccessiblePolicyId = 'policy-321-not-in-space';
 
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
       componentProps.item.tags = [buildPerPolicyTag(unAccessiblePolicyId)];
       apiMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
         items: [],

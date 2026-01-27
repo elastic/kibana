@@ -17,7 +17,7 @@ import type { ClientConfigType, ReportingAPIClient, KibanaContext } from '@kbn/r
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InternalApiClientProvider } from '@kbn/reporting-public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
@@ -59,6 +59,7 @@ export async function mountManagementSection({
     license$,
     actions: actionsService,
     notifications: notificationsService,
+    userProfile: coreStart.userProfile,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;

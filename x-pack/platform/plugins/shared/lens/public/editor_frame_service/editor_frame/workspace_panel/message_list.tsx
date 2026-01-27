@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import type { UserMessage } from '../../../types';
+import type { UserMessage } from '@kbn/lens-common';
 
 export const MessageList = ({
   messages,

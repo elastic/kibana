@@ -10,32 +10,36 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiText } from '@elastic/eui';
 
+export interface SaveButtonProps extends CommonProps {
+  onSave: () => Promise<void>;
+  label?: string;
+  isSaving?: boolean;
+}
 export interface DraftModeCalloutProps extends CommonProps {
-  message?: React.ReactNode;
-  node?: React.ReactNode;
+  message?: string;
+  saveButtonProps?: SaveButtonProps;
 }
 
-const defaultCalloutMessage = (
-  <FormattedMessage
-    id="share.draftModeCallout.message"
-    defaultMessage="This link might not be permanent. Save your changes to ensure it works as expected."
-  />
-);
+const defaultCalloutMessage = i18n.translate('share.draftModeCallout.message', {
+  defaultMessage:
+    'This link might not be permanent. Save your changes to ensure it works as expected.',
+});
+
+const saveButtonText = i18n.translate('share.draftModeCallout.saveButtonText', {
+  defaultMessage: 'Save changes',
+});
 
 /**
  * A warning callout to indicate the user has unsaved changes.
  */
 export const DraftModeCallout = ({
-  node,
   message = defaultCalloutMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
+  saveButtonProps,
 }: DraftModeCalloutProps) => {
-  return node ? (
-    node
-  ) : (
+  return (
     <EuiCallOut
       announceOnMount
       data-test-subj={dataTestSubj}
@@ -48,6 +52,18 @@ export const DraftModeCallout = ({
       <EuiText component="p" size="s">
         {message}
       </EuiText>
+      {saveButtonProps && (
+        <EuiButton
+          color="warning"
+          fill
+          size="s"
+          data-test-subj={saveButtonProps['data-test-subj']}
+          onClick={saveButtonProps.onSave}
+          isLoading={saveButtonProps.isSaving}
+        >
+          {saveButtonProps.label ?? saveButtonText}
+        </EuiButton>
+      )}
     </EuiCallOut>
   );
 };

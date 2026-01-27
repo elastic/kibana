@@ -38,6 +38,8 @@
           ", PluginsSetup, PluginsStart>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+        "lineNumber": 185,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,9 +51,11 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; readonly unifiedRulesPage: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,6 +70,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -81,6 +87,8 @@
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+                "lineNumber": 201,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -108,6 +116,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -123,6 +133,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+                "lineNumber": 209,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -138,6 +150,8 @@
                   "PluginsSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+                "lineNumber": 209,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,6 +179,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 513,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,6 +195,8 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+                "lineNumber": 513,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -194,6 +212,8 @@
                   "PluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+                "lineNumber": 513,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -212,6 +232,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 639,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -235,6 +257,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -250,10 +274,49 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AddMessageVariablesOptional",
+        "type": "Function",
+        "tags": [],
+        "label": "AddMessageVariablesOptional",
+        "description": [],
+        "signature": [
+          "{ ({ buttonTitle, messageVariables, paramsProperty, onSelectEventHandler, showButtonTitle, isOptionalField, }: Props): React.JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/add_message_variables_optional.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AddMessageVariablesOptional.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  onSelectEventHandler,\n  showButtonTitle = false,\n  isOptionalField = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/add_message_variables_optional.tsx",
+            "lineNumber": 29,
+            "columnNumber": 77,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -269,6 +332,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -284,6 +349,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -303,6 +370,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -318,6 +387,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -345,6 +416,8 @@
           "<R>>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -356,6 +429,8 @@
             "label": "{\n  id,\n  params,\n  http,\n  signal,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+            "lineNumber": 27,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -367,6 +442,8 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -381,6 +458,8 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -395,6 +474,8 @@
                   "{ [x: string]: unknown; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -409,6 +490,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -431,6 +514,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -446,6 +531,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -467,6 +554,8 @@
           "[]>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -481,6 +570,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -496,6 +587,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -519,6 +612,8 @@
           "[]>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,6 +628,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,6 +645,45 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 56,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getIsExperimentalFeatureEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsExperimentalFeatureEnabled",
+        "description": [],
+        "signature": [
+          "(feature: \"rulesListDatagrid\" | \"stackAlertsPage\" | \"ruleTagFilter\" | \"ruleStatusFilter\" | \"rulesDetailLogs\" | \"ruleUseExecutionStatus\" | \"ruleKqlBar\" | \"isMustacheAutocompleteOn\" | \"showMustacheAutocompleteSwitch\" | \"alertDeletionSettingsEnabled\" | \"unifiedRulesPage\") => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/get_experimental_features.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getIsExperimentalFeatureEnabled.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "\"rulesListDatagrid\" | \"stackAlertsPage\" | \"ruleTagFilter\" | \"ruleStatusFilter\" | \"rulesDetailLogs\" | \"ruleUseExecutionStatus\" | \"ruleKqlBar\" | \"isMustacheAutocompleteOn\" | \"showMustacheAutocompleteSwitch\" | \"alertDeletionSettingsEnabled\" | \"unifiedRulesPage\""
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/get_experimental_features.ts",
+            "lineNumber": 17,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -567,6 +703,8 @@
           "(fields: { type: string; name: string; }[]) => TimeFieldOptions[]"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -581,6 +719,8 @@
               "{ type: string; name: string; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -608,6 +748,8 @@
           "; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -622,6 +764,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "lineNumber": 11,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -649,6 +793,8 @@
           ", timeValue: string) => string"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -669,6 +815,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+            "lineNumber": 11,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -684,6 +832,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+            "lineNumber": 11,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -705,6 +855,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -720,6 +872,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -737,6 +891,8 @@
           "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, readOnly, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -751,6 +907,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
+            "lineNumber": 61,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -770,6 +928,8 @@
           "({ field, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_field_wrapper.tsx",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,6 +944,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_field_wrapper.tsx",
+            "lineNumber": 24,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -807,6 +969,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -821,6 +985,8 @@
               "LoadRuleAggregationsProps"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+            "lineNumber": 13,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -840,6 +1006,8 @@
           "({ field, euiFieldProps, idAria, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/mustache_text_field_wrapper.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -854,6 +1022,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/mustache_text_field_wrapper.tsx",
+            "lineNumber": 22,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -875,6 +1045,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -890,6 +1062,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -907,6 +1081,8 @@
           "({ children }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/section_loading.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -921,6 +1097,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/section_loading.tsx",
+            "lineNumber": 16,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -940,6 +1118,8 @@
           "React.NamedExoticComponent<SimpleConnectorFormProps>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+        "lineNumber": 228,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -955,6 +1135,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -980,6 +1162,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/template_action_variable.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1000,6 +1184,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/template_action_variable.ts",
+            "lineNumber": 10,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1019,6 +1205,8 @@
           "(props: Props) => React.ReactElement<any, any> | null"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/text_area_with_message_variables.tsx",
+        "lineNumber": 96,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1033,6 +1221,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/text_area_with_message_variables.tsx",
+            "lineNumber": 96,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1049,9 +1239,11 @@
         "label": "TextFieldWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, index, inputTargetValue, editAction, errors, formRowProps, defaultValue, wrapField, showButtonTitle, }: Props) => React.JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, index, inputTargetValue, editAction, errors, formRowProps, defaultValue, wrapField, showButtonTitle, \"aria-label\": ariaLabel, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/text_field_with_message_variables.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1060,12 +1252,14 @@
             "id": "def-public.TextFieldWithMessageVariables.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  editAction,\n  errors,\n  formRowProps,\n  defaultValue,\n  wrapField = false,\n  showButtonTitle,\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  editAction,\n  errors,\n  formRowProps,\n  defaultValue,\n  wrapField = false,\n  showButtonTitle,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/text_field_with_message_variables.tsx",
+            "lineNumber": 62,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1087,6 +1281,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1102,6 +1298,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1119,6 +1317,8 @@
           "({ rule_type_id: ruleTypeId, created_by: createdBy, updated_by: updatedBy, created_at: createdAt, updated_at: updatedAt, api_key_owner: apiKeyOwner, api_key_created_by_user: apiKeyCreatedByUser, notify_when: notifyWhen, mute_all: muteAll, muted_alert_ids: mutedInstanceIds, scheduled_task_id: scheduledTaskId, execution_status: executionStatus, actions: actions, snooze_schedule: snoozeSchedule, is_snoozed_until: isSnoozedUntil, active_snoozes: activeSnoozes, last_run: lastRun, next_run: nextRun, alert_delay: alertDelay, flapping, ...rest }: any) => any"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/common_transformations.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1133,6 +1333,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/common_transformations.ts",
+            "lineNumber": 71,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1164,6 +1366,8 @@
           "<Record<string, unknown>, Record<string, unknown>>>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1175,6 +1379,8 @@
             "label": "{\n  http,\n  connector,\n  id,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
+            "lineNumber": 40,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1189,6 +1395,8 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1203,6 +1411,8 @@
                   "{ config: Record<string, unknown>; secrets: Record<string, unknown>; name: string; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1214,6 +1424,8 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1235,6 +1447,8 @@
           "ConnectorContextValue"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/context/use_connector_context.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1254,6 +1468,8 @@
           "<P>) => { isLoading: boolean; response: R | undefined; error: Error | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_sub_action.tsx",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1269,6 +1485,8 @@
               "<P>"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_sub_action.tsx",
+            "lineNumber": 80,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1306,6 +1524,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/kibana/kibana_react.ts",
+        "lineNumber": 22,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1325,6 +1545,8 @@
           ") => string | null"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/value_validators.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1339,6 +1561,8 @@
               "RuleUiAction"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/value_validators.ts",
+            "lineNumber": 20,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1360,6 +1584,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1375,6 +1601,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1394,6 +1622,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/expression_items/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1409,6 +1639,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "lineNumber": 16,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1425,6 +1657,8 @@
         "label": "ActionConnectorFieldsProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1436,6 +1670,8 @@
             "label": "readOnly",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1447,6 +1683,8 @@
             "label": "isEdit",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1469,6 +1707,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1489,6 +1729,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 33,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1517,6 +1759,8 @@
           "<TParams>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1531,6 +1775,8 @@
               "{ [P in keyof TParams]?: TParams[P] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1542,6 +1788,8 @@
             "label": "index",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1558,6 +1806,8 @@
               ", index: number) => void"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1572,6 +1822,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 100,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1587,6 +1839,8 @@
                   "SavedObjectAttribute"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 100,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1602,6 +1856,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 100,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1626,6 +1882,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1640,6 +1898,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1661,6 +1921,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1675,6 +1937,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1689,6 +1953,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1710,6 +1976,8 @@
               "<Record<string, unknown>, Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1724,6 +1992,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1738,6 +2008,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1752,6 +2024,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1766,6 +2040,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1787,6 +2063,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1801,6 +2079,8 @@
               "((field?: string | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1815,6 +2095,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 112,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1833,6 +2115,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1847,6 +2131,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1861,6 +2147,8 @@
         "label": "ActionType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1872,6 +2160,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1883,6 +2173,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1894,6 +2186,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1905,6 +2199,8 @@
             "label": "enabledInConfig",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1916,6 +2212,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1930,6 +2228,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1944,6 +2244,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1955,6 +2257,24 @@
             "label": "isSystemActionType",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1969,6 +2289,8 @@
               "\"endpointSecurity\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1980,6 +2302,24 @@
             "label": "isDeprecated",
             "description": [],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1996,6 +2336,8 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2020,6 +2362,8 @@
           "<ActionConfig, ActionSecrets, ActionParams>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2031,6 +2375,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2045,6 +2391,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2056,6 +2404,8 @@
             "label": "selectMessage",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2070,6 +2420,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2084,6 +2436,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2095,7 +2449,7 @@
             "label": "validateParams",
             "description": [],
             "signature": [
-              "(actionParams: ActionParams) => Promise<",
+              "(actionParams: ActionParams, connectorConfig: ActionConfig | null) => Promise<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2106,6 +2460,8 @@
               "<unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2120,9 +2476,28 @@
                   "ActionParams"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 136,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.validateParams.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "connectorConfig",
+                "description": [],
+                "signature": [
+                  "ActionConfig | null"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 137,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2146,6 +2521,8 @@
               ">> | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2168,6 +2545,8 @@
               "<ActionParams>>>"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2183,6 +2562,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 630,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2207,6 +2588,8 @@
               ">> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2222,6 +2605,8 @@
               "<ActionParams> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2237,6 +2622,8 @@
               "<ActionParams> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2258,6 +2645,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2272,6 +2661,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2286,6 +2677,8 @@
               "{ id: string; name: string; }[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2300,6 +2693,8 @@
               "((params: ActionParams) => {} | ActionParams) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2314,6 +2709,8 @@
                   "ActionParams"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 151,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2340,6 +2737,8 @@
               "[]) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2361,12 +2760,30 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "lineNumber": 152,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -2379,6 +2796,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2393,6 +2812,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2407,6 +2828,62 @@
               "\"endpointSecurity\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.connectorForm",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorForm",
+            "description": [
+              "\nConnector form config"
+            ],
+            "signature": [
+              "{ deserializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>> | undefined; serializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>, ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              "> | undefined; hideSettingsTitle?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2421,6 +2898,8 @@
         "label": "AggregationType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2432,6 +2911,8 @@
             "label": "text",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2443,6 +2924,8 @@
             "label": "fieldRequired",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2454,6 +2937,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2465,9 +2950,11 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2482,6 +2969,8 @@
         "label": "AlertStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2496,6 +2985,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2510,6 +3001,8 @@
               "\"OK\" | \"Active\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2521,6 +3014,8 @@
             "label": "muted",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2535,6 +3030,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2549,6 +3046,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2560,6 +3059,8 @@
             "label": "flapping",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2574,6 +3075,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2585,6 +3088,8 @@
             "label": "tracked",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2599,6 +3104,8 @@
         "label": "AlertSummary",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2610,6 +3117,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2621,6 +3130,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2635,6 +3146,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2646,6 +3159,8 @@
             "label": "ruleTypeId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2657,6 +3172,8 @@
             "label": "consumer",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2668,6 +3185,8 @@
             "label": "muteAll",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2682,6 +3201,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2693,6 +3214,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2704,6 +3227,8 @@
             "label": "statusStartDate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2715,6 +3240,8 @@
             "label": "statusEndDate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2729,6 +3256,8 @@
               "\"OK\" | \"Active\" | \"Error\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2743,6 +3272,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2757,6 +3288,8 @@
               "{ date: string; message: string; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2779,6 +3312,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2799,6 +3334,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2810,6 +3347,8 @@
             "label": "revision",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2824,6 +3363,8 @@
         "label": "AlertSummaryTimeRange",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2835,6 +3376,8 @@
             "label": "utcFrom",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2846,6 +3389,8 @@
             "label": "utcTo",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2857,6 +3402,8 @@
             "label": "fixedInterval",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2871,6 +3418,8 @@
               "string | JSX.Element | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2885,6 +3434,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2899,6 +3450,8 @@
         "label": "BulkOperationResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 205,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2928,6 +3481,8 @@
               ">[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2949,6 +3504,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2960,6 +3517,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2981,10 +3540,13 @@
             "section": "def-public.ConfigFieldSchema",
             "text": "ConfigFieldSchema"
           },
-          " extends ",
-          "CommonFieldSchema"
+          "<T> extends ",
+          "CommonFieldSchema",
+          "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2999,6 +3561,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3013,20 +3577,24 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.ConfigFieldSchema.defaultValue",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "defaultValue",
             "description": [],
             "signature": [
-              "string | string[] | undefined"
+              "T | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3051,6 +3619,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3065,6 +3635,8 @@
               "{ [P in Extract<keyof T, string>]: unknown; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3079,6 +3651,8 @@
         "label": "IErrorObject",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 321,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3100,6 +3674,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 322,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3114,6 +3690,8 @@
         "label": "NotifyWhenSelectOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 492,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3128,6 +3706,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 493,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3142,6 +3722,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 494,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3157,6 +3739,8 @@
               "<\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\">"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 495,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3181,6 +3765,8 @@
           "<Params>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 381,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3205,6 +3791,8 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 382,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3267,6 +3855,8 @@
               ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 383,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3305,6 +3895,8 @@
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 384,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3319,6 +3911,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 385,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3335,6 +3929,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 386,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3349,6 +3945,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 387,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3363,6 +3961,8 @@
               "((ruleId: string) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 388,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3377,6 +3977,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 388,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3395,6 +3997,8 @@
         "label": "RuleStatusFilterProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3416,6 +4020,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3430,6 +4036,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3444,6 +4052,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3458,6 +4068,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3480,6 +4092,8 @@
               ") => string) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3500,6 +4114,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+                "lineNumber": 25,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3526,6 +4142,8 @@
               "[]) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3547,6 +4165,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
+                "lineNumber": 26,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3591,6 +4211,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 264,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3602,6 +4224,8 @@
             "label": "ruleType",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3616,6 +4240,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3627,6 +4253,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 267,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3638,6 +4266,8 @@
             "label": "actionsCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3649,6 +4279,8 @@
             "label": "isEditable",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3660,6 +4292,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3674,6 +4308,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3685,6 +4321,8 @@
             "label": "isInternallyManaged",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 272,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3717,6 +4355,8 @@
           "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"minimumLicenseRequired\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\" | \"autoRecoverAlerts\">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3731,6 +4371,8 @@
               "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3745,6 +4387,8 @@
               "{ [x: string]: { read: boolean; all: boolean; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3756,6 +4400,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3770,6 +4416,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3781,6 +4429,8 @@
             "label": "isInternallyManaged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3805,6 +4455,8 @@
           "<Params>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 301,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3816,6 +4468,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 302,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3827,6 +4481,25 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 303,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.getDescriptionFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescriptionFields",
+            "description": [],
+            "signature": [
+              "GetDescriptionFieldsFn",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 304,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3838,6 +4511,8 @@
             "label": "iconClass",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 305,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3854,6 +4529,8 @@
               ") => string) | null"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 306,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3875,6 +4552,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 307,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3889,6 +4568,8 @@
                   "Params"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 307,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3904,6 +4585,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 307,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3930,6 +4613,8 @@
               "<Params, Record<string, unknown>, string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 308,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3945,6 +4630,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 630,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3958,6 +4645,8 @@
             "label": "requiresAppContext",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 311,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3972,6 +4661,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 312,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3986,6 +4677,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 313,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4000,6 +4693,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 314,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4014,6 +4709,8 @@
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 315,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4028,6 +4725,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 318,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4052,6 +4751,8 @@
           "<Params, MetaData, ActionGroupIds>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 275,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4066,6 +4767,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4080,6 +4783,8 @@
               "Params"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4091,6 +4796,8 @@
             "label": "ruleInterval",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4102,6 +4809,8 @@
             "label": "ruleThrottle",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4116,6 +4825,8 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 284,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4130,6 +4841,8 @@
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 285,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4144,6 +4857,8 @@
                   "Key"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 285,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4159,6 +4874,8 @@
                   "Params[Key] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 285,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4174,11 +4891,13 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 286,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4193,6 +4912,8 @@
                   "Prop"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 287,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4209,6 +4930,8 @@
                   "<Params>[Prop] | null"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 288,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4227,6 +4950,8 @@
               "(metadata: MetaData) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4241,6 +4966,8 @@
                   "MetaData"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "lineNumber": 290,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4265,6 +4992,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 291,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4276,6 +5005,8 @@
             "label": "defaultActionGroupId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 292,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4297,6 +5028,8 @@
               "<ActionGroupIds>[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4311,6 +5044,8 @@
               "MetaData | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 294,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4331,6 +5066,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 295,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4351,6 +5088,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 296,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4371,6 +5110,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 297,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4391,6 +5132,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4413,9 +5156,12 @@
             "text": "SecretsFieldSchema"
           },
           " extends ",
-          "CommonFieldSchema"
+          "CommonFieldSchema",
+          "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4430,6 +5176,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4455,6 +5203,8 @@
           "CoreStart"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4475,6 +5225,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4496,6 +5248,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4516,6 +5270,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4536,6 +5292,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4556,6 +5314,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4579,6 +5339,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4600,6 +5362,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4621,6 +5385,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4642,6 +5408,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4653,6 +5421,8 @@
             "label": "isCloud",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4669,6 +5439,8 @@
               "[]) => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4684,6 +5456,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+                "lineNumber": 74,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4726,6 +5500,8 @@
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4788,6 +5564,8 @@
               ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4803,6 +5581,8 @@
               "<unknown>"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4824,6 +5604,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4838,6 +5620,8 @@
               "HTMLElement"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4852,6 +5636,8 @@
               "I18nStart"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4866,6 +5652,8 @@
               "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4886,6 +5674,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4906,6 +5696,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4926,6 +5718,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4937,6 +5731,8 @@
             "label": "isServerless",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4956,7 +5752,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -4967,6 +5763,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4987,6 +5785,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5007,6 +5807,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5028,6 +5830,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5049,6 +5853,31 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5063,6 +5892,8 @@
         "label": "ValidationResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5077,6 +5908,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5093,6 +5926,8 @@
         "label": "ActionConnectorMode",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5105,6 +5940,8 @@
         "label": "AlertProvidedActionVariables",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5117,6 +5954,8 @@
         "label": "RuleFlyoutCloseReason",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 194,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5129,6 +5968,8 @@
         "label": "TIME_UNITS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/constants/time_units.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5169,6 +6010,8 @@
           "<Config, Secrets>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5208,6 +6051,8 @@
           "<Connector, Params, any>) => void; has: (id: string) => boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5223,21 +6068,8 @@
           "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5250,6 +6082,8 @@
         "label": "AlertHistoryDefaultIndexName",
         "description": [],
         "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5265,6 +6099,8 @@
           "Readonly<{ event: { kind: string; }; kibana?: { alert: { actionGroupName?: string | undefined; actionGroup?: string | undefined; context?: { [x: string]: Record<string, unknown>; } | undefined; id?: string | undefined; }; } | undefined; rule?: { type?: string | undefined; space?: string | undefined; params?: { [x: string]: Record<string, unknown>; } | undefined; name?: string | undefined; id?: string | undefined; } | undefined; message?: unknown; tags?: string[] | undefined; '@timestamp': string; }> | null"
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5280,6 +6116,8 @@
           "\"preconfigured-alert-history-es-index\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5303,6 +6141,8 @@
           "<T[K]> : T[K]; }"
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5321,6 +6161,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 225,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5333,6 +6175,8 @@
         "label": "connectorDeprecatedMessage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/connectors_selection.tsx",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5343,9 +6187,7 @@
         "type": "Type",
         "tags": [],
         "label": "ConnectorFormSchema",
-        "description": [
-          "\nThe following type is equivalent to:\n\ninterface ConnectorFormSchema<Config, Secrets> {\n id?: string,\n name?: string,\n actionTypeId: string,\n isDeprecated: boolean,\n config: Config,\n secrets: Secrets,\n}"
-        ],
+        "description": [],
         "signature": [
           "Pick<",
           {
@@ -5365,7 +6207,9 @@
           },
           "<Config, Secrets>, \"id\" | \"name\">>"
         ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/types.ts",
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5378,6 +6222,8 @@
         "label": "deprecatedMessage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/connectors_selection.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5403,6 +6249,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5418,6 +6266,8 @@
           "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5439,6 +6289,8 @@
           " : never"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_event_log_list.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5454,6 +6306,8 @@
           "\"ruleName\" | \"ruleTags\" | \"ruleExecutionStatusLastDate\" | \"ruleSnoozeNotify\" | \"ruleScheduleInterval\" | \"ruleExecutionStatusLastDuration\" | \"ruleExecutionPercentile\" | \"ruleExecutionSuccessRatio\" | \"ruleExecutionStatus\" | \"ruleExecutionState\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rules_list/components/rules_list_column_selector.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5469,6 +6323,8 @@
           "\"enabled\" | \"disabled\" | \"snoozed\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 405,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5492,6 +6348,8 @@
           "<string, string>>"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5507,6 +6365,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5570,6 +6430,8 @@
           ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+        "lineNumber": 192,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5601,6 +6463,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 209,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5613,9 +6477,11 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5630,6 +6496,8 @@
         "label": "builtInAggregationTypes",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5641,6 +6509,8 @@
             "label": "count",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5652,6 +6522,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5666,6 +6538,8 @@
                   "false"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5680,6 +6554,8 @@
                   "AGGREGATION_TYPES"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5694,6 +6570,8 @@
                   "never[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5707,6 +6585,8 @@
             "label": "avg",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5718,6 +6598,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5732,6 +6614,8 @@
                   "true"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5746,6 +6630,8 @@
                   "\"number\"[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5760,6 +6646,8 @@
                   "AGGREGATION_TYPES"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5773,6 +6661,8 @@
             "label": "sum",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5784,6 +6674,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5798,6 +6690,8 @@
                   "true"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 33,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5812,6 +6706,8 @@
                   "\"number\"[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5826,6 +6722,8 @@
                   "AGGREGATION_TYPES"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5839,6 +6737,8 @@
             "label": "min",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5850,6 +6750,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5864,6 +6766,8 @@
                   "true"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5878,6 +6782,8 @@
                   "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5892,6 +6798,8 @@
                   "AGGREGATION_TYPES"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5905,6 +6813,8 @@
             "label": "max",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5916,6 +6826,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5930,6 +6842,8 @@
                   "true"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5944,6 +6858,8 @@
                   "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -5958,6 +6874,8 @@
                   "AGGREGATION_TYPES"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5974,6 +6892,8 @@
         "label": "builtInComparators",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5985,6 +6905,8 @@
             "label": "[COMPARATORS.GREATER_THAN]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5996,6 +6918,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6016,6 +6940,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6027,6 +6953,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6040,6 +6968,8 @@
             "label": "[COMPARATORS.GREATER_THAN_OR_EQUALS]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6051,6 +6981,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6071,6 +7003,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6082,6 +7016,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6095,6 +7031,8 @@
             "label": "[COMPARATORS.LESS_THAN]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6106,6 +7044,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6126,6 +7066,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6137,6 +7079,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6150,6 +7094,8 @@
             "label": "[COMPARATORS.LESS_THAN_OR_EQUALS]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6161,6 +7107,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6181,6 +7129,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6192,6 +7142,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 62,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6205,6 +7157,8 @@
             "label": "[COMPARATORS.BETWEEN]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6216,6 +7170,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 65,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6236,6 +7192,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 68,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6247,6 +7205,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6260,6 +7220,8 @@
             "label": "[COMPARATORS.NOT_BETWEEN]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6271,6 +7233,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6291,6 +7255,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6302,6 +7268,8 @@
                 "label": "requiredValues",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/index.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6318,6 +7286,8 @@
         "label": "builtInGroupByTypes",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6329,6 +7299,8 @@
             "label": "all",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6340,6 +7312,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 13,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6354,6 +7328,8 @@
                   "false"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6365,6 +7341,8 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6379,6 +7357,8 @@
                   "never[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6392,6 +7372,8 @@
             "label": "top",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6403,6 +7385,8 @@
                 "label": "text",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6417,6 +7401,8 @@
                   "true"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6428,6 +7414,8 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6442,6 +7430,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6458,6 +7448,8 @@
         "label": "firstFieldOption",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6469,6 +7461,8 @@
             "label": "text",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6480,10 +7474,29 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "description": [],
+        "signature": [
+          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; readonly QUERY_FILTERS: \"queryFilters\"; readonly KQL_FILTERS: \"kqlFilters\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_detail_description_type.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6495,6 +7508,8 @@
       "label": "TriggersAndActionsUIPublicPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+      "lineNumber": 104,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -6518,6 +7533,8 @@
             "<any, any, any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 105,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -6541,6 +7558,8 @@
             "<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 106,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -6556,6 +7575,8 @@
       "label": "TriggersAndActionsUIPublicPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+      "lineNumber": 109,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -6579,6 +7600,8 @@
             "<any, any, any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 110,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -6602,6 +7625,8 @@
             "<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 111,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -6628,6 +7653,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 112,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6652,6 +7679,8 @@
                 "[]) => void; }"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 113,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6674,6 +7703,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 117,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6690,6 +7721,8 @@
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 118,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6712,6 +7745,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 120,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6728,6 +7763,8 @@
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 121,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6750,6 +7787,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 123,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6764,6 +7803,8 @@
                 "AlertsSearchBarProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 123,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6786,6 +7827,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 124,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6800,6 +7843,8 @@
                 "ComponentOpts"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 124,
+              "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6822,6 +7867,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 125,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6836,6 +7883,8 @@
                 "RuleTagFilterProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 125,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6870,6 +7919,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 126,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6890,6 +7941,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 126,
+              "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6914,6 +7967,8 @@
             "<T>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 127,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6929,6 +7984,8 @@
                 "<T>"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 128,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -6965,6 +8022,8 @@
             "<T>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 130,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -6986,6 +8045,8 @@
                 "<T>"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 131,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7006,6 +8067,8 @@
             ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 133,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7020,6 +8083,8 @@
                 "RulesListProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 133,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7042,6 +8107,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 134,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7056,6 +8123,8 @@
                 "RulesListNotifyBadgePropsWithApi"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 135,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7106,6 +8175,8 @@
             ">, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 137,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7135,6 +8206,8 @@
                 ">"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 137,
+              "columnNumber": 23,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7157,6 +8230,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 138,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7171,6 +8246,8 @@
                 "RuleStatusPanelProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 138,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7193,6 +8270,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 139,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7207,6 +8286,8 @@
                 "AlertSummaryWidgetProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 139,
+              "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7229,6 +8310,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 140,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7243,6 +8326,8 @@
                 "RuleSnoozeModalProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 140,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7265,6 +8350,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 141,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7279,6 +8366,8 @@
                 "UntrackAlertsModalProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 141,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7301,6 +8390,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 142,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7315,6 +8406,8 @@
                 "RuleSettingsLinkProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 142,
+              "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7357,6 +8450,8 @@
             "; id?: string | undefined; skipRecurrences?: string[] | undefined; } | null; }"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 143,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7386,6 +8481,8 @@
                 ">"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 143,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7408,6 +8505,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 152,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -7422,6 +8521,8 @@
                 "GlobalRuleEventLogListProps"
               ],
               "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 153,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -7451,6 +8552,8 @@
           "100"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7463,6 +8566,8 @@
         "label": "TIME_SERIES_BUCKET_SELECTOR_FIELD",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/lib/time_series_query.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7478,6 +8583,8 @@
           "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/lib/time_series_types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7492,6 +8599,8 @@
       "label": "PluginStartContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/plugin.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -7516,6 +8625,8 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/plugin.ts",
+          "lineNumber": 17,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -7548,6 +8659,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7568,6 +8681,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 42,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7587,6 +8702,8 @@
           "(aggType: string) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7601,6 +8718,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 38,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7620,6 +8739,8 @@
           "(termField?: string | string[] | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7634,6 +8755,8 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 39,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -7653,6 +8776,8 @@
           "(groupBy?: string | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7667,6 +8792,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 40,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -7701,6 +8828,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7721,6 +8850,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 42,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7739,6 +8870,8 @@
         "label": "BuildAggregationOpts",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7753,6 +8886,8 @@
               "{ timeField: string; dateStart?: string | undefined; dateEnd?: string | undefined; interval?: string | undefined; timeWindowSize: number; timeWindowUnit: string; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7764,6 +8899,8 @@
             "label": "aggType",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7778,6 +8915,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7792,6 +8931,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7806,6 +8947,8 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7820,6 +8963,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7834,6 +8979,8 @@
               "{ resultLimit?: number | undefined; conditionScript: string; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7848,6 +8995,8 @@
               "((message: string) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7862,6 +9011,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+                "lineNumber": 29,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7880,6 +9031,8 @@
         "label": "DateRange",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7891,6 +9044,8 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7902,6 +9057,8 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7916,6 +9073,8 @@
         "label": "DateRangeInfo",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7927,6 +9086,8 @@
             "label": "dateStart",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7938,6 +9099,8 @@
             "label": "dateEnd",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7959,6 +9122,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7973,6 +9138,8 @@
         "label": "GetDateRangeInfoParams",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7987,6 +9154,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8001,6 +9170,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8015,6 +9186,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8026,6 +9199,8 @@
             "label": "window",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8040,6 +9215,8 @@
         "label": "ParseAggregationResultsOpts",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8051,6 +9228,8 @@
             "label": "isCountAgg",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8062,6 +9241,8 @@
             "label": "isGroupAgg",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8079,6 +9260,8 @@
               ">>"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8093,6 +9276,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8107,6 +9292,8 @@
               "{ label: string; searchPath: string; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8121,6 +9308,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8135,6 +9324,8 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8149,6 +9340,8 @@
         "label": "ParsedAggregationResults",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8164,6 +9357,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8175,6 +9370,8 @@
             "label": "truncated",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8189,6 +9386,8 @@
         "label": "TimeSeriesResult",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8210,6 +9409,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8221,6 +9422,8 @@
             "label": "truncated",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8235,6 +9438,8 @@
         "label": "TimeSeriesResultRow",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8246,6 +9451,8 @@
             "label": "group",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8267,6 +9474,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8284,6 +9493,8 @@
         "label": "BUCKET_SELECTOR_FIELD",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8299,6 +9510,8 @@
           "100"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8314,6 +9527,8 @@
           "[string, number]"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8329,6 +9544,8 @@
           "\"all documents\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8343,6 +9560,8 @@
         "label": "NORMALIZED_FIELD_TYPES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8354,6 +9573,8 @@
             "label": "long",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8365,6 +9586,8 @@
             "label": "integer",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8376,6 +9599,8 @@
             "label": "short",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8387,6 +9612,8 @@
             "label": "byte",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8398,6 +9625,8 @@
             "label": "double",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8409,6 +9638,8 @@
             "label": "float",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8420,6 +9651,8 @@
             "label": "half_float",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8431,6 +9664,8 @@
             "label": "scaled_float",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8442,6 +9677,8 @@
             "label": "unsigned_long",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/normalized_field_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

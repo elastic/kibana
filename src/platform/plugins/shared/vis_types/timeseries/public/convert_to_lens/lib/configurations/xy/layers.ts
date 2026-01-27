@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EventAnnotationConfig,
-  XYAnnotationsLayerConfig,
-  XYLayerConfig,
-  YAxisMode,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { FillTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { PaletteOutput } from '@kbn/coloring';
 import { getValidColor } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
+import type { YAxisMode, XYLayerConfig, XYAnnotationLayerConfig } from '@kbn/lens-common';
+import { FillStyles } from '@kbn/expression-xy-plugin/common';
+import type { AvailableAnnotationIcon, EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
@@ -48,13 +44,14 @@ function getColor(
   metricColumn: Column,
   metric: Metric,
   seriesColor: string,
-  splitAccessor?: string
+  splitAccessors: string[]
 ) {
-  if (isPercentileColumnWithMeta(metricColumn) && !splitAccessor) {
+  const hasSplitAccessors = splitAccessors.length > 0;
+  if (isPercentileColumnWithMeta(metricColumn) && !hasSplitAccessors) {
     const [_, percentileIndex] = metricColumn.meta.reference.split('.');
     return metric.percentiles?.[parseInt(percentileIndex, 10)]?.color;
   }
-  if (isPercentileRanksColumnWithMeta(metricColumn) && !splitAccessor) {
+  if (isPercentileRanksColumnWithMeta(metricColumn) && !hasSplitAccessors) {
     const [_, percentileRankIndex] = metricColumn.meta.reference.split('.');
     return metric.colors?.[parseInt(percentileRankIndex, 10)];
   }
@@ -87,9 +84,9 @@ export const getLayers = async (
     );
     const isReferenceLine =
       metricColumns.length === 1 && metricColumns[0].operationType === 'static_value';
-    const splitAccessor = dataSourceLayer.columns.find(
-      (column) => column.isBucketed && column.isSplit
-    )?.columnId;
+    const splitAccessors = dataSourceLayer.columns
+      .filter((column) => column.isBucketed && column.isSplit)
+      .map((c) => c.columnId);
     const chartType = getChartType(series, model.type);
     const commonProps = {
       layerId: dataSourceLayer.layerId,
@@ -102,7 +99,7 @@ export const getLayers = async (
         );
         return {
           forAccessor: metricColumn.columnId,
-          color: getColor(metricColumn, metric!, series.color, splitAccessor),
+          color: getColor(metricColumn, metric!, series.color, splitAccessors),
           axisMode: isReferenceLine // reference line should be assigned to axis with real data
             ? model.series.some((s) => s.id !== series.id && getAxisMode(s, model) === 'right')
               ? 'right'
@@ -111,7 +108,7 @@ export const getLayers = async (
             ? 'left'
             : getAxisMode(series, model),
           ...(isReferenceLine && {
-            fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
+            fill: chartType.includes('area') ? FillStyles.BELOW : FillStyles.NONE,
             lineWidth: series.line_width,
           }),
         };
@@ -129,7 +126,7 @@ export const getLayers = async (
         ...commonProps,
         xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
           ?.columnId,
-        splitAccessor,
+        splitAccessors: splitAccessors.length > 0 ? splitAccessors : undefined,
         collapseFn: seriesAgg,
         palette: getPalette(series.palette as PaletteOutput),
       };
@@ -148,7 +145,7 @@ export const getLayers = async (
   });
 
   try {
-    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
+    const annotationsLayers: Array<XYAnnotationLayerConfig | undefined> = await Promise.all(
       Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
         const [firstAnnotation] = annotations;
         const convertedAnnotations: EventAnnotationConfig[] = [];
@@ -190,6 +187,17 @@ export const getLayers = async (
   }
 };
 
+function getEventIcon(annotationIcon: string | undefined): AvailableAnnotationIcon {
+  if (
+    !annotationIcon ||
+    !(annotationIcon in ICON_TYPES_MAP) ||
+    typeof ICON_TYPES_MAP[annotationIcon] !== 'string'
+  ) {
+    return 'triangle';
+  }
+  return ICON_TYPES_MAP[annotationIcon] as AvailableAnnotationIcon;
+}
+
 const convertAnnotation = (
   annotation: Annotation,
   dataView: DataView
@@ -214,12 +222,7 @@ const convertAnnotation = (
       shouldBeCompatibleWithColorJs: true,
     }).hex(),
     timeField: annotation.time_field || dataView.timeFieldName,
-    icon:
-      annotation.icon &&
-      ICON_TYPES_MAP[annotation.icon] &&
-      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
-        ? ICON_TYPES_MAP[annotation.icon]
-        : 'triangle',
+    icon: getEventIcon(annotation.icon),
     filter: {
       type: 'kibana_query',
       query: annotation.query_string?.query || '*',

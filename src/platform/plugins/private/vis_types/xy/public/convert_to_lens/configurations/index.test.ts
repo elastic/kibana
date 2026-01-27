@@ -96,6 +96,7 @@ describe('getConfiguration', () => {
       fittingFunction: undefined,
       gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
       labelsOrientation: { x: -0, yLeft: -0, yRight: -90 },
+      preferredSeriesType: 'bar',
       layers: [
         {
           accessors: ['1'],
@@ -106,7 +107,7 @@ describe('getConfiguration', () => {
           palette: { name: 'default' },
           seriesType: 'area_stacked',
           simpleView: false,
-          splitAccessor: '3',
+          splitAccessors: ['3'],
           xAccessor: '2',
           xScaleType: 'ordinal',
           yConfig: [{ axisMode: 'left', forAccessor: '1' }],
@@ -120,7 +121,7 @@ describe('getConfiguration', () => {
           palette: { name: 'default' },
           seriesType: 'area_stacked',
           simpleView: false,
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: '5',
           xScaleType: 'ordinal',
           yConfig: [{ axisMode: 'left', forAccessor: '4' }],

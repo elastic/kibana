@@ -34,6 +34,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
             "label": "{\n  log,\n  ref,\n  settings,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree.ts",
+            "lineNumber": 21,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,6 +69,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree.ts",
+                "lineNumber": 22,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -76,6 +82,8 @@
                 "label": "ref",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree.ts",
+                "lineNumber": 23,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -91,6 +99,93 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workspaces",
+        "id": "def-server.activateWorktreeOrUseSourceRepo",
+        "type": "Function",
+        "tags": [],
+        "label": "activateWorktreeOrUseSourceRepo",
+        "description": [],
+        "signature": [
+          "({\n  log,\n  ref,\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; ref?: string | undefined; }) => Promise<",
+          "WorktreeWorkspace",
+          " | ",
+          "SourceRepoWorkspace",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workspaces",
+            "id": "def-server.activateWorktreeOrUseSourceRepo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  ref,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+            "lineNumber": 21,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.activateWorktreeOrUseSourceRepo.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+                "lineNumber": 22,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.activateWorktreeOrUseSourceRepo.$1.ref",
+                "type": "string",
+                "tags": [],
+                "label": "ref",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+                "lineNumber": 23,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -123,6 +218,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-workspaces/src/get_workspace_from_source_repo.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,6 +231,8 @@
             "label": "{\n  log,\n  settings,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workspaces/src/get_workspace_from_source_repo.ts",
+            "lineNumber": 19,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,6 +253,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-workspaces/src/get_workspace_from_source_repo.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -169,6 +270,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-workspaces/src/get_workspace_from_source_repo.ts",
+                "lineNumber": 21,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -188,6 +291,8 @@
         "label": "IWorkspace",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,6 +307,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -218,6 +325,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -234,6 +343,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -250,6 +361,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -266,6 +379,8 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -282,6 +397,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -298,6 +415,8 @@
               "Exec"
             ],
             "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('step level timeout', () => {
@@ -47,7 +47,10 @@ steps:
       );
     expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
     expect(workflowExecutionDoc?.error).toBeDefined();
-    expect(workflowExecutionDoc?.error).toContain('TimeoutError');
+    expect(workflowExecutionDoc?.error).toEqual({
+      type: 'Error',
+      message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
+    });
     expect(workflowExecutionDoc?.scopeStack).toEqual([]);
   });
 
@@ -65,9 +68,10 @@ steps:
 
     expect(timeoutStepExecution.status).toBe(ExecutionStatus.FAILED);
     expect(timeoutStepExecution.error).toBeDefined();
-    expect(timeoutStepExecution.error).toBe(
-      'Error: TimeoutError: Step execution exceeded the configured timeout of 2s.'
-    );
+    expect(timeoutStepExecution.error).toEqual({
+      type: 'Error',
+      message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
+    });
   });
 
   it('should have execution duration close to configured timeout value', async () => {

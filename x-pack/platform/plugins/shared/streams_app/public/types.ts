@@ -17,13 +17,10 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { IndexLifecycleManagementPluginStart } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
-import type {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
@@ -51,7 +48,6 @@ export interface StreamsAppSetupDependencies {
   discoverShared: DiscoverSharedPublicSetup;
   share: SharePublicSetup;
   unifiedSearch: {};
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface StreamsAppStartDependencies {
@@ -62,6 +58,7 @@ export interface StreamsAppStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  indexLifecycleManagement?: IndexLifecycleManagementPluginStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;
@@ -71,7 +68,6 @@ export interface StreamsAppStartDependencies {
   streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   unifiedDocViewer: UnifiedDocViewerStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;

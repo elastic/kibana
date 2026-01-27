@@ -8,9 +8,9 @@
 import { renderRuleStats } from './rule_stats';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { RulesParams } from '../../../locators/rules';
+import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 
-const RULES_PAGE_LINK = '/app/observability/alerts/rules';
+const RULES_PAGE_LINK = '/app/rules';
 const STAT_CLASS = 'euiStat';
 const STAT_TITLE_PRIMARY_SELECTOR = '[class*="euiStat__title-primary"]';
 const STAT_BUTTON_CLASS = 'euiButtonEmpty';
@@ -18,7 +18,7 @@ const STAT_BUTTON_CLASS = 'euiButtonEmpty';
 describe('Rule stats', () => {
   const mockedLocator = {
     navigate: jest.fn(),
-  } as any as LocatorPublic<RulesParams>;
+  } as unknown as LocatorPublic<RulesLocatorParams>;
 
   beforeEach(() => {
     jest.clearAllMocks();
