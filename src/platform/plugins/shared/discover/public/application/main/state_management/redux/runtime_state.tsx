@@ -16,7 +16,7 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
-import type { UrlSyncObservables, TabState } from './types';
+import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
 
@@ -47,7 +47,6 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 };
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'> & {
-  readonly urlSyncObservables: UrlSyncObservables;
   onSubscribe: ({ unsubscribeFn }: { unsubscribeFn: () => void }) => void;
   unsubscribe: () => void;
 };
@@ -77,14 +76,12 @@ export const createTabRuntimeState = ({
   profilesManager,
   ebtManager,
   initialValues,
-  createUrlSyncObservablesFn,
 }: {
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
-  createUrlSyncObservablesFn: () => UrlSyncObservables;
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = ebtManager.createScopedEBTManager();
   let unsubscribeFn: (() => void) | undefined;
@@ -103,7 +100,6 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    urlSyncObservables: createUrlSyncObservablesFn(),
     onSubscribe: ({ unsubscribeFn: fn }: { unsubscribeFn: () => void }) => {
       unsubscribeFn = fn;
     },

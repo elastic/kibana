@@ -18,10 +18,8 @@ import {
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
 } from '../runtime_state';
-import type { UrlSyncObservables } from '../types';
 
 export function getTabRuntimeStateMock(
-  urlSyncObservables: UrlSyncObservables,
   attrs: Partial<ReactiveTabRuntimeState> = {}
 ): ReactiveTabRuntimeState {
   let unsubscribeFn: (() => void) | undefined;
@@ -36,7 +34,6 @@ export function getTabRuntimeStateMock(
     scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     ...attrs,
-    urlSyncObservables,
     onSubscribe: ({ unsubscribeFn: fn }: { unsubscribeFn: () => void }) => {
       unsubscribeFn = fn;
     },

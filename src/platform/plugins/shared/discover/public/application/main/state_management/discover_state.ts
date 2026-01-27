@@ -9,7 +9,7 @@
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { Observable } from 'rxjs';
+import { from, type Observable } from 'rxjs';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
@@ -17,14 +17,10 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppState } from './redux';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import {
-  createTabActionInjector,
-  internalStateActions,
-  selectTab,
-  selectTabRuntimeState,
-} from './redux';
+import { createTabActionInjector, internalStateActions, selectTab } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
+import { createTabAppStateObservable } from './utils/create_tab_app_state_observable';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -143,7 +139,11 @@ export function getDiscoverStateContainer({
     getCurrentTab,
   });
 
-  const appState$ = selectTabRuntimeState(runtimeStateManager, tabId).urlSyncObservables.appState$;
+  const appState$ = createTabAppStateObservable({
+    tabId,
+    internalState$: from(internalState),
+    getState: internalState.getState,
+  });
 
   return {
     appState$,

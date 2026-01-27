@@ -30,9 +30,6 @@ import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
-import type { Observable } from 'rxjs';
-import type { INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
@@ -212,13 +209,6 @@ export interface DiscoverInternalState {
      */
     unsafeCurrentId: string;
   };
-}
-
-export interface UrlSyncObservables {
-  readonly appState$: Observable<DiscoverAppState>;
-  readonly appStateContainer: INullableBaseStateContainer<DiscoverAppState>;
-  readonly globalState$: Observable<GlobalQueryStateFromUrl>;
-  readonly globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl>;
 }
 
 export interface UpdateESQLQueryActionPayload {

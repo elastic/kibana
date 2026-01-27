@@ -8,7 +8,7 @@
  */
 
 import type { DiscoverStateContainer } from './discover_state';
-import { createSearchSessionRestorationDataProvider } from './redux/utils';
+import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
