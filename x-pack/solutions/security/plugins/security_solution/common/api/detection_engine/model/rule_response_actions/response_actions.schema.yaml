@@ -144,6 +144,7 @@ components:
 
     RunscriptParams:
       type: object
+      description: 'IMPORTANT: Run script response action will only be available with v9.4.0'
       properties:
         command:
           type: string
@@ -151,7 +152,7 @@ components:
             - runscript
         comment:
           type: string
-          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Collect data"'
         config:
           type: object
           properties:
