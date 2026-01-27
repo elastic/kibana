@@ -313,6 +313,8 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Prevents URL-like strings from being displayed as links in alerts [#226849]({{kib-pull}}226849).
 * Improves anonymization error messages when NER model is unavailable [#247696]({{kib-pull}}247696).
 * Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
+* Fixes broken Data Visualizer and AI Operations navigation breadcrumbs and sidebar in solutions [#248167]({{kib-pull}}248167).
+* Fixes counter metric fields missing in anomaly detection dropdown [#153021]({{kib-pull}}153021).
 
 
 **Search**:
