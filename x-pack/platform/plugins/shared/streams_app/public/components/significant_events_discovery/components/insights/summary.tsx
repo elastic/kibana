@@ -90,11 +90,11 @@ export function Summary({ count }: { count: number }) {
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
 
-  const onGenerateSummaryClick = async () => {
+  const onGenerateInsightsClick = async () => {
     await scheduleTask();
   };
 
-  const onRegenerateSummaryClick = async () => {
+  const onRegenerateInsightsClick = async () => {
     await acknowledgeInsightsDiscoveryTask();
     await scheduleTask();
 
