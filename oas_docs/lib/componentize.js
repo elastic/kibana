@@ -15,10 +15,8 @@ const cloneDeep = require('lodash/cloneDeep');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { createComponentNameGenerator } = require('./component_name_generator');
 const { createProcessSchema, stripMetadata } = require('./process_schema');
-const { STRATEGY_DEFAULTS } = require('./strategy_defaults');
+const { STRATEGY_DEFAULTS, HTTP_METHODS } = require('./constants');
 
-// TODO: extract to constants file
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
 /**
  * Main componentization function
  * Traverses an OpenAPI document and extracts inline schemas into reusable components.
@@ -136,8 +134,9 @@ const componentizeObjectSchemas = async (
 
         log.debug(`Processing method: ${method.toUpperCase()}`); // upper case is easier to read in logs
 
-        // Process request body if method supports request content (put, post, patch)
+        // Process request body if method supports request content (put, post, patch),
         if (methodValue.requestBody?.content) {
+          // TODO: extract to helper function, e.g. handleRequestBodySchemas()
           Object.entries(methodValue.requestBody.content).forEach(
             ([contentType, contentTypeObj]) => {
               if (contentTypeObj.schema) {
@@ -199,6 +198,7 @@ const componentizeObjectSchemas = async (
 
         // Process responses
         if (methodValue.responses) {
+          // TODO: extract to helper function, e.g handleResponseSchemas()
           Object.entries(methodValue.responses).forEach(([statusCode, response]) => {
             if (response.content) {
               Object.entries(response.content).forEach(([contentType, contentTypeObj]) => {
@@ -305,7 +305,7 @@ const componentizeObjectSchemas = async (
     fs.unlinkSync(tempFilePath);
     tempFilePath = null;
 
-    // Log stats for dev
+    // Log stats for dev, TODO: extract to logger utility that can be silenced or redirected
     log.info('Componentization complete!');
     log.info(`Paths processed: ${pathCount}`);
     log.info(`Operations processed: ${methodValueCount}`);

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { STRATEGY_DEFAULTS } = require('./strategy_defaults');
-
-const MAX_RECURSION_DEPTH = 100;
+const { STRATEGY_DEFAULTS, MAX_RECURSION_DEPTH } = require('./constants');
 
 /**
  * Check if a schema has structural fields worth extracting as a component.
@@ -194,7 +192,7 @@ const createProcessSchema = (
       return;
     }
 
-    // Process each composition type, we could extract this to a helper function if needed (e.g. handleCompositionTypes)
+    // Process each composition type, TODO: extract to helper function (e.g. handleCompositionTypes)
     ['oneOf', 'anyOf', 'allOf'].forEach((compType) => {
       if (schema[compType] && Array.isArray(schema[compType])) {
         log.debug(
