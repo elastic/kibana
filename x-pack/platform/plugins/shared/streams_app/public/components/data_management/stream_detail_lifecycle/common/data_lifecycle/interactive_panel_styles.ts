@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { darken } from '@elastic/eui';
 import type { useEuiTheme } from '@elastic/eui';
 
 export interface InteractivePanelStylesOptions {
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
   backgroundColor?: string;
-  hoverBackgroundColor?: string;
   isPopoverOpen: boolean;
   minHeight?: string;
   minWidth?: string;
@@ -23,7 +23,6 @@ export interface InteractivePanelStylesOptions {
 export const getInteractivePanelStyles = ({
   euiTheme,
   backgroundColor,
-  hoverBackgroundColor,
   isPopoverOpen,
   minHeight,
   minWidth,
@@ -32,8 +31,6 @@ export const getInteractivePanelStyles = ({
   alignCenter,
   extraStyles,
 }: InteractivePanelStylesOptions) => {
-  const hoverColor = hoverBackgroundColor ?? backgroundColor;
-
   return {
     backgroundColor,
     margin: '0',
@@ -42,7 +39,7 @@ export const getInteractivePanelStyles = ({
     transform: 'none !important',
     transition: 'background-color 150ms ease-in-out !important',
     '&:hover': {
-      backgroundColor: hoverColor,
+      backgroundColor: backgroundColor ? darken(backgroundColor, 0.07) : undefined,
       transform: 'none !important',
       boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
     },

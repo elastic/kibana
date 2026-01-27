@@ -38,7 +38,6 @@ export interface LifecyclePhaseProps {
   size?: string;
   isDelete?: boolean;
   onClick?: () => void;
-  phaseColorHover?: string;
   description?: string;
   sizeInBytes?: number;
   docsCount?: number;
@@ -53,7 +52,6 @@ export const LifecyclePhase = ({
   size,
   isDelete = false,
   onClick,
-  phaseColorHover,
   description,
   sizeInBytes,
   docsCount,
@@ -96,7 +94,6 @@ export const LifecyclePhase = ({
       css={getInteractivePanelStyles({
         euiTheme,
         backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
-        hoverBackgroundColor: phaseColorHover ?? phaseColor,
         isPopoverOpen,
         minHeight: '48px',
         ...(isDelete

@@ -88,7 +88,6 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
           grow: phase.grow,
           isDelete: phase.name === 'delete',
           timelineValue: phasesWithGrow[index + 1]?.min_age,
-          colorHover: ilmPhases[phase.name].hoverColor,
           description: ilmPhases[phase.name].description,
           sizeInBytes: 'size_in_bytes' in phase ? phase.size_in_bytes : undefined,
           docsCount: estimatedDocs,
@@ -115,15 +114,11 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
         color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
         size: storageSize,
         retentionPeriod,
-        colorHover: isServerless
-          ? euiTheme.colors.backgroundFilledSuccess
-          : ilmPhases.hot.hoverColor,
         description: isServerless ? '' : ilmPhases.hot.description,
         sizeInBytes: stats?.sizeBytes,
         docsCount: stats?.totalDocs,
         deletePhaseDescription: ilmPhases.delete.description,
         deletePhaseColor: ilmPhases.delete.color,
-        deletePhaseColorHover: ilmPhases.delete.hoverColor,
       });
     }
 

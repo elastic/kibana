@@ -21,5 +21,3 @@ const DOWNSAMPLING_COLORS = [
 ];
 
 export const getDownsamplingColor = (index: number) => DOWNSAMPLING_COLORS[index];
-
-export const getDownsamplingHoverColor = (index: number) => DOWNSAMPLING_COLORS[index + 1];

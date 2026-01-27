@@ -76,7 +76,6 @@ export const LifecycleBar = ({
                 onClick={() => {
                   onPhaseClick?.(phase, index);
                 }}
-                phaseColorHover={phase.colorHover}
                 description={phase.description}
                 sizeInBytes={phase.sizeInBytes}
                 docsCount={phase.docsCount}

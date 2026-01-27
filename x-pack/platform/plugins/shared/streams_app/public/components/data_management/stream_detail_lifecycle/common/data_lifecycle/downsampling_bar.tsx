@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { capitalize } from 'lodash';
-import { getDownsamplingColor, getDownsamplingHoverColor } from '../../helpers/downsampling_colors';
+import { getDownsamplingColor } from '../../helpers/downsampling_colors';
 import { getInteractivePanelStyles } from './interactive_panel_styles';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 
@@ -151,7 +151,6 @@ export const DownsamplingBar = ({ segments, gridTemplateColumns }: DownsamplingB
                     stepNumber={(segment.stepIndex ?? index) + 1}
                     phaseName={segment.phaseName}
                     color={getDownsamplingColor(segment.stepIndex ?? index)}
-                    colorHover={getDownsamplingHoverColor(segment.stepIndex ?? index)}
                   />
                 ) : segment.isDelete ? (
                   <EuiPanel
@@ -193,7 +192,6 @@ interface DownsamplingPhaseBarProps {
   stepNumber: number;
   phaseName?: string;
   color?: string;
-  colorHover?: string;
 }
 
 const DownsamplingPhaseBar = ({
@@ -201,7 +199,6 @@ const DownsamplingPhaseBar = ({
   stepNumber,
   phaseName,
   color,
-  colorHover,
 }: DownsamplingPhaseBarProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -223,7 +220,6 @@ const DownsamplingPhaseBar = ({
       css={getInteractivePanelStyles({
         euiTheme,
         backgroundColor: color ?? euiTheme.colors.backgroundBasePlain,
-        hoverBackgroundColor: colorHover ?? euiTheme.colors.backgroundBaseSubdued,
         isPopoverOpen,
         minHeight: '30px',
         fullSize: true,

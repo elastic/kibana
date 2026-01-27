@@ -18,7 +18,6 @@ export interface LifecyclePhase {
   isDelete?: boolean;
   timelineValue?: string;
   min_age?: string;
-  colorHover?: string;
   description?: string;
   sizeInBytes?: number;
   docsCount?: number;
@@ -32,27 +31,23 @@ export function buildLifecyclePhases({
   color,
   size,
   retentionPeriod,
-  colorHover,
   description,
   sizeInBytes,
   docsCount,
   isReadOnly,
   deletePhaseDescription,
   deletePhaseColor,
-  deletePhaseColorHover,
 }: {
   label: string;
   color: string;
   size?: string;
   retentionPeriod?: string;
-  colorHover?: string;
   description?: string;
   sizeInBytes?: number;
   docsCount?: number;
   isReadOnly?: boolean;
   deletePhaseDescription?: string;
   deletePhaseColor?: string;
-  deletePhaseColorHover?: string;
 }): LifecyclePhase[] {
   // Extract unit from retentionPeriod for the zero phase or default to 'd'
   const { unit = 'd' } = retentionPeriod ? splitSizeAndUnits(retentionPeriod) : {};
@@ -66,7 +61,6 @@ export function buildLifecyclePhases({
       grow: true,
       timelineValue: retentionPeriod,
       min_age: `0${unit}`,
-      colorHover,
       description,
       sizeInBytes,
       docsCount,
@@ -84,7 +78,6 @@ export function buildLifecyclePhases({
       min_age: retentionPeriod,
       description: deletePhaseDescription,
       color: deletePhaseColor,
-      colorHover: deletePhaseColorHover,
     });
   }
 

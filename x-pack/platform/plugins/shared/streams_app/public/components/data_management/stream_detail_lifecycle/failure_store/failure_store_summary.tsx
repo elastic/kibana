@@ -38,14 +38,12 @@ export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreS
       defaultMessage: 'Failed ingest',
     }),
     color: euiTheme.colors.severity.danger,
-    colorHover: euiTheme.colors.vis.euiColorVisText7,
     size: storageSize,
     retentionPeriod,
     sizeInBytes: stats?.size,
     docsCount: stats?.count,
     deletePhaseDescription: ilmPhases.delete.description,
     deletePhaseColor: ilmPhases.delete.color,
-    deletePhaseColorHover: ilmPhases.delete.hoverColor,
   });
 
   return <DataLifecycleSummary phases={phases} />;
