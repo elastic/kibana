@@ -13,62 +13,16 @@ import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-inter
 import { map } from 'rxjs';
 import type { ConsoleAppenderConfig, FileAppenderConfig } from '@kbn/core-logging-server';
 import { AsyncLocalStorage } from 'async_hooks';
+import type { TrackUserActionParams } from '@kbn/core-user-activity-server';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
+import type {
+  InjectedContext,
+  InternalUserActivityServiceSetup,
+  InternalUserActivityServiceStart,
+} from './types';
 
 interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
-}
-
-interface ObjectParams {
-  id: string;
-  name: string;
-  type: string;
-  tags: string[];
-}
-
-interface EventParams {
-  action: string;
-  type: string;
-}
-
-export interface TrackUserActionParams {
-  message?: string;
-  event: EventParams;
-  object: ObjectParams;
-}
-
-interface SessionContext {
-  id?: string;
-}
-
-interface SpaceContext {
-  id?: string;
-}
-
-interface UserContext {
-  id?: string;
-  username?: string;
-  email?: string;
-  roles?: string[];
-  ip?: string;
-}
-
-interface InjectedContext {
-  session?: SessionContext;
-  kibana?: {
-    space?: SpaceContext;
-  };
-  user?: UserContext;
-}
-
-export interface InternalUserActivityServiceSetup {
-  trackUserAction(params: TrackUserActionParams): void;
-  setInjectedContext(newContext: InjectedContext): void;
-}
-
-export interface InternalUserActivityServiceStart {
-  trackUserAction(params: TrackUserActionParams): void;
-  setInjectedContext(newContext: InjectedContext): void;
 }
 
 export class UserActivityService
