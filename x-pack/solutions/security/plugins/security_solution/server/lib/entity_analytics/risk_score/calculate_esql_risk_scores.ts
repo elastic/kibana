@@ -16,7 +16,8 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import { generateEUID, getEntityIdRuntimeMappings } from './entity_identifiers';
+import { EntityTypeToNewIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -160,10 +161,11 @@ export const calculateScoresWithESQL = async (
           after_key?: Record<string, string>;
         };
         const entities = buckets.map(
-          ({ key }) => key[(EntityTypeToIdentifierField as Record<string, string>)[entityType]]
+          ({ key }) => key[(EntityTypeToNewIdentifierField as Record<string, string>)[entityType]]
         );
 
-        if (entities.length === 0) {
+        if (entities.length === 0 || (entities.length === 1 && entities[0] === '')) {
+          // TODO fix the possibility of the blank string on the composite aggregation side
           return Promise.resolve([
             entityType as EntityType,
             { afterKey: afterKey || {}, scores: [] },
@@ -171,9 +173,9 @@ export const calculateScoresWithESQL = async (
         }
         const bounds = {
           lower: (params.afterKeys as Record<string, Record<string, string>>)[entityType]?.[
-            (EntityTypeToIdentifierField as Record<string, string>)[entityType]
+            (EntityTypeToNewIdentifierField as Record<string, string>)[entityType]
           ],
-          upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
+          upper: afterKey?.[(EntityTypeToNewIdentifierField as Record<string, string>)[entityType]],
         };
 
         const query = getESQL(
@@ -193,7 +195,7 @@ export const calculateScoresWithESQL = async (
           .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
 
           .then(async (riskScoreBuckets) => {
-            const results = await applyScoreModifiers({
+            return applyScoreModifiers({
               now,
               experimentalFeatures: params.experimentalFeatures,
               identifierType: entityType as EntityType,
@@ -206,13 +208,11 @@ export const calculateScoresWithESQL = async (
               page: {
                 buckets: riskScoreBuckets,
                 bounds,
-                identifierField: (EntityTypeToIdentifierField as Record<string, string>)[
+                identifierField: (EntityTypeToNewIdentifierField as Record<string, string>)[
                   entityType
                 ],
               },
             });
-
-            return results;
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
             return [
@@ -238,7 +238,7 @@ export const calculateScoresWithESQL = async (
     );
     const esqlResults = await Promise.all(promises);
 
-    const results: RiskScoresPreviewResponse = esqlResults.reduce<RiskScoresPreviewResponse>(
+    return esqlResults.reduce<RiskScoresPreviewResponse>(
       (res, [entityType, { afterKey, scores }]) => {
         res.after_keys[entityType] = afterKey || {};
         res.scores[entityType] = scores;
@@ -246,8 +246,6 @@ export const calculateScoresWithESQL = async (
       },
       { after_keys: {}, scores: {} }
     );
-
-    return results;
   });
 
 const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => {
@@ -304,7 +302,10 @@ export const getCompositeQuery = (
     size: 0,
     index: params.index,
     ignore_unavailable: true,
-    runtime_mappings: params.runtimeMappings,
+    runtime_mappings: {
+      ...params.runtimeMappings,
+      ...getEntityIdRuntimeMappings(entityTypes),
+    },
     query: {
       function_score: {
         query: {
@@ -323,7 +324,7 @@ export const getCompositeQuery = (
       },
     },
     aggs: entityTypes.reduce((aggs, entityType) => {
-      const idField = EntityTypeToIdentifierField[entityType];
+      const idField = EntityTypeToNewIdentifierField[entityType];
       return {
         ...aggs,
         [entityType]: {
@@ -348,24 +349,26 @@ export const getESQL = (
   pageSize: number,
   index: string = '.alerts-security.alerts-default'
 ) => {
-  const identifierField = EntityTypeToIdentifierField[entityType];
+  const identifierField = EntityTypeToNewIdentifierField[entityType];
 
-  const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
-  const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
+  const lower = afterKeys.lower ? `${identifierField} > "${afterKeys.lower}"` : undefined;
+  const upper = afterKeys.upper ? `${identifierField} <= "${afterKeys.upper}"` : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
   }
-  const rangeClause = [lower, upper].filter(Boolean).join(' and ');
+  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
   const query = /* SQL */ `
   FROM ${index} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
+    | WHERE kibana.alert.risk_score IS NOT NULL
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
+    | ${generateEUID(entityType)}
+    | WHERE ${rangeClause}
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
@@ -436,7 +439,7 @@ export const buildRiskScoreBucket =
     });
 
     return {
-      key: { [EntityTypeToIdentifierField[entityType]]: entity },
+      key: { [EntityTypeToNewIdentifierField[entityType]]: entity },
       doc_count: count,
       top_inputs: {
         doc_count: inputs.length,

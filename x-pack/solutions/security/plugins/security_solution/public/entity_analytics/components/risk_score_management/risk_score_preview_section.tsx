@@ -24,7 +24,7 @@ import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import { EntityTypeToNewIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -213,7 +213,7 @@ const RiskEnginePreview: React.FC<{
           <RiskScorePreviewPanel
             items={getRiskiestScores(
               data?.scores[entityType],
-              EntityTypeToIdentifierField[entityType]
+              EntityTypeToNewIdentifierField[entityType]
             )}
             showMessage={
               <FormattedMessage
