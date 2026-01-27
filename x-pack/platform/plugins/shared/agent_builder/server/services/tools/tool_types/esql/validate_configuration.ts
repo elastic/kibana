@@ -20,15 +20,13 @@ const validateDefaultValueType = (
   paramName: string
 ): void => {
   switch (type) {
-    case 'text':
-    case 'keyword':
+    case 'string':
       if (typeof defaultValue !== 'string') {
         throw createBadRequestError(
           `Parameter '${paramName}' has type '${type}' but defaultValue is not a string`
         );
       }
       break;
-    case 'long':
     case 'integer':
       if (typeof defaultValue !== 'number' || !Number.isInteger(defaultValue)) {
         throw createBadRequestError(
@@ -36,7 +34,6 @@ const validateDefaultValueType = (
         );
       }
       break;
-    case 'double':
     case 'float':
       if (typeof defaultValue !== 'number') {
         throw createBadRequestError(
@@ -55,24 +52,6 @@ const validateDefaultValueType = (
       if (typeof defaultValue !== 'string') {
         throw createBadRequestError(
           `Parameter '${paramName}' has type '${type}' but defaultValue is not a string`
-        );
-      }
-      break;
-    case 'object':
-      if (
-        typeof defaultValue !== 'object' ||
-        defaultValue === null ||
-        Array.isArray(defaultValue)
-      ) {
-        throw createBadRequestError(
-          `Parameter '${paramName}' has type '${type}' but defaultValue is not an object`
-        );
-      }
-      break;
-    case 'nested':
-      if (!Array.isArray(defaultValue)) {
-        throw createBadRequestError(
-          `Parameter '${paramName}' has type '${type}' but defaultValue is not an array`
         );
       }
       break;

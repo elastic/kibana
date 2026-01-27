@@ -13,6 +13,12 @@ export * from './application';
 export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
+/**
+ * Cases connector limits.
+ */
+export const MAX_OPEN_CASES = 20;
+export const DEFAULT_MAX_OPEN_CASES = 5;
+
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 
