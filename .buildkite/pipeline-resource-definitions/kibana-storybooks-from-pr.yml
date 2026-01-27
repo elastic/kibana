@@ -1,0 +1,38 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-deploy-storybooks-from-pr
+  description: 'Build Storybooks from a PR'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-storybooks-from-pr'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  system: buildkite
+  owner: 'group:appex-sharedux'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / storybooks from PR
+      description: 'Builds Storybooks from a PR.'
+    spec:
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/storybooks_from_pr.yml
+      provider_settings:
+        build_pull_requests: true
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+        trigger_mode: none
+      cancel_intermediate_builds: true
+      env:
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+      teams:
+        appex-sharedux:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana
