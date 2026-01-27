@@ -12,9 +12,10 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 2. `evaluate` – a [`@playwright/test`](https://playwright.dev/docs/test-intro) extension that boots:
 
    - an Inference Client that is pre-bound to a Kibana connector
-   - a (Kibana-flavored) Phoenix client to run experiments
+   - an executor client to run experiments (defaults to **in-Kibana**; can be switched to the Phoenix-backed executor)
 
-3. `scripts/generate_schema` – one-off script that (re)generates typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`. The artifacts are currently not in use because we only have a single query, but the script is useful if we add more queries.
+3. `scripts/generate_schema` – optional utility to (re)generate typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`.
+   This is not required to run evals and the generated artifacts are currently not used (we only have a single query), but it is useful if we add more queries.
 
 ## Writing an evaluation test
 
@@ -22,7 +23,7 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 // my_eval.test.ts
 import { evaluate } from '@kbn/evals';
 
-evaluate('the model should answer truthfully', async ({ inferenceClient, phoenixClient }) => {
+evaluate('the model should answer truthfully', async ({ inferenceClient, executorClient }) => {
   const dataset = {
     name: 'my-dataset',
     description: 'my-description',
@@ -38,44 +39,64 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
     ],
   };
 
-  await phoenixClient.runExperiment({
-    dataset,
-    evaluators: [
+  await executorClient.runExperiment(
+    {
+      dataset,
+      task: async ({ input }) => {
+        const result = await inferenceClient.output({
+          id: 'foo',
+          input: input.content as string,
+        });
+
+        return { content: result.content };
+      },
+    },
+    [
       {
         name: 'equals',
         kind: 'CODE',
-        evaluate: ({ input, output, expected }) => {
+        evaluate: async ({ output, expected }) => {
           return {
-            score: output === 'bar' ? 1 : 0,
+            score: output?.content === expected?.content ? 1 : 0,
+            metadata: { output: output?.content, expected: expected?.content },
           };
         },
       },
-    ],
-    task: async ({ input }) => {
-      return (
-        await inferenceClient.output({
-          id: 'foo',
-          input: input.content as string,
-        })
-      ).content;
-    },
-  });
+    ]
+  );
 });
 ```
+
+### Typing datasets (recommended)
+
+For strong typing of \(input\), \(expected\), and \(metadata\), define a suite-local `Example` type and use it consistently in your dataset, task, and evaluator selection:
+
+```ts
+import type { Example } from '@kbn/evals';
+
+type MyExample = Example<
+  { question: string },
+  { expectedAnswer: string },
+  { tags?: string[] } | null
+>;
+```
+
+Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your evaluator callback receives typed `expected`/`metadata`.
 
 ### Available fixtures
 
 | Fixture                     | Description                                                                                                                                   |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
-| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                               |
+| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
+| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                |
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
 | `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
 
 ## Running the suite
 
-Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
+If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
@@ -85,6 +106,10 @@ telemetry.tracing.exporters:
       project_name: '<my-name>'
       api_key: '<my-api-key>'
 ```
+
+This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
+
+
 
 Create a Playwright config that delegates to the helper:
 
@@ -120,7 +145,8 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry:
+To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
+You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
 
 ```yaml
 telemetry.tracing.exporters:
@@ -259,7 +285,7 @@ export const evaluate = base.extend({
   },
 });
 
-evaluate('my test', async ({ phoenixClient }) => {
+evaluate('my test', async ({ executorClient }) => {
   // Your test logic here
 });
 ```
@@ -269,6 +295,15 @@ evaluate('my test', async ({ phoenixClient }) => {
 ## Elasticsearch Export
 
 The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+
+### Exporting to a separate Elasticsearch cluster
+
+By default, exports go to the same Elasticsearch cluster used by the Scout test environment (`esClient` fixture).
+If you want to keep using an isolated Scout cluster for the eval run, but export results to a different Elasticsearch cluster (e.g. your local `localhost:9200`), set:
+
+```bash
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config ...
+```
 
 ### Datastream Structure
 
@@ -355,7 +390,7 @@ To enable selective evaluator execution, wrap your evaluators with the `selectEv
 ```ts
 import { selectEvaluators } from '@kbn/evals';
 
-await phoenixClient.runExperiment(
+await executorClient.runExperiment(
   {
     dataset,
     task: myTask,
@@ -428,10 +463,46 @@ Then you can run the evaluations as normal. The Playwright tests will use the pr
 
 > **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
-## Regenerating Phoenix GraphQL types
+## Executor selection (Phoenix vs in-Kibana)
+
+By default, evals run using the **in-Kibana executor** (no Phoenix dataset/experiment API required).
+
+If you want to run using the **Phoenix-backed executor**, set:
 
 ```bash
-node --require ./src/setup_node_env x-pack/platform/packages/shared/kbn-evals/scripts/generate_schema/index.ts
+KBN_EVALS_EXECUTOR=phoenix
 ```
 
-The script temporarily installs GraphQL-Codegen, fetches the Phoenix schema, emits the artefacts into `kibana_phoenix_client/__generated__`, lints them, and finally removes the transient dependencies.
+When using `KBN_EVALS_EXECUTOR=phoenix`, the eval runner (Playwright worker process) needs Phoenix API settings.
+The simplest way to provide them locally (e.g. when running `node scripts/phoenix`) is via environment variables:
+
+```bash
+PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
+```
+
+If your Phoenix instance requires auth, also set:
+
+```bash
+PHOENIX_API_KEY=... PHOENIX_BASE_URL=... KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
+```
+
+#### Dataset upsert fallback (Phoenix-only)
+
+Some Phoenix environments intermittently fail the GraphQL dataset upsert used to keep datasets in sync. As a fallback, `@kbn/evals` can **delete and recreate** the dataset via Phoenix REST APIs.
+
+Because deleting a dataset **wipes all past experiments** on that dataset, this fallback is **disabled by default**. To explicitly allow it, set:
+
+```bash
+KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true
+```
+
+Alternatively, you can configure a Phoenix exporter in `kibana.dev.yml` so `@kbn/evals` can read Phoenix API settings via `getPhoenixConfig()`.
+
+```yaml
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+```

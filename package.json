@@ -1222,6 +1222,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "0.208.0",
     "@opentelemetry/exporter-trace-otlp-proto": "0.208.0",
     "@opentelemetry/instrumentation": "0.208.0",
+    "@opentelemetry/instrumentation-hapi": "0.57.0",
     "@opentelemetry/instrumentation-http": "0.208.0",
     "@opentelemetry/instrumentation-undici": "0.19.0",
     "@opentelemetry/otlp-exporter-base": "0.208.0",

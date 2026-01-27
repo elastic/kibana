@@ -4,21 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
-import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
-import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
+import type {
+  EvalsExecutorClient,
+  Evaluator,
+  EvaluationDataset,
+  ExperimentTask,
+  RanExperiment,
+  TaskOutput,
+} from '../types';
 import { upsertDataset } from './upsert_dataset';
 import type { PhoenixConfig } from '../utils/get_phoenix_config';
 
-export class KibanaPhoenixClient {
+/**
+ * Phoenix-backed eval runner. This remains supported as an option during the migration,
+ * but the rest of `@kbn/evals` should depend only on the shared runner interface + types.
+ */
+export class KibanaPhoenixClient implements EvalsExecutorClient {
   private readonly phoenixClient: PhoenixClient;
+  private readonly allowPhoenixDatasetDeleteRecreateFallback: boolean;
 
   private readonly experiments: RanExperiment[] = [];
 
@@ -34,6 +46,8 @@ export class KibanaPhoenixClient {
     this.phoenixClient = createClient({
       options: this.options.config,
     });
+    this.allowPhoenixDatasetDeleteRecreateFallback =
+      process.env.KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK === 'true';
   }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
@@ -55,8 +69,8 @@ export class KibanaPhoenixClient {
         examples: dataset.examples.map((example) => {
           return {
             input: example.input,
-            output: example.output ?? null,
-            metadata: example.metadata ?? {},
+            output: (example.output ?? null) as any,
+            metadata: (example.metadata ?? {}) as any,
           };
         }),
       });
@@ -74,12 +88,50 @@ export class KibanaPhoenixClient {
       },
     });
 
-    await upsertDataset({
-      phoenixClient: this.phoenixClient,
-      datasetId: storedDataset.id,
-      storedExamples: examplesResponse.data?.data.examples ?? [],
-      nextExamples: dataset.examples,
-    });
+    try {
+      await upsertDataset({
+        phoenixClient: this.phoenixClient,
+        datasetId: storedDataset.id,
+        storedExamples: (examplesResponse.data?.data.examples ?? []) as any,
+        nextExamples: dataset.examples as any,
+      });
+    } catch (error) {
+      // Some Phoenix versions/environments intermittently fail the GraphQL dataset upsert.
+      // Deleting a dataset wipes all past experiments on that dataset, so only do this with explicit consent.
+      if (!this.allowPhoenixDatasetDeleteRecreateFallback) {
+        this.options.log.warning(
+          `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}). ` +
+            `Refusing to delete+recreate without explicit opt-in. ` +
+            `To allow the destructive fallback (will wipe past experiments), set ` +
+            `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
+        );
+        this.options.log.debug(error);
+        throw error;
+      }
+
+      const message = `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}); falling back to delete+recreate`;
+      this.options.log.warning(message);
+      this.options.log.debug(error);
+
+      await this.phoenixClient.DELETE('/v1/datasets/{id}', {
+        params: { path: { id: storedDataset.id } },
+      });
+
+      const { datasetId } = await datasets.createDataset({
+        client: this.phoenixClient,
+        name: dataset.name,
+        description: dataset.description,
+        examples: dataset.examples.map((example) => {
+          return {
+            input: example.input,
+            output: (example.output ?? null) as any,
+            metadata: (example.metadata ?? {}) as any,
+          };
+        }),
+      });
+
+      return { datasetId };
+    }
 
     return { datasetId: storedDataset.id };
   }
@@ -121,38 +173,23 @@ export class KibanaPhoenixClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment>;
-
-  async runExperiment(
-    {
-      dataset,
-      task,
-      metadata: experimentMetadata,
-      concurrency,
-      trustUpstreamDataset,
-    }: {
-      dataset: EvaluationDataset;
-      task: ExperimentTask<Example, TaskOutput>;
-      metadata?: Record<string, unknown>;
-      concurrency?: number;
-      trustUpstreamDataset?: boolean;
-    },
-    evaluators: Evaluator[]
   ): Promise<RanExperiment> {
     return withInferenceContext(async () => {
+      const {
+        dataset,
+        task,
+        metadata: experimentMetadata,
+        concurrency,
+        trustUpstreamDataset,
+      } = options;
+
       // Phoenix can occasionally reset connections locally (e.g., container restart or transient overload).
       // Retry to avoid flaking the entire suite.
       const ranExperiment = await pRetry(
         async () => {
           const datasetId = trustUpstreamDataset
             ? (await this.getDatasetByName(dataset.name)).id
-            : (
-                await this.syncDataSet({
-                  name: dataset.name,
-                  description: dataset.description,
-                  examples: dataset.examples,
-                })
-              ).datasetId;
+            : (await this.syncDataSet(dataset)).datasetId;
 
           const experiments = await import('@arizeai/phoenix-client/experiments');
 
@@ -160,7 +197,8 @@ export class KibanaPhoenixClient {
             client: this.phoenixClient,
             dataset: { datasetId },
             experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
-            task,
+            // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
+            task: task as any,
             experimentMetadata: {
               ...experimentMetadata,
               model: this.options.model,
@@ -169,17 +207,18 @@ export class KibanaPhoenixClient {
             setGlobalTracerProvider: false,
             evaluators: evaluators.map((evaluator) => {
               return {
-                ...evaluator,
-                evaluate: ({ input, output, expected, metadata }) => {
+                name: evaluator.name,
+                kind: evaluator.kind,
+                evaluate: ({ input, output, expected, metadata: md }: any) => {
                   return evaluator.evaluate({
                     expected: expected ?? null,
                     input,
-                    metadata: metadata ?? {},
+                    metadata: md ?? {},
                     output,
                   });
                 },
               };
-            }),
+            }) as any,
             logger: {
               error: this.options.log.error.bind(this.options.log),
               info: this.options.log.info.bind(this.options.log),
@@ -204,18 +243,16 @@ export class KibanaPhoenixClient {
       );
 
       this.experiments.push(ranExperiment);
-
       return ranExperiment;
     });
   }
 
-  async getRanExperiments() {
+  async getRanExperiments(): Promise<RanExperiment[]> {
     return this.experiments;
   }
 
   /**
-   * Fetch dataset metadata for a list of IDs, returning a map id -> name.
-   * Falls back to id if name cannot be fetched.
+   * Phoenix-only helper retained for parity/debugging.
    */
   async getDatasets(ids: string[]): Promise<DatasetInfo[]> {
     const limiter = pLimit(5);
