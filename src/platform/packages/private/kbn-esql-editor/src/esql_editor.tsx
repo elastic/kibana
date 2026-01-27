@@ -1339,6 +1339,7 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
+          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter
