@@ -144,7 +144,9 @@ components:
 
     RunscriptParams:
       type: object
-      description: 'IMPORTANT: Run script response action will only be available with v9.4.0'
+      description: |
+        > warn
+        > Run script response action will only be available with v9.4.0
       properties:
         command:
           type: string
