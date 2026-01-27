@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, where, sort, SortOrder, stats } from '@kbn/esql-composer';
+import { esql } from '@kbn/esql-language';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
@@ -98,15 +98,16 @@ export function getESQLForLayer(
     }
   }
 
-  // indexPattern.title is the actual es pattern
-  let esqlCompose = from(indexPattern.title);
+  // indexPattern.title is the actual ES pattern
+  // Build query parts as strings, then combine with esql() for proper parameterization
+  // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
+  const queryParts: string[] = [`FROM ${indexPattern.title}`];
+  const queryParams: Record<string, string | number> = {};
 
   if (indexPattern.timeFieldName) {
-    esqlCompose = esqlCompose.pipe(
-      where('??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend', {
-        timeFieldName: indexPattern.timeFieldName,
-      })
-    );
+    // This way we later replace timeFieldName but keep _tstart and _tend as parameters
+    queryParts.push(`WHERE ??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend`);
+    queryParams.timeFieldName = indexPattern.timeFieldName;
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -380,6 +381,9 @@ export function getESQLForLayer(
 
   const buckets = bucketsResult as string[];
 
+  // Merge all params from metrics and buckets
+  const allParams = Object.assign({}, queryParams, ...allParamObjects);
+
   if (buckets.length > 0) {
     if (buckets.some((b) => !b || b.includes('undefined'))) {
       return getEsqlQueryFailedResult('unknown');
@@ -387,13 +391,10 @@ export function getESQLForLayer(
 
     if (metrics.length > 0) {
       const statsBody = `${metrics.join(', ')} BY ${buckets.join(', ')}`;
-      const allParams = Object.assign({}, ...allParamObjects);
-      esqlCompose = esqlCompose.pipe(
-        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
-      );
+      queryParts.push(`STATS ${statsBody}`);
     }
 
-    const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
+    const sortFields = bucketEsAggsEntries.map(([colId, col], index) => {
       const aggId = String(index);
       let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
         ? `col_${index}-${aggId}`
@@ -403,24 +404,28 @@ export function getESQLForLayer(
         esAggsId = col.sourceField;
       }
 
-      return { [esAggsId]: SortOrder.Asc };
+      return `${esAggsId} ASC`;
     });
 
-    esqlCompose = esqlCompose.pipe(sort(...sorts));
+    queryParts.push(`SORT ${sortFields.join(', ')}`);
   } else {
     if (metrics.length > 0) {
       const statsBody = metrics.join(', ');
-      const allParams = Object.assign({}, ...allParamObjects);
-      esqlCompose = esqlCompose.pipe(
-        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
-      );
+      queryParts.push(`STATS ${statsBody}`);
     }
   }
 
   try {
+    const queryString = queryParts.join(' | ');
+    const query =
+      Object.keys(allParams).length > 0 ? esql(queryString, allParams) : esql(queryString);
+
+    // Inline parameters to produce final query string with resolved values
+    query.inlineParams();
+
     return {
       success: true,
-      esql: esqlCompose.toString(),
+      esql: query.print(),
       partialRows,
       esAggsIdMap,
     };
