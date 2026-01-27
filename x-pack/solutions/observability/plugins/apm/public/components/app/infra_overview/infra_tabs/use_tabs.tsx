@@ -12,6 +12,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
+import { buildKqlFilter } from './build_kql_filter';
+
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
   hidden?: boolean;
@@ -50,19 +52,10 @@ export function useTabs({
     [start, end]
   );
 
-  const hostsFilter = useMemo(
-    () => `${HOST_NAME}: (${hostNames.map((hostName) => `"${hostName}"`).join(' OR ')})`,
-    [hostNames]
-  );
-
-  const podsFilter = useMemo(
-    () => `${KUBERNETES_POD_NAME}: (${podNames.map((podName) => `"${podName}"`).join(' OR ')})`,
-    [podNames]
-  );
-
+  const hostsFilter = useMemo(() => buildKqlFilter(HOST_NAME, hostNames), [hostNames]);
+  const podsFilter = useMemo(() => buildKqlFilter(KUBERNETES_POD_NAME, podNames), [podNames]);
   const containersFilter = useMemo(
-    () =>
-      `${CONTAINER_ID}: (${containerIds.map((containerId) => `"${containerId}"`).join(' OR ')})`,
+    () => buildKqlFilter(CONTAINER_ID, containerIds),
     [containerIds]
   );
 

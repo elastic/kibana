@@ -87,4 +87,10 @@ describe('metricsToApiOptions', () => {
     expect(firstListAsSet).toEqual(secondListAsSet);
     expect(firstList.length).toBe(secondList.length);
   }
+
+  it("should join the source filter and the kuery when it's provided in the expected format", () => {
+    const kuery = 'host.name: "my-host"';
+    const { options } = metricsToApiOptions(testMetricsMapField1First, kuery);
+    expect(options.filterKuery).toBe(`(event.module: "test") AND (host.name: "my-host")`);
+  });
 });
