@@ -14,6 +14,12 @@ import { mergeServiceStats } from './merge_service_stats';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { Logger } from '@kbn/logging';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
 
 jest.mock('./get_service_transaction_stats');
 jest.mock('./get_health_statuses');
@@ -35,16 +41,16 @@ describe('getServicesItems', () => {
   const baseParams = {
     environment: 'production',
     kuery: '',
-    apmEventClient: {} as any,
-    apmAlertsClient: {} as any,
-    sloClient: {} as any,
+    apmEventClient: {} as unknown as APMEventClient,
+    apmAlertsClient: {} as unknown as ApmAlertsClient,
+    sloClient: {} as unknown as ApmSloClient,
     logger: mockLogger,
     start: 1000,
     end: 2000,
     serviceGroup: null,
-    randomSampler: {} as any,
-    documentType: 'transactionMetric' as any,
-    rollupInterval: '1m' as any,
+    randomSampler: {} as unknown as RandomSampler,
+    documentType: 'transactionMetric' as ApmServiceTransactionDocumentType,
+    rollupInterval: '1m' as RollupInterval,
     useDurationSummary: false,
   };
 
