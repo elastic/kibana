@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type {
-  UserPromptDocument,
-} from './types';
+import type { UserPromptDocument } from './types';
 import type { UserPromptProperties } from './storage';
 import type {
   CreateUserPromptPayload as UserPromptCreateParams,

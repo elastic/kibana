@@ -6,10 +6,7 @@
  */
 
 export { createClient, type UserPromptClient } from './client';
-export type {
-  FindUserPromptsParams,
-  FindUserPromptsResult,
-} from './types';
+export type { FindUserPromptsParams, FindUserPromptsResult } from './types';
 
 export type {
   CreateUserPromptPayload as UserPromptCreateParams,
