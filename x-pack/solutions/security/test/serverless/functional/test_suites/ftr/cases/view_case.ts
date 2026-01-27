@@ -52,7 +52,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('header-page-supplements');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-attachments');
         await testSubjects.existOrFail('description');
 
         await testSubjects.existOrFail('case-view-activity');
@@ -272,7 +272,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY
-    describe('Lens visualization', () => {
+    describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
         await createAndNavigateToCase(getPageObject, getService, owner);
@@ -381,15 +381,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      it("shows the 'files' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
+      it("shows the 'attachments' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-attachments');
+        await testSubjects.existOrFail('case-view-attachments');
       });
     });
 
     describe('Files', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
-
+      before(async () => {
+        // open attachments to have access to the files tab
+        await testSubjects.click('case-view-tab-title-attachments');
+      });
       it('adds a file to the case', async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');

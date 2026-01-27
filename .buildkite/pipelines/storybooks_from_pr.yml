@@ -1,0 +1,9 @@
+steps:
+  - label: "Build Storybooks"
+    commands:
+      - .buildkite/scripts/steps/storybooks/build_and_upload.sh
+      - export STORYBOOK_URL=$(buildkite-agent meta-data get pr_comment:storybooks:head)
+      - ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "Storybook deployment $STORYBOOK_URL" \
+        --context "kibana-storybooks-from-pr" \
+        --clear-previous
