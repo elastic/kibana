@@ -217,7 +217,6 @@ export class ConfigService {
           this.getValidatedConfigAtPath$(path, {
             // At this point we don't care about how valid the config is: we just want to read `enabled`
             stripUnknownKeys: true,
-            // Pass raw config to detect when user tries to set `enabled` on a non-disableable plugin
             rawConfig: rawConfigAtPath,
           }) as Observable<{ enabled?: boolean }>,
           { defaultValue: undefined }
