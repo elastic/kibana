@@ -207,5 +207,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.verifyNoRenderErrors();
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
     });
+
+    it('can edit a by-value session and return to the dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.clickSaveSearchButton();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+    });
   });
 }
