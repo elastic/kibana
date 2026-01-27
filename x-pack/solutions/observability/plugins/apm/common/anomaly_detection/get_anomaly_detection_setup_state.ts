@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { FETCH_STATUS } from '../../public/hooks/use_fetcher';
-import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 
 export enum AnomalyDetectionSetupState {

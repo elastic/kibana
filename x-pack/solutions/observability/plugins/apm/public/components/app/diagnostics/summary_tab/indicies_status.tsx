@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 import { TabStatus } from './tab_status';
@@ -26,12 +27,16 @@ export function FieldMappingStatus() {
 
   return (
     <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="fieldMappingStatus">
-      Indices
+      {i18n.translate('xpack.apm.fieldMappingStatus.tabStatus.indicesLabel', {
+        defaultMessage: 'Indices',
+      })}
       <EuiLink
         data-test-subj="apmFieldMappingStatusSeeDetailsLink"
         href={router.link('/diagnostics/indices', { query })}
       >
-        See details
+        {i18n.translate('xpack.apm.fieldMappingStatus.seeDetailsLinkLabel', {
+          defaultMessage: 'See details',
+        })}
       </EuiLink>
     </TabStatus>
   );

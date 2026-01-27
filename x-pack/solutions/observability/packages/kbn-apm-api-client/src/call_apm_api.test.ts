@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import * as callApiExports from './rest/call_api';
-import { createCallApmApi, callApmApi } from './rest/create_call_apm_api';
+import * as callApiExports from './call_api';
+import type { APMClient } from './create_call_apm_api';
+import { createCallApmApi } from './create_call_apm_api';
 import type { CoreStart } from '@kbn/core/public';
 
 const callApi = jest
@@ -14,12 +15,18 @@ const callApi = jest
   .mockImplementation(() => Promise.resolve(null));
 
 describe('callApmApi', () => {
+  let callApmApi: APMClient;
   beforeEach(() => {
-    createCallApmApi({} as CoreStart);
+    callApmApi = createCallApmApi({} as unknown as CoreStart);
   });
 
   afterEach(() => {
     callApi.mockClear();
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should format the pathname with the given path params', async () => {

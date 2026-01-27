@@ -7,12 +7,12 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { APIClientRequestParamsOf } from '@kbn/apm-api-client';
 import type { TraceSearchQuery } from '../../../../common/trace_explorer';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TraceExplorerSamplesFetcherContextProvider } from '../../../hooks/use_trace_explorer_samples';
-import type { APIClientRequestParamsOf } from '../../../services/rest/create_call_apm_api';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
 import { push } from '../../shared/links/url_helpers';
 import { TraceSearchBox } from './trace_search_box';

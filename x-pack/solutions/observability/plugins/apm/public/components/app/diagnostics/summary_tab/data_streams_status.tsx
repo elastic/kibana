@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
@@ -26,12 +27,16 @@ export function DataStreamsStatus() {
 
   return (
     <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="dataStreamsStatus">
-      Data streams
+      {i18n.translate('xpack.apm.dataStreamsStatus.tabStatus.dataStreamsLabel', {
+        defaultMessage: 'Data streams',
+      })}
       <EuiLink
         data-test-subj="apmDataStreamsStatusSeeDetailsLink"
         href={router.link('/diagnostics/data-streams', { query })}
       >
-        See details
+        {i18n.translate('xpack.apm.dataStreamsStatus.seeDetailsLinkLabel', {
+          defaultMessage: 'See details',
+        })}
       </EuiLink>
     </TabStatus>
   );

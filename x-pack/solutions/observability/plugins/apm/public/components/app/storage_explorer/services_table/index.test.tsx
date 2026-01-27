@@ -14,7 +14,7 @@ import { ServicesTable } from '.';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 // Mock the hooks

@@ -13,6 +13,7 @@ import React from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -21,7 +22,6 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockNow } from '../utils/test_helpers';
-import { clearCache, callApi } from './rest/call_api';
+import { clearCache, callApi } from './call_api';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import { mockNow } from './test_helpers/mock_now';
 
 type CoreMock = CoreStart & {
   http: {
@@ -32,6 +32,8 @@ describe('callApi', () => {
   afterEach(() => {
     core.http.get.mockClear();
     clearCache();
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('_inspect', () => {

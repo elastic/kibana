@@ -20,7 +20,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -118,7 +118,9 @@ export function AddEnvironments({ currentEnvironments, onCreateJobSuccess, onCan
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="apmAddEnvironmentsCancelButton"
-            aria-label="Cancel"
+            aria-label={i18n.translate('xpack.apm.addEnvironments.euiButtonEmpty.cancelLabel', {
+              defaultMessage: 'Cancel',
+            })}
             onClick={onCancel}
           >
             {i18n.translate(

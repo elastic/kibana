@@ -15,13 +15,13 @@ import {
   WaterfallLegendType,
   type CriticalPathSegment,
 } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 

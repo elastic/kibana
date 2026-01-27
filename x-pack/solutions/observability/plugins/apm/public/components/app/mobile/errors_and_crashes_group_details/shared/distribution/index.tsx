@@ -14,12 +14,12 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import React from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { TimeseriesChartWithContext } from '../../../../../shared/charts/timeseries_chart_with_context';
 import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import type { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { isPending } from '../../../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../../../hooks/use_previous_period_text';
-import type { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { getComparisonChartTheme } from '../../../../../shared/time_comparison/get_comparison_chart_theme';
 
 import {

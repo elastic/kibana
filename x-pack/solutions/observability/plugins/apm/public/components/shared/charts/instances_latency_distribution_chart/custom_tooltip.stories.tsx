@@ -7,7 +7,7 @@
 
 import type { TooltipInfo } from '@elastic/charts';
 import React from 'react';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { CustomTooltip } from './custom_tooltip';
 

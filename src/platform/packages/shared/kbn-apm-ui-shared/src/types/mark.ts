@@ -24,4 +24,5 @@ export interface ErrorMark extends Mark {
   error: Error;
   serviceColor: string;
   onClick?: () => void;
+  href?: string;
 }

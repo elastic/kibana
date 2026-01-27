@@ -22,7 +22,7 @@ interface Props {
   rangeFrom: string;
   rangeTo: string;
   traceId: string;
-  scrollElement: Element;
+  scrollElement?: Element | null;
   onNodeClick: OnNodeClick;
   getRelatedErrorsHref?: WaterfallGetRelatedErrorsHref;
   onErrorClick: OnErrorClick;

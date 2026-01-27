@@ -9,7 +9,7 @@ import type { TooltipInfo } from '@elastic/charts';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import type { TimeFormatter } from '../../../../../common/utils/formatters';
 import { asTransactionRate } from '../../../../../common/utils/formatters';

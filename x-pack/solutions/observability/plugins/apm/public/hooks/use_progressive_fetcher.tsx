@@ -12,9 +12,9 @@ import {
   getProbabilityFromProgressiveLoadingQuality,
   ProgressiveLoadingQuality,
 } from '@kbn/observability-plugin/common';
+import type { APMClient, APMClientOptions } from '@kbn/apm-api-client';
 import type { APMServerRouteRepository } from '../../server';
 
-import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
 import type { FetcherResult } from './use_fetcher';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
 

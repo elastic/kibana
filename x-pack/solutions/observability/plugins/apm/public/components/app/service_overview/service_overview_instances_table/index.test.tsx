@@ -16,7 +16,7 @@ import * as useApmParamsModule from '../../../../hooks/use_apm_params';
 import * as useBreakpointsModule from '../../../../hooks/use_breakpoints';
 import * as useInstanceDetailsFetcherModule from './use_instance_details_fetcher';
 import type { InstancesSortField } from '../../../../../common/instances';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../hooks/use_breakpoints');

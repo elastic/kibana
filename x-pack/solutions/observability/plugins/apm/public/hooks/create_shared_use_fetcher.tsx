@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { createContext, useContext, useMemo } from 'react';
+import type { APIClientRequestParamsOf } from '@kbn/apm-api-client';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import type { APIEndpoint } from '../../server';
-import type { APIClientRequestParamsOf, APIReturnType } from '../services/rest/create_call_apm_api';
 import type { FetcherResult } from './use_fetcher';
 import { useFetcher } from './use_fetcher';
 

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useState } from 'react';
 import { asDuration } from '../../../utils/formatters';
@@ -84,7 +91,11 @@ export function ErrorMarker({ mark }: Props) {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {mark.onClick ? (
+            {mark.href ? (
+              <EuiLink data-test-subj="apmErrorDetailsLink" href={mark.href}>
+                {truncatedErrorMessage}
+              </EuiLink>
+            ) : mark.onClick ? (
               <EuiButtonEmpty
                 data-test-subj="apmTimelineErrorMarkerButton"
                 onClick={() => {

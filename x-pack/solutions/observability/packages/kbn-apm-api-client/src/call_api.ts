@@ -39,7 +39,6 @@ export async function callApi<T = void>(
   { http, uiSettings }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  // TODO: caue
   const inspectableEsQueriesEnabled: boolean = uiSettings.get(
     'observability:enableInspectEsQueries'
   );

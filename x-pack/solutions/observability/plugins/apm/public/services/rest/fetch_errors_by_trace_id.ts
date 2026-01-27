@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APIReturnType } from './create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { callApmApi } from './create_call_apm_api';
 
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;

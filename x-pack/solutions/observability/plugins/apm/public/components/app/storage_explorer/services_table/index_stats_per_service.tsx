@@ -10,11 +10,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiPanel, EuiTitle, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asDynamicBytes, asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
 import { getIndexManagementHref } from '../get_storage_explorer_links';
 

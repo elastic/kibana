@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {

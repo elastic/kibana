@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { CustomComponentProps } from '@kbn/home-plugin/public';
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import type { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 
 const CentralizedContainer = styled.div`
   display: flex;

@@ -8,12 +8,12 @@ import type { EuiBasicTableColumn, PropertySort } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { asDynamicBytes, asMillisecondDuration } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ServerlessFunctionNameLink } from './serverless_function_name_link';
 
 type ServerlessFunctionOverview =

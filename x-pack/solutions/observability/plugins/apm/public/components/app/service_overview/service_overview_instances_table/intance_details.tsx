@@ -13,6 +13,7 @@ import { get } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -37,7 +38,6 @@ import {
 } from '../../../../../common/es_fields/infra_metrics';
 
 import { isPending } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
 import { getContainerIcon } from '../../../shared/service_icons';

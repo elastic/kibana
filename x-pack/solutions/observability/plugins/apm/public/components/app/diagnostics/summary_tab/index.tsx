@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';
@@ -51,9 +51,17 @@ export function DiagnosticsSummary() {
 
 function CrossClusterSearchCallout() {
   return (
-    <EuiCallOut title="Cross cluster search not supported" color="warning">
-      The APM index settings is targetting remote clusters. Please note that this is not currently
-      supported by the Diagnostics Tool and functionality will therefore be limited.
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.apm.crossClusterSearchCallout.euiCallOut.crossClusterSearchNotLabel',
+        { defaultMessage: 'Cross cluster search not supported' }
+      )}
+      color="warning"
+    >
+      {i18n.translate('xpack.apm.crossClusterSearchCallout.theAPMIndexSettingsCallOutLabel', {
+        defaultMessage:
+          'The APM index settings is targetting remote clusters. Please note that this is not currently supported by the Diagnostics Tool and functionality will therefore be limited.',
+      })}
     </EuiCallOut>
   );
 }
@@ -69,8 +77,15 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
   return (
     <>
-      <EuiCallOut title="Insufficient access" color="warning">
-        Not all features are available due to missing privileges.
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.privilegesCallout.euiCallOut.insufficientAccessLabel', {
+          defaultMessage: 'Insufficient access',
+        })}
+        color="warning"
+      >
+        {i18n.translate('xpack.apm.privilegesCallout.notAllFeaturesAreCallOutLabel', {
+          defaultMessage: 'Not all features are available due to missing privileges.',
+        })}
         <br />
         <br />
         <EuiDescriptionList

@@ -9,7 +9,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
-import type { Location } from 'history';
+import { createMemoryHistory, type Location } from 'history';
 import moment from 'moment';
 import type { Moment } from 'moment-timezone';
 import React from 'react';
@@ -101,9 +101,11 @@ export function expectTextsInDocument(output: any, texts: string[]) {
   });
 }
 
-export function renderWithContext(component: React.ReactNode, params?: any) {
+export function renderWithContext(component: React.ReactNode, params?: any, routePath?: string) {
   return render(
-    <MockApmPluginContextWrapper>
+    <MockApmPluginContextWrapper
+      history={routePath ? createMemoryHistory({ initialEntries: [routePath] }) : undefined}
+    >
       <KibanaContextProvider>
         <UrlParamsProvider>
           <EuiThemeProvider>{component}</EuiThemeProvider>

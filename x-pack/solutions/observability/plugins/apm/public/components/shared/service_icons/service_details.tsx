@@ -9,7 +9,7 @@ import type { EuiDescriptionListProps } from '@elastic/eui';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 
 type ServiceDetailsReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;

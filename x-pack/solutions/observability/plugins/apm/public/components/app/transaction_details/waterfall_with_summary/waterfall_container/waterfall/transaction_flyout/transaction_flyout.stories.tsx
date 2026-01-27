@@ -8,11 +8,11 @@ import { apm, dedot } from '@kbn/synthtrace-client';
 import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { TransactionFlyout } from '.';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import type { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof TransactionFlyout>;
 type TransactionDetailsApiReturnType =

@@ -15,7 +15,6 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
@@ -54,7 +53,6 @@ export const FullScreenWaterfall = ({
     typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
   >(null);
   const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
-  const [scrollElement, setScrollElement] = useState<Element | null>(null);
 
   const traceWaterfallTitleId = useGeneratedHtmlId({
     prefix: 'traceWaterfallTitle',
@@ -68,24 +66,6 @@ export const FullScreenWaterfall = ({
   );
 
   const minWidth = euiTheme.base * 30;
-
-  /**
-   * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
-   *
-   * This pattern is necessary because:
-   * - Embeddables are constructed once with immutable initial state
-   * - EUI components don't expose refs, requiring a wrapper div with closest()
-   * - scrollElement must be available before the embeddable initializes (conditional render below)
-   *
-   *
-   * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
-   * we can replace this workaround with a direct ref usage.
-   */
-  const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
-    }
-  }, []);
 
   const handleCloseFlyout = useCallback(() => {
     setActiveFlyoutId(null);
@@ -144,33 +124,17 @@ export const FullScreenWaterfall = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-          The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-          This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-          Issue: https://github.com/elastic/kibana/issues/248307
-          */}
-        <div
-          ref={embeddableContainerRef}
-          css={css`
-            width: 100%;
-            & .embPanel__content {
-              display: block !important;
-            }
-          `}
-        >
-          {scrollElement && serviceName ? (
-            <FullTraceWaterfallFetcher
-              callApmApi={callApmApi}
-              serviceName={serviceName}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              traceId={traceId}
-              scrollElement={scrollElement}
-              onNodeClick={handleNodeClick}
-              onErrorClick={handleErrorClick}
-            />
-          ) : null}
-        </div>
+        {serviceName ? (
+          <FullTraceWaterfallFetcher
+            callApmApi={callApmApi}
+            serviceName={serviceName}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            traceId={traceId}
+            onNodeClick={handleNodeClick}
+            onErrorClick={handleErrorClick}
+          />
+        ) : null}
       </EuiFlyoutBody>
 
       {docId && activeFlyoutId ? (

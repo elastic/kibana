@@ -12,7 +12,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { type LogsLocatorParams, getNodeQuery, getTimeRange } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { type AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import type {
   Action,
   SectionRecord,

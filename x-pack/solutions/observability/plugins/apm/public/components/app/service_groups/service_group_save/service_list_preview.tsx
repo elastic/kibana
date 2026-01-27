@@ -12,7 +12,7 @@ import { orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ValuesType } from 'utility-types';
 import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 

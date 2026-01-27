@@ -5,4 +5,12 @@
  * 2.0.
  */
 export { createCallApmApi } from './src/create_call_apm_api';
-export type { APMClient, APIReturnType } from './src/create_call_apm_api';
+export type {
+  APMClient,
+  APIReturnType,
+  APMClientOptions,
+  AutoAbortedAPMClient,
+  AbstractAPMClient,
+  APIClientRequestParamsOf,
+} from './src/create_call_apm_api';
+export { clearCache } from './src/call_api';

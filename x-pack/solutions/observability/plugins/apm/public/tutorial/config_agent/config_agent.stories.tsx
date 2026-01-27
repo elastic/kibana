@@ -8,9 +8,9 @@
 import type { StoryObj } from '@storybook/react';
 import type { HttpStart } from '@kbn/core/public';
 import React from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import { TutorialConfigAgent } from '.';
-import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 

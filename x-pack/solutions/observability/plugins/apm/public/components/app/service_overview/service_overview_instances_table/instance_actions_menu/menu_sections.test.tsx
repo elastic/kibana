@@ -10,7 +10,7 @@ import type { IBasePath } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 
 type InstaceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;

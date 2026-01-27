@@ -17,3 +17,4 @@ export type {
   CompressionStrategy,
   WaterfallGetRelatedErrorsHref,
 } from './src/types/trace_item';
+export type { ErrorMark, AgentMark } from './src/types/mark';

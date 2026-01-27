@@ -9,8 +9,8 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { SortDirection } from '../service_overview_instances_chart_and_table';
 import { PAGE_SIZE } from '../service_overview_instances_chart_and_table';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';

@@ -12,6 +12,7 @@ import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React, { useState } from 'react';
 import type { Error } from '@kbn/apm-types';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { WaterfallContainer } from '.';
 import type {
   WaterfallSpan,
@@ -19,7 +20,6 @@ import type {
 } from '../../../../../../common/waterfall/typings';
 import type { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 
 type Args = ComponentProps<typeof WaterfallContainer>;

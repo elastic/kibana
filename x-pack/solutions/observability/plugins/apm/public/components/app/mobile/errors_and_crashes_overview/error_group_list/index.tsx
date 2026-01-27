@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,

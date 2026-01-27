@@ -9,10 +9,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { StoryFn, Meta } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React from 'react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { Schema } from '.';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface Args {
   hasCloudAgentPolicy: boolean;

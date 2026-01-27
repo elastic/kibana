@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 
 type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 

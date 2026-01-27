@@ -8,7 +8,7 @@ import { RIGHT_ALIGNMENT, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
-import type { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import {
   ChartType,
   getTimeSeriesColor,

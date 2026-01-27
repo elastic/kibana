@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useFetcher } from './use_fetcher';
 import type { Environment } from '../../common/environment_rt';
-import type { APIReturnType } from '../services/rest/create_call_apm_api';
 type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
 
 const INITIAL_DATA: EnvironmentsAPIResponse = { environments: [] };

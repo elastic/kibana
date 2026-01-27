@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import type { CustomComponentProps } from '@kbn/home-plugin/public';
-import type { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { AgentConfigInstructions } from './agent_config_instructions';
 import type { PolicyOption } from './get_policy_options';
 import { getPolicyOptions } from './get_policy_options';

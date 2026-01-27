@@ -8,7 +8,6 @@
  */
 
 import { EuiDelayRender } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FocusedTraceWaterfallFetcher } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -73,27 +72,13 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           },
         ]}
       >
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-        The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-        This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-        Issue: https://github.com/elastic/kibana/issues/248307
-        */}
-        <div
-          css={css`
-            width: 100%;
-            & .embPanel__content {
-              display: block !important;
-            }
-          `}
-        >
-          <FocusedTraceWaterfallFetcher
-            callApmApi={callApmApi}
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            docId={docId}
-          />
-        </div>
+        <FocusedTraceWaterfallFetcher
+          callApmApi={callApmApi}
+          traceId={traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          docId={docId}
+        />
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

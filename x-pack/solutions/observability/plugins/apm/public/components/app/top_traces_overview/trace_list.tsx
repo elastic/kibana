@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 import {
@@ -28,7 +29,6 @@ import {
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { FetcherResult } from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';

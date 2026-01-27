@@ -5,47 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
-import type {
-  ClientRequestParamsOf,
-  ReturnOf,
-  RouteRepositoryClient,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
-import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { APMClient } from '@kbn/apm-api-client';
 import { createCallApmApi as createCallApmApiShared } from '@kbn/apm-api-client';
-import type { FetchOptions } from '../../../common/fetch_options';
-import type { APMServerRouteRepository, APIEndpoint } from '../../../server';
-
-export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
-  signal: AbortSignal | null;
-};
-
-export type APMClient = RouteRepositoryClient<APMServerRouteRepository, APMClientOptions>['fetch'];
-
-export type AutoAbortedAPMClient = RouteRepositoryClient<
-  APMServerRouteRepository,
-  Omit<APMClientOptions, 'signal'>
->['fetch'];
-
-export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
-  APMServerRouteRepository,
-  TEndpoint
-> & {
-  _inspect?: InspectResponse;
-};
-
-export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequestParamsOf<
-  APMServerRouteRepository,
-  TEndpoint
->;
-
-export type AbstractAPMRepository = ServerRouteRepository;
-
-export type AbstractAPMClient = RouteRepositoryClient<
-  AbstractAPMRepository,
-  APMClientOptions
->['fetch'];
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 
 export let callApmApi: APMClient = () => {
   throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
@@ -53,20 +15,4 @@ export let callApmApi: APMClient = () => {
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = createCallApmApiShared(core);
-  // ((endpoint, options) => {
-  //   const { params } = options as unknown as {
-  //     params?: Partial<Record<string, any>>;
-  //   };
-
-  //   const { method, pathname, version } = formatRequest(endpoint, params?.path);
-
-  //   return callApi(core, {
-  //     ...options,
-  //     method,
-  //     pathname,
-  //     body: params?.body,
-  //     query: params?.query,
-  //     version,
-  //   } as unknown as Parameters<CallApi>[1]);
-  // }) as APMClient;
 }

@@ -9,6 +9,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { LatencyChart } from '.';
 import type { Props } from '.';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -21,7 +22,6 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_ra
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface Args extends Props {

@@ -7,10 +7,13 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-import { renderWithTheme } from '../../../../../../utils/test_helpers';
+import { renderWithContext } from '../../../../../../utils/test_helpers';
 import { Waterfall } from '.';
 import type { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallLegendType } from '@kbn/apm-ui-shared';
+
+const ROUTE_PATH =
+  '/services/{serviceName}/transactions/view?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&offset=1d&rangeFrom=2026-01-27T18:42:17.513Z&rangeTo=2026-01-27T18:56:56.108Z&serviceGroup=&showCriticalPath=&transactionName=GET%20%2Fapi%2Forders&transactionType=request&flyoutDetailTab=&waterfallItemId=&traceId=b7f4d072c68388e1b8485609c61a546e&transactionId=b7f4d072c68388e1';
 
 describe('Waterfall', () => {
   const createMockWaterfall = (overrides?: Partial<IWaterfall>): IWaterfall => {
@@ -33,7 +36,11 @@ describe('Waterfall', () => {
 
   it('does not render warning when exceedsMax is false', () => {
     const waterfall = createMockWaterfall({ exceedsMax: false });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWithContext(
+      <Waterfall waterfall={waterfall} showCriticalPath={false} />,
+      undefined,
+      ROUTE_PATH
+    );
 
     const warning = screen.queryByTestId('apmWaterfallSizeWarning');
     expect(warning).not.toBeInTheDocument();
@@ -45,7 +52,11 @@ describe('Waterfall', () => {
       traceDocsTotal: 15551,
       maxTraceItems: 5000,
     });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWithContext(
+      <Waterfall waterfall={waterfall} showCriticalPath={false} />,
+      undefined,
+      ROUTE_PATH
+    );
 
     const warning = screen.getByTestId('apmWaterfallSizeWarning');
     expect(warning).toBeInTheDocument();
@@ -57,7 +68,11 @@ describe('Waterfall', () => {
       traceDocsTotal: 15551,
       maxTraceItems: 5000,
     });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWithContext(
+      <Waterfall waterfall={waterfall} showCriticalPath={false} />,
+      undefined,
+      ROUTE_PATH
+    );
 
     const warning = screen.getByTestId('apmWaterfallSizeWarning');
     const warningText = warning.textContent;
@@ -73,7 +88,11 @@ describe('Waterfall', () => {
       traceDocsTotal: 10000,
       maxTraceItems: 3000,
     });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWithContext(
+      <Waterfall waterfall={waterfall} showCriticalPath={false} />,
+      undefined,
+      ROUTE_PATH
+    );
 
     const warning = screen.getByTestId('apmWaterfallSizeWarning');
     const warningText = warning.textContent;

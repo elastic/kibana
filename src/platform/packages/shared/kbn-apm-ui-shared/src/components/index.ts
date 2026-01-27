@@ -22,5 +22,6 @@ export * from './timeline';
 export * from './timeline/legend';
 export { getSpanIcon } from './span_icon/get_span_icon';
 export * from './trace_waterfall/badges';
+export * from './trace_waterfall/marks/get_agent_marks';
 
 export type { Margins } from './timeline';

@@ -11,17 +11,21 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import {
+  getAgentMarks,
   TimelineAxisContainer,
   VerticalLinesContainer,
   type WaterfallGetRelatedErrorsHref,
 } from '@kbn/apm-ui-shared';
-import { getAgentMarks } from '../marks/get_agent_marks';
+
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import type {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { useGetErrorDetailLink } from '../../../../../shared/links/apm/error_detail_link';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 
 const Container = styled.div`
   transition: 0.1s padding ease;
@@ -85,11 +89,52 @@ export function Waterfall({
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-
   const { duration } = waterfall;
 
+  const { query } = useAnyOfApmParams(
+    '/dependencies/operation',
+    '/traces/explorer/waterfall',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
+
+  const serviceGroup = 'serviceGroup' in query ? query.serviceGroup : '';
+
+  const getErrorDetailLink = useGetErrorDetailLink();
+
+  const errorLinksMap = useMemo(() => {
+    return waterfall.errorItems.reduce<Map<string, string>>((acc, error) => {
+      if (!error.doc.error.grouping_key) {
+        return acc;
+      }
+
+      const traceId = error.doc.trace?.id;
+      const transactionId = error.doc.transaction?.id;
+
+      const kueryParts = [
+        traceId && `${TRACE_ID} : "${traceId}"`,
+        transactionId && `${TRANSACTION_ID} : "${transactionId}"`,
+      ].filter(Boolean);
+
+      const queryParam = {
+        ...query,
+        serviceGroup,
+        kuery: kueryParts.join(' and '),
+      };
+      const errorHref = getErrorDetailLink({
+        serviceName: error.doc.service.name,
+        errorGroupId: error.doc.error.grouping_key,
+        query: queryParam,
+      });
+
+      acc.set(error.id, errorHref);
+
+      return acc;
+    }, new Map<string, string>());
+  }, [waterfall.errorItems, query, getErrorDetailLink, serviceGroup]);
+
   const agentMarks = getAgentMarks(waterfall.entryTransaction?.transaction.marks?.agent);
-  const errorMarks = getErrorMarks(waterfall.errorItems);
+  const errorMarks = getErrorMarks(waterfall.errorItems, errorLinksMap);
 
   const timelineMargins = useMemo(() => {
     // Calculate the left margin relative to the deepest level, or 100px, whichever

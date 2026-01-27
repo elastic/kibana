@@ -9,7 +9,7 @@ import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { ServiceIcons } from '.';
 

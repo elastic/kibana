@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { ManagedTable } from '../../../../../shared/managed_table';
-import type { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { getColumns } from './get_columns';
 
 type MobileMainStatisticsByField =

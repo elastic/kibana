@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 

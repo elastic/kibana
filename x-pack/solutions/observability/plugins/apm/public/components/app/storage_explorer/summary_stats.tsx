@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { APIReturnType } from '@kbn/apm-api-client';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -29,7 +30,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 interface Props {
   data?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
