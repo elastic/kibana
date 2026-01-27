@@ -21,7 +21,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { DiscoverAppState } from '../../state_management/redux';
-import type { DiscoverCustomization } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
@@ -152,36 +151,13 @@ describe('Discover documents layout', () => {
     expect(container.getCurrentTab().appState.grid?.columns?.someField.width).toEqual(206);
   });
 
-  test('should render customisations', async () => {
-    const customization: DiscoverCustomization = {
-      id: 'data_table',
-      logsEnabled: true,
-      rowAdditionalLeadingControls: [],
-    };
-
-    customisationService.set(customization);
-    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
-    const discoverGridComponent = component.find(DiscoverGrid);
-    expect(discoverGridComponent.exists()).toBeTruthy();
-
-    expect(discoverGridComponent.prop('rowAdditionalLeadingControls')).toBe(
-      customization.rowAdditionalLeadingControls
-    );
-    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
-  });
-
   describe('context awareness', () => {
     it('should pass cell renderers from profile', async () => {
-      customisationService.set({
-        id: 'data_table',
-        logsEnabled: true,
-      });
       await discoverServiceMock.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
       const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
       const discoverGridComponent = component.find(DiscoverGrid);
       expect(discoverGridComponent.exists()).toBeTruthy();
       expect(Object.keys(discoverGridComponent.prop('externalCustomRenderers')!)).toEqual([
-        '_source',
         'rootProfile',
       ]);
     });
