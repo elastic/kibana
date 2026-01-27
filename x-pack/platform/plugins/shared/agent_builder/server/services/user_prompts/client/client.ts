@@ -14,13 +14,11 @@ import type { UserPromptStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
 import type {
-  UserPromptDocument,
+  CreateUserPromptPayload as UserPromptCreateParams,
+  UpdateUserPromptPayload as UserPromptUpdateParams,
   UserPrompt,
-  UserPromptCreateParams,
-  UserPromptUpdateParams,
-  FindUserPromptsParams,
-  FindUserPromptsResult,
-} from './types';
+} from '../../../../common/http_api/user_prompts';
+import type { UserPromptDocument, FindUserPromptsParams, FindUserPromptsResult } from './types';
 
 const createUserPromptNotFoundError = (promptId: string) => {
   return createBadRequestError(`User prompt with id '${promptId}' not found`);

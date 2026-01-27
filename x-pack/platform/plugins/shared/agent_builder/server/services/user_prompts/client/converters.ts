@@ -6,12 +6,14 @@
  */
 
 import type {
-  UserPromptCreateParams,
-  UserPromptUpdateParams,
   UserPromptDocument,
-  UserPrompt,
 } from './types';
 import type { UserPromptProperties } from './storage';
+import type {
+  CreateUserPromptPayload as UserPromptCreateParams,
+  UpdateUserPromptPayload as UserPromptUpdateParams,
+  UserPrompt,
+} from '../../../../common/http_api/user_prompts';
 
 export const fromEs = (document: UserPromptDocument): UserPrompt => {
   if (!document._source) {
