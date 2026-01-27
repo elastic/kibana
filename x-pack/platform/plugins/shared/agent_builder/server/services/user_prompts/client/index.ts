@@ -8,7 +8,6 @@
 export { createClient, type UserPromptClient } from './client';
 export type {
   UserPrompt,
-  UserPromptWithSpace,
   UserPromptCreateParams,
   UserPromptUpdateParams,
   FindUserPromptsParams,

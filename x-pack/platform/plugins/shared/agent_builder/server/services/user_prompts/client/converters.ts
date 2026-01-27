@@ -10,7 +10,6 @@ import type {
   UserPromptUpdateParams,
   UserPromptDocument,
   UserPrompt,
-  UserPromptWithSpace,
 } from './types';
 import type { UserPromptProperties } from './storage';
 
@@ -22,22 +21,6 @@ export const fromEs = (document: UserPromptDocument): UserPrompt => {
     id: document._source.id,
     name: document._source.name,
     content: document._source.content,
-    created_at: document._source.created_at,
-    updated_at: document._source.updated_at,
-    created_by: document._source.created_by,
-    updated_by: document._source.updated_by,
-  };
-};
-
-export const fromEsWithSpace = (document: UserPromptDocument): UserPromptWithSpace => {
-  if (!document._source) {
-    throw new Error('No source found on user prompt document');
-  }
-  return {
-    id: document._source.id,
-    name: document._source.name,
-    content: document._source.content,
-    space: document._source.space,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     created_by: document._source.created_by,

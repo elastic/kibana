@@ -20,10 +20,6 @@ export interface UserPrompt {
   updated_by: string;
 }
 
-export interface UserPromptWithSpace extends UserPrompt {
-  space: string;
-}
-
 export interface UserPromptCreateParams {
   id: string;
   name: string;
@@ -45,5 +41,5 @@ export interface FindUserPromptsResult {
   page: number;
   perPage: number;
   total: number;
-  data: UserPromptWithSpace[];
+  data: UserPrompt[];
 }

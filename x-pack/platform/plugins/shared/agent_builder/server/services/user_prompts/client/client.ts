@@ -12,7 +12,7 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { UserPromptStorage } from './storage';
 import { createStorage } from './storage';
-import { fromEs, fromEsWithSpace, createAttributes, updateDocument } from './converters';
+import { fromEs, createAttributes, updateDocument } from './converters';
 import type {
   UserPromptDocument,
   UserPrompt,
@@ -119,7 +119,7 @@ class UserPromptClientImpl implements UserPromptClient {
       page,
       perPage,
       total,
-      data: response.hits.hits.map((hit) => fromEsWithSpace(hit as UserPromptDocument)),
+      data: response.hits.hits.map((hit) => fromEs(hit as UserPromptDocument)),
     };
   }
 

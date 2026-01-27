@@ -9,7 +9,6 @@ export {
   createClient,
   type UserPromptClient,
   type UserPrompt,
-  type UserPromptWithSpace,
   type UserPromptCreateParams,
   type UserPromptUpdateParams,
   type FindUserPromptsParams,

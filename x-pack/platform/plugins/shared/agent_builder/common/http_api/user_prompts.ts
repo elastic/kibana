@@ -17,15 +17,11 @@ export interface UserPrompt {
   updated_by: string;
 }
 
-export interface UserPromptWithSpace extends UserPrompt {
-  space: string;
-}
-
 export interface FindUserPromptsResponse {
   page: number;
   per_page: number;
   total: number;
-  data: UserPromptWithSpace[];
+  data: UserPrompt[];
 }
 
 export type GetUserPromptResponse = UserPrompt;
