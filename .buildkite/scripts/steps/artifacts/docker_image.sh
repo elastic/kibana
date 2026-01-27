@@ -115,6 +115,14 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   echo "--- Build dependencies report"
   node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
+  # Prompt a restart
+  if [[ "${BUILDKITE_RETRY_COUNT:-0}" -gt 0 ]]; then
+    echo "OK to go"
+  else
+    echo "Bad luck"
+    exit 69
+  fi
+
   echo "--- Upload archives"
   cd target
   buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-linux-x86_64.tar.gz"
