@@ -92,7 +92,7 @@ export interface StatsFieldSummary {
    * The definition of the field, which is the right-hand side of the `=`
    * operator, or the argument itself if no `=` operator is present.
    */
-  definition: ESQLProperNode;
+  // definition: ESQLProperNode;
 
   /**
    * A list of terminal nodes that were found in the definition.

@@ -17,7 +17,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLColumn, ESQLList, ESQLLiteral, ESQLLocation, ESQLProperNode } from '../../types';
+import type { ESQLLocation, ESQLProperNode } from '../../types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../shared/sorting/types';
@@ -147,25 +147,38 @@ export interface ESQLCommandSummary {
 
 export interface FieldSummary {
   /**
-   * Command argument AST node where the field was found.
-   */
-  arg: ESQLProperNode;
-
-  /**
    * The field name, correctly formatted, extracted from the AST.
    */
   field: string;
 
   /**
-   * The definition of the field, which is the right-hand side of the `=`
-   * operator, or the argument itself if no `=` operator is present.
+   * AST node where the field was found.
    */
-  definition: ESQLProperNode;
+  arg: ESQLProperNode;
 
   /**
-   * A list of terminal nodes that were found in the definition.
+   * The expression that defines the value of the field.
+   *
+   * What's the difference between arg and definition?
+   * arg is the full assignment expression (e.g. foo = bar + 1)
+   * definition is just the right side (e.g. bar + 1), the expression that defines the value of the field.
+   * {
+   *  fields: 'foo',
+   *  arg: <AST node representing 'foo = bar + 1'>,
+   *  definition: <AST node representing 'bar + 1'>
+   * }
+   *
+   * If not in an assignement, arg and definition are the same.
+   * e.g. in STATS count() BY field, for the BY field, both arg and definition are the same node representing 'field'.
+   * {
+   *  fields: 'field',
+   *  arg: <AST node representing 'field'>,
+   *  definition: <AST node representing 'field'>
+   * }
+   *
+   * // TODO: IMO this is a derivative of arg, and should not be here. We should provide a function to extract it when needed.
    */
-  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList>;
+  definition: ESQLProperNode;
 }
 
 export interface ESQLPolicy {
