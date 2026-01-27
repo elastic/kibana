@@ -20,6 +20,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
 
@@ -32,6 +33,7 @@ export interface AgentBuilderSetupDependencies {
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   actions: ActionsPluginSetup;
+  home: HomeServerPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
