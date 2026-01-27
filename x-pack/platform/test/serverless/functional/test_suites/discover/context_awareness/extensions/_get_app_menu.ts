@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
     });
 
@@ -63,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-action');
 

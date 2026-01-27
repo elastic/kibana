@@ -109,9 +109,28 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(OLD_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    // Set date range within the KQL data source card
+    await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
+    await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
+    await page.getByRole('tab', { name: 'End date: Absolute' }).click();
+    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await endDateInput.clear();
+    await endDateInput.fill(oldDocumentsDateRange.to);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
+    await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
+    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await startDateInput.clear();
+    await startDateInput.fill(oldDocumentsDateRange.from);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeVisible();
@@ -132,9 +151,28 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(NEW_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    // Set date range within the KQL data source card
+    await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
+    await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
+    await page.getByRole('tab', { name: 'End date: Absolute' }).click();
+    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await endDateInput.clear();
+    await endDateInput.fill(oldDocumentsDateRange.to);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
+    await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
+    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await startDateInput.clear();
+    await startDateInput.fill(oldDocumentsDateRange.from);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();
@@ -155,8 +193,12 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(EMPTY_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();
