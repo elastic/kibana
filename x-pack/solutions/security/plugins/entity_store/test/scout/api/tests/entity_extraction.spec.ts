@@ -344,6 +344,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '1d9cb6c21dfa9156571de1281d707719',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'john.doe',
           'entity.name': 'user:john.doe@host-123',
           'entity.type': 'Identity',
@@ -358,6 +359,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '34e67fc3f53984dbfd0ed097197cc453',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'jane.smith',
           'entity.name': 'user:jane.smith@host-456',
           'entity.type': 'Identity',
@@ -372,6 +374,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'ba6d49220ff970733fff891e87d09e56',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'bob.jones',
           'entity.name': 'user:bob.jones@server-01',
           'entity.type': 'Identity',
@@ -386,6 +389,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'd0ddd45157d6fe1cbde790dea38d8817',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'alice.brown',
           'user.id': 'user-789',
           'entity.name': 'user:user-789',
@@ -400,6 +404,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'bd55eef67b506ab8735e6f0f59e8bee8',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.id': 'user-101',
           'entity.name': 'user:user-101',
           'entity.type': 'Identity',
@@ -413,6 +418,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'd21d3cc5ca462fa168d3365cf151c1b2',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'entity.name': 'non-generated-user',
           'entity.type': 'Identity',
           '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -425,6 +431,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '6f42b467570b3e7ab0d0ae8b60965648',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.email': 'test@example.com',
           'entity.name': 'user:test@example.com',
           'entity.type': 'Identity',
@@ -438,6 +445,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'e7f943e1388a4bb2e06e96821fe7cc13',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.domain': 'corp',
           'user.name': 'charlie.wilson',
           'entity.name': 'user:charlie.wilson.corp',
@@ -452,6 +460,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'a870b6e8cd872aeb6696cc70997484fd',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'david.lee',
           'entity.name': 'user:david.lee',
           'entity.type': 'Identity',
@@ -465,6 +474,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'c049dff0ed865eb3709c2577344652df',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': '',
           'user.id': 'user-202',
           'entity.name': 'user:user-202',
@@ -479,6 +489,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '7b71429fa06bece73a69aa3b6c111933',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.id': 'user-303',
           'entity.name': 'user:user-303',
           'entity.type': 'Identity',
@@ -492,6 +503,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'a71d3785ad04601f4b98990e871cd82b',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'eve.martin',
           'entity.name': 'user:eve.martin@host-404',
           'entity.type': 'Identity',
@@ -507,6 +519,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'd4ccc5552730aec959408caca3473ee7',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'frank.taylor',
           'entity.name': 'user:frank.taylor@workstation-05',
           'entity.type': 'Identity',
@@ -522,6 +535,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '9c2027667a9851d44876ae4e4008b108',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.email': 'grace@example.com',
           'user.name': 'grace.anderson',
           'entity.name': 'user:grace@example.com',
@@ -536,6 +550,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'fcaaebb1c3ef5431de17f325a54bf97f',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'henry.clark',
           'entity.name': 'user:henry.clark',
           'entity.type': 'Identity',
@@ -549,6 +564,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '8b8b96fb0537d319e1397a175681a6b6',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.domain': '',
           'user.name': 'iris.davis',
           'entity.name': 'user:iris.davis',
@@ -563,6 +579,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '4b11dd6cf7a4b049ce8afd5f38064094',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'jack.white',
           'entity.name': 'user:jack.white',
           'entity.type': 'Identity',
@@ -576,6 +593,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '9211621cb08e16e69dc48158e35579c8',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.name': 'karen.green',
           'user.id': 'user-505',
           'entity.name': 'user:karen.green@host-505',
@@ -591,6 +609,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '5a3d5fc12af596c35c9bcce0ec15e297',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.email': 'larry@example.com',
           'user.name': 'larry.black',
           'entity.name': 'user:larry.black@host-606',
@@ -606,6 +625,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '855f0e0353f2a443af0c6baea478a6d8',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'user',
           'user.domain': 'corp',
           'user.name': 'mary.blue',
           'entity.name': 'user:mary.blue@server-07',
@@ -652,6 +672,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: 'a0dfa1f1ee31c53378f0ffe1cd168deb',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'service',
           'entity.name': 'non-generated-service-id',
           'entity.type': 'Service',
           '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -664,6 +685,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '0f9d5fcd02e63ca500ca9515f76ce174',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'service',
           'entity.name': 'service:service-name',
           'entity.type': 'Service',
           '@timestamp': '2026-01-20T12:05:05.000Z',
@@ -707,6 +729,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _id: '9e606449c558b5253d8b1f028fe7dca0',
         _score: 1,
         _source: {
+          'entity.EngineMetadata.Type': 'generic',
           'entity.name': 'generic:generic-id',
           'entity.source': '.ds-.entities.v2.updates.security_generic_default-2026.01.27-000001',
           '@timestamp': '2026-01-20T12:05:05.000Z',

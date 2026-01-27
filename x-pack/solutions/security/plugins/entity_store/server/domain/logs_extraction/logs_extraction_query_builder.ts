@@ -17,8 +17,16 @@ export const HASHED_ID = 'entity.hashedId';
 const HASH_ALG = 'MD5';
 
 const MAIN_ENTITY_ID = 'entity.id';
-const DEFAULT_FIELDS_TO_KEEP = ['@timestamp', MAIN_ENTITY_ID, HASHED_ID];
+const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+const TIMESTAMP_FIELD = '@timestamp';
+
 const METADATA_FIELDS = ['_index'];
+const DEFAULT_FIELDS_TO_KEEP = [
+  TIMESTAMP_FIELD,
+  MAIN_ENTITY_ID,
+  HASHED_ID,
+  ENGINE_METADATA_TYPE_FIELD,
+];
 
 const RECENT_DATA_PREFIX = 'recent';
 // Some fields have only src and we need to fallback to it.
@@ -49,16 +57,18 @@ export const buildLogsExtractionEsqlQuery = ({
 }: LogsExtractionQueryParams): string => {
   const idFieldName = getIdFieldName(identityField);
 
-  return `FROM ${indexPatterns.join(', ')}
+  return `SET unmapped_fields="nullify";
+  
+  FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE (${entityIdFilter(identityField, type)})
-      AND @timestamp > TO_DATETIME("${fromDateISO}")
-      AND @timestamp <= TO_DATETIME("${toDateISO}")
-  | SORT @timestamp ASC
+      AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
+  | SORT ${TIMESTAMP_FIELD} ASC
   | LIMIT ${maxPageSearchSize}
   ${entityFieldEvaluation(identityField, type)}
   | STATS
-    ${recentData('timestamp')} = MAX(@timestamp),
+    ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${recentFieldStats(fields)}
     BY ${recentData(idFieldName)}
   | LOOKUP JOIN ${latestIndex}
@@ -67,10 +77,10 @@ export const buildLogsExtractionEsqlQuery = ({
     ${recentData(idFieldName)} AS ${idFieldName}
   | EVAL
     ${mergedFieldStats(idFieldName, fields)},
-    ${customFieldEvalLogic(entityTypeFallback)},
+    ${customFieldEvalLogic(type, entityTypeFallback)},
     ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
   | KEEP ${fieldsToKeep(idFieldName, fields)}
-  | SORT @timestamp ASC`;
+  | SORT ${TIMESTAMP_FIELD} ASC`;
 };
 
 function entityIdFilter(identityField: EntityIdentity, type: EntityType) {
@@ -94,9 +104,9 @@ function recentFieldStats(fields: EntityField[]) {
         case 'collect_values':
           return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, @timestamp)`;
+          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, @timestamp)`;
+          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         default:
           throw new Error('unknown field operation');
       }
@@ -136,10 +146,11 @@ function fieldsToKeep(idFieldName: string, fields: EntityField[]) {
     .join(',\n ');
 }
 
-function customFieldEvalLogic(entityTypeFallback?: string) {
+function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
   const evals = [
-    `@timestamp = ${recentData('timestamp')}`,
+    `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
     `entity.name = COALESCE(entity.name, entity.id)`,
+    `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
   ];
 
   if (entityTypeFallback) {

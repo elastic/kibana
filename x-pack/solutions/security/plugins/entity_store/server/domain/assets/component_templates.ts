@@ -17,6 +17,7 @@ const BASE_ENTITY_INDEX_MAPPING = {
   labels: { type: 'object' },
   tags: { type: 'keyword', ignore_above: 1024 },
   'entity.id': { type: 'keyword' },
+  'entity.EngineMetadata.Type': { type: 'keyword' },
 
   // 'asset.criticality': { type: 'keyword' },
   // 'entity.name': { type: 'keyword' },
