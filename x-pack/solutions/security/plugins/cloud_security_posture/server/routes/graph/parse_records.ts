@@ -21,6 +21,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import {
+  type LabelNodeId,
   type GraphEdge,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
@@ -37,8 +38,16 @@ interface ParseContext {
   readonly nodesLimit?: number;
   readonly nodesMap: Record<string, NodeDataModel>;
   readonly edgesMap: Record<string, EdgeDataModel>;
-  readonly edgeLabelsNodes: Record<string, string[]>;
-  readonly labelEdges: Record<string, LabelEdges>;
+  /**
+   * Used to group multiple labels that share the same document set.
+   */
+  readonly edgeLabelsNodes: Record<LabelNodeId, LabelNodeId[]>;
+  /**
+   * Maps label node ID to array of edges (source-target pairs).
+   * A single label can connect to multiple actor-target pairs when
+   * MV_EXPAND creates multiple rows from the same document(s).
+   */
+  readonly labelEdges: Record<LabelNodeId, LabelEdges[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -269,13 +278,14 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel => {
+const createLabelNode = (record: GraphEdge): LabelNodeDataModel => {
   const {
+    labelNodeId,
     action,
     docs,
-    isAlert,
     isOrigin,
     isOriginAlert,
+    isAlert,
     badge,
     uniqueEventsCount,
     uniqueAlertsCount,
@@ -283,7 +293,9 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
     sourceCountryCodes,
   } = record;
 
-  const labelId = edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`;
+  const labelId = `label(${action})ln(${labelNodeId})oe(${isOrigin ? 1 : 0})oa(${
+    isOriginAlert ? 1 : 0
+  })`;
   const color =
     uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
       ? 'danger'
@@ -308,25 +320,33 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
 const processLabelNodes = (
   context: ParseContext,
   nodeData: {
-    edgeId: string;
+    labelNodeId: string;
     sourceId: string;
     targetId: string;
     labelNode: LabelNodeDataModel;
   }
 ) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
-  const { edgeId, sourceId, targetId, labelNode } = nodeData;
-  if (edgeLabelsNodes[edgeId] === undefined) {
-    edgeLabelsNodes[edgeId] = [];
+  const { labelNodeId, sourceId, targetId, labelNode } = nodeData;
+
+  // Group labels by labelNodeId (document-based)
+  if (edgeLabelsNodes[labelNodeId] === undefined) {
+    edgeLabelsNodes[labelNodeId] = [];
   }
 
-  nodesMap[labelNode.id] = labelNode;
-  edgeLabelsNodes[edgeId].push(labelNode.id);
-  labelEdges[labelNode.id] = {
+  // Only add the label node if it doesn't exist yet
+  if (nodesMap[labelNode.id] === undefined) {
+    nodesMap[labelNode.id] = labelNode;
+    edgeLabelsNodes[labelNodeId].push(labelNode.id);
+    labelEdges[labelNode.id] = [];
+  }
+
+  // Add the edge (source-target pair) for this label node
+  labelEdges[labelNode.id].push({
     source: sourceId,
     target: targetId,
     edgeType: 'solid',
-  };
+  });
 };
 
 const isAboveAPINodesLimit = (context: ParseContext) => {
@@ -350,12 +370,12 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
     }
 
     const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+    const { labelNodeId } = record;
 
-    const edgeId = `a(${actorId})-b(${targetId})`;
-    const labelNode = createLabelNode(record, edgeId);
+    const labelNode = createLabelNode(record);
 
     processLabelNodes(context, {
-      edgeId,
+      labelNodeId,
       sourceId: actorId,
       targetId,
       labelNode,
@@ -381,48 +401,58 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
 const createEdgesAndGroups = (context: ParseContext) => {
   const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges } = context;
 
-  Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
+  Object.entries(edgeLabelsNodes).forEach(([labelNodeId, edgeLabelsIds]) => {
     // When there's more than one edge label, create a group node
     if (edgeLabelsIds.length === 1) {
       const edgeLabelId = edgeLabelsIds[0];
+      const edges = labelEdges[edgeLabelId];
 
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelId].source,
-        edgeLabelId,
-        labelEdges[edgeLabelId].target,
-        labelEdges[edgeLabelId].edgeType
-      );
+      // Connect to all source-target pairs for this label
+      edges.forEach((edge) => {
+        connectEntitiesAndLabelNode(
+          edgesMap,
+          nodesMap,
+          edge.source,
+          edgeLabelId,
+          edge.target,
+          edge.edgeType
+        );
+      });
     } else {
       const groupNode: GroupNodeDataModel = {
-        id: `grp(${edgeId})`,
+        id: `grp(${labelNodeId})`,
         shape: 'group',
       };
       nodesMap[groupNode.id] = groupNode;
       let groupEdgesColor: EdgeColor = 'subdued';
 
+      // Get all unique source-target pairs from all labels in this group
+      const firstLabelEdges = labelEdges[edgeLabelsIds[0]];
+
       // Order of creation matters when using dagre layout, first create edges to the group node,
       // then connect the group node to the label nodes
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelsIds[0]].source,
-        groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target,
-        'solid',
-        groupEdgesColor
-      );
+      firstLabelEdges.forEach((edge) => {
+        connectEntitiesAndLabelNode(
+          edgesMap,
+          nodesMap,
+          edge.source,
+          groupNode.id,
+          edge.target,
+          'solid',
+          groupEdgesColor
+        );
+      });
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
+        const edges = labelEdges[edgeLabelId];
         connectEntitiesAndLabelNode(
           edgesMap,
           nodesMap,
           groupNode.id,
           edgeLabelId,
           groupNode.id,
-          labelEdges[edgeLabelId].edgeType
+          edges[0]?.edgeType ?? 'solid'
         );
 
         if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {

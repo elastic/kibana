@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: '.entities.v1.latest.security_*',
-          expectedCount: 12,
+          expectedCount: 15,
         });
 
         // Execute enrich policy to pick up entity data
@@ -178,7 +178,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: getEntitiesLatestIndexName(),
-          expectedCount: 12,
+          expectedCount: 15,
         });
       });
 

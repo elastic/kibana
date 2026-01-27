@@ -457,3 +457,120 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mv-expand-actor",
+    "index": ".entities.v1.latest.security_generic_default",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "your-project-id",
+          "name": "your-project-name"
+        },
+        "provider": "gcp",
+        "region": "global",
+        "service": {
+          "name": "GCP IAM"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "mv-expand-test-actor@example.com",
+        "name": "MvExpandTestActor",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "user": {
+        "id": "mv-expand-test-actor@example.com",
+        "name": "MvExpandTestActor"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mv-expand-target-identity-entity",
+    "index": ".entities.v1.latest.security_generic_default",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "your-project-id",
+          "name": "your-project-name"
+        },
+        "provider": "gcp",
+        "region": "global",
+        "service": {
+          "name": "GCP IAM"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "mv-expand-target-identity",
+        "name": "MvExpandTargetIdentity",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "user": {
+        "id": "mv-expand-target-identity",
+        "name": "MvExpandTargetIdentity"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mv-expand-target-storage-entity",
+    "index": ".entities.v1.latest.security_generic_default",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "your-project-id",
+          "name": "your-project-name"
+        },
+        "provider": "gcp",
+        "region": "us-central1",
+        "service": {
+          "name": "GCP Storage"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "mv-expand-target-storage",
+        "name": "MvExpandTargetStorage",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_storage_bucket-default-2025.07.16-000005",
+        "sub_type": "GCP Storage Bucket",
+        "type": "Storage"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "storage": {
+        "id": "mv-expand-target-storage",
+        "name": "MvExpandTargetStorage"
+      }
+    }
+  }
+}

@@ -60,6 +60,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -90,7 +91,7 @@ describe('parseRecords', () => {
     expect(targetNode).toHaveProperty('shape', 'hexagon');
 
     // Label node should reference the actor and target by their entity IDs
-    expect(labelNode.id).toContain('label(login)oe(1)oa(0)');
+    expect(labelNode.id).toContain('label(login)ln(doc-id-1)oe(1)oa(0)');
     expect(labelNode.label).toBe('login');
     expect(labelNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
     expect(labelNode).toHaveProperty('color', 'primary');
@@ -135,6 +136,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -178,6 +180,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-1',
       },
       {
         action: 'logout',
@@ -206,6 +209,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -265,6 +269,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -301,6 +306,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -342,24 +348,28 @@ describe('parseRecords', () => {
         action: 'action1',
         isOrigin: false,
         isOriginAlert: false,
+        labelNodeId: 'doc-id-1',
       },
       {
         ...baseLabelNodeData,
         action: 'action2',
         isOrigin: true,
         isOriginAlert: false,
+        labelNodeId: 'doc-id-2',
       },
       {
         ...baseLabelNodeData,
         action: 'action3',
         isOrigin: false,
         isOriginAlert: true,
+        labelNodeId: 'doc-id-3',
       },
       {
         ...baseLabelNodeData,
         action: 'action4',
         isOrigin: true,
         isOriginAlert: true,
+        labelNodeId: 'doc-id-4',
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -368,10 +378,10 @@ describe('parseRecords', () => {
     // All events use MD5 hashes for actor and target groups
     // Since it's the same actor and target with multiple actions, they should reuse hashes
     expect(labelNodes.map((n) => n.id)).toStrictEqual([
-      `a(actor1)-b(target1)label(action1)oe(0)oa(0)`,
-      `a(actor1)-b(target1)label(action2)oe(1)oa(0)`,
-      `a(actor1)-b(target1)label(action3)oe(0)oa(1)`,
-      `a(actor1)-b(target1)label(action4)oe(1)oa(1)`,
+      `label(action1)ln(doc-id-1)oe(0)oa(0)`,
+      `label(action2)ln(doc-id-2)oe(1)oa(0)`,
+      `label(action3)ln(doc-id-3)oe(0)oa(1)`,
+      `label(action4)ln(doc-id-4)oe(1)oa(1)`,
     ]);
   });
 
@@ -403,6 +413,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-1',
       },
       {
         action: 'foo2',
@@ -430,6 +441,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
+        labelNodeId: 'doc-id-2',
       },
     ];
     // nodesLimit = 2, so only first record should be processed
@@ -471,6 +483,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -534,6 +547,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -605,6 +619,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -663,6 +678,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -704,6 +720,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -749,6 +766,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -796,6 +814,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -842,6 +861,7 @@ describe('parseRecords', () => {
           targetHostIps: ['172.16.0.10'],
           sourceIps: ['203.0.113.1', '198.51.100.1'],
           sourceCountryCodes: ['JP', 'CA'],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -894,6 +914,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -946,6 +967,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -1000,6 +1022,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
 
@@ -1064,6 +1087,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
 
@@ -1120,6 +1144,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
 
@@ -1182,6 +1207,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
 
@@ -1245,6 +1271,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
 
@@ -1303,6 +1330,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -1356,6 +1384,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -1433,6 +1462,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records);

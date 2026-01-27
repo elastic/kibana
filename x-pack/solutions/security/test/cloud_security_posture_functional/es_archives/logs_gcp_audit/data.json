@@ -1508,3 +1508,117 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MvExpandBugTest123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T15:00:00.000Z",
+      "user": {
+        "entity": {
+          "id": "mv-expand-test-actor@example.com"
+        },
+        "email": "mv-expand-test-actor@example.com",
+        "name": "MV Expand Test Actor"
+      },
+      "client": {
+        "user": {
+          "email": "mv-expand-test-actor@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.MvExpandTest",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "mv-expand-bug-test-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.resources.manage",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-mv-expand-test-123"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ManageResourcesRequest",
+            "parent": "projects/your-project-id"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "mv-expand-target-identity",
+            "mv-expand-target-storage"
+          ]
+        }
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.30",
+          "mv-expand-test-actor@example.com",
+          "mv-expand-target-identity",
+          "mv-expand-target-storage"
+        ],
+        "ip": [
+          "10.0.0.30"
+        ],
+        "user": [
+          "mv-expand-test-actor@example.com"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.30"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/370.0.0"
+      }
+    }
+  }
+}

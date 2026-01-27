@@ -18,6 +18,8 @@ export interface OriginEventId {
 export const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
 export const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
 
+export type LabelNodeId = string;
+
 export interface GraphEdge {
   // event/alert attributes
   action: string;
@@ -30,6 +32,13 @@ export interface GraphEdge {
   uniqueAlertsCount: number;
   sourceIps?: string[] | string;
   sourceCountryCodes?: string[] | string;
+  /**
+   * Unique identifier for the label node based on document IDs.
+   * This ensures that label nodes are deduplicated by documents, not by actor-target pairs.
+   * When a single document expands via MV_EXPAND into multiple rows with different entity types,
+   * they should share the same label node because they originate from the same document(s).
+   */
+  labelNodeId: LabelNodeId;
   // actor attributes
   actorNodeId: string;
   actorIdsCount: number;
