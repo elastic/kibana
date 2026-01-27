@@ -13,6 +13,7 @@ plugins:
     - slo
     - spaces
     - streams_app
+    - transform
   disabled:
 
 packages:
