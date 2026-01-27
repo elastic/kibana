@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstComment, ESQLSingleAstItem } from '../types';
+import type { ESQLAstComment, ESQLLocation, ESQLSingleAstItem } from '../types';
 
 export const within = (
-  inner: number | ESQLSingleAstItem,
-  outer: ESQLSingleAstItem | ESQLAstComment | undefined
+  inner: number | { location: ESQLLocation },
+  outer: { location?: ESQLLocation } | ESQLSingleAstItem | ESQLAstComment | undefined
 ) => {
   if (!outer?.location) {
     return false;
