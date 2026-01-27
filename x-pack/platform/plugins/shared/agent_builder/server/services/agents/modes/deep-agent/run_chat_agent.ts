@@ -14,7 +14,10 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import type {
+  AgentEventEmitterFn,
+  AgentHandlerContext,
+} from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
@@ -36,7 +39,8 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { steps } from './constants';
 import type { StateType } from './state';
-import { ToolManager } from './tool_manager';
+import { ToolManager } from '../utils/tool_manager';
+import { pickTools } from '../utils/select_tools';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -114,16 +118,38 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
-  const toolManager = await ToolManager.from({
-    attachmentBoundTools,
-    versionedAttachmentTools,
-    registryTools,
-    browserApiTools,
-    dynamicToolCapacity: 10, // TODO: make this configurable
+  const previousDynamicToolIds: string[] = conversation?.state?.dynamic_tool_ids || [];
+
+  const dynamicRegistryTools = await pickTools({
+    toolProvider,
+    selection: [{ tool_ids: previousDynamicToolIds }],
     request,
-    logger,
-    eventEmitter,
   });
+
+  const dynamicSkillTools = (await Promise.all(skills.list()
+    .filter(skill => skill.getInlineTools != undefined)
+    .map(skill => skill.getInlineTools!()))).flat()
+    .filter(tool => previousDynamicToolIds.includes(tool.id))
+    .map(tool => skills.convertSkillTool(tool));
+
+  const toolManager = await ToolManager
+    .builder()
+    .withStaticTools({
+      executableTools: [
+        ...attachmentBoundTools,
+        ...versionedAttachmentTools,
+        ...registryTools,
+      ],
+      browserApiTools: browserApiTools
+    })
+    .withDynamicTools({
+      executableTools: [...dynamicRegistryTools, ...dynamicSkillTools],
+    }).build({
+      request,
+      logger,
+      eventEmitter,
+      dynamicToolCapacity: 15, // make this configurable
+    })
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
@@ -184,7 +210,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      getConversationState: () => getConversationState({ promptManager }),
+      getConversationState: () => getConversationState({ promptManager, toolManager }),
       pendingRound,
       startTime,
       modelProvider,
@@ -211,11 +237,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
 const getConversationState = ({
   promptManager,
+  toolManager,
 }: {
   promptManager: PromptManager;
+  toolManager: ToolManager;
 }): ConversationInternalState => {
   return {
     prompt: promptManager.dump(),
+    dynamic_tool_ids: toolManager.getDynamicToolIds(),
   };
 };
 

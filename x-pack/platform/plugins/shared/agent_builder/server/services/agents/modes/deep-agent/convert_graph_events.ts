@@ -17,7 +17,6 @@ import type {
   ToolResultEvent,
 } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
-import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
@@ -50,7 +49,7 @@ import {
 } from './actions';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
-import { ToolManager } from './tool_manager';
+import { ToolManager } from '../utils/tool_manager';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 

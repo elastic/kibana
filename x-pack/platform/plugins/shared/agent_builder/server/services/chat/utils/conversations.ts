@@ -37,6 +37,7 @@ export const createConversation$ = ({
         id: conversationId,
         title,
         agent_id: agentId,
+        state: roundCompletedEvent.data.conversation_state,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }

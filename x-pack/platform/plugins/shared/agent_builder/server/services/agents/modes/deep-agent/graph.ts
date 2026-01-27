@@ -42,8 +42,8 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
-import { ToolManager } from './tool_manager';
-import type { SkillsService, ToolProvider } from '@kbn/agent-builder-server/runner';
+import { ToolManager } from '../utils/tool_manager';
+import type { ExecutableTool, SkillsService, ToolProvider } from '@kbn/agent-builder-server/runner';
 import { pickTools } from '../utils/select_tools';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -158,7 +158,7 @@ export const createAgentGraph = ({
 
     const toolNode = new ToolNode<BaseMessage[]>(toolManager.list());
 
-    lastAction.tool_calls.forEach(toolCall => toolManager.getTool(toolCall.toolName)) // ensures tools are marked as used in LRUMap
+    lastAction.tool_calls.forEach(toolCall => toolManager.recordToolUse(toolCall.toolName)) // ensures tools are marked as used in LRUMap
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
 
@@ -169,7 +169,7 @@ export const createAgentGraph = ({
     * Here we check which skills were loaded and add the skill tools to the tool manager.
     * Once hooks are available, this should be moved to a hook.
     */
-    await Promise.all(toolNodeResult.flatMap(result => {
+    const toolsToAdd = await Promise.all(toolNodeResult.flatMap(result => {
       if (!ToolMessage.isInstance(result)) {
         return []
       }
@@ -181,22 +181,25 @@ export const createAgentGraph = ({
         }
         return []
       })
-      .map(async skillId => {
+      .flatMap(async skillId => {
+        const tools: ExecutableTool[] = [];
         const skillDefinition = skills.getSkillDefinition(skillId);
         if (skillDefinition && skillDefinition.getInlineTools) {
-          const tools = await skillDefinition.getInlineTools();
-          const langchainTools = tools.map(tool => skills.convertSkillTool(tool));
-          langchainTools.forEach(tool => toolManager.addTool(tool));
+          const inlineTools = await skillDefinition.getInlineTools();
+          tools.push(...inlineTools.map(tool => skills.convertSkillTool(tool)));
         }
         if (skillDefinition && skillDefinition.getAllowedTools) {
-          const tools = await pickTools({
+          const allowedTools = await pickTools({
             selection: [{ tool_ids: skillDefinition.getAllowedTools() }],
             toolProvider,
             request,
           });
-          tools.forEach(tool => toolManager.addTool(tool));
+          tools.push(...allowedTools);
         }
+        return tools;
       }))
+
+    await toolManager.addTool(toolsToAdd.flat());
 
     const action = processToolNodeResponse(toolNodeResult);
     return {

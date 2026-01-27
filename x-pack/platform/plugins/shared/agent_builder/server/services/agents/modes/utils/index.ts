@@ -24,3 +24,5 @@ export {
   isCleanedResult,
   estimateCleaningSavings,
 } from './clean_tool_history';
+export { ToolManager, LRUMap } from './tool_manager';
+export type { ToolManagerParams, FromParams } from './tool_manager';
