@@ -560,7 +560,7 @@ describe('BulkDeleteTask', () => {
           .calls[0][0];
         const createTaskRunner = registerCall[TYPE].createTaskRunner;
 
-        const taskRunner = createTaskRunner({
+        const runner = createTaskRunner({
           taskInstance: {
             id: 'test-task-id',
             state: { isDone: false, deletedCount: 0, errors: [] },
@@ -569,7 +569,7 @@ describe('BulkDeleteTask', () => {
           abortController: new AbortController(),
         });
 
-        const result = await taskRunner.run();
+        const result = await runner.run();
 
         expect(mockLogger.error).toHaveBeenCalledWith(FAKE_REQUEST_NOT_DEFINED_ERROR);
         expect(result).toBeUndefined();
