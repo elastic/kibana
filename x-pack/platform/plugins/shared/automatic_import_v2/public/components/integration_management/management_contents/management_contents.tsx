@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { EuiStepsProps } from '@elastic/eui';
-import { EuiSteps, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSteps, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { IntegrationDetails } from './integration_details/integration_details';
 import * as i18n from './translations';
+import { DataStreams } from './data_streams/data_streams';
 
 const useStepStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -34,11 +35,7 @@ export const ManagementContents = React.memo(() => {
     {
       title: i18n.STEP_DEFINE_DATA_STREAMS,
       titleSize: 'xs',
-      children: (
-        <EuiText>
-          <p>Step 2</p>
-        </EuiText>
-      ),
+      children: <DataStreams />,
     },
   ];
 

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { trialCompanionTelemetryEvents } from './trial_companion';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
 import { dataQualityTelemetryEvents } from './data_quality';
@@ -34,4 +35,5 @@ export const telemetryEvents = [
   ...appTelemetryEvents,
   ...siemMigrationsTelemetryEvents,
   ...aiValueReportTelemetryEvents,
+  ...trialCompanionTelemetryEvents,
 ];

@@ -25,6 +25,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { postNBADismiss } from './api';
+import { TrialCompanionEventTypes } from '../common/lib/telemetry/events/trial_companion/types';
 import { useKibana } from '../common/lib/kibana';
 import type { Milestone } from '../../common/trial_companion/types';
 import type { NBAAction, NBATODOItem } from './nba_translations';
@@ -37,7 +39,6 @@ export const GET_SET_UP_DISMISS_BUTTON_TEST_ID = `${TEST_SUBJ_PREFIX}-get-set-up
 export interface YourTrialCompanionProps {
   open: Milestone[];
   todoItems: NBATODOItem[];
-  onDismiss: () => void;
 }
 
 export interface YourTrialCompanionTODOItemProps {
@@ -98,7 +99,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
   setExpandedItemId,
   trigger,
 }) => {
-  const { ...startServices } = useKibana().services;
+  const { analytics, application } = useKibana().services;
   const iconType = completed.includes(item.milestoneId)
     ? 'checkInCircleFilled'
     : RadioCircleIconSVG;
@@ -111,7 +112,10 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
   const viewButtonText = action?.text;
   const onViewButton = () => {
     if (action) {
-      startServices.application.navigateToApp(action.app);
+      analytics?.reportEvent(TrialCompanionEventTypes.ViewButtonClicked, {
+        app: action.app,
+      });
+      application.navigateToApp(action.app);
     }
   };
   const onToggle = (isOpen: boolean) => {
@@ -169,8 +173,8 @@ function completedTODOs(todoList: NBATODOItem[], open: Milestone[]): Milestone[]
 export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   open,
   todoItems,
-  onDismiss,
 }: YourTrialCompanionProps) => {
+  const { analytics } = useKibana().services;
   const accordionId = useGeneratedHtmlId({ prefix: 'yourTrialCompanionAccordion' });
   const { euiTheme } = useEuiTheme();
   const completed = completedTODOs(todoItems, open);
@@ -189,7 +193,8 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   const [isVisible, setIsVisible] = useState(true);
   const onDismissButton = () => {
     setIsVisible(false);
-    onDismiss();
+    analytics?.reportEvent(TrialCompanionEventTypes.DismissButtonClicked, {});
+    postNBADismiss();
   };
 
   return (

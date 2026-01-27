@@ -6404,6 +6404,12 @@
       "properties": {
         "knowledge_base": {
           "properties": {
+            "users_with_any_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of unique users with any knowledge base entries"
+              }
+            },
             "users_with_global_entries": {
               "type": "long",
               "_meta": {

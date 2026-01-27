@@ -119,9 +119,6 @@ export const useBulkActions = ({
     };
   }, [kql, filterOptions]);
 
-  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'bulkEditAlertSuppressionEnabled'
-  );
   const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
@@ -548,20 +545,16 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
-            ...(isBulkEditAlertSuppressionFeatureEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isAlertSuppressionDisabled,
-                    toolTipContent: isAlertSuppressionLicenseValid
-                      ? undefined
-                      : alertSuppressionUpsellingMessage,
-                    panel: 4,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              'data-test-subj': 'alertSuppressionBulkEditRule',
+              disabled: isAlertSuppressionDisabled,
+              toolTipContent: isAlertSuppressionLicenseValid
+                ? undefined
+                : alertSuppressionUpsellingMessage,
+              panel: 4,
+            },
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -793,7 +786,6 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
       isAlertSuppressionLicenseValid,

@@ -47,7 +47,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         logger.debug('Install api called');
 
         await Promise.all(
-          entityTypes.map((type) => assetManager.init(type, logExtractionFrequency))
+          entityTypes.map((type) => assetManager.initEntityType(req, type, logExtractionFrequency))
         );
 
         return res.ok({

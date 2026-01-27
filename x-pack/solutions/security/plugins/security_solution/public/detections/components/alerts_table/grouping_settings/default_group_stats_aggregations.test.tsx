@@ -6,6 +6,7 @@
  */
 
 import { defaultGroupStatsAggregations } from '.';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
 describe('defaultGroupStatsAggregations', () => {
   it('should return the default values if the field is not supported', () => {
@@ -174,6 +175,26 @@ describe('defaultGroupStatsAggregations', () => {
         hostsCountAggregation: {
           cardinality: {
             field: 'host.name',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('should return values depending for kibana.alert.attack_ids input field', () => {
+    const aggregations = defaultGroupStatsAggregations(ALERT_ATTACK_IDS);
+    expect(aggregations).toEqual([
+      {
+        unitsCount: {
+          cardinality: {
+            field: 'kibana.alert.uuid',
+          },
+        },
+      },
+      {
+        latestTimestamp: {
+          max: {
+            field: '@timestamp',
           },
         },
       },

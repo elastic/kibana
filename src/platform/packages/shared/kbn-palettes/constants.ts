@@ -17,6 +17,10 @@ const semantic = {
    * Log level palette
    */
   LogLevel: 'log_level' as const,
+  /**
+   * Severity palette
+   */
+  Severity: 'severity' as const,
 };
 
 const categorical = {

@@ -165,6 +165,7 @@ import {
   type AgentlessPoliciesService,
   AgentlessPoliciesServiceImpl,
 } from './services/agentless/agentless_policies';
+import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -671,6 +672,7 @@ export class FleetPlugin
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
+    registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({

@@ -28,6 +28,7 @@ import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
+import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
@@ -141,6 +142,14 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         },
         sortable: true,
         width: '300px',
+      },
+      {
+        name: i18n.MODEL,
+        'data-test-subj': 'modelCell',
+        render: (endpointInfo: InferenceInferenceEndpointInfo) => {
+          return <Model endpointInfo={endpointInfo} />;
+        },
+        width: '200px',
       },
       {
         field: 'service',

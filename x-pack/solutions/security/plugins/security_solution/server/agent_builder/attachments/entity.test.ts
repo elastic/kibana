@@ -27,7 +27,7 @@ describe('createEntityAttachmentType', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data).toBe('identifier: hostname-1, identifierType: host');
+        expect(result.data).toEqual(input);
       }
     });
 
@@ -42,7 +42,7 @@ describe('createEntityAttachmentType', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data).toBe('identifier: username-1, identifierType: user');
+        expect(result.data).toEqual(input);
       }
     });
 
@@ -57,7 +57,7 @@ describe('createEntityAttachmentType', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data).toBe('identifier: service-1, identifierType: service');
+        expect(result.data).toEqual(input);
       }
     });
 
@@ -72,7 +72,7 @@ describe('createEntityAttachmentType', () => {
 
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data).toBe('identifier: generic-1, identifierType: generic');
+        expect(result.data).toEqual(input);
       }
     });
 

@@ -19,6 +19,7 @@ import type {
   AutomaticImportPluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
+import { useGetIntegrationById } from './common';
 
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
@@ -46,7 +47,11 @@ export class AutomaticImportPlugin
     _core: CoreStart,
     _dependencies: AutomaticImportPluginStartDependencies
   ): AutomaticImportPluginStart {
-    return {};
+    return {
+      hooks: {
+        useGetIntegrationById,
+      },
+    };
   }
 
   public stop() {}

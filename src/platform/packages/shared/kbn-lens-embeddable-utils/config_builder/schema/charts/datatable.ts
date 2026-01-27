@@ -10,8 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -25,6 +24,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
+import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
@@ -154,6 +154,7 @@ const datatableStateSharedOptionsSchema = {
       },
       {
         meta: {
+          id: 'datatableDensity',
           description: 'Density configuration for the datatable',
         },
       }
@@ -204,7 +205,7 @@ const datatableStateCommonOptionsSchema = {
   ),
 };
 
-const datatableStateRowsOptionsNoESQLSchema = schema.object({
+const datatableStateRowsOptionsNoESQLSchema = {
   ...datatableStateCommonOptionsSchema,
   /**
    * Alignment of the rows
@@ -234,9 +235,10 @@ const datatableStateRowsOptionsNoESQLSchema = schema.object({
    * number of columns specified in the columns parameter.
    */
   collapse_by: schema.maybe(collapseBySchema),
-});
+};
 
-const datatableStateRowsOptionsESQLSchema = datatableStateRowsOptionsNoESQLSchema.extends({
+const datatableStateRowsOptionsESQLSchema = {
+  ...datatableStateRowsOptionsNoESQLSchema,
   /**
    * Color configuration
    */
@@ -248,9 +250,9 @@ const datatableStateRowsOptionsESQLSchema = datatableStateRowsOptionsNoESQLSchem
       },
     })
   ),
-});
+};
 
-const datatableStateMetricsOptionsSchema = schema.object({
+const datatableStateMetricsOptionsSchema = {
   ...datatableStateCommonOptionsSchema,
   /**
    * Color configuration
@@ -293,7 +295,7 @@ const datatableStateMetricsOptionsSchema = schema.object({
       { meta: { description: 'Summary row configuration' } }
     )
   ),
-});
+};
 
 interface SortByValidationInput {
   metrics: Array<{}>;
@@ -399,6 +401,7 @@ export const datatableStateSchemaNoESQL = schema.object(
   {
     validate: validateSortBy,
     meta: {
+      id: 'datatableNoESQL',
       description: 'Datatable state configuration for standard queries',
     },
   }
@@ -415,13 +418,9 @@ export const datatableStateSchemaESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      schema.allOf([
-        schema.object({
-          ...genericOperationOptionsSchema,
-        }),
-        datatableStateMetricsOptionsSchema,
-        esqlColumnSchema,
-      ]),
+      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        meta: { id: 'datatableESQLMetric' },
+      }),
       {
         minSize: 1,
         maxSize: 1000,
@@ -432,7 +431,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(schema.allOf([datatableStateRowsOptionsESQLSchema, esqlColumnSchema]), {
+      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -452,6 +451,7 @@ export const datatableStateSchemaESQL = schema.object(
   {
     validate: validateSortBy,
     meta: {
+      id: 'datatableESQL',
       description: 'Datatable state configuration for ES|QL queries',
     },
   }
@@ -460,7 +460,10 @@ export const datatableStateSchemaESQL = schema.object(
 export const datatableStateSchema = schema.oneOf(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
-    meta: { description: 'Datatable chart configuration: DSL or ES|QL query based' },
+    meta: {
+      description: 'Datatable chart configuration: DSL or ES|QL query based',
+      id: 'datatableChartSchema',
+    },
   }
 );
 

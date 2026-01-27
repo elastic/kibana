@@ -5,25 +5,36 @@
  * 2.0.
  */
 
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { ZodObject } from '@kbn/zod';
 import type { ToolTypeDefinition } from '../tool_types';
-import type { ToolPersistedDefinition } from './client';
 import type { ToolTypeConversionContext } from '../tool_types/definitions';
+import type { ToolPersistedDefinition } from './client';
 
-export const convertPersistedDefinition = ({
+export const convertPersistedDefinition = <
+  TType extends ToolType,
+  TConfig extends object,
+  TPersistedConfig extends object = TConfig,
+  TSchema extends ZodObject<any> = ZodObject<any>
+>({
   tool,
   definition,
   context,
 }: {
-  tool: ToolPersistedDefinition;
-  definition: ToolTypeDefinition;
+  tool: ToolPersistedDefinition<TPersistedConfig> & { type: TType };
+  definition: ToolTypeDefinition<TType, TConfig, TSchema, TPersistedConfig>;
   context: ToolTypeConversionContext;
-}): InternalToolDefinition => {
+}): InternalToolDefinition<TType, TConfig, TSchema> => {
   const { id, type, description, tags, configuration } = tool;
   const { request, spaceId } = context;
 
+  const convertedConfiguration = definition.convertFromPersistence
+    ? definition.convertFromPersistence(configuration, context)
+    : (configuration as unknown as TConfig); // Force the type to be a runtime config because it doesn't need to be converted
+
   const getDynamicProps = () => {
-    return definition.getDynamicProps(configuration, { request, spaceId });
+    return definition.getDynamicProps(convertedConfiguration, { request, spaceId });
   };
 
   return {
@@ -31,7 +42,7 @@ export const convertPersistedDefinition = ({
     type,
     description,
     tags,
-    configuration,
+    configuration: convertedConfiguration,
     readonly: false,
     confirmation: {
       askUser: 'never',

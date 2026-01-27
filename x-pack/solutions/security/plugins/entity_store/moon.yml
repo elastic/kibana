@@ -31,6 +31,10 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/logging-mocks'
   - '@kbn/spaces-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-types'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/encrypted-saved-objects-plugin'
 tags:
   - plugin
   - prod

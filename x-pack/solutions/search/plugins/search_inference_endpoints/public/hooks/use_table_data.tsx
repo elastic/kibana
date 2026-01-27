@@ -17,6 +17,7 @@ import {
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   SortOrder,
 } from '../components/all_inference_endpoints/types';
+import { getModelId } from '../utils/get_model_id';
 
 interface UseTableDataReturn {
   tableData: InferenceInferenceEndpointInfo[];
@@ -47,7 +48,13 @@ export const useTableData = (
       );
     }
 
-    return filteredEndpoints.filter((endpoint) => endpoint.inference_id.includes(searchKey));
+    return filteredEndpoints.filter((endpoint) => {
+      const lowerSearchKey = searchKey.toLowerCase();
+      const inferenceIdMatch = endpoint.inference_id.toLowerCase().includes(lowerSearchKey);
+      const modelId = getModelId(endpoint);
+      const modelIdMatch = modelId ? modelId.toLowerCase().includes(lowerSearchKey) : false;
+      return inferenceIdMatch || modelIdMatch;
+    });
   }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {

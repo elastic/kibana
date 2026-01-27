@@ -32,10 +32,17 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
+import type {
+  UpdateCascadeGroupingActionPayload,
+  UpdateESQLQueryActionPayload,
+} from '../application/main/state_management/redux/types';
 
 export type UpdateESQLQueryFn = (
   queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
+
+export type UpdateCascadeGroupingFn = (
+  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
 ) => void;
 
 /**

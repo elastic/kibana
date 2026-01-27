@@ -116,14 +116,15 @@ export interface ChromeStart {
    *```tsx
    * import React, { useEffect } from 'react';
    * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-   * import { useKibana } from '@kbn/kibana-react-plugin/public';
+   * import type { CoreStart } from '@kbn/core/public';
    *
    * interface Props {
    *  config: AppMenuConfig;
+   *  core: CoreStart;
    *}
    *
-   * const Example = ({ config }: Props) => {
-   *  const { chrome } = useKibana().services;
+   * const Example = ({ config, core }: Props) => {
+   *  const { chrome } = core;
    *
    *  useEffect(() => {
    *    chrome.setAppMenu(config);

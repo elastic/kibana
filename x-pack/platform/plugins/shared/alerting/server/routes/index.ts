@@ -168,13 +168,11 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
-  if (alertingConfig?.gapAutoFillScheduler?.enabled) {
-    createAutoFillSchedulerRoute(router, licenseState);
-    getAutoFillSchedulerRoute(router, licenseState);
-    updateAutoFillSchedulerRoute(router, licenseState);
-    deleteAutoFillSchedulerRoute(router, licenseState);
-    findAutoFillSchedulerLogsRoute(router, licenseState);
-  }
+  createAutoFillSchedulerRoute(router, licenseState);
+  getAutoFillSchedulerRoute(router, licenseState);
+  updateAutoFillSchedulerRoute(router, licenseState);
+  deleteAutoFillSchedulerRoute(router, licenseState);
+  findAutoFillSchedulerLogsRoute(router, licenseState);
 
   // Rules Settings APIs
   if (alertingConfig.rulesSettings.enabled) {

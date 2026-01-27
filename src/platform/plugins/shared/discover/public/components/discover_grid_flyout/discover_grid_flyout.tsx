@@ -19,7 +19,6 @@ import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
-import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import type { DocViewerExtensionParams } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
@@ -79,13 +78,11 @@ export function DiscoverGridFlyout({
   hideFilteringOnComputedColumns,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
-  const flyoutCustomization = useDiscoverCustomization('flyout');
   const isESQLQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
   const { flyoutActions } = useFlyoutActions({
-    actions: flyoutCustomization?.actions,
     dataView,
     rowIndex: actualHit.raw._index,
     rowId: actualHit.raw._id,
@@ -99,15 +96,12 @@ export function DiscoverGridFlyout({
   });
   const docViewer = useMemo(() => {
     const getDocViewer = getDocViewerAccessor(() => ({
-      title: flyoutCustomization?.title,
-      docViewsRegistry: (registry: DocViewsRegistry) =>
-        typeof flyoutCustomization?.docViewsRegistry === 'function'
-          ? flyoutCustomization.docViewsRegistry(registry)
-          : registry,
+      title: undefined,
+      docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
     return getDocViewer({ actions: docViewerExtensionActions ?? {}, record: actualHit });
-  }, [actualHit, docViewerExtensionActions, flyoutCustomization, getDocViewerAccessor]);
+  }, [actualHit, docViewerExtensionActions, getDocViewerAccessor]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
@@ -116,14 +110,12 @@ export function DiscoverGridFlyout({
   return (
     <UnifiedDocViewerFlyout
       flyoutTitle={docViewer.title}
-      flyoutDefaultWidth={flyoutCustomization?.size}
       flyoutActions={
         !isESQLQuery && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
-      FlyoutCustomBody={flyoutCustomization?.Content}
       services={services}
       docViewsRegistry={docViewer.docViewsRegistry}
       isEsqlQuery={isESQLQuery}

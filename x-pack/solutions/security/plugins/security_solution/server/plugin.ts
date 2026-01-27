@@ -666,6 +666,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.trialCompanionMilestoneService.setup({
         taskManager: plugins.taskManager,
         enabled: trialCompanionDeps.enabled,
+        telemetry: core.analytics,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');

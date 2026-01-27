@@ -15,17 +15,19 @@ import type {
 import { partition } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
+import { getESQLForLayer, isEsqlQuerySuccess } from '../../../datasources/form_based/to_esql';
+import {
+  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
+} from '../../../datasources/form_based/to_esql_failure_reasons';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 
-const cannotConvertToEsqlTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
-  defaultMessage: 'This visualization cannot be converted to ES|QL',
-});
-
-const getEsqlConversionDisabledSettings = (tooltip: string = cannotConvertToEsqlTooltip) => ({
+const getEsqlConversionDisabledSettings = (
+  tooltip: string = esqlConversionFailureReasonMessages.unknown
+) => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
   convertibleLayers: [],
@@ -74,18 +76,14 @@ export const useEsqlConversion = (
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
-          defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
-        })
+        esqlConversionFailureReasonMessages.trend_line_not_supported
       );
     }
 
     // Guard: layer count
     if (layerIds.length > 1) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
-          defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
-        })
+        esqlConversionFailureReasonMessages.multi_layer_not_supported
       );
     }
 
@@ -134,7 +132,7 @@ export const useEsqlConversion = (
       // This prevents conversion errors from breaking the visualization
     }
 
-    return esqlLayer
+    return isEsqlQuerySuccess(esqlLayer)
       ? {
           isConvertToEsqlButtonDisabled: false,
           convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
@@ -151,11 +149,7 @@ export const useEsqlConversion = (
             },
           ],
         }
-      : getEsqlConversionDisabledSettings(
-          i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip', {
-            defaultMessage: 'The visualization has unsupported settings for query mode',
-          })
-        );
+      : getEsqlConversionDisabledSettings(getFailureTooltip(esqlLayer?.reason));
   }, [
     activeVisualization,
     coreStart.uiSettings,

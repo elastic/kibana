@@ -131,7 +131,7 @@
     "@kbn/react-kibana-context-common",
     "@kbn/control-group-renderer",
     "@kbn/unified-tabs",
-    "@kbn/esql-composer",
+    "@kbn/esql-language",
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/controls-constants",

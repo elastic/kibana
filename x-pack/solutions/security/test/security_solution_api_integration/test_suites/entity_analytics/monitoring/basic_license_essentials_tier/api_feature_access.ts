@@ -14,7 +14,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const privilegedUserMonitoringRoutes = privilegeMonitoringRouteHelpersFactory(supertest);
 
-  describe('@ess Basic License API Access', () => {
+  describe('@ess Basic License API Access', function () {
+    this.tags('skipFIPS');
     it('should not be able to access init engine api due to license', async () => {
       const response = await privilegedUserMonitoringRoutes.init(403);
       expect(response.body.message).toEqual(licenseMessage);

@@ -65,15 +65,6 @@ describe('useGapAutoFillCapabilities', () => {
     expect(result.current.canEditGapAutoFill).toBe(false);
   });
 
-  it('denies access when experimental feature flag is disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const { result } = renderHook(() => useGapAutoFillCapabilities());
-
-    expect(result.current.canAccessGapAutoFill).toBe(false);
-    expect(result.current.canEditGapAutoFill).toBe(false);
-  });
-
   it('denies edit rights when license is enterprise but user lacks CRUD', () => {
     mockUseLicense.mockReturnValue({
       isEnterprise: () => true,

@@ -26,6 +26,7 @@ import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
+import URL from 'url';
 import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';

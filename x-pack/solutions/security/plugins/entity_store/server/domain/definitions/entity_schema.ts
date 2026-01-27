@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
 
-const mappingSchema = z.custom<MappingProperty>().optional();
+const mappingSchema = z.any();
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('collect_values'), maxLength: z.number() }),
@@ -21,11 +20,11 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('prefer_oldest_value') }),
 ]);
 
-const retentionFieldSchema = z.object({
+const fieldSchema = z.object({
   allowAPIUpdate: z.optional(z.boolean()),
   mapping: mappingSchema,
   source: z.string(),
-  destination: z.optional(z.string()),
+  destination: z.string(),
   retention: retentionOperationSchema,
 });
 
@@ -39,12 +38,13 @@ export const entitySchema = z.object({
   name: z.string(),
   type: z.string(),
   filter: z.string().optional(),
-  fields: z.array(retentionFieldSchema),
+  fields: z.array(fieldSchema),
   identityFields: z.array(identityFieldSchema),
   indexPatterns: z.array(z.string()),
 });
 
-export type EntityRetentionField = z.infer<typeof retentionFieldSchema>; // entity field for retention operations
+export type EntityField = z.infer<typeof fieldSchema>; // entities fields
+export type EntityIdentityField = z.infer<typeof identityFieldSchema>; // entities identity field
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'

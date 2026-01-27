@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getEntityDefinition } from './definitions/registry';
 import type { EntityType } from './definitions/entity_schema';
@@ -21,13 +21,17 @@ export class AssetManager {
     private namespace: string
   ) {}
 
-  public async init(type: EntityType, logExtractionFrequency?: string) {
+  public async initEntityType(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionFrequency?: string
+  ) {
     await this.install(type); // TODO: async
-    await this.start(type, logExtractionFrequency);
+    await this.start(request, type, logExtractionFrequency);
   }
 
-  public async start(type: EntityType, logExtractionFrequency?: string) {
-    this.logger.debug(`Scheduling extract entity task for type: ${type}`);
+  public async start(request: KibanaRequest, type: EntityType, logExtractionFrequency?: string) {
+    this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
     // TODO: if this fails, set status to failed
     await scheduleExtractEntityTask({
@@ -36,6 +40,7 @@ export class AssetManager {
       type,
       frequency: logExtractionFrequency,
       namespace: this.namespace,
+      request,
     });
   }
 
@@ -50,12 +55,13 @@ export class AssetManager {
 
   public async install(type: EntityType) {
     // TODO: return early if already installed
-    this.logger.debug(`Installing assets for entity type: ${type}`);
-    const definition = getEntityDefinition({ type });
+    this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+
+    const definition = getEntityDefinition(type, this.namespace);
 
     await installElasticsearchAssets({
       esClient: this.esClient,
-      logger: this.logger,
+      logger: this.logger.get(type),
       definition,
       namespace: this.namespace,
     });
@@ -65,15 +71,15 @@ export class AssetManager {
   }
 
   public async uninstall(type: EntityType) {
-    const definition = getEntityDefinition({ type });
+    const definition = getEntityDefinition(type, this.namespace);
     await this.stop(type);
     await uninstallElasticsearchAssets({
       esClient: this.esClient,
-      logger: this.logger,
+      logger: this.logger.get(type),
       definition,
       namespace: this.namespace,
     });
 
-    this.logger.debug(`Uninstalled definition: ${type}`);
+    this.logger.get(type).debug(`Uninstalled definition: ${type}`);
   }
 }

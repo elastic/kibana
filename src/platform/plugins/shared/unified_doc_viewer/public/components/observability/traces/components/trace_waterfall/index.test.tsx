@@ -60,7 +60,7 @@ describe('TraceWaterfall', () => {
     // Verify the wrapper exists with the CSS override
     const wrapper = embeddable?.parentElement;
     expect(wrapper).toHaveStyleRule('width', '100%');
-    expect(wrapper).toHaveStyleRule('display', 'block', {
+    expect(wrapper).toHaveStyleRule('display', 'block!important', {
       target: '.embPanel__content',
     });
   });

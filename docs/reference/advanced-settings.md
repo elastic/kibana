@@ -171,6 +171,9 @@ $$$metrics-maxbuckets$$$`metrics:max_buckets` {applies_to}`stack: ga` {applies_t
 $$$metrics:allowStringIndices$$$`metrics:allowStringIndices` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Enables you to use {{es}} indices in **TSVB** visualizations. `false` by default.
 
+$$$workflows:ui:enabled$$$`workflows:ui:enabled` {applies_to}`stack: preview 9.3` {applies_to}`serverless: preview`
+:   Enables Elastic Workflows and related experiences. `false` by default.
+
 $$$fields-popularlimit$$$`fields:popularLimit` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The top N most popular fields to show. `10` by default.
 

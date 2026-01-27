@@ -12,6 +12,8 @@
  *
  * Source: elasticsearch-specification repository, operations: index, index-1, index-2
  * This override is used to add the `document` parameter (body in OpenAPI) to the paramsSchema
+ * and also modify the methods to just POST, since PUT and POST are interchangeable for "{index}/_doc/{id}', but POST is needed for "{index}/_doc"
+ *
  */
 
 import { z } from '@kbn/zod/v4';
@@ -153,7 +155,7 @@ A nice side effect is that there is no need to maintain strict ordering of async
 Even the simple case of updating the Elasticsearch index using data from a database is simplified if external versioning is used, as only the latest version will be used if the index operations arrive out of order.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create`,
-  methods: ['PUT', 'POST'],
+  methods: ['POST'],
   patterns: ['{index}/_doc/{id}', '{index}/_doc'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create',
   parameterTypes: {

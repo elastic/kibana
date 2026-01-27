@@ -29,15 +29,11 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
-import { removeFinalUnknownIdentiferArg } from './shared';
+import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting/types';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 

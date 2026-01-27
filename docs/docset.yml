@@ -38,6 +38,8 @@ subs:
   elastic-sec:   "Elastic Security"
   es:   "Elasticsearch"
   esql:   "ES|QL"
+  infer: "inference"
+  infer-cap: "Inference"
   kib:   "Kibana"
   ls:   "Logstash"
   security-features:   "security features"

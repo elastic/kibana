@@ -112,6 +112,7 @@ export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
 
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
+export const KUBERNETES_CARD_DISMISSED_STORAGE_KEY = 'infra.inventory.k8sCardDismissed';
 
 export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
   CreateInventoryViewAttributes,

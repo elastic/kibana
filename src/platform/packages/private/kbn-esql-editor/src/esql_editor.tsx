@@ -58,6 +58,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
@@ -91,7 +92,7 @@ import {
 } from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
@@ -104,6 +105,8 @@ import {
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
+
+const VISOR_AUTO_OPEN_DISMISSED_KEY = 'esql:visorAutoOpenDismissed';
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -203,13 +206,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
+  const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
+    VISOR_AUTO_OPEN_DISMISSED_KEY,
+    !openVisorOnSourceCommands
+  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRef(false);
+  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -220,25 +227,34 @@ const ESQLEditorInternal = function ESQLEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  // Open visor on initial render if query has only source commands
+  // The visor opens automatically if:
+  // - the user has not dismissed the auto open behavior
+  // - the query contains only a source command
+  // - the visor has not been opened automatically on mount before
+  // - The openVisorOnSourceCommands prop is true
   useEffect(() => {
     if (
-      openVisorOnSourceCommands &&
       !hasOpenedVisorOnMount.current &&
+      !hasUserDismissedVisorAutoOpen &&
       code &&
       hasOnlySourceCommand(code)
     ) {
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, openVisorOnSourceCommands]);
+  }, [code, hasOpenedVisorOnMount, hasUserDismissedVisorAutoOpen, setIsVisorOpen]);
+
+  const onToggleVisor = useCallback(() => {
+    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
       setIsVisorOpen(false);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setIsVisorOpen]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -894,10 +910,6 @@ const ESQLEditorInternal = function ESQLEditor({
     ]
   );
 
-  const toggleVisor = useCallback(() => {
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, []);
-
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
       // forces refresh
@@ -1226,7 +1238,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
+                    addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
@@ -1355,7 +1367,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
+        toggleVisor={onToggleVisor}
         hideQuickSearch={hideQuickSearch}
       />
       {createPortal(

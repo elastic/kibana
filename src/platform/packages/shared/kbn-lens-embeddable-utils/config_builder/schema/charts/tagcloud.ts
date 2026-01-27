@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -20,7 +20,7 @@ import {
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 
-const tagcloudStateMetricOptionsSchema = schema.object({
+const tagcloudStateMetricOptionsSchema = {
   /**
    * Whether to show the metric label
    */
@@ -30,14 +30,14 @@ const tagcloudStateMetricOptionsSchema = schema.object({
       defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
     })
   ),
-});
+};
 
-const tagcloudStateTagsByOptionsSchema = schema.object({
+const tagcloudStateTagsByOptionsSchema = {
   /**
    * Color configuration
    */
   color: schema.maybe(colorMappingSchema),
-});
+};
 
 const tagcloudStateSharedOptionsSchema = {
   orientation: schema.maybe(
@@ -65,47 +65,53 @@ const tagcloudStateSharedOptionsSchema = {
   ),
 };
 
-export const tagcloudStateSchemaNoESQL = schema.object({
-  type: schema.literal('tagcloud'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...tagcloudStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(tagcloudStateMetricOptionsSchema),
-  /**
-   * Configure how to break down to tags
-   */
-  tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
-});
+export const tagcloudStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('tagcloud'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...tagcloudStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      tagcloudStateMetricOptionsSchema
+    ),
+    /**
+     * Configure how to break down to tags
+     */
+    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
+  },
+  { meta: { id: 'tagcloudNoESQL' } }
+);
 
-export const tagcloudStateSchemaESQL = schema.object({
-  type: schema.literal('tagcloud'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...tagcloudStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    tagcloudStateMetricOptionsSchema,
-    esqlColumnSchema,
-  ]),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  tag_by: schema.allOf([tagcloudStateTagsByOptionsSchema, esqlColumnSchema]),
-});
+export const tagcloudStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('tagcloud'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...tagcloudStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(tagcloudStateMetricOptionsSchema),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    tag_by: esqlColumnSchema.extends(tagcloudStateTagsByOptionsSchema),
+  },
+  { meta: { id: 'tagcloudESQL' } }
+);
 
-export const tagcloudStateSchema = schema.oneOf([
-  tagcloudStateSchemaNoESQL,
-  tagcloudStateSchemaESQL,
-]);
+export const tagcloudStateSchema = schema.oneOf(
+  [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
+  {
+    meta: { id: 'tagcloudChartSchema' },
+  }
+);
 
 export type TagcloudState = TypeOf<typeof tagcloudStateSchema>;
 export type TagcloudStateNoESQL = TypeOf<typeof tagcloudStateSchemaNoESQL>;
