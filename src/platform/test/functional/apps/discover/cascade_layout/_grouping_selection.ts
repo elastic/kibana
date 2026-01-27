@@ -105,6 +105,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(true);
       });
 
+      it('should list the number of groups in the row header', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        await monacoEditor.setCodeEditorValue(statsQuery);
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+
+        const totalHitsMessage = await testSubjects.getVisibleText('discoverQueryTotalHits');
+
+        const [, countMatchString] = totalHitsMessage.match(/^(.*)\sgroups$/) ?? [];
+
+        // strip out comma separator
+        const totalHitCounts = Number(countMatchString.replace(/,/g, ''));
+
+        expect(totalHitCounts).to.be.a('number');
+
+        const rootRows = await find.allByCssSelector('[data-row-type="root"]');
+
+        // we expect the total hits count to possibly be greater the row counts since
+        // we only render on the screen up to the point that's visible
+        expect(totalHitCounts >= rootRows.length).to.be(true);
+      });
+
       it('should copy to clipboard when "copy to clipboard" context menu item is clicked', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();

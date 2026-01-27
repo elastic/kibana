@@ -78,3 +78,17 @@ export const AI_ASSISTED_RULE_CREATION_PROMPT_PLACEHOLDER = i18n.translate(
       'What do you want to detect or check, and in which service, system, or technology...',
   }
 );
+
+export const AI_ASSISTED_RULE_CREATION_MANAGE_CONNECTORS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.manageConnectors',
+  {
+    defaultMessage: 'Manage connectors',
+  }
+);
+
+export const AI_ASSISTED_RULE_CREATION_CONNECTORS_LOAD_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.connectorsLoadError',
+  {
+    defaultMessage: 'Failed to load AI connectors',
+  }
+);

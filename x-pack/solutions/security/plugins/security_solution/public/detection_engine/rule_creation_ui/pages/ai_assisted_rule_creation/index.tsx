@@ -14,9 +14,11 @@ import {
   EuiProgress,
   EuiCallOut,
   EuiButton,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -25,8 +27,8 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { MaxWidthEuiFlexItem, redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
-import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { useAgentBuilderStream } from './hooks/use_agent_builder_stream';
+import { useInferenceConnectors } from './hooks/use_inference_connectors';
 import { CreateRulePage } from '../rule_creation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PromptComponent } from './prompt';
@@ -44,6 +46,8 @@ import {
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 import * as i18n from './translations';
+
+const manageConnectorsPath = '/insightsAndAlerting/triggersActionsConnectors/connectors';
 
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
@@ -63,14 +67,19 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const lastSubmittedPrompt = useRef<string>('');
   const {
     settings,
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
   } = useKibana().services;
   const styles = useHeaderLinkBackStyles();
+
+  const manageConnectorsUrl = useMemo(
+    () => getUrlForApp('management', { path: manageConnectorsPath }),
+    [getUrlForApp]
+  );
 
   const [promptValue, setPromptValue] = useState('');
   const [submittedPromptValue, setSubmittedPromptValue] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const { aiConnectors, isLoading: isAiConnectorsLoading } = useAIConnectors();
+  const { aiConnectors, isLoading: isAiConnectorsLoading } = useInferenceConnectors();
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
 
@@ -186,14 +195,32 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                       <AiAssistedRuleInfo />
                       <EuiSpacer size="m" />
                       <EuiFlexItem grow={false}>
-                        <ConnectorSelector
-                          isLoading={isAiConnectorsLoading}
-                          connectors={aiConnectors}
-                          selectedId={selectedConnectorId}
-                          onChange={setSelectedConnectorId}
-                          mode={'combobox'}
-                          settings={settings}
-                        />
+                        <EuiFlexGroup gutterSize="s" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <ConnectorSelector
+                              isLoading={isAiConnectorsLoading}
+                              connectors={aiConnectors}
+                              selectedId={selectedConnectorId}
+                              onChange={setSelectedConnectorId}
+                              mode={'combobox'}
+                              settings={settings}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiToolTip
+                              content={i18n.AI_ASSISTED_RULE_CREATION_MANAGE_CONNECTORS}
+                              disableScreenReaderOutput
+                            >
+                              <EuiButtonIcon
+                                iconType="gear"
+                                href={manageConnectorsUrl}
+                                target="_blank"
+                                aria-label={i18n.AI_ASSISTED_RULE_CREATION_MANAGE_CONNECTORS}
+                                data-test-subj="ai-assisted-rule-creation-manage-connectors-button"
+                              />
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiSpacer size="m" />
                       <PromptComponent
@@ -204,6 +231,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                         isValid={isValid}
                         onSendMessage={onSendMessage}
                         isAiRuleCreationInProgress={isAiRuleCreationInProgress}
+                        isDisabled={aiConnectors.length === 0}
                       />
                       {rule || isAiRuleCreationCancelled ? (
                         <>
