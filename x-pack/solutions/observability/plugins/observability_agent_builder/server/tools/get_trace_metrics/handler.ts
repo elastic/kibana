@@ -164,7 +164,6 @@ export async function getToolHandler({
         terms: {
           field: groupBy,
           size: MAX_NUMBER_OF_GROUPS,
-          order: { [getTermsOrderAggregationPath(sortBy, latencyType)]: 'desc' },
         },
         aggs: {
           ...getLatencyAggregation({
@@ -174,6 +173,12 @@ export async function getToolHandler({
           }),
           ...getFailureRateAggregation(documentType),
           ...getThroughputAggregation((endMs - startMs) / 1000 / 60),
+          sort_by: {
+            bucket_sort: {
+              sort: [{ [getTermsOrderAggregationPath(sortBy, latencyType)]: { order: 'desc' } }],
+              size: MAX_NUMBER_OF_GROUPS,
+            },
+          },
         },
       },
     },
