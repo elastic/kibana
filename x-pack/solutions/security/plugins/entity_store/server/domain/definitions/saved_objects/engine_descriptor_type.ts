@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
