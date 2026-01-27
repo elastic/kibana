@@ -31,7 +31,8 @@ const authSchema = z
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
     // Allows overriding the query parameter name for scope (e.g., 'user_scope' for Slack)
-    scopeQueryParam: z.string().default('scope').optional().meta({
+    // No default here - defaults come from connector spec, fallback to 'scope' at runtime
+    scopeQueryParam: z.string().optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
   })
