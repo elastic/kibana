@@ -6,9 +6,9 @@
  */
 
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import type { ProjectRouting } from '@kbn/es-query';
 
 import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
-import { ProjectRouting } from '@kbn/es-query';
 
 export type SolutionView = SolutionId | typeof SOLUTION_VIEW_CLASSIC;
 
