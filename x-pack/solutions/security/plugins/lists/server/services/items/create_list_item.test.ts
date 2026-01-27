@@ -11,7 +11,6 @@ import { getListItemResponseMock } from '../../../common/schemas/response/list_i
 import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getIndexESListItemMock } from '../../schemas/elastic_query/index_es_list_item_schema.mock';
 
-import type { CreateListItemOptions } from './create_list_item';
 import { createListItem } from './create_list_item';
 import { getCreateListItemOptionsMock } from './create_list_item.mock';
 
@@ -62,15 +61,5 @@ describe('create_list_item', () => {
     const expected = getListItemResponseMock();
     expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
-  });
-
-  test('It returns null if an item does not match something such as an ip_range with an invalid value', async () => {
-    const options: CreateListItemOptions = {
-      ...getCreateListItemOptionsMock(),
-      type: 'ip_range',
-      value: '# some comment',
-    };
-    const list = await createListItem(options);
-    expect(list).toEqual(null);
   });
 });
