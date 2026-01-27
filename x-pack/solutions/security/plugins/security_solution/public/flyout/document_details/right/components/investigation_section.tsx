@@ -33,7 +33,7 @@ export const InvestigationSection = memo(() => {
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: KEY,
-    defaultValue: false,
+    defaultValue: true,
   });
 
   return (
