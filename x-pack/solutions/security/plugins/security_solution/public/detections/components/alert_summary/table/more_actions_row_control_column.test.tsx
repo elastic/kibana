@@ -22,7 +22,7 @@ jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('MoreActionsRowControlColumn', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -59,7 +59,7 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show cases actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -97,7 +97,7 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show tags actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {

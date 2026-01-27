@@ -105,7 +105,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsAll: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';
