@@ -77,15 +77,16 @@ describe('SystemFlyoutService', () => {
       expect(container.querySelector('[data-eui="EuiFlyout"]')).toBeTruthy();
     });
 
-    it('renders with custom title in flyoutMenuProps', () => {
+    it('renders with custom title at the top level', () => {
       systemFlyouts.open(<div>System flyout content</div>, {
-        title: 'Custom Title',
+        title: 'Top Level Title',
       });
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
-      // Verify render was called
-      const [renderedElement] = mockReactDomRender.mock.calls[0];
-      expect(renderedElement).toBeDefined();
+      // Verify the title was passed through
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Top Level Title');
     });
 
     it('renders flyoutMenuProps with custom properties', () => {
@@ -107,14 +108,17 @@ describe('SystemFlyoutService', () => {
       expect(euiFlyoutElement.props.flyoutMenuProps).toEqual(expectedFlyoutMenuProps);
     });
 
-    it('does not allow title in both top-level and flyoutMenuProps', () => {
-      // TypeScript should prevent this at compile time.
-      // This test is just to document the behavior.
+    it('gives precedence to flyoutMenuProps.title over top-level title', () => {
       systemFlyouts.open(<div>System flyout content</div>, {
         title: 'Top Level Title',
-        // @ts-expect-error - Title can not be in both places
         flyoutMenuProps: { title: 'Menu Title', 'data-test-subj': 'test-menu' },
       });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Verify that flyoutMenuProps.title takes precedence
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Menu Title');
     });
 
     it('applies additional EuiFlyout options', () => {

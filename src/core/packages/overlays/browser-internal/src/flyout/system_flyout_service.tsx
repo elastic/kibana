@@ -20,7 +20,7 @@ import type {
   OverlaySystemFlyoutStart,
 } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, type EuiFlyoutMenuProps } from '@elastic/eui';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
 interface SystemFlyoutStartDeps {
@@ -76,8 +76,11 @@ export class SystemFlyoutService {
           flyoutRef.close();
         };
 
-        // Merge top-level title into flyoutMenuProps
-        const mergedFlyoutMenuProps = title ? { ...flyoutMenuProps, title } : flyoutMenuProps;
+        // title and other flyoutMenuProps: flyoutMenuProps.title takes precedence over top-level title
+        let mergedFlyoutMenuProps: EuiFlyoutMenuProps | undefined;
+        if (title || flyoutMenuProps) {
+          mergedFlyoutMenuProps = { title, ...flyoutMenuProps };
+        }
 
         // Render the flyout content using EuiFlyout with session="start"
         // This ensures full EUI Flyout System integration as a new MAIN flyout.
