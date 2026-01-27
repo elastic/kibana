@@ -10,7 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
-import { ALERT_ACTIONS_DATA_STREAM, AlertAction } from '../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { EsServiceScopedToken } from '../services/es_service/tokens';
 import {
   LoggerServiceToken,
@@ -18,7 +18,7 @@ import {
 } from '../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
-import type { AlertEpisode, RuleId, Policy } from './types';
+import type { AlertEpisode, Policy, RuleId } from './types';
 
 @injectable()
 export class DispatcherService {
