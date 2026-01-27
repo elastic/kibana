@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  useEuiTheme,
   EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +25,6 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
-  const { euiTheme } = useEuiTheme();
 
   const { status } = useSearchApiKey();
   const hasAPIKeyManagePermissions = useMemo(() => {
