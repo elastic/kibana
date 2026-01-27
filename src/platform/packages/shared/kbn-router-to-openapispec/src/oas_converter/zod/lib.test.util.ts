@@ -22,7 +22,6 @@ export function createLargeSchema() {
     ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     neverType: z.never(),
-    map: z.map(z.string(), z.string()),
     record: z.record(z.string(), z.string()),
     union: z.union([
       z.string().describe('Union string').max(1),

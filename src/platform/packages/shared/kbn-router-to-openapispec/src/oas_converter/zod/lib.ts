@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { isZod } from '@kbn/zod';
+import { toJSONSchema } from './zod-to-json-schema-polyfill';
 import { isPassThroughAny } from '@kbn/zod-helpers';
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -28,10 +29,15 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
 }
 
 const instanceofZodTypeKind = (type: z.ZodTypeAny | z.core.$ZodType, zodTypeKind: z.core.$ZodTypeDef['type']) => {
-  if (type instanceof z.ZodType) {
+  // classic API case
+  if ('def' in type && type.def && typeof type.def === 'object' && 'type' in type.def) {
     return type.def.type === zodTypeKind;
   }
-  return type._zod.def.type === zodTypeKind;
+  // core API case
+  if ('_zod' in type && type._zod?.def) {
+    return type._zod.def.type === zodTypeKind;
+  }
+  return false;
 };
 
 type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
@@ -286,10 +292,9 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
 export const convert = (schema: z.ZodType<any>) => {
   return {
     shared: {},
-    schema: z.toJSONSchema(schema, {
-      target: 'draft-2020-12',
-      // to avoid weird v3 - v4 compatibility issues, temporarily 'draft-2020-12', once
-      // zod is upgraded to v4, we can switch back to 'openapi-3.0'
+    schema: toJSONSchema(schema, {
+      target: 'openapi-3.0',
+      unrepresentable: 'any'
     }) as OpenAPIV3.SchemaObject,
   };
 };

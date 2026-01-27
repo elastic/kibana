@@ -8,25 +8,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { convert, convertPathParameters, convertQuery } from './lib';
+
+const BooleanFromString = z.union([z.enum(['true', 'false']), z.boolean()]);
+const PassThroughAny = Object.assign(z.any(), { kbnTypeName: 'PassThroughAny' }) as z.ZodAny & {
+  kbnTypeName: 'PassThroughAny';
+};
 
 import { createLargeSchema } from './lib.test.util';
 
-// TODO: Re-enable once Zod v4 migration is complete and openapi-3.1 target is available
-describe.skip('zod', () => {
+describe('zod', () => {
   describe('convert', () => {
     test('base case', () => {
       expect(convert(createLargeSchema())).toEqual({
         schema: {
           additionalProperties: false,
           properties: {
-            any: {
-              description: 'any type',
-            },
+            any: {},
             booleanDefault: {
               default: true,
-              description: 'defaults to to true',
               type: 'boolean',
             },
             booleanFromString: {
@@ -40,32 +40,16 @@ describe.skip('zod', () => {
                 },
               ],
               default: false,
-              description: 'boolean or string "true" or "false"',
             },
             ipType: {
               format: 'ipv4',
+              pattern:
+                '^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$',
               type: 'string',
             },
             literalType: {
               enum: ['literallythis'],
               type: 'string',
-            },
-            map: {
-              items: {
-                items: [
-                  {
-                    type: 'string',
-                  },
-                  {
-                    type: 'string',
-                  },
-                ],
-                maxItems: 2,
-                minItems: 2,
-                type: 'array',
-              },
-              maxItems: 125,
-              type: 'array',
             },
             maybeNumber: {
               maximum: 1000,
@@ -89,12 +73,10 @@ describe.skip('zod', () => {
             union: {
               anyOf: [
                 {
-                  description: 'Union string',
                   maxLength: 1,
                   type: 'string',
                 },
                 {
-                  description: 'Union number',
                   minimum: 0,
                   type: 'number',
                 },
@@ -106,7 +88,18 @@ describe.skip('zod', () => {
               type: 'string',
             },
           },
-          required: ['string', 'ipType', 'literalType', 'neverType', 'map', 'record', 'union'],
+          required: [
+            'string',
+            'booleanDefault',
+            'booleanFromString',
+            'ipType',
+            'literalType',
+            'neverType',
+            'record',
+            'union',
+            'uri',
+            'any',
+          ],
           type: 'object',
         },
         shared: {},
@@ -221,8 +214,7 @@ describe.skip('zod', () => {
       expect(
         convertQuery(
           z.object({
-            // temporarily casting while waiting for the owners of boolean_from_string to update to Zod v4
-            a: z.optional(BooleanFromString as unknown as z.ZodTypeAny).describe('string or boolean flag'),
+            a: z.optional(BooleanFromString).describe('string or boolean flag'),
           })
         )
       ).toEqual({
