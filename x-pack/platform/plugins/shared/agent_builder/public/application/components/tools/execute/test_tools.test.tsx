@@ -230,3 +230,79 @@ describe('ToolTestFlyout date-time picker', () => {
     expect(callArgs.toolParams.testField).toBe(expectedIso);
   });
 });
+
+describe('ToolTestFlyout array combo box', () => {
+  const mockTool: ToolDefinitionWithSchema = {
+    ...mockToolDefinition,
+    schema: {
+      ...mockToolDefinition.schema,
+      properties: {
+        tags: {
+          title: 'Tags',
+          type: 'array',
+        },
+      },
+    },
+  };
+
+  const mockOnClose = jest.fn();
+  const mockExecuteTool = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAgentBuilderServices.mockReturnValue({
+      docLinksService: {
+        tools: 'https://example.com/docs',
+      },
+    });
+    mockUseTool.mockReturnValue({
+      tool: mockTool,
+      isLoading: false,
+    });
+    mockUseExecuteTool.mockReturnValue({
+      executeTool: mockExecuteTool,
+      isLoading: false,
+    });
+  });
+
+  const renderComponent = () => {
+    return render(
+      <IntlProvider locale="en">
+        <ToolTestFlyout toolId="test-tool" onClose={mockOnClose} />
+      </IntlProvider>
+    );
+  };
+
+  it('creates options and submits mixed numeric/string values', async () => {
+    const { container } = renderComponent();
+    const comboBox = await waitFor(() =>
+      container.querySelector('[data-test-subj="agentBuilderToolTestInput-tags"]')
+    );
+    const input = comboBox?.querySelector('input');
+
+    expect(input).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(input as Element, { target: { value: '123' } });
+      fireEvent.keyDown(input as Element, { key: 'Enter' });
+    });
+
+    act(() => {
+      fireEvent.change(input as Element, { target: { value: 'alpha' } });
+      fireEvent.keyDown(input as Element, { key: 'Enter' });
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector('[data-test-subj="agentBuilderToolTestSubmitButton"]') as Element
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockExecuteTool).toHaveBeenCalled();
+    });
+
+    const callArgs = mockExecuteTool.mock.calls[0][0];
+    expect(callArgs.toolParams.tags).toEqual([123, 'alpha']);
+  });
+});
