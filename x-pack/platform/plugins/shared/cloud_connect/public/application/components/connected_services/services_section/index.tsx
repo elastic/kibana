@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import type { CloudService, ServiceType } from '../../../../types';
 
 interface ServicesSectionProps {
@@ -30,6 +31,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   subscription,
   currentLicenseType,
 }) => {
+  const { autoEnablingEis } = useCloudConnectedAppContext();
   const {
     loadingService,
     disableModalService,
@@ -74,7 +76,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
           })
         ),
       onRotateApiKey: services.eis?.enabled ? () => handleRotateServiceApiKey('eis') : undefined,
-      isLoading: loadingService === 'eis',
+      isLoading: loadingService === 'eis' || autoEnablingEis,
       subscriptionRequired: services.eis?.subscription?.required,
       hasActiveSubscription,
       validLicenseTypes: services.eis?.support?.valid_license_types,
