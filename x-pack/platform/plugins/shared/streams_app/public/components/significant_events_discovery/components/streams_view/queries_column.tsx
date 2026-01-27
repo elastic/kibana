@@ -7,17 +7,23 @@
 
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import React from 'react';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 
 interface QueriesColumnProps {
   streamName: string;
+  streamInsightsOnboardingResult?: TaskResult<InsightsOnboardingResult>;
 }
 
-export function QueriesColumn({ streamName }: QueriesColumnProps) {
-  const significantEventsFetchState = useFetchSignificantEvents({
-    name: streamName,
-  });
+export function QueriesColumn({ streamName, streamInsightsOnboardingResult }: QueriesColumnProps) {
+  const significantEventsFetchState = useFetchSignificantEvents(
+    {
+      name: streamName,
+    },
+    [streamInsightsOnboardingResult]
+  );
 
   return (
     <EuiText

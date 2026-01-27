@@ -365,7 +365,12 @@ export function StreamsTreeTable({
               name: QUERIES_COLUMN_HEADER,
               width: '120px',
               align: 'left',
-              render: (item: TableRow) => <QueriesColumn streamName={item.stream.name} />,
+              render: (item: TableRow) => (
+                <QueriesColumn
+                  streamName={item.stream.name}
+                  streamInsightsOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+                />
+              ),
             },
             {
               name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
