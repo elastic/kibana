@@ -11,7 +11,7 @@ import { generateLogsData } from '../fixtures/generators';
 
 const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
-test.describe.only(
+test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
   { tag: ['@svlOblt'] },
   () => {

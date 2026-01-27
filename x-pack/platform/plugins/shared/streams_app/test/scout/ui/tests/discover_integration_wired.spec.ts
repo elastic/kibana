@@ -11,7 +11,7 @@ import { generateLogsData } from '../fixtures/generators';
 
 const WIRED_STREAM_NAME = 'logs.child';
 
-test.describe.only(
+test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
   { tag: ['@svlOblt'] },
   () => {
