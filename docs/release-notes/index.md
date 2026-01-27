@@ -59,6 +59,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds `kibana.alert.index_pattern` to all alerts [#239450]({{kib-pull}}239450).
 
 **Connectivity**:
+* Elastic will regularly be adding new AI models from 9.3 onwards which will appear as pre-configured AI connectors in  {{kib}}. Refer to [the Elastic Inference Service page](docs-content://explore-analyze/elastic-inference/eis.md) for more details.
 * Adds Groq to the list of available providers for the Inference/AI Connector and for Inference endpoint creation [#244962]({{kib-pull}}244962).
 * Introduces a Brave Search connector [#245329]({{kib-pull}}245329).
 * The webhook connector now supports the following HTTP request methods: POST(default), PUT, PATCH, GET, and DELETE [#238072]({{kib-pull}}238072).
