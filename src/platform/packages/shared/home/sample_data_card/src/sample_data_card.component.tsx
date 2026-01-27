@@ -40,7 +40,7 @@ export const SampleDataCard = ({
     sampleDataSet.status === INSTALLED_STATUS ? { label: INSTALLED_STATUS } : undefined;
 
   const footer = <Footer {...{ sampleDataSet, onAction }} />;
-
+  console.log('image', image);
   return (
     <EuiCard
       textAlign="left"

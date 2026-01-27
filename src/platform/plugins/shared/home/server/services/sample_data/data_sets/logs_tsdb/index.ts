@@ -31,9 +31,11 @@ export const logsTSDBSpecProvider: SampleDatasetProvider = ({ staticAssets }) =>
     id: 'logstsdb',
     name: logsName,
     description: logsDescription,
-    previewImagePath: staticAssets.getPluginAssetHref('/sample_data_resources/logs/dashboard.webp'),
+    previewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/logs/search_analytics.svg'
+    ),
     darkPreviewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/logs/dashboard_dark.webp'
+      '/sample_data_resources/logs/search_analytics.svg'
     ),
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef8f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0c247',
