@@ -6,10 +6,11 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15359
   alerting: 22371
+  alertingVTwo: 358684
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 4662
+  automaticImportVTwo: 10605
   banners: 4087
   canvas: 15142
   cases: 153204
@@ -26,14 +27,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 559233
+  core: 558848
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12500
+  dashboardEnhanced: 11961
   dashboardMarkdown: 4994
-  data: 454000
+  data: 454500
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -44,7 +45,7 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 32797
   developerToolbar: 4467
-  devTools: 8109
+  devTools: 8107
   discover: 28617
   discoverEnhanced: 5660
   discoverShared: 2322
@@ -53,7 +54,7 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 7912
-  enterpriseSearch: 40244
+  enterpriseSearch: 40158
   entityStore: 1755
   esql: 18224
   esqlDataGrid: 10209
@@ -67,7 +68,7 @@ pageLoadAssetSize:
   expressionMetricVis: 17559
   expressionPartitionVis: 29826
   expressions: 105076
-  expressionTagcloud: 12643
+  expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
   fieldFormats: 64634
@@ -130,7 +131,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9285
+  presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
@@ -149,7 +150,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6682
+  searchGettingStarted: 6596
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071
@@ -166,7 +167,7 @@ pageLoadAssetSize:
   serverless: 7451
   serverlessObservability: 19472
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 6608
+  serverlessWorkplaceAI: 7718
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -175,7 +176,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 25991
+  streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -209,4 +210,4 @@ pageLoadAssetSize:
   watcher: 10485
   workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 65731
+  workplaceAIApp: 65529

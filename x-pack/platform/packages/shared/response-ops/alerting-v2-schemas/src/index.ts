@@ -6,3 +6,4 @@
  */
 
 export * from './rule_data_schema';
+export { validateDuration, validateEsqlQuery } from './validation';

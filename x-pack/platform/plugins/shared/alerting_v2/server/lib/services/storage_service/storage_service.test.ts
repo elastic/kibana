@@ -31,8 +31,16 @@ describe('StorageService', () => {
   describe('bulkIndexDocs', () => {
     const index = 'my-index';
     const mockDocs = [
-      { '@timestamp': '2024-01-01T00:00:00Z', rule_id: 'rule-1', alert_series_id: 'series-1' },
-      { '@timestamp': '2024-01-01T00:01:00Z', rule_id: 'rule-2', alert_series_id: 'series-2' },
+      {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        rule: { id: 'rule-1', version: 1 },
+        group_hash: 'hash-1',
+      },
+      {
+        '@timestamp': '2024-01-01T00:01:00Z',
+        rule: { id: 'rule-2', version: 1 },
+        group_hash: 'hash-2',
+      },
     ];
 
     it('should return early when docs array is empty', async () => {

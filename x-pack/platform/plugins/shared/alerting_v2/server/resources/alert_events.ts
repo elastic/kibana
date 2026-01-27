@@ -30,54 +30,60 @@ export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
 const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
+    // Document '_id' is used as the unique alert event identifier
     '@timestamp': { type: 'date' },
     scheduled_timestamp: { type: 'date' },
-    type: { type: 'keyword' }, // "signal" | "alert"
     rule: {
       properties: {
         id: { type: 'keyword' },
+        version: { type: 'long' },
       },
     },
-    source: { type: 'keyword' },
-    data: { type: 'flattened' },
-    status: { type: 'keyword' },
     group_hash: { type: 'keyword' },
+    data: { type: 'flattened' },
+    status: { type: 'keyword' }, // breached | recovered | no_data
+    source: { type: 'keyword' },
+    type: { type: 'keyword' }, // signal | alert
+
+    // Alert specific fields (not applicable for signal type)
     episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' },
-    episode_status_count: { type: 'long' },
+    episode_status: { type: 'keyword' }, // inactive | pending | active | recovering
+    episode_status_count: { type: 'long' }, // Only set for pending and recovering episode_status
   },
 };
 
-export const commonAlertEventSchema = z.object({
+const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
+const alertEventTypeSchema = z.enum(['signal', 'alert']);
+const episodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
+
+export const alertEventStatus = alertEventStatusSchema.enum;
+export const alertEventType = alertEventTypeSchema.enum;
+export const episodeStatus = episodeStatusSchema.enum;
+
+export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   scheduled_timestamp: z.string().optional(),
   parent_rule_id: z.string().optional(),
   rule: z.object({
     id: z.string(),
+    version: z.number(),
   }),
-  data: z.record(z.string(), z.any()).optional(),
-  group_hash: z.string(), // hash(rule_id + grouping key/value + source)
-  source: z.string(), // "internal" | "external"
-  status: z.enum(['breach', 'recover', 'no_data']),
-});
+  group_hash: z.string(),
+  data: z.record(z.string(), z.any()),
+  status: alertEventStatusSchema,
+  source: z.string(),
+  type: alertEventTypeSchema,
 
-export const signalAlertEventSchema = commonAlertEventSchema.extend({
-  type: z.literal('signal'),
-});
-
-export const alertAlertEventSchema = commonAlertEventSchema.extend({
-  type: z.literal('alert'),
-  episode_id: z.string(),
-  episode_status: z.enum(['inactive', 'pending', 'active', 'recovering']), // breach: pending -> active | recover: recovering -> inactive
+  // Alert specific fields (not applicable for signal type)
+  episode_id: z.string().optional(),
+  episode_status: episodeStatusSchema.optional(),
   episode_status_count: z.number().optional(),
 });
 
-export const alertEventSchema = z.discriminatedUnion('type', [
-  signalAlertEventSchema,
-  alertAlertEventSchema,
-]);
-
 export type AlertEvent = z.infer<typeof alertEventSchema>;
+export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
+export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
+export type EpisodeStatus = z.infer<typeof episodeStatusSchema>;
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,

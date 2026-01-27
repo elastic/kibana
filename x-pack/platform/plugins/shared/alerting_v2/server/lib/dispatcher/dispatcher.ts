@@ -10,7 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM, AlertAction } from '../../resources/alert_actions';
 import { EsServiceScopedToken } from '../services/es_service/tokens';
 import {
   LoggerServiceToken,
@@ -82,7 +82,7 @@ export class DispatcherService {
         });
       }
 
-      await this.storageService.bulkIndexDocs({
+      await this.storageService.bulkIndexDocs<AlertAction>({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: [
           {

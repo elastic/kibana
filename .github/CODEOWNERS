@@ -399,7 +399,6 @@ src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
-src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
@@ -998,7 +997,9 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/yaml-rule-editor @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -2928,6 +2929,11 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics

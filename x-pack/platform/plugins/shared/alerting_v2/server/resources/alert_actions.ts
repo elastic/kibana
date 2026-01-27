@@ -46,7 +46,7 @@ export const alertActionSchema = z.object({
   '@timestamp': z.string(),
   group_hash: z.string(),
   last_series_event_timestamp: z.string(),
-  expiry: z.string(),
+  expiry: z.string().optional(),
   actor: z.string(),
   action_type: z.string(), // "fire-event"
   episode_id: z.string(),
