@@ -156,6 +156,10 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     /**
      * Creates a Fleet Agent policy and adds to it the Endpoint Package Policy that
      * stores the Policy configuration data
+     *
+     * Creating Package policy results in installing prebuilt rules under the hood.
+     * Hence it is useful to call `installMockPrebuiltRulesPackage()` beforehand,
+     * if it's not already called in the test config, like in `config.base.edr_workflows.ts`.
      */
     async createPolicy({
       agentPolicyOverrides = {},
