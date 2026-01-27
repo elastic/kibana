@@ -75,6 +75,19 @@ describe('FullScreenWaterfall', () => {
     expect(embeddable).toHaveAttribute('data-hide-panel-chrome', 'true');
   });
 
+  it('wraps EmbeddableRenderer with CSS override for proper layout', () => {
+    const { container } = render(<FullScreenWaterfall {...defaultProps} />);
+
+    const embeddable = container.querySelector('[data-test-subj="embeddableRenderer"]');
+    expect(embeddable).toBeInTheDocument();
+
+    const wrapper = embeddable?.parentElement;
+    expect(wrapper).toHaveStyleRule('width', '100%');
+    expect(wrapper).toHaveStyleRule('display', 'block!important', {
+      target: '.embPanel__content',
+    });
+  });
+
   it('should not display nested flyouts initially', () => {
     render(<FullScreenWaterfall {...defaultProps} />);
 
