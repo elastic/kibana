@@ -9,8 +9,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/monitoring';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { createSourcesSyncService } from './sources_sync';
-import { createIndexUpdateDetectionService } from './update_detection/index/update_detection';
 import { createIndexDeletionDetectionService } from './deletion_detection/index/deletion_detection';
+import { createUpdateDetectionService } from './update_detection/update_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
@@ -18,7 +18,7 @@ export const createIndexSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {
-  const updateDetectionService = createIndexUpdateDetectionService(dataClient, soClient);
+  const updateDetectionService = createUpdateDetectionService(dataClient, soClient, 'index');
   const deletionDetectionService = createIndexDeletionDetectionService(dataClient, soClient);
   const sourcesSyncService = createSourcesSyncService(dataClient);
   /**
