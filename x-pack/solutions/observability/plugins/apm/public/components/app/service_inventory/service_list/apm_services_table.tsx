@@ -26,7 +26,7 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import type { ServiceListItem, SloStatus } from '../../../../../common/service_inventory';
+import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
@@ -60,6 +60,7 @@ import type {
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
+import { SloStatusBadge } from './slo_status_badge';
 import { useServiceActions } from './service_actions';
 import {
   APM_SLO_INDICATOR_TYPES,
@@ -70,90 +71,6 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
-
-interface SloStatusConfig {
-  id: string;
-  color: 'danger' | 'warning' | 'success' | 'default' | 'hollow';
-  showCount: boolean;
-  tooltipContent: string;
-  ariaLabel: (serviceName: string) => string;
-  badgeLabel: (count?: number | string) => string;
-}
-
-export const SLO_COUNT_CAP = 50;
-
-const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
-  violated: {
-    id: 'Violated',
-    color: 'danger',
-    showCount: true,
-    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.sloViolated', {
-      defaultMessage: 'One or more SLOs are violated. Click to view SLOs.',
-    }),
-    ariaLabel: (serviceName: string) =>
-      i18n.translate('xpack.apm.servicesTable.sloViolatedAriaLabel', {
-        defaultMessage: 'View violated SLOs for {serviceName}',
-        values: { serviceName },
-      }),
-    badgeLabel: (count?: number | string) =>
-      i18n.translate('xpack.apm.servicesTable.sloViolated', {
-        defaultMessage: '{count} Violated',
-        values: { count },
-      }),
-  },
-  degrading: {
-    id: 'Degrading',
-    color: 'warning',
-    showCount: true,
-    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.sloDegrading', {
-      defaultMessage: 'One or more SLOs are degrading. Click to view SLOs.',
-    }),
-    ariaLabel: (serviceName: string) =>
-      i18n.translate('xpack.apm.servicesTable.sloDegradingAriaLabel', {
-        defaultMessage: 'View degrading SLOs for {serviceName}',
-        values: { serviceName },
-      }),
-    badgeLabel: (count?: number | string) =>
-      i18n.translate('xpack.apm.servicesTable.sloDegrading', {
-        defaultMessage: '{count} Degrading',
-        values: { count },
-      }),
-  },
-  noData: {
-    id: 'NoData',
-    color: 'default',
-    showCount: false,
-    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.sloNoData', {
-      defaultMessage: 'One or more SLOs have no data. Click to view SLOs.',
-    }),
-    ariaLabel: (serviceName: string) =>
-      i18n.translate('xpack.apm.servicesTable.sloNoDataAriaLabel', {
-        defaultMessage: 'View SLOs with no data for {serviceName}',
-        values: { serviceName },
-      }),
-    badgeLabel: () =>
-      i18n.translate('xpack.apm.servicesTable.sloNoData', {
-        defaultMessage: 'No data',
-      }),
-  },
-  healthy: {
-    id: 'Healthy',
-    color: 'success',
-    showCount: false,
-    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.sloHealthy', {
-      defaultMessage: 'All SLOs are healthy. Click to view details.',
-    }),
-    ariaLabel: (serviceName: string) =>
-      i18n.translate('xpack.apm.servicesTable.sloHealthyAriaLabel', {
-        defaultMessage: 'View healthy SLOs for {serviceName}',
-        values: { serviceName },
-      }),
-    badgeLabel: () =>
-      i18n.translate('xpack.apm.servicesTable.sloHealthy', {
-        defaultMessage: 'Healthy',
-      }),
-  },
-};
 
 export function getServiceColumns({
   query,
@@ -178,7 +95,7 @@ export function getServiceColumns({
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
-  onSloBadgeClick?: (serviceName: string, agentName?: AgentName) => void;
+  onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -257,25 +174,13 @@ export function getServiceColumns({
                 return null;
               }
 
-              const config = SLO_STATUS_CONFIG[sloStatus];
-              const cappedCount =
-                config.showCount && sloCount
-                  ? sloCount >= SLO_COUNT_CAP
-                    ? `${SLO_COUNT_CAP}+`
-                    : sloCount
-                  : undefined;
-
               return (
-                <EuiToolTip position="bottom" content={config.tooltipContent}>
-                  <EuiBadge
-                    data-test-subj={`serviceInventorySlo${config.id}Badge`}
-                    color={config.color}
-                    onClick={() => onSloBadgeClick?.(serviceName, agentName)}
-                    onClickAriaLabel={config.ariaLabel(serviceName)}
-                  >
-                    {config.badgeLabel(cappedCount)}
-                  </EuiBadge>
-                </EuiToolTip>
+                <SloStatusBadge
+                  sloStatus={sloStatus}
+                  sloCount={sloCount}
+                  serviceName={serviceName}
+                  onClick={() => onSloBadgeClick(serviceName, agentName)}
+                />
               );
             },
           } as ITableColumn<ServiceListItem>,

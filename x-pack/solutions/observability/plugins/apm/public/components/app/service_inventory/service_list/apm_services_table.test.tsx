@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import { ApmServicesTable, getServiceColumns, SLO_COUNT_CAP } from './apm_services_table';
+import { ApmServicesTable, getServiceColumns } from './apm_services_table';
+import { SLO_COUNT_CAP } from './slo_status_badge';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { apmRouter } from '../../../routing/apm_route_config';
@@ -287,6 +288,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       expect(columns.length).toBe(9);
@@ -303,6 +305,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasHealthColumn = columns.some((c) => c.field === 'healthStatus');
@@ -320,6 +323,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasAlertsColumn = columns.some((c) => c.field === 'alertsCount');
@@ -337,6 +341,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -354,6 +359,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -371,6 +377,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasTransactionTypeColumn = columns.some((c) => c.field === 'transactionType');
@@ -388,6 +395,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
       });
 
       const hasEnvironmentColumn = columns.some((c) => c.field === 'environments');
@@ -430,6 +438,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onSloBadgeClick: jest.fn(),
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -474,6 +483,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onSloBadgeClick: jest.fn(),
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -508,6 +518,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onSloBadgeClick: jest.fn(),
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -551,6 +562,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onSloBadgeClick: jest.fn(),
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
