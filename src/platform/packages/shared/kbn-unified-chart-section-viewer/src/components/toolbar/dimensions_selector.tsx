@@ -74,7 +74,7 @@ export const DimensionsSelector = ({
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    return dimensions.map<SelectableEntry>((dimension) => {
+    const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
       const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
@@ -87,6 +87,12 @@ export const DimensionsSelector = ({
         disabled: singleSelection ? false : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
       };
+    });
+    // Sort so that selected options appear first
+    return mappedOptions.sort((a, b) => {
+      const aSelected = a.checked === 'on' ? 0 : 1;
+      const bSelected = b.checked === 'on' ? 0 : 1;
+      return aSelected - bSelected;
     });
   }, [
     dimensions,
