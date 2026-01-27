@@ -14,7 +14,6 @@ import type { Agent } from '../../../../../types';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
-import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
 import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
 
 describe('AgentDetailsIntegrationOutputs', () => {

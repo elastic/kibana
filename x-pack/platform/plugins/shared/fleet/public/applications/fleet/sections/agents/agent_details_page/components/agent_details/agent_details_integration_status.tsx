@@ -13,6 +13,7 @@ import {
   EuiToolTip,
   EuiText,
   EuiTreeView,
+  euiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +28,7 @@ import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 import { type InputStatusFormatter } from './input_status_utils';
 
 const StyledEuiLink = styled(EuiLink)`
-  font-size: ${(props) => props.theme.euiTheme.font.scale.s};
+  font-size: ${(props) => euiFontSize(props.theme, 's').fontSize?.toString()};
 `;
 
 const StyledEuiTreeView = styled(EuiTreeView)`
@@ -57,7 +58,7 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     }
     .euiTreeView__nodeLabel {
       .euiText {
-        font-size: ${(props) => props.theme.euiTheme.font.scale.m};
+        font-size: ${(props) => euiFontSize(props.theme, 's').fontSize?.toString()};
         user-select: text;
         cursor: text;
       }
@@ -215,7 +216,7 @@ export const AgentDetailsIntegrationStatus: React.FunctionComponent<{
           ),
           id: 'agentIntegrationsItems',
           icon: itemsTotalErrors ? (
-            <EuiNotificationBadge data-test-subj="agentIntegrationsItemsStatusHealth">
+            <EuiNotificationBadge size="s" data-test-subj="agentIntegrationsItemsStatusHealth">
               {itemsTotalErrors}
             </EuiNotificationBadge>
           ) : undefined,
