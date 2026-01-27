@@ -9,7 +9,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Type } from '@kbn/config-schema';
-import { SchemaTypeError, ValidationError } from '@kbn/config-schema';
+import { schema as schemaBuilder, SchemaTypeError, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Observable } from 'rxjs';
@@ -363,19 +363,24 @@ export class ConfigService {
     );
 
     // Check for stripped 'enabled' field: when the raw config has `enabled` but
-    // the validated config doesn't, it means the schema doesn't allow `enabled`
+    // the validated config doesn't, it means the schema doesn't allow `enabled`.
+    // Using schema validation to enforce this check.
     if (
-      stripUnknownKeys &&
       validateOptions?.rawConfig &&
-      typeof validateOptions.rawConfig.enabled !== 'undefined' &&
       typeof (validatedValue as { enabled?: boolean })?.enabled === 'undefined'
     ) {
-      throw new ValidationError(
-        new SchemaTypeError(
-          `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`,
-          [namespace]
-        )
+      const ensureEnabledNotSetSchema = schemaBuilder.object(
+        {},
+        {
+          unknowns: 'allow',
+          validate: (v: Record<string, unknown>) => {
+            if (typeof v.enabled !== 'undefined') {
+              return `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`;
+            }
+          },
+        }
       );
+      ensureEnabledNotSetSchema.validate(validateOptions.rawConfig, {}, namespace);
     }
 
     return validatedValue;
