@@ -30,6 +30,8 @@
           "({ from, to }: { from: string; to: string; }) => { startDate: string; endDate: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
             "label": "{ from, to }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,6 +56,8 @@
                 "label": "from",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -63,6 +69,8 @@
                 "label": "to",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -83,6 +91,8 @@
           "({ from, to }: { from: string; to: string; }) => { startDate: number; endDate: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +104,8 @@
             "label": "{ from, to }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -105,6 +117,8 @@
                 "label": "from",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "lineNumber": 47,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -116,6 +130,8 @@
                 "label": "to",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "lineNumber": 47,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -136,6 +152,8 @@
           "(epochDate: number) => number"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +168,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -177,6 +197,8 @@
           ") => number"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,6 +220,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -218,6 +242,8 @@
           "\nRepresents a time range with from and to ISO string dates"
         ],
         "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,6 +255,8 @@
             "label": "from",
             "description": [],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +268,8 @@
             "label": "to",
             "description": [],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +284,8 @@
               "\"absolute\" | \"relative\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

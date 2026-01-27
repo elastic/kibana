@@ -36,7 +36,12 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
+export type MonacoMessage = monaco.editor.IMarkerData & {
+  code: string;
+
+  // By default warnings are not underlined, use this flag to indicate it should be
+  underlinedWarning?: boolean;
+};
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
@@ -154,6 +159,8 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
+
+        const computeStart = performance.now();
         const suggestions = await suggest(fullText, offset, deps);
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
@@ -161,7 +168,17 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
 
-        return wrapAsMonacoSuggestions(suggestions, fullText);
+        const result = wrapAsMonacoSuggestions(suggestions, fullText);
+        const computeEnd = performance.now();
+
+        deps?.telemetry?.onSuggestionsReady?.(
+          computeStart,
+          computeEnd,
+          model.getValueLength(),
+          model.getLineCount()
+        );
+
+        return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!deps?.getFieldsMetadata) return item;

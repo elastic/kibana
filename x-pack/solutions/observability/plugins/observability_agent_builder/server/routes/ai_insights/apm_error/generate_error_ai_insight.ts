@@ -6,18 +6,18 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
+import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
+import type { AiInsightResult, ContextEvent } from '../types';
 
 const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
@@ -60,10 +60,7 @@ const buildUserPrompt = (errorContext: string) => {
 };
 
 export interface GenerateErrorAiInsightParams {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   errorId: string;
   serviceName: string;
@@ -89,7 +86,7 @@ export async function generateErrorAiInsight({
   request,
   inferenceClient,
   dataRegistry,
-}: GenerateErrorAiInsightParams): Promise<{ summary: string; context: string }> {
+}: GenerateErrorAiInsightParams): Promise<AiInsightResult> {
   const errorContext = await fetchApmErrorContext({
     core,
     plugins,
@@ -105,7 +102,7 @@ export async function generateErrorAiInsight({
 
   const userPrompt = buildUserPrompt(errorContext);
 
-  const response = await inferenceClient.chatComplete({
+  const events$ = inferenceClient.chatComplete({
     system: ERROR_AI_INSIGHT_SYSTEM_PROMPT,
     messages: [
       {
@@ -113,7 +110,16 @@ export async function generateErrorAiInsight({
         content: userPrompt,
       },
     ],
+    stream: true,
   });
 
-  return { summary: response.content, context: errorContext };
+  const streamWithContext$ = concat(
+    of<ContextEvent>({ type: 'context', context: errorContext }),
+    events$
+  );
+
+  return {
+    events$: streamWithContext$,
+    context: errorContext,
+  };
 }

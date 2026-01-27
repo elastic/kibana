@@ -21,7 +21,8 @@ import { login, ROLE } from '../../tasks/login';
 
 export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/248743
+describe.skip(
   'Form',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -195,8 +196,7 @@ describe(
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/248743
-    describe.skip('User should be able to add response action to ESQL rule', () => {
+    describe('User should be able to add response action to ESQL rule', () => {
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
       beforeEach(() => {

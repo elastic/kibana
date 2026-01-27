@@ -11,17 +11,21 @@ import { uniqBy } from 'lodash';
 import { isAssignment, isColumn } from '../../../ast/is';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand } from '../../../types';
-import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
+import type { IAdditionalFields } from '../registry';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string
+  query: string,
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
 
-  const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, columnMap, unmappedFieldsStrategy);
 
   const newColumns = [];
 

@@ -42,3 +42,7 @@ export type ControlsRendererParentApi = Pick<
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     isCompressed?: () => boolean;
   };
+
+export interface PublishesFocusedPanelId {
+  focusedPanelId$: BehaviorSubject<string | undefined>;
+}

@@ -12,6 +12,8 @@
         "label": "NoDataViewsPromptComponentProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25,6 +27,8 @@
               "True if the user has permission to create a data view, false otherwise."
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -41,6 +45,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,6 +64,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,6 +82,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -92,6 +102,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -110,6 +122,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -126,6 +140,8 @@
           "\nKibana-specific service types."
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,6 +164,8 @@
               "; }; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,6 +180,8 @@
               "{ userPermissions: { editDataView: () => boolean; }; openEditor: (options: DataViewEditorOptions) => () => void; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,6 +198,8 @@
               "; }; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -192,6 +214,8 @@
         "label": "NoDataViewsPromptProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,6 +232,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +250,8 @@
               "(dataView: unknown) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -238,6 +266,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+                "lineNumber": 107,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,6 +288,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -276,6 +308,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -295,6 +329,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -311,6 +347,8 @@
           "\nAbstract external services for this component."
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -324,6 +362,8 @@
               "True if the user has permission to create a new Data View, false otherwise."
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +380,8 @@
               "(options: DataViewEditorOptions) => () => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -354,6 +396,8 @@
                   "DataViewEditorOptions"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+                "lineNumber": 43,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -371,6 +415,8 @@
               "A link to information about Data Views in Kibana"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,6 +433,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,6 +448,8 @@
               "A link to the documentation for ES|QL"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,6 +470,8 @@
           "ILocatorClient"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -435,6 +487,8 @@
           "(appId: string, options?: { path?: string | undefined; state?: unknown; } | undefined) => void"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -447,6 +501,8 @@
             "label": "appId",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -461,6 +517,8 @@
               "{ path?: string | undefined; state?: unknown; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false
           }

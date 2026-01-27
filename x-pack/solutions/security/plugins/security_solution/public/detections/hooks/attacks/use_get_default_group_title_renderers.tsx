@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
-import type { GroupPanelRenderer } from '@kbn/grouping/src';
+import type { GroupPanelRenderer, RawBucket } from '@kbn/grouping/src';
 
 import type { AlertsGroupingAggregation } from '../../components/alerts_table/grouping_settings/types';
 import { AttackGroupContent } from '../../components/attacks/table/attack_group_content';
@@ -27,6 +27,12 @@ export interface UseGetDefaultGroupTitleRenderersProps {
 
   /** Indicates if the attack data is currently loading */
   isLoading?: boolean;
+
+  /** Helper function to open the flyout */
+  openAttackDetailsFlyout: (
+    selectedGroup: string,
+    bucket: RawBucket<AlertsGroupingAggregation>
+  ) => void;
 }
 
 /**
@@ -38,12 +44,14 @@ export interface UseGetDefaultGroupTitleRenderersProps {
  * @param props.getAttack - Helper function to retrieve attack details
  * @param props.showAnonymized - When true, displays anonymized values; when false, displays original values
  * @param props.isLoading - Indicates if the attack data is currently loading
+ * @param props.openAttackDetailsFlyout - Helper function to open the flyout
  * @returns An object containing the defaultGroupTitleRenderers function for rendering group titles
  */
 export const useGetDefaultGroupTitleRenderers = ({
   getAttack,
   showAnonymized,
   isLoading = false,
+  openAttackDetailsFlyout,
 }: UseGetDefaultGroupTitleRenderersProps) => {
   const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = useCallback(
     (selectedGroup, bucket) => {
@@ -72,6 +80,7 @@ export const useGetDefaultGroupTitleRenderers = ({
                   attack={attack}
                   dataTestSubj="attack"
                   showAnonymized={showAnonymized}
+                  openAttackDetailsFlyout={() => openAttackDetailsFlyout(selectedGroup, bucket)}
                 />
               )}
             </>
@@ -79,7 +88,7 @@ export const useGetDefaultGroupTitleRenderers = ({
         />
       );
     },
-    [getAttack, showAnonymized, isLoading]
+    [getAttack, showAnonymized, isLoading, openAttackDetailsFlyout]
   );
 
   return { defaultGroupTitleRenderers };

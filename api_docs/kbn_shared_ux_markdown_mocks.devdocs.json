@@ -48,6 +48,8 @@
           ", {}, PropArguments, {}>"
         ],
         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
             "label": "propArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -70,6 +74,8 @@
                 "label": "readOnly",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -81,6 +87,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 38,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -92,6 +100,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 38,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -105,6 +115,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 39,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -118,6 +130,8 @@
                 "label": "openLinksInNewTab",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -129,6 +143,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 42,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -140,6 +156,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 42,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -153,6 +171,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -166,6 +186,8 @@
                 "label": "placeholder",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -177,6 +199,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 46,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -188,6 +212,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 47,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -201,6 +227,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 49,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -214,6 +242,8 @@
                 "label": "markdownContent",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -225,6 +255,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -236,6 +268,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 53,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -249,6 +283,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 55,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -262,6 +298,8 @@
                 "label": "ariaLabelContent",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -273,6 +311,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 58,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -284,6 +324,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 59,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -297,6 +339,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 61,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -310,6 +354,8 @@
                 "label": "height",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 63,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -321,6 +367,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -332,6 +380,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 65,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -343,6 +393,8 @@
                         "label": "defaultValue",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 66,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -354,6 +406,8 @@
                         "label": "label",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 67,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -368,6 +422,8 @@
                           "(string | number)[]"
                         ],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 68,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -383,6 +439,8 @@
                 "label": "enableTooltipSupport",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -394,6 +452,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 72,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -405,6 +465,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 72,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -418,6 +480,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 73,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -431,6 +495,8 @@
                 "label": "validateLinks",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -442,6 +508,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 76,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -453,6 +521,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 76,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -466,6 +536,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 77,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -479,6 +551,8 @@
                 "label": "enableSoftLineBreaks",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -490,6 +564,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 80,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -501,6 +577,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "lineNumber": 80,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -514,6 +592,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                    "lineNumber": 81,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -529,6 +609,8 @@
             "label": "serviceArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -544,6 +626,8 @@
               "never[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,6 +651,8 @@
               "MarkdownProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -588,6 +674,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                "lineNumber": 88,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -607,6 +695,8 @@
               "MarkdownProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -631,6 +721,8 @@
           "{ height: any; readOnly: any; placeholder: any; openLinksInNewTab: any; ariaLabelContent: any; markdownContent: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
