@@ -52,7 +52,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      */
     getInput: () => ControlGroupRuntimeState;
 
-    getControls: () => ControlsLayout;
+    getControls: () => ControlsLayout['controls'];
 
     openAddDataControlFlyout: (options?: { controlStateTransform?: ControlStateTransform }) => void;
   };

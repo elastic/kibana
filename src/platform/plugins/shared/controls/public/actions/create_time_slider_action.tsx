@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type BehaviorSubject, map } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import { apiCanPinPanels } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { map } from 'rxjs';
-
-import { apiPublishesControlsLayout } from './types';
 
 interface SupportsTimeSliderControl {
   hasTimeSliderControl: boolean;
+  layout$: BehaviorSubject<unknown>; // we don't care about the type of layout, we just need to respond to changes to it
 }
 const apiSupportsTimeSliderControl = (api: unknown): api is SupportsTimeSliderControl =>
-  typeof (api as SupportsTimeSliderControl).hasTimeSliderControl === 'boolean';
+  typeof (api as SupportsTimeSliderControl).hasTimeSliderControl === 'boolean' &&
+  Boolean((api as SupportsTimeSliderControl).layout$);
 
-const compatibilityCheck = (api: unknown | null) =>
-  apiCanPinPanels(api) &&
-  apiPublishesControlsLayout(api) &&
-  apiSupportsTimeSliderControl(api) &&
-  !api.hasTimeSliderControl;
+const compatibilityCheck = (api: unknown | null) => {
+  return apiCanPinPanels(api) && apiSupportsTimeSliderControl(api) && !api.hasTimeSliderControl;
+};
 
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
@@ -35,7 +34,7 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   getIconType: () => 'controlsHorizontal',
   couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
-    apiPublishesControlsLayout(embeddable)
+    apiSupportsTimeSliderControl(embeddable)
       ? embeddable.layout$.pipe(map(() => undefined))
       : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),

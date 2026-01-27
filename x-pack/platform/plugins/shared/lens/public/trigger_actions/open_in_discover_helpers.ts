@@ -113,9 +113,7 @@ function getEsqlControls(embeddable: LensApi) {
   if (!apiIsPresentationContainer(parentApi)) return null;
 
   const usedVariables = getESQLQueryVariables(embeddableQuery.esql);
-  const controlsLayout = isControlGroupRendererApi(parentApi)
-    ? parentApi.getControls().controls
-    : {};
+  const controlsLayout = isControlGroupRendererApi(parentApi) ? parentApi.getControls() : {};
   const esqlControlState = Object.values(parentApi.children$.getValue()).reduce(
     (acc: { [uuid: string]: Serializable }, api, index) => {
       if (

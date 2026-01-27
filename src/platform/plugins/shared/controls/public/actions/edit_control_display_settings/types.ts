@@ -22,13 +22,11 @@ import {
   type HasType,
 } from '@kbn/presentation-publishing';
 import type { HasUniqueId } from '@kbn/presentation-publishing';
-// import { apiPublishesControlsLayout, type PublishesControlsLayout } from '../types';
 
 export type PinnableControlApi = HasType &
   HasUniqueId &
   IsPinnable &
-  HasParentApi<PinnableControlParentApi> &
-  HasPrependWrapperRef;
+  HasParentApi<PinnableControlParentApi>;
 
 export type PinnableControlParentApi = PresentationContainer &
   HasType &
