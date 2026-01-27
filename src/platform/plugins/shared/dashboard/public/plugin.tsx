@@ -63,6 +63,8 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -117,6 +119,7 @@ export interface DashboardStartDependencies {
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   cps?: CPSPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface DashboardSetup {

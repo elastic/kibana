@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -103,6 +110,8 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
     "@kbn/image-embeddable-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/dashboard-agent-common"
   ],
   "exclude": ["target/**/*"]
 }

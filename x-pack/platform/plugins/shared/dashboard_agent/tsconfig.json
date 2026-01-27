@@ -11,6 +11,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",
+    "@kbn/dashboard-agent-common",
     "@kbn/zod",
     "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
