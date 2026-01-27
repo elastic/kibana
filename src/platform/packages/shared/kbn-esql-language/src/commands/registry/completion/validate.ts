@@ -29,7 +29,11 @@ export const validate = (
 
   const { prompt, location, inferenceId } = command as ESQLAstCompletionCommand;
 
-  const promptExpressionType = getExpressionType(prompt, context?.columns);
+  const promptExpressionType = getExpressionType(
+    prompt,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push(

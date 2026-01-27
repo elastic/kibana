@@ -529,7 +529,7 @@ describe('getFormattedFunctionSignature', () => {
         ],
       };
 
-      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, undefined, 3);
       // Should show first 3 types + "+2 more"
       expect(result).toContain('boolean|date|double');
       expect(result).toContain('+2 more');
@@ -563,7 +563,7 @@ describe('getFormattedFunctionSignature', () => {
         ],
       };
 
-      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, undefined, 3);
       // Should show all 4 types instead of "boolean | date | double|…+1 more"
       expect(result).toContain('boolean|date|double|integer');
       expect(result).not.toContain('+1 more');
@@ -591,7 +591,7 @@ describe('getFormattedFunctionSignature', () => {
         ],
       };
 
-      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, 3);
+      const result = getFormattedFunctionSignature(functionDef, undefined, undefined, undefined, 3);
       // Should show all types without "+more" indicator
       expect(result).toContain('boolean|date|double');
       expect(result).not.toContain('more');
