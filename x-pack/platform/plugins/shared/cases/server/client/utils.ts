@@ -34,7 +34,6 @@ import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   AttachmentType,
-  EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -65,7 +64,6 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
-  isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { RegisteredAttachmentTypeRegistry } from '../attachment_framework/attachment_registry';
@@ -128,12 +126,10 @@ export const decodeCommentRequest = (
         )} indices: ${JSON.stringify(indices)}`
       );
     }
-  } else if (isCommentRequestTypeEvent(comment)) {
-    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
-  } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypeRegistered(comment)) {
     decodeRegisteredAttachment(comment, attachmentRegistry);
+  } else if (isCommentRequestTypeExternalReference(comment)) {
+    decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
     decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
@@ -177,6 +173,10 @@ const decodeRegisteredAttachment = (
     const attachmentType = attachmentRegistry.get(registeredAttachmentPayload.type);
 
     attachmentType.schemaValidator?.(metadata);
+  } else {
+    // Note: We don't throw here because validateRegisteredAttachments will check this
+    // and throw a more descriptive error. This allows the validation to happen in a
+    // consistent place for all attachment types.
   }
 };
 

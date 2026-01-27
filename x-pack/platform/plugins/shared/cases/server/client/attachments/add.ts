@@ -40,11 +40,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     const query = decodeWithExcessOrThrow(AttachmentRequestRt)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
-    decodeCommentRequest(
-      comment,
-      externalReferenceAttachmentTypeRegistry,
-      attachmentTypeRegistry
-    );
+    decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry, attachmentTypeRegistry);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 

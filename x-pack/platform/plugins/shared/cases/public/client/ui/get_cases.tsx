@@ -40,8 +40,8 @@ export const getCasesLazy = ({
   features,
   releasePhase,
   renderAlertsTable,
-  renderEventsTable,
-}: GetCasesPropsInternal) => (
+}: // renderEventsTable,
+GetCasesPropsInternal) => (
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
@@ -65,7 +65,7 @@ export const getCasesLazy = ({
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
         renderAlertsTable={renderAlertsTable}
-        renderEventsTable={renderEventsTable}
+        // renderEventsTable={renderEventsTable}
       />
     </Suspense>
   </CasesProvider>

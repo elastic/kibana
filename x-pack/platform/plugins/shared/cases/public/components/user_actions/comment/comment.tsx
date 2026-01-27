@@ -16,7 +16,7 @@ import type {
   PersistableStateAttachmentPayload,
   UserCommentAttachment,
   AlertAttachment,
-  EventAttachment,
+  // EventAttachment,
   ActionsAttachment,
   ExternalReferenceAttachment,
   PersistableStateAttachment,
@@ -38,7 +38,7 @@ import { createExternalReferenceAttachmentUserActionBuilder } from './external_r
 import { createAttachmentUserActionBuilder } from './new_attachment';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
-import { createEventAttachmentUserActionBuilder } from './event';
+// import { createEventAttachmentUserActionBuilder } from './event';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
@@ -267,18 +267,22 @@ const getCreateCommentUserAction = ({
 
       return alertBuilder.build();
 
-    case AttachmentType.event:
-      const eventAttachment = attachment as SnakeToCamelCase<EventAttachment>;
-      const eventBuilder = createEventAttachmentUserActionBuilder({
-        userProfiles,
-        attachment: eventAttachment,
-        userAction,
-        onShowAlertDetails,
-        handleDeleteComment,
-        loadingCommentIds,
-      });
+    // Event attachments are now handled by registered attachments above
+    // Keeping this case for backward compatibility with old enum-based event attachments
+    // case AttachmentType.event:
+    //   // For backward compatibility, we still handle old event attachments
+    //   // New event attachments are handled by the registered attachment system above
+    //   const eventAttachment = attachment as SnakeToCamelCase<EventAttachment>;
+    //   const eventBuilder = createEventAttachmentUserActionBuilder({
+    //     userProfiles,
+    //     attachment: eventAttachment,
+    //     userAction,
+    //     onShowAlertDetails,
+    //     handleDeleteComment,
+    //     loadingCommentIds,
+    //   });
 
-      return eventBuilder.build();
+    //   return eventBuilder.build();
 
     case AttachmentType.actions:
       const actionsAttachment = attachment as SnakeToCamelCase<ActionsAttachment>;

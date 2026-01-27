@@ -45,7 +45,7 @@ export const validateRegisteredAttachments = ({
     );
   }
 
-  // For registry-based types, check if type is NOT in enum and validate against registry
+  // For registry-based types (NOT in enum), validate against registry
   if (isRegisteredAttachmentType(query.type)) {
     if (!attachmentTypeRegistry.has(query.type)) {
       throw Boom.badRequest(`Attachment type ${query.type} is not registered.`);

@@ -6,3 +6,4 @@
  */
 
 export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
+export const EVENT_ATTACHMENT_TYPE = 'event';

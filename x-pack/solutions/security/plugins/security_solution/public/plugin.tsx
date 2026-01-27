@@ -24,7 +24,10 @@ import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_met
 import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type {
+  ExternalReferenceAttachmentType,
+  RegisteredAttachmentType,
+} from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -69,7 +72,7 @@ import { generateAttachmentType } from './cases/attachments/indicator';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
-
+import { getEventType } from './cases/attachments/event/event_type';
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
   private experimentalFeatures: ExperimentalFeatures;
@@ -258,12 +261,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
 
-    cases?.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentEndpointRegular()
-    );
+    if (cases?.attachmentFramework) {
+      cases.attachmentFramework.registerExternalReference(
+        getExternalReferenceAttachmentEndpointRegular()
+      );
 
-    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
-    cases?.attachmentFramework?.registerExternalReference(externalAttachmentType);
+      const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
+      cases.attachmentFramework.registerExternalReference(externalAttachmentType);
+
+      const eventType: RegisteredAttachmentType = getEventType();
+      cases.attachmentFramework.registerAttachment(eventType);
+    }
 
     this.registerDiscoverSharedFeatures(plugins);
 

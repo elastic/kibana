@@ -63,7 +63,8 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
-  EventAttachmentPayload,
+  // EventAttachmentPayload,
+  RegisteredAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -183,11 +184,12 @@ export interface CasesPublicStart {
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
-  | EventAttachmentPayload
+  // | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
+  | ExternalReferenceSOAttachmentPayload
+  | RegisteredAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

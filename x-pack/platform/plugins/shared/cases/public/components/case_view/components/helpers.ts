@@ -6,14 +6,20 @@
  */
 
 import { AttachmentType } from '../../../../common/types/domain';
+import { EVENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { isRegisteredAttachmentType } from '../../../../common/utils/attachments';
 import type { AttachmentUI } from '../../../containers/types';
-import type { CaseUI, AlertAttachmentUI, EventAttachmentUI } from '../../../../common/ui/types';
+import type {
+  CaseUI,
+  AlertAttachmentUI,
+  RegisteredAttachmentUI,
+} from '../../../../common/ui/types';
 
 export const getManualAlertIds = (comments: AttachmentUI[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUI) => {
-    if (comment.type === AttachmentType.alert) {
+    if (isAlertAttachment(comment)) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      ids.forEach((id) => alertIds.add(id));
+      ids.forEach((id: string) => alertIds.add(id));
       return alertIds;
     }
     return alertIds;
@@ -40,22 +46,22 @@ const filterAlertCommentByIds = (
   };
 };
 
-const isEventAttachment = (comment: AttachmentUI): comment is EventAttachmentUI => {
-  return comment.type === AttachmentType.event;
+const isEventAttachment = (comment: AttachmentUI): comment is RegisteredAttachmentUI => {
+  return isRegisteredAttachmentType(comment.type) && comment.type === EVENT_ATTACHMENT_TYPE;
 };
 
 const filterEventCommentByIds = (
-  comment: EventAttachmentUI,
+  comment: RegisteredAttachmentUI,
   searchTerm: string
-): EventAttachmentUI | null => {
-  const ids = Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId];
+): RegisteredAttachmentUI | null => {
+  const ids = Array.isArray(comment.attachmentId) ? comment.attachmentId : [comment.attachmentId];
   const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
   if (filteredIds.length === 0) {
     return null;
   }
   return {
     ...comment,
-    eventId: filteredIds,
+    attachmentId: filteredIds,
   };
 };
 

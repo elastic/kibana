@@ -12,12 +12,10 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { intersection } from 'lodash';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
-  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
@@ -29,6 +27,7 @@ import {
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { EVENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
@@ -43,9 +42,10 @@ import {
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
-  isCommentRequestTypeEvent,
+  isCommentRequestTypeUser,
   countEventsForID,
 } from '../utils';
+import { isCommentRequestTypeRegistered } from '../../../common/utils/attachments';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
 
@@ -105,7 +105,7 @@ export class CaseCommentModel {
         refresh: false,
       };
 
-      if (queryRestAttributes.type === AttachmentType.user && queryRestAttributes?.comment) {
+      if (isCommentRequestTypeUser(queryRestAttributes) && queryRestAttributes?.comment) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
         })) as SavedObject<UserCommentAttachmentPayload>;
@@ -313,11 +313,11 @@ export class CaseCommentModel {
       }
     );
 
-    const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
-      {
-        caseId: this.caseInfo.id,
-      }
-    );
+    // const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
+    //   {
+    //     caseId: this.caseInfo.id,
+    //   }
+    // );
 
     attachments.forEach((attachment) => {
       if (isCommentRequestTypeAlert(attachment)) {
@@ -354,33 +354,16 @@ export class CaseCommentModel {
         return;
       }
 
-      if (isCommentRequestTypeEvent(attachment)) {
-        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-
-        // filter out events already present in the case
-        if (intersection(Array.from(eventsAttachedToCase), ids).length) {
-          return;
-        }
-
-        dedupedAttachments.push({
-          ...attachment,
-          eventId: ids,
-          index: indices,
-        });
-
-        return;
-      }
-
       dedupedAttachments.push(attachment);
     });
 
     return dedupedAttachments;
   }
 
-  private getAttachmentsByType<
-    T extends AttachmentType,
-    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
-  >(attachments: AttachmentRequest[], attachmentType: T): R {
+  private getAttachmentsByType<T extends AttachmentType, R = AlertAttachmentPayload[]>(
+    attachments: AttachmentRequest[],
+    attachmentType: T
+  ): R {
     return attachments.filter((attachment) => attachment.type === attachmentType) as R;
   }
 
@@ -393,7 +376,11 @@ export class CaseCommentModel {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
       }
 
-      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
+      // Events are now registered attachments, check for registered event attachments
+      const eventAttachments = req.filter(
+        (attachment) =>
+          isCommentRequestTypeRegistered(attachment) && attachment.type === EVENT_ATTACHMENT_TYPE
+      );
       const hasEventsInRequest = eventAttachments.length > 0;
 
       if (hasEventsInRequest) {
@@ -427,7 +414,7 @@ export class CaseCommentModel {
   private getCommentReferences(commentReq: AttachmentRequest) {
     let references: SavedObjectReference[] = [];
 
-    if (commentReq.type === AttachmentType.user && commentReq?.comment) {
+    if (isCommentRequestTypeUser(commentReq) && commentReq?.comment) {
       const commentStringReferences = getOrUpdateLensReferences(
         this.params.lensEmbeddableFactory,
         commentReq.comment

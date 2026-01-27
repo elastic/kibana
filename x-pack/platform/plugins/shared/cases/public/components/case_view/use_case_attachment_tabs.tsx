@@ -19,13 +19,12 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { AttachmentType } from '../../../common/types/domain';
-import { DASHBOARD_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { isRegisteredAttachmentType } from '../../../common/utils/attachments';
-import type {
-  RegisteredAttachment,
-  AlertAttachment,
-  EventAttachment,
-} from '../../../common/types/domain';
+import type { RegisteredAttachment, AlertAttachment } from '../../../common/types/domain';
 import type { SnakeToCamelCase } from '../../../common/types';
 
 const FilesBadge = ({
@@ -242,8 +241,8 @@ export const useCaseAttachmentTabs = ({
   const stats = useMemo(() => {
     if (!searchTerm) {
       return {
-        totalAlerts: Number(caseData.totalAlerts),
-        totalEvents: Number(caseData.totalEvents),
+        totalAlerts: Number(caseData.totalAlerts) || 0,
+        totalEvents: Number(caseData.totalEvents) || 0,
       };
     }
     return caseData.comments.reduce(
@@ -253,10 +252,16 @@ export const useCaseAttachmentTabs = ({
           acc.totalAlerts = Array.isArray(alertComment.alertId)
             ? acc.totalAlerts + alertComment.alertId.length
             : acc.totalAlerts + 1;
-        } else if (comment.type === AttachmentType.event && features.events.enabled) {
-          const eventComment = comment as SnakeToCamelCase<EventAttachment>;
-          acc.totalEvents = Array.isArray(eventComment.eventId)
-            ? acc.totalEvents + eventComment.eventId.length
+        } else if (
+          isRegisteredAttachmentType(comment.type) &&
+          comment.type === EVENT_ATTACHMENT_TYPE &&
+          features.events.enabled
+        ) {
+          // Handle registered event attachments (type: "event" with attachmentId and metaData)
+          const registeredEventComment = comment as SnakeToCamelCase<RegisteredAttachment>;
+          const attachmentId = registeredEventComment.attachmentId;
+          acc.totalEvents = Array.isArray(attachmentId)
+            ? acc.totalEvents + attachmentId.length
             : acc.totalEvents + 1;
         }
         return acc;
@@ -288,7 +293,8 @@ export const useCaseAttachmentTabs = ({
       const dashboardAttachment = attachment as SnakeToCamelCase<RegisteredAttachment>;
       const id = dashboardAttachment.attachmentId || '';
       const searchLower = searchTerm.toLowerCase();
-      return id.toLowerCase().includes(searchLower);
+      const idString = Array.isArray(id) ? id.join(' ') : id;
+      return idString.toLowerCase().includes(searchLower);
     }).length;
   }, [caseData.comments, searchTerm]);
 
