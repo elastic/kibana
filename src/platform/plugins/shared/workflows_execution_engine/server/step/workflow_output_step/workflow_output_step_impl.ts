@@ -193,9 +193,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
       let executionStatus: ExecutionStatus;
       let outcome: 'success' | 'failure' | 'unknown';
 
-      // Store outputs in workflow execution context and persist them
-      // This ensures outputs are saved before the workflow terminates
-      this.workflowExecutionRuntime.setWorkflowOutputs(outputValues);
+      // Store outputs in workflow execution context
+      const currentContext = (workflowExecution.context as Record<string, unknown>) || {};
+      currentContext.output = outputValues;
+      workflowExecution.context = currentContext;
 
       switch (stepStatus) {
         case 'completed':

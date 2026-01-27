@@ -139,7 +139,6 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart, workflowsExecutionEngine] =
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
-
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -215,7 +214,6 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart, workflowsExecutionEngine] =
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
-
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,

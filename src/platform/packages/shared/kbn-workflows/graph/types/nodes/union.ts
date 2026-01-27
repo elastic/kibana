@@ -17,6 +17,7 @@ import {
   WaitGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -52,6 +53,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   WaitGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
