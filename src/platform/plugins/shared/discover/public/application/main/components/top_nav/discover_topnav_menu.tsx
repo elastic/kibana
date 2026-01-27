@@ -23,6 +23,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { getReadOnlyBadge } from '../../../discover_router';
 
 /**
  * We handle the top nav menu this way because we need to render it higher in the tree than
@@ -46,7 +47,7 @@ export const DiscoverTopNavMenuProvider = ({
   customizationContext,
   children,
 }: PropsWithChildren<{ customizationContext: DiscoverCustomizationContext }>) => {
-  const { chrome } = useDiscoverServices();
+  const { chrome, capabilities } = useDiscoverServices();
   const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
 
   const topNavBadges = useObservable(
@@ -59,12 +60,15 @@ export const DiscoverTopNavMenuProvider = ({
       return;
     }
 
-    chrome.setBreadcrumbsBadges(topNavBadges ?? []);
+    const readOnlyBadge = getReadOnlyBadge({ capabilities });
+    const badges = readOnlyBadge ? [readOnlyBadge] : [];
 
-    return () => {
-      chrome.setBreadcrumbsBadges([]);
-    };
-  }, [chrome, customizationContext.displayMode, topNavBadges]);
+    if (topNavBadges) {
+      badges.push(...topNavBadges);
+    }
+
+    chrome.setBreadcrumbsBadges(badges);
+  }, [capabilities, chrome, customizationContext.displayMode, topNavBadges]);
 
   useUnmount(() => {
     topNavMenuContext.topNavBadges$.next(undefined);
