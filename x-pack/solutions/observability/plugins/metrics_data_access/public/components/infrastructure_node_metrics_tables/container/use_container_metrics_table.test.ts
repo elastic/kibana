@@ -20,7 +20,7 @@ describe('useContainerMetricsTable hook', () => {
     typeof useInfrastructureNodeMetrics
   >;
 
-  it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
+  it('should call useInfrastructureNodeMetrics hook with event.module filter in kuery', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
@@ -37,7 +37,7 @@ describe('useContainerMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `(event.dataset: "kubernetes.container") AND (${kuery})`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({

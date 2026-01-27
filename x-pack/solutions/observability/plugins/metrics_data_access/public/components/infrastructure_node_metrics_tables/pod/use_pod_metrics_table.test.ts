@@ -37,7 +37,7 @@ describe('usePodMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `(event.dataset: "kubernetes.pod") AND (${kuery})`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.pod" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
