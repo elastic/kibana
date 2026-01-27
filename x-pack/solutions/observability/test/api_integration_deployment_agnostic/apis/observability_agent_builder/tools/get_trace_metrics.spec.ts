@@ -24,6 +24,15 @@ interface GetTraceMetricsToolResult extends OtherResult {
   };
 }
 
+function expectSortedDescending(
+  items: TraceMetricsItem[],
+  metric: 'latency' | 'throughput' | 'failureRate'
+) {
+  for (let i = 1; i < items.length; i++) {
+    expect(items[i - 1][metric] >= items[i][metric]).to.be(true);
+  }
+}
+
 const START = 'now-15m';
 const END = 'now';
 
@@ -221,9 +230,92 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns values sorted by latency descending by default', () => {
-        for (let i = 1; i < resultData.items.length; i++) {
-          expect(resultData.items[i - 1].latency).to.be.greaterThan(resultData.items[i].latency);
-        }
+        expectSortedDescending(resultData.items, 'latency');
+      });
+
+      it('returns values sorted by throughput descending when sortBy=throughput', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            sortBy: 'throughput',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expectSortedDescending(items, 'throughput');
+      });
+
+      it('returns values sorted by failure rate descending when sortBy=failureRate', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            sortBy: 'failureRate',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expectSortedDescending(items, 'failureRate');
+      });
+
+      describe('when sorting by latency with different latency types', () => {
+        it('returns values sorted by average latency descending when latencyType=avg', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: START,
+              end: END,
+              sortBy: 'latency',
+              latencyType: 'avg',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expectSortedDescending(items, 'latency');
+        });
+
+        it('returns values sorted by p95 latency descending when latencyType=p95', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: START,
+              end: END,
+              sortBy: 'latency',
+              latencyType: 'p95',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expectSortedDescending(items, 'latency');
+        });
+
+        it('returns values sorted by p99 latency descending when latencyType=p99', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: START,
+              end: END,
+              sortBy: 'latency',
+              latencyType: 'p99',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expectSortedDescending(items, 'latency');
+        });
       });
     });
 
