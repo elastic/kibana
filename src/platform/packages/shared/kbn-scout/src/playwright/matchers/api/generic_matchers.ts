@@ -14,7 +14,6 @@ import type { GenericMatchers } from './types';
  * Create generic matchers delegating to Playwright/Jest expect
  */
 export function createGenericMatchers(actual: unknown): GenericMatchers {
-  // eslint-disable-next-line playwright/valid-expect
   const base = baseExpect(actual);
   return {
     toBe: (expected: unknown) => base.toBe(expected),
