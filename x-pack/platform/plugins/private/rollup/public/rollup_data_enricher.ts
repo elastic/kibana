@@ -15,7 +15,7 @@ const SOURCE = i18n.translate('xpack.rollupJobs.rollupDataEnricher.source', {
 
 export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
-    .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices')
+    .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices_caps')
     .then((response) => {
       return {
         applyToAliases: true,
