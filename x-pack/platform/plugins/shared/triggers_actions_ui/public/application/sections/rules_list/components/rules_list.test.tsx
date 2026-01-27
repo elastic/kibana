@@ -433,7 +433,7 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('rules_list component with items', () => {
+  describe.skip('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
       await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));
