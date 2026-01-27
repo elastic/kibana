@@ -58,12 +58,7 @@ export const ControlPanel = ({
     parentApi.viewMode$,
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
-  // const [grow, setGrow] = useState<ControlPanelState['grow']>(
-  //   initialState.grow ?? DEFAULT_CONTROL_GROW
-  // );
-  // const [width, setWidth] = useState<ControlPanelState['width']>(
-  //   initialState.width ?? DEFAULT_CONTROL_WIDTH
-  // );
+
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
 
