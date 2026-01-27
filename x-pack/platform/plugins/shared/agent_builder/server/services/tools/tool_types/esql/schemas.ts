@@ -28,7 +28,7 @@ export const paramSchema = schema.object({
         schema.string(),
         schema.number(),
         schema.boolean(),
-        schema.arrayOf(schema.oneOf([schema.string(), schema.number()])),
+        schema.arrayOf(schema.oneOf([schema.string(), schema.number()]), { maxSize: 100 }),
       ])
     ),
     schema.never()
