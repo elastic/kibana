@@ -105,7 +105,7 @@ export const ConsoleTutorialsGroup = () => {
           }
         ),
         request: consoleTutorials.agentBuilder,
-        image: `${assetBasePath}/search_agent_builder_illustration.svg`,
+        image: `${assetBasePath}/search_task_automation.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
         isNew: true,
       },
