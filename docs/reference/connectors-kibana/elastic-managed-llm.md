@@ -43,7 +43,7 @@ Details of the currently used model are available in the [model card](https://as
 
 ## Region and hosting
 
-The Preconfigured AI Connectors use a third party service provider for {{infer}}. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
+The Preconfigured AI Connectors use third party service providers for {{infer}}. See [the elastic inference service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
 
 ## Data protection
 
