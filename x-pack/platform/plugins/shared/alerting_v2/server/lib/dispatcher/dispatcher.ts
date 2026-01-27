@@ -32,7 +32,7 @@ export class DispatcherService {
     const startedAt = new Date();
 
     const result = await this.esClient.esql.query({
-      query: `FROM .alerts-events*,.alerts-actions* METADATA _index 
+      query: `FROM .alerts-events,.alerts-actions METADATA _index
         | EVAL rule_id = COALESCE(rule.id, rule_id)
         | STATS
             last_fire = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event",
