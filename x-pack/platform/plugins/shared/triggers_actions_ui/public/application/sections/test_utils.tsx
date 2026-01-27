@@ -7,8 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import type { QueryClientProviderProps } from '@kbn/react-query';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
 // FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,10 +15,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 import type { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-
-/* eslint-disable no-console */
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -27,41 +25,25 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: FC<PropsWithChildren<unknown>>;
+  AppWrapper: FC<PropsWithChildren>;
 }
 
+const { queryClient: defaultTestQueryClient, provider: TestQueryClientProvider } =
+  createTestResponseOpsQueryClient();
+
 export const createAppMockRenderer = (options?: {
-  queryClientContext?: QueryClientProviderProps['context'];
+  queryClient?: QueryClient;
   additionalServices?: any;
 }): AppMockRenderer => {
-  const { queryClientContext, additionalServices } = options ?? {};
+  const { queryClient = defaultTestQueryClient, additionalServices } = options ?? {};
   const services = createStartServicesMock();
   const core = coreMock.createStart();
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    /**
-     * React query prints the errors in the console even though
-     * all tests are passings. We turn them off for testing.
-     */
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
-  });
-
-  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren>(({ children }) => (
     <I18nProvider>
       {core.rendering.addContext(
         <KibanaContextProvider services={{ ...services, ...additionalServices }}>
-          <QueryClientProvider client={queryClient} context={queryClientContext}>
-            {children}
-          </QueryClientProvider>
+          <TestQueryClientProvider>{children}</TestQueryClientProvider>
         </KibanaContextProvider>
       )}
     </I18nProvider>

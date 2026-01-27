@@ -10,8 +10,8 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery } from '@kbn/react-query';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SetOptional } from 'type-fest';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import type {
   FindRuleTemplatesParams,
   FindRuleTemplatesResponse,
@@ -21,7 +21,6 @@ import { findRuleTemplates } from '../apis/find_rule_templates';
 export interface UseFindTemplatesQueryParams extends SetOptional<FindRuleTemplatesParams, 'page'> {
   enabled?: boolean;
   refresh?: Date;
-  toasts: ToastsStart;
 }
 
 export const getKey = (
@@ -30,7 +29,6 @@ export const getKey = (
 
 export const useFindTemplatesQuery = ({
   http,
-  toasts,
   enabled,
   refresh,
   page = 1,
@@ -42,8 +40,12 @@ export const useFindTemplatesQuery = ({
   ruleTypeId,
   tags,
 }: UseFindTemplatesQueryParams) => {
-  const queryFn = async ({ pageParam }: { pageParam?: FindRuleTemplatesParams }) => {
-    const response = await findRuleTemplates({
+  const queryFn = async ({
+    pageParam,
+  }: {
+    pageParam?: Pick<FindRuleTemplatesParams, 'page' | 'perPage'>;
+  }) => {
+    return findRuleTemplates({
       http,
       page: pageParam?.page ?? page,
       perPage: pageParam?.perPage ?? perPage,
@@ -53,17 +55,6 @@ export const useFindTemplatesQuery = ({
       defaultSearchOperator,
       ruleTypeId,
       tags,
-    });
-
-    return response;
-  };
-
-  const onErrorFn = (error: Error) => {
-    toasts.addDanger({
-      title: i18n.translate('responseOpsRulesApis.unableToLoadTemplates', {
-        defaultMessage: 'Unable to load rule templates',
-      }),
-      text: error.message,
     });
   };
 
@@ -100,11 +91,23 @@ export const useFindTemplatesQuery = ({
       tags,
     }),
     queryFn,
-    onError: onErrorFn,
     getNextPageParam,
+    initialPageParam: {
+      page,
+      perPage,
+    },
     enabled,
     refetchOnWindowFocus: false,
     staleTime: 30 * 1000, // Consider data fresh for 30 seconds
+    meta: {
+      getErrorToast: (error: Error) => ({
+        type: 'danger',
+        title: i18n.translate('responseOpsRulesApis.unableToLoadTemplates', {
+          defaultMessage: 'Unable to load rule templates',
+        }),
+        text: error.message,
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
 
   const templates = useMemo(() => {

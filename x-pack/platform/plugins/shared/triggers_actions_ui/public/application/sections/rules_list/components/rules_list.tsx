@@ -231,7 +231,6 @@ export const RulesList = ({
     isSuccess: isLoadRuleTypesSuccess,
   } = useGetRuleTypesPermissions({
     http,
-    toasts,
     filteredRuleTypes,
   });
   // Fetch action types
@@ -759,7 +758,7 @@ export const RulesList = ({
     showToast({ action: 'DELETE', errors, total });
     clearRulesToBulkEdit();
     onClearSelection();
-    refreshRules();
+    await refreshRules();
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
@@ -1044,7 +1043,6 @@ export const RulesList = ({
               });
             }}
             http={http}
-            toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
           />

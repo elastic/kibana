@@ -8,7 +8,6 @@
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { createLocation, createMemoryHistory } from 'history';
 import * as React from 'react';
@@ -17,6 +16,7 @@ import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_feat
 import type { MatchParams } from './home';
 import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
@@ -46,7 +46,7 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
 
-const queryClient = new QueryClient();
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 describe('home', () => {
   beforeEach(() => {
@@ -74,9 +74,9 @@ describe('home', () => {
     render(
       <IntlProvider locale="en">
         <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
+          <TestQueryClientProvider>
             <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
+          </TestQueryClientProvider>
         </Router>
       </IntlProvider>
     );
@@ -103,9 +103,9 @@ describe('home', () => {
 
     const home = mountWithIntl(
       <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
+        <TestQueryClientProvider>
           <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
+        </TestQueryClientProvider>
       </Router>
     );
 
@@ -134,9 +134,9 @@ describe('home', () => {
 
     const home = mountWithIntl(
       <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
+        <TestQueryClientProvider>
           <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
+        </TestQueryClientProvider>
       </Router>
     );
 

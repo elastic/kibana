@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/presentation-util'
   - '@kbn/react-query'
+  - '@kbn/response-ops-react-query'
 tags:
   - plugin
   - prod

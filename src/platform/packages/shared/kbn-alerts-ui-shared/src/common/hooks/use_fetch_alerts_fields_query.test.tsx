@@ -7,22 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import type React from 'react';
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const { QueryClient, QueryClientProvider } = ReactQuery;
-
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 const mockHttpClient = httpServiceMock.createStartContract();
 

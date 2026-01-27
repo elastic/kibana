@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useBulkDelete } from './use_bulk_delete';
 import { bulkDeleteScheduledReports } from '../apis/bulk_delete_scheduled_reports';
-import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/reporting-public', () => ({
   useKibana: jest.fn(),
@@ -22,13 +20,11 @@ jest.mock('../apis/bulk_delete_scheduled_reports', () => ({
   bulkDeleteScheduledReports: jest.fn(),
 }));
 
+const { provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('useBulkDelete', () => {
   const http = httpServiceMock.createStartContract();
   const toasts = notificationServiceMock.createStartContract().toasts;
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-  );
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({

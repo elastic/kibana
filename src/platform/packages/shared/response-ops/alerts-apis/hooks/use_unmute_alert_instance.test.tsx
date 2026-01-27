@@ -10,13 +10,15 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { useUnmuteAlertInstance } from './use_unmute_alert_instance';
 import * as api from '../apis/unmute_alert_instance';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/unmute_alert_instance');
 
 const params = { ruleId: '', alertInstanceId: '' };
+
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useUnmuteAlertInstance', () => {
   const http = httpServiceMock.createStartContract();
@@ -31,7 +33,7 @@ describe('useUnmuteAlertInstance', () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'unmuteAlertInstance');
 
     const { result } = renderHook(() => useUnmuteAlertInstance({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);
@@ -49,7 +51,7 @@ describe('useUnmuteAlertInstance', () => {
     const spy = jest.spyOn(api, 'unmuteAlertInstance').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useUnmuteAlertInstance({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);

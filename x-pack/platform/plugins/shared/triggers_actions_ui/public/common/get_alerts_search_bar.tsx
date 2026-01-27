@@ -6,20 +6,18 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { lazy, Suspense } from 'react';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import type { AlertsSearchBarProps } from '../application/sections/alerts_search_bar';
 
 const AlertsSearchBarLazy: React.FC<AlertsSearchBarProps> = lazy(
   () => import('../application/sections/alerts_search_bar/alerts_search_bar')
 );
 
-const queryClient = new QueryClient();
-
 export const getAlertsSearchBarLazy = (props: AlertsSearchBarProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
-    <QueryClientProvider client={queryClient}>
+    <ResponseOpsQueryClientProvider>
       <AlertsSearchBarLazy {...props} />
-    </QueryClientProvider>
+    </ResponseOpsQueryClientProvider>
   </Suspense>
 );

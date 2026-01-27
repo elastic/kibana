@@ -12,7 +12,6 @@ import {
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React, { lazy } from 'react';
 import { act } from 'react-dom/test-utils';
@@ -20,6 +19,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import ActionForm from './action_form';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -27,6 +27,8 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
 }));
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
@@ -375,7 +377,7 @@ describe('action_form', () => {
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={new QueryClient()}>
+      <TestQueryClientProvider>
         <ActionForm
           actions={initialAlert.actions}
           messageVariables={{
@@ -437,7 +439,7 @@ describe('action_form', () => {
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           ruleTypeId=".es-query"
         />
-      </QueryClientProvider>
+      </TestQueryClientProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update

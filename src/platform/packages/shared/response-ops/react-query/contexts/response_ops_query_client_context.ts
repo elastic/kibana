@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient } from '@kbn/react-query';
+import { createContext } from 'react';
+import type { QueryClient } from '@kbn/react-query';
 
-export const alertsTableQueryClient = new QueryClient();
+export const ResponseOpsQueryClientContext = createContext<QueryClient | undefined>(undefined);

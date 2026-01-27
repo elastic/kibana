@@ -27,7 +27,8 @@ export function useArchiveMaintenanceWindow() {
     return archiveMaintenanceWindow({ http, maintenanceWindowId, archive });
   };
 
-  return useMutation(mutationFn, {
+  return useMutation({
+    mutationFn,
     onSuccess: (data, { archive }) => {
       const archiveToast = i18n.translate('xpack.maintenanceWindows.archiveSuccess', {
         defaultMessage: "Archived maintenance window ''{title}''",

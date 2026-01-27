@@ -8,12 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
-import type { ServerError } from '@kbn/response-ops-alerts-apis/types';
+import type {
+  ResponseOpsQueryMeta,
+  QueryOptionsOverrides,
+} from '@kbn/response-ops-react-query/types';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { queryKeys } from '../constants';
 import type { Case, CasesBulkGetResponse } from '../apis/bulk_get_cases';
 import { bulkGetCases } from '../apis/bulk_get_cases';
@@ -33,25 +35,33 @@ const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
 export interface UseBulkGetCasesQueryParams {
   caseIds: string[];
   http: HttpStart;
-  notifications: NotificationsStart;
 }
 
 export const useBulkGetCasesQuery = (
-  { caseIds, http, notifications: { toasts } }: UseBulkGetCasesQueryParams,
-  options?: Pick<QueryOptionsOverrides<typeof bulkGetCases>, 'enabled'>
+  { caseIds, http }: UseBulkGetCasesQueryParams,
+  options?: Pick<QueryOptionsOverrides<typeof bulkGetCases>, 'enabled'> & {
+    queryClient?: QueryClient;
+  }
 ) => {
-  return useQuery({
-    queryKey: queryKeys.casesBulkGet(caseIds),
-    queryFn: ({ signal }) => bulkGetCases(http, { ids: caseIds }, signal),
-    context: AlertsQueryContext,
-    enabled: caseIds.length > 0 && options?.enabled !== false,
-    select: transformCases,
-    onError: (error: ServerError) => {
-      if (error.name !== 'AbortError') {
-        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: ERROR_TITLE,
-        });
-      }
+  const { enabled, queryClient } = options || {};
+  const alertingQueryClient = useResponseOpsQueryClient();
+  return useQuery(
+    {
+      queryKey: queryKeys.casesBulkGet(caseIds),
+      queryFn: ({ signal }) => bulkGetCases(http, { ids: caseIds }, signal),
+      enabled: caseIds.length > 0 && enabled !== false,
+      select: transformCases,
+      meta: {
+        getErrorToast: (error) => {
+          if (error.name !== 'AbortError') {
+            return {
+              type: 'error',
+              title: ERROR_TITLE,
+            };
+          }
+        },
+      } satisfies ResponseOpsQueryMeta,
     },
-  });
+    queryClient ?? alertingQueryClient
+  );
 };

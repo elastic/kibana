@@ -10,16 +10,17 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import type { RulesSettingsFlapping } from '@kbn/alerting-types';
 import { RuleSettingsFlappingForm } from '.';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const queryClient = new QueryClient();
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const TestProviders: FC<PropsWithChildren> = ({ children }) => {
   return (
     <I18nProvider>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
     </I18nProvider>
   );
 };

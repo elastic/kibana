@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import type React from 'react';
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchUnifiedAlertsFields } from './use_fetch_unified_alerts_fields';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const { QueryClient, QueryClientProvider, useQuery } = ReactQuery;
-
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { useQuery } = ReactQuery;
 
 const mockHttpClient = httpServiceMock.createStartContract();
-const mockToasts = notificationServiceMock.createStartContract().toasts;
+const notifications = notificationServiceMock.createStartContract();
+
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: {
+    notifications,
+  },
+});
 
 const emptyData = { fields: [] };
 
@@ -41,6 +40,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
         },
       ],
     });
+    (useQuery as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -49,11 +49,10 @@ describe('useFetchAlertsFieldsNewApi', () => {
   });
 
   it('should return all fields when empty rule types', async () => {
-    const { result } = renderHook(
+    const { result, rerender } = renderHook(
       () =>
         useFetchUnifiedAlertsFields({
           http: mockHttpClient,
-          toasts: mockToasts,
           ruleTypeIds: [],
         }),
       {
@@ -67,6 +66,8 @@ describe('useFetchAlertsFieldsNewApi', () => {
         query: { rule_type_ids: [] },
       });
     });
+
+    rerender();
 
     expect(result.current.data).toEqual({
       fields: [
@@ -82,7 +83,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
       () =>
         useFetchUnifiedAlertsFields({
           http: mockHttpClient,
-          toasts: mockToasts,
           ruleTypeIds: ['logs', 'siem.esqlRule', 'siem.eqlRule'],
         }),
       {
@@ -103,10 +103,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
         ruleTypeIds,
         enabled,
       }: React.PropsWithChildren<{ ruleTypeIds: string[]; enabled?: boolean }>) =>
-        useFetchUnifiedAlertsFields(
-          { http: mockHttpClient, toasts: mockToasts, ruleTypeIds },
-          { enabled }
-        ),
+        useFetchUnifiedAlertsFields({ http: mockHttpClient, ruleTypeIds }, { enabled }),
       {
         wrapper,
         initialProps: {
@@ -116,11 +113,11 @@ describe('useFetchAlertsFieldsNewApi', () => {
       }
     );
 
-    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }), {});
 
     rerender({ ruleTypeIds: [], enabled: true });
 
-    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }), {});
   });
 
   it('should call the api only once', async () => {
@@ -128,7 +125,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
       () =>
         useFetchUnifiedAlertsFields({
           http: mockHttpClient,
-          toasts: mockToasts,
           ruleTypeIds: ['apm'],
         }),
       {
@@ -168,7 +164,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
       () =>
         useFetchUnifiedAlertsFields({
           http: mockHttpClient,
-          toasts: mockToasts,
           ruleTypeIds: [],
         }),
       {
@@ -180,7 +175,9 @@ describe('useFetchAlertsFieldsNewApi', () => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
 
       expect(result.current.isError).toBe(true);
-      expect(mockToasts.addDanger).toHaveBeenCalledWith('Unable to load alert fields');
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to load alert fields',
+      });
     });
   });
 });

@@ -47,7 +47,6 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
   const {
     application: { getUrlForApp },
     http,
-    notifications: { toasts },
   } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
@@ -71,7 +70,6 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
     isSuccess: isLoadRuleTypesSuccess,
   } = useGetRuleTypesPermissions({
     http,
-    toasts,
     filteredRuleTypes: [],
   });
 

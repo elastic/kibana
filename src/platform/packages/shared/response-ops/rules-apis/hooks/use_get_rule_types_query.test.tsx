@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetRuleTypesQuery } from './use_get_rule_types_query';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import { getRuleTypes } from '../apis/get_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { testQueryClientConfig } from '../test_utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const mockRuleTypes = [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as unknown as RuleType[];
 
@@ -24,11 +21,7 @@ const mockGetRuleTypes = jest.mocked(getRuleTypes);
 
 const http = httpServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-export const Wrapper = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useGetRuleTypesQuery', () => {
   beforeEach(() => {
@@ -50,7 +43,7 @@ describe('useGetRuleTypesQuery', () => {
           { enabled: true }
         ),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 

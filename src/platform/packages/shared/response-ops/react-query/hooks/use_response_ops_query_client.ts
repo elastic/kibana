@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
+import { useContext } from 'react';
+import { ResponseOpsQueryClientContext } from '../contexts/response_ops_query_client_context';
 
-export const testQueryClientConfig = {
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
+export const useResponseOpsQueryClient = () => {
+  return useContext(ResponseOpsQueryClientContext);
 };

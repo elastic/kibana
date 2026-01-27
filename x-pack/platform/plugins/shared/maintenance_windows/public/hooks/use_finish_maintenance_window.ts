@@ -21,7 +21,8 @@ export function useFinishMaintenanceWindow() {
     return finishMaintenanceWindow({ http, maintenanceWindowId });
   };
 
-  return useMutation(mutationFn, {
+  return useMutation({
+    mutationFn,
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.maintenanceWindows.finishedSuccess', {

@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { PropsWithChildren } from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useTagsAction } from './use_tags_action';
 import type { Alert } from '@kbn/alerting-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../contexts/alerts_table_context', () => {
   const actual = jest.requireActual('../../contexts/alerts_table_context');
@@ -28,15 +24,7 @@ jest.mock('../../contexts/alerts_table_context', () => {
 
 const { useAlertsTableContext } = jest.requireMock('../../contexts/alerts_table_context');
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper = ({ children }: PropsWithChildren) => {
-  return (
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useTagsAction', () => {
   const mockAlert = {

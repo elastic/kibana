@@ -93,6 +93,7 @@
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin",
     "@kbn/actions-types",
+    "@kbn/response-ops-react-query",
     "@kbn/kql",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/deeplinks-observability",

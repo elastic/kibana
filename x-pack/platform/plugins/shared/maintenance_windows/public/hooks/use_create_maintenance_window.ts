@@ -43,7 +43,8 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
     return createMaintenanceWindow({ http, createParams });
   };
 
-  return useMutation(mutationFn, {
+  return useMutation({
+    mutationFn,
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.maintenanceWindows.createSuccess', {

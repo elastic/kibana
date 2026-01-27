@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import { of } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseSearchAlertsQueryParams } from './use_search_alerts_query';
-import { AlertsQueryContext } from '../contexts/alerts_query_context';
 import { useSearchAlertsQuery } from './use_search_alerts_query';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const searchResponse = {
   id: '0',
@@ -87,7 +83,7 @@ const expectedResponse: ReturnType<typeof useSearchAlertsQuery>['data'] = {
   ecsAlertsData: [],
 };
 
-const queryClient = new QueryClient(testQueryClientConfig);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useSearchAlertsQuery', () => {
   const mockDataPlugin = {
@@ -112,12 +108,6 @@ describe('useSearchAlertsQuery', () => {
     pageSize: 10,
     sort: [],
   };
-
-  const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      {children}
-    </QueryClientProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();

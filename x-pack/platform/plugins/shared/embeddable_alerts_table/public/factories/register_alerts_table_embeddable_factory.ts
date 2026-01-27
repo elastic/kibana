@@ -7,21 +7,24 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { QueryClient } from '@kbn/react-query';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 
 export interface RegisterAlertsTableEmbeddableFactoryParams {
   embeddable: EmbeddableSetup;
   core: CoreSetup<EmbeddableAlertsTablePublicStartDependencies>;
+  queryClient: QueryClient;
 }
 
 export const registerAlertsTableEmbeddableFactory = ({
   embeddable,
   core,
+  queryClient,
 }: RegisterAlertsTableEmbeddableFactoryParams) => {
   embeddable.registerReactEmbeddableFactory(EMBEDDABLE_ALERTS_TABLE_ID, async () => {
     const [coreStart, deps] = await core.getStartServices();
     const { getAlertsTableEmbeddableFactory } = await import('./alerts_table_embeddable_factory');
-    return getAlertsTableEmbeddableFactory(coreStart, deps);
+    return getAlertsTableEmbeddableFactory(coreStart, deps, queryClient);
   });
 };

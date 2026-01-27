@@ -12,10 +12,7 @@ import { useFindTemplatesQuery } from './use_find_templates_query';
 import { findRuleTemplates } from '../apis/find_rule_templates';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '../test_utils';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const MOCK_TEMPLATES = [
   {
@@ -38,11 +35,9 @@ const mockFindRuleTemplates = jest.mocked(findRuleTemplates);
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-export const Wrapper = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
+});
 
 describe('useFindTemplatesQuery', () => {
   beforeEach(() => {
@@ -64,14 +59,13 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
           sortField: 'name',
           sortOrder: 'asc',
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -97,13 +91,12 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
           search: 'availability',
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -131,12 +124,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 2,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -177,7 +169,7 @@ describe('useFindTemplatesQuery', () => {
       total: 10,
     });
 
-    result.current.fetchNextPage();
+    await result.current.fetchNextPage();
 
     rerender();
     await waitFor(() => {
@@ -206,12 +198,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -228,12 +219,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: false,
           perPage: 10,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -251,12 +241,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -275,13 +264,12 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
           ruleTypeId: 'specific-rule-type',
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -300,13 +288,12 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
           tags: ['production', 'critical'],
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -332,12 +319,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -361,12 +347,11 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 5,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -383,7 +368,7 @@ describe('useFindTemplatesQuery', () => {
       total: 11,
     });
 
-    result.current.fetchNextPage();
+    await result.current.fetchNextPage();
 
     rerender();
     await waitFor(() => {
@@ -398,7 +383,7 @@ describe('useFindTemplatesQuery', () => {
       total: 11,
     });
 
-    result.current.fetchNextPage();
+    await result.current.fetchNextPage();
 
     rerender();
     await waitFor(() => {
@@ -412,14 +397,13 @@ describe('useFindTemplatesQuery', () => {
       () =>
         useFindTemplatesQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 10,
           search: 'template availability',
           defaultSearchOperator: 'AND',
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 

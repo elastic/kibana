@@ -10,18 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export interface UseGetAlertsGroupAggregationsQueryProps {
   http: HttpStart;
-  toasts: ToastsStart;
   enabled?: boolean;
   params: {
     ruleTypeIds: string[];
@@ -53,31 +52,27 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
  */
 export const useGetAlertsGroupAggregationsQuery = <T>({
   http,
-  toasts,
   enabled = true,
   params,
 }: UseGetAlertsGroupAggregationsQueryProps) => {
-  const onErrorFn = (error: Error) => {
-    if (error) {
-      toasts.addDanger(
-        i18n.translate(
-          'alertsUIShared.hooks.useGetAlertsGroupAggregationsQuery.unableToFetchAlertsGroupingAggregations',
-          {
-            defaultMessage: 'Unable to fetch alerts grouping aggregations',
-          }
-        )
-      );
-    }
-  };
-
   return useQuery({
     queryKey: ['getAlertsGroupAggregations', JSON.stringify(params)],
     queryFn: () =>
       http.post<SearchResponseBody<{}, T>>(`${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`, {
         body: JSON.stringify(params),
       }),
-    onError: onErrorFn,
     refetchOnWindowFocus: false,
     enabled,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        title: i18n.translate(
+          'alertsUIShared.hooks.useGetAlertsGroupAggregationsQuery.unableToFetchAlertsGroupingAggregations',
+          {
+            defaultMessage: 'Unable to fetch alerts grouping aggregations',
+          }
+        ),
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
 };

@@ -8,11 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/alerts-ui-shared/src/common/constants';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { mutationKeys } from '../constants';
 
 export interface UseBulkUpdateAlertTagsParams {
@@ -20,6 +21,7 @@ export interface UseBulkUpdateAlertTagsParams {
   notifications: NotificationsStart;
   onSuccess?: () => void;
   onError?: () => void;
+  queryClient?: QueryClient;
 }
 
 export const useBulkUpdateAlertTags = ({
@@ -27,28 +29,29 @@ export const useBulkUpdateAlertTags = ({
   notifications: { toasts },
   onSuccess,
   onError,
+  queryClient,
 }: UseBulkUpdateAlertTagsParams) => {
+  const alertingQueryClient = useResponseOpsQueryClient();
   return useMutation<
     string,
     string,
     { index: string; alertIds: string[]; add?: string[]; remove?: string[] }
   >(
-    mutationKeys.bulkUpdateAlertTags(),
-    ({ index, alertIds, add, remove }) => {
-      try {
-        const body = JSON.stringify({
-          index,
-          alertIds,
-          ...(add ? { add } : {}),
-          ...(remove ? { remove } : {}),
-        });
-        return http.post(`${BASE_RAC_ALERTS_API_PATH}/tags`, { body });
-      } catch (e) {
-        throw new Error(`Unable to update tags: ${e.message}`);
-      }
-    },
     {
-      context: AlertsQueryContext,
+      mutationKey: mutationKeys.bulkUpdateAlertTags(),
+      mutationFn: ({ index, alertIds, add, remove }) => {
+        try {
+          const body = JSON.stringify({
+            index,
+            alertIds,
+            ...(add ? { add } : {}),
+            ...(remove ? { remove } : {}),
+          });
+          return http.post(`${BASE_RAC_ALERTS_API_PATH}/tags`, { body });
+        } catch (e) {
+          throw new Error(`Unable to update tags: ${e.message}`);
+        }
+      },
       onSuccess: (_, params) => {
         toasts.addSuccess(
           i18n.translate(
@@ -74,6 +77,7 @@ export const useBulkUpdateAlertTags = ({
         );
         onError?.();
       },
-    }
+    },
+    queryClient ?? alertingQueryClient
   );
 };

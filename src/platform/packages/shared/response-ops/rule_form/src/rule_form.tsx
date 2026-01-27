@@ -10,8 +10,8 @@
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
 import { RuleFormScreenContextProvider } from './rule_form_screen_context';
@@ -21,8 +21,6 @@ import {
 } from './translations';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import type { RuleFormStepId } from './constants';
-
-const queryClient = new QueryClient();
 
 export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaData> {
   plugins: RuleFormPlugins;
@@ -211,8 +209,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
   ]);
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <ResponseOpsQueryClientProvider>
       <RuleFormScreenContextProvider>{ruleFormComponent}</RuleFormScreenContextProvider>
-    </QueryClientProvider>
+    </ResponseOpsQueryClientProvider>
   );
 };

@@ -38,6 +38,7 @@
     "@kbn/control-group-renderer",
     "@kbn/react-query",
     "@kbn/kql",
-    "@kbn/es-ui-shared-plugin"
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/response-ops-react-query"
   ]
 }

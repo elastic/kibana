@@ -6,21 +6,19 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { RuleEventLogList } from '../application/sections';
 import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from '../application/sections/rule_details/components/rule_event_log_list';
 
-const queryClient = new QueryClient();
-
 export const getRuleEventLogListLazy = <T extends RuleEventLogListOptions = 'default'>(
   props: RuleEventLogListProps<T>
 ) => {
   return (
-    <QueryClientProvider client={queryClient}>
+    <ResponseOpsQueryClientProvider>
       <RuleEventLogList {...props} />
-    </QueryClientProvider>
+    </ResponseOpsQueryClientProvider>
   );
 };

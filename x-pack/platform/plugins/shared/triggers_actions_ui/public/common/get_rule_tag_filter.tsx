@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { RuleTagFilter } from '../application/sections';
 import type { RuleTagFilterProps } from '../application/sections/rules_list/components/rule_tag_filter';
 
-const queryClient = new QueryClient();
-
 export const getRuleTagFilterLazy = (props: RuleTagFilterProps) => {
   return (
-    <QueryClientProvider client={queryClient}>
+    <ResponseOpsQueryClientProvider>
       <RuleTagFilter {...props} />
-    </QueryClientProvider>
+    </ResponseOpsQueryClientProvider>
   );
 };

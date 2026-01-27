@@ -34,6 +34,8 @@ import {
 } from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { createResponseOpsQueryClient } from '@kbn/response-ops-react-query/utils/create_response_ops_query_client_config';
+import type { QueryClient } from '@kbn/react-query';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import type { StartServices } from './types';
@@ -77,6 +79,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
+  private queryClient?: QueryClient;
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -139,6 +142,10 @@ export class ReportingPublicPlugin
 
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
+    const queryClient = createResponseOpsQueryClient({
+      dependencies: { notifications: core.notifications },
+    });
+    this.queryClient = queryClient;
 
     homeSetup.featureCatalogue.register({
       id: 'reporting',
@@ -173,6 +180,7 @@ export class ReportingPublicPlugin
           shareService: share,
           config: this.config,
           apiClient,
+          queryClient,
           params,
           actionsService: actionsSetup,
           notificationsService: coreStart.notifications,
@@ -247,11 +255,12 @@ export class ReportingPublicPlugin
         createScheduledReportShareIntegration,
       }) => {
         const [coreStart, startDeps] = await getStartServices();
-        if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
+        if (await shouldRegisterScheduledReportShareIntegration(core.http, this.queryClient!)) {
           shareSetup.registerShareIntegration<ExportShareDerivatives>(
             createScheduledReportShareIntegration({
               apiClient,
               services: { ...coreStart, ...startDeps, actions: actionsSetup },
+              queryClient: this.queryClient!,
             })
           );
         }

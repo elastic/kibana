@@ -4,27 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetQueryDelaySettings } from './use_get_query_delay_settings';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../lib/rule_api/get_query_delay_settings', () => ({
   getQueryDelaySettings: jest.fn(),
 }));
 
 const { getQueryDelaySettings } = jest.requireMock('../lib/rule_api/get_query_delay_settings');
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useGetQueryDelaySettings', () => {
   beforeEach(() => {
@@ -32,7 +22,7 @@ describe('useGetQueryDelaySettings', () => {
   });
 
   it('should call getQueryDelaySettings', async () => {
-    renderHook(() => useGetQueryDelaySettings({ enabled: true, onSuccess: () => {} }), {
+    renderHook(() => useGetQueryDelaySettings({ enabled: true }), {
       wrapper,
     });
 
@@ -44,12 +34,9 @@ describe('useGetQueryDelaySettings', () => {
   it('should return isError = true if api fails', async () => {
     getQueryDelaySettings.mockRejectedValue('This is an error.');
 
-    const { result } = renderHook(
-      () => useGetQueryDelaySettings({ enabled: true, onSuccess: () => {} }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useGetQueryDelaySettings({ enabled: true }), {
+      wrapper,
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
   });

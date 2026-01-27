@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ALERT_RULE_TYPE_ID, isSiemRuleType } from '@kbn/rule-data-utils';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
 import type { AdditionalContext, AlertActionsProps } from '../types';
@@ -26,16 +25,11 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
   props: AlertActionsProps<AC>
 ) => {
   const {
-    services: {
-      http,
-      notifications: { toasts },
-    },
+    services: { http },
   } = useAlertsTableContext();
   const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     filteredRuleTypes: [],
     http,
-    toasts,
-    context: AlertsQueryContext,
   });
 
   const isSecurityRule =

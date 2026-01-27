@@ -17,7 +17,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import ReportSchedulesTable from './report_schedules_table';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockScheduledReports } from '../../../common/test/fixtures';
 import { bulkDisableScheduledReports } from '../apis/bulk_disable_scheduled_reports';
@@ -26,6 +25,7 @@ import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { bulkEnableScheduledReports } from '../apis/bulk_enable_scheduled_reports';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/reporting-public', () => ({
   useKibana: jest.fn(),
@@ -60,15 +60,17 @@ const application = applicationServiceMock.createStartContract();
 export const getMockTheme = (partialTheme: RecursivePartial<UseEuiTheme>): UseEuiTheme =>
   partialTheme as UseEuiTheme;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
 const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
+
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
 
 describe('ReportSchedulesTable', () => {
   // Disabling delay to avoid issues with fake timers
@@ -130,13 +132,7 @@ describe('ReportSchedulesTable', () => {
       data: [],
     });
 
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findByTestId('reportSchedulesTable')).toBeInTheDocument();
     expect(screen.getByTestId('scheduledReportsSearchField')).toBeInTheDocument();
@@ -151,25 +147,13 @@ describe('ReportSchedulesTable', () => {
       data: [],
     });
 
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findByText('No reports have been created')).toBeInTheDocument();
   });
 
   it('renders data correctly', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
     expect(await screen.findByText(mockScheduledReports[0].title)).toBeInTheDocument();
@@ -178,13 +162,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('shows view schedule config', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -197,13 +175,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should show config flyout from table action', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -219,13 +191,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should show config flyout from title click', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -235,13 +201,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should open dashboard', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -262,13 +222,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should search schedules with the provided search text on enter', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -283,13 +237,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should reset the search param when clearing the search field', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -306,13 +254,7 @@ describe('ReportSchedulesTable', () => {
   });
 
   it('should force refetch schedules when pressing refresh', async () => {
-    render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    render(<ReportSchedulesTable />, { wrapper });
 
     expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
     expect(mockGetScheduledReports).toHaveBeenCalledTimes(1);
@@ -355,13 +297,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('should show edit action correctly', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -373,13 +309,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('should show disable action correctly ', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -391,13 +321,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('should show delete action correctly ', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -416,13 +340,7 @@ describe('ReportSchedulesTable', () => {
         data: [{ ...mockScheduledReports[0], created_by: 'testuser', enabled: false }],
       });
 
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -463,13 +381,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('shows disable confirmation modal correctly', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -487,13 +399,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('shows delete confirmation modal correctly', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -517,13 +423,7 @@ describe('ReportSchedulesTable', () => {
         total: 1,
         data: [{ ...mockScheduledReports[0], enabled: false }],
       });
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -535,13 +435,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('disable schedule report correctly', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -575,13 +469,7 @@ describe('ReportSchedulesTable', () => {
         total: 1,
         data: [{ ...mockScheduledReports[0], enabled: false }],
       });
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
 
@@ -605,13 +493,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('delete schedule report correctly', async () => {
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -643,13 +525,7 @@ describe('ReportSchedulesTable', () => {
         services: mockKibanaServices(true),
       });
 
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 
@@ -668,13 +544,7 @@ describe('ReportSchedulesTable', () => {
         services: mockKibanaServices(true),
       });
 
-      render(
-        <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable />
-          </QueryClientProvider>
-        </IntlProvider>
-      );
+      render(<ReportSchedulesTable />, { wrapper });
 
       expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
 

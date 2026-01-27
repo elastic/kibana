@@ -15,10 +15,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
 import { css } from '@emotion/react';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common/data_views/data_view';
+import { useSuspenseQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
@@ -52,8 +52,9 @@ const AsyncContent = <T,>({
   queryFn: () => Promise<T>;
   children: (data: T) => React.ReactNode;
 }) => {
-  const { data } = useQuery<T, Error>(queryKey, queryFn, {
-    suspense: true,
+  const { data } = useSuspenseQuery<T, Error>({
+    queryKey,
+    queryFn,
   });
   return <>{children(data as T)}</>;
 };

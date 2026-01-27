@@ -19,10 +19,10 @@
     "@kbn/core-http-browser",
     "@kbn/actions-types",
     "@kbn/i18n",
-    "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/triggers-actions-ui-types",
     "@kbn/alerting-types",
     "@kbn/react-query",
+    "@kbn/response-ops-react-query",
   ]
 }

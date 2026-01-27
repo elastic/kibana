@@ -37,7 +37,8 @@ export function useUpdateMaintenanceWindow(props?: UseUpdateMaintenanceWindowPro
     return updateMaintenanceWindow({ http, maintenanceWindowId, updateParams });
   };
 
-  return useMutation(mutationFn, {
+  return useMutation({
+    mutationFn,
     onSuccess: (variables: MaintenanceWindow) => {
       toasts.addSuccess(
         i18n.translate('xpack.maintenanceWindows.updateSuccess', {

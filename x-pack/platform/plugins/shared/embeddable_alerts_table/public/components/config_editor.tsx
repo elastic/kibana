@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { QueryClientProvider } from '@kbn/react-query';
-import { queryClient } from '../query_client';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import { ConfigEditorContent } from './config_editor_content';
 
@@ -30,7 +29,7 @@ export const ConfigEditor = ({
   const { overlays, http, notifications } = coreServices;
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <ResponseOpsQueryClientProvider>
       <ConfigEditorContent
         ariaLabelledBy={ariaLabelledBy}
         initialConfig={initialConfig}
@@ -41,6 +40,6 @@ export const ConfigEditor = ({
         onCancel={closeFlyout}
         services={{ http, notifications, overlays }}
       />
-    </QueryClientProvider>
+    </ResponseOpsQueryClientProvider>
   );
 };

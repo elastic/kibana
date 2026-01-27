@@ -12,9 +12,9 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
@@ -25,10 +25,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   };
 });
 
-const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('WebhookActionConnectorFields renders', () => {
   beforeEach(() => {
@@ -79,7 +76,7 @@ describe('WebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     await screen.findByTestId('webhookViewHeadersSwitch');
@@ -117,7 +114,7 @@ describe('WebhookActionConnectorFields renders', () => {
           registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>,
-      { wrapper: customQueryProviderWrapper }
+      { wrapper }
     );
 
     await screen.findByTestId('authOAuth2');
@@ -176,7 +173,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await screen.findByTestId('webhookHeaderPanel');
@@ -232,7 +229,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await screen.findByTestId('webhookHeaderPanel');
@@ -283,7 +280,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await act(async () => {
@@ -331,7 +328,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await act(async () => {
@@ -362,7 +359,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       const fieldElement = await screen.findByTestId(field);
@@ -401,7 +398,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await screen.findByTestId('webhookHeaderPanel');
@@ -465,7 +462,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await screen.findByTestId('webhookHeaderPanel');
@@ -527,7 +524,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await screen.findByTestId('webhookHeaderPanel');
@@ -583,7 +580,7 @@ describe('WebhookActionConnectorFields renders', () => {
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>,
-        { wrapper: customQueryProviderWrapper }
+        { wrapper }
       );
 
       await act(async () => {

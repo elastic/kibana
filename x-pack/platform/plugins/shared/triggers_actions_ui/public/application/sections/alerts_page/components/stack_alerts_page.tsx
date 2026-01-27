@@ -16,16 +16,15 @@ import {
   AlertConsumers,
   isSiemRuleType,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
-import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -52,9 +51,9 @@ import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
 export const StackAlertsPage = () => {
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <QueryClientProvider client={alertsTableQueryClient}>
+      <ResponseOpsQueryClientProvider>
         <PageContentWrapper />
-      </QueryClientProvider>
+      </ResponseOpsQueryClientProvider>
     </Provider>
   );
 };
@@ -72,13 +71,12 @@ const PageContentWrapperComponent: React.FC = () => {
     chrome: { docTitle },
     setBreadcrumbs,
     http,
-    notifications: { toasts },
   } = useKibana().services;
 
   const {
     ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
-  } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
+  } = useGetRuleTypesPermissions({ http, filteredRuleTypes: [] });
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 

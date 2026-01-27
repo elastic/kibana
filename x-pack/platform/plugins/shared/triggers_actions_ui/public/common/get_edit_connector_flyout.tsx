@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { EditConnectorFlyout } from '../application/sections/action_connector_form';
 import type { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
 import type { ConnectorServices } from '../types';
-
-const queryClient = new QueryClient();
 
 export const getEditConnectorFlyoutLazy = (
   props: EditConnectorFlyoutProps & { connectorServices: ConnectorServices }
@@ -21,9 +19,9 @@ export const getEditConnectorFlyoutLazy = (
     <ConnectorProvider
       value={{ services: props.connectorServices, isServerless: !!props.isServerless }}
     >
-      <QueryClientProvider client={queryClient}>
+      <ResponseOpsQueryClientProvider>
         <EditConnectorFlyout {...props} />
-      </QueryClientProvider>
+      </ResponseOpsQueryClientProvider>
     </ConnectorProvider>
   );
 };

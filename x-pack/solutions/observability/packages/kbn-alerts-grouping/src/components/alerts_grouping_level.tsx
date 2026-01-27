@@ -63,7 +63,7 @@ export const AlertsGroupingLevel = typedMemo(
     to,
     takeActionItems,
     getAggregationsByGroupingField,
-    services: { http, notifications },
+    services: { http },
   }: AlertsGroupingLevelProps<T>) => {
     const filters = useMemo(() => {
       try {
@@ -120,7 +120,6 @@ export const AlertsGroupingLevel = typedMemo(
     const { data: alertGroupsData, isLoading: isLoadingGroups } =
       useGetAlertsGroupAggregationsQuery<GroupingAggregation<T>>({
         http,
-        toasts: notifications.toasts,
         enabled: aggregationsQuery && !isNoneGroup([selectedGroup]),
         params: aggregationsQuery,
       });

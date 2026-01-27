@@ -7,6 +7,8 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import datemath from '@kbn/datemath';
+import type { IExecutionLogResult } from '@kbn/alerting-plugin/common';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import { useKibana } from '../../common/lib/kibana';
 import type {
   LoadExecutionLogAggregationsProps,
@@ -25,7 +27,7 @@ const getParsedDate = (date: string) => {
 };
 
 interface CommonProps {
-  onError?: (err: any) => void;
+  getErrorToast?: ResponseOpsQueryMeta['getErrorToast'];
 }
 
 type LoadExecutionLogProps = LoadExecutionLogAggregationsProps & CommonProps;
@@ -56,12 +58,17 @@ export function useLoadRuleEventLogs(props: UseLoadRuleEventLogsProps) {
     });
   }, [props, http]);
 
-  const { data, error, isLoading, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isFetching, refetch } = useQuery<
+    IExecutionLogResult,
+    { body?: { statusCode: number } } // TODO is there a type for this error shape?
+  >({
     queryKey: ['loadRuleEventLog', props],
     queryFn,
-    onError: props.onError,
     retry: 0,
     refetchOnWindowFocus: false,
+    meta: {
+      getErrorToast: props.getErrorToast,
+    } satisfies ResponseOpsQueryMeta,
   });
   const hasExceedLogs = useMemo(() => error && error.body?.statusCode === 413, [error]);
   return useMemo(

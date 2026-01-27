@@ -8,9 +8,9 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { QueryOptionsOverrides } from '@kbn/response-ops-react-query/types';
 import type { FetchAlertsIndexNamesParams } from '../apis/fetch_alerts_index_names';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
-import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 
 export type UseFetchAlertsIndexNamesQueryParams = FetchAlertsIndexNamesParams;
 
@@ -28,7 +28,7 @@ export const useFetchAlertsIndexNamesQuery = (
   { http, ruleTypeIds }: UseFetchAlertsIndexNamesQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsIndexNames>,
-    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+    'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
   return useQuery({

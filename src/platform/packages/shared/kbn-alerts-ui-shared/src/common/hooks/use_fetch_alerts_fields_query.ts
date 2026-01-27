@@ -8,8 +8,9 @@
  */
 
 import { isSiemRuleType } from '@kbn/rule-data-utils';
+import type { QueryClient } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
+import type { QueryOptionsOverrides } from '@kbn/response-ops-react-query/types';
 import type { FetchAlertsFieldsParams } from '../apis/fetch_alerts_fields';
 import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
 
@@ -29,8 +30,10 @@ export const useFetchAlertsFieldsQuery = (
   { http, ...params }: UseFetchAlertsFieldsQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsFields>,
-    'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
-  >
+    'placeholderData' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled' | 'meta'
+  > & {
+    queryClient?: QueryClient;
+  }
 ) => {
   const { ruleTypeIds } = params;
 

@@ -8,14 +8,13 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { RuleTypeModalComponent } from '.';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '@kbn/response-ops-rules-apis/test_utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockIntersectionObserver = jest.fn();
 mockIntersectionObserver.mockReturnValue({
@@ -129,27 +128,20 @@ jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query', () => (
   })),
 }));
 
-function render(ui: React.ReactElement) {
-  const queryClient = new QueryClient(testQueryClientConfig);
-  return rtlRender(ui, {
-    wrapper: ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ),
-  });
-}
+const notifications = notificationServiceMock.createStartContract();
+
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
+});
 
 describe('RuleTypeModalComponent', () => {
   const mockOnClose = jest.fn();
   const mockOnSelectRuleType = jest.fn();
   const mockOnSelectTemplate = jest.fn();
   const mockHttpGet = jest.fn();
-  const mockToastsAddDanger = jest.fn();
   const mockHttp = {
     get: mockHttpGet,
   } as unknown as jest.Mocked<HttpStart>;
-  const mockToasts = {
-    addDanger: mockToastsAddDanger,
-  } as unknown as jest.Mocked<ToastsStart>;
 
   const ruleTypes: RuleTypeModel[] = [
     {
@@ -201,8 +193,9 @@ describe('RuleTypeModalComponent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
     mockHttpGet.mockReset();
-    mockToastsAddDanger.mockReset();
+    notifications.toasts.addDanger.mockReset();
     jest.useRealTimers(); // Ensure clean timer state
   });
 
@@ -219,8 +212,8 @@ describe('RuleTypeModalComponent', () => {
         filteredRuleTypes={[]}
         registeredRuleTypes={ruleTypes}
         http={mockHttp}
-        toasts={mockToasts}
-      />
+      />,
+      { wrapper }
     );
 
     expect(screen.getByText('Create new rule')).toBeInTheDocument();
@@ -243,8 +236,8 @@ describe('RuleTypeModalComponent', () => {
         filteredRuleTypes={[]}
         registeredRuleTypes={ruleTypes}
         http={mockHttp}
-        toasts={mockToasts}
-      />
+      />,
+      { wrapper }
     );
 
     const closeButton = screen.getByRole('button', { name: /close/i });
@@ -262,8 +255,8 @@ describe('RuleTypeModalComponent', () => {
         filteredRuleTypes={[]}
         http={mockHttp}
         registeredRuleTypes={ruleTypes}
-        toasts={mockToasts}
-      />
+      />,
+      { wrapper }
     );
 
     expect(screen.queryByText('Select a Rule Type')).not.toBeInTheDocument();
@@ -313,8 +306,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
@@ -357,8 +350,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
@@ -386,8 +379,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
@@ -452,8 +445,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
@@ -502,15 +495,15 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
 
       // Should show error toast
       await waitFor(() => {
-        expect(mockToastsAddDanger).toHaveBeenCalledWith({
+        expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
           title: 'Unable to load rule templates',
           text: errorMessage,
         });
@@ -528,8 +521,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       await switchToTemplateMode();
@@ -554,8 +547,8 @@ describe('RuleTypeModalComponent', () => {
           filteredRuleTypes={[]}
           registeredRuleTypes={ruleTypes}
           http={mockHttp}
-          toasts={mockToasts}
-        />
+        />,
+        { wrapper }
       );
 
       // Should be in rule type mode by default

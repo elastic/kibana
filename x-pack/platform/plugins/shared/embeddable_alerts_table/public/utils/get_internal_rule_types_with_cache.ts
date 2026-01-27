@@ -9,9 +9,12 @@ import { getKey as getInternalRuleTypesQueryKey } from '@kbn/response-ops-rules-
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
-import { queryClient } from '../query_client';
+import type { QueryClient } from '@kbn/react-query';
 
-export const getInternalRuleTypesWithCache = async (http: CoreStart['http']) => {
+export const getInternalRuleTypesWithCache = async (
+  http: CoreStart['http'],
+  queryClient: QueryClient
+) => {
   // We cannot use the `useGetInternalRuleTypesQuery` hook since this fetch happens outside
   // of React, but we can interact with the query cache to avoid duplicated requests.
   // This effectively acts as a prefetch for the subsequent rule type requests performed by the

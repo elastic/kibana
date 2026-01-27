@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { QueryClient } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { unmuteAlertInstance } from '../apis/unmute_alert_instance';
@@ -23,6 +24,7 @@ const ERROR_TITLE = i18n.translate('alertsApis.unmuteAlert.error', {
 export interface UseUnmuteAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  queryClient?: QueryClient;
 }
 
 export const getKey = mutationKeys.unmuteAlertInstance;
@@ -30,13 +32,14 @@ export const getKey = mutationKeys.unmuteAlertInstance;
 export const useUnmuteAlertInstance = ({
   http,
   notifications: { toasts },
+  queryClient,
 }: UseUnmuteAlertInstanceParams) => {
+  const alertingQueryClient = useResponseOpsQueryClient();
   return useMutation(
-    ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
-      unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
+      mutationFn: ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
+        unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
       mutationKey: getKey(),
-      context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnmuted', {
@@ -54,6 +57,7 @@ export const useUnmuteAlertInstance = ({
           );
         }
       },
-    }
+    },
+    queryClient ?? alertingQueryClient
   );
 };

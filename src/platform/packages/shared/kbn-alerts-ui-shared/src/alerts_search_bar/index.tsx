@@ -53,7 +53,7 @@ export const AlertsSearchBar = ({
   });
 
   const { data: { fields: alertFields } = {} } = useFetchUnifiedAlertsFields(
-    { http, ruleTypeIds, toasts },
+    { http, ruleTypeIds },
     {
       enabled: fetchUnifiedAlertsFields,
     }
@@ -103,6 +103,7 @@ export const AlertsSearchBar = ({
     },
     [onQueryChange, setQueryLanguage]
   );
+
   const onRefresh = ({ dateRange }: { dateRange: TimeRange }) => {
     onQuerySubmit({
       dateRange,

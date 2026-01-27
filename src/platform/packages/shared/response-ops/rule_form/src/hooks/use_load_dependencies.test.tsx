@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -16,6 +15,7 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { useLoadDependencies } from './use_load_dependencies';
 import type { RuleTypeRegistryContract } from '../common/types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../common/hooks/use_load_ui_config', () => ({
   useLoadUiConfig: jest.fn(),
@@ -214,11 +214,7 @@ useLoadRuleTypeAlertFields.mockReturnValue({
   isInitialLoading: false,
 });
 
-const queryClient = new QueryClient();
-
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 const httpMock = jest.fn();
 const toastsMock = jest.fn();

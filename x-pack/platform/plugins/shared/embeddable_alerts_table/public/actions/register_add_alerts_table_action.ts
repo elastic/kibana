@@ -9,20 +9,23 @@ import type { CoreStart } from '@kbn/core/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { QueryClient } from '@kbn/react-query';
 import { ADD_ALERTS_TABLE_ACTION_ID } from '../constants';
 
 export interface AddAlertsTableActionDeps {
   coreServices: CoreStart;
   uiActions: UiActionsStart;
+  queryClient: QueryClient;
 }
 
 export const registerAddAlertsTableAction = ({
   coreServices,
   uiActions,
+  queryClient,
 }: AddAlertsTableActionDeps) => {
   uiActions.registerActionAsync<EmbeddableApiContext>(ADD_ALERTS_TABLE_ACTION_ID, async () => {
     const { getAddAlertsTableAction } = await import('./add_alerts_table_action');
-    return getAddAlertsTableAction(coreServices);
+    return getAddAlertsTableAction(coreServices, queryClient);
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_ALERTS_TABLE_ACTION_ID);
 };

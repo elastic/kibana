@@ -12,10 +12,7 @@ import { useGetRuleTagsQuery } from './use_get_rule_tags_query';
 import { getRuleTags } from '../apis/get_rule_tags';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '../test_utils';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
@@ -25,11 +22,9 @@ const mockGetRuleTags = jest.mocked(getRuleTags);
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-export const Wrapper = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
+});
 
 describe('useGetRuleTagsQuery', () => {
   beforeEach(() => {
@@ -51,14 +46,13 @@ describe('useGetRuleTagsQuery', () => {
       () =>
         useGetRuleTagsQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           search: 'test',
           perPage: 50,
           page: 1,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -88,13 +82,12 @@ describe('useGetRuleTagsQuery', () => {
       () =>
         useGetRuleTagsQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 5,
           page: 1,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -118,7 +111,7 @@ describe('useGetRuleTagsQuery', () => {
       total: 10,
     });
 
-    result.current.fetchNextPage();
+    await result.current.fetchNextPage();
 
     expect(mockGetRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -143,13 +136,12 @@ describe('useGetRuleTagsQuery', () => {
       () =>
         useGetRuleTagsQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
           perPage: 5,
           page: 1,
         }),
       {
-        wrapper: Wrapper,
+        wrapper,
       }
     );
 
@@ -167,17 +159,16 @@ describe('useGetRuleTagsQuery', () => {
     });
   });
 
-  it('should call onError if API fails', async () => {
+  it('should show error toast if API fails', async () => {
     mockGetRuleTags.mockRejectedValue('');
 
     const { result } = renderHook(
       () =>
         useGetRuleTagsQuery({
           http,
-          toasts: notifications.toasts,
           enabled: true,
         }),
-      { wrapper: Wrapper }
+      { wrapper }
     );
 
     expect(mockGetRuleTags).toBeCalled();

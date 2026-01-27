@@ -44,7 +44,6 @@ import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_lin
 import type { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
-import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_event_logs';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import type { RefreshToken } from './types';
@@ -120,7 +119,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     getRuleDetailsRoute,
   } = props;
 
-  const { uiSettings, notifications } = useKibana().services;
+  const { uiSettings } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -200,19 +199,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
-    (e) => {
-      if (e.body?.statusCode === 413) {
-        return;
-      }
-      notifications.toasts.addDanger({
-        title: API_FAILED_MESSAGE,
-        text: e.body?.message ?? e,
-      });
-    },
-    [notifications]
-  );
-
   const { data, isLoading, hasExceedLogs, loadEventLogs } = useLoadRuleEventLogs({
     id: ruleId,
     sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
@@ -224,7 +210,16 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     perPage: pagination.pageSize,
     namespaces,
     ruleTypeIds: filteredRuleTypes,
-    onError,
+    getErrorToast: (error) => {
+      const errorBody = (error as { body?: { statusCode: number; message: string } }).body;
+      if (errorBody?.statusCode === 413) {
+        return;
+      }
+      return {
+        type: 'error',
+        title: API_FAILED_MESSAGE,
+      };
+    },
   });
 
   useEffect(() => {

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +15,7 @@ import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
@@ -28,14 +28,7 @@ jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -65,11 +58,11 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   updatedAt: new Date().toISOString(),
 };
 
-const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
+const RulesSettingsLinkWithProviders: React.FunctionComponent = () => (
   <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>
+    <TestQueryClientProvider>
       <RulesSettingsLink alertDeleteCategoryIds={['management']} />
-    </QueryClientProvider>
+    </TestQueryClientProvider>
   </IntlProvider>
 );
 

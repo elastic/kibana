@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from './embeddable_alerts_table';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
-});
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const core = coreMock.createStart();
 core.http.get.mockResolvedValue([
@@ -45,6 +30,8 @@ const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-ale
 
 const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-uuid`;
 
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('EmbeddableAlertsTable', () => {
   afterEach(() => {
     queryClient.clear();
@@ -52,16 +39,15 @@ describe('EmbeddableAlertsTable', () => {
 
   it('should not render the alerts table until the rule types have been loaded', async () => {
     render(
-      <QueryClientProvider client={queryClient}>
-        <EmbeddableAlertsTable
-          id={TABLE_ID}
-          timeRange={{
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
-          }}
-          services={services}
-        />
-      </QueryClientProvider>
+      <EmbeddableAlertsTable
+        id={TABLE_ID}
+        timeRange={{
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        }}
+        services={services}
+      />,
+      { wrapper }
     );
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -72,16 +58,15 @@ describe('EmbeddableAlertsTable', () => {
       throw new Error('Error loading rule types');
     });
     render(
-      <QueryClientProvider client={queryClient}>
-        <EmbeddableAlertsTable
-          id={TABLE_ID}
-          timeRange={{
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
-          }}
-          services={services}
-        />
-      </QueryClientProvider>
+      <EmbeddableAlertsTable
+        id={TABLE_ID}
+        timeRange={{
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        }}
+        services={services}
+      />,
+      { wrapper }
     );
 
     expect(await screen.findByText('Cannot load rule types')).toBeInTheDocument();
@@ -89,17 +74,16 @@ describe('EmbeddableAlertsTable', () => {
 
   it('should show a missing auth prompt if the solution rule types are not accessible', async () => {
     render(
-      <QueryClientProvider client={queryClient}>
-        <EmbeddableAlertsTable
-          id={TABLE_ID}
-          solution="security"
-          timeRange={{
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
-          }}
-          services={services}
-        />
-      </QueryClientProvider>
+      <EmbeddableAlertsTable
+        id={TABLE_ID}
+        solution="security"
+        timeRange={{
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        }}
+        services={services}
+      />,
+      { wrapper }
     );
 
     expect(await screen.findByText('Missing alerting authorizations')).toBeInTheDocument();
@@ -107,16 +91,15 @@ describe('EmbeddableAlertsTable', () => {
 
   it('should render the alerts table with the correct time range and base props', async () => {
     render(
-      <QueryClientProvider client={queryClient}>
-        <EmbeddableAlertsTable
-          id={TABLE_ID}
-          timeRange={{
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
-          }}
-          services={services}
-        />
-      </QueryClientProvider>
+      <EmbeddableAlertsTable
+        id={TABLE_ID}
+        timeRange={{
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        }}
+        services={services}
+      />,
+      { wrapper }
     );
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(mockAlertsTable).toHaveBeenCalledWith(
@@ -174,24 +157,23 @@ describe('EmbeddableAlertsTable', () => {
 
   it('should render the alerts table with the correct time range and filters query', async () => {
     render(
-      <QueryClientProvider client={queryClient}>
-        <EmbeddableAlertsTable
-          id={TABLE_ID}
-          timeRange={{
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
-          }}
-          query={{
-            type: 'alertsFilters',
-            filters: [
-              { filter: { type: 'ruleTags', value: ['tag1'] } },
-              { operator: 'and' },
-              { filter: { type: 'ruleTypes', value: ['type1'] } },
-            ],
-          }}
-          services={services}
-        />
-      </QueryClientProvider>
+      <EmbeddableAlertsTable
+        id={TABLE_ID}
+        timeRange={{
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        }}
+        query={{
+          type: 'alertsFilters',
+          filters: [
+            { filter: { type: 'ruleTags', value: ['tag1'] } },
+            { operator: 'and' },
+            { filter: { type: 'ruleTypes', value: ['type1'] } },
+          ],
+        }}
+        services={services}
+      />,
+      { wrapper }
     );
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(mockAlertsTable).toHaveBeenCalledWith(
@@ -296,17 +278,16 @@ describe('EmbeddableAlertsTable', () => {
       ];
       core.http.get.mockResolvedValueOnce(ruleTypes);
       render(
-        <QueryClientProvider client={queryClient}>
-          <EmbeddableAlertsTable
-            id={TABLE_ID}
-            timeRange={{
-              from: '2025-01-01T00:00:00.000Z',
-              to: '2025-01-01T01:00:00.000Z',
-            }}
-            solution={solution}
-            services={services}
-          />
-        </QueryClientProvider>
+        <EmbeddableAlertsTable
+          id={TABLE_ID}
+          timeRange={{
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          }}
+          solution={solution}
+          services={services}
+        />,
+        { wrapper }
       );
       expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
       expect(mockAlertsTable).toHaveBeenCalledWith(

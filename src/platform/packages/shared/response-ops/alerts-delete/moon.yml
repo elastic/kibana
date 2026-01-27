@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/kibana-react-plugin'
   - '@kbn/react-query'
+  - '@kbn/response-ops-react-query'
 tags:
   - shared-browser
   - package

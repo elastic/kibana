@@ -12,8 +12,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteDescriptiveFormGroup } from './descriptive_form_group';
 import * as i18n from '../translations';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -21,6 +21,8 @@ const notifications = notificationServiceMock.createStartContract();
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
+
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 describe('AlertDeleteRuleSettingsSection', () => {
   const lastRunDate = '2025-10-01T02:10:23.000Z';
@@ -34,21 +36,11 @@ describe('AlertDeleteRuleSettingsSection', () => {
     });
   };
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        cacheTime: 0,
-      },
-    },
-  });
   const servicesMock = { http, notifications };
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <IntlProvider locale="en">
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
     </IntlProvider>
   );
 

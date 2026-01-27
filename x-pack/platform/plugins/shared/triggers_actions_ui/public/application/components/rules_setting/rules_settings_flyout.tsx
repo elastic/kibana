@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, useRef } from 'react';
+import React, { memo, useCallback, useState, useRef, useEffect } from 'react';
 import type {
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
@@ -124,36 +124,46 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
     useResettableState<RulesSettingsQueryDelayProperties>();
 
-  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
+  const {
+    data: fetchedFlappingSettings,
+    isLoading: isFlappingLoading,
+    isError: hasFlappingError,
+  } = useFetchFlappingSettings({
     http,
     enabled: isVisible,
-    onSuccess: (fetchedSettings) => {
-      if (!flappingSettings) {
-        setFlappingSettings(
-          {
-            enabled: fetchedSettings.enabled,
-            lookBackWindow: fetchedSettings.lookBackWindow,
-            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-          },
-          true // Update the initial value so we don't need to fetch it from the server again
-        );
-      }
-    },
   });
 
-  const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
+  useEffect(() => {
+    if (fetchedFlappingSettings && !flappingSettings) {
+      setFlappingSettings(
+        {
+          enabled: fetchedFlappingSettings.enabled,
+          lookBackWindow: fetchedFlappingSettings.lookBackWindow,
+          statusChangeThreshold: fetchedFlappingSettings.statusChangeThreshold,
+        },
+        true // Update the initial value so we don't need to fetch it from the server again
+      );
+    }
+  }, [fetchedFlappingSettings, flappingSettings, setFlappingSettings]);
+
+  const {
+    data: fetchedQueryDelaySettings,
+    isLoading: isQueryDelayLoading,
+    isError: hasQueryDelayError,
+  } = useGetQueryDelaySettings({
     enabled: isVisible,
-    onSuccess: (fetchedSettings) => {
-      if (!queryDelaySettings) {
-        setQueryDelaySettings(
-          {
-            delay: fetchedSettings.delay,
-          },
-          true
-        );
-      }
-    },
   });
+
+  useEffect(() => {
+    if (fetchedQueryDelaySettings && !queryDelaySettings) {
+      setQueryDelaySettings(
+        {
+          delay: fetchedQueryDelaySettings.delay,
+        },
+        true
+      );
+    }
+  }, [fetchedQueryDelaySettings, queryDelaySettings, setQueryDelaySettings]);
 
   const onCloseFlyout = useCallback(() => {
     resetFlappingSettings();

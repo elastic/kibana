@@ -6,7 +6,6 @@
  */
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -16,7 +15,6 @@ import { noop } from 'lodash';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor, act } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -32,6 +30,7 @@ import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
   open: () => {
@@ -110,19 +109,6 @@ describe('ObservabilityActions component', () => {
   });
 
   const setup = async (pageId: string) => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
-      },
-      logger: {
-        log: () => {},
-        warn: () => {},
-        error: () => {},
-      },
-    });
-
     const props: Pick<
       ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>,
       | 'tableId'
@@ -167,14 +153,22 @@ describe('ObservabilityActions component', () => {
       <Router history={createMemoryHistory()}>
         <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+            <ResponseOpsQueryClientProvider
+              config={{
+                defaultOptions: {
+                  queries: {
+                    retry: false,
+                  },
+                },
+              }}
+            >
               <AlertActions
                 {...(props as unknown as ComponentProps<
                   GetObservabilityAlertsTableProp<'renderActionsCell'>
                 >)}
                 services={services}
               />
-            </QueryClientProvider>
+            </ResponseOpsQueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>
       </Router>

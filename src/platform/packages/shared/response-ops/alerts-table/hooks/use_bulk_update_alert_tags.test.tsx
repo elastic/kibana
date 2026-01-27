@@ -7,28 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useBulkUpdateAlertTags } from './use_bulk_update_alert_tags';
-import { testQueryClientConfig } from '../utils/test';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper = ({ children }: PropsWithChildren) => {
-  return (
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
+});
 
 describe('useBulkUpdateAlertTags', () => {
   beforeEach(() => {

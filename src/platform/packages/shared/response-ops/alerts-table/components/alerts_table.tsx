@@ -30,15 +30,15 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { Alert, BrowserFields } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import deepEqual from 'fast-deep-equal';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { applySetStateAction } from '../utils/apply_set_state_action';
 import { useAlertsTableQueryParams } from '../hooks/use_alerts_table_query_params';
 import { applyColumnsConfiguration } from '../utils/columns_configuration';
@@ -58,7 +58,6 @@ import type {
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { useColumns } from '../hooks/use_columns';
 import { InspectButtonContainer } from './alerts_query_inspector';
-import { alertsTableQueryClient } from '../query_client';
 import { useBulkGetCasesQuery } from '../hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindowsQuery } from '../hooks/use_bulk_get_maintenance_windows';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
@@ -104,7 +103,6 @@ const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
 
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
-
 /**
  * If an alert is expanded, returns the page where the alert is located if different
  * from the current page index
@@ -159,11 +157,11 @@ const initialBulkActionsState = {
 export const AlertsTable = memo(
   forwardRef((props, ref) => {
     return (
-      <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+      <ResponseOpsQueryClientProvider>
         <ErrorBoundary fallback={ErrorFallback}>
           <AlertsTableContent {...props} ref={ref} />
         </ErrorBoundary>
-      </QueryClientProvider>
+      </ResponseOpsQueryClientProvider>
     );
   })
   // Type cast to avoid losing the generic type
@@ -228,7 +226,7 @@ const AlertsTableContent = typedForwardRef(
     const memoizedServices = useMemo(() => services, Object.values(services));
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
-    const queryClient = useQueryClient({ context: AlertsQueryContext });
+    const queryClient = useResponseOpsQueryClient()!;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     const configurationStorage = useMemo(
       () => configurationStorageProp ?? getLocalStorageWrapper(),
@@ -326,7 +324,7 @@ const AlertsTableContent = typedForwardRef(
 
     const fieldsQuery = useFetchAlertsFieldsQuery(
       { http, ruleTypeIds },
-      { enabled: !alertsFieldsProp, context: AlertsQueryContext }
+      { enabled: !alertsFieldsProp }
     );
     const selectedAlertsFields = useMemo<BrowserFields>(
       () => alertsFieldsProp ?? fieldsQuery.data?.browserFields ?? {},
@@ -422,7 +420,7 @@ const AlertsTableContent = typedForwardRef(
       return casesService?.helpers.canUseCases(casesConfiguration?.owner ?? []);
     }, [casesConfiguration?.owner, casesService?.helpers]);
     const casesQuery = useBulkGetCasesQuery(
-      { caseIds, http, notifications },
+      { caseIds, http },
       {
         enabled: isCasesColumnEnabled(columns) && !!casesPermissions?.read,
       }
@@ -430,8 +428,8 @@ const AlertsTableContent = typedForwardRef(
 
     const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
     const maintenanceWindowsQuery = useBulkGetMaintenanceWindowsQuery(
-      { ids: maintenanceWindowIds, http, application, notifications, licensing },
-      { enabled: isMaintenanceWindowColumnEnabled(columns), context: AlertsQueryContext }
+      { ids: maintenanceWindowIds, http, application, licensing },
+      { enabled: isMaintenanceWindowColumnEnabled(columns) }
     );
 
     const refresh = useCallback(() => {
@@ -441,9 +439,11 @@ const AlertsTableContent = typedForwardRef(
       } else {
         refetchAlerts();
       }
-      queryClient.invalidateQueries(queryKeys.casesBulkGet(caseIds));
-      queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
-      queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
+      queryClient.invalidateQueries({ queryKey: queryKeys.casesBulkGet(caseIds) });
+      queryClient.invalidateQueries({ queryKey: alertsQueryKeys.getMutedAlerts(ruleIds) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds),
+      });
     }, [
       pageIndex,
       queryClient,

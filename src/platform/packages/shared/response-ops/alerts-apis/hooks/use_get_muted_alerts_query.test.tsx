@@ -9,20 +9,25 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/get_muted_alerts_instances_by_rule';
 import { useGetMutedAlertsQuery } from './use_get_muted_alerts_query';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/get_muted_alerts_instances_by_rule');
 
 const ruleIds = ['a', 'b'];
 
-describe('useGetMutedAlertsQuery', () => {
-  const http = httpServiceMock.createStartContract();
-  const notifications = notificationServiceMock.createStartContract();
-  const addErrorMock = notifications.toasts.addError;
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
 
+const { provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: {
+    notifications,
+  },
+});
+
+describe('useGetMutedAlertsQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -31,7 +36,7 @@ describe('useGetMutedAlertsQuery', () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     await waitFor(() =>
@@ -43,7 +48,7 @@ describe('useGetMutedAlertsQuery', () => {
     const spy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }, { enabled: false }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     await waitFor(() => expect(spy).not.toHaveBeenCalled());
@@ -55,10 +60,10 @@ describe('useGetMutedAlertsQuery', () => {
       .mockRejectedValue(new Error('An error'));
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     await waitFor(() => expect(spy).toHaveBeenCalled());
-    await waitFor(() => expect(addErrorMock).toHaveBeenCalled());
+    await waitFor(() => expect(notifications.toasts.addError).toHaveBeenCalled());
   });
 });

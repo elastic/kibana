@@ -69,10 +69,6 @@ export interface SearchAlertsParams {
    */
   pageSize: number;
   /**
-   * Force using the default context, otherwise use the AlertQueryContext
-   */
-  skipAlertsQueryContext?: boolean;
-  /**
    * The minimum score to apply to the query
    */
   minScore?: number;

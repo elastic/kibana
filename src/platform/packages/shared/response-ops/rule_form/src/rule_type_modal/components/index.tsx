@@ -10,7 +10,6 @@
 import { countBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -20,7 +19,6 @@ import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
 export interface RuleTypeModalComponentProps {
   http: HttpStart;
-  toasts: ToastsStart;
   filteredRuleTypes: string[];
   registeredRuleTypes: RuleTypeModel[];
   onClose: RuleTypeModalProps['onClose'];
@@ -33,7 +31,6 @@ const DEBOUNCE_OPTIONS = { wait: 300 };
 
 export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   http,
-  toasts,
   filteredRuleTypes = EMPTY_ARRAY,
   registeredRuleTypes,
   ...rest
@@ -62,7 +59,6 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesLoading },
   } = useGetRuleTypesPermissions({
     http,
-    toasts,
     filteredRuleTypes,
     registeredRuleTypes: registeredRuleTypesWithAppContext,
   });
@@ -88,7 +84,6 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     isFetchingNextPage: templatesLoadingMore,
   } = useFindTemplatesQuery({
     http,
-    toasts,
     enabled: selectedMode === 'template',
     perPage: 10,
     sortField: 'name',

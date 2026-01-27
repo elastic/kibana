@@ -16,9 +16,9 @@ import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
+import type { QueryClient } from '@kbn/react-query';
 import type { ReportTypeId } from '../../types';
 import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
-import { queryClient } from '../../query_client';
 import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import { getReportingHealth } from '../apis/get_reporting_health';
@@ -26,10 +26,14 @@ import { supportedReportTypes } from '../report_params';
 
 export interface CreateScheduledReportProviderOptions {
   apiClient: ReportingAPIClient;
+  queryClient: QueryClient;
   services: ReportingPublicPluginStartDependencies;
 }
 
-export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSetup) => {
+export const shouldRegisterScheduledReportShareIntegration = async (
+  http: HttpSetup,
+  queryClient: QueryClient
+) => {
   const { isSufficientlySecure, hasPermanentEncryptionKey } = await queryClient.fetchQuery({
     queryKey: getReportingHealthQueryKey(),
     queryFn: () => getReportingHealth({ http }),
@@ -39,6 +43,7 @@ export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSe
 
 export const createScheduledReportShareIntegration = ({
   apiClient,
+  queryClient,
   services,
 }: CreateScheduledReportProviderOptions): RegisterShareIntegrationArgs<ExportShareDerivatives> => {
   return {
@@ -66,6 +71,7 @@ export const createScheduledReportShareIntegration = ({
           return (
             <ScheduledReportFlyoutShareWrapper
               apiClient={apiClient}
+              queryClient={queryClient}
               services={services}
               sharingData={sharingData}
               onClose={closeFlyout}

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useUpdateRuleSettings } from './use_update_rules_settings';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const mockAddDanger = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -39,17 +38,7 @@ const { updateQueryDelaySettings } = jest.requireMock(
 );
 const { updateFlappingSettings } = jest.requireMock('../lib/rule_api/update_flapping_settings');
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useUpdateRuleSettings', () => {
   beforeEach(() => {
@@ -69,8 +58,8 @@ describe('useUpdateRuleSettings', () => {
       }
     );
 
-    await act(async () => {
-      await result.current.mutate({
+    act(() => {
+      result.current.mutate({
         flapping: { enabled: true, lookBackWindow: 3, statusChangeThreshold: 3 },
         queryDelay: { delay: 2 },
       });

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClientProvider } from '@kbn/react-query';
-import { testQueryClient } from '../test_utils/test_query_client';
 import { useGetReportingHealthQuery } from './use_get_reporting_health_query';
 import * as getReportingHealthModule from '../apis/get_reporting_health';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/get_reporting_health', () => ({
   getReportingHealth: jest.fn(),
@@ -20,9 +18,7 @@ jest.mock('../apis/get_reporting_health', () => ({
 
 const mockHttpService = httpServiceMock.create() as unknown as HttpSetup;
 
-const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useGetReportingHealthQuery', () => {
   beforeEach(() => {
@@ -37,7 +33,10 @@ describe('useGetReportingHealthQuery', () => {
       wrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeTruthy();
+      expect(result.current.data).toBeDefined();
+    });
 
     expect(getReportingHealthModule.getReportingHealth).toHaveBeenCalledWith({
       http: mockHttpService,

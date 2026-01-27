@@ -8,11 +8,11 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/bulk_unmute_alerts';
 import { useBulkUnmuteAlerts } from './use_bulk_unmute_alerts';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/bulk_unmute_alerts');
 
@@ -22,6 +22,8 @@ const params = {
     { rule_id: 'rule-2', alert_instance_ids: ['alert-3'] },
   ],
 };
+
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useBulkUnmuteAlerts', () => {
   const http = httpServiceMock.createStartContract();
@@ -36,7 +38,7 @@ describe('useBulkUnmuteAlerts', () => {
     const bulkUnmuteAlertsSpy = jest.spyOn(api, 'bulkUnmuteAlerts');
 
     const { result } = renderHook(() => useBulkUnmuteAlerts({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);
@@ -53,7 +55,7 @@ describe('useBulkUnmuteAlerts', () => {
     const spy = jest.spyOn(api, 'bulkUnmuteAlerts').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useBulkUnmuteAlerts({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);

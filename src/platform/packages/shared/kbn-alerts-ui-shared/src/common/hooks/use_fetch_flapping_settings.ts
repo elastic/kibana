@@ -9,17 +9,15 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { RulesSettingsFlapping } from '@kbn/alerting-types/rule_settings';
 import { fetchFlappingSettings } from '../apis/fetch_flapping_settings';
 
 interface UseFetchFlappingSettingsProps {
   http: HttpStart;
   enabled: boolean;
-  onSuccess?: (settings: RulesSettingsFlapping) => void;
 }
 
 export const useFetchFlappingSettings = (props: UseFetchFlappingSettingsProps) => {
-  const { http, enabled, onSuccess } = props;
+  const { http, enabled } = props;
 
   const queryFn = () => {
     return fetchFlappingSettings({ http });
@@ -28,7 +26,6 @@ export const useFetchFlappingSettings = (props: UseFetchFlappingSettingsProps) =
   const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
     queryKey: ['fetchFlappingSettings'],
     queryFn,
-    onSuccess,
     enabled,
     refetchOnWindowFocus: false,
     retry: false,

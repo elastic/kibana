@@ -5,87 +5,66 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useSecretHeaders } from './use_secret_headers';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useSecretHeaders } from './use_secret_headers';
+import type { DeepPartial } from '@kbn/utility-types';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({}),
-}));
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
 
-const customWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
-  });
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
+jest.mocked<() => DeepPartial<ReturnType<typeof useKibana>>>(useKibana).mockReturnValue({
+  services: {
+    http,
+    notifications,
+  },
+});
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: {
+    notifications,
+  },
+});
 
 describe('useSecretHeaders', () => {
-  const addErrorMock = jest.fn();
-  const getMock = jest.fn();
-
-  const mockServices = {
-    http: { get: getMock },
-    notifications: { toasts: { addError: addErrorMock } },
-  };
-
   beforeEach(() => {
+    queryClient.clear();
     jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
-      services: mockServices,
-    });
   });
 
   it('fetches secret headers successfully', async () => {
-    getMock.mockResolvedValue(['secretHeader1', 'secretHeader2']);
+    http.get.mockResolvedValue(['secretHeader1', 'secretHeader2']);
     const { result } = renderHook(() => useSecretHeaders('connector1'), {
-      wrapper: customWrapper(),
+      wrapper,
     });
 
     await waitFor(() => {
       expect(result.current.data).toEqual(['secretHeader1', 'secretHeader2']);
     });
 
-    expect(getMock).toHaveBeenCalledWith('/internal/stack_connectors/connector1/secret_headers');
+    expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/connector1/secret_headers');
   });
 
   it('returns empty array if connectorId is undefined', async () => {
-    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper: customWrapper() });
+    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper });
 
     expect(result.current.data).toEqual([]);
-    expect(getMock).not.toHaveBeenCalled();
+    expect(http.get).not.toHaveBeenCalled();
   });
 
   it('calls toasts.addError when fetching the secret headers fails', async () => {
     const error = { body: { message: 'Failed' }, name: 'Error' };
-    getMock.mockRejectedValue(error);
+    http.get.mockRejectedValue(error);
 
-    renderHook(() => useSecretHeaders('connector1'), { wrapper: customWrapper() });
+    renderHook(() => useSecretHeaders('connector1'), { wrapper });
 
     await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalledWith(
-        new Error('Failed'),
-        expect.objectContaining({
-          title: 'Error fetching secret headers',
-        })
-      );
+      expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Error fetching secret headers',
+      });
     });
   });
 });

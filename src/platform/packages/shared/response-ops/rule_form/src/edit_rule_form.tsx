@@ -61,7 +61,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     plugins;
   const { toasts } = notifications;
 
-  const { mutate, isLoading: isSaving } = useUpdateRule({
+  const { mutate, isPending: isSaving } = useUpdateRule({
     http,
     onSuccess: ({ name }) => {
       toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));

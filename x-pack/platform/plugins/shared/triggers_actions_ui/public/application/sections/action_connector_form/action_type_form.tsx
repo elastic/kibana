@@ -198,7 +198,6 @@ export const ActionTypeForm = ({
 
   const { ruleTypesState } = useGetRuleTypesPermissions({
     http,
-    toasts: notifications.toasts,
     filteredRuleTypes: [],
   });
 

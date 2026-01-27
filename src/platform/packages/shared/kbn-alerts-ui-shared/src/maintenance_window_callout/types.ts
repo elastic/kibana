@@ -64,5 +64,4 @@ export interface KibanaServices {
     capabilities: Record<string, any>;
   };
   http: Pick<CoreStart['http'], 'fetch' | 'basePath'>;
-  notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }

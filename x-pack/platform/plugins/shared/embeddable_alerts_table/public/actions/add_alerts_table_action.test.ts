@@ -11,12 +11,15 @@ import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_inte
 
 import { getAddAlertsTableAction } from './add_alerts_table_action';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
 
 jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
 const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+
+const { queryClient } = createTestResponseOpsQueryClient();
 
 describe('getAddAlertsTableAction', () => {
   it('should be compatible only when the user has access to at least one rule type', async () => {
@@ -25,7 +28,7 @@ describe('getAddAlertsTableAction', () => {
     ] as unknown as InternalRuleType[];
     mockGetInternalRuleTypes.mockResolvedValue(ruleTypes);
 
-    const action = getAddAlertsTableAction(core);
+    const action = getAddAlertsTableAction(core, queryClient);
 
     const isCompatible = await action.isCompatible!({
       embeddable: mockPresentationContainer,
@@ -38,7 +41,7 @@ describe('getAddAlertsTableAction', () => {
     const ruleTypes = [] as unknown as InternalRuleType[];
     mockGetInternalRuleTypes.mockResolvedValue(ruleTypes);
 
-    const action = getAddAlertsTableAction(core);
+    const action = getAddAlertsTableAction(core, queryClient);
 
     const isCompatible = await action.isCompatible!({
       embeddable: mockPresentationContainer,

@@ -126,13 +126,13 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       (id) => navigateToEditMaintenanceWindows(id),
       [navigateToEditMaintenanceWindows]
     );
-    const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
+    const { mutate: finishMaintenanceWindow, isPending: isLoadingFinish } =
       useFinishMaintenanceWindow();
     const onCancel = useCallback<TableActionsPopoverProps['onCancel']>(
       (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishMaintenanceWindow, refreshData]
     );
-    const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =
+    const { mutate: archiveMaintenanceWindow, isPending: isLoadingArchive } =
       useArchiveMaintenanceWindow();
 
     const onArchive = useCallback(
@@ -143,7 +143,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         ),
       [archiveMaintenanceWindow, refreshData]
     );
-    const { mutate: finishAndArchiveMaintenanceWindow, isLoading: isLoadingFinishAndArchive } =
+    const { mutate: finishAndArchiveMaintenanceWindow, isPending: isLoadingFinishAndArchive } =
       useFinishAndArchiveMaintenanceWindow();
 
     const onCancelAndArchive = useCallback(
@@ -151,7 +151,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [finishAndArchiveMaintenanceWindow, refreshData]
     );
 
-    const { mutate: deleteMaintenanceWindow, isLoading: isLoadingDelete } =
+    const { mutate: deleteMaintenanceWindow, isPending: isLoadingDelete } =
       useDeleteMaintenanceWindow();
 
     const onDelete = useCallback(

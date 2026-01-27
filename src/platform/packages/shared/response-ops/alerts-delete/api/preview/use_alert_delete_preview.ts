@@ -12,6 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { AlertDeleteParams } from '@kbn/alerting-types/alert_delete_types';
+import { keepPreviousData } from '@kbn/react-query';
 import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 export interface UseAlertDeletePreviewParams {
@@ -20,6 +21,7 @@ export interface UseAlertDeletePreviewParams {
   queryParams: AlertDeleteParams;
   lastRun?: string;
 }
+
 export const useAlertDeletePreview = ({
   isEnabled,
   services: { http },
@@ -54,7 +56,7 @@ export const useAlertDeletePreview = ({
         requestQuery: params,
       });
     },
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     staleTime: 1000 * 60,
     enabled:
       isEnabled &&

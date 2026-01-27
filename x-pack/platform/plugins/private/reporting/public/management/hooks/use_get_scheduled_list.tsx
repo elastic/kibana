@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { keepPreviousData, useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/reporting-public';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { queryKeys } from '../query_keys';
@@ -25,6 +25,6 @@ export const useGetScheduledList = (props: GetScheduledListQueryProps) => {
   return useQuery({
     queryKey: getKey({ page, perPage, search }),
     queryFn: () => getScheduledReportsList({ http, page, perPage, search }),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 };

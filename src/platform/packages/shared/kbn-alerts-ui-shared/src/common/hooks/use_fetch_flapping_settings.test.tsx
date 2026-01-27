@@ -7,19 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchFlappingSettings } from './use_fetch_flapping_settings';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 const http = httpServiceMock.createStartContract();
 
@@ -73,29 +66,5 @@ describe('useFetchFlappingSettings', () => {
     });
 
     expect(http.get).not.toHaveBeenCalled();
-  });
-
-  test('should call onSuccess when the fetching was successful', async () => {
-    const onSuccessMock = jest.fn();
-    const { result } = renderHook(
-      () => useFetchFlappingSettings({ http, enabled: true, onSuccess: onSuccessMock }),
-      {
-        wrapper,
-      }
-    );
-
-    await waitFor(() => {
-      return expect(result.current.isInitialLoading).toEqual(false);
-    });
-
-    expect(onSuccessMock).toHaveBeenCalledWith({
-      createdAt: now,
-      createdBy: 'test',
-      updatedAt: now,
-      updatedBy: 'test',
-      enabled: true,
-      lookBackWindow: 20,
-      statusChangeThreshold: 20,
-    });
   });
 });

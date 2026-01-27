@@ -14,7 +14,6 @@ import { createMemoryHistory, createLocation } from 'history';
 
 import type { MatchParams, ReportingTabsProps } from './reporting_tabs';
 import ReportingTabs from './reporting_tabs';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   applicationServiceMock,
   coreMock,
@@ -38,6 +37,7 @@ import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { ReportDiagnostic } from './report_diagnostic';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('./report_exports_table', () => {
   return () => <div data-test-subj="reportExportsTable">{'Render Report Exports Table'}</div>;
@@ -47,7 +47,7 @@ jest.mock('./report_schedules_table', () => {
   return () => <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>;
 });
 
-const queryClient = new QueryClient();
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 describe('Reporting tabs', () => {
   const ilmLocator: LocatorPublic<SerializableRecord> = {
@@ -144,9 +144,9 @@ describe('Reporting tabs', () => {
             <IlmPolicyStatusContextProvider>
               <IntlProvider locale="en">
                 <Router history={renderProps.history ?? props.history}>
-                  <QueryClientProvider client={queryClient}>
+                  <TestQueryClientProvider>
                     <ReportingTabs {...renderProps} />
-                  </QueryClientProvider>
+                  </TestQueryClientProvider>
                 </Router>
               </IntlProvider>
             </IlmPolicyStatusContextProvider>

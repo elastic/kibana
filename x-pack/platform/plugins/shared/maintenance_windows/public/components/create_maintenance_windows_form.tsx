@@ -104,12 +104,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     }
   }, []);
 
-  const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
+  const { mutate: createMaintenanceWindow, isPending: isCreateLoading } =
     useCreateMaintenanceWindow({
       onError: onCreateOrUpdateError,
     });
 
-  const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
+  const { mutate: updateMaintenanceWindow, isPending: isUpdateLoading } =
     useUpdateMaintenanceWindow({
       onError: onCreateOrUpdateError,
     });

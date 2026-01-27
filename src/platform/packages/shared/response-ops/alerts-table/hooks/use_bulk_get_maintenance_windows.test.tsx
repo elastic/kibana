@@ -14,10 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useBulkGetMaintenanceWindowsQuery } from './use_bulk_get_maintenance_windows';
 import { useLicense } from './use_license';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '../utils/test';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('./use_license');
 jest.mock('../apis/bulk_get_maintenance_windows');
@@ -63,11 +60,9 @@ const response = {
   errors: [],
 };
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+const { provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
+});
 
 describe('useBulkGetMaintenanceWindowsQuery', () => {
   let addErrorMock: jest.Mock;
@@ -94,7 +89,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
         useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
           http,
-          notifications,
           application,
           licensing,
         }),
@@ -128,7 +122,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
           {
             ids: ['test-id'],
             http,
-            notifications,
             application,
             licensing,
           },
@@ -162,7 +155,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
         useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
           http,
-          notifications,
           application,
           licensing,
         }),
@@ -190,7 +182,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
         useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
           http,
-          notifications,
           application,
           licensing,
         }),
@@ -211,7 +202,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
         useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
           http,
-          notifications,
           application,
           licensing,
         }),
@@ -240,7 +230,6 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
         useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
           http,
-          notifications,
           application,
           licensing,
         }),
