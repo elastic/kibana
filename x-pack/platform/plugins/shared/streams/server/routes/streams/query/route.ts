@@ -7,14 +7,13 @@
 
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { getEsqlView, upsertEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
-import { getEsqlViewName } from '../../../lib/streams/esql_views/view_name';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.

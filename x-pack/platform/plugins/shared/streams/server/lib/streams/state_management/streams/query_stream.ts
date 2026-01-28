@@ -6,9 +6,8 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { StatusError } from '../../errors/status_error';
-import { getEsqlViewName } from '../../esql_views/view_name';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type {

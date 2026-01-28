@@ -18,24 +18,25 @@ describe('manage_esql_views', () => {
   describe('getEsqlView', () => {
     it('should call GET /_query/view/{name} and return the view', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      const mockResponse = {
-        name: 'stream.my-query-stream',
+      const expectedView = {
+        name: '$.my-query-stream',
         query: 'FROM logs-* | LIMIT 100',
       };
+      const mockResponse = { views: [expectedView] };
       esClient.transport.request.mockResolvedValueOnce(mockResponse);
 
       const result = await getEsqlView({
         esClient,
         logger,
-        name: 'stream.my-query-stream',
+        name: '$.my-query-stream',
       });
 
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '/_query/view/stream.my-query-stream',
+        path: '/_query/view/$.my-query-stream',
       });
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(expectedView);
     });
   });
 
