@@ -33,12 +33,9 @@ const DASHBOARDS_TABLE_SORTING = {
   },
 } as const;
 
-const DASHBOARDS_TABLE_CAPTION = i18n.translate(
-  'xpack.securitySolution.dashboards.tableCaption',
-  {
-    defaultMessage: 'Security dashboards',
-  }
-);
+const DASHBOARDS_TABLE_CAPTION = i18n.translate('xpack.securitySolution.dashboards.tableCaption', {
+  defaultMessage: 'Security dashboards',
+});
 
 export const DashboardsTable: React.FC = () => {
   const { items, isLoading, error } = useSecurityDashboardsTableItems();

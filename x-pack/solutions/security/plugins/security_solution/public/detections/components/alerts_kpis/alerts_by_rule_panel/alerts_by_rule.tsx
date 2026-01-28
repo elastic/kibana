@@ -61,12 +61,9 @@ export const AlertsByRule: React.FC<AlertsByRuleProps> = ({ data, isLoading, sho
           loading={isLoading}
           sorting={SORTING}
           pagination={PAGINATION}
-          tableCaption={i18n.translate(
-            'xpack.securitySolution.alertsByRule.alertsByRuleCaption',
-            {
-              defaultMessage: 'Alerts by rule',
-            }
-          )}
+          tableCaption={i18n.translate('xpack.securitySolution.alertsByRule.alertsByRuleCaption', {
+            defaultMessage: 'Alerts by rule',
+          })}
         />
       </TableWrapper>
     </Wrapper>
