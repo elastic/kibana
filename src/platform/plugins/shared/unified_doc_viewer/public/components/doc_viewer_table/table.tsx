@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -80,7 +81,27 @@ const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
-const getPinnedFieldsStorageKey = (dataViewId: string) => `${PINNED_FIELDS_KEY}:${dataViewId}`;
+const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
+  const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
+  if (
+    typeof pinnedFieldsEntry === 'object' &&
+    pinnedFieldsEntry !== null &&
+    Array.isArray(pinnedFieldsEntry[dataViewId])
+  ) {
+    return pinnedFieldsEntry[dataViewId].filter((cur: unknown) => typeof cur === 'string');
+  }
+  return [];
+};
+const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storage: Storage) => {
+  let pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
+  pinnedFieldsEntry =
+    typeof pinnedFieldsEntry === 'object' && pinnedFieldsEntry !== null ? pinnedFieldsEntry : {};
+
+  storage.set(PINNED_FIELDS_KEY, {
+    ...pinnedFieldsEntry,
+    [dataViewId]: newFields,
+  });
+};
 
 const InternalDocViewerTable = ({
   columns,
@@ -98,9 +119,9 @@ const InternalDocViewerTable = ({
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const currentDataViewId = dataView.id ?? 'unknown';
+  const currentDataViewId = dataView.id!;
 
   const [searchTerm, setSearchTerm] = useRestorableLocalStorage(
     'searchTerm',
@@ -122,28 +143,14 @@ const InternalDocViewerTable = ({
     SHOW_ONLY_SELECTED_FIELDS,
     false
   );
-  const [pinnedFieldsRaw, setPinnedFieldsRaw] = useRestorableLocalStorage(
-    'pinnedFields',
-    getPinnedFieldsStorageKey(currentDataViewId),
-    []
-  );
 
   const tableFiltersCallbacks = useTableFiltersCallbacks({
     searchTerm,
     selectedFieldTypes: fieldTypeFilters,
   });
 
-  // Ensure pinnedFields is always an array (handles legacy format or corrupted data)
-  const pinnedFields = useMemo(
-    () => (Array.isArray(pinnedFieldsRaw) ? pinnedFieldsRaw : []),
-    [pinnedFieldsRaw]
-  );
-
-  const setPinnedFields = useCallback(
-    (newPinnedFields: string[]) => {
-      setPinnedFieldsRaw(newPinnedFields);
-    },
-    [setPinnedFieldsRaw]
+  const [pinnedFields, setPinnedFields] = useState<string[]>(
+    getPinnedFields(currentDataViewId, storage)
   );
 
   const flattened = hit.flattened;
@@ -161,8 +168,9 @@ const InternalDocViewerTable = ({
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
       setPinnedFields(newPinned);
+      updatePinnedFieldsState(newPinned, currentDataViewId, storage);
     },
-    [pinnedFields, setPinnedFields]
+    [currentDataViewId, pinnedFields, storage]
   );
 
   const onChangeSearchTerm = useCallback(
