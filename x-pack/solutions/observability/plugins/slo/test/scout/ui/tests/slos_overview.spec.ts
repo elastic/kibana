@@ -14,14 +14,8 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
   test.describe.configure({ timeout: TEST_TIMEOUT });
 
-  test.beforeAll(async ({ sloData }) => {
-    await sloData.generateSloData();
-    await sloData.addSLO();
-  });
-
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-
     await pageObjects.slo.goto();
   });
 
