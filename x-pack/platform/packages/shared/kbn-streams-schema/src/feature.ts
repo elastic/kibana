@@ -11,6 +11,8 @@ const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
 export type FeatureStatus = z.infer<typeof featureStatusSchema>;
 
+export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
+
 export const baseFeatureSchema = z.object({
   id: z.string(),
   type: z.string(),

@@ -7,5 +7,5 @@
 `features`:
 {{{features}}}
 
-`dataset_analysis`:
-{{{dataset_analysis}}}
+`dataset_analysis` (source: {{dataset_analysis_source}}):
+{{#dataset_analysis}}{{{dataset_analysis}}}{{/dataset_analysis}}{{^dataset_analysis}}See the `dataset_analysis` feature in the features list above.{{/dataset_analysis}}

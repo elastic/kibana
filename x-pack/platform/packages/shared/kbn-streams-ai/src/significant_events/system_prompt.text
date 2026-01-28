@@ -17,9 +17,12 @@ Your primary goal is to analyze the provided context about a user's log dataset�
 
 ## Understanding Features
 
-You will receive **Features**—structured facts about the environment extracted from logs. Features identify infrastructure, technologies, and dependencies with confidence scores (0-100).
+You will receive **Features**—structured facts about the environment extracted from logs. Features come in two categories:
 
-Each feature includes:
+### Inferred Features (category: "inferred")
+These are facts extracted by AI analysis with confidence scores (0-100). They identify infrastructure, technologies, and dependencies.
+
+Each inferred feature includes:
 - `type`: `infrastructure`, `technology`, or `dependency`
 - `name`: Generic identifier (e.g., `programming_language`, `database`)
 - `description`: Summary of what the feature represents
@@ -28,6 +31,17 @@ Each feature includes:
 - `evidence`: Supporting log snippets
 - `tags`: Descriptive tags (array of strings)
 - `meta`: High-cardinality or variable data (e.g., availability zones, API endpoints)
+
+### Computed Features (category: "computed")
+These are automatically computed metadata about the dataset.
+
+**Dataset Analysis Feature** (`type: "dataset_analysis"`):
+This special feature contains the full schema, field distributions, and sample values from the log dataset.
+
+**Understanding `dataset_analysis_source`:**
+The `dataset_analysis` input indicates its source:
+- `source: "filtered"` — A fresh analysis was generated specifically for this request because a filter was applied. Use the `dataset_analysis` content directly as it represents the filtered subset of data.
+- `source: "features"` — No filter was applied, so the analysis comes from the pre-computed `dataset_analysis` feature in the features list. When the `dataset_analysis` field is empty, look for the feature with `type: "dataset_analysis"` in the features array and use its `meta.analysis` content.
 
 ### Using Features to Generate Queries
 
