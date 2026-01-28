@@ -13,8 +13,7 @@ import type {
   CommandOptionVisitorContext,
   StatsCommandVisitorContext,
   InlineStatsCommandVisitorContext,
-  ExpressionVisitorContext,
-  CommandVisitorContext,
+  SharedData,
 } from '../../../ast/visitor';
 import { Visitor } from '../../../ast/visitor';
 import { singleItems } from '../../../ast';
@@ -22,120 +21,147 @@ import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../..
 import type { ESQLColumn, ESQLCommand } from '../../../types';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { getColumnName } from '../../definitions/utils/columns';
+import type { VisitorMethods } from '../../../ast/visitor/types';
+
+interface SummaryData extends SharedData {
+  newColumns: string[];
+  grouping: FieldSummary[];
+  aggregates: FieldSummary[];
+  query: string;
+}
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
-  const newColumns: string[] = [];
-  const grouping: FieldSummary[] = [];
-  const aggregates: FieldSummary[] = [];
-
-  // Collects fields in columns
-  const collectInColumns = (ctx: ColumnExpressionVisitorContext, isInByClause: boolean) => {
-    const column = ctx.node;
-    const newColumn = {
-      field: getColumnName(column),
-      arg: column,
-      definition: column,
-    };
-    if (!isInByClause) {
-      newColumns.push(newColumn.field);
-      aggregates.push(newColumn);
-    } else {
-      grouping.push(newColumn);
-    }
+  const data: SummaryData = {
+    newColumns: [],
+    grouping: [],
+    aggregates: [],
+    query,
   };
 
-  // Collects params
-  const collectInLiterals = (ctx: LiteralExpressionVisitorContext, isInByClause: boolean) => {
-    const literal = ctx.node;
-    if (isParamLiteral(literal)) {
-      const newColumn = {
-        field: literal.text,
-        arg: literal,
-        definition: literal,
-      };
-      if (!isInByClause) {
-        aggregates.push(newColumn);
-      } else {
-        grouping.push(newColumn);
-      }
-    }
-  };
-
-  // Collects columns from assignments, "where" expressions, and other functions calls.
-  const collectInFunctions = (ctx: FunctionCallExpressionVisitorContext, isInByClause: boolean) => {
-    const expression = ctx.node;
-
-    // Assignment expression, STATS var=AVG(field)
-    if (isAssignment(expression) && isColumn(expression.args[0])) {
-      // From the asignment, we extract:
-      // * The left side (fisrt argument) as the new column
-      // * The right side (second argument) as the definition of that column
-      const [column, definition] = singleItems(expression.args);
-
-      const newColumn = {
-        field: getColumnName(column as ESQLColumn),
-        arg: expression,
-        definition,
-      };
-
-      newColumns.push(newColumn.field);
-      if (isInByClause) {
-        grouping.push(newColumn);
-      } else {
-        aggregates.push(newColumn);
-      }
-      return;
-    }
-
-    // Where expression, we only look for columns in the left side of the expression (first argument)
-    if (isWhereExpression(expression)) {
-      ctx.visitArgument(0, isInByClause);
-      return;
-    }
-
-    // By default uses the expression text as column name:
-    // STATS AVG(field) => new column "AVG(field)"
-    const name = query.substring(expression.location.min, expression.location.max + 1);
-
-    newColumns.push(name);
-
-    const newColumn = {
-      field: name,
-      arg: expression,
-      definition: expression,
-    };
-    if (isInByClause) {
-      grouping.push(newColumn);
-    } else {
-      aggregates.push(newColumn);
-    }
-  };
-
-  // We set a flag to identify we are in the BY clause
-  const collectInCommandOption = (ctx: CommandOptionVisitorContext) => {
-    const isInByClause = ctx.node.name === 'by';
-    for (const _ of ctx.visitArguments(isInByClause));
-  };
-
-  const collectInStats = (ctx: StatsCommandVisitorContext | InlineStatsCommandVisitorContext) => {
-    for (const _ of ctx.visitArguments(false)); // Arguments corresponds to the "aggregates" part
-    for (const _ of ctx.visitOptions(false)); // Options corresponds to the "grouping" part "BY"
-  };
-
-  new Visitor()
-    .on('visitCommand', (ctx: CommandVisitorContext) => {})
+  new Visitor<VisitorMethods, SummaryData>({ data })
+    .on('visitCommand', () => {})
     .on('visitStatsCommand', collectInStats)
     .on('visitInlineStatsCommand', collectInStats)
     .on('visitCommandOption', collectInCommandOption)
-    .on('visitExpression', (ctx: ExpressionVisitorContext) => () => {})
+    .on('visitExpression', () => {})
     .on('visitColumnExpression', collectInColumns)
     .on('visitLiteralExpression', collectInLiterals)
     .on('visitFunctionCallExpression', collectInFunctions)
     .visitCommand(command);
 
   return {
-    newColumns: new Set(newColumns),
-    grouping: new Set(grouping),
-    aggregates: new Set(aggregates),
+    newColumns: new Set(data.newColumns),
+    grouping: new Set(data.grouping),
+    aggregates: new Set(data.aggregates),
   };
+};
+
+// ======= Visitor Handlers =======
+
+const collectInStats = (
+  ctx:
+    | StatsCommandVisitorContext<VisitorMethods, SummaryData>
+    | InlineStatsCommandVisitorContext<VisitorMethods, SummaryData>
+) => {
+  for (const _ of ctx.visitArguments(false)); // Arguments corresponds to the "aggregates" part
+  for (const _ of ctx.visitOptions(false)); // Options corresponds to the "grouping" part "BY"
+};
+
+const collectInCommandOption = (ctx: CommandOptionVisitorContext<VisitorMethods, SummaryData>) => {
+  const isInByClause = ctx.node.name === 'by';
+  for (const _ of ctx.visitArguments(isInByClause));
+};
+
+const collectInColumns = (
+  ctx: ColumnExpressionVisitorContext<VisitorMethods, SummaryData>,
+  isInByClause: boolean
+) => {
+  const { newColumns, grouping, aggregates } = ctx.ctx.data;
+  const column = ctx.node;
+  const newColumn = {
+    field: getColumnName(column),
+    arg: column,
+    definition: column,
+  };
+  if (!isInByClause) {
+    newColumns.push(newColumn.field);
+    aggregates.push(newColumn);
+  } else {
+    grouping.push(newColumn);
+  }
+};
+
+// Collects param variables
+const collectInLiterals = (
+  ctx: LiteralExpressionVisitorContext<VisitorMethods, SummaryData>,
+  isInByClause: boolean
+) => {
+  const { grouping, aggregates } = ctx.ctx.data;
+  const literal = ctx.node;
+  if (isParamLiteral(literal)) {
+    const newColumn = {
+      field: literal.text,
+      arg: literal,
+      definition: literal,
+    };
+    if (!isInByClause) {
+      aggregates.push(newColumn);
+    } else {
+      grouping.push(newColumn);
+    }
+  }
+};
+
+// Collects columns from assignments, "where" expressions, and other functions calls.
+const collectInFunctions = (
+  ctx: FunctionCallExpressionVisitorContext<VisitorMethods, SummaryData>,
+  isInByClause: boolean
+) => {
+  const { newColumns, grouping, aggregates, query } = ctx.ctx.data;
+  const expression = ctx.node;
+
+  // Assignment expression, STATS var=AVG(field)
+  if (isAssignment(expression) && isColumn(expression.args[0])) {
+    // From the asignment, we extract:
+    // * The left side (fisrt argument) as the new column
+    // * The right side (second argument) as the definition of that column
+    const [column, definition] = singleItems(expression.args);
+
+    const newColumn = {
+      field: getColumnName(column as ESQLColumn),
+      arg: expression,
+      definition,
+    };
+
+    newColumns.push(newColumn.field);
+    if (isInByClause) {
+      grouping.push(newColumn);
+    } else {
+      aggregates.push(newColumn);
+    }
+    return;
+  }
+
+  // Where expression, we only look for columns in the left side of the expression (first argument)
+  if (isWhereExpression(expression)) {
+    ctx.visitArgument(0, isInByClause);
+    return;
+  }
+
+  // By default uses the expression text as column name:
+  // STATS AVG(field) => new column "AVG(field)"
+  const name = query.substring(expression.location.min, expression.location.max + 1);
+
+  newColumns.push(name);
+
+  const newColumn = {
+    field: name,
+    arg: expression,
+    definition: expression,
+  };
+  if (isInByClause) {
+    grouping.push(newColumn);
+  } else {
+    aggregates.push(newColumn);
+  }
 };
