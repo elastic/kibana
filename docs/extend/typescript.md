@@ -25,7 +25,7 @@ More details are available in the [official docs](https://www.typescriptlang.org
 
 This architecture imposes several limitations to which we must comply:
 
-* Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) does allow circular imports between files. So in theory, you may face a problem when migrating to the TS project references and you will have to resolve this circular dependency. When building with TypeScript project references (using `node scripts/type_check` or `./node_modules/.bin/tsc -b`), circular dependencies between projects will be detected and reported, which must be resolved before migration can proceed.
+* Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) allows it. So in theory, you can face a problem when migrating to the TS project references, leaving you with a circular dependency to fix. When building with TypeScript project references (using `node scripts/type_check` or `./node_modules/.bin/tsc -b`), circular dependencies between projects will be detected and reported, which must be resolved before migration can proceed.
 * A project must emit its type declaration. It’s not always possible to generate a type declaration if the compiler cannot infer a type. There are two basic cases:
 
     1. Your plugin exports a type inferring an internal type declared in Kibana codebase. In this case, you’ll have to either export an internal type or to declare an exported type explicitly.
