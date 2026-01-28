@@ -28,10 +28,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const grouping: FieldSummary[] = [];
   const aggregates: FieldSummary[] = [];
 
-  // Simple column reference.
-  // We consider it a new column unless it's in the BY clause.
-  // If its in the BY clause, we add it to the grouping fields.
-  const visitColumnExpression = (ctx: ColumnExpressionVisitorContext, isInByClause: boolean) => {
+  // Collects fields in columns
+  const collectInColumns = (ctx: ColumnExpressionVisitorContext, isInByClause: boolean) => {
     const column = ctx.node;
     const newColumn = {
       field: getColumnName(column),
@@ -46,8 +44,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     }
   };
 
-  // Params
-  const visitLiteralExpression = (ctx: LiteralExpressionVisitorContext, isInByClause: boolean) => {
+  // Collects params
+  const collectInLiterals = (ctx: LiteralExpressionVisitorContext, isInByClause: boolean) => {
     const literal = ctx.node;
     if (isParamLiteral(literal)) {
       const newColumn = {
@@ -63,12 +61,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     }
   };
 
-  // Function expressions.
-  // Extracts columns from assignments, "where" expressions, and other functions calls.
-  const visitFunctionCallExpression = (
-    ctx: FunctionCallExpressionVisitorContext,
-    isInByClause: boolean
-  ) => {
+  // Collects columns from assignments, "where" expressions, and other functions calls.
+  const collectInFunctions = (ctx: FunctionCallExpressionVisitorContext, isInByClause: boolean) => {
     const expression = ctx.node;
 
     // Assignment expression, STATS var=AVG(field)
@@ -118,30 +112,25 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   };
 
   // We set a flag to identify we are in the BY clause
-  const visitCommandOption = (ctx: CommandOptionVisitorContext) => {
+  const collectInCommandOption = (ctx: CommandOptionVisitorContext) => {
     const isInByClause = ctx.node.name === 'by';
     for (const _ of ctx.visitArguments(isInByClause));
   };
 
-  const visitStatsCommand = (ctx: StatsCommandVisitorContext) => {
+  const collectInStats = (ctx: StatsCommandVisitorContext | InlineStatsCommandVisitorContext) => {
     for (const _ of ctx.visitArguments(false)); // Arguments corresponds to the "aggregates" part
     for (const _ of ctx.visitOptions(false)); // Options corresponds to the "grouping" part "BY"
   };
 
-  const visitInlineStatsCommand = (ctx: InlineStatsCommandVisitorContext) => {
-    for (const _ of ctx.visitArguments(false));
-    for (const _ of ctx.visitOptions(false));
-  };
-
   new Visitor()
-    .on('visitColumnExpression', visitColumnExpression)
-    .on('visitLiteralExpression', visitLiteralExpression)
-    .on('visitFunctionCallExpression', visitFunctionCallExpression)
-    .on('visitCommandOption', visitCommandOption)
-    .on('visitExpression', (ctx: ExpressionVisitorContext, isInByClause: boolean) => () => {})
     .on('visitCommand', (ctx: CommandVisitorContext) => {})
-    .on('visitStatsCommand', visitStatsCommand)
-    .on('visitInlineStatsCommand', visitInlineStatsCommand)
+    .on('visitStatsCommand', collectInStats)
+    .on('visitInlineStatsCommand', collectInStats)
+    .on('visitCommandOption', collectInCommandOption)
+    .on('visitExpression', (ctx: ExpressionVisitorContext) => () => {})
+    .on('visitColumnExpression', collectInColumns)
+    .on('visitLiteralExpression', collectInLiterals)
+    .on('visitFunctionCallExpression', collectInFunctions)
     .visitCommand(command);
 
   return {
