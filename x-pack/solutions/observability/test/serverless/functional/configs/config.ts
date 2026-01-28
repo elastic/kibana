@@ -22,4 +22,5 @@ export default createTestConfig({
   // include settings from project controller
   esServerArgs: [],
   kbnServerArgs: [],
+  enableFleetDockerRegistry: true,
 });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { dockerRegistryPort, type FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
@@ -14,6 +14,7 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
+    const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
 
     return {
       ...svlSharedConfig.getAll(),
@@ -23,6 +24,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...services,
         ...options.services,
       },
+      ...(!enableFleetDockerRegistry && { dockerServers: undefined }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
@@ -43,11 +45,14 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...(options.kbnServerArgs || []),
           ...(options.esServerlessOptions?.uiam
             ? [
-                '--mockIdpPlugin.uiam.enabled=true',
-                `--xpack.security.uiam.enabled=true`,
-                `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
-                `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
-              ]
+              '--mockIdpPlugin.uiam.enabled=true',
+              `--xpack.security.uiam.enabled=true`,
+              `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+              `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+            ]
+            : []),
+          ...(enableFleetDockerRegistry && dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
         ],
       },
