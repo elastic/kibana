@@ -7,11 +7,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
-import type { Template } from './sample_data';
 import { PAGE_SIZE_OPTIONS } from './use_templates_pagination';
-
-export type SortField = keyof Template;
-export type SortOrder = 'asc' | 'desc';
+import type { QueryParams, Template } from './types';
 
 const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: 1,
@@ -19,13 +16,6 @@ const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortField: 'name',
   sortOrder: 'asc',
 };
-
-export interface QueryParams {
-  page: number;
-  perPage: number;
-  sortField: SortField;
-  sortOrder: SortOrder;
-}
 
 export interface UseTemplatesStateReturnValue {
   queryParams: QueryParams;

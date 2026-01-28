@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import * as i18n from '../templates/translations';
 import { LinkButton } from '../links';
 import { useCasesCreateTemplateNavigation } from '../../common/navigation';
-import type { Template } from './sample_data';
+import type { Template } from './types';
 import { useTemplatesColumns } from './use_templates_columns';
 import { useTemplatesState } from './use_templates_state';
 import { useTemplatesPagination } from './use_templates_pagination';

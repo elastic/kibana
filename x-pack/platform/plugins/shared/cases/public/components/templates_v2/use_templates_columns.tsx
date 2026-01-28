@@ -25,10 +25,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Template } from './sample_data';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getEmptyCellValue } from '../empty_value';
 import * as i18n from '../templates/translations';
+import type { Template } from './types';
 
 type TemplatesColumns =
   | EuiTableActionsColumnType<Template>

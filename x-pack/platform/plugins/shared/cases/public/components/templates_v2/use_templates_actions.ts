@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { Template } from './sample_data';
+import type { Template } from './types';
 
 export interface UseTemplatesActionsReturnValue {
   handleEdit: (template: Template) => void;

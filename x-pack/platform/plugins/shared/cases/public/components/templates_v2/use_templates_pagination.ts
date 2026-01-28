@@ -7,8 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import type { CriteriaWithPagination, Pagination } from '@elastic/eui';
-import type { Template } from './sample_data';
-import type { QueryParams, SortField } from './use_templates_state';
+import type { QueryParams, SortField, Template } from './types';
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 

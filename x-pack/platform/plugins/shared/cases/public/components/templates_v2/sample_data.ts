@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-export interface Template {
-  key: string;
-  name: string;
-  description: string;
-  solution: 'security' | 'observability' | 'other';
-  fields: number;
-  tags: string[];
-  lastUpdate: string;
-  lastTimeUsed: string;
-  usage: number;
-  isDefault: boolean;
-}
+import type { Template } from './types';
 
 // Mock data - remove when API is available
 export const MOCK_TEMPLATES: Template[] = [

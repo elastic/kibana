@@ -92,6 +92,62 @@ export const ERROR_FETCHING_TEMPLATES = i18n.translate(
   }
 );
 
+export const ERROR_CREATING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.errorCreatingTemplate',
+  {
+    defaultMessage: 'Error creating template',
+  }
+);
+
+export const SUCCESS_CREATING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.successCreatingTemplate',
+  {
+    defaultMessage: 'Template created successfully',
+  }
+);
+
+export const ERROR_UPDATING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.errorUpdatingTemplate',
+  {
+    defaultMessage: 'Error updating template',
+  }
+);
+
+export const SUCCESS_UPDATING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.successUpdatingTemplate',
+  {
+    defaultMessage: 'Template updated successfully',
+  }
+);
+
+export const ERROR_DELETING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.errorDeletingTemplate',
+  {
+    defaultMessage: 'Error deleting template',
+  }
+);
+
+export const SUCCESS_DELETING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.successDeletingTemplate',
+  {
+    defaultMessage: 'Template deleted successfully',
+  }
+);
+
+export const ERROR_EXPORTING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.errorExportingTemplate',
+  {
+    defaultMessage: 'Error exporting template',
+  }
+);
+
+export const SUCCESS_EXPORTING_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.successExportingTemplate',
+  {
+    defaultMessage: 'Template exported successfully',
+  }
+);
+
 // Table column names
 export const COLUMN_NAME = i18n.translate('xpack.cases.templates.column.name', {
   defaultMessage: 'Name',
