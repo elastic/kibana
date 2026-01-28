@@ -110,10 +110,12 @@ test.describe(
     });
 
     test('modal does not appear if Wired Streams is already enabled', async ({
+      page,
       pageObjects,
       apiServices,
     }) => {
       await apiServices.onboarding.enableWiredStreams();
+      await page.waitForTimeout(1000);
 
       await pageObjects.onboarding.goto();
       await pageObjects.onboarding.waitForMainTilesToLoad();

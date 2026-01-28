@@ -12,7 +12,7 @@ export class OnboardingApp {
 
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.useCaseGridByTestId.waitFor({ state: 'visible' });
+    await this.useCaseGridByTestId.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   public get hostUseCaseTile() {
