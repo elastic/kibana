@@ -127,3 +127,10 @@ export const toMillis = (value?: string): number | undefined => {
 
   return size && multiplier !== undefined ? Number(size) * multiplier : undefined;
 };
+
+export const isZeroAge = (value?: string): boolean => {
+  if (!value) return false;
+  const { size } = splitSizeAndUnits(value);
+  const amount = Number(size);
+  return Number.isFinite(amount) && amount === 0;
+};

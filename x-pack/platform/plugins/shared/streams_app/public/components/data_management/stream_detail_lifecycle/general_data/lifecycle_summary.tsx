@@ -16,11 +16,11 @@ import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_a
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { formatBytes } from '../helpers/format_bytes';
 import { getILMRatios } from '../helpers/helpers';
+import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import {
-  DataLifecycleSummary,
   buildLifecyclePhases,
   type LifecyclePhase,
-} from '../common/data_lifecycle/data_lifecycle_summary';
+} from '../common/data_lifecycle/lifecycle_types';
 
 interface LifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
@@ -82,6 +82,7 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
           'searchable_snapshot' in phase ? phase.searchable_snapshot : undefined;
 
         return {
+          name: phase.name,
           color: ilmPhases[phase.name].color,
           label: phase.name,
           size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,

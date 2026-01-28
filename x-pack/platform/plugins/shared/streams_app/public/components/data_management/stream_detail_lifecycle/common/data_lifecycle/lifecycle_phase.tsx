@@ -10,9 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
-  EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -22,45 +20,50 @@ import {
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { formatBytes } from '../../helpers/format_bytes';
-import { splitSizeAndUnits } from '../../helpers/format_size_units';
-import { getInteractivePanelStyles } from './interactive_panel_styles';
+import { isZeroAge } from '../../helpers/format_size_units';
+import { LifecyclePhaseButton } from './lifecycle_phase_button';
 
-const isZeroAge = (value?: string) => {
-  if (!value) return false;
-  const { size } = splitSizeAndUnits(value);
-  const amount = Number(size);
-  return Number.isFinite(amount) && amount === 0;
-};
-
-export interface LifecyclePhaseProps {
+interface BaseLifecyclePhaseProps {
   color?: string;
-  label?: string;
-  size?: string;
-  isDelete?: boolean;
-  onClick?: () => void;
   description?: string;
-  sizeInBytes?: number;
   docsCount?: number;
-  minAge?: string;
   isReadOnly?: boolean;
+  label: string;
+  minAge?: string;
+  onClick?: () => void;
   searchableSnapshot?: string;
+  size?: string;
+  sizeInBytes?: number;
 }
 
-export const LifecyclePhase = ({
-  color,
-  label,
-  size,
-  isDelete = false,
-  onClick,
-  description,
-  sizeInBytes,
-  docsCount,
-  minAge,
-  isReadOnly = false,
-  searchableSnapshot,
-}: LifecyclePhaseProps) => {
+interface DeleteLifecyclePhaseProps extends BaseLifecyclePhaseProps {
+  isDelete: true;
+}
+
+interface StandardLifecyclePhaseProps extends BaseLifecyclePhaseProps {
+  color: string;
+  isDelete?: false;
+}
+
+export type LifecyclePhaseProps = DeleteLifecyclePhaseProps | StandardLifecyclePhaseProps;
+
+export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const {
+    color,
+    description,
+    docsCount,
+    isReadOnly = false,
+    label,
+    minAge,
+    onClick,
+    searchableSnapshot,
+    size,
+    sizeInBytes,
+  } = props;
+  const isDelete = props.isDelete === true;
 
   const phaseColor = isDelete ? euiTheme.colors.backgroundBaseSubdued : color;
 
@@ -72,87 +75,6 @@ export const LifecyclePhase = ({
   const closePopover = () => {
     setIsPopoverOpen(false);
   };
-
-  const button = (
-    <EuiPanel
-      paddingSize="s"
-      hasBorder={false}
-      hasShadow={false}
-      role="button"
-      data-test-subj={isDelete ? 'lifecyclePhase-delete-button' : `lifecyclePhase-${label}-button`}
-      aria-label={
-        isDelete
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.deletePhase.ariaLabel', {
-              defaultMessage: 'Delete phase',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.phase.ariaLabel', {
-              defaultMessage: '{phase} phase',
-              values: { phase: label ?? '' },
-            })
-      }
-      onClick={handleClick}
-      css={getInteractivePanelStyles({
-        euiTheme,
-        backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
-        isPopoverOpen,
-        minHeight: '48px',
-        ...(isDelete
-          ? {
-              minWidth: '50px',
-              padding: '0',
-              alignCenter: true,
-            }
-          : {}),
-      })}
-      grow={false}
-    >
-      {isDelete ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          responsive={false}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="trash" data-test-subj="dataLifecycle-delete-icon" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          <EuiText
-            size="xs"
-            color={euiTheme.colors.plainDark}
-            data-test-subj={`lifecyclePhase-${label}-name`}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}
-          >
-            <b>{capitalize(label)}</b>
-          </EuiText>
-          {size && (
-            <EuiText
-              size="xs"
-              color={euiTheme.colors.plainDark}
-              data-test-subj={`lifecyclePhase-${label}-size`}
-              title={size}
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '100%',
-              }}
-            >
-              {size}
-            </EuiText>
-          )}
-        </EuiFlexGroup>
-      )}
-    </EuiPanel>
-  );
-
   const showStoredSize = !isDelete && sizeInBytes !== undefined;
   const showDocumentCount = !isDelete && docsCount !== undefined;
   const showRetentionPeriod = label !== 'hot' && minAge !== undefined && !isZeroAge(minAge);
@@ -161,7 +83,17 @@ export const LifecyclePhase = ({
 
   return (
     <EuiPopover
-      button={button}
+      button={
+        <LifecyclePhaseButton
+          euiTheme={euiTheme}
+          isDelete={isDelete}
+          isPopoverOpen={isPopoverOpen}
+          label={label}
+          onClick={handleClick}
+          phaseColor={phaseColor}
+          size={size}
+        />
+      }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
@@ -232,7 +164,7 @@ export const LifecyclePhase = ({
                   <EuiSpacer size="s" />
                 </>
               )}
-              {showStoredSize && (
+              {showStoredSize && sizeInBytes !== undefined && (
                 <>
                   <EuiFlexItem data-test-subj={`lifecyclePhase-${label}-storedSize`}>
                     <EuiFlexGroup
@@ -263,7 +195,7 @@ export const LifecyclePhase = ({
                   <EuiSpacer size="s" />
                 </>
               )}
-              {showDocumentCount && (
+              {showDocumentCount && docsCount !== undefined && (
                 <EuiFlexItem data-test-subj={`lifecyclePhase-${label}-docsCount`}>
                   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
                     <EuiFlexItem grow={false}>

@@ -9,45 +9,54 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import { splitSizeAndUnits } from '@kbn/failure-store-modal/src/components/utils';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 
-export interface LifecyclePhase {
-  name?: string;
-  color?: string;
-  label?: string;
-  size?: string;
-  grow: EuiFlexItemProps['grow'];
-  isDelete?: boolean;
-  timelineValue?: string;
-  min_age?: string;
-  description?: string;
-  sizeInBytes?: number;
+interface BaseLifecyclePhase {
+  color: string;
   docsCount?: number;
-  isReadOnly?: boolean;
+  description?: string;
   downsample?: DownsampleStep;
+  grow: EuiFlexItemProps['grow'];
+  isReadOnly?: boolean;
+  label: string;
+  min_age?: string;
+  name: string;
   searchableSnapshot?: string;
+  sizeInBytes?: number;
+  timelineValue?: string;
 }
 
+interface DeleteLifecyclePhase extends BaseLifecyclePhase {
+  isDelete: true;
+}
+
+interface StandardLifecyclePhase extends BaseLifecyclePhase {
+  isDelete?: false;
+  size?: string;
+}
+
+export type LifecyclePhase = DeleteLifecyclePhase | StandardLifecyclePhase;
+
 export function buildLifecyclePhases({
+  docsCount,
   label,
   color,
-  size,
-  retentionPeriod,
-  description,
-  sizeInBytes,
-  docsCount,
-  isReadOnly,
-  deletePhaseDescription,
   deletePhaseColor,
+  deletePhaseDescription,
+  description,
+  isReadOnly,
+  retentionPeriod,
+  size,
+  sizeInBytes,
 }: {
-  label: string;
   color: string;
-  size?: string;
-  retentionPeriod?: string;
-  description?: string;
-  sizeInBytes?: number;
   docsCount?: number;
-  isReadOnly?: boolean;
+  deletePhaseColor: string;
   deletePhaseDescription?: string;
-  deletePhaseColor?: string;
+  description?: string;
+  isReadOnly?: boolean;
+  label: string;
+  retentionPeriod?: string;
+  size?: string;
+  sizeInBytes?: number;
 }): LifecyclePhase[] {
   // Extract unit from retentionPeriod for the zero phase or default to 'd'
   const { unit = 'd' } = retentionPeriod ? splitSizeAndUnits(retentionPeriod) : {};

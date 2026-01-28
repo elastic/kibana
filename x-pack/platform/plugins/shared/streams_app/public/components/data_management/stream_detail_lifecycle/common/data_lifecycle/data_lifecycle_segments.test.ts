@@ -54,6 +54,7 @@ describe('buildLifecyclePhases', () => {
       color: '#00FF00',
       size: '2.0 GB',
       retentionPeriod: undefined,
+      deletePhaseColor: '#000000',
     });
 
     expect(phases).toHaveLength(1);
@@ -73,10 +74,15 @@ describe('buildLifecyclePhases', () => {
       label: 'Test phase',
       color: '#FF0000',
       retentionPeriod: '7d',
+      deletePhaseColor: '#000000',
     });
 
     expect(phases).toHaveLength(2);
-    expect(phases[0].size).toBeUndefined();
+    const [firstPhase] = phases;
+    if (firstPhase.isDelete) {
+      throw new Error('Expected a non-delete phase');
+    }
+    expect(firstPhase.size).toBeUndefined();
   });
 
   it('should extract unit from retentionPeriod for min_age', () => {
@@ -84,6 +90,7 @@ describe('buildLifecyclePhases', () => {
       label: 'Test',
       color: '#FF0000',
       retentionPeriod: '30m',
+      deletePhaseColor: '#000000',
     });
     expect(phasesWithMinutes[0].min_age).toBe('0m');
 
@@ -91,6 +98,7 @@ describe('buildLifecyclePhases', () => {
       label: 'Test',
       color: '#FF0000',
       retentionPeriod: '60s',
+      deletePhaseColor: '#000000',
     });
     expect(phasesWithSeconds[0].min_age).toBe('0s');
 
@@ -98,6 +106,7 @@ describe('buildLifecyclePhases', () => {
       label: 'Test',
       color: '#FF0000',
       retentionPeriod: '24h',
+      deletePhaseColor: '#000000',
     });
     expect(phasesWithHours[0].min_age).toBe('0h');
   });

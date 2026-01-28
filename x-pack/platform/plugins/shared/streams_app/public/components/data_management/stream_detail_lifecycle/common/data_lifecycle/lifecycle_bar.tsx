@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LifecyclePhase } from './data_lifecycle_summary';
+import type { LifecyclePhase } from './lifecycle_types';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
 
 interface LifecycleBarProps {
@@ -17,6 +17,35 @@ interface LifecycleBarProps {
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
 }
+
+const renderLifecyclePhase = (
+  phase: LifecyclePhase,
+  index: number,
+  onPhaseClick?: (phase: LifecyclePhase, index: number) => void
+) => {
+  const commonProps = {
+    label: phase.label,
+    onClick: () => {
+      onPhaseClick?.(phase, index);
+    },
+    description: phase.description,
+    minAge: phase.min_age,
+    isReadOnly: phase.isReadOnly,
+  };
+
+  return phase.isDelete ? (
+    <LifecyclePhaseComponent isDelete {...commonProps} />
+  ) : (
+    <LifecyclePhaseComponent
+      {...commonProps}
+      color={phase.color}
+      size={phase.size}
+      sizeInBytes={phase.sizeInBytes}
+      docsCount={phase.docsCount}
+      searchableSnapshot={phase.searchableSnapshot}
+    />
+  );
+};
 
 export const LifecycleBar = ({
   phases,
@@ -68,21 +97,7 @@ export const LifecycleBar = ({
                 justifyContent: 'center',
               }}
             >
-              <LifecyclePhaseComponent
-                color={phase.color}
-                label={phase.label}
-                size={phase.size}
-                isDelete={phase.isDelete}
-                onClick={() => {
-                  onPhaseClick?.(phase, index);
-                }}
-                description={phase.description}
-                sizeInBytes={phase.sizeInBytes}
-                docsCount={phase.docsCount}
-                minAge={phase.min_age}
-                isReadOnly={phase.isReadOnly}
-                searchableSnapshot={phase.searchableSnapshot}
-              />
+              {renderLifecyclePhase(phase, index, onPhaseClick)}
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

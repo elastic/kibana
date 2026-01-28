@@ -12,11 +12,11 @@ import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 import { formatBytes } from '../helpers/format_bytes';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import {
-  DataLifecycleSummary,
   buildLifecyclePhases,
   type LifecyclePhase,
-} from '../common/data_lifecycle/data_lifecycle_summary';
+} from '../common/data_lifecycle/lifecycle_types';
 
 interface FailureStoreSummaryProps {
   stats?: EnhancedFailureStoreStats;

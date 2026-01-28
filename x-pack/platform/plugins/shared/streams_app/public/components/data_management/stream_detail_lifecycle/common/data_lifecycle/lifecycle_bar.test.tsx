@@ -20,8 +20,8 @@ describe('LifecycleBar', () => {
   describe('Rendering', () => {
     it('should render phases with labels', () => {
       const phases: LifecyclePhase[] = [
-        { grow: 5, label: 'hot', color: '#FF0000' },
-        { grow: 3, label: 'warm', color: '#FFA500' },
+        { grow: 5, name: 'hot', label: 'hot', color: '#FF0000' },
+        { grow: 3, name: 'warm', label: 'warm', color: '#FFA500' },
       ];
 
       render(
@@ -39,8 +39,8 @@ describe('LifecycleBar', () => {
 
     it('should render phases with sizes', () => {
       const phases: LifecyclePhase[] = [
-        { grow: 5, label: 'hot', color: '#FF0000', size: '1.0 GB' },
-        { grow: 3, label: 'warm', color: '#FFA500', size: '500 MB' },
+        { grow: 5, name: 'hot', label: 'hot', color: '#FF0000', size: '1.0 GB' },
+        { grow: 3, name: 'warm', label: 'warm', color: '#FFA500', size: '500 MB' },
       ];
 
       render(
@@ -58,8 +58,8 @@ describe('LifecycleBar', () => {
 
     it('should render delete phase with trash icon', () => {
       const phases: LifecyclePhase[] = [
-        { grow: true, label: 'hot', color: '#FF0000' },
-        { grow: false, isDelete: true },
+        { grow: true, name: 'hot', label: 'hot', color: '#FF0000' },
+        { grow: false, color: '#000000', name: 'delete', label: 'delete', isDelete: true },
       ];
 
       render(
@@ -78,7 +78,9 @@ describe('LifecycleBar', () => {
   describe('Click handling', () => {
     it('should call onPhaseClick when phase is clicked', () => {
       const onPhaseClick = jest.fn();
-      const phases: LifecyclePhase[] = [{ grow: true, label: 'hot', color: '#FF0000' }];
+      const phases: LifecyclePhase[] = [
+        { grow: true, name: 'hot', label: 'hot', color: '#FF0000' },
+      ];
 
       render(
         <LifecycleBar
@@ -98,8 +100,8 @@ describe('LifecycleBar', () => {
     it('should call onPhaseClick with correct index for multiple phases', () => {
       const onPhaseClick = jest.fn();
       const phases: LifecyclePhase[] = [
-        { grow: 5, label: 'hot', color: '#FF0000' },
-        { grow: 3, label: 'warm', color: '#FFA500' },
+        { grow: 5, name: 'hot', label: 'hot', color: '#FF0000' },
+        { grow: 3, name: 'warm', label: 'warm', color: '#FFA500' },
       ];
 
       render(

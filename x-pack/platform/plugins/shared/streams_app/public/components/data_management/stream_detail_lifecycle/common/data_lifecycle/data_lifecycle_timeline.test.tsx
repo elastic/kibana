@@ -21,9 +21,16 @@ describe('DataLifecycleTimeline', () => {
   describe('Basic rendering', () => {
     it('should render timeline with phase labels', () => {
       const phases: LifecyclePhase[] = [
-        { grow: 5, min_age: '0d', label: 'hot' },
-        { grow: 3, min_age: '30d', label: 'warm' },
-        { grow: false, min_age: '60d', isDelete: true },
+        { grow: 5, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },
+        { grow: 3, color: '#FFA500', name: 'warm', min_age: '30d', label: 'warm' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '60d',
+          isDelete: true,
+        },
       ];
 
       render(
@@ -40,7 +47,9 @@ describe('DataLifecycleTimeline', () => {
     });
 
     it('should render with custom timeline segments', () => {
-      const phases: LifecyclePhase[] = [{ grow: true, label: 'active' }];
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'active', label: 'active' },
+      ];
       const timelineSegments: TimelineSegment[] = [
         { grow: 3, leftValue: '0d' },
         { grow: 3, leftValue: '10d' },
@@ -64,7 +73,9 @@ describe('DataLifecycleTimeline', () => {
 
   describe('Infinite retention', () => {
     it('should render infinity symbol when retention is infinite', () => {
-      const phases: LifecyclePhase[] = [{ grow: true, min_age: '0d', label: 'active' }];
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'active', min_age: '0d', label: 'active' },
+      ];
 
       render(
         <DataLifecycleTimeline
@@ -81,8 +92,15 @@ describe('DataLifecycleTimeline', () => {
 
     it('should not render infinity symbol when retention is finite', () => {
       const phases: LifecyclePhase[] = [
-        { grow: true, min_age: '0d', label: 'active' },
-        { grow: false, min_age: '30d', isDelete: true },
+        { grow: true, color: '#FF0000', name: 'active', min_age: '0d', label: 'active' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '30d',
+          isDelete: true,
+        },
       ];
 
       render(
@@ -101,8 +119,15 @@ describe('DataLifecycleTimeline', () => {
   describe('Delete phase handling', () => {
     it('should not show vertical line on right for delete phase', () => {
       const phases: LifecyclePhase[] = [
-        { grow: true, min_age: '0d', label: 'active' },
-        { grow: false, min_age: '30d', isDelete: true },
+        { grow: true, color: '#FF0000', name: 'active', min_age: '0d', label: 'active' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '30d',
+          isDelete: true,
+        },
       ];
 
       const { container } = render(

@@ -14,7 +14,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { LifecyclePhase } from './data_lifecycle_summary';
+import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
 
 export const DataLifecycleTimeline = ({

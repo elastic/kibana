@@ -30,16 +30,22 @@ export interface SegmentPhase extends BaseLifecycleSegment {
   label?: string;
 }
 
-// EUI flex grow values are 0-10
-type GrowValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+type GrowValue = Exclude<EuiFlexItemProps['grow'], boolean | null | undefined>;
+
+function assertGrowValue(value: number): asserts value is GrowValue {
+  if (value < 0 || value > 10 || !Number.isInteger(value)) {
+    throw new Error(`Invalid GrowValue: ${value}`);
+  }
+}
 
 const toGrowValue = (value: number): GrowValue => {
   const clamped = Math.min(10, Math.max(1, Math.round(value)));
-  return clamped as GrowValue;
+  assertGrowValue(clamped);
+  return clamped;
 };
 
 const normalizeToGrowValue = (value: number, maxValue: number): GrowValue => {
-  if (!Number.isFinite(value) || value <= 0) return 1 as GrowValue;
+  if (!Number.isFinite(value) || value <= 0) return 1;
   return toGrowValue((value / maxValue) * 10);
 };
 

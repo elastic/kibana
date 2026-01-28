@@ -32,7 +32,7 @@ describe('LifecyclePhase', () => {
 
   describe('Delete phase', () => {
     it('should render trash icon for delete phase', () => {
-      render(<LifecyclePhase isDelete />);
+      render(<LifecyclePhase isDelete label="delete" />);
 
       expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
     });
@@ -183,7 +183,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should have correct aria-label for delete phase', () => {
-      render(<LifecyclePhase isDelete />);
+      render(<LifecyclePhase isDelete label="delete" />);
 
       expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Delete phase');
     });

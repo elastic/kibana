@@ -36,6 +36,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: 5,
@@ -44,6 +45,7 @@ describe('DataLifecycleSummary', () => {
         },
         {
           color: '#FFA500',
+          name: 'warm',
           label: 'warm',
           size: '500.0 KB',
           grow: 3,
@@ -52,6 +54,9 @@ describe('DataLifecycleSummary', () => {
         },
         {
           grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
           isDelete: true,
           min_age: '60d',
         },
@@ -71,13 +76,21 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: 5,
           timelineValue: '1s',
           min_age: '0s',
         },
-        { grow: false, isDelete: true, min_age: '1s' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          isDelete: true,
+          min_age: '1s',
+        },
       ];
 
       render(<DataLifecycleSummary phases={phases} />);
@@ -89,13 +102,21 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#00FF00',
+          name: 'main',
           label: 'Main phase',
           size: '2.0 GB',
           grow: true,
           timelineValue: '30d',
           min_age: '0d',
         },
-        { grow: false, isDelete: true, min_age: '30d' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          isDelete: true,
+          min_age: '30d',
+        },
       ];
 
       render(<DataLifecycleSummary phases={phases} />);
@@ -111,6 +132,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#00FF00',
+          name: 'main',
           label: 'Main phase',
           size: '2.0 GB',
           grow: true,
@@ -127,6 +149,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'main',
           label: 'Main phase',
           size: '50.0 KB',
           grow: true,
@@ -144,6 +167,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: 5,
@@ -165,6 +189,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: 5,
@@ -176,6 +201,9 @@ describe('DataLifecycleSummary', () => {
         },
         {
           grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
           isDelete: true,
         },
       ];
@@ -193,6 +221,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: true,
@@ -218,6 +247,7 @@ describe('DataLifecycleSummary', () => {
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',
+          name: 'hot',
           label: 'hot',
           size: '1.0 MB',
           grow: 5,

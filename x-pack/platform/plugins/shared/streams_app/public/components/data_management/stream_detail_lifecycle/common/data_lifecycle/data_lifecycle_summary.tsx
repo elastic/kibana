@@ -28,9 +28,6 @@ import { LifecycleBar } from './lifecycle_bar';
 import { DownsamplingBar } from './downsampling_bar';
 import { type LifecyclePhase } from './lifecycle_types';
 
-// Re-export for backwards compatibility
-export { type LifecyclePhase, buildLifecyclePhases } from './lifecycle_types';
-
 interface DataLifecycleSummaryProps {
   phases: LifecyclePhase[];
   loading?: boolean;
