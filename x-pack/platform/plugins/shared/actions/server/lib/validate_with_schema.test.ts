@@ -325,6 +325,44 @@ test('should throw an error when custom validators fail', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type secrets: test error"`);
 });
 
+describe('validateSecretes', () => {
+  test('should not run validation when secrets are undefined', () => {
+    const schemaValidator = {
+      parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+    };
+    const customValidator = (
+      value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
+      services: ValidatorServices
+    ) => {
+      throw new Error('test error');
+    };
+
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: {
+          schema: schemaValidator,
+        },
+        config: {
+          schema: schemaValidator,
+        },
+        secrets: {
+          schema: schemaValidator,
+          customValidator,
+        },
+      },
+    };
+
+    expect(() =>
+      validateSecrets(actionType, undefined, { configurationUtilities })
+    ).not.toThrowError();
+  });
+});
+
 describe('validateConnectors', () => {
   const testValue = { any: ['old', 'thing'] };
   const selfValidator = { parse: (value: Record<string, unknown>) => value };
