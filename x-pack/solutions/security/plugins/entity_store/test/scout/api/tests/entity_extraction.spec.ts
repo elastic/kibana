@@ -12,7 +12,7 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -20,14 +20,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     };
 
     // enable feature flag
-    await apiClient.post('internal/kibana/settings', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        changes: {
-          [FF_ENABLE_ENTITY_STORE_V2]: true,
-        },
-      },
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
     // Install the entity store

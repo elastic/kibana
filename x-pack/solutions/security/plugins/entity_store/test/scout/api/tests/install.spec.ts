@@ -23,15 +23,9 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
 
   apiTest(
     'Should install the entity store happy path with feature flag enabled',
-    async ({ apiClient }) => {
-      await apiClient.post('internal/kibana/settings', {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          changes: {
-            [FF_ENABLE_ENTITY_STORE_V2]: true,
-          },
-        },
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
       const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
@@ -50,15 +44,9 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     }
   );
 
-  apiTest('Should fail with feature flag disabled', async ({ apiClient }) => {
-    await apiClient.post('internal/kibana/settings', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        changes: {
-          [FF_ENABLE_ENTITY_STORE_V2]: false,
-        },
-      },
+  apiTest('Should fail with feature flag disabled', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: false,
     });
 
     const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
