@@ -145,13 +145,15 @@ export async function loadIndices(
   onIndicesLoaded: (indices: Index[]) => void,
   onEnrichmentError: (source: string) => void
 ) {
+  const indicesPromise = httpService.httpClient.get<Record<string, Index>>(
+    `${API_BASE_PATH}/indices_get`
+  );
+
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
   // we'll wait for the main request to complete first so the index list has stability
-  const indices = await httpService.httpClient.get<Record<string, Index>>(
-    `${API_BASE_PATH}/indices_get`
-  );
+  const indices = await indicesPromise;
 
   // Pre-compute an alias -> index names lookup for enrichers that return data keyed by alias.
   const aliasToIndexNames = new Map<string, string[]>();
