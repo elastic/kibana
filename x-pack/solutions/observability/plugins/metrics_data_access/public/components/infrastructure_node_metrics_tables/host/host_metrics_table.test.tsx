@@ -37,18 +37,7 @@ describe('HostMetricsTable', () => {
     to: 'now',
   };
 
-  const filterClauseDsl = {
-    bool: {
-      should: [
-        {
-          match: {
-            'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  };
+  const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
   const mockData = {
     series: [
@@ -66,7 +55,7 @@ describe('HostMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyHostMetricsTable = createLazyHostMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(<LazyHostMetricsTable timerange={timerange} kuery={kuery} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
@@ -96,7 +85,7 @@ describe('HostMetricsTable', () => {
       const { findByText } = render(
         <IntegratedHostMetricsTable
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           sourceId="default"
           metricsClient={metricsClient}
           {...coreProvidersPropsMock}

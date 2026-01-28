@@ -13,7 +13,7 @@ import type { NodeMetricsTableProps } from '../shared';
 const LazyIntegratedPodMetricsTable = lazy(() => import('./integrated_pod_metrics_table'));
 
 export function createLazyPodMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({ timerange, filterClauseDsl, sourceId, isOtel }: NodeMetricsTableProps) => {
+  return ({ timerange, kuery, sourceId, isOtel }: NodeMetricsTableProps) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedPodMetricsTable
@@ -21,7 +21,7 @@ export function createLazyPodMetricsTable(core: CoreStart, metricsClient: Metric
           metricsClient={metricsClient}
           sourceId={sourceId || 'default'}
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           isOtel={isOtel}
         />
       </Suspense>

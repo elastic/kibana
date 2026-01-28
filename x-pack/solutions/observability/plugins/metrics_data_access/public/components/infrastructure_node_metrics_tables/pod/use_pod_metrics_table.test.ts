@@ -25,18 +25,8 @@ describe('usePodMetricsTable hook', () => {
     typeof useInfrastructureNodeMetrics
   >;
 
-  it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ term: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.dataset': 'kubernetes.pod' } }, { ...filterClauseDsl }],
-      },
-    };
+  it('should call useInfrastructureNodeMetrics hook with event.module filter in kuery', () => {
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -48,35 +38,24 @@ describe('usePodMetricsTable hook', () => {
     renderHook(() =>
       usePodMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
       })
     );
 
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.pod" AND (${kuery})`;
+
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: kueryWithEventModuleFilter,
         }),
       })
     );
   });
 
   it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when isOtel is true', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ term: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [
-          { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
-          { ...filterClauseDsl },
-        ],
-      },
-    };
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -88,7 +67,7 @@ describe('usePodMetricsTable hook', () => {
     renderHook(() =>
       usePodMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
         isOtel: true,
       })
@@ -97,7 +76,7 @@ describe('usePodMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: `event.dataset: "kubeletstatsreceiver.otel" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
             expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
@@ -108,17 +87,7 @@ describe('usePodMetricsTable hook', () => {
   });
 
   it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ term: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.dataset': 'kubernetes.pod' } }, { ...filterClauseDsl }],
-      },
-    };
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -130,7 +99,7 @@ describe('usePodMetricsTable hook', () => {
     renderHook(() =>
       usePodMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
         isOtel: false,
       })
@@ -139,7 +108,7 @@ describe('usePodMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: `event.dataset: "kubernetes.pod" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: ECS_POD_CPU_USAGE_LIMIT_PCT }),
             expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),

@@ -85,7 +85,7 @@ function getUnpackMetricsForSchema(isOtel: boolean, isK8sContainer?: boolean): U
 
 export function useContainerMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
   isOtel,
   isK8sContainer,
@@ -97,8 +97,8 @@ export function useContainerMetricsTable({
   });
 
   const metricsExplorerOptions = useMemo(
-    () => getOptionsForSchema(isOtel ?? false, isK8sContainer, filterClauseDsl).options,
-    [isOtel, isK8sContainer, filterClauseDsl]
+    () => getOptionsForSchema(isOtel ?? false, isK8sContainer, kuery).options,
+    [isOtel, isK8sContainer, kuery]
   );
 
   const transform = useMemo(() => {

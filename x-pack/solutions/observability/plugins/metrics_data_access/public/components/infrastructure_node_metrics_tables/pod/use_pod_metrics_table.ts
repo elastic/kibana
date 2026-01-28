@@ -31,11 +31,7 @@ import {
 type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'kubernetes.pod',
-    },
-  },
+  sourceFilter: `event.dataset: "kubernetes.pod"`,
   groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
   metricsMap: {
     [ECS_POD_CPU_USAGE_LIMIT_PCT]: {
@@ -67,11 +63,7 @@ type PodMetricsFieldsOtel =
   | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'kubeletstatsreceiver.otel',
-    },
-  },
+  sourceFilter: `event.dataset: "kubeletstatsreceiver.otel"`,
   groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
   metricsMap: {
     // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.
@@ -107,7 +99,7 @@ export interface PodNodeMetricsRow {
 
 export function usePodMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
   isOtel,
 }: UseNodeMetricsTableOptions) {
@@ -118,13 +110,13 @@ export function usePodMetricsTable({
   });
 
   const { options: podMetricsOptions } = useMemo(
-    () => metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(podMetricsQueryConfig, kuery),
+    [kuery]
   );
 
   const { options: podMetricsOptionsOtel } = useMemo(
-    () => metricsToApiOptions(podMetricsQueryConfigOtel, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(podMetricsQueryConfigOtel, kuery),
+    [kuery]
   );
 
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({

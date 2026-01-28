@@ -30,25 +30,8 @@ describe('useHostMetricsTable hook', () => {
     typeof useInfrastructureNodeMetrics
   >;
 
-  it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
-    const filterClauseDsl = {
-      bool: {
-        should: [
-          {
-            terms: {
-              'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.module': 'system' } }, { ...filterClauseDsl }],
-      },
-    };
+  it('should call useInfrastructureNodeMetrics hook with event.module filter in kuery', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -60,32 +43,24 @@ describe('useHostMetricsTable hook', () => {
     renderHook(() =>
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
       })
     );
 
+    const kueryWithEventModuleFilter = `event.module: "system" AND (${kuery})`;
+
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: kueryWithEventModuleFilter,
         }),
       })
     );
   });
 
   it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when isOtel is true', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ term: { 'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.dataset': 'hostmetricsreceiver.otel' } }, { ...filterClauseDsl }],
-      },
-    };
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -97,7 +72,7 @@ describe('useHostMetricsTable hook', () => {
     renderHook(() =>
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
         isOtel: true,
       })
@@ -106,7 +81,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: `event.dataset: "hostmetricsreceiver.otel" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),
@@ -119,17 +94,7 @@ describe('useHostMetricsTable hook', () => {
   });
 
   it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
-    const filterClauseDsl = {
-      bool: {
-        filter: [{ term: { 'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.module': 'system' } }, { ...filterClauseDsl }],
-      },
-    };
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -141,7 +106,7 @@ describe('useHostMetricsTable hook', () => {
     renderHook(() =>
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
         isOtel: false,
       })
@@ -150,7 +115,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: `event.module: "system" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SYSTEM_CPU_CORES }),
             expect.objectContaining({ field: SYSTEM_CPU_TOTAL_NORM_PCT }),

@@ -13,13 +13,13 @@ import { usePodMetricsTable } from './use_pod_metrics_table';
 
 function HookedPodMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
   isOtel,
 }: UseNodeMetricsTableOptions) {
   const podMetricsTableProps = usePodMetricsTable({
     timerange,
-    filterClauseDsl,
+    kuery,
     metricsClient,
     isOtel,
   });
@@ -34,7 +34,7 @@ function HookedPodMetricsTable({
 
 function PodMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   metricsClient,
   isOtel,
@@ -44,7 +44,7 @@ function PodMetricsTableWithProviders({
     <CoreProviders {...coreProvidersProps}>
       <HookedPodMetricsTable
         timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
+        kuery={kuery}
         metricsClient={metricsClient}
         isOtel={isOtel}
       />

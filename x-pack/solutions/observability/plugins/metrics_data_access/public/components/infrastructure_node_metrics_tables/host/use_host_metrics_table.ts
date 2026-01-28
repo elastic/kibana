@@ -37,11 +37,7 @@ type HostMetricsField =
   | typeof SYSTEM_MEMORY_USED_PCT;
 
 const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
-  sourceFilter: {
-    term: {
-      'event.module': 'system',
-    },
-  },
+  sourceFilter: `event.module: "system"`,
   groupByField: 'host.name',
   metricsMap: {
     [SYSTEM_CPU_CORES]: { aggregation: 'max', field: SYSTEM_CPU_CORES },
@@ -64,11 +60,7 @@ type HostMetricsFieldsOtel =
   | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'hostmetricsreceiver.otel',
-    },
-  },
+  sourceFilter: `event.dataset: "hostmetricsreceiver.otel"`,
   groupByField: 'host.name',
   metricsMap: {
     [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {
@@ -102,7 +94,7 @@ export interface HostNodeMetricsRow {
 
 export function useHostMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
   isOtel,
 }: UseNodeMetricsTableOptions) {
@@ -113,13 +105,13 @@ export function useHostMetricsTable({
   });
 
   const { options: hostMetricsOptions } = useMemo(
-    () => metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(hostsMetricsQueryConfig, kuery),
+    [kuery]
   );
 
   const { options: hostMetricsOptionsOtel } = useMemo(
-    () => metricsToApiOptions(hostsMetricsQueryConfigOtel, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(hostsMetricsQueryConfigOtel, kuery),
+    [kuery]
   );
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: isOtel ? hostMetricsOptionsOtel : hostMetricsOptions,

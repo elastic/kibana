@@ -16,19 +16,19 @@ type ContainerIntegratedProps = IntegratedNodeMetricsTableProps & {
 
 type HookedContainerMetricsTableProps = Pick<
   ContainerIntegratedProps,
-  'timerange' | 'filterClauseDsl' | 'isOtel' | 'isK8sContainer' | 'metricsClient'
+  'timerange' | 'kuery' | 'isOtel' | 'isK8sContainer' | 'metricsClient'
 >;
 
 function HookedContainerMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   isOtel,
   isK8sContainer,
   metricsClient,
 }: HookedContainerMetricsTableProps) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
-    filterClauseDsl,
+    kuery,
     isOtel,
     isK8sContainer,
     metricsClient,
@@ -45,7 +45,7 @@ function HookedContainerMetricsTable({
 
 function ContainerMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   isOtel,
   isK8sContainer,
@@ -56,7 +56,7 @@ function ContainerMetricsTableWithProviders({
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
         timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
+        kuery={kuery}
         isOtel={isOtel}
         metricsClient={metricsClient}
         isK8sContainer={isK8sContainer}

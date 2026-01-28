@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { MetricsQueryOptions } from '../shared';
 import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from '../shared';
 import {
@@ -23,11 +22,7 @@ type ContainerMetricsFieldEcs =
   | typeof ECS_CONTAINER_MEMORY_USAGE_BYTES;
 
 const containerMetricsQueryConfigEcs: MetricsQueryOptions<ContainerMetricsFieldEcs> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'kubernetes.container',
-    },
-  },
+  sourceFilter: `event.dataset: "kubernetes.container"`,
   groupByField: 'container.id',
   metricsMap: {
     [ECS_CONTAINER_CPU_USAGE_LIMIT_PCT]: {
@@ -48,11 +43,7 @@ type ContainerMetricsFieldSemconvDocker =
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
-    sourceFilter: {
-      term: {
-        'event.dataset': 'dockerstatsreceiver.otel',
-      },
-    },
+    sourceFilter: `event.dataset: "dockerstatsreceiver.otel"`,
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION]: {
@@ -73,11 +64,7 @@ type ContainerMetricsFieldSemconvK8s =
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
-    sourceFilter: {
-      term: {
-        'event.dataset': 'kubeletstatsreceiver.otel',
-      },
-    },
+    sourceFilter: `event.dataset: "kubeletstatsreceiver.otel"`,
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION]: {
@@ -112,12 +99,12 @@ export const metricByField = metricByFieldEcs;
 export function getOptionsForSchema(
   isOtel: boolean,
   isK8sContainer?: boolean,
-  filterClauseDsl?: QueryDslQueryContainer
+  kuery?: string
 ) {
   if (isOtel) {
     return isK8sContainer
-      ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, filterClauseDsl)
-      : metricsToApiOptions(containerMetricsQueryConfigSemconvDocker, filterClauseDsl);
+      ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, kuery)
+      : metricsToApiOptions(containerMetricsQueryConfigSemconvDocker, kuery);
   }
-  return metricsToApiOptions(containerMetricsQueryConfigEcs, filterClauseDsl);
+  return metricsToApiOptions(containerMetricsQueryConfigEcs, kuery);
 }
