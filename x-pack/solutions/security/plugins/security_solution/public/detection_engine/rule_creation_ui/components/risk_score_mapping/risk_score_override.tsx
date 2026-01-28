@@ -75,6 +75,7 @@ export function RiskScoreOverride({
               id="risk_score-mapping-override"
               checked={isMappingChecked}
               onChange={onToggleMappingChecked}
+              disabled={isDisabled}
             />
           </EuiFlexItem>
           <EuiFlexItem>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>

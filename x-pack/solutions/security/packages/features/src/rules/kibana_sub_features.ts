@@ -56,26 +56,11 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
-const TRANSLATIONS = Object.freeze({
-  all: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName',
-    {
-      defaultMessage: 'All',
-    }
-  ),
-  read: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.readPrivilegeName',
-    {
-      defaultMessage: 'Read',
-    }
-  ),
-});
-
 export const getExceptionsSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.exceptionsSubFeatureName',
     {
-      defaultMessage: 'Manage Exceptions',
+      defaultMessage: 'Exceptions',
     }
   ),
   privilegeGroups: [
@@ -85,7 +70,12 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
         {
           id: EXCEPTIONS_SUBFEATURE_ALL_ID,
           includeIn: 'all',
-          name: TRANSLATIONS.all,
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.manageExceptionPrivilegeName',
+            {
+              defaultMessage: 'Manage Exceptions',
+            }
+          ),
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE],
             read: [EXCEPTION_LIST_NAMESPACE],
@@ -102,7 +92,7 @@ export const getInvestigationGuideSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.investigationGuideSubFeatureName',
     {
-      defaultMessage: 'Edit investigation guides',
+      defaultMessage: 'Investigation guides',
     }
   ),
   privilegeGroups: [
@@ -112,7 +102,12 @@ export const getInvestigationGuideSubFeature = (): SubFeatureConfig => ({
         {
           id: INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
           includeIn: 'all',
-          name: TRANSLATIONS.all,
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.investigationGuidePrivilegeName',
+            {
+              defaultMessage: 'Edit investigation guides',
+            }
+          ),
           savedObject: {
             all: [], // TODO: this might need to be filled
             read: [],
@@ -129,7 +124,7 @@ export const getCustomHighlightedFieldsSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.customHighlightedFieldsSubFeatureName',
     {
-      defaultMessage: 'Edit custom highlighted fields',
+      defaultMessage: 'Custom highlighted fields',
     }
   ),
   privilegeGroups: [
@@ -139,7 +134,12 @@ export const getCustomHighlightedFieldsSubFeature = (): SubFeatureConfig => ({
         {
           id: CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
           includeIn: 'all',
-          name: TRANSLATIONS.all,
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.customHighlightedFieldsPrivilegeName',
+            {
+              defaultMessage: 'Edit custom highlighted fields',
+            }
+          ),
           savedObject: {
             all: [], // TODO: this might need to be filled
             read: [],
@@ -154,9 +154,9 @@ export const getCustomHighlightedFieldsSubFeature = (): SubFeatureConfig => ({
 
 export const getEnableDisableRulesSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.enableDisableRulesSubFeatureName',
+    'securitySolutionPackages.features.featureRegistry.enableDisableSubFeatureName',
     {
-      defaultMessage: 'Enable/Disable rules',
+      defaultMessage: 'Enable/Disable',
     }
   ),
   privilegeGroups: [
@@ -166,7 +166,12 @@ export const getEnableDisableRulesSubFeature = (): SubFeatureConfig => ({
         {
           id: ENABLE_DISABLE_RULES_SUBFEATURE_ID,
           includeIn: 'all',
-          name: TRANSLATIONS.all,
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.enableDisableRulesPrivilegeName',
+            {
+              defaultMessage: 'Enable/Disable rules',
+            }
+          ),
           savedObject: {
             all: [], // TODO: this might need to be filled
             read: [],

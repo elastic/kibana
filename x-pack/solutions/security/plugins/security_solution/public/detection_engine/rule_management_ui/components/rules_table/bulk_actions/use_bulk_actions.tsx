@@ -99,6 +99,12 @@ export const useBulkActions = ({
   const downloadExportedRules = useDownloadExportedRules();
   const {
     timelinePrivileges: { crud: canCreateTimelines },
+    rulesPrivileges: {
+      rules: { edit: canEditRules, read: canReadRules },
+      enableDisable: { edit: canEnableDisableRules },
+      investigationGuide: { edit: canEditInvestigationGuides },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
+    },
   } = useUserPrivileges();
 
   const {
@@ -492,7 +498,7 @@ export const useBulkActions = ({
         isBulkEditFinished = true;
       };
 
-      const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
+      const isDeleteDisabled = !canEditRules || containsLoading || selectedRuleIds.length === 0;
       const isEditDisabled =
         missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
       const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
@@ -507,7 +513,10 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_ENABLE,
               'data-test-subj': 'enableRuleBulk',
               disabled:
-                missingActionPrivileges || containsLoading || (!containsDisabled && !isAllSelected),
+                missingActionPrivileges ||
+                containsLoading ||
+                (!containsDisabled && !isAllSelected) ||
+                !canEnableDisableRules,
               onClick: handleEnableAction,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -519,7 +528,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_DUPLICATE,
               name: i18n.BULK_ACTION_DUPLICATE,
               'data-test-subj': 'duplicateRuleBulk',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               onClick: handleDuplicateAction,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -531,21 +540,21 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_INDEX_PATTERNS,
               name: i18n.BULK_ACTION_INDEX_PATTERNS,
               'data-test-subj': 'indexPatternsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               panel: 2,
             },
             {
               key: i18n.BULK_ACTION_TAGS,
               name: i18n.BULK_ACTION_TAGS,
               'data-test-subj': 'tagsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               panel: 1,
             },
             {
               key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               'data-test-subj': 'investigationFieldsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditInvestigationGuides || isEditDisabled,
               panel: 3,
             },
             ...(isBulkEditAlertSuppressionFeatureEnabled
@@ -554,7 +563,7 @@ export const useBulkActions = ({
                     key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isAlertSuppressionDisabled,
+                    disabled: !canEditRules || isAlertSuppressionDisabled,
                     toolTipContent: isAlertSuppressionLicenseValid
                       ? undefined
                       : alertSuppressionUpsellingMessage,
@@ -566,7 +575,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               'data-test-subj': 'addRuleActionsBulk',
-              disabled: !hasActionsPrivileges || isEditDisabled,
+              disabled: !canEditRules || !hasActionsPrivileges || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.add_rule_actions),
               toolTipContent: !hasActionsPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -578,7 +587,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_SET_SCHEDULE,
               name: i18n.BULK_ACTION_SET_SCHEDULE,
               'data-test-subj': 'setScheduleBulk',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_schedule),
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -631,7 +640,10 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_DISABLE,
               'data-test-subj': 'disableRuleBulk',
               disabled:
-                missingActionPrivileges || containsLoading || (!containsEnabled && !isAllSelected),
+                missingActionPrivileges ||
+                containsLoading ||
+                (!containsEnabled && !isAllSelected) ||
+                !canEnableDisableRules,
               onClick: handleDisableActions,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -774,16 +786,22 @@ export const useBulkActions = ({
       rules,
       selectedRuleIds,
       hasActionsPrivileges,
+      canEditRules,
+      isAlertSuppressionLicenseValid,
       isAllSelected,
+      canEnableDisableRules,
+      canEditInvestigationGuides,
+      isBulkEditAlertSuppressionFeatureEnabled,
+      alertSuppressionUpsellingMessage,
+      canCreateTimelines,
+      isBulkFillRuleGapsEnabled,
       loadingRuleIds,
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
+      globalQuery,
       toasts,
       showBulkDuplicateConfirmation,
-      showManualRuleRunConfirmation,
-      showManualRuleRunLimitError,
-      showBulkFillRuleGapsRuleLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
@@ -791,16 +809,13 @@ export const useBulkActions = ({
       downloadExportedRules,
       setIsPreflightInProgress,
       executeBulkActionsDryRun,
-      filterOptions,
-      completeBulkEditForm,
-      isBulkEditAlertSuppressionFeatureEnabled,
+      showManualRuleRunConfirmation,
       startServices,
-      canCreateTimelines,
-      isAlertSuppressionLicenseValid,
-      alertSuppressionUpsellingMessage,
-      globalQuery,
+      showManualRuleRunLimitError,
       showBulkFillRuleGapsConfirmation,
-      isBulkFillRuleGapsEnabled,
+      showBulkFillRuleGapsRuleLimitError,
+      completeBulkEditForm,
+      filterOptions,
     ]
   );
 

@@ -264,7 +264,12 @@ export const RuleDetailsPage = connector(
         hasIndexMaintenance,
       },
     ] = useUserData();
-    const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const {
+      rules: { edit: canEditRules },
+      enableDisable: { edit: canEnableDisableRules },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
+      investigationGuide: { edit: canEditInvestigationGuides },
+    } = useUserPrivileges().rulesPrivileges;
     const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
@@ -611,6 +616,9 @@ export const RuleDetailsPage = connector(
 
     const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
+    const isRuleEditButtonEnabled =
+      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
+
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
@@ -680,7 +688,7 @@ export const RuleDetailsPage = connector(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
-                            canEditRules
+                            canEnableDisableRules
                           )}
                         >
                           <EuiFlexGroup>
@@ -690,7 +698,7 @@ export const RuleDetailsPage = connector(
                                 !rule ||
                                 !isExistingRule ||
                                 !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                                !canEditRules ||
+                                !canEnableDisableRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               enabled={isRuleEnabled}
@@ -710,14 +718,14 @@ export const RuleDetailsPage = connector(
                               ruleId={ruleId}
                               disabled={
                                 !isExistingRule ||
-                                !canEditRules ||
+                                !isRuleEditButtonEnabled ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               disabledReason={explainLackOfPermission(
                                 rule,
                                 hasMlPermissions,
                                 hasActionsPrivileges,
-                                canEditRules
+                                isRuleEditButtonEnabled
                               )}
                             />
                           </EuiFlexItem>
