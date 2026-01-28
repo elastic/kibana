@@ -11,10 +11,9 @@ import {
   type DatasetScoreWithStats,
   type ReportDisplayOptions,
   calculateOverallStats,
-  formatReportData,
-  type EvaluationReport,
   type EvaluationReporter,
   createTable,
+  convertAggregationToDatasetScores,
 } from '@kbn/evals';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
@@ -57,18 +56,9 @@ function aggregateDatasetsByScenario(
       // Collect unique evaluator names from all datasets in this scenario
       const evaluatorNamesSet = new Set<string>();
       scenarioDatasets.forEach((d) => {
-        d.evaluatorScores.forEach((_, evaluatorName) => {
+        d.evaluatorStats.forEach((_, evaluatorName) => {
           evaluatorNamesSet.add(evaluatorName);
         });
-      });
-
-      // Aggregate raw scores from all datasets in this scenario (not used directly in the reports now, but will be when statistcal tests are added)
-      const aggregatedScores = new Map<string, number[]>();
-      evaluatorNamesSet.forEach((evaluatorName) => {
-        const allScores = scenarioDatasets.flatMap(
-          (d) => d.evaluatorScores.get(evaluatorName) || []
-        );
-        aggregatedScores.set(evaluatorName, allScores);
       });
 
       return {
@@ -77,7 +67,7 @@ function aggregateDatasetsByScenario(
         numExamples: sumBy(scenarioDatasets, (d) => d.numExamples),
         // experimentId is not meaningful for aggregated scenarios (multiple experiments/datasets combined)
         experimentId: '_',
-        evaluatorScores: aggregatedScores,
+        evaluatorScores: new Map(),
         evaluatorStats: calculateOverallStats(scenarioDatasets),
       };
     })
@@ -92,22 +82,28 @@ async function buildScenarioReport(
   scoreRepository: EvaluationScoreRepository,
   runId: string,
   log: SomeDevLog
-): Promise<EvaluationReport> {
+): Promise<{
+  datasetScoresWithStats: DatasetScoreWithStats[];
+  totalRepetitions: number;
+  taskModel: { id: string; family: string; provider: string };
+  evaluatorModel: { id: string; family: string; provider: string } | null;
+}> {
   log.info(`Building scenario report for run ID: ${runId}`);
 
-  const docs = await scoreRepository.getScoresByRunId(runId);
+  const runStats = await scoreRepository.getStatsByRunId(runId);
 
-  if (!docs || docs.length === 0) {
+  if (!runStats || runStats.stats.length === 0) {
     throw new Error(`No scores found for run ID: ${runId}`);
   }
 
-  const baseReport = formatReportData(docs);
-
-  const scenarioDatasets = aggregateDatasetsByScenario(baseReport.datasetScoresWithStats, log);
+  const baseScores = convertAggregationToDatasetScores(runStats.stats);
+  const scenarioDatasets = aggregateDatasetsByScenario(baseScores, log);
 
   return {
-    ...baseReport,
     datasetScoresWithStats: scenarioDatasets,
+    totalRepetitions: runStats.totalRepetitions,
+    taskModel: runStats.taskModel,
+    evaluatorModel: runStats.evaluatorModel,
   };
 }
 
@@ -136,12 +132,12 @@ export function createScenarioSummaryReporter(
 
       log.info(`\n${chalk.bold.blue('📋 Run Metadata:')}`);
       log.info(
-        `Run: ${chalk.cyan(report.runId)} - Model: ${chalk.yellow(
-          report.model.id || 'Unknown'
-        )} - Evaluator: ${chalk.yellow(report.evaluatorModel.id || 'Unknown')}`
+        `Run: ${chalk.cyan(runId)} - Model: ${chalk.yellow(
+          report.taskModel.id || 'Unknown'
+        )} - Evaluator: ${chalk.yellow(report.evaluatorModel?.id || 'Unknown')}`
       );
-      if (report.repetitions > 1) {
-        log.info(`Repetitions: ${chalk.cyan(report.repetitions.toString())}`);
+      if (report.totalRepetitions > 1) {
+        log.info(`Repetitions: ${chalk.cyan(report.totalRepetitions.toString())}`);
       }
 
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
@@ -152,7 +148,7 @@ export function createScenarioSummaryReporter(
         decimalPlaces: 1,
         statsToInclude: ['mean', 'percentage', 'stdDev'],
       });
-      const scenarioTable = createTable(report.datasetScoresWithStats, report.repetitions, {
+      const scenarioTable = createTable(report.datasetScoresWithStats, report.totalRepetitions, {
         firstColumnHeader: 'Scenario',
         styleRowName: (name) => chalk.bold.white(name),
         evaluatorDisplayOptions,

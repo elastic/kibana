@@ -12,7 +12,7 @@ import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/type
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
-import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
+import type { Evaluator, EvaluationDataset, ExperimentTask, ExampleWithId } from '../types';
 import { upsertDataset } from './upsert_dataset';
 import type { PhoenixConfig } from '../utils/get_phoenix_config';
 
@@ -220,5 +220,17 @@ export class KibanaPhoenixClient {
     );
 
     return datasets;
+  }
+
+  async getDatasetExamples(datasetId: string): Promise<ExampleWithId[]> {
+    const response = await this.phoenixClient.GET('/v1/datasets/{id}/examples', {
+      params: {
+        path: {
+          id: datasetId,
+        },
+      },
+    });
+
+    return (response.data?.data.examples ?? []) as ExampleWithId[];
   }
 }

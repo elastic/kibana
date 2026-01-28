@@ -89,6 +89,16 @@ var IGNORE_WARNINGS = [
     code: 'DEP0060',
     message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
   },
+  // from kbn-es docker_uiam.ts using URL.parse() - no immediate fix available
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0169',
+  },
+  // FORCE_COLOR and NO_COLOR env conflict - harmless warning from Node.js internal/tty
+  {
+    name: 'Warning',
+    messageContains: "The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set",
+  },
   // EBT is currently referencing a non-existing entry file https://github.com/elastic/ebt/blob/main/package.json#L7
   {
     name: 'DeprecationWarning',

@@ -198,12 +198,29 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         );
       }
 
-      const documents = buildFlattenedScoreDocuments({
+      const documents = await buildFlattenedScoreDocuments({
         experiments,
         taskModel: model,
         evaluatorModel,
         runId: currentRunId,
         totalRepetitions: repetitions,
+        phoenixClient,
+        datasetInfoById: await (async () => {
+          const datasetIds = Array.from(
+            new Set(experiments.map((experiment) => experiment.datasetId).filter(Boolean))
+          );
+          if (datasetIds.length === 0) {
+            return new Map();
+          }
+          try {
+            const datasetInfos = await phoenixClient.getDatasets(datasetIds);
+            return new Map(datasetInfos.map((dataset) => [dataset.id, dataset]));
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            log.warning(`Failed to fetch dataset metadata for run ID: ${currentRunId}. ${message}`);
+            return new Map();
+          }
+        })(),
       });
 
       try {

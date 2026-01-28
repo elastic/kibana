@@ -11,6 +11,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import { hostname } from 'os';
+import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
@@ -28,27 +29,48 @@ function computeInputHash(input: unknown): string {
   }
 }
 
-export function buildFlattenedScoreDocuments({
+export async function buildFlattenedScoreDocuments({
   experiments,
   taskModel,
   evaluatorModel,
   runId,
   totalRepetitions,
+  phoenixClient,
+  datasetInfoById = new Map(),
 }: {
   experiments: RanExperiment[];
   taskModel: ModelInfo;
   evaluatorModel: ModelInfo | null;
   runId: string;
   totalRepetitions: number;
-}): EvaluationScoreDocument[] {
+  phoenixClient?: KibanaPhoenixClient;
+  datasetInfoById?: Map<string, { id: string; name: string }>;
+}): Promise<EvaluationScoreDocument[]> {
   const documents: EvaluationScoreDocument[] = [];
   const timestamp = new Date().toISOString();
   const gitMetadata = getGitMetadata();
   const hostName = hostname();
+  const datasetExamplesById = new Map<string, Array<{ id: string; input?: unknown }>>();
+
+  if (phoenixClient) {
+    const datasetIds = Array.from(new Set(experiments.map((experiment) => experiment.datasetId)));
+    await Promise.all(
+      datasetIds.map(async (datasetId) => {
+        try {
+          const examples = await phoenixClient.getDatasetExamples(datasetId);
+          datasetExamplesById.set(datasetId, examples);
+        } catch {
+          datasetExamplesById.set(datasetId, []);
+        }
+      })
+    );
+  }
 
   for (const experiment of experiments) {
     const { datasetId, evaluationRuns, runs } = experiment;
-    const datasetName = datasetId;
+    const datasetName = datasetInfoById.get(datasetId)?.name ?? datasetId;
+    const datasetExamples = datasetExamplesById.get(datasetId) ?? [];
+    const datasetExampleIndexMap = new Map<string, number>();
 
     const exampleIndexMap = new Map<string, number>();
     if (runs) {
@@ -58,6 +80,10 @@ export function buildFlattenedScoreDocuments({
       }
     }
 
+    datasetExamples.forEach((example, index) => {
+      datasetExampleIndexMap.set(example.id, index);
+    });
+
     if (!evaluationRuns) {
       continue;
     }
@@ -65,6 +91,7 @@ export function buildFlattenedScoreDocuments({
     for (const evalRun of evaluationRuns) {
       const evalRunInfo = evalRun as {
         exampleId?: string;
+        exampleIndex?: number;
         repetitionIndex?: number;
         traceId?: string;
         name: string;
@@ -75,11 +102,20 @@ export function buildFlattenedScoreDocuments({
           metadata?: Record<string, unknown> | null;
         };
       };
-      const exampleId = evalRunInfo.exampleId ?? '';
+      let exampleId = evalRunInfo.exampleId ?? '';
       const repetitionIndex = evalRunInfo.repetitionIndex ?? 0;
-      const exampleIndex = exampleIndexMap.get(exampleId) ?? 0;
+      const exampleIndex =
+        exampleIndexMap.get(exampleId) ??
+        datasetExampleIndexMap.get(exampleId) ??
+        evalRunInfo.exampleIndex ??
+        0;
       const runData = runs?.[exampleId] as { input?: unknown; traceId?: string } | undefined;
-      const inputHash = runData?.input ? computeInputHash(runData.input) : '';
+      const exampleFromIndex = datasetExamples[exampleIndex];
+      if (!exampleId && exampleFromIndex?.id) {
+        exampleId = exampleFromIndex.id;
+      }
+      const exampleInput = runData?.input ?? exampleFromIndex?.input;
+      const inputHash = exampleInput ? computeInputHash(exampleInput) : '';
 
       documents.push({
         '@timestamp': timestamp,

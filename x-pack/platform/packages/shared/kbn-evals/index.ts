@@ -41,7 +41,11 @@ export {
   type RunStats,
 } from './src/utils/score_repository';
 
-export { getUniqueEvaluatorNames, calculateOverallStats } from './src/utils/evaluation_stats';
+export {
+  getUniqueEvaluatorNames,
+  calculateOverallStats,
+  convertAggregationToDatasetScores,
+} from './src/utils/evaluation_stats';
 export type {
   DatasetScore,
   DatasetScoreWithStats,

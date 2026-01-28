@@ -64,9 +64,15 @@ export function calculateEvaluatorStats(scores: number[], totalExamples: number)
 export function getUniqueEvaluatorNames(datasetScores: DatasetScore[]): string[] {
   const allEvaluatorNames = new Set<string>();
   datasetScores.forEach((dataset) => {
-    dataset.evaluatorScores.forEach((_, evaluatorName) => {
-      allEvaluatorNames.add(evaluatorName);
-    });
+    if (dataset.evaluatorScores.size > 0) {
+      dataset.evaluatorScores.forEach((_, evaluatorName) => {
+        allEvaluatorNames.add(evaluatorName);
+      });
+    } else if ('evaluatorStats' in dataset) {
+      dataset.evaluatorStats.forEach((_, evaluatorName) => {
+        allEvaluatorNames.add(evaluatorName);
+      });
+    }
   });
   return Array.from(allEvaluatorNames).sort();
 }
@@ -81,10 +87,30 @@ export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string
   const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
 
   evaluatorNames.forEach((evaluatorName) => {
-    // Get all scores across all datasets for this evaluator
     const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
+    if (allScores.length > 0) {
+      const totalScore = datasetScores.reduce((sum, d) => {
+        const scores = d.evaluatorScores.get(evaluatorName) || [];
+        return sum + scores.reduce((scoreSum, score) => scoreSum + score, 0);
+      }, 0);
 
-    if (allScores.length === 0) {
+      overallStats.set(evaluatorName, {
+        mean: mean(allScores) ?? 0,
+        median: median(allScores) ?? 0,
+        stdDev: deviation(allScores) ?? 0,
+        min: min(allScores) ?? 0,
+        max: max(allScores) ?? 0,
+        count: allScores.length,
+        percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
+      });
+      return;
+    }
+
+    const statsByDataset = datasetScores
+      .map((d) => ('evaluatorStats' in d ? d.evaluatorStats.get(evaluatorName) : undefined))
+      .filter((stats): stats is EvaluatorStats => Boolean(stats && stats.count > 0));
+
+    if (statsByDataset.length === 0) {
       overallStats.set(evaluatorName, {
         mean: 0,
         median: 0,
@@ -97,20 +123,31 @@ export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string
       return;
     }
 
-    // Calculate weighted percentage (total score across all datasets / total examples)
-    const totalScore = datasetScores.reduce((sum, d) => {
-      const scores = d.evaluatorScores.get(evaluatorName) || [];
-      return sum + scores.reduce((scoreSum, score) => scoreSum + score, 0);
-    }, 0);
+    const totalCount = statsByDataset.reduce((sum, stats) => sum + stats.count, 0);
+    const weightedMean =
+      totalCount > 0
+        ? statsByDataset.reduce((sum, stats) => sum + stats.mean * stats.count, 0) / totalCount
+        : 0;
+    const pooledVariance =
+      totalCount > 1
+        ? statsByDataset.reduce((sum, stats) => {
+            return (
+              sum +
+              (stats.count - 1) * stats.stdDev ** 2 +
+              stats.count * (stats.mean - weightedMean) ** 2
+            );
+          }, 0) /
+          (totalCount - 1)
+        : 0;
 
     overallStats.set(evaluatorName, {
-      mean: mean(allScores) ?? 0,
-      median: median(allScores) ?? 0,
-      stdDev: deviation(allScores) ?? 0,
-      min: min(allScores) ?? 0,
-      max: max(allScores) ?? 0,
-      count: allScores.length,
-      percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
+      mean: weightedMean,
+      median: weightedMean,
+      stdDev: Math.sqrt(pooledVariance),
+      min: Math.min(...statsByDataset.map((stats) => stats.min)),
+      max: Math.max(...statsByDataset.map((stats) => stats.max)),
+      count: totalCount,
+      percentage: totalExamples > 0 ? (weightedMean * totalCount) / totalExamples : 0,
     });
   });
 
