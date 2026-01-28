@@ -41,6 +41,19 @@ describe('CspDirectives', () => {
       expect(directives.getCspHeader()).toMatchInlineSnapshot(`"style-src foo bar"`);
     });
 
+    it('augments report-only directives when testing default-src none', () => {
+      const config = cspConfig.schema.validate({
+        img_src: ['img-src-value'],
+      });
+      const directives = CspDirectives.fromConfig(config);
+      expect(directives.getCspHeadersByDisposition()).toMatchInlineSnapshot(`
+        Object {
+          "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; img-src 'self' img-src-value",
+          "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co",
+        }
+      `);
+    });
+
     it('automatically adds single quotes for keywords', () => {
       const directives = new CspDirectives();
       directives.addDirectiveValue('style-src', 'none');
