@@ -20,7 +20,6 @@ export interface GetLogAiInsightsParams {
   core: ObservabilityAgentBuilderCoreSetup;
   index: string;
   id: string;
-  spaceId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
@@ -32,7 +31,6 @@ export async function getLogAiInsights({
   core,
   index,
   id,
-  spaceId,
   request,
   esClient,
   dataRegistry,

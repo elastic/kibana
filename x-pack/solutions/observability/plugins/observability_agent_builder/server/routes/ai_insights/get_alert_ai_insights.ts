@@ -46,7 +46,6 @@ interface GetAlertAiInsightParams {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   alertDoc: AlertDocForInsight;
-  spaceId: string;
   inferenceClient: InferenceClient;
   connectorId: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -58,7 +57,6 @@ export async function getAlertAiInsight({
   core,
   plugins,
   alertDoc,
-  spaceId,
   inferenceClient,
   connectorId,
   dataRegistry,

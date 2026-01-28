@@ -67,7 +67,6 @@ const buildUserPrompt = (errorContext: string) => {
 export interface GenerateErrorAiInsightParams {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  spaceId: string;
   errorId: string;
   serviceName: string;
   environment?: string;
@@ -83,7 +82,6 @@ export interface GenerateErrorAiInsightParams {
 export async function generateErrorAiInsight({
   core,
   plugins,
-  spaceId,
   errorId,
   serviceName,
   environment,
