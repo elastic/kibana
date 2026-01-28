@@ -266,6 +266,41 @@ describe('UserActivityService', () => {
         session: { id: 'session-a' },
       });
     });
+
+    it('inherits context from parent async execution', async () => {
+      await Promise.resolve().then(async () => {
+        // Parent sets initial context
+        service.setInjectedContext({
+          user: { username: 'parent-user' },
+          session: { id: 'parent-session' },
+          kibana: { space: { id: 'parent-space' } },
+        });
+
+        // Child async operation should inherit parent's context
+        await Promise.resolve().then(async () => {
+          // Child adds more context (should merge with parent's)
+          service.setInjectedContext({
+            kibana: { space: { id: 'child-space' } },
+          });
+
+          await timer(10);
+
+          service.trackUserAction({
+            message: 'Child action',
+            event: { action: 'child-action', type: 'change' },
+            object: { id: 'child', name: 'Child', type: 'test', tags: [] },
+          });
+        });
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      // Should have both parent's context and child's additions
+      expect(logCalls[0][1]).toMatchObject({
+        user: { username: 'parent-user' },
+        session: { id: 'parent-session' },
+        kibana: { space: { id: 'child-space' } },
+      });
+    });
   });
 
   describe('stop', () => {
