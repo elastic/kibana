@@ -247,6 +247,9 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
+  const isLoadingExistingSuggestion = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'loadingExistingSuggestion' })
+  );
   const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
   );
@@ -284,12 +287,17 @@ export const StepsEditor = React.memo(() => {
   const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
 
   if (aiFeatures && aiFeatures.enabled) {
-    if (isLoadingSuggestion) {
+    // Show loading prompt while loading existing suggestion or generating new one
+    if (isLoadingExistingSuggestion || isLoadingSuggestion) {
       return (
         <SuggestionLoadingPrompt
-          onCancel={() => {
-            cancelSuggestion();
-          }}
+          onCancel={
+            isLoadingSuggestion
+              ? () => {
+                  cancelSuggestion();
+                }
+              : undefined
+          }
         />
       );
     }

@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 export interface SuggestionLoadingPromptProps {
-  onCancel(): void;
+  onCancel?(): void;
 }
 
 export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptProps) {
@@ -44,12 +44,16 @@ export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptPro
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiProgress size="s" color="accent" />
-      <EuiSpacer size="s" />
-      <EuiLink onClick={onCancel} data-test-subj="streamsAppPipelineSuggestionCancelButton">
-        {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
-          defaultMessage: 'Cancel',
-        })}
-      </EuiLink>
+      {onCancel && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiLink onClick={onCancel} data-test-subj="streamsAppPipelineSuggestionCancelButton">
+            {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiLink>
+        </>
+      )}
     </EuiCallOut>
   );
 }

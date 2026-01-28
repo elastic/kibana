@@ -41,6 +41,7 @@ import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import {
   createNotifySuggestionFailureNotifier,
   createSuggestPipelineActor,
+  createLoadExistingSuggestionActor,
 } from './suggest_pipeline_actor';
 import type {
   InteractiveModeContext,
@@ -70,9 +71,11 @@ export const interactiveModeMachine = setup({
   actors: {
     stepMachine,
     suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
+    loadExistingSuggestion: getPlaceholderFor(createLoadExistingSuggestionActor),
   },
   actions: {
     notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
+    cancelSuggestionTask: (_, __: { streamName: string }) => {},
     addProcessor: assign(
       (
         assignArgs,
@@ -390,8 +393,46 @@ export const interactiveModeMachine = setup({
   },
   states: {
     pipelineSuggestion: {
-      initial: 'idle',
+      initial: 'loadingExistingSuggestion',
       states: {
+        loadingExistingSuggestion: {
+          invoke: {
+            id: 'loadExistingSuggestionActor',
+            src: 'loadExistingSuggestion',
+            input: ({ context }) => ({
+              streamName: context.streamName,
+            }),
+            onDone: [
+              {
+                guard: ({ event }) => event.output.type === 'completed',
+                target: 'viewingSuggestion',
+                actions: enqueueActions(({ event, enqueue }) => {
+                  // Type guard is satisfied by the guard above, but TypeScript needs help
+                  const output = event.output as { type: 'completed'; pipeline: StreamlangDSL };
+                  enqueue({
+                    type: 'storeSuggestedPipeline',
+                    params: { pipeline: output.pipeline },
+                  });
+                  enqueue({
+                    type: 'overwriteSteps',
+                    params: { steps: output.pipeline.steps },
+                  });
+                }),
+              },
+              {
+                guard: ({ event }) => event.output.type === 'in_progress',
+                target: 'generatingSuggestion',
+              },
+              {
+                // For 'none' or 'failed' - go to idle
+                target: 'idle',
+              },
+            ],
+            onError: {
+              target: 'idle',
+            },
+          },
+        },
         idle: {
           on: {
             'suggestion.generate': {
@@ -448,6 +489,10 @@ export const interactiveModeMachine = setup({
             'suggestion.cancel': {
               target: 'idle',
               actions: [
+                {
+                  type: 'cancelSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
                 { type: 'clearSuggestion' },
                 {
                   type: 'overwriteSteps',
@@ -652,8 +697,26 @@ export const createInteractiveModeMachineImplementations = ({
       telemetryClient,
       notifications,
     }),
+    loadExistingSuggestion: createLoadExistingSuggestionActor({
+      streamsRepositoryClient,
+    }),
   },
   actions: {
     notifySuggestionFailure: createNotifySuggestionFailureNotifier({ toasts }),
+    cancelSuggestionTask: (_, params: { streamName: string }) => {
+      // Fire-and-forget cancel request - we don't need to wait for it
+      // TypeScript has trouble with discriminated unions in route types,
+      // so we use a type assertion here
+      streamsRepositoryClient
+        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
+          params: {
+            path: { name: params.streamName },
+            body: { action: 'cancel' },
+          },
+        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
+        .catch(() => {
+          // Ignore errors - task may not exist or may have already completed
+        });
+    },
   },
 });

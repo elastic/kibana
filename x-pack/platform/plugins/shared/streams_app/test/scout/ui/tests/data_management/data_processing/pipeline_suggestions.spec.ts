@@ -17,30 +17,61 @@ import {
 } from '../../../fixtures/ai_suggestions_helpers';
 import { MOCK_GROK_PIPELINE } from '../../../fixtures/pipeline_suggestions_helpers';
 
-/**
- * Helper to set up a mock pipeline suggestion response
- */
-async function setupMockPipelineResponse(page: ScoutPage) {
-  await page.route(
-    '**/internal/streams/logs-generic-default/_suggest_processing_pipeline',
-    async (route) => {
-      // SSE format: each event is "data: <json>\n\n"
-      const sseData = `data: ${JSON.stringify({
-        type: 'suggested_processing_pipeline',
-        pipeline: MOCK_GROK_PIPELINE,
-      })}\n\n`;
+const STATUS_ENDPOINT_PATTERN = '**/internal/streams/logs-generic-default/_pipeline_suggestion/_status';
 
-      await route.fulfill({
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-        },
-        body: sseData,
-      });
+/**
+ * Helper to set up mock pipeline suggestion task endpoints
+ */
+async function setupMockPipelineTaskEndpoints(page: ScoutPage) {
+  // Mock the task schedule endpoint - returns task ID
+  await page.route(
+    '**/internal/streams/logs-generic-default/_pipeline_suggestion/_task',
+    async (route) => {
+      const request = route.request();
+      const body = request.postDataJSON();
+
+      if (body?.action === 'schedule') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            status: 'completed',
+            pipeline: MOCK_GROK_PIPELINE,
+          }),
+        });
+      } else if (body?.action === 'cancel') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'canceled' }),
+        });
+      } else if (body?.action === 'acknowledge') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'acknowledged', pipeline: MOCK_GROK_PIPELINE }),
+        });
+      } else {
+        await route.continue();
+      }
     }
   );
+
+  // Unroute any existing status endpoint mock, then add new one
+  await page.unroute(STATUS_ENDPOINT_PATTERN);
+
+  // Mock the task status endpoint - returns completed status with pipeline
+  // Note: TaskResult spreads the payload directly, so pipeline is at root level
+  await page.route(STATUS_ENDPOINT_PATTERN, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'completed',
+        pipeline: MOCK_GROK_PIPELINE,
+      }),
+    });
+  });
 }
 
 test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }, () => {
@@ -54,6 +85,28 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
   test.beforeEach(async ({ browserAuth, pageObjects, page, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
+
+    // Set up default mocks BEFORE navigating to the page
+    // Mock the bulk status endpoint to return no suggestions initially
+    await page.route('**/internal/streams/_pipeline_suggestion/_bulk_status', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      });
+    });
+
+    // Mock the initial status endpoint to return not_started (no existing suggestion)
+    await page.route(STATUS_ENDPOINT_PATTERN, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'not_started',
+        }),
+      });
+    });
+
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
   });
@@ -89,7 +142,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
   test('should generate suggestion and allow accept/reject', async ({ page, pageObjects }) => {
     // Wait for page to load
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await setupMockPipelineResponse(page);
+    await setupMockPipelineTaskEndpoints(page);
 
     // Generate suggestion
     await pageObjects.streams.clickSuggestPipelineButton();
@@ -116,7 +169,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
   test('should regenerate suggestions', async ({ page, pageObjects }) => {
     // Wait for page to load
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await setupMockPipelineResponse(page);
+    await setupMockPipelineTaskEndpoints(page);
 
     // Generate first suggestion
     await pageObjects.streams.clickSuggestPipelineButton();
@@ -126,5 +179,30 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     await pageObjects.streams.regeneratePipelineSuggestion();
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
     await expect(page.getByTestId('streamsAppProcessorBlock')).toBeVisible();
+  });
+
+  test('should restore existing suggestion on page load', async ({ page, pageObjects }) => {
+    // Unroute any existing status endpoint mock
+    await page.unroute(STATUS_ENDPOINT_PATTERN);
+
+    // Set up the status endpoint to return a completed suggestion BEFORE page reload
+    // Note: TaskResult spreads the payload directly, so pipeline is at root level
+    await page.route(STATUS_ENDPOINT_PATTERN, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'completed',
+          pipeline: MOCK_GROK_PIPELINE,
+        }),
+      });
+    });
+
+    // Reload the page to trigger the initial load
+    await page.reload();
+
+    // Wait for page to load and check that suggestion is shown immediately
+    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+    await expect(page.getByText('Review processing suggestions')).toBeVisible();
   });
 });

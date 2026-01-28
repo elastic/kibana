@@ -21,6 +21,7 @@ export {
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
+export type { PipelineSuggestionBulkStatusItem } from './pipeline_suggestion';
 export {
   excludeFrozenQuery,
   kqlQuery,
