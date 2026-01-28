@@ -117,6 +117,10 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
       for (const _ of ctx.visitArguments(false)); // Arguments corresponds to the "aggregates" part
       for (const _ of ctx.visitOptions()); // Options corresponds to the "grouping" part "BY"
     })
+    .on('visitInlineStatsCommand', (ctx) => {
+      for (const _ of ctx.visitArguments(false));
+      for (const _ of ctx.visitOptions());
+    })
     .visitCommand(command);
 
   return {
