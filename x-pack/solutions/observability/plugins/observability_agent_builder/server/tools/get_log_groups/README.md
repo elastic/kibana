@@ -22,22 +22,6 @@ This tool returns three arrays:
 
 - Regular log messages that are not exceptions
 - Grouped by message pattern using `categorize_text` aggregation
-- Filtered to exclude logs with `error.exception.type` attribute
-
-## When to use
-
-- Get a quick overview of what's being logged and what exceptions are occurring across services
-- Identify which services or exception types are generating the most errors
-- Discover unexpected log patterns or new error types
-- Answer "what kinds of things are happening?" rather than "what exactly happened?"
-
-## Relationship to other tools
-
-| Tool                  | Question it answers                | Data                                                    |
-| --------------------- | ---------------------------------- | ------------------------------------------------------- |
-| `get_log_groups`      | "What's happening?"                | All logs and exceptions, grouped by pattern             |
-| `get_trace_metrics`   | "What's the service health?"       | Transaction metrics (latency, throughput, failure rate) |
-| `get_correlated_logs` | "What happened before this error?" | Logs correlated by trace.id                             |
 
 ## Examples
 
