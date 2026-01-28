@@ -2,19 +2,27 @@
 # This file configures the valid values for changelog fields using the pivot structure.
 # Place this file as `changelog.yml` in the `docs/` directory
 
-# Available products (optional - if not specified, all products from products.yml are allowed)
-# New name (preferred):
 products:
-# - elasticsearch
-  - kibana
-# - apm
-# - beats
-# - elastic-agent
-# - fleet
-# - cloud-hosted
-  - cloud-serverless
-# - cloud-enterprise
-# Add more products as needed
+  # List of available product IDs (empty = all from products.yml)
+  available:
+    - kibana
+    - observability
+    - cloud-serverless
+    - security
+  # Default products when --products not specified
+  default:
+    - product: kibana
+      lifecycle: ga
+
+# Extraction configuration
+# Controls automatic extraction of information from PR descriptions
+extract:
+  # Auto-extract release notes from PR descriptions (default: true)
+  # Can be overridden by CLI --no-extract-release-notes
+  release_notes: true
+  # Auto-extract issues from PR body (default: true)
+  # Looks for patterns like "Fixes #123", "Closes #456", etc.
+  issues: true
 
 # Available lifecycle values (strongly typed: preview, beta, ga)
 # New name (preferred):
@@ -50,14 +58,13 @@ pivot:
     # Simple string form: labels as comma-separated string
     bug-fix: "release_note:fix"
     deprecation: "release_note:deprecation"
-    # Empty block: no labels (YAML null)
     feature: "release_note:feature"
     enhancement: "release_note:enhancement"
     docs: ">docs"
-    # known-issue:
-    # other:
-    # regression:
-    # security:
+    known-issue:
+    other:
+    regression:
+    security:
 
   # Area definitions with labels
   # Keys are area display names, values are label strings
@@ -108,10 +115,94 @@ block:
       publish:
         types:
           - docs
+        areas:
+         - "Elastic Observability solution"
+         - "Elastic Security solution"
     'cloud-serverless':
       create: "release_note:skip, reverted, backport"
       publish:
-        areas:
-          - Monitoring
+        # TBD: Are there areas to block?
+        # areas:
+        #   - Monitoring
         types:
           - docs
+    'observability':
+      create: "release_note:skip, reverted, backport"
+      publish:
+        types:
+          - docs
+        areas:
+        # Block every area except the observability solution
+          - Alerting
+          - "Beats management"
+          - Canvas
+          - "Dashboards and Visualizations"
+          - "Data ingestion and Fleet"
+          - Discover
+          - "ES|QL"
+          # - "Elastic Observability solution"
+          - "Elastic Security solution"
+          - "Kibana platform"
+          - "Kibana security"
+          - "Kibana UI"
+          - Logstash
+          - "Machine learning"
+          - Management
+          - Maps
+          - Monitoring
+          - Operations
+          - Platform
+          - QA  
+          - "Querying and filtering"
+          - Reporting
+          - Search
+          - Sharing
+    'security':
+      create: "release_note:skip, reverted, backport"
+      publish:
+        types:
+          - docs
+        areas:
+          # Block every area except the security solution
+          - Alerting
+          - "Beats management"
+          - Canvas
+          - "Dashboards and Visualizations"
+          - "Data ingestion and Fleet"
+          - Discover
+          - "ES|QL"
+          - "Elastic Observability solution"
+          # - "Elastic Security solution"
+          - "Kibana platform"
+          - "Kibana security"
+          - "Kibana UI"
+          - Logstash
+          - "Machine learning"
+          - Management
+          - Maps
+          - Monitoring
+          - Operations
+          - Platform
+          - QA  
+          - "Querying and filtering"
+          - Reporting
+          - Search
+          - Sharing
+
+# Bundle configuration (profiles and defaults)
+bundle:
+  # Input directory containing changelog YAML files
+  directory: docs/changelog
+  # Output directory for bundled changelog files
+  output_directory: docs/releases
+  # Whether to resolve (copy contents) by default
+  resolve: true
+
+  # Named bundle profiles for different release scenarios
+  profiles:
+    kibana-release:
+      products: "kibana {version} {lifecycle}"
+      output: "kibana-{version}.yaml"
+    serverless-release:
+      products: "cloud-serverless {version} {lifecycle}"
+      output: "serverless-{version}.yaml"
