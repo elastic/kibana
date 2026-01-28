@@ -381,13 +381,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [sidebarToggleState$]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
