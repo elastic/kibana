@@ -79,12 +79,12 @@ export function QueriesTable() {
     },
     {
       field: 'query.feature',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.featuresColumn', {
-        defaultMessage: 'Features',
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.systemsColumn', {
+        defaultMessage: 'Systems',
       }),
       render: (_: unknown, item: SignificantEventItem) => {
-        const featureName = item.query.feature?.name;
-        return featureName ? <EuiBadge color="hollow">{featureName}</EuiBadge> : '--';
+        const systemName = item.query.feature?.name;
+        return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
       },
     },
     {

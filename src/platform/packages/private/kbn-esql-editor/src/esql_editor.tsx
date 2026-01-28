@@ -35,6 +35,7 @@ import {
   fixESQLQueryWithVariables,
   prettifyQuery,
   hasOnlySourceCommand,
+  getESQLAdHocDataview,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -46,6 +47,7 @@ import type {
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
 } from '@kbn/esql-types';
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -56,6 +58,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
@@ -72,6 +75,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
@@ -88,7 +92,7 @@ import {
 } from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
@@ -101,6 +105,8 @@ import {
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
+
+const VISOR_AUTO_OPEN_DISMISSED_KEY = 'esql:visorAutoOpenDismissed';
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -149,7 +155,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -200,13 +206,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
+  const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
+    VISOR_AUTO_OPEN_DISMISSED_KEY,
+    !openVisorOnSourceCommands
+  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRef(false);
+  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -217,25 +227,41 @@ const ESQLEditorInternal = function ESQLEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  // Open visor on initial render if query has only source commands
+  // The visor opens automatically if:
+  // - the user has not dismissed the auto open behavior
+  // - the query contains only a source command
+  // - the visor has not been opened automatically on mount before
+  // - The openVisorOnSourceCommands prop is true
   useEffect(() => {
     if (
-      openVisorOnSourceCommands &&
       !hasOpenedVisorOnMount.current &&
+      !hasUserDismissedVisorAutoOpen &&
+      openVisorOnSourceCommands &&
       code &&
       hasOnlySourceCommand(code)
     ) {
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, openVisorOnSourceCommands]);
+  }, [
+    code,
+    hasOpenedVisorOnMount,
+    hasUserDismissedVisorAutoOpen,
+    openVisorOnSourceCommands,
+    setIsVisorOpen,
+  ]);
+
+  const onToggleVisor = useCallback(() => {
+    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
       setIsVisorOpen(false);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setIsVisorOpen]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -700,19 +726,49 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
+      getKqlSuggestions: async (kqlQuery: string, cursorPositionInKql: number) => {
+        const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
+        if (!hasQuerySuggestions) {
+          return undefined;
+        }
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: minimalQueryRef.current,
+        });
+        const suggestions = await kql?.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          query: kqlQuery,
+          selectionStart: cursorPositionInKql,
+          selectionEnd: cursorPositionInKql,
+          indexPatterns: [dataView],
+        });
+        return (
+          suggestions?.map((suggestion) => {
+            return {
+              text: suggestion.text,
+              label: suggestion.text,
+              detail:
+                typeof suggestion.description === 'string' ? suggestion.description : undefined,
+              kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            };
+          }) ?? []
+        );
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
     getJoinIndicesCallback,
-    kibana.services?.esql,
     canCreateLookupIndex,
+    kibana.services?.esql,
+    kql?.autocomplete,
     dataSourcesCache,
     memoizedSources,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
+    data.dataViews,
     memoizedFieldsFromESQL,
     abortController.signal,
     variablesService?.esqlVariables,
@@ -838,7 +894,8 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd(active);
 
       if (active) {
-        setEditorMessages({ errors: allErrors, warnings: allWarnings });
+        const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
+        setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',
@@ -859,10 +916,6 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd,
     ]
   );
-
-  const toggleVisor = useCallback(() => {
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, []);
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
@@ -1192,7 +1245,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
+                    addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
@@ -1293,6 +1346,7 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
+          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter
@@ -1321,7 +1375,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
+        toggleVisor={onToggleVisor}
         hideQuickSearch={hideQuickSearch}
       />
       {createPortal(
