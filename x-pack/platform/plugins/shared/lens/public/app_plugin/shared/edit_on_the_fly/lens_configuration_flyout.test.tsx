@@ -147,7 +147,8 @@ const visualizationMap = mockVisualizationMap();
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
-    query?: Query | AggregateQuery
+    query?: Query | AggregateQuery,
+    stateOverrides: { hideTextBasedEditor?: boolean } = {}
   ) {
     const mockCoreStart = coreMock.createStart();
     mockCoreStart.rendering.addContext = createAddContextMock();
@@ -182,6 +183,7 @@ describe('LensEditConfigurationFlyout', () => {
             activeId: 'testVis',
             selectedLayerId: 'layer1',
           },
+          ...stateOverrides,
         },
       }
     );
@@ -298,20 +300,27 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('ESQLEditor')).toBeNull();
   });
 
-  it('should not display the suggestions if hidesSuggestions prop is true and query is not ES|QL', async () => {
-    await renderConfigFlyout({
-      hidesSuggestions: true,
-      attributes: {
-        ...lensAttributes,
-        state: {
-          ...lensAttributes.state,
-          query: {
-            type: 'kql',
-            query: '',
-          } as unknown as Query,
+  // This test simulates the Discover editing use case where both the ES|QL editor
+  // and suggestions should be hidden. The hideTextBasedEditor flag is set by the
+  // parent application (e.g., Discover) to control the flyout layout.
+  it('should not display the suggestions if hideTextBasedEditor and hidesSuggestions are both true', async () => {
+    await renderConfigFlyout(
+      {
+        hidesSuggestions: true,
+        attributes: {
+          ...lensAttributes,
+          state: {
+            ...lensAttributes.state,
+            query: {
+              type: 'kql',
+              query: '',
+            } as unknown as Query,
+          },
         },
       },
-    });
+      undefined,
+      { hideTextBasedEditor: true }
+    );
     expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
