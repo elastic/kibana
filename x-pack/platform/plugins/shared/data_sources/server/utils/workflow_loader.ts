@@ -8,11 +8,14 @@
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
 import { parse } from 'yaml';
+import type { OpeningAndClosingTags } from 'mustache';
 import Mustache from 'mustache';
 import type {
   WorkflowInfo,
   WorkflowsConfig,
 } from '@kbn/data-catalog-plugin/common/data_source_spec';
+
+const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
 function hasAgentBuilderToolTag(yamlContent: string): boolean {
   const parsed = parse(yamlContent);
@@ -48,7 +51,7 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
       yamlFiles.map(async (fileName) => {
         const filePath = join(directory, fileName);
         const rawContent = await fs.readFile(filePath, 'utf-8');
-        const content = Mustache.render(rawContent, templateInputs, {}, ['<%=', '%>']);
+        const content = Mustache.render(rawContent, templateInputs, {}, TEMPLATE_DELIMITERS);
         const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {
