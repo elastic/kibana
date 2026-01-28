@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import semver from 'semver';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -17,13 +17,44 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
+  let currentMinor: string;
+  let previousMinor: string;
+
+  async function verifyReassignAction(
+    agentPolicyId: string,
+    agentId: string,
+    versionSuffix: string
+  ) {
+    const actionSearchResponse = await es.search({
+      index: '.fleet-actions',
+      q: `agents:${agentId}`,
+    });
+    expect(actionSearchResponse.hits.hits.length).to.eql(1);
+    const actionDoc = actionSearchResponse.hits.hits[0]._source as any;
+    expect(actionDoc.data.policy_id).to.eql(`${agentPolicyId}#${versionSuffix}`);
+    expect(actionDoc.type).to.eql('POLICY_REASSIGN');
+  }
 
   describe('fleet_version_specific_policies', () => {
     skipIfNoDockerRegistry(providerContext);
+    let kibanaVersion: string;
+    let previousMinorVersion: string;
 
-    describe('package level agent version condition', () => {
+    before(async () => {
+      kibanaVersion = await kibanaServer.version.get();
+      const coercedKibanaVersion = semver.coerce(kibanaVersion);
+      currentMinor = `${coercedKibanaVersion?.major}.${coercedKibanaVersion?.minor}`;
+      previousMinor = `${coercedKibanaVersion?.major}.${(coercedKibanaVersion?.minor ?? 1) - 1}`;
+      previousMinorVersion = `${previousMinor}.0`;
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/250457
+    describe.skip('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
+      const agentId = `agent-${Date.now()}`;
+      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -67,6 +98,20 @@ export default function (providerContext: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
+          upgradedAgentId,
+          `${agentPolicyWithPPId}#${previousMinor}`,
+          kibanaVersion,
+          undefined,
+          new Date().toISOString()
+        );
       });
       after(async () => {
         await supertest
@@ -100,6 +145,14 @@ export default function (providerContext: FtrProviderContext) {
             expect(source.data.inputs.length).to.eql(0);
           }
         });
+
+        await retry.tryForTime(10000, async () => {
+          // verify agent with parent policy is reassigned
+          await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
+
+          // verify upgraded agent with version specific policy is reassigned
+          await verifyReassignAction(agentPolicyWithPPId, upgradedAgentId, currentMinor);
+        });
       });
 
       it('should set has_agent_version_conditions to false when package policy is deleted', async () => {
@@ -115,9 +168,12 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('template level agent version condition', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/250460
+    describe.skip('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
+      const agentId = `agent-${Date.now()}`;
+      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -207,6 +263,20 @@ export default function (providerContext: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
+          upgradedAgentId,
+          `${agentPolicyWithPPId}#${previousMinor}`,
+          kibanaVersion,
+          undefined,
+          new Date().toISOString()
+        );
       });
       after(async () => {
         await supertest
@@ -261,6 +331,14 @@ export default function (providerContext: FtrProviderContext) {
             expect(source.data.inputs[0].streams[0].id).to.contain('cel-auth0.logs-');
             expect(source.data.inputs[0].streams[0].program).to.be(undefined);
           }
+        });
+
+        await retry.tryForTime(10000, async () => {
+          // verify agent with parent policy is reassigned
+          await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
+
+          // verify upgraded agent with version specific policy is reassigned
+          await verifyReassignAction(agentPolicyWithPPId, upgradedAgentId, currentMinor);
         });
       });
 
