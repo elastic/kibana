@@ -37,12 +37,12 @@ describe('ValidateRuleStep', () => {
     });
   });
 
-  it('throws when rule is missing from state', async () => {
+  it('halts with state_not_ready when rule is missing from state', async () => {
     const step = new ValidateRuleStep();
     const state = createState(undefined);
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'ValidateRuleStep requires rule from previous step'
-    );
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
   });
 });

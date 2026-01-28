@@ -15,6 +15,8 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import type { StateWithEsqlResponse, StateWithRule } from '../type_guards';
+import { hasRuleAndEsqlResponse } from '../type_guards';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -25,16 +27,20 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
+  private isStepReady(
+    state: Readonly<RulePipelineState>
+  ): state is StateWithRule & StateWithEsqlResponse {
+    return hasRuleAndEsqlResponse(state);
+  }
+
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { rule, esqlResponse, input } = state;
+    const { input } = state;
 
-    if (!rule) {
-      throw new Error('CreateAlertEventsStep requires rule from previous step');
+    if (!this.isStepReady(state)) {
+      return { type: 'halt', reason: 'state_not_ready' };
     }
 
-    if (!esqlResponse) {
-      throw new Error('CreateAlertEventsStep requires esqlResponse from previous step');
-    }
+    const { rule, esqlResponse } = state;
 
     const alertEvents = buildAlertEventsFromEsqlResponse({
       ruleId: input.ruleId,

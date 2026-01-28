@@ -7,19 +7,23 @@
 
 import { injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { StateWithRule } from '../type_guards';
+import { hasRule } from '../type_guards';
 
 @injectable()
 export class ValidateRuleStep implements RuleExecutionStep {
   public readonly name = 'validate_rule';
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { rule } = state;
+  private isStepReady(state: Readonly<RulePipelineState>): state is StateWithRule {
+    return hasRule(state);
+  }
 
-    if (!rule) {
-      throw new Error('ValidateRuleStep requires rule from previous step');
+  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
+    if (!this.isStepReady(state)) {
+      return { type: 'halt', reason: 'state_not_ready' };
     }
 
-    if (!rule.enabled) {
+    if (!state.rule.enabled) {
       return { type: 'halt', reason: 'rule_disabled' };
     }
 

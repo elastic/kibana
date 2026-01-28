@@ -81,28 +81,28 @@ describe('CreateAlertEventsStep', () => {
     });
   });
 
-  it('throws when rule is missing from state', async () => {
+  it('halts with state_not_ready when rule is missing from state', async () => {
     const { loggerService } = createLoggerService();
     const { storageService } = createStorageService();
 
     const step = new CreateAlertEventsStep(loggerService, storageService);
     const state = createState(createRuleExecutionInput(), undefined, createEsqlResponse());
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'CreateAlertEventsStep requires rule from previous step'
-    );
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
   });
 
-  it('throws when esqlResponse is missing from state', async () => {
+  it('halts with state_not_ready when esqlResponse is missing from state', async () => {
     const { loggerService } = createLoggerService();
     const { storageService } = createStorageService();
 
     const step = new CreateAlertEventsStep(loggerService, storageService);
     const state = createState(createRuleExecutionInput(), createRuleResponse(), undefined);
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'CreateAlertEventsStep requires esqlResponse from previous step'
-    );
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
   });
 
   it('propagates storage service errors', async () => {

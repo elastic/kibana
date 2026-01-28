@@ -30,7 +30,7 @@ export interface RulePipelineState {
   readonly alertEvents?: Array<{ id: string; doc: AlertEvent }>;
 }
 
-export type HaltReason = 'rule_deleted' | 'rule_disabled';
+export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
 export type RuleStepOutput =
   | { type: 'continue'; data?: Partial<Omit<RulePipelineState, 'input'>> }

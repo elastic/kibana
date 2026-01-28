@@ -16,6 +16,8 @@ import {
   QueryService,
   type QueryServiceContract,
 } from '../../services/query_service/query_service';
+import type { StateWithRule } from '../type_guards';
+import { hasRule } from '../type_guards';
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
@@ -26,12 +28,18 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     @inject(QueryService) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { rule, input } = state;
+  private isStepReady(state: Readonly<RulePipelineState>): state is StateWithRule {
+    return hasRule(state);
+  }
 
-    if (!rule) {
-      throw new Error('ExecuteRuleQueryStep requires rule from previous step');
+  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
+    const { input } = state;
+
+    if (!this.isStepReady(state)) {
+      return { type: 'halt', reason: 'state_not_ready' };
     }
+
+    const { rule } = state;
 
     const queryPayload = getQueryPayload({
       query: rule.query,

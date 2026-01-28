@@ -102,15 +102,15 @@ describe('ExecuteRuleQueryStep', () => {
     await expect(step.execute(state)).rejects.toThrow('Query execution failed');
   });
 
-  it('throws when rule is missing from state', async () => {
+  it('halts with state_not_ready when rule is missing from state', async () => {
     const { loggerService } = createLoggerService();
     const { queryService } = createQueryService();
 
     const step = new ExecuteRuleQueryStep(loggerService, queryService);
     const state = createState(createRuleExecutionInput(), undefined);
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'ExecuteRuleQueryStep requires rule from previous step'
-    );
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
   });
 });
