@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 
 import { useNavigation } from '../../common/lib/kibana';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
+import { ENTITY_ANALYTICS_OVERVIEW_PATH, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
 
 type WatchlistGroupLabel = {
   id: string;
@@ -28,6 +28,7 @@ type WatchlistItem = {
   isGroupLabelOption?: false;
   checked?: 'on' | 'off';
   groupicon?: never;
+  prepend?: React.ReactNode;
 };
 
 type WatchlistOption = WatchlistGroupLabel | WatchlistItem;
@@ -38,6 +39,7 @@ type WatchlistFilterProps = {
 
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
+  
   { prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }} />, id: 'group-prebuilt', label: 'Prebuilt', isGroupLabelOption: true, groupicon: 'pin' },
   { id: 'prebuilt-priv', label: 'Privileged users' },
   { id: 'prebuilt-llm', label: 'Unauthorized LLM access' },
@@ -53,17 +55,22 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
   // hook this up to real data
   const [options, setOptions] = useState<WatchlistOption[]>(WATCHLIST_OPTIONS);
+  const [selected, setSelected] = useState<WatchlistItem | null>(null);
 
-  const selected = options.find((o) => !o.isGroupLabelOption && o.checked === 'on');
 
   const { navigateTo } = useNavigation();
 
   const navigateToWatchlist = useCallback(
-    () => {
-      navigateTo({
+    (watchlist_id: string) => {
+      if(watchlist_id === 'none' || watchlist_id === 'clear-selection') {        
+        navigateTo({
+        path: ENTITY_ANALYTICS_OVERVIEW_PATH
+      });
+      }
+      else {navigateTo({
         path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
       });
-    },
+    }},
     [navigateTo]
   );
 
@@ -75,7 +82,11 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
-        navigateToWatchlist();
+        navigateToWatchlist(newlySelected.id);
+        setSelected(newlySelected);
+      } else {
+        setSelected(null);
+        navigateToWatchlist('none');
       }
     },
     [onChangeSelectedId, navigateToWatchlist]
@@ -91,6 +102,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
           options={options}
           selectedOptions={selected ? [selected] : []}
           onChange={onChangeComboBox}
+          isClearable={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
