@@ -17,8 +17,8 @@ export class AlertsTablePage {
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
-    this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
+    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
   }
 
   async navigate() {
