@@ -269,14 +269,12 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     // it will be updated to the actual definition of the group field if it was declared by a preceding stats command
     let groupFieldNode = group;
 
-    const statsCommandsFields = getStatsCommandRuntimeFields(esqlQuery);
-    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
+    const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
+    const lastStatsCommandFields = statsCommandRuntimeFields[statsCommandRuntimeFields.length - 1];
 
     if (!lastStatsCommandFields.has(groupFieldName)) {
       // get all the new fields created by the stats commands in the query,
       // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery); // HD deduplicate
-
       const groupDeclarationStatsCommandLookupIndex = statsCommandRuntimeFields.findIndex((field) =>
         field.has(group.field)
       );
@@ -728,7 +726,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   // This is the STATS command driving the cascade experience for the query provided
   const operatingStatsCommand = getStatsCommandToOperateOn(ESQLQuery)!;
-  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery); // HD use stats instead of this.
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
   const lastStatsCommandFields = statsCommandRuntimeFields[statsCommandRuntimeFields.length - 1];
 
   // when the grouping option is an unnamed function,
