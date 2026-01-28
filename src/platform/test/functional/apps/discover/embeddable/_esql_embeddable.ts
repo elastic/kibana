@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.clickSaveSearchButton();
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
-      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+      expect(await dataGrid.getDocCount()).to.be(1000);
     });
   });
 }
