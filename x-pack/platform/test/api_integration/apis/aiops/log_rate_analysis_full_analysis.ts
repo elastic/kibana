@@ -30,7 +30,14 @@ export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  const kibanaServer = config.get('servers.kibana');
+  // Native fetch doesn't support credentials in URLs, so we need to extract them
+  const { username, password, ...serverWithoutAuth } = kibanaServer;
+  const kibanaServerUrl = formatUrl(serverWithoutAuth);
+  const authHeader =
+    username && password
+      ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
+      : {};
   const esArchiver = getService('esArchiver');
 
   describe('POST /internal/aiops/log_rate_analysis - full analysis', () => {
@@ -177,6 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
                 'Content-Type': 'application/json',
                 [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
                 'kbn-xsrf': 'stream',
+                ...authHeader,
               },
               body: JSON.stringify(body),
             });
