@@ -11,6 +11,7 @@ import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogDocumentById } from './get_log_document_by_id';
 import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
@@ -55,7 +56,7 @@ export async function getLogAiInsights({
   const isErrorOrWarning = isWarningOrAbove(logEntry);
   const systemPrompt = isErrorOrWarning
     ? dedent(`
-        You are an expert SRE assistant analyzing a log with severity ${severity}. Provide a thorough investigation:
+        You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
 
         - **What happened**: Summarize the error in plain language
         - **Where it originated**: Identify the service, component, or code path
@@ -67,7 +68,7 @@ export async function getLogAiInsights({
         Base your analysis strictly on the provided data.
       `)
     : dedent(`
-        You are an expert SRE assistant analyzing a log with severity ${severity}. Keep it concise:
+        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
 
         - Explain what the log message means in context
         - Identify the source (service, host, container)
@@ -113,7 +114,6 @@ export async function getLogAiInsights({
           start: windowStart,
           end: windowEnd,
           logId: id,
-          errorLogsOnly: true,
         });
 
         return sequences[0] || null;
@@ -188,7 +188,7 @@ export async function getLogAiInsights({
           ${context}
           </LogContext>
           Analyze this log entry and generate a summary explaining what it means.
-          Follow your system instructions. Ensure the analysis is grounded in the provided context, and concise.
+          Ensure the analysis is grounded in the provided context, and concise.
         `),
       },
     ],
