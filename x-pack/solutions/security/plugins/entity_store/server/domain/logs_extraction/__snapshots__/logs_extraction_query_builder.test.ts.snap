@@ -298,8 +298,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
                   ),
                   NULL
                 ),
-                CASE(host.hostname IS NOT NULL AND host.hostname != \\"\\", host.hostname, NULL),
                 CASE(host.name IS NOT NULL AND host.name != \\"\\", host.name, NULL),
+                CASE(host.hostname IS NOT NULL AND host.hostname != \\"\\", host.hostname, NULL),
                 NULL
               )
       )
