@@ -1,11 +1,11 @@
 ---
-navigation_title: "Elastic Managed LLMs"
+navigation_title: "Preconfigured AI Connectors"
 applies_to:
     stack: ga 9.0
     serverless: ga
 ---
 
-# Elastic Managed LLMs
+# Preconfigured AI Connectors
 
 Elastic provides built-in LLMs through AI connectors vetted for GenAI product features across our platform.
 Currently, the following built-in LLMs are available:
@@ -43,11 +43,11 @@ Details of the currently used model are available in the [model card](https://as
 
 ## Region and hosting
 
-The Elastic Managed LLMs use a third party service provider for inference. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
+The Preconfigured AI Connectors use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
 
 ## Data protection
 
-Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLMs in the AWS US region `us-east-1`.
+Customer projects or deployments hosted in any cloud service provider or region have access to the Preconfigured AI Connectors in the AWS US region `us-east-1`.
 All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the service provider.
 
 Only request metadata is logged in AWS CloudWatch.
@@ -58,4 +58,4 @@ Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to lea
 
 ## Pricing
 
-The Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details.
+The Preconfigured AI Connectors incur a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details.
