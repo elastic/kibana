@@ -294,7 +294,7 @@ describe('generateOpenApiDocument', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
-        bodySchema: createSharedZodSchema() as unknown as CreateTestRouterArgs['bodySchema'],
+        bodySchema: createSharedZodSchema(),
       });
 
       const result = await generateOpenApiDocument(
