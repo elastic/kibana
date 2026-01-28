@@ -243,8 +243,22 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
 
     const streamName = params?.query?.stream;
 
-    // Build a map of stream name -> suggestion count
-    const streamSuggestionCounts = new Map<string, number>();
+    // Build a map of stream name -> per-type suggestion counts
+    interface StreamCounts {
+      pipelineCount: number;
+      featuresCount: number;
+      significantEventsCount: number;
+    }
+    const streamSuggestionCounts = new Map<string, StreamCounts>();
+
+    const getOrCreateCounts = (stream: string): StreamCounts => {
+      let counts = streamSuggestionCounts.get(stream);
+      if (!counts) {
+        counts = { pipelineCount: 0, featuresCount: 0, significantEventsCount: 0 };
+        streamSuggestionCounts.set(stream, counts);
+      }
+      return counts;
+    };
 
     // Query all suggestion task types and aggregate counts
     for (const taskType of SUGGESTION_TASK_TYPES) {
@@ -268,22 +282,30 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
         // A suggestion counts as available if the task completed (or acknowledged) successfully
         const hasSuggestion = status === TaskStatus.Completed || status === TaskStatus.Acknowledged;
 
+        const counts = getOrCreateCounts(extractedStreamName);
         if (hasSuggestion) {
-          const currentCount = streamSuggestionCounts.get(extractedStreamName) ?? 0;
-          streamSuggestionCounts.set(extractedStreamName, currentCount + 1);
-        } else if (!streamSuggestionCounts.has(extractedStreamName)) {
-          // Ensure stream is in the map even with 0 count
-          streamSuggestionCounts.set(extractedStreamName, 0);
+          if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
+            counts.pipelineCount += 1;
+          } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
+            counts.featuresCount += 1;
+          } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
+            counts.significantEventsCount += 1;
+          }
         }
       }
     }
 
     // Convert map to array of results
     const results: SuggestionBulkStatusItem[] = [];
-    for (const [stream, suggestionCount] of streamSuggestionCounts.entries()) {
+    for (const [stream, counts] of streamSuggestionCounts.entries()) {
+      const suggestionCount =
+        counts.pipelineCount + counts.featuresCount + counts.significantEventsCount;
       results.push({
         stream,
         suggestionCount,
+        pipelineCount: counts.pipelineCount,
+        featuresCount: counts.featuresCount,
+        significantEventsCount: counts.significantEventsCount,
       });
     }
 
