@@ -27,6 +27,15 @@ export function registerIndicesStats({ router, lib: { handleEsError } }: RouteDe
           expand_wildcards: ['hidden', 'all'],
           forbid_closed_indices: false,
           metric: ['docs', 'store'],
+          filter_path: [
+            '*.*.uuid',
+            '*.*.status',
+            '*.*.health',
+            '*.*.primaries.docs.count',
+            '*.*.primaries.docs.deleted',
+            '*.*.total.store.size_in_bytes',
+            '*.*.primaries.store.size_in_bytes',
+          ],
         });
         return response.ok({ body: resp });
       } catch (error) {
