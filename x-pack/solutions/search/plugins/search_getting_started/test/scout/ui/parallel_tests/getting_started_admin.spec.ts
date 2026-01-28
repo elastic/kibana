@@ -36,6 +36,11 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
     });
 
     await test.step('renders all tutorial cards and buttons', async () => {
+      await pageObjects.gettingStarted.clickTutorialExpandButton();
+      await expect(await pageObjects.gettingStarted.getTutorialExpandButton()).toContainText(
+        'Show less'
+      );
+
       const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
       await expect(searchBasicsCard).toBeVisible();
 
@@ -59,6 +64,11 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
 
       const esqlButton = await pageObjects.gettingStarted.getTutorialCardButton('esql');
       await expect(esqlButton).toBeVisible();
+
+      const timeSeriesAnalysisButton = await pageObjects.gettingStarted.getTutorialCardButton(
+        'tsds'
+      );
+      await expect(timeSeriesAnalysisButton).toBeVisible();
     });
 
     await test.step('renders footer links with correct hrefs', async () => {
