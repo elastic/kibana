@@ -104,9 +104,14 @@ function getQueryZonePosition(
 
   // After query zone: cursor past query.max
   if (queryLocation && innerText.length > queryLocation.max) {
-    const ctx = commandText
-      ? getPromQLQueryContext(promqlCommand, commandText, cursorPosition)
-      : undefined;
+    // Assignment `col0 = (query)`: cursor is past the outer `)`, where `by` can't go.
+    // Grouping belongs inside the parens, so skip detection and only suggest pipe.
+    const isAssignment =
+      queryNode != null && extractPromqlLocationFromAssignment(queryNode) != null;
+    const ctx =
+      !isAssignment && commandText
+        ? getPromQLQueryContext(promqlCommand, commandText, cursorPosition)
+        : undefined;
     const canAddGrouping = ctx ? checkCanAddGrouping(ctx) : false;
     const hasTrailingWhitespace = innerText.trimEnd() !== innerText;
 
@@ -253,21 +258,15 @@ function checkCanAddGrouping(ctx: PromQLQueryContext): boolean {
     return false;
   }
 
-  const exactPosition = ctx.logicalCursor - 1;
-  const position = findPromqlAstPosition(
-    ctx.root,
-    within(exactPosition, ctx.root) ? exactPosition : -1
-  );
-  const functionNode = getFunctionFromPosition(position.node, position.parent);
+  const beforePosition = ctx.logicalCursor - 1;
 
-  // If AST found a valid aggregation, use it
-  if (
-    functionNode &&
-    functionNode.location.max === exactPosition &&
-    !functionNode.grouping &&
-    functionNode.args.length > 0
-  ) {
-    return isPromqlAcrossSeriesFunction(functionNode.name);
+  const nearest = findNearestAggregationForGrouping(ctx.root, beforePosition);
+  if (nearest) {
+    return true;
+  }
+
+  if (ctx.root.expression && !ctx.root.expression.incomplete) {
+    return false;
   }
 
   // Fallback: AST incomplete, check text for complete aggregation like "avg(bytes)"
@@ -281,6 +280,41 @@ function checkCanAddGrouping(ctx: PromQLQueryContext): boolean {
   const match = textBeforeCursor.slice(0, lastCloseParen + 1).match(/(\w+)\s*\([^)]*\)$/);
 
   return match ? isPromqlAcrossSeriesFunction(match[1]) : false;
+}
+
+/** Traverses the full PromQL AST to find the nearest across-series aggregation */
+function findNearestAggregationForGrouping(
+  root: PromQLAstNode,
+  beforePosition: number
+): PromQLFunction | undefined {
+  let nearest: PromQLFunction | undefined;
+  let nearestMax = -1;
+
+  function traverse(node: PromQLAstNode): void {
+    for (const child of childrenOfPromqlNode(node)) {
+      traverse(child);
+    }
+
+    if (node.type !== 'function') {
+      return;
+    }
+
+    const func = node as PromQLFunction;
+    if (
+      func.location.max <= beforePosition &&
+      func.location.max > nearestMax &&
+      func.args.length > 0 &&
+      !func.grouping &&
+      isPromqlAcrossSeriesFunction(func.name)
+    ) {
+      nearest = func;
+      nearestMax = func.location.max;
+    }
+  }
+
+  traverse(root);
+
+  return nearest;
 }
 
 /** Checks if cursor is inside function args: `sum(|`, `sum( |`, or `sum(|)`. */
