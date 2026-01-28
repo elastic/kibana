@@ -125,6 +125,9 @@ export function getQuerySummaryPerCommandType(
   return summaries;
 }
 
+/**
+ * Analyzes a specific command within an ES|QL query and returns a summary of it.
+ */
 export function getSummaryPerCommand(query: string, command: ESQLAstCommand): ESQLCommandSummary {
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
