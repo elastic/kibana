@@ -70,6 +70,9 @@ const fullscreenLabels = {
   tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
   }),
+  prompts: i18n.translate('xpack.agentBuilder.conversationActions.prompts', {
+    defaultMessage: 'View all prompts',
+  }),
   rename: i18n.translate('xpack.agentBuilder.conversationActions.rename', {
     defaultMessage: 'Rename',
   }),
@@ -219,6 +222,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       data-test-subj="agentBuilderActionsTools"
     >
       {fullscreenLabels.tools}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="prompts"
+      icon="document"
+      onClick={closePopover}
+      href={createAgentBuilderUrl(appPaths.prompts.list)}
+      data-test-subj="agentBuilderActionsPrompts"
+    >
+      {fullscreenLabels.prompts}
     </EuiContextMenuItem>,
     ...(hasAccessToGenAiSettings
       ? [

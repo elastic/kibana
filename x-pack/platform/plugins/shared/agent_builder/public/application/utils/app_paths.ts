@@ -31,4 +31,7 @@ export const appPaths = {
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
     bulkImportMcp: '/tools/bulk_import_mcp',
   },
+  prompts: {
+    list: '/prompts',
+  },
 };
