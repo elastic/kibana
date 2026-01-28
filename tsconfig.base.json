@@ -786,6 +786,8 @@
       "@kbn/core-user-activity-server/*": ["src/core/packages/user-activity/server/*"],
       "@kbn/core-user-activity-server-internal": ["src/core/packages/user-activity/server-internal"],
       "@kbn/core-user-activity-server-internal/*": ["src/core/packages/user-activity/server-internal/*"],
+      "@kbn/core-user-activity-server-mocks": ["src/core/packages/user-activity/server-mocks"],
+      "@kbn/core-user-activity-server-mocks/*": ["src/core/packages/user-activity/server-mocks/*"],
       "@kbn/core-user-profile-browser": ["src/core/packages/user-profile/browser"],
       "@kbn/core-user-profile-browser/*": ["src/core/packages/user-profile/browser/*"],
       "@kbn/core-user-profile-browser-internal": ["src/core/packages/user-profile/browser-internal"],

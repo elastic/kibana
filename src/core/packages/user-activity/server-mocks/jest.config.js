@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UserActivityService } from './src/user_activity_service';
-export type {
-  InternalUserActivityServiceSetup,
-  InternalUserActivityServiceStart,
-} from './src/types';
-export { config } from './src/user_activity_config';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/user-activity/server-mocks'],
+};
