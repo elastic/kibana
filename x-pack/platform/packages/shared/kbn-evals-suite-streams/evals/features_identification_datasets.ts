@@ -183,7 +183,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Complete feature structure with all mandatory fields present',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence contains direct quotes from log messages',
         'Extracts all major stack components: Java, Spring Boot, MySQL, Kafka, GCP, CentOS, and inventory-service dependency',
         'Version strings accurately reflect what logs contain',
@@ -265,7 +265,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Must have complete structure with all required fields',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence must be actual log message content',
         'Should detect all technologies: Rust, MongoDB, NATS, Azure, Debian, plus gRPC dependency',
         'Versions must match the strings found in logs',
@@ -345,7 +345,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Features must contain all required fields',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence must be extracted from actual log content',
         'Should identify Node.js, Express, Elasticsearch, Redis, RHEL, and recommendation-engine dependency',
         'Version information must be accurate',
@@ -486,7 +486,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Should handle version upgrade scenario correctly',
         'Could optionally note version change in meta.observed_versions or meta.notes',
         'Express and MongoDB versions remain stable across upgrade',
-        'All required fields present',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
       ]
     },
     metadata: {
@@ -577,7 +577,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Complete feature structure required',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Features identified from indirect signals must be tagged as inferred with meta.notes explaining the reasoning',
         'Moderate confidence levels appropriate for indirect evidence (not highly confident)',
         'No version information should be invented when not present in logs',
@@ -657,7 +657,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present in each feature',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Inferred features must have "inferred" tag and meta.notes with explanation',
         'Confidence should reflect uncertainty from indirect signals',
         'Should identify Ruby, Rails, PostgreSQL, Redis, AWS, and ECS from ecosystem patterns',
@@ -738,7 +738,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Complete feature structure with all fields',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Inferred features must be tagged and include meta.notes explanation',
         'Moderate confidence for features identified through indirect evidence',
         'Should detect PHP, Laravel, MariaDB, Redis, Nginx, and DigitalOcean',
@@ -822,7 +822,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All fields required in feature structure',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Scala, PostgreSQL, and IBM Cloud need "inferred" tag with meta.notes',
         'Cassandra has explicit version so higher confidence is appropriate',
         'Should extract Scala, PostgreSQL, Cassandra, IBM Cloud, and reporting-service dependency',
@@ -882,7 +882,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Go has explicit version, Python inferred from subprocess and imports',
         'Should handle polyglot architecture correctly',
         'Python confidence should be moderate due to subprocess context',
-        'All required fields must be present',
+        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
       ]
     },
     metadata: {
@@ -964,7 +964,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Port numbers (9042, 5432) alone cannot determine specific database technology',
         'Generic "cache" and "ttl" keywords are insufficient for vendor identification',
         'Mixed language error tokens (Java, JavaScript) without dominant pattern',
-        'Evidence must be direct quotes from log messages when features are extracted',
+        'Any features extracted must have evidence field containing direct quotes from log messages',
       ]
     },
     metadata: {
@@ -1042,7 +1042,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Should extract zero or very few features',
         'Technology names in URL paths (/api/redis/status) do not indicate actual infrastructure usage',
         'Service names (postgres-primary) and customer names (mongodb-inc) are not infrastructure indicators',
-        'Evidence must be actual log content when features are identified',
+        'Any features extracted must have evidence field containing direct quotes from log messages',
       ]
     },
     metadata: {
@@ -1121,7 +1121,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'S3-compatible URLs might be MinIO, Ceph, or other on-premises object storage',
         'Metadata endpoint timeout prevents cloud provider confirmation',
         'Port 3306 alone cannot distinguish between MySQL, MariaDB, or database proxies',
-        'Any extracted features must have evidence from actual log text',
+        'Any features extracted must have evidence field containing direct quotes from log messages',
       ]
     },
     metadata: {
@@ -1200,7 +1200,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         '"database-cluster" is a routing pool label, not database identification',
         'Generic load balancing behavior without nginx, haproxy, or envoy signatures',
         'No Kubernetes, Docker, or ECS-specific patterns present',
-        'Evidence must come from actual log content if features are identified',
+        'Any features extracted must have evidence field containing direct quotes from log messages',
       ]
     },
     metadata: {
@@ -1244,7 +1244,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Port 5432 suggests PostgreSQL but ERROR 1045 is MySQL-specific',
         'SQLSTATE is generic and doesn\'t resolve the conflict',
         'Without clear resolution, should not emit database feature or use very low confidence',
-        'Could potentially emit if tagged with conflict note in meta',
+        'If database feature is emitted despite conflict, must include meta.notes explaining the conflicting signals',
       ]
     },
     metadata: {
@@ -1285,9 +1285,9 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     output: {
       criteria: [
         'Should output zero features from adversarial log',
-        'Technology name spam in error message about missing dependencies',
-        'No actual connections or usage evidence',
-        'Service fails to start due to missing dependencies',
+        'Technology names mentioned only in error/failure contexts must not be extracted as features',
+        'No actual connections or usage evidence present in logs',
+        'Must not identify technologies that are listed as missing or unavailable',
         'Must distinguish between "needs X" and "has X"',
       ]
     },

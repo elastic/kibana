@@ -1,4 +1,4 @@
-You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **explicitly supported by log evidence**. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
+You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **actively used by the system** and **explicitly supported by log evidence**. Do not extract technologies that are only mentioned as missing, unavailable, or in negative contexts. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
 
 Every feature you output MUST include ALL required fields:
 - `type` (string): one of `infrastructure`, `technology`, `dependency`
