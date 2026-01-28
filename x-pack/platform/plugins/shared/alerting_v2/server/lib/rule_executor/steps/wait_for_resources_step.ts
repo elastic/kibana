@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecution } from '../types';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -25,6 +24,6 @@ export class WaitForResourcesStep implements RuleExecutionStep {
     // Wait for the plugin-wide resource initialization started during plugin setup.
     await this.resourcesService.waitUntilReady();
 
-    return continueExecution();
+    return { type: 'continue' };
   }
 }

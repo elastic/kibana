@@ -73,15 +73,12 @@ export function createAlertEvents(count: number = 2): Array<{ id: string; doc: A
     doc: {
       '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2025-01-01T00:00:00.000Z',
-      rule: { id: 'rule-1', tags: [] },
-      grouping: { key: 'host.name', value: `host-${i}` },
+      rule: { id: 'rule-1', version: 1 },
+      group_hash: `host.name:${i}`,
       data: { 'host.name': `host-${i}` },
-      parent_rule_id: '',
-      status: 'breach',
-      alert_id: `alert-${i}`,
-      alert_series_id: `series-${i}`,
+      status: 'breached',
       source: 'internal',
-      tags: [],
+      type: 'alert',
     },
   }));
 }

@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecutionWith } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
@@ -42,6 +41,6 @@ export class BuildQueryStep implements RuleExecutionStep {
         })}`,
     });
 
-    return continueExecutionWith({ queryPayload });
+    return { type: 'continue', data: { queryPayload } };
   }
 }

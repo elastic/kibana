@@ -7,7 +7,6 @@
 
 import { injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecution, halt } from '../types';
 
 @injectable()
 export class ValidateRuleStep implements RuleExecutionStep {
@@ -21,9 +20,9 @@ export class ValidateRuleStep implements RuleExecutionStep {
     }
 
     if (!rule.enabled) {
-      return halt('rule_disabled');
+      return { type: 'halt', reason: 'rule_disabled' };
     }
 
-    return continueExecution();
+    return { type: 'continue' };
   }
 }

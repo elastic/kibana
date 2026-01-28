@@ -11,12 +11,12 @@ import type { RulePipelineState, RuleExecutionInput } from '../types';
 import type { QueryPayload } from '../get_query_payload';
 import type { RuleResponse } from '../../rules_client';
 import {
-  createQueryService,
   createRuleExecutionInput,
   createRuleResponse,
   createQueryPayload,
   createEsqlResponse,
 } from '../test_utils';
+import { createQueryService } from '../../services/query_service/query_service.mock';
 
 describe('ExecuteQueryStep', () => {
   const createState = (

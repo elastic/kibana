@@ -9,12 +9,9 @@ import { StoreAlertsStep } from './store_alerts_step';
 import type { RulePipelineState } from '../types';
 import type { AlertEvent } from '../../../resources/alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import {
-  createStorageService,
-  createRuleExecutionInput,
-  createLoggerService,
-  createAlertEvents,
-} from '../test_utils';
+import { createRuleExecutionInput, createAlertEvents } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createStorageService } from '../../services/storage_service/storage_service.mock';
 
 describe('StoreAlertsStep', () => {
   const createState = (
@@ -59,7 +56,12 @@ describe('StoreAlertsStep', () => {
 
     await step.execute(state);
 
-    expect(mockEsClient.bulk).toHaveBeenCalledWith({});
+    expect(mockEsClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: expect.any(Array),
+        refresh: 'wait_for',
+      })
+    );
   });
 
   it('passes docs with correct ids to storage service', async () => {
@@ -87,9 +89,9 @@ describe('StoreAlertsStep', () => {
 
     // Verify each doc is indexed with its corresponding id
     const operations = bulkCall!.operations as Array<Record<string, unknown>>;
-    expect(operations[0]).toEqual({ index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0' } });
+    expect(operations[0]).toEqual({ create: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0' } });
     expect(operations[1]).toEqual(alertEvents[0].doc);
-    expect(operations[2]).toEqual({ index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-1' } });
+    expect(operations[2]).toEqual({ create: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-1' } });
     expect(operations[3]).toEqual(alertEvents[1].doc);
   });
 

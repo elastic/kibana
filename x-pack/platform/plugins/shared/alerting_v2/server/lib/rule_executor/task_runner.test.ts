@@ -35,7 +35,10 @@ describe('RuleExecutorTaskRunner', () => {
     it('constructs the pipeline input from task instance correctly', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+      const input = createRuleExecutionInput({
+        abortSignal: abortController.signal,
+        scheduledAt: taskInstance.scheduledAt?.toISOString(),
+      });
 
       pipeline.execute.mockResolvedValue({
         completed: true,

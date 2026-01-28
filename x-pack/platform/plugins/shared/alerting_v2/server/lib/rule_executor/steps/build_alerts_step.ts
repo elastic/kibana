@@ -7,7 +7,6 @@
 
 import { injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecutionWith } from '../types';
 import { buildAlertEventsFromEsqlResponse } from '../build_alert_events';
 
 @injectable()
@@ -31,8 +30,9 @@ export class BuildAlertsStep implements RuleExecutionStep {
       ruleAttributes: rule,
       esqlResponse,
       scheduledTimestamp: input.scheduledAt,
+      ruleVersion: 1,
     });
 
-    return continueExecutionWith({ alertEvents });
+    return { type: 'continue', data: { alertEvents } };
   }
 }

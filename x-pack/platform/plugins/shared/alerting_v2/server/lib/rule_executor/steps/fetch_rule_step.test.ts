@@ -9,7 +9,9 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { FetchRuleStep } from './fetch_rule_step';
 import type { RulePipelineState, RuleExecutionInput } from '../types';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
-import { createLoggerService, createRulesClient, createRuleExecutionInput } from '../test_utils';
+import { createRuleExecutionInput } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createRulesClient } from '../../rules_client/rules_client.mock';
 
 // Note: RulesClient converts SavedObjectsError to Boom errors internally,
 // so we test by triggering SO errors and verifying the step handles the resulting Boom errors.
@@ -113,6 +115,10 @@ describe('FetchRuleStep', () => {
 
     await step.execute(state);
 
-    expect(rulesClient.getRule).toHaveBeenCalledWith({ id: 'custom-rule' });
+    expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'custom-rule',
+      undefined
+    );
   });
 });

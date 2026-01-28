@@ -12,6 +12,8 @@ import type { RuleResponse } from '../../rules_client';
 import { createRuleResponse, createRuleExecutionInput, createEsqlResponse } from '../test_utils';
 
 describe('BuildAlertsStep', () => {
+  let step: BuildAlertsStep;
+
   const createState = (
     rule?: RuleResponse,
     esqlResponse?: ESQLSearchResponse
@@ -21,8 +23,11 @@ describe('BuildAlertsStep', () => {
     esqlResponse,
   });
 
+  beforeEach(() => {
+    step = new BuildAlertsStep();
+  });
+
   it('builds alert events from esql response', async () => {
-    const step = new BuildAlertsStep();
     const state = createState(createRuleResponse(), createEsqlResponse());
 
     const result = await step.execute(state);
@@ -30,55 +35,56 @@ describe('BuildAlertsStep', () => {
     expect(result.type).toBe('continue');
     expect(result).toHaveProperty('data.alertEvents');
 
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { alertEvents } = result.data as { alertEvents: Array<{ id: string; doc: unknown }> };
+    // @ts-expect-error: alertEvents exists
+    const { alertEvents } = result.data;
     expect(alertEvents).toHaveLength(2);
     expect(alertEvents[0]).toHaveProperty('id');
     expect(alertEvents[0]).toHaveProperty('doc');
   });
 
   it('returns empty array when esql response has no values', async () => {
-    const step = new BuildAlertsStep();
     const emptyResponse = createEsqlResponse([{ name: 'host.name', type: 'keyword' }], []);
     const state = createState(createRuleResponse(), emptyResponse);
 
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { alertEvents } = result.data as { alertEvents: unknown[] };
+    expect(result).toHaveProperty('data.alertEvents');
+
+    // @ts-expect-error: alertEvents exists
+    const { alertEvents } = result.data;
     expect(alertEvents).toHaveLength(0);
   });
 
   it('returns empty array when esql response has no columns', async () => {
-    const step = new BuildAlertsStep();
     const emptyResponse = createEsqlResponse([], []);
     const state = createState(createRuleResponse(), emptyResponse);
 
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { alertEvents } = result.data as { alertEvents: unknown[] };
+    expect(result).toHaveProperty('data.alertEvents');
+
+    // @ts-expect-error: alertEvents exists
+    const { alertEvents } = result.data;
     expect(alertEvents).toHaveLength(0);
   });
 
-  it('includes rule tags in alert events', async () => {
-    const step = new BuildAlertsStep();
-    const rule = createRuleResponse({ tags: ['production', 'critical'] });
+  it('includes rule metadata in alert events', async () => {
+    const rule = createRuleResponse();
     const state = createState(rule, createEsqlResponse());
 
     const result = await step.execute(state);
 
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { alertEvents } = result.data as {
-      alertEvents: Array<{ id: string; doc: { tags?: string[] } }>;
-    };
-    expect(alertEvents[0].doc.tags).toEqual(['production', 'critical']);
+    expect(result).toHaveProperty('data.alertEvents');
+
+    // @ts-expect-error: alertEvents exists
+    const { alertEvents } = result.data;
+    expect(alertEvents[0].doc.rule).toEqual({ id: rule.id, version: 1 });
+    expect(alertEvents[0].doc.type).toBe('signal');
   });
 
-  it('uses groupingKey for alert grouping', async () => {
-    const step = new BuildAlertsStep();
+  it('includes group hash for alert grouping', async () => {
     const rule = createRuleResponse({ groupingKey: ['host.name', 'service.name'] });
     const esqlResponse = createEsqlResponse(
       [
@@ -94,15 +100,14 @@ describe('BuildAlertsStep', () => {
 
     const result = await step.execute(state);
 
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { alertEvents } = result.data as {
-      alertEvents: Array<{ id: string; doc: { grouping?: { key: string; value: string } } }>;
-    };
-    expect(alertEvents[0].doc.grouping?.key).toBe('host.name|service.name');
+    expect(result).toHaveProperty('data.alertEvents');
+
+    // @ts-expect-error: alertEvents exists
+    const { alertEvents } = result.data;
+    expect(alertEvents[0].doc.group_hash).toEqual(expect.any(String));
   });
 
   it('throws when rule is missing from state', async () => {
-    const step = new BuildAlertsStep();
     const state = createState(undefined, createEsqlResponse());
 
     await expect(step.execute(state)).rejects.toThrow(
@@ -111,7 +116,6 @@ describe('BuildAlertsStep', () => {
   });
 
   it('throws when esqlResponse is missing from state', async () => {
-    const step = new BuildAlertsStep();
     const state = createState(createRuleResponse(), undefined);
 
     await expect(step.execute(state)).rejects.toThrow(
@@ -120,7 +124,6 @@ describe('BuildAlertsStep', () => {
   });
 
   it('has correct step name', () => {
-    const step = new BuildAlertsStep();
     expect(step.name).toBe('build_alerts');
   });
 });

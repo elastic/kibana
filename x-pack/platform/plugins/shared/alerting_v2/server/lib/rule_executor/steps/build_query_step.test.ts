@@ -7,7 +7,8 @@
 
 import { BuildQueryStep } from './build_query_step';
 import type { RulePipelineState } from '../types';
-import { createLoggerService, createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('BuildQueryStep', () => {
   const createState = (rule?: ReturnType<typeof createRuleResponse>): RulePipelineState => ({

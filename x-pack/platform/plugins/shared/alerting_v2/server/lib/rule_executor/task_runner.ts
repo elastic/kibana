@@ -43,9 +43,6 @@ export class RuleExecutorTaskRunner {
 
     return {
       ruleId: params.ruleId,
-      // TODO: Implement rule versioning. For now, use 1 as a placeholder.
-      // The version should increment when the rule definition changes.
-      ruleVersion: 1,
       spaceId: params.spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: abortController.signal,

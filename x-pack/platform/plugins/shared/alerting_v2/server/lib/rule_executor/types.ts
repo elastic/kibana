@@ -36,20 +36,6 @@ export type RuleStepOutput =
   | { type: 'continue'; data?: Partial<Omit<RulePipelineState, 'input'>> }
   | { type: 'halt'; reason: HaltReason };
 
-export const continueExecutionWith = <T extends Partial<Omit<RulePipelineState, 'input'>>>(
-  data: T
-): RuleStepOutput => ({
-  type: 'continue',
-  data,
-});
-
-export const continueExecution = (): RuleStepOutput => ({ type: 'continue' });
-
-export const halt = (reason: HaltReason): RuleStepOutput => ({
-  type: 'halt',
-  reason,
-});
-
 export interface RuleExecutionStep {
   readonly name: string;
   execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput>;

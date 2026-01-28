@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecution } from '../types';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
@@ -44,6 +43,6 @@ export class StoreAlertsStep implements RuleExecutionStep {
       message: `alerting_v2:esql run: ruleId=${input.ruleId} spaceId=${input.spaceId} alertsDataStream=${targetDataStream}`,
     });
 
-    return continueExecution();
+    return { type: 'continue' };
   }
 }

@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecutionWith } from '../types';
 import {
   QueryService,
   type QueryServiceContract,
@@ -47,6 +46,6 @@ export class ExecuteQueryStep implements RuleExecutionStep {
       throw error;
     }
 
-    return continueExecutionWith({ esqlResponse });
+    return { type: 'continue', data: { esqlResponse } };
   }
 }

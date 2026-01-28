@@ -131,7 +131,6 @@ Create a new file in `steps/` directory (e.g., `my_new_step.ts`):
 ```typescript
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueExecutionWith, continueExecution, halt } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -159,13 +158,13 @@ export class MyNewStep implements RuleExecutionStep {
     // Return one of three options:
 
     // Option 1: Continue with new data to add to state
-    return continueExecutionWith({ myNewField: myResult });
+    return { type: 'continue', data: { myNewField: myResult } };
 
     // Option 2: Continue without adding data
-    // return continueExecution();
+    // return { type: 'continue' };
 
     // Option 3: Halt pipeline with a domain reason
-    // return halt('rule_disabled');
+    // return { type: 'halt', reason: 'rule_disabled' };
   }
 
   private async doSomething(rule: RuleResponse): Promise<unknown> {
@@ -233,7 +232,8 @@ Create a test file `steps/my_new_step.test.ts`:
 
 ```typescript
 import { MyNewStep } from './my_new_step';
-import { createLoggerService, createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyNewStep', () => {
   it('continues with data when successful', async () => {
@@ -423,7 +423,8 @@ Test utilities are available in `test_utils.ts`:
 
 ```typescript
 import { MyStep } from './my_step';
-import { createLoggerService, createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyStep', () => {
   it('executes successfully', async () => {
@@ -446,7 +447,8 @@ describe('MyStep', () => {
 
 ```typescript
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
-import { createLoggerService, createRuleExecutionInput } from '../test_utils';
+import { createRuleExecutionInput } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('ErrorHandlingMiddleware', () => {
   it('calls next and returns result on success', async () => {
