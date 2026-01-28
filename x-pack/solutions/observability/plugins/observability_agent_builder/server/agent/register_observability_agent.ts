@@ -106,7 +106,7 @@ function getKqlInstructions() {
 export function getEntityLinkingInstructions(spaceId?: string) {
   const prefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
   return dedent(`
-  ## Entity Linking Guidelines
+  ### Entity Linking Guidelines
   Use markdown for readability. When referencing entities, create clickable links.
   IMPORTANT: Do NOT wrap links in backticks - backticks prevent links from being clickable.
 
