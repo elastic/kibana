@@ -47,12 +47,10 @@ interface PromqlPosition {
   canAddGrouping?: boolean;
 }
 
-// ============================================================================
-// Regex Patterns
-// ============================================================================
+// Shared identifier pattern for param names, column names, etc.
+export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
 
-// Param zone detection
-const TRAILING_PARAM_NAME_REGEX = /([A-Za-z_][A-Za-z0-9_]*)\s*$/;
+const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
 
 // ============================================================================
 // Main Entry Point
@@ -478,6 +476,8 @@ export function findFunctionForGrouping(
 // Param Definitions
 // ============================================================================
 
+export const PROMQL_KEYWORD = 'promql';
+
 export enum PromqlParamValueType {
   TimeseriesSources = 'timeseries_sources',
   DateLiterals = 'date_literals',
@@ -518,9 +518,15 @@ const PROMQL_PARAMS: PromqlParamDefinition[] = [
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map(({ name }) => name);
 
-const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => required).map(
+export const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => required).map(
   ({ name }) => name
 );
+
+/* Matches "param=" or "param =" but not "endpoint=" for param "end". */
+const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
+  param,
+  pattern: new RegExp(`\\b${param}\\s*=`, 'i'),
+}));
 
 export function getPromqlParamDefinitions(): PromqlParamDefinition[] {
   return PROMQL_PARAMS;
@@ -569,10 +575,9 @@ export function looksLikePromqlParamAssignment(text: string): boolean {
 /** Scans command text to find used params (includes params after cursor for filtering). */
 export function getUsedPromqlParamNames(commandText: string): Set<string> {
   const used = new Set<string>();
-  const tokens = commandText.toLowerCase().split(/\s+/);
 
-  for (const param of PROMQL_PARAM_NAMES) {
-    if (tokens.some((token) => token === param || token.startsWith(`${param}=`))) {
+  for (const { param, pattern } of PARAM_ASSIGNMENT_PATTERNS) {
+    if (pattern.test(commandText)) {
       used.add(param);
     }
   }

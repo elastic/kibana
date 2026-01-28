@@ -158,7 +158,7 @@ export const FullScreenWaterfall = ({
           css={css`
             width: 100%;
             & .embPanel__content {
-              display: block;
+              display: block !important;
             }
           `}
         >
