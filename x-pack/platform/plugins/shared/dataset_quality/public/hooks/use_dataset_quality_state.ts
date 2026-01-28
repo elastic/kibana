@@ -15,7 +15,8 @@ export const useDatasetQualityState = () => {
 
   const statsLoading = useSelector(
     service,
-    (state) => state.matches('initializing') || state.matches('main.stats.datasets.fetching')
+    (state) =>
+      state.matches('initializing') || state.matches({ main: { stats: { datasets: 'fetching' } } })
   );
 
   const canUserReadFailureStore = Boolean(

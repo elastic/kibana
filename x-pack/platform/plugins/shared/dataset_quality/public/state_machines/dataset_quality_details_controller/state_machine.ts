@@ -71,6 +71,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'checkDatasetIsAggregatable',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeDatasetAggregatableStatus'],
@@ -103,6 +104,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'loadDataStreamDetails',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeDataStreamDetails'],
@@ -144,6 +146,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'checkBreakdownFieldIsEcs',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeBreakdownFieldEcsStatus'],
@@ -163,6 +166,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetchingDataStreamSettings: {
                   invoke: {
                     src: 'loadDataStreamSettings',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'qualityIssues',
                       actions: ['storeDataStreamSettings'],
@@ -189,6 +193,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetchingDataStreamDegradedFields: {
                           invoke: {
                             src: 'loadDegradedFields',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'doneFetchingDegradedFields',
                               actions: ['storeDegradedFields'],
@@ -228,6 +233,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetchingFailedDocs: {
                           invoke: {
                             src: 'loadFailedDocsDetails',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'doneFetchingFailedDocs',
                               actions: ['storeFailedDocsDetails'],
@@ -302,6 +308,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 checkingAndLoadingIntegration: {
                   invoke: {
                     src: 'checkAndLoadIntegration',
+                    input: ({ context }) => context,
                     onDone: [
                       {
                         target: 'loadingIntegrationDashboards',
@@ -322,6 +329,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 loadingIntegrationDashboards: {
                   invoke: {
                     src: 'loadIntegrationDashboards',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeIntegrationDashboards'],
@@ -375,6 +383,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetching: {
                           invoke: {
                             src: 'loadfailedDocsErrors',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'done',
                               actions: ['storeFailedDocsErrors'],
@@ -414,6 +423,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             fetching: {
                               invoke: {
                                 src: 'loadDegradedFieldValues',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'done',
                                   actions: ['storeDegradedFieldValues'],
@@ -438,6 +448,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             analyzing: {
                               invoke: {
                                 src: 'analyzeDegradedField',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'analyzed',
                                   actions: ['storeDegradedFieldAnalysis'],
@@ -458,6 +469,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             mitigating: {
                               invoke: {
                                 src: 'saveNewFieldLimit',
+                                input: ({ context }) => context,
                                 onDone: [
                                   {
                                     target: 'askingForRollover',
@@ -488,6 +500,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             rollingOver: {
                               invoke: {
                                 src: 'rolloverDataStream',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'success',
                                   actions: ['raiseForceTimeRangeRefresh'],
@@ -553,6 +566,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 updating: {
                   invoke: {
                     src: 'updateFailureStore',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'idle',
                       actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],

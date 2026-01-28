@@ -66,23 +66,23 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       state.matches('initializing') ||
-      state.matches('main.stats.datasets.fetching') ||
-      state.matches('main.stats.docsStats.fetching') ||
-      state.matches('main.integrations.fetching') ||
-      state.matches('main.stats.degradedDocs.fetching') ||
-      state.matches('main.stats.failedDocs.fetching')
+      state.matches({ main: { stats: { datasets: 'fetching' } } }) ||
+      state.matches({ main: { stats: { docsStats: 'fetching' } } }) ||
+      state.matches({ main: { integrations: 'fetching' } }) ||
+      state.matches({ main: { stats: { degradedDocs: 'fetching' } } }) ||
+      state.matches({ main: { stats: { failedDocs: 'fetching' } } })
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('main.stats.datasets.fetching')
+    state.matches({ main: { stats: { datasets: 'fetching' } } })
   );
   const loadingDocStats = useSelector(service, (state) =>
-    state.matches('main.stats.docsStats.fetching')
+    state.matches({ main: { stats: { docsStats: 'fetching' } } })
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('main.stats.degradedDocs.fetching')
+    state.matches({ main: { stats: { degradedDocs: 'fetching' } } })
   );
   const loadingFailedStats = useSelector(service, (state) =>
-    state.matches('main.stats.failedDocs.fetching')
+    state.matches({ main: { stats: { failedDocs: 'fetching' } } })
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
