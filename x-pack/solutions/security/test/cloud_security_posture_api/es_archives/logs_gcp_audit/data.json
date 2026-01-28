@@ -1475,3 +1475,145 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multi-relationships-event-1",
+    "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:35:00.789Z",
+      "user": {
+        "name": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com",
+        "entity": {
+          "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com"
+        }
+      },
+      "service": {
+        "target": {
+          "entity": {
+            "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
+          }
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "my-gcp-project-123456"
+        },
+        "provider": "gcp",
+        "project": {
+          "id": "my-gcp-project",
+          "name": "My GCP Project"
+        },
+        "region": "us-central1"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.SetIamPolicy",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "multi-relationships-event-id-12345",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "admin"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com"
+        ]
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "google-cloud-sdk",
+        "original": "google-cloud-sdk gcloud/450.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multi-relationships-event-2",
+    "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:40:00.789Z",
+      "user": {
+        "name": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
+        "entity": {
+          "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1"
+          }
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "my-gcp-project-123456"
+        },
+        "provider": "gcp",
+        "project": {
+          "id": "my-gcp-project",
+          "name": "My GCP Project"
+        },
+        "region": "us-west1"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "host"
+        ],
+        "id": "multi-relationships-event-id-67890",
+        "ingested": "2024-10-07T17:48:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "start"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
+        ]
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "google-cloud-sdk",
+        "original": "google-cloud-sdk gcloud/450.0.0"
+      }
+    }
+  }
+}

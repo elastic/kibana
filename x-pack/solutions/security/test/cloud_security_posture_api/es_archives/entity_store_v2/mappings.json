@@ -416,6 +416,25 @@
             },
             "url": {
               "type": "keyword"
+            },
+            "relationships": {
+              "properties": {
+                "Owns": {
+                  "type": "keyword"
+                },
+                "Depends_on": {
+                  "type": "keyword"
+                },
+                "Communicates_with": {
+                  "type": "keyword"
+                },
+                "Supervised_by": {
+                  "type": "keyword"
+                },
+                "Accessed_frequently_by": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },

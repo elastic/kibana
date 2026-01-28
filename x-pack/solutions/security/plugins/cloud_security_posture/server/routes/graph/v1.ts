@@ -61,22 +61,6 @@ export const getGraph = async ({
   // Optionally fetch relationships in parallel when entityIds are provided
   const hasEntityIds = entityIds && entityIds.length > 0;
 
-  // relationships-test-target-1, relationships-test-target-2, standalone-entity-1
-  // const relationshipResultsPromise = true
-  //   ? fetchEntityRelationships({
-  //       esClient,
-  //       logger,
-  //       entityIds: [
-  //         { id: 'relationships-test-target-1', isOrigin: false },
-  //         { id: 'relationships-test-target-2', isOrigin: false },
-  //         { id: 'standalone-entity-1', isOrigin: false },
-  //         { id: 'standalone-entity-2', isOrigin: true },
-  //         { id: 'standalone-entity-3', isOrigin: false },
-  //       ],
-  //       spaceId,
-  //     })
-  //   : Promise.resolve([]);
-
   const relationshipResultsPromise = hasEntityIds
     ? fetchEntityRelationships({
         esClient,
