@@ -7,42 +7,40 @@
 
 import { z } from '@kbn/zod';
 
-const baseActionSchema = z.object({
-  episode_id: z.string().optional(),
-});
-
-const ackActionSchema = baseActionSchema.extend({
+const ackActionSchema = z.object({
   action_type: z.literal('ack'),
+  episode_id: z.string(),
 });
 
-const unackActionSchema = baseActionSchema.extend({
+const unackActionSchema = z.object({
   action_type: z.literal('unack'),
+  episode_id: z.string(),
 });
 
-const tagActionSchema = baseActionSchema.extend({
+const tagActionSchema = z.object({
   action_type: z.literal('tag'),
   tags: z.array(z.string()),
 });
 
-const untagActionSchema = baseActionSchema.extend({
+const untagActionSchema = z.object({
   action_type: z.literal('untag'),
   tags: z.array(z.string()),
 });
 
-const snoozeActionSchema = baseActionSchema.extend({
+const snoozeActionSchema = z.object({
   action_type: z.literal('snooze'),
 });
 
-const unsnoozeActionSchema = baseActionSchema.extend({
+const unsnoozeActionSchema = z.object({
   action_type: z.literal('unsnooze'),
 });
 
-const activateActionSchema = baseActionSchema.extend({
+const activateActionSchema = z.object({
   action_type: z.literal('activate'),
   reason: z.string(),
 });
 
-const deactivateActionSchema = baseActionSchema.extend({
+const deactivateActionSchema = z.object({
   action_type: z.literal('deactivate'),
   reason: z.string(),
 });
@@ -61,13 +59,13 @@ export const createAlertActionDataSchema = z.discriminatedUnion('action_type', [
 export type CreateAlertActionData = z.infer<typeof createAlertActionDataSchema>;
 
 export const createAlertActionParamsSchema = z.object({
-  alert_series_id: z.string(),
+  group_hash: z.string(),
 });
 
 export type CreateAlertActionParams = z.infer<typeof createAlertActionParamsSchema>;
 
 export const bulkCreateAlertActionItemDataSchema = createAlertActionDataSchema.and(
-  z.object({ alert_series_id: z.string() })
+  z.object({ group_hash: z.string() })
 );
 export type BulkCreateAlertActionItemData = z.infer<typeof bulkCreateAlertActionItemDataSchema>;
 

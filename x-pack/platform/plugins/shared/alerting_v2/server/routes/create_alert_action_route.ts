@@ -22,7 +22,7 @@ import {
 @injectable()
 export class CreateAlertActionRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{alert_series_id}/action`;
+  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{group_hash}/action`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -50,7 +50,7 @@ export class CreateAlertActionRoute {
   async handle() {
     try {
       await this.alertActionsClient.createAction({
-        alertSeriesId: this.request.params.alert_series_id,
+        groupHash: this.request.params.group_hash,
         action: this.request.body,
       });
 
