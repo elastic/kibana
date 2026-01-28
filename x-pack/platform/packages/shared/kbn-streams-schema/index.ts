@@ -23,7 +23,9 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
+export { isTSDBMode } from './src/helpers/is_tsdb_mode';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,

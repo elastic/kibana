@@ -22,10 +22,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import {
   Streams,
-  getIndexPatternsForStream,
   getSegments,
   isDescendantOf,
   isRootStreamDefinition,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -188,23 +188,27 @@ function StreamNode({
     [share.url.locators]
   );
 
-  // Use TSDB mode from data_stream.index_mode directly from listing data
-  const isTSDBMode = node.data_stream?.index_mode === 'time_series';
-
   const discoverUrl = useMemo(() => {
-    const indexPatterns = getIndexPatternsForStream(node.stream);
-
-    if (!discoverLocator || !indexPatterns) {
+    if (!discoverLocator) {
       return undefined;
     }
 
-    const sourceCommand = isTSDBMode ? 'TS' : 'FROM';
+    // Use index_mode from data_stream (from listing data)
+    const esqlQuery = getDiscoverEsqlQuery({
+      definition: node.stream,
+      indexMode: node.data_stream?.index_mode,
+    });
+
+    if (!esqlQuery) {
+      return undefined;
+    }
+
     return discoverLocator.getRedirectUrl({
       query: {
-        esql: `${sourceCommand} ${indexPatterns.join(', ')}`,
+        esql: esqlQuery,
       },
     });
-  }, [discoverLocator, node, isTSDBMode]);
+  }, [discoverLocator, node]);
 
   return (
     <EuiFlexGroup

@@ -11,7 +11,6 @@ import {
   getInheritedFieldsFromAncestors,
   getInheritedSettings,
   findInheritedFailureStore,
-  type IngestStreamIndexMode,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -92,7 +91,7 @@ export async function readStream({
     return {
       stream: streamDefinition,
       privileges,
-      index_mode: dataStream?.index_mode as IngestStreamIndexMode | undefined,
+      index_mode: dataStream?.index_mode,
       elasticsearch_assets:
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
@@ -132,7 +131,7 @@ export async function readStream({
     rules,
     privileges,
     queries,
-    index_mode: dataStream?.index_mode as IngestStreamIndexMode | undefined,
+    index_mode: dataStream?.index_mode,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
