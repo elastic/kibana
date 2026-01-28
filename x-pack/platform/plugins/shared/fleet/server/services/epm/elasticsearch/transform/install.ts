@@ -17,8 +17,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 import pMap from 'p-map';
 
-import { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
-
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 
 import { generateTransformSecondaryAuthHeaders } from '../../../api_keys/transform_api_keys';
@@ -59,6 +57,7 @@ import {
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
+import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -467,10 +466,10 @@ const installTransformsAssets = async (
   request?: KibanaRequest
 ) => {
   let installedTransforms: EsAssetReference[] = [];
-  const authorizationHeader = request
-    ? HTTPAuthorizationHeader.parseFromRequest(request)
+
+  const username = request
+    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
     : undefined;
-  const username = authorizationHeader?.getUsername();
 
   if (transformPaths.length > 0) {
     const {

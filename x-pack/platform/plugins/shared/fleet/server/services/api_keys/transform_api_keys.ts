@@ -16,8 +16,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '..';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
 import type {
   TransformAPIKey,
   SecondaryAuthorizationHeader,
@@ -56,9 +54,9 @@ export async function generateTransformSecondaryAuthHeaders({
     return;
   }
 
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-
-  const user = username ?? authorizationHeader?.getUsername();
+  const user = request
+    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+    : undefined;
 
   const name = pkgName
     ? `${pkgName}${pkgVersion ? '-' + pkgVersion : ''}-transform${user ? '-by-' + user : ''}`

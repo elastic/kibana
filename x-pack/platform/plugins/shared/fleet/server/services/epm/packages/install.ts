@@ -28,7 +28,6 @@ import type {
   PackageDataStreamTypes,
   PackageInstallContext,
 } from '../../../../common/types';
-import { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
@@ -1107,8 +1106,9 @@ export async function installCustomPackage(
     version: INITIAL_VERSION,
     owner: {
       github:
-        (request ? HTTPAuthorizationHeader.parseFromRequest(request)?.getUsername() : null) ??
-        'unknown',
+        (request
+          ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+          : null) ?? 'unknown',
     },
     type: 'integration' as const,
     data_streams: generateDatastreamEntries(datasets, pkgName),
