@@ -14,8 +14,194 @@ const yaml = require('js-yaml');
 const cloneDeep = require('lodash/cloneDeep');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { createComponentNameGenerator } = require('./component_name_generator');
-const { createProcessSchema, stripMetadata } = require('./process_schema');
+const { createProcessSchema } = require('./process_schema');
 const { STRATEGY_DEFAULTS, HTTP_METHODS } = require('./constants');
+
+/**
+ * Determines if a top-level schema should be extracted as a component.
+ * Top-level schemas are extracted if they:
+ * - Are not already a $ref
+ * - Have properties (for object types)
+ * - Are empty objects (if extractEmpty is true)
+ * - Have composition types (oneOf/anyOf/allOf)
+ *
+ * @param {Object} schema - The schema to check
+ * @param {boolean} extractEmpty - Whether to extract empty object schemas
+ * @returns {boolean} - True if schema should be extracted
+ */
+function shouldExtractTopLevelSchema(schema, extractEmpty) {
+  return (
+    !schema.$ref &&
+    ((schema.type === 'object' && schema.properties) ||
+      (extractEmpty && schema.type === 'object') ||
+      schema.oneOf ||
+      schema.anyOf ||
+      schema.allOf)
+  );
+}
+
+/**
+ * Extracts a top-level schema (request or response) as a component and replaces it with a $ref.
+ *
+ * @param {Object} schema - The schema to extract
+ * @param {Object} contentTypeObj - The content type object containing the schema
+ * @param {Object} baseContext - Base context for the operation
+ * @param {Object} extractionContext - Additional context (isRequest, responseCode)
+ * @param {Function} nameGenerator - Function to generate component names
+ * @param {Object} components - The components.schemas object
+ * @param {Object} stats - Statistics tracking object
+ * @param {Object} log - Logger instance
+ * @param {Function} processSchema - The schema processor function
+ * @param {string} logType - Type for logging ('request' or 'response')
+ */
+function extractAndReplaceTopLevelSchema(
+  schema,
+  contentTypeObj,
+  baseContext,
+  extractionContext,
+  nameGenerator,
+  components,
+  stats,
+  log,
+  processSchema,
+  logType
+) {
+  const context = {
+    ...baseContext,
+    ...extractionContext,
+  };
+  const name = nameGenerator(context);
+
+  if (components[name]) {
+    log.warn(`Component name collision: ${name} - appending counter`);
+  }
+
+  const schemaToStore = cloneDeep(schema);
+  components[name] = schemaToStore;
+  stats.schemasExtracted++;
+  log.debug(`Extracted top-level ${logType} schema ${name}`);
+
+  contentTypeObj.schema = { $ref: `#/components/schemas/${name}` };
+
+  processSchema(schemaToStore, {
+    method: baseContext.method,
+    path: baseContext.path,
+    operationId: baseContext.operationId,
+    ...extractionContext,
+    propertyPath: [],
+  });
+}
+
+/**
+ * Processes request body schemas for a given method operation.
+ * Extracts top-level schemas and recursively processes nested schemas.
+ *
+ * @param {Object} methodValue - The method operation object
+ * @param {Object} baseContext - Base context for the operation
+ * @param {boolean} extractEmpty - Whether to extract empty object schemas
+ * @param {Function} nameGenerator - Function to generate component names
+ * @param {Object} components - The components.schemas object
+ * @param {Object} stats - Statistics tracking object
+ * @param {Object} log - Logger instance
+ * @param {Function} processSchema - The schema processor function
+ */
+function processRequestBodySchemas(
+  methodValue,
+  baseContext,
+  extractEmpty,
+  nameGenerator,
+  components,
+  stats,
+  log,
+  processSchema
+) {
+  if (!methodValue.requestBody?.content) return;
+
+  Object.entries(methodValue.requestBody.content).forEach(([contentType, contentTypeObj]) => {
+    if (contentTypeObj.schema) {
+      log.debug(`Processing request body (${contentType})`);
+      const schema = contentTypeObj.schema;
+
+      if (shouldExtractTopLevelSchema(schema, extractEmpty)) {
+        extractAndReplaceTopLevelSchema(
+          schema,
+          contentTypeObj,
+          baseContext,
+          { isRequest: true },
+          nameGenerator,
+          components,
+          stats,
+          log,
+          processSchema,
+          'request'
+        );
+      } else {
+        processSchema(schema, {
+          ...baseContext,
+          isRequest: true,
+        });
+      }
+    }
+  });
+}
+
+/**
+ * Processes response schemas for a given method operation.
+ * Extracts top-level schemas and recursively processes nested schemas.
+ *
+ * @param {Object} methodValue - The method operation object
+ * @param {Object} baseContext - Base context for the operation
+ * @param {boolean} extractEmpty - Whether to extract empty object schemas
+ * @param {Function} nameGenerator - Function to generate component names
+ * @param {Object} components - The components.schemas object
+ * @param {Object} stats - Statistics tracking object
+ * @param {Object} log - Logger instance
+ * @param {Function} processSchema - The schema processor function
+ */
+function processResponseSchemas(
+  methodValue,
+  baseContext,
+  extractEmpty,
+  nameGenerator,
+  components,
+  stats,
+  log,
+  processSchema
+) {
+  if (!methodValue.responses) return;
+
+  Object.entries(methodValue.responses).forEach(([statusCode, response]) => {
+    if (response.content) {
+      Object.entries(response.content).forEach(([contentType, contentTypeObj]) => {
+        if (contentTypeObj.schema) {
+          log.debug(`Processing response ${statusCode} (${contentType})`);
+          const schema = contentTypeObj.schema;
+
+          if (shouldExtractTopLevelSchema(schema, extractEmpty)) {
+            extractAndReplaceTopLevelSchema(
+              schema,
+              contentTypeObj,
+              baseContext,
+              { isRequest: false, responseCode: statusCode },
+              nameGenerator,
+              components,
+              stats,
+              log,
+              processSchema,
+              'response'
+            );
+          } else {
+            processSchema(schema, {
+              ...baseContext,
+              isRequest: false,
+              responseCode: statusCode,
+            });
+          }
+        }
+      });
+    }
+  });
+}
 
 /**
  * Main componentization function
@@ -56,7 +242,6 @@ const componentizeObjectSchemas = async (
     log = console,
     extractPrimitives = STRATEGY_DEFAULTS.extractPrimitives,
     removeProperties = STRATEGY_DEFAULTS.removeProperties,
-    preserveMetadata = STRATEGY_DEFAULTS.preserveMetadata,
     extractEmpty = STRATEGY_DEFAULTS.extractEmpty,
   } = {}
 ) => {
@@ -67,10 +252,8 @@ const componentizeObjectSchemas = async (
     log.info(`Loading OAS document from ${absPath}`);
     const originalDoc = yaml.load(fs.readFileSync(absPath, 'utf8'));
 
-    // Work on a deep copy to avoid mutations
     const oasDoc = cloneDeep(originalDoc);
 
-    // Initialize components if needed
     if (!oasDoc.components) {
       oasDoc.components = {};
     }
@@ -79,7 +262,6 @@ const componentizeObjectSchemas = async (
     }
 
     const components = oasDoc.components.schemas;
-    // utility to generate unique component names
     const nameGenerator = createComponentNameGenerator();
     const stats = {
       schemasExtracted: 0,
@@ -89,15 +271,12 @@ const componentizeObjectSchemas = async (
       maxDepth: 0,
     };
 
-    // Store strategy options for use when storing top-level components
     const strategyOptions = {
       extractPrimitives,
       removeProperties,
-      preserveMetadata,
       extractEmpty,
     };
 
-    // Create the schema processor with proper context and strategy options
     const processSchema = createProcessSchema(
       components,
       nameGenerator,
@@ -106,10 +285,7 @@ const componentizeObjectSchemas = async (
       strategyOptions
     );
 
-    // MAIN FLOW
-    //Process all paths
     log.info('Processing paths...');
-    // iitialize counters
     let pathCount = 0;
     let methodValueCount = 0;
 
@@ -118,8 +294,6 @@ const componentizeObjectSchemas = async (
       log.debug(`Processing path: ${pathName}`);
 
       for (const [method, methodValue] of Object.entries(pathValue)) {
-        // Only process HTTP method operations (skip path-level properties)
-
         if (!HTTP_METHODS.includes(method.toLowerCase())) {
           continue;
         }
@@ -132,141 +306,32 @@ const componentizeObjectSchemas = async (
           propertyPath: [],
         };
 
-        log.debug(`Processing method: ${method.toUpperCase()}`); // upper case is easier to read in logs
+        log.debug(`Processing method: ${method.toUpperCase()}`);
 
-        // Process request body if method supports request content (put, post, patch),
-        if (methodValue.requestBody?.content) {
-          // TODO: extract to helper function, e.g. handleRequestBodySchemas()
-          Object.entries(methodValue.requestBody.content).forEach(
-            ([contentType, contentTypeObj]) => {
-              if (contentTypeObj.schema) {
-                log.debug(`Processing request body (${contentType})`);
-                const schema = contentTypeObj.schema;
+        processRequestBodySchemas(
+          methodValue,
+          baseContext,
+          extractEmpty,
+          nameGenerator,
+          components,
+          stats,
+          log,
+          processSchema
+        );
 
-                // Extract top-level schema if it's an object with properties or has composition types
-                // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
-                // Also extract empty objects if extractEmpty is true
-                if (
-                  !schema.$ref &&
-                  ((schema.type === 'object' && schema.properties) ||
-                    (extractEmpty && schema.type === 'object') ||
-                    schema.oneOf ||
-                    schema.anyOf ||
-                    schema.allOf)
-                ) {
-                  const requestContext = {
-                    ...baseContext,
-                    isRequest: true,
-                  };
-                  const name = nameGenerator(requestContext);
-
-                  if (components[name]) {
-                    log.warn(`Component name collision: ${name} - appending counter`);
-                  }
-
-                  // Apply metadata stripping if needed
-                  const schemaToStore = strategyOptions.preserveMetadata
-                    ? cloneDeep(schema)
-                    : stripMetadata(cloneDeep(schema));
-                  components[name] = schemaToStore;
-                  stats.schemasExtracted++;
-                  log.debug(`Extracted top-level request schema ${name}`);
-
-                  // Replace with reference
-                  contentTypeObj.schema = { $ref: `#/components/schemas/${name}` };
-
-                  // Now recursively process the extracted component with fresh context
-                  // Reset propertyPath since this is now a standalone component
-                  processSchema(schemaToStore, {
-                    method: baseContext.method,
-                    path: baseContext.path,
-                    operationId: baseContext.operationId,
-                    isRequest: true,
-                    propertyPath: [],
-                  });
-                } else {
-                  // Not extractable, just process recursively
-                  processSchema(schema, {
-                    ...baseContext,
-                    isRequest: true,
-                  });
-                }
-              }
-            }
-          );
-        }
-
-        // Process responses
-        if (methodValue.responses) {
-          // TODO: extract to helper function, e.g handleResponseSchemas()
-          Object.entries(methodValue.responses).forEach(([statusCode, response]) => {
-            if (response.content) {
-              Object.entries(response.content).forEach(([contentType, contentTypeObj]) => {
-                if (contentTypeObj.schema) {
-                  log.debug(`Processing response ${statusCode} (${contentType})`);
-                  const schema = contentTypeObj.schema;
-
-                  // Extract top-level schema if it's an object with properties or has composition types
-                  // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
-                  // Also extract empty objects if extractEmpty is true
-                  if (
-                    !schema.$ref &&
-                    ((schema.type === 'object' && schema.properties) ||
-                      (extractEmpty && schema.type === 'object') ||
-                      schema.oneOf ||
-                      schema.anyOf ||
-                      schema.allOf)
-                  ) {
-                    const responseContext = {
-                      ...baseContext,
-                      isRequest: false,
-                      responseCode: statusCode,
-                    };
-                    const name = nameGenerator(responseContext);
-
-                    if (components[name]) {
-                      log.warn(`Component name collision: ${name} - appending counter`);
-                    }
-
-                    // Apply metadata stripping if needed TODO: remove
-                    const schemaToStore = strategyOptions.preserveMetadata
-                      ? cloneDeep(schema)
-                      : stripMetadata(cloneDeep(schema));
-                    components[name] = schemaToStore;
-                    stats.schemasExtracted++;
-                    log.debug(`Extracted top-level response schema ${name}`);
-
-                    // Replace with reference
-                    contentTypeObj.schema = { $ref: `#/components/schemas/${name}` };
-
-                    // Now recursively process the extracted component with fresh context
-                    // Reset propertyPath since this is now a standalone component
-                    processSchema(schemaToStore, {
-                      method: baseContext.method,
-                      path: baseContext.path,
-                      operationId: baseContext.operationId,
-                      isRequest: false,
-                      responseCode: statusCode,
-                      propertyPath: [],
-                    });
-                  } else {
-                    // Not extractable, just process recursively
-                    processSchema(schema, {
-                      ...baseContext,
-                      isRequest: false,
-                      responseCode: statusCode,
-                    });
-                  }
-                }
-              });
-            }
-          });
-        }
+        processResponseSchemas(
+          methodValue,
+          baseContext,
+          extractEmpty,
+          nameGenerator,
+          components,
+          stats,
+          log,
+          processSchema
+        );
       }
     }
 
-    // Process pre-existing components (e.g., manual additions)
-    // Track which components existed before componentization to avoid infinite loops
     log.info('Processing existing components...');
     const preExistingComponentNames = Object.keys(components);
     const processedComponents = new Set();
@@ -280,9 +345,6 @@ const componentizeObjectSchemas = async (
       const componentSchema = components[componentName];
       log.debug(`Processing existing component: ${componentName}`);
 
-      // Process this component to extract any nested inline schemas
-      // Use a generic context since these components aren't tied to specific operations
-      // Include parentComponentName so nested schemas get meaningful names
       processSchema(componentSchema, {
         method: null,
         path: null,
@@ -294,18 +356,15 @@ const componentizeObjectSchemas = async (
       });
     }
 
-    // Write to temporary file first
     tempFilePath = path.join(os.tmpdir(), `componentize-${Date.now()}-${path.basename(absPath)}`);
     log.debug(`Writing to temporary file: ${tempFilePath}`);
     fs.writeFileSync(tempFilePath, yaml.dump(oasDoc, { noRefs: true, lineWidth: -1 }), 'utf8');
 
-    // If successful, replace original file
     log.info(`Writing componentized schemas to ${absPath}`);
     fs.copyFileSync(tempFilePath, absPath);
     fs.unlinkSync(tempFilePath);
     tempFilePath = null;
 
-    // Log stats for dev, TODO: extract to logger utility that can be silenced or redirected
     log.info('Componentization complete!');
     log.info(`Paths processed: ${pathCount}`);
     log.info(`Operations processed: ${methodValueCount}`);
@@ -316,7 +375,6 @@ const componentizeObjectSchemas = async (
     log.info(`Max depth: ${stats.maxDepth}`);
   } catch (error) {
     log.error(`Error during componentization: ${error.message}`);
-    // Clean up temp file if it exists
     if (tempFilePath && fs.existsSync(tempFilePath)) {
       fs.unlinkSync(tempFilePath);
       log.debug(`Cleaned up temporary file: ${tempFilePath}`);

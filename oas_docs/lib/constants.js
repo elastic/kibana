@@ -6,20 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-// TODO: Change filename to constants.js
 /**
  * Default values for refactoring schemas to component references.
 
  *
  * @property {boolean} extractPrimitives - Extract primitive properties as separate components (default: false)
  * @property {boolean} removeProperties - Remove extracted properties from parent components (default: false)
- * @property {boolean} preserveMetadata - Preserve metadata fields like additionalProperties, default, description (default: true)
  * @property {boolean} extractEmpty - Extract empty object schemas { type: 'object' } (default: true)
  */
 const STRATEGY_DEFAULTS = {
   extractPrimitives: false,
   removeProperties: false,
-  preserveMetadata: true,
   extractEmpty: true,
 };
 
