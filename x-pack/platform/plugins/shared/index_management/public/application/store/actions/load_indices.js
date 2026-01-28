@@ -15,9 +15,9 @@ export const loadIndicesEnrichmentError = createAction(
   'INDEX_MANAGEMENT_LOAD_INDICES_ENRICHMENT_ERROR'
 );
 
-let abortController: AbortController;
+let abortController;
 
-export const loadIndices = () => async (dispatch: any) => {
+export const loadIndices = () => async (dispatch) => {
   if (abortController && !abortController.signal.aborted) {
     abortController.abort();
   }
