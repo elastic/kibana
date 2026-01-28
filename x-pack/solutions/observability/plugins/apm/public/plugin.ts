@@ -100,6 +100,8 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
+import { createFocusedTraceWaterfallFetcher } from './components/shared/focused_trace_waterfall/focused_trace_waterfall_fetcher';
+import { createFullTraceWaterfallFetcher } from './components/shared/trace_waterfall/full_trace_waterfall_fetcher';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -519,7 +521,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet } = plugins;
+    const { fleet, discoverShared } = plugins;
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
@@ -527,6 +529,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-focused-trace-waterfall',
+      render: createFocusedTraceWaterfallFetcher({ core }),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-full-trace-waterfall',
+      render: createFullTraceWaterfallFetcher({ core }),
     });
 
     if (fleet) {

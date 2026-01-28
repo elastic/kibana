@@ -4,27 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isPending, useFetcher } from '../../hooks/use_fetcher';
-import { Loading } from './loading';
-import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
-import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 
-export function TraceWaterfallEmbeddable({
-  serviceName,
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
+import { EuiCallOut } from '@elastic/eui';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { Loading } from './loading';
+import { TraceWaterfall } from '.';
+
+export function createFullTraceWaterfallFetcher({ core }: { core: CoreStart }) {
+  createCallApmApi(core);
+  return (props: FullTraceWaterfallProps) => <FullTraceWaterfallFetcher {...props} />;
+}
+
+export function FullTraceWaterfallFetcher({
+  traceId,
   rangeFrom,
   rangeTo,
-  traceId,
+  serviceName,
   scrollElement,
   onNodeClick,
-  getRelatedErrorsHref,
   onErrorClick,
-  mode,
-}: ApmTraceWaterfallEmbeddableEntryProps) {
-  const isFiltered = mode === 'filtered';
-
+}: FullTraceWaterfallProps) {
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
@@ -33,12 +37,11 @@ export function TraceWaterfallEmbeddable({
           query: {
             start: rangeFrom,
             end: rangeTo,
-            serviceName: isFiltered ? serviceName : undefined,
           },
         },
       });
     },
-    [rangeFrom, rangeTo, traceId, isFiltered, serviceName]
+    [rangeFrom, rangeTo, traceId]
   );
 
   if (isPending(status)) {
@@ -65,12 +68,10 @@ export function TraceWaterfallEmbeddable({
       errors={data.errors}
       onClick={onNodeClick}
       scrollElement={scrollElement}
-      getRelatedErrorsHref={getRelatedErrorsHref}
       isEmbeddable
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
-      isFiltered={isFiltered}
       agentMarks={data.agentMarks}
       showCriticalPathControl
     />
