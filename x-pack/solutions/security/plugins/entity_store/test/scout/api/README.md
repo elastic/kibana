@@ -1,13 +1,20 @@
 ### Running
 
-First start the server
+Stop local running elasticsearch and kibana (the server brings it up)
+
+Start the server for ECH stateful
 ```sh
 node scripts/scout.js start-server --stateful
 ```
 
+Or serverless security
+```sh
+node scripts/scout.js start-server --serverless=security
+```
+
 And then run
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project local
+npx playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project=local
 ```
 
 ### Generating archives

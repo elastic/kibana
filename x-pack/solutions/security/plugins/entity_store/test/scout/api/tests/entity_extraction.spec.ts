@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout-security';
-import { apiTest, tags, expect } from '@kbn/scout-security';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES } from '../fixtures/constants';
+import { apiTest, expect } from '@kbn/scout-security';
+import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
-apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  let apiCredentials: RoleApiCredentials;
+apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, esArchiver }) => {
-    apiCredentials = await requestAuth.getApiKey('admin');
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...COMMON_HEADERS,
+    };
 
     // enable feature flag
     await apiClient.post('internal/kibana/settings', {
-      headers: {
-        ...apiCredentials.apiKeyHeader,
-        ...COMMON_HEADERS,
-      },
+      headers: defaultHeaders,
       responseType: 'json',
       body: {
         changes: {
@@ -32,10 +32,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
 
     // Install the entity store
     const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
-      headers: {
-        ...apiCredentials.apiKeyHeader,
-        ...COMMON_HEADERS,
-      },
+      headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
@@ -48,10 +45,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
 
   apiTest.afterAll(async ({ apiClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-      headers: {
-        ...apiCredentials.apiKeyHeader,
-        ...COMMON_HEADERS,
-      },
+      headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
@@ -62,10 +56,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
       {
-        headers: {
-          ...apiCredentials.apiKeyHeader,
-          ...COMMON_HEADERS,
-        },
+        headers: defaultHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -331,10 +322,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
       {
-        headers: {
-          ...apiCredentials.apiKeyHeader,
-          ...COMMON_HEADERS,
-        },
+        headers: defaultHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -659,10 +647,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
       {
-        headers: {
-          ...apiCredentials.apiKeyHeader,
-          ...COMMON_HEADERS,
-        },
+        headers: defaultHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -716,10 +701,7 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
       {
-        headers: {
-          ...apiCredentials.apiKeyHeader,
-          ...COMMON_HEADERS,
-        },
+        headers: defaultHeaders,
         responseType: 'json',
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
@@ -747,7 +729,6 @@ apiTest.describe('Entity Store API tests', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
         _source: {
           'entity.EngineMetadata.Type': 'generic',
           'entity.name': 'generic:generic-id',
-          'entity.source': '.ds-.entities.v2.updates.security_generic_default-2026.01.27-000001',
           '@timestamp': '2026-01-20T12:05:05.000Z',
           'entity.id': 'generic:generic-id',
         },

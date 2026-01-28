@@ -16,6 +16,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
   name: `Security 'generic' Entity Store Definition`,
   // Generic doesn't have type prefix on the id
   identityField: {
+    calculated: false,
     field: GENERIC_IDENTITY_FIELD,
     mapping: { type: 'keyword' },
   },

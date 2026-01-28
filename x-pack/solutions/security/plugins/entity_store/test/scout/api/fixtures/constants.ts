@@ -22,3 +22,6 @@ export const ENTITY_STORE_ROUTES = {
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity-store/${entityType}/force-log-extraction`,
 } as const;
+
+// ESS Only until we have LAST/FIRST enabled for serverless
+export const ENTITY_STORE_TAGS = ['@ess' /* '@svlSecurity'*/];

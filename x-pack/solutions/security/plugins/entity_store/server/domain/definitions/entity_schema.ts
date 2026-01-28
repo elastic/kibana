@@ -49,7 +49,7 @@ const calculatedIdentityFieldLogic = z.object({
 const identityFieldSchema = z.object({
   field: z.string(),
   mapping: mappingSchema,
-  calculated: z.literal(false).optional(),
+  calculated: z.literal(false),
 });
 
 export const entitySchema = z.object({

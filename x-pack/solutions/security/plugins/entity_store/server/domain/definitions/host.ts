@@ -42,8 +42,8 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
                   ),
                   NULL
                 ),
-                CASE(${esqlIsNotNullOrEmpty('host.hostname')}, host.hostname, NULL),
                 CASE(${esqlIsNotNullOrEmpty('host.name')}, host.name, NULL),
+                CASE(${esqlIsNotNullOrEmpty('host.hostname')}, host.hostname, NULL),
                 NULL
               )`,
   },
