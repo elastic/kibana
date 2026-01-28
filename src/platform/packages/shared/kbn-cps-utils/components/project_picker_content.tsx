@@ -34,6 +34,7 @@ export interface ProjectPickerContentProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
+  showTitle?: boolean;
   settingsComponent?: React.ReactNode;
 }
 
@@ -55,6 +56,7 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
+  showTitle = true,
   settingsComponent,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
@@ -72,26 +74,28 @@ export const ProjectPickerContent = ({
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        {isReadonly && (
-          <EuiCallOut
-            size="s"
-            css={styles.callout}
-            title={strings.getProjectPickerReadonlyCallout()}
-            iconType="info"
-          />
-        )}
-      </EuiFlexItem>
+      {showTitle && (
+        <EuiFlexItem grow={false}>
+          <EuiPopoverTitle paddingSize="s">
+            <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiTitle size="xxs">
+                  <h5>{strings.getProjectPickerPopoverTitle()}</h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
+          {isReadonly && (
+            <EuiCallOut
+              size="s"
+              css={styles.callout}
+              title={strings.getProjectPickerReadonlyCallout()}
+              iconType="info"
+            />
+          )}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           isFullWidth
