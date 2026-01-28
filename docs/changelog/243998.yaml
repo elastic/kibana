@@ -86,6 +86,8 @@ type: enhancement
 products:
 - product: kibana
   target: 9.3.0
+- product: observability
+  target: 9.3.0
 areas:
 - Management
 title: Add  custom processor description
