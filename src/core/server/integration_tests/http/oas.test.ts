@@ -21,6 +21,8 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { createInternalHttpService } from '../utilities';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 
 let prebootDeps: {
   context: jest.Mocked<InternalContextPreboot>;
@@ -29,6 +31,7 @@ let prebootDeps: {
 let setupDeps: {
   context: jest.Mocked<InternalContextSetup>;
   executionContext: jest.Mocked<InternalExecutionContextSetup>;
+  userActivity: jest.Mocked<InternalUserActivityServiceSetup>;
 };
 beforeEach(async () => {
   prebootDeps = {
@@ -39,6 +42,7 @@ beforeEach(async () => {
   setupDeps = {
     context: contextSetup,
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
   };
 });
 
