@@ -21,6 +21,7 @@ import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputsInYaml } from './validate_workflow_inputs_in_yaml';
+import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -142,7 +143,8 @@ export function useYamlValidation(
             yamlDocument
           ),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model),
-          ...validateWorkflowInputsInYaml(workflowInputsItems, workflows, lineCounter)
+          ...validateWorkflowInputsInYaml(workflowInputsItems, workflows, lineCounter),
+          ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs)
         );
       }
 
@@ -311,6 +313,15 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
             : null,
         },
       });
+    } else if (validationResult.owner === 'workflow-output-validation') {
+      if (validationResult.severity !== null) {
+        markers.push({
+          ...marker,
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          source: 'workflow-output-validation',
+        });
+      }
     } else {
       if (validationResult.severity !== null) {
         markers.push({
