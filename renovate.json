@@ -4375,10 +4375,10 @@
       "enabled": true
     },
     {
-      "groupName": "XState5",
+      "groupName": "xstate",
       "matchDepNames": [
-        "xstate5",
-        "@xstate5/react"
+        "xstate",
+        "@xstate/react"
       ],
       "reviewers": [
         "team:obs-onboarding-team"
