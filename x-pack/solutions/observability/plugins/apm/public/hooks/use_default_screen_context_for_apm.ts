@@ -11,7 +11,7 @@ import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { ApmPluginStartDeps } from '../plugin';
 
-export function useDefaultAgentBuilderScreenContextForAPM({
+export function useDefaultScreenContextForApm({
   hasApmData,
   hasApmIntegrations,
   noDataConfig,
