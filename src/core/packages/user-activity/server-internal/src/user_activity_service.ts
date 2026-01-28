@@ -20,16 +20,22 @@ import type {
   InternalUserActivityServiceStart,
 } from './types';
 
+/** @internal */
 interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
 }
 
+/**
+ * Service for recording user actions within Kibana.
+ *
+ * Supports custom logging appenders using the same schema as the core logging service.
+ * @internal
+ */
 export class UserActivityService
   implements CoreService<InternalUserActivityServiceSetup, InternalUserActivityServiceStart>
 {
   private readonly logger: Logger;
   private enabled = false;
-
   private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
 
   constructor(private readonly coreContext: CoreContext) {

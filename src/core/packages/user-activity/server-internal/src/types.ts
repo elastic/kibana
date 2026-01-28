@@ -12,14 +12,17 @@ import type {
   UserActivityServiceStart,
 } from '@kbn/core-user-activity-server';
 
+/** @internal */
 export interface SessionContext {
   id?: string;
 }
 
+/** @internal */
 export interface SpaceContext {
   id?: string;
 }
 
+/** @internal */
 export interface UserContext {
   id?: string;
   username?: string;
@@ -28,6 +31,10 @@ export interface UserContext {
   ip?: string;
 }
 
+/**
+ * Context automatically injected by HTTP middleware.
+ * @internal
+ */
 export interface InjectedContext {
   session?: SessionContext;
   kibana?: {
@@ -36,10 +43,24 @@ export interface InjectedContext {
   user?: UserContext;
 }
 
+/** @internal */
 export interface InternalUserActivityServiceSetup extends UserActivityServiceSetup {
+  /**
+   * Sets request-scoped context that will be included in tracked actions.
+   * Multiple calls merge the context.
+   *
+   * @param newContext {@link InjectedContext}
+   */
   setInjectedContext(newContext: InjectedContext): void;
 }
 
+/** @internal */
 export interface InternalUserActivityServiceStart extends UserActivityServiceStart {
+  /**
+   * Sets request-scoped context that will be included in tracked actions.
+   * Multiple calls merge the context
+   *
+   * @param newContext {@link InjectedContext}.
+   */
   setInjectedContext(newContext: InjectedContext): void;
 }

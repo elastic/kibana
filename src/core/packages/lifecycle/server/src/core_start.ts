@@ -57,7 +57,7 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
-  /** @interval {@link UserActivityServiceStart} */
+  /** {@link UserActivityServiceStart} */
   userActivity: UserActivityServiceStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;

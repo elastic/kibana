@@ -83,7 +83,7 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   userSettings: UserSettingsServiceSetup;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
-  /** @interval {@link UserActivityServiceSetup} */
+  /** {@link UserActivityServiceSetup} */
   userActivity: UserActivityServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;

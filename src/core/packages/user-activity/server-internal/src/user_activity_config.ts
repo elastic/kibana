@@ -14,6 +14,7 @@ import { appendersSchema } from '@kbn/core-logging-server-internal';
 
 type AppendersType = TypeOf<typeof appendersSchema>;
 
+/** Default appender: JSON output to console */
 const defaultAppender: Map<string, AppendersType> = new Map([
   [
     'console_json_default_appender',
@@ -24,15 +25,23 @@ const defaultAppender: Map<string, AppendersType> = new Map([
   ],
 ]);
 
+/**
+ * Configuration schema for the User Activity Service.
+ * Uses the same appenders schema as the core logging service.
+ */
 const configSchema = schema.object({
+  /** Whether the service is enabled. Disabled by default. */
   enabled: schema.boolean({ defaultValue: false }),
+  /** Logging appenders configuration. Defaults to JSON console output. */
   appenders: schema.mapOf(schema.string(), appendersSchema, {
     defaultValue: defaultAppender,
   }),
 });
 
+/** @internal */
 export type UserActivityConfigType = TypeOf<typeof configSchema>;
 
+/** @internal */
 export const config: ServiceConfigDescriptor<UserActivityConfigType> = {
   path: 'user_activity',
   schema: configSchema,
