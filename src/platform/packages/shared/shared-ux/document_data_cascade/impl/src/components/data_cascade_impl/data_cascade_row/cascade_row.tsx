@@ -101,31 +101,34 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   ]);
 
   return (
-    <StickyHeaderPortalProvider portalRef={headerPortalRenderRef} isActiveSticky={isActiveSticky}>
-      <div
-        {...treeGridRowARIAAttributes}
-        data-index={virtualRow.index}
-        data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
-        ref={innerRef}
-        style={virtualRowStyle}
-        {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
-        css={styles.rowWrapper}
-      >
-        <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
-          <React.Fragment>
-            {isActiveSticky && activeStickyRenderSlotRef.current
-              ? createPortal(
-                  <div css={styles.rowStickyHeaderInner}>
-                    <>{rowHeader}</>
-                    <div ref={setHeaderPortalRenderRef} />
-                  </div>,
-                  activeStickyRenderSlotRef.current,
-                  `${rowId}-sticky-header`
-                )
-              : null}
-          </React.Fragment>
-          <EuiFlexItem>{rowHeader}</EuiFlexItem>
-          <React.Fragment>
+    <div
+      {...treeGridRowARIAAttributes}
+      data-index={virtualRow.index}
+      data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
+      ref={innerRef}
+      style={virtualRowStyle}
+      {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
+      css={styles.rowWrapper}
+    >
+      <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
+        <React.Fragment>
+          {isActiveSticky && activeStickyRenderSlotRef.current
+            ? createPortal(
+                <div css={styles.rowStickyHeaderInner}>
+                  <>{rowHeader}</>
+                  <div ref={setHeaderPortalRenderRef} />
+                </div>,
+                activeStickyRenderSlotRef.current,
+                `${rowId}-sticky-header`
+              )
+            : null}
+        </React.Fragment>
+        <EuiFlexItem>{rowHeader}</EuiFlexItem>
+        <React.Fragment>
+          <StickyHeaderPortalProvider
+            portalRef={headerPortalRenderRef}
+            isActiveSticky={isActiveSticky}
+          >
             {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
               <EuiFlexItem role="gridcell">
                 {rowVisibleCells.map((cell) => (
@@ -133,9 +136,9 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                 ))}
               </EuiFlexItem>
             )}
-          </React.Fragment>
-        </EuiFlexGroup>
-      </div>
-    </StickyHeaderPortalProvider>
+          </StickyHeaderPortalProvider>
+        </React.Fragment>
+      </EuiFlexGroup>
+    </div>
   );
 }
