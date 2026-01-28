@@ -146,7 +146,9 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     saveQueryStream,
   } = useStreamRoutingEvents();
   const queryStreamForm = useQueryStreamForm();
-  const isSaving = useIsQueryModeSaving();
+  const isSaving = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: { creating: 'saving' } } })
+  );;
 
   // The FROM clause is hardcoded - query from parent's ES|QL view
   const parentViewName = getEsqlViewName(parentStreamName);

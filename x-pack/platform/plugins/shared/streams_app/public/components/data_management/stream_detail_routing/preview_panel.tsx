@@ -33,7 +33,6 @@ import {
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
   useQueryStreamSamples,
-  useIsQueryModeCreating,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
@@ -48,8 +47,7 @@ export function PreviewPanel() {
   const documents = selectPreviewDocuments(samplesSnapshot.context);
   const hasDocuments = !isEmpty(documents);
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-
-  const isQueryModeCreating = useIsQueryModeCreating();
+  const isQueryModeCreating = routingSnapshot.matches({ ready: { queryMode: 'creating' } });
 
   let content;
 

@@ -217,9 +217,3 @@ export const useIsQueryModeCreating = () => {
     state.matches({ ready: { queryMode: 'creating' } })
   );
 };
-
-export const useIsQueryModeSaving = () => {
-  return useStreamsRoutingSelector((state) =>
-    state.matches({ ready: { queryMode: { creating: 'saving' } } })
-  );
-};

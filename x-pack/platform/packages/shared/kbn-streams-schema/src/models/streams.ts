@@ -24,20 +24,14 @@ export namespace Streams {
   export namespace all {
     export type Model = ingest.all.Model | QueryStream.Model;
     export type Source = ingest.all.Source | QueryStream.Source;
-    export type Definition =
-      | ingest.all.Definition
-      | QueryStream.Definition;
-    export type GetResponse =
-      | ingest.all.GetResponse
-      | QueryStream.GetResponse;
-    export type UpsertRequest =
-      | ingest.all.UpsertRequest
-      | QueryStream.UpsertRequest;
+    export type Definition = ingest.all.Definition | QueryStream.Definition;
+    export type GetResponse = ingest.all.GetResponse | QueryStream.GetResponse;
+    export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
   }
 
   export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
     ingest.all,
-QueryStream,
+    QueryStream,
   ]);
 }
 

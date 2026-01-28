@@ -35,7 +35,6 @@ import { EditRoutingStreamEntry } from './edit_routing_stream_entry';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
-  useIsQueryModeCreating,
 } from './state_management/stream_routing_state_machine';
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
@@ -352,7 +351,7 @@ function QueryModeChildrenList() {
   const { euiTheme } = useEuiTheme();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
-  const isCreating = useIsQueryModeCreating();
+  const isCreating = useStreamsRoutingSelector((state) => state.matches({ ready: { queryMode: 'creating' } }));
   const { createQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
