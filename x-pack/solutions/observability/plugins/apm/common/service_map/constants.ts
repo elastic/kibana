@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports -- This is common code (client+server), useEuiTheme cannot be used here
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 export const MINIMUM_GROUP_SIZE = 4;

@@ -30,7 +30,7 @@ import type {
   ServiceNodeData,
   DependencyNodeData,
 } from './react_flow_types';
-import { isExitSpan, createEdgeMarker } from './utils';
+import { createEdgeMarker } from './utils';
 import { getPaths } from './get_paths';
 import { groupReactFlowNodes } from './group_react_flow_nodes';
 import {
@@ -66,14 +66,18 @@ function toDependencyNodeData(node: ConnectionNode): DependencyNodeData {
   };
 }
 
+function isServiceNode(node: ConnectionNode): boolean {
+  return node[SERVICE_NAME] !== undefined;
+}
+
 function toNodeData(node: ConnectionNode): ServiceMapNodeData {
-  return isExitSpan(node) ? toDependencyNodeData(node) : toServiceNodeData(node);
+  return isServiceNode(node) ? toServiceNodeData(node) : toDependencyNodeData(node);
 }
 
 function toReactFlowNode(node: ConnectionNode): ServiceMapNode {
   return {
     id: node.id,
-    type: isExitSpan(node) ? 'dependency' : 'service',
+    type: isServiceNode(node) ? 'service' : 'dependency',
     position: { x: 0, y: 0 },
     data: toNodeData(node),
   };
