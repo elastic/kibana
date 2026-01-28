@@ -8,14 +8,32 @@
 import { renderHook } from '@testing-library/react';
 import { useIntegrationLastAlertIngested } from './use_integration_last_alert_ingested';
 import { useQuery } from '@kbn/react-query';
+import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('@kbn/react-query');
+jest.mock('../../../common/lib/kibana');
 
 const integrationName = 'splunk';
+
+const mockUseKibana = useKibana as jest.Mock;
 
 describe('useIntegrationLastAlertIngested', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
+        core: {
+          uiSettings: {
+            get: jest.fn(() => 'UTC'),
+          },
+        },
+      },
+    });
   });
 
   it('should return isLoading true', () => {

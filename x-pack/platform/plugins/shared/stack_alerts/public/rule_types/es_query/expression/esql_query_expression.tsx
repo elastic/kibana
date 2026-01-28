@@ -214,7 +214,7 @@ export const EsqlQueryExpression: React.FC<
     }
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
-    const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
     const table = await getESQLResults({
       esqlQuery: esqlQuery.esql,

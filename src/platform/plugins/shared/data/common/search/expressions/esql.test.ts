@@ -28,7 +28,12 @@ describe('getEsqlFn', () => {
     const esqlFn = getEsqlFn({
       getStartDependencies: async () => ({
         search: mockSearch,
-        uiSettings: {} as UiSettingsCommon,
+        uiSettings: {
+          get: jest.fn((key: string) => {
+            if (key === 'dateFormat:tz') return 'UTC';
+            return undefined;
+          }),
+        } as unknown as UiSettingsCommon,
       }),
     });
 
