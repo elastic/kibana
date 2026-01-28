@@ -9,7 +9,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -115,6 +115,10 @@ export const DimensionsSelector = ({
     [onChange, dimensions]
   );
 
+  const handleClearAll = useCallback(() => {
+    onChange([]);
+  }, [onChange]);
+
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
     const isAtMaxDimensions = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
@@ -172,18 +176,41 @@ export const DimensionsSelector = ({
 
   const popoverContentBelowSearch = useMemo(() => {
     const count = selectedDimensions.length;
+    if (count === 0) {
+      return undefined;
+    }
     return (
-      <EuiText size="xs" color="subdued" css={css`
-        padding: 8px 0;
-      `}>
-        <FormattedMessage
-          id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
-          defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
-          values={{ count }}
-        />
-      </EuiText>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        css={css`
+          padding: 8px 0;
+        `}
+      >
+        <EuiFlexItem>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
+              defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
+              values={{ count }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            onClick={handleClearAll}
+          >
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.clearAll"
+              defaultMessage="Clear all"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
-  }, [selectedDimensions.length]);
+  }, [selectedDimensions.length, handleClearAll]);
 
   return (
     <ToolbarSelector
