@@ -12,7 +12,7 @@ import { PromQLFunctionDefinitionTypes, type PromQLFunctionDefinition } from '..
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isSource } from '../../../ast/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting';
 import { techPreviewLabel } from './shared';
 
@@ -84,6 +84,13 @@ export function getIndexFromPromQLParams({
     );
 
     const { value } = indexEntry ?? {};
+
+    if (isList(value) && value.values.length > 0) {
+      const firstElement = value.values[0];
+      if (isIdentifier(firstElement) || isSource(firstElement)) {
+        return firstElement.name;
+      }
+    }
 
     if (isIdentifier(value) || isSource(value)) {
       return value.name;
