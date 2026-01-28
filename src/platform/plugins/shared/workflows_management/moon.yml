@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
+  - '@kbn/object-utils'
 tags:
   - plugin
   - prod
