@@ -177,6 +177,7 @@ export const createPureDatasetQualityControllerStateMachine = (
       storeFailedDocStats: assign(() => ({})),
       storeNonAggregatableDatasets: assign(() => ({})),
       storeIntegrations: assign(() => ({})),
+      resetLoadedTotalDocsTypes: assign(() => ({ loadedTotalDocsTypes: [] })),
       notifyFetchDatasetTypesPrivilegesFailed: () => {},
       notifyFetchDatasetStatsFailed: () => {},
       notifyFetchDegradedStatsFailed: () => {},
@@ -251,6 +252,11 @@ export const createPureDatasetQualityControllerStateMachine = (
           return false;
         }
         return (event.error as { statusCode?: number }).statusCode === 501;
+      },
+      allTotalDocsTypesLoaded: ({ context, event }) => {
+        if (!('dataStreamType' in event)) return false;
+        const loadedTypes = [...context.loadedTotalDocsTypes, event.dataStreamType];
+        return KNOWN_TYPES.every((type) => loadedTypes.includes(type));
       },
     },
   }).createMachine({
@@ -396,15 +402,23 @@ export const createPureDatasetQualityControllerStateMachine = (
                 initial: 'fetching',
                 states: {
                   fetching: {
+                    entry: ['resetLoadedTotalDocsTypes'],
                     ...generateInvokePerType(),
                   },
                   loaded: {},
                   unauthorized: { type: 'final' },
                 },
                 on: {
-                  SAVE_TOTAL_DOCS_STATS: {
-                    actions: ['storeTotalDocStats', 'storeDatasets'],
-                  },
+                  SAVE_TOTAL_DOCS_STATS: [
+                    {
+                      target: '.loaded',
+                      actions: ['storeTotalDocStats', 'storeDatasets'],
+                      guard: 'allTotalDocsTypesLoaded',
+                    },
+                    {
+                      actions: ['storeTotalDocStats', 'storeDatasets'],
+                    },
+                  ],
                   NOTIFY_TOTAL_DOCS_STATS_FAILED: [
                     {
                       guard: 'checkIfActionForbidden',
@@ -616,6 +630,9 @@ export const createDatasetQualityControllerStateMachine = ({
             ...context.totalDocsStats,
             [event.dataStreamType]: event.data,
           },
+          loadedTotalDocsTypes: context.loadedTotalDocsTypes.includes(event.dataStreamType)
+            ? context.loadedTotalDocsTypes
+            : [...context.loadedTotalDocsTypes, event.dataStreamType],
         };
       }),
       storeDegradedDocStats: assign(({ event }) => {

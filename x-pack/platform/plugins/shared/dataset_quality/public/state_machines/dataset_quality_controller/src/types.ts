@@ -48,6 +48,7 @@ export interface WithDataStreamStats {
 
 export interface WithTotalDocs {
   totalDocsStats: DictionaryType<DataStreamDocsStat>;
+  loadedTotalDocsTypes: DataStreamType[];
 }
 
 export interface WithDegradedDocs {
