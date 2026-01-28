@@ -13,6 +13,7 @@ import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
@@ -350,6 +351,14 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
+    // Get the stream definition to check if it's a wired stream
+    const streamDefinition = await streamsClient.getStream(params.path.name);
+
+    // Only check conflicts for wired streams - classic streams don't need this
+    if (!Streams.WiredStream.Definition.is(streamDefinition)) {
+      return { conflicts: [] };
+    }
+
     const userFieldDefinitions = params.body.field_definitions.filter(
       (field) => field.type !== 'system'
     );
@@ -357,6 +366,9 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     if (userFieldDefinitions.length === 0) {
       return { conflicts: [] };
     }
+
+    // Get the root stream name to limit conflict checking to the same tree
+    const rootStreamName = getRoot(params.path.name);
 
     // Get all streams and descendants of current stream (to exclude from conflict check)
     const [allStreams, descendants] = await Promise.all([
@@ -370,22 +382,26 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       ...descendants.map((d) => d.name),
     ]);
 
-    // Build a map of fieldName -> [{streamName, type}] for all non-excluded streams
+    // Build a map of fieldName -> [{streamName, type}] for all non-excluded wired streams in the same root tree
     const fieldMap = new Map<string, Array<{ streamName: string; type: string }>>();
 
     for (const stream of allStreams) {
+      // Only check wired streams
+      if (!Streams.WiredStream.Definition.is(stream)) {
+        continue;
+      }
+
+      // Only check streams within the same root tree
+      if (getRoot(stream.name) !== rootStreamName) {
+        continue;
+      }
+
       // Skip the current stream and its descendants
       if (excludedStreamNames.has(stream.name)) {
         continue;
       }
 
-      let fields: Record<string, { type: string }> = {};
-
-      if (Streams.WiredStream.Definition.is(stream)) {
-        fields = stream.ingest.wired.fields;
-      } else if (Streams.ClassicStream.Definition.is(stream)) {
-        fields = stream.ingest.classic?.field_overrides || {};
-      }
+      const fields = stream.ingest.wired.fields;
 
       for (const [fieldName, config] of Object.entries(fields)) {
         // Skip system fields
