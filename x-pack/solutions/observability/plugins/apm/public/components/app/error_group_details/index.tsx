@@ -210,7 +210,6 @@ export function ErrorGroupDetails() {
 
     agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
-      sessionTag: 'observability',
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
@@ -218,7 +217,7 @@ export function ErrorGroupDetails() {
           data: {
             app: 'apm',
             url: window.location.href,
-            description: `Error details view for error group ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range.`,
+            description: `The user is looking at the error details view for error group ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range.`,
           },
           hidden: true,
         },

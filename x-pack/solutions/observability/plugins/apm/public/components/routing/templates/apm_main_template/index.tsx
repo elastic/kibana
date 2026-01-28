@@ -14,6 +14,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { useLocation } from 'react-router-dom';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { useDefaultAgentBuilderScreenContextForAPM } from '../../../../hooks/use_default_agent_builder_screen_context_for_apm';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -109,6 +110,12 @@ export function ApmMainTemplate({
   });
 
   useDefaultAiAssistantStarterPromptsForAPM({
+    hasApmData,
+    hasApmIntegrations,
+    noDataConfig,
+  });
+
+  useDefaultAgentBuilderScreenContextForAPM({
     hasApmData,
     hasApmIntegrations,
     noDataConfig,
