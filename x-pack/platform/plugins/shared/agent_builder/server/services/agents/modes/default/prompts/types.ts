@@ -18,17 +18,16 @@ export interface PromptFactoryParams {
   processedConversation: ProcessedConversation;
   filesystem: IFileSystemStore;
   outputSchema?: Record<string, unknown>;
+  conversationTimestamp: string;
 }
 
 export interface ResearchAgentPromptRuntimeParams {
   initialMessages: BaseMessageLike[];
-  conversationTimestamp: string;
   actions: ResearchAgentAction[];
 }
 
 export interface AnswerAgentPromptRuntimeParams {
   initialMessages: BaseMessageLike[];
-  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
 }
