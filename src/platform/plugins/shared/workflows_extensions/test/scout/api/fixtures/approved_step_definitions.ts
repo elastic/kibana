@@ -60,4 +60,16 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
+  {
+    id: 'streams.getSignificantEvents',
+    handlerHash: 'f59e4bd1b92e9af63c54044432a69b598a27afba4d5995909ca2900fe863aef4',
+  },
+  {
+    id: 'streams.getStream',
+    handlerHash: '7c3e0c9433fdc63e07ae285045f8c0b83b3024ee13ee3213a125e1235cb00027',
+  },
+  {
+    id: 'streams.listStreams',
+    handlerHash: '28302d5cb8ec8fea12b080c418baf1791f06a11d8387d13e5b5b1f2920583327',
+  },
 ];

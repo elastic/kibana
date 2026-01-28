@@ -16,6 +16,11 @@ import {
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
 } from './data';
+import {
+  streamsListStreamsStepDefinition,
+  streamsGetStreamStepDefinition,
+  streamsGetSignificantEventsStepDefinition,
+} from './streams';
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
@@ -26,4 +31,7 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(AiPromptStepDefinition);
   stepRegistry.register(AiSummarizeStepDefinition);
   stepRegistry.register(AiClassifyStepDefinition);
+  stepRegistry.register(streamsListStreamsStepDefinition);
+  stepRegistry.register(streamsGetStreamStepDefinition);
+  stepRegistry.register(streamsGetSignificantEventsStepDefinition);
 };
