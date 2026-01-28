@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
+import { AgentBuilderPrompts } from '../components/prompts/prompts';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { appPaths } from '../utils/app_paths';
+import { labels } from '../utils/i18n';
 
 export const AgentBuilderPromptsPage = () => {
-  useBreadcrumb([{ text: 'Prompts', path: '/prompts' }]);
-  return <div>Prompts Page - Coming Soon</div>;
+  useBreadcrumb([{ text: labels.prompts.title, path: appPaths.prompts.list }]);
+  return <AgentBuilderPrompts />;
 };

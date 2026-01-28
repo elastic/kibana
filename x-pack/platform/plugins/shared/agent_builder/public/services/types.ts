@@ -15,6 +15,7 @@ import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { PromptsService } from './prompts';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -24,6 +25,7 @@ export interface AgentBuilderInternalService {
   docLinksService: DocLinksService;
   navigationService: NavigationService;
   toolsService: ToolsService;
+  promptsService: PromptsService;
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;

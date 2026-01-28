@@ -484,4 +484,33 @@ export const labels = {
       defaultMessage: 'Yes, abort',
     }),
   },
+  prompts: {
+    title: i18n.translate('xpack.agentBuilder.prompts.title', { defaultMessage: 'Prompts' }),
+    newPromptButton: i18n.translate('xpack.agentBuilder.prompts.newPromptButton', {
+      defaultMessage: 'New prompt',
+    }),
+    promptsTableCaption: (promptsCount: number) =>
+      i18n.translate('xpack.agentBuilder.prompts.promptsTableCaption', {
+        defaultMessage: 'Available prompts: {promptsCount} prompts',
+        values: { promptsCount },
+      }),
+    searchPromptsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.prompts.searchPromptsPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    ),
+    noPromptsMatchMessage: i18n.translate('xpack.agentBuilder.prompts.noPromptsMatchMessage', {
+      defaultMessage: 'No prompts match your search.',
+    }),
+    noPromptsMessage: i18n.translate('xpack.agentBuilder.prompts.noPromptsMessage', {
+      defaultMessage: "It looks like you don't have any prompts defined yet.",
+    }),
+    listPromptsErrorMessage: i18n.translate('xpack.agentBuilder.prompts.listPromptsErrorMessage', {
+      defaultMessage: 'Failed to fetch prompts',
+    }),
+    newPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.newPromptButtonLabel', {
+      defaultMessage: 'New prompt',
+    }),
+  },
 };

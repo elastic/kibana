@@ -14,4 +14,5 @@ export { DocLinksService } from './doc_links';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
 export { EventsService } from './events';
+export { PromptsService } from './prompts';
 export type { AgentBuilderInternalService } from './types';
