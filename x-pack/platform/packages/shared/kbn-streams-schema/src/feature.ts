@@ -8,31 +8,10 @@
 import { z } from '@kbn/zod';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
-export type FeatureStatus = (typeof featureStatus)[number];
-
 export const featureStatusSchema = z.enum(featureStatus);
+export type FeatureStatus = z.infer<typeof featureStatusSchema>;
 
-export interface BaseFeature {
-  id: string;
-  type: string;
-  subtype?: string;
-  title?: string;
-  description: string;
-  properties: Record<string, string>;
-  confidence: number;
-  evidence: string[];
-  tags: string[];
-  meta: Record<string, any>;
-}
-
-export interface Feature extends BaseFeature {
-  uuid: string;
-  status: FeatureStatus;
-  last_seen: string;
-  expires_at?: string;
-}
-
-export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+export const baseFeatureSchema = z.object({
   id: z.string(),
   type: z.string(),
   subtype: z.string().optional(),
@@ -45,7 +24,9 @@ export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   meta: z.record(z.string(), z.any()),
 });
 
-export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
+export type BaseFeature = z.infer<typeof baseFeatureSchema>;
+
+export const featureSchema = baseFeatureSchema.and(
   z.object({
     uuid: z.string(),
     status: featureStatusSchema,
@@ -54,6 +35,8 @@ export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
   })
 );
 
-export function isFeature(feature: any): feature is Feature {
+export type Feature = z.infer<typeof featureSchema>;
+
+export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
 }
