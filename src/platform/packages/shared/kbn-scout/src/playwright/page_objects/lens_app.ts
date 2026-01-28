@@ -8,23 +8,45 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
+import { EuiComboBoxWrapper, expect } from '..';
 
 export class LensApp {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly lensApp;
+  private readonly chartSwitchPopover;
+  private readonly chartSwitchList;
+  private readonly saveAndReturnButton;
+  private readonly closeDimensionEditorButton;
+  public readonly applyChangesButton;
+  private readonly dimensionFieldComboBox;
+
+  constructor(private readonly page: ScoutPage) {
+    this.lensApp = this.page.testSubj.locator('lnsApp');
+    this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
+    this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
+    this.saveAndReturnButton = this.page.testSubj.locator('lnsApp_saveAndReturnButton');
+    this.closeDimensionEditorButton = this.page.testSubj.locator(
+      'lns-indexPattern-dimensionContainerClose'
+    );
+    this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
+    this.dimensionFieldComboBox = new EuiComboBoxWrapper(this.page, 'indexPattern-dimension-field');
+  }
 
   async waitForLensApp() {
-    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+    await expect(this.lensApp).toBeVisible();
   }
 
   async switchToVisualization(visType: string) {
     await this.openChartSwitchPopover();
-    await this.page.testSubj.click(`lnsChartSwitchPopover_${visType}`);
-    await this.applyChangesIfPresent();
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+  }
+
+  async applyChanges() {
+    await this.applyChangesButton.click();
+    await expect(this.applyChangesButton).toBeHidden();
   }
 
   async saveAndReturn() {
-    await this.page.testSubj.click('lnsApp_saveAndReturnButton');
+    await this.saveAndReturnButton.click();
   }
 
   async configureXYDimensions(options?: {
@@ -63,22 +85,17 @@ export class LensApp {
   }
 
   private async openDimensionEditor(dimension: string) {
-    const closeButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerClose');
-    if (await closeButton.isVisible()) {
+    if (await this.closeDimensionEditorButton.isVisible()) {
       return;
     }
 
-    await expect(async () => {
-      await this.page.testSubj.click(dimension);
-      await closeButton.waitFor({ state: 'visible', timeout: 1000 });
-    }).toPass({ timeout: 10_000 });
+    await this.page.testSubj.locator(dimension).click();
+    await expect(this.closeDimensionEditorButton).toBeVisible();
   }
 
   private async closeDimensionEditor() {
-    await this.page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-    await this.page.testSubj.waitForSelector('lns-indexPattern-dimensionContainerClose', {
-      state: 'hidden',
-    });
+    await this.closeDimensionEditorButton.click();
+    await expect(this.closeDimensionEditorButton).toBeHidden();
   }
 
   private async selectOperation(operation: string, isPreviousIncompatible = false) {
@@ -86,49 +103,21 @@ export class LensApp {
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
     const operationButton = this.page.testSubj.locator(operationSelector);
-    await expect(async () => {
-      if ((await operationButton.count()) === 0) {
-        throw new Error(`Operation "${operation}" not available yet`);
-      }
-      await operationButton.scrollIntoViewIfNeeded();
-      await operationButton.click();
-      const ariaPressed = await operationButton.getAttribute('aria-pressed');
-      if (ariaPressed !== 'true') {
-        throw new Error(`aria-pressed="${ariaPressed}" for "${operation}"`);
-      }
-    }).toPass({ timeout: 10_000 });
+    await expect(operationButton).toBeVisible();
+    await operationButton.scrollIntoViewIfNeeded();
+    await operationButton.click();
+    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
   }
 
   private async selectField(field: string) {
-    const fieldCombo = this.page.testSubj.locator('indexPattern-dimension-field');
-    await fieldCombo.waitFor({ state: 'visible' });
-    await fieldCombo.click();
-    await this.page.testSubj.typeWithDelay(
-      'indexPattern-dimension-field > comboBoxSearchInput',
-      field
-    );
-
-    const optionByTestSubj = this.page.testSubj.locator(`lns-fieldOption-${field}`);
-    if ((await optionByTestSubj.count()) > 0) {
-      await optionByTestSubj.click();
-      return;
-    }
-
-    await this.page.getByRole('option', { name: field, exact: true }).click();
+    await this.dimensionFieldComboBox.selectSingleOption(field);
   }
 
   private async openChartSwitchPopover() {
-    if ((await this.page.testSubj.locator('lnsChartSwitchList').count()) > 0) {
+    if (await this.chartSwitchList.isVisible()) {
       return;
     }
-    await this.page.testSubj.click('lnsChartSwitchPopover');
-    await this.page.testSubj.waitForSelector('lnsChartSwitchList', { state: 'visible' });
-  }
-
-  private async applyChangesIfPresent() {
-    const applyButton = this.page.testSubj.locator('lnsApplyChanges__apply');
-    if ((await applyButton.count()) > 0) {
-      await applyButton.click();
-    }
+    await this.chartSwitchPopover.click();
+    await expect(this.chartSwitchList).toBeVisible();
   }
 }
