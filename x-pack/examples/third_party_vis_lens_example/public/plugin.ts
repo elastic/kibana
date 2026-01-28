@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Plugin, CoreSetup } from '@kbn/core/public';
