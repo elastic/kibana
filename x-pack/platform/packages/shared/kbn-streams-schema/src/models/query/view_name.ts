@@ -7,15 +7,15 @@
 
 /**
  * Prefix used for ES|QL view names to avoid shadowing existing streams/indices.
- * For example, a query stream named "cars.electric" will have an ES|QL view named "stream.cars.electric".
+ * For example, a query stream named "cars.electric" will have an ES|QL view named "$.cars.electric".
  */
-export const ESQL_VIEW_PREFIX = 'stream.';
+export const ESQL_VIEW_PREFIX = '$.';
 
 /**
  * Generates the ES|QL view name for a given stream name.
  * @param streamName - The name of the stream
  * @returns The ES|QL view name with the prefix applied
- * @example getEsqlViewName('cars.electric') => 'stream.cars.electric'
+ * @example getEsqlViewName('cars.electric') => '$.cars.electric'
  */
 export function getEsqlViewName(streamName: string): string {
   return `${ESQL_VIEW_PREFIX}${streamName}`;
@@ -25,7 +25,7 @@ export function getEsqlViewName(streamName: string): string {
  * Extracts the stream name from an ES|QL view name.
  * @param viewName - The ES|QL view name
  * @returns The stream name if the view name has the correct prefix, null otherwise
- * @example getStreamNameFromViewName('stream.cars.electric') => 'cars.electric'
+ * @example getStreamNameFromViewName('$.cars.electric') => 'cars.electric'
  * @example getStreamNameFromViewName('other.name') => null
  */
 export function getStreamNameFromViewName(viewName: string): string | null {
@@ -34,4 +34,3 @@ export function getStreamNameFromViewName(viewName: string): string | null {
   }
   return null;
 }
-
