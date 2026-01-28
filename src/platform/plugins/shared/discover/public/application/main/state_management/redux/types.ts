@@ -26,13 +26,14 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -167,6 +168,7 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    cascadedDocuments?: CascadedDocumentsRestorableState;
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
@@ -213,4 +215,9 @@ export interface DiscoverInternalState {
 export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
+}
+
+export interface UpdateCascadeGroupingActionPayload {
+  tabId: string;
+  groupingOrUpdater: string[] | ((prevGrouping: string[]) => string[]);
 }
