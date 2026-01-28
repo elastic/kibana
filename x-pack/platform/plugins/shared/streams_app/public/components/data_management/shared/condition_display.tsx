@@ -42,6 +42,7 @@ export const ConditionPanel = ({
   return (
     <EuiPanel
       color="plain"
+      hasShadow={false}
       paddingSize="s"
       className={css`
         border-radius: ${euiTheme.size.s};
