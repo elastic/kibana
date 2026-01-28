@@ -6,6 +6,7 @@
  */
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { loadWorkflows } from '../common/workflow_loader';
 import { API_BASE_PATH } from '../common/constants';
 import type { DataCatalog } from './data_catalog';
 
@@ -50,7 +51,7 @@ export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
         if (!type) {
           return response.notFound({ body: `Type ${request.params.id} not found` });
         }
-        const workflowInfos = type.generateWorkflows('<fake-stack-connector-id>');
+        const workflowInfos = await loadWorkflows(type.workflows);
         return response.ok({
           body: {
             ...type,

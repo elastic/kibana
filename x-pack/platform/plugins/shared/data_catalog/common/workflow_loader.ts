@@ -10,10 +10,7 @@ import { join, extname } from 'path';
 import { parse } from 'yaml';
 import type { OpeningAndClosingTags } from 'mustache';
 import Mustache from 'mustache';
-import type {
-  WorkflowInfo,
-  WorkflowsConfig,
-} from '@kbn/data-catalog-plugin/common/data_source_spec';
+import type { WorkflowInfo, WorkflowsConfig } from './data_source_spec';
 
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
