@@ -132,6 +132,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'description',
   'format_version',
   'discovery',
+  'var_groups',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);

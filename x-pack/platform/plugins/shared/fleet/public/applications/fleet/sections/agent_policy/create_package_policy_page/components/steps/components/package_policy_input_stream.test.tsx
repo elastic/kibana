@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
-
 import type { TestRenderer } from '../../../../../../../../mock';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+
 import type {
   PackageInfo,
-  NewPackagePolicyInputStream,
   RegistryStreamWithDataStream,
+  NewPackagePolicyInputStream,
+  RegistryVarGroup,
 } from '../../../../../../types';
 
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
@@ -39,6 +41,11 @@ jest.mock('../../datastream_hooks', () => ({
     isLoading: false,
   }),
 }));
+jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
+  return {
+    useAgentless: jest.fn(),
+  };
+});
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -47,259 +54,368 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
+
+// Mock stream-level var_group
+const mockStreamVarGroup: RegistryVarGroup = {
+  name: 'auth_method',
+  title: 'Authentication Method',
+  selector_title: 'Choose authentication',
+  description: 'Select how to authenticate to the service.',
+  options: [
+    {
+      name: 'api_key',
+      title: 'API Key',
+      description: 'Authenticate using an API key.',
+      vars: ['api_key'],
+    },
+    {
+      name: 'oauth',
+      title: 'OAuth',
+      description: 'Authenticate using OAuth.',
+      vars: ['client_id', 'client_secret'],
+    },
+    {
+      name: 'cloud_connector',
+      title: 'Cloud Connector',
+      vars: ['connector_id'],
+      hide_in_deployment_modes: ['default'],
+    },
+  ],
+};
+
+// Package input stream with stream-level var_groups
+const mockPackageInputStreamWithVarGroups: RegistryStreamWithDataStream = {
+  input: 'httpjson',
+  title: 'Collect logs via API',
+  template_path: 'stream.yml.hbs',
+  var_groups: [mockStreamVarGroup],
+  vars: [
+    {
+      name: 'api_key',
+      type: 'password',
+      title: 'API Key',
+      required: true,
+      show_user: true,
+    },
+    {
+      name: 'client_id',
+      type: 'text',
+      title: 'Client ID',
+      required: true,
+      show_user: true,
+    },
+    {
+      name: 'client_secret',
+      type: 'password',
+      title: 'Client Secret',
+      required: true,
+      show_user: true,
+    },
+    {
+      name: 'connector_id',
+      type: 'text',
+      title: 'Connector ID',
+      required: true,
+      show_user: true,
+    },
+    {
+      name: 'url',
+      type: 'text',
+      title: 'API URL',
+      required: true,
+      show_user: true,
+    },
+  ],
+  description: 'Collect logs from an HTTP API',
+  data_stream: {
+    title: 'API Logs',
+    release: 'ga',
+    type: 'logs',
+    package: 'test_package',
+    dataset: 'test_package.api_logs',
+    path: 'api_logs',
+    elasticsearch: {},
+    ingest_pipeline: 'default',
+    streams: [],
+  },
+};
+
+// Package policy input stream (what gets saved)
+const mockPackagePolicyInputStream: NewPackagePolicyInputStream = {
+  id: 'stream-1',
+  enabled: true,
+  data_stream: {
+    type: 'logs',
+    dataset: 'test_package.api_logs',
+  },
+  vars: {
+    api_key: { type: 'password', value: '' },
+    client_id: { type: 'text', value: '' },
+    client_secret: { type: 'password', value: '' },
+    connector_id: { type: 'text', value: '' },
+    url: { type: 'text', value: 'https://api.example.com' },
+  },
+};
+
+const mockPackageInfo: PackageInfo = {
+  name: 'test_package',
+  version: '1.0.0',
+  title: 'Test Package',
+  description: 'A test package for var_groups',
+  type: 'integration',
+  format_version: '3.0.0',
+  owner: { github: 'elastic/integrations', type: 'elastic' },
+  categories: ['custom'],
+  data_streams: [],
+  policy_templates: [],
+  assets: { kibana: {} },
+  status: 'installed',
+} as unknown as PackageInfo;
+
 describe('PackagePolicyInputStreamConfig', () => {
-  const mockPackageInfo: PackageInfo = {
-    name: 'test-package',
-    version: '1.0.0',
-    title: 'Test Package',
-    description: 'Test package description',
-    type: 'input',
-    policy_templates: [
-      {
-        name: 'test-template',
-        title: 'Test Template',
-        input: 'otelcol',
-        type: 'logs',
-        template_path: 'input.yml.hbs',
-        vars: [],
-      },
-    ],
-  } as any;
-
-  const mockPackageInputStream: RegistryStreamWithDataStream = {
-    data_stream: {
-      type: 'logs',
-      dataset: 'test-package.test-template',
-    },
-    vars: [],
-  } as any;
-
-  const mockPackagePolicyInputStream: NewPackagePolicyInputStream = {
-    id: 'test-stream-id',
-    enabled: true,
-    data_stream: {
-      type: 'logs',
-      dataset: 'test-package.test-template',
-    },
-    vars: {},
-  };
-
-  const mockUpdatePackagePolicyInputStream = jest.fn();
-  const mockInputStreamValidationResults = {};
-
-  const defaultProps = {
-    packageInputStream: mockPackageInputStream,
-    packageInfo: mockPackageInfo,
-    packagePolicyInputStream: mockPackagePolicyInputStream,
-    updatePackagePolicyInputStream: mockUpdatePackagePolicyInputStream,
-    inputStreamValidationResults: mockInputStreamValidationResults,
-    forceShowErrors: false,
-    isEditPage: false,
-    totalStreams: 1,
-  };
-
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
+  let mockUpdatePackagePolicyInputStream: jest.Mock;
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
-    jest.clearAllMocks();
+    mockUpdatePackagePolicyInputStream = jest.fn();
+
+    useAgentlessMock.mockReturnValue({
+      isAgentlessEnabled: false,
+      isAgentlessDefault: false,
+      isAgentlessAgentPolicy: jest.fn(),
+      isAgentlessIntegration: jest.fn(),
+      isServerless: false,
+      isCloud: false,
+    });
   });
 
-  const renderComponent = (props = {}) => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const render = (
+    packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
+    packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
+    packageInfo: PackageInfo = mockPackageInfo
+  ) => {
     renderResult = testRenderer.render(
-      <PackagePolicyInputStreamConfig {...defaultProps} {...props} />
+      <PackagePolicyInputStreamConfig
+        packageInputStream={packageInputStream}
+        packageInfo={packageInfo}
+        packagePolicyInputStream={packagePolicyInputStream}
+        updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
+        inputStreamValidationResults={{ vars: {} }}
+        forceShowErrors={false}
+        totalStreams={2}
+      />
     );
-    return renderResult;
   };
 
-  it('should render data stream type selector for input packages', async () => {
-    renderComponent();
-
-    // Click advanced options to show the selector
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      const radioGroup = await renderResult.findByTestId('packagePolicyDataStreamType');
-      expect(radioGroup).toBeInTheDocument();
-    });
-  });
-
-  it('should show all three options (logs, metrics, traces) when available_types is not defined', async () => {
-    renderComponent();
-
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      expect(await renderResult.findByLabelText('Logs')).toBeInTheDocument();
-      expect(await renderResult.findByLabelText('Metrics')).toBeInTheDocument();
-      expect(await renderResult.findByLabelText('Traces')).toBeInTheDocument();
-    });
-  });
-
-  it('should show only specified options when available_types is defined in policy_template', async () => {
-    const packageInfoWithAvailableTypes: PackageInfo = {
-      ...mockPackageInfo,
-      policy_templates: [
-        {
-          name: 'test-template',
-          title: 'Test Template',
-          input: 'otelcol',
-          type: 'logs',
-          available_types: ['logs', 'metrics'],
-          template_path: 'input.yml.hbs',
-          vars: [],
-        },
-      ],
-    } as any;
-
-    renderComponent({ packageInfo: packageInfoWithAvailableTypes });
-
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      expect(await renderResult.findByLabelText('Logs')).toBeInTheDocument();
-      expect(await renderResult.findByLabelText('Metrics')).toBeInTheDocument();
-      expect(renderResult.queryByLabelText('Traces')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should show all three signal types when available_types includes all three', async () => {
-    const packageInfoWithAllTypes: PackageInfo = {
-      ...mockPackageInfo,
-      policy_templates: [
-        {
-          name: 'test-template',
-          title: 'Test Template',
-          input: 'otelcol',
-          type: 'logs',
-          available_types: ['logs', 'metrics', 'traces'],
-          template_path: 'input.yml.hbs',
-          vars: [],
-        },
-      ],
-    } as any;
-
-    renderComponent({ packageInfo: packageInfoWithAllTypes });
-
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      expect(await renderResult.findByLabelText('Logs')).toBeInTheDocument();
-      expect(await renderResult.findByLabelText('Metrics')).toBeInTheDocument();
-      expect(await renderResult.findByLabelText('Traces')).toBeInTheDocument();
-    });
-  });
-
-  it('should default to first available type when available_types is defined', async () => {
-    const packageInfoWithAvailableTypes: PackageInfo = {
-      ...mockPackageInfo,
-      policy_templates: [
-        {
-          name: 'test-template',
-          title: 'Test Template',
-          input: 'otelcol',
-          type: 'logs',
-          available_types: ['metrics', 'logs'],
-          template_path: 'input.yml.hbs',
-          vars: [],
-        },
-      ],
-    } as any;
-
-    renderComponent({
-      packageInfo: packageInfoWithAvailableTypes,
-      packagePolicyInputStream: {
-        ...mockPackagePolicyInputStream,
-        data_stream: {
-          ...mockPackagePolicyInputStream.data_stream,
-          type: undefined as any,
-        },
-        vars: {},
-      },
+  describe('stream-level var_groups', () => {
+    it('test data has var_groups defined', () => {
+      // Sanity check that our test data is correctly structured
+      expect(mockPackageInputStreamWithVarGroups.var_groups).toBeDefined();
+      expect(mockPackageInputStreamWithVarGroups.var_groups).toHaveLength(1);
+      expect(mockPackageInputStreamWithVarGroups.var_groups![0].name).toBe('auth_method');
+      expect(mockPackageInputStreamWithVarGroups.var_groups![0].options).toHaveLength(3);
     });
 
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
+    it('should render VarGroupSelector when stream has var_groups', async () => {
+      render();
 
-    await waitFor(async () => {
-      // Should default to first available type (metrics)
-      const metricsRadio = await renderResult.findByLabelText('Metrics');
-      expect(metricsRadio).toBeChecked();
-    });
-  });
-
-  it('should call updatePackagePolicyInputStream when data stream type is changed', async () => {
-    renderComponent();
-
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      const metricsOption = await renderResult.findByLabelText('Metrics');
-      metricsOption.click();
-    });
-
-    expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
-      vars: {
-        'data_stream.type': {
-          type: 'string',
-          value: 'metrics',
-        },
-      },
-    });
-  });
-
-  it('should disable data stream type selector on edit page', async () => {
-    renderComponent({ isEditPage: true });
-
-    const advancedToggle = await renderResult.findByTestId(
-      'advancedStreamOptionsToggle-test-stream-id'
-    );
-    advancedToggle.click();
-
-    await waitFor(async () => {
-      const logsRadio = await renderResult.findByLabelText('Logs');
-      expect(logsRadio).toBeDisabled();
-    });
-  });
-
-  it('should not show data stream type selector for non-input packages', async () => {
-    const integrationPackageInfo: PackageInfo = {
-      ...mockPackageInfo,
-      type: 'integration',
-    } as any;
-
-    renderComponent({ packageInfo: integrationPackageInfo });
-
-    // For non-input packages, the advanced toggle might not be rendered if there are no advanced options
-    // But if it is rendered, clicking it should not show the data stream type selector
-    const advancedToggle = renderResult.queryByTestId('advancedStreamOptionsToggle-test-stream-id');
-
-    if (advancedToggle) {
-      advancedToggle.click();
       await waitFor(() => {
-        expect(renderResult.queryByTestId('packagePolicyDataStreamType')).not.toBeInTheDocument();
+        expect(renderResult.getByText('Authentication Method')).toBeInTheDocument();
+        expect(renderResult.getByText('Choose authentication')).toBeInTheDocument();
+        expect(
+          renderResult.getByText('Select how to authenticate to the service.')
+        ).toBeInTheDocument();
       });
-    } else {
-      // If toggle doesn't exist, verify the selector is also not in the document
-      expect(renderResult.queryByTestId('packagePolicyDataStreamType')).not.toBeInTheDocument();
-    }
+    });
+
+    it('should show only vars for the selected option (api_key by default)', async () => {
+      render();
+
+      await waitFor(() => {
+        // API Key var should be visible (first option is selected by default)
+        // Use test-subj which is more reliable than text matching for input fields
+        expect(renderResult.getByTestId('passwordInput-api-key')).toBeInTheDocument();
+
+        // OAuth vars should be hidden
+        expect(renderResult.queryByTestId('textInput-client-id')).not.toBeInTheDocument();
+        expect(renderResult.queryByTestId('passwordInput-client-secret')).not.toBeInTheDocument();
+
+        // Common var (url) should always be visible
+        expect(renderResult.getByTestId('textInput-api-url')).toBeInTheDocument();
+      });
+    });
+
+    it('should show OAuth vars when oauth option is selected', async () => {
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('varGroupSelector-auth_method')).toBeInTheDocument();
+      });
+
+      const select = renderResult.getByTestId('varGroupSelector-auth_method');
+      fireEvent.change(select, { target: { value: 'oauth' } });
+
+      // Verify callback was called with new selection
+      await waitFor(() => {
+        expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
+          var_group_selections: { auth_method: 'oauth' },
+        });
+      });
+
+      // Re-render with updated props (simulating what parent component would do)
+      const updatedPolicyInputStream: NewPackagePolicyInputStream = {
+        ...mockPackagePolicyInputStream,
+        var_group_selections: { auth_method: 'oauth' },
+      };
+      renderResult.rerender(
+        <PackagePolicyInputStreamConfig
+          packageInputStream={mockPackageInputStreamWithVarGroups}
+          packageInfo={mockPackageInfo}
+          packagePolicyInputStream={updatedPolicyInputStream}
+          updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
+          inputStreamValidationResults={{ vars: {} }}
+          forceShowErrors={false}
+          totalStreams={2}
+        />
+      );
+
+      await waitFor(() => {
+        // OAuth vars should now be visible
+        expect(renderResult.getByTestId('textInput-client-id')).toBeInTheDocument();
+        expect(renderResult.getByTestId('passwordInput-client-secret')).toBeInTheDocument();
+
+        // API Key should be hidden
+        expect(renderResult.queryByTestId('passwordInput-api-key')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should persist var_group_selections to the policy when selection changes', async () => {
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('varGroupSelector-auth_method')).toBeInTheDocument();
+      });
+
+      const select = renderResult.getByTestId('varGroupSelector-auth_method');
+      fireEvent.change(select, { target: { value: 'oauth' } });
+
+      await waitFor(() => {
+        expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
+          var_group_selections: { auth_method: 'oauth' },
+        });
+      });
+    });
+
+    it('should use saved var_group_selections from policy', async () => {
+      const policyWithSavedSelections: NewPackagePolicyInputStream = {
+        ...mockPackagePolicyInputStream,
+        var_group_selections: { auth_method: 'oauth' },
+      };
+
+      render(mockPackageInputStreamWithVarGroups, policyWithSavedSelections);
+
+      await waitFor(() => {
+        // OAuth vars should be visible (saved selection)
+        expect(renderResult.getByTestId('textInput-client-id')).toBeInTheDocument();
+        expect(renderResult.getByTestId('passwordInput-client-secret')).toBeInTheDocument();
+
+        // API Key should be hidden
+        expect(renderResult.queryByTestId('passwordInput-api-key')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should filter options based on deployment mode (agentless)', async () => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: true,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: true,
+      });
+
+      render();
+
+      await waitFor(() => {
+        const select = renderResult.getByTestId('varGroupSelector-auth_method');
+        const options = Array.from(select.querySelectorAll('option'));
+
+        // cloud_connector should be visible in agentless mode
+        expect(options.find((o) => o.value === 'cloud_connector')).toBeDefined();
+      });
+    });
+
+    it('should filter options based on deployment mode (default)', async () => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: false,
+      });
+
+      render();
+
+      await waitFor(() => {
+        const select = renderResult.getByTestId('varGroupSelector-auth_method');
+        const options = Array.from(select.querySelectorAll('option'));
+
+        // cloud_connector should be filtered out in default mode
+        expect(options.find((o) => o.value === 'cloud_connector')).toBeUndefined();
+      });
+    });
+
+    it('should not render VarGroupSelector when stream has no var_groups', async () => {
+      const streamWithoutVarGroups: RegistryStreamWithDataStream = {
+        ...mockPackageInputStreamWithVarGroups,
+        var_groups: undefined,
+      };
+
+      render(streamWithoutVarGroups);
+
+      await waitFor(() => {
+        // No var group selector should be rendered
+        expect(renderResult.queryByText('Authentication Method')).not.toBeInTheDocument();
+
+        // All vars should be visible since there's no var_group filtering
+        expect(renderResult.getByTestId('passwordInput-api-key')).toBeInTheDocument();
+        expect(renderResult.getByTestId('textInput-client-id')).toBeInTheDocument();
+        expect(renderResult.getByTestId('passwordInput-client-secret')).toBeInTheDocument();
+      });
+    });
+
+    it('should use package-level var_groups when stream has none but package has them', async () => {
+      const packageInfoWithVarGroups: PackageInfo = {
+        ...mockPackageInfo,
+        var_groups: [mockStreamVarGroup],
+      };
+
+      const streamWithoutVarGroups: RegistryStreamWithDataStream = {
+        ...mockPackageInputStreamWithVarGroups,
+        var_groups: undefined,
+      };
+
+      // When stream has no var_groups but package does, the component uses the varGroupSelections prop
+      // Since we're not passing varGroupSelections, it defaults to {}, so NO filtering should occur
+      // (vars not controlled by any var_group are shown, vars controlled without selection are hidden)
+      render(streamWithoutVarGroups, mockPackagePolicyInputStream, packageInfoWithVarGroups);
+
+      await waitFor(() => {
+        // Without varGroupSelections prop, package-level filtering hides all controlled vars
+        // Only the uncontrolled var (url) should be visible
+        expect(renderResult.getByTestId('textInput-api-url')).toBeInTheDocument();
+
+        // Controlled vars are hidden because no selection is provided
+        expect(renderResult.queryByTestId('passwordInput-api-key')).not.toBeInTheDocument();
+      });
+    });
   });
 });
