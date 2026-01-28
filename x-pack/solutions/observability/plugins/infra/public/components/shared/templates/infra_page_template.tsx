@@ -110,7 +110,6 @@ export const InfraPageTemplate = ({
 
     agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
-      sessionTag: 'observability',
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
