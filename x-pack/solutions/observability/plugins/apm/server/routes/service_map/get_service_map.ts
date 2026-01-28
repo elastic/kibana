@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
@@ -16,11 +16,17 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
+import {
+  isPrecomputedServiceMapAvailable,
+  getPrecomputedServiceMap,
+  convertEdgesToServiceMapSpans,
+} from './transforms';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
   config: APMConfig;
   apmEventClient: APMEventClient;
+  esClient: ElasticsearchClient;
   serviceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
@@ -29,11 +35,13 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  usePrecomputedServiceMap?: boolean;
 }
 
 async function getConnectionData({
   config,
   apmEventClient,
+  esClient,
   serviceName,
   environment,
   start,
@@ -41,8 +49,30 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
+  usePrecomputedServiceMap,
 }: IEnvOptions): Promise<{ tracesCount: number; spans: ServiceMapSpan[] }> {
   return withApmSpan('get_service_map_connections', async () => {
+    // Try pre-computed service map if enabled
+    if (usePrecomputedServiceMap) {
+      const available = await isPrecomputedServiceMapAvailable(esClient);
+      if (available) {
+        logger.debug('Using pre-computed service map');
+        const { edges } = await getPrecomputedServiceMap({
+          esClient,
+          apmEventClient,
+          start,
+          end,
+          environment,
+          serviceName,
+          logger,
+        });
+        const spans = convertEdgesToServiceMapSpans(edges);
+        return { spans, tracesCount: 0 }; // tracesCount not applicable for pre-computed
+      }
+      logger.debug('Pre-computed service map not available, falling back to sampling');
+    }
+
+    // Fall back to trace sampling approach
     logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
       config,
