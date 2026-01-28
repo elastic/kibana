@@ -127,7 +127,7 @@ export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
   );
 };
 
-// TODO: Keep in ES; solve the discrepancy with signatures.
+// TODO: Remove when ES solve the discrepancy with signatures.
 const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
   'instant vector': 'instant_vector',
   'range vector': 'range_vector',
