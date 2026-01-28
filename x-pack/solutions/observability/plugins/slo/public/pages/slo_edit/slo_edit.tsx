@@ -91,7 +91,7 @@ export function SloEditPage() {
       {isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
-        <SloEditForm slo={slo} isEditMode={isEditMode} initialValues={initialValues} />
+        <SloEditForm slo={slo} formSettings={{ isEditMode }} initialValues={initialValues} />
       )}
     </ObservabilityPageTemplate>
   );

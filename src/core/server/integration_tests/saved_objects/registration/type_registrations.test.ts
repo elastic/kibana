@@ -64,6 +64,7 @@ const previouslyRegisteredTypes = [
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-engine-descriptor-v2',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -181,6 +182,7 @@ const previouslyRegisteredTypes = [
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
 ].sort();
 
 describe('SO type registrations', () => {

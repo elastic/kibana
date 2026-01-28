@@ -63,7 +63,7 @@ packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
-packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
+packages/kbn-eslint-plugin-telemetry @elastic/kibana-core
 packages/kbn-extract-plugin-translations @elastic/kibana-core
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
@@ -399,7 +399,6 @@ src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
-src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
@@ -523,6 +522,7 @@ src/platform/packages/shared/kbn-field-formats-common @elastic/kibana-visualizat
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
+src/platform/packages/shared/kbn-ftr-benchmarks @elastic/kibana-operations
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/appex-ai-infra
@@ -630,11 +630,11 @@ src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
+src/platform/packages/shared/kbn-unified-chart-section-viewer @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
@@ -2564,6 +2564,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
+/x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -2589,11 +2590,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
-/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
-src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/security-threat-hunting
-
 /x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
@@ -2618,7 +2614,6 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/draggables @elastic/security-threat-hunting-investigations
@@ -2631,11 +2626,9 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/common/components/first_last_seen/first_last_seen.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_date/index.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_number/index.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting-investigations
@@ -2711,6 +2704,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts @elastic/security-threat-hunting-investigations
 
 ## Security Solution Threat Hunting areas - Kibana Cases
+
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/kibana-cases
+src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
@@ -2929,6 +2927,11 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
