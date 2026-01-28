@@ -122,35 +122,12 @@ export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_gro
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { Threshold } from './components/custom_threshold/components/threshold';
 
-export {
-  ObservabilityAlertsTableLazy,
-  ObservabilityAlertsTable,
-  AlertsTableCellValue,
-  getAlertFieldValue,
-  CellTooltip,
-  TimestampTooltip,
-  getColumns,
-  getGroupStats,
-  getAggregationsByGroupingField,
-  renderGroupPanel,
-  GroupingToolbarControls,
-  DEFAULT_GROUPING_OPTIONS,
-  ungrouped,
-  ruleName,
-  source,
-  AlertSeverityBadge,
-  AlertStatusIndicator,
-  Tags,
-  AlertActions,
-  useCaseActions,
-} from './components/alerts_table';
+// Only export lazy versions to keep bundle size down
+// Consumers should define their own columns configuration
+export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertActions } from './components/alerts_table/components/alert_actions_lazy';
 export type {
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
   GetObservabilityAlertsTableProp,
-  BucketItem,
-  AlertsByGroupingAgg,
-  ObservabilityRuleTypeRegistry as AlertsTableObservabilityRuleTypeRegistry,
-  ConfigSchema as AlertsTableConfigSchema,
-  TopAlert as AlertsTableTopAlert,
-} from './components/alerts_table';
+} from './components/alerts_table/types';

@@ -5,11 +5,24 @@
  * 2.0.
  */
 
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { BoolQuery } from '@kbn/es-query';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
-import { ObservabilityAlertsTable, getColumns } from '@kbn/observability-plugin/public';
+import {
+  ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_DURATION,
+  ALERT_RULE_NAME,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_INSTANCE_ID,
+  TAGS,
+  ALERT_REASON,
+  ALERT_WORKFLOW_TAGS,
+} from '@kbn/rule-data-utils';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { paths } from '../../../../../constants/paths';
 import { observabilityAlertFeatureIds } from '../../../../../constants/alerts';
 import { useHasData } from '../../../../../hooks/use_has_data';
@@ -23,7 +36,89 @@ import { buildEsQuery } from '../../../../../utils/build_es_query';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observabilityOverview.overview.alert.table';
-const tableColumns = getColumns({ showRuleName: true });
+
+// Define columns inline to avoid pulling in heavy dependencies from observability plugin
+const tableColumns: EuiDataGridColumn[] = [
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.statusColumnDescription',
+      { defaultMessage: 'Alert Status' }
+    ),
+    id: ALERT_STATUS,
+    initialWidth: 120,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.triggeredColumnDescription',
+      { defaultMessage: 'Triggered' }
+    ),
+    id: ALERT_START,
+    initialWidth: 190,
+    schema: 'datetime',
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.durationColumnDescription',
+      { defaultMessage: 'Duration' }
+    ),
+    id: ALERT_DURATION,
+    initialWidth: 70,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.ruleNameColumnDescription',
+      { defaultMessage: 'Rule name' }
+    ),
+    id: ALERT_RULE_NAME,
+    initialWidth: 150,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.sourceColumnDescription',
+      { defaultMessage: 'Group' }
+    ),
+    id: ALERT_INSTANCE_ID,
+    initialWidth: 100,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.observedValueColumnDescription',
+      { defaultMessage: 'Observed value' }
+    ),
+    id: ALERT_EVALUATION_VALUE,
+    initialWidth: 100,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.thresholdColumnDescription',
+      { defaultMessage: 'Threshold' }
+    ),
+    id: ALERT_EVALUATION_THRESHOLD,
+    initialWidth: 100,
+  },
+  {
+    displayAsText: i18n.translate('xpack.observabilityOverview.alertsTable.tagsColumnDescription', {
+      defaultMessage: 'Tags',
+    }),
+    id: TAGS,
+    initialWidth: 150,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.workflowTagsColumnDescription',
+      { defaultMessage: 'Workflow tags' }
+    ),
+    id: ALERT_WORKFLOW_TAGS,
+    initialWidth: 150,
+  },
+  {
+    displayAsText: i18n.translate(
+      'xpack.observabilityOverview.alertsTable.reasonColumnDescription',
+      { defaultMessage: 'Reason' }
+    ),
+    id: ALERT_REASON,
+  },
+];
 
 export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
   const {
