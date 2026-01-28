@@ -8,14 +8,18 @@
  */
 
 import { capitalize, chain, memoize } from 'lodash';
-import type { AgentOptions } from 'https';
-import { Agent } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import type { Response } from 'node-fetch';
-import nodeFetch from 'node-fetch';
+import { Agent } from 'undici';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfig } from '../kibana_config';
+
+interface AgentConnectOptions {
+  ca?: string | string[] | Buffer | Buffer[];
+  cert?: string | string[] | Buffer | Buffer[];
+  rejectUnauthorized?: boolean;
+  checkServerIdentity?: (hostname: string, cert: object) => Error | undefined;
+}
 
 type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
 
@@ -123,25 +127,25 @@ export class StatusHandler {
     );
 
     try {
-      return await nodeFetch(url, {
-        agent: url.protocol === 'https:' ? this.getAgent() : undefined,
+      return await fetch(url, {
+        dispatcher: url.protocol === 'https:' ? this.getAgent() : undefined,
         signal: controller.signal,
         redirect: 'manual',
-      });
+      } as RequestInit);
     } finally {
       clearTimeout(timeoutId);
     }
   }
 
-  private getAgent = memoize(() => new Agent(this.getAgentConfig()));
+  private getAgent = memoize(() => new Agent({ connect: this.getAgentConnectOptions() }));
 
-  private getAgentConfig() {
+  private getAgentConnectOptions(): AgentConnectOptions {
     const {
       certificateAuthorities: ca,
       certificate: cert,
       verificationMode,
     } = this.kibanaConfig.ssl;
-    const options: AgentOptions = { ca, cert };
+    const options: AgentConnectOptions = { ca, cert };
 
     switch (verificationMode) {
       case 'none':
@@ -150,7 +154,7 @@ export class StatusHandler {
       case 'certificate':
         options.rejectUnauthorized = true;
         // by default, NodeJS is checking the server identify
-        options.checkServerIdentity = () => undefined;
+        options.checkServerIdentity = () => undefined as unknown as Error | undefined;
         break;
       case 'full':
         options.rejectUnauthorized = true;
