@@ -11,12 +11,19 @@ import type {
   AdoptionTrackedAPIsByPlugin,
   ApiDeclaration,
   ApiReference,
+  IssuesByPlugin,
   MissingApiItemMap,
   PluginApi,
   ReferencedDeprecationsByPlugin,
 } from './types';
 import { TypeKind } from './types';
 import { collectApiStatsForPlugin } from './stats';
+
+const createEmptyIssues = (): IssuesByPlugin => ({
+  missingApiItems: {},
+  referencedDeprecations: {},
+  adoptionTrackedAPIs: {},
+});
 
 const createMockApiDeclaration = (overrides: Partial<ApiDeclaration> = {}): ApiDeclaration => ({
   id: 'test-id',
@@ -48,7 +55,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(1);
       expect(stats.missingComments[0].id).toBe('no-comment');
@@ -65,7 +72,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(1);
       expect(stats.missingComments[0].id).toBe('empty-comment');
@@ -82,7 +89,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(0);
     });
@@ -110,7 +117,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(1);
       expect(stats.missingComments[0].id).toBe('child-no-comment');
@@ -141,7 +148,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(1);
       expect(stats.missingComments[0].id).toBe('level3-no-comment');
@@ -169,7 +176,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(3);
       expect(stats.missingComments.map((d) => d.id)).toEqual([
@@ -197,7 +204,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       // Should only flag the regular API, not the node_modules one
       expect(stats.missingComments).toHaveLength(1);
@@ -217,7 +224,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.isAnyType).toHaveLength(1);
       expect(stats.isAnyType[0].id).toBe('any-type');
@@ -241,7 +248,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.isAnyType).toHaveLength(0);
     });
@@ -262,7 +269,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.isAnyType).toHaveLength(1);
       expect(stats.isAnyType[0].id).toBe('child-any');
@@ -290,7 +297,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.isAnyType).toHaveLength(3);
     });
@@ -307,7 +314,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, missingApiItems, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems,
+        referencedDeprecations: {},
+        adoptionTrackedAPIs: {},
+      });
 
       expect(stats.missingExports).toBe(2);
     });
@@ -315,7 +326,7 @@ describe('collectApiStatsForPlugin', () => {
     it('handles empty missingApiItems', () => {
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingExports).toBe(0);
     });
@@ -329,7 +340,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, missingApiItems, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems,
+        referencedDeprecations: {},
+        adoptionTrackedAPIs: {},
+      });
 
       expect(stats.missingExports).toBe(0);
     });
@@ -341,7 +356,7 @@ describe('collectApiStatsForPlugin', () => {
         client: [createMockApiDeclaration({ id: 'api1' })],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.apiCount).toBe(1);
     });
@@ -356,7 +371,7 @@ describe('collectApiStatsForPlugin', () => {
         common: [createMockApiDeclaration({ id: 'common1' })],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.apiCount).toBe(4);
     });
@@ -374,7 +389,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       // Parent + 2 children = 3
       expect(stats.apiCount).toBe(3);
@@ -395,7 +410,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       // level1 + level2 + level3 = 3
       expect(stats.apiCount).toBe(3);
@@ -417,7 +432,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.noReferences).toHaveLength(2);
       expect(stats.noReferences.map((d) => d.id)).toEqual(['no-refs', 'empty-refs']);
@@ -435,7 +450,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.noReferences).toHaveLength(0);
     });
@@ -456,7 +471,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.noReferences).toHaveLength(1);
       expect(stats.noReferences[0].id).toBe('child-no-refs');
@@ -465,7 +480,7 @@ describe('collectApiStatsForPlugin', () => {
 
   describe('deprecation tracking', () => {
     it('counts referenced deprecations', () => {
-      const deprecations: ReferencedDeprecationsByPlugin = {
+      const referencedDeprecations: ReferencedDeprecationsByPlugin = {
         'test-plugin': [
           {
             deprecatedApi: createMockApiDeclaration({ id: 'deprecated1' }),
@@ -480,7 +495,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, deprecations, {});
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems: {},
+        referencedDeprecations,
+        adoptionTrackedAPIs: {},
+      });
 
       expect(stats.deprecatedAPIsReferencedCount).toBe(2);
     });
@@ -488,13 +507,13 @@ describe('collectApiStatsForPlugin', () => {
     it('handles no deprecations', () => {
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.deprecatedAPIsReferencedCount).toBe(0);
     });
 
     it('handles missing plugin entry in deprecations', () => {
-      const deprecations: ReferencedDeprecationsByPlugin = {
+      const referencedDeprecations: ReferencedDeprecationsByPlugin = {
         'other-plugin': [
           {
             deprecatedApi: createMockApiDeclaration({ id: 'deprecated' }),
@@ -505,7 +524,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, deprecations, {});
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems: {},
+        referencedDeprecations,
+        adoptionTrackedAPIs: {},
+      });
 
       expect(stats.deprecatedAPIsReferencedCount).toBe(0);
     });
@@ -528,7 +551,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, adoptionTrackedAPIs);
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems: {},
+        referencedDeprecations: {},
+        adoptionTrackedAPIs,
+      });
 
       expect(stats.adoptionTrackedAPIs).toHaveLength(2);
       expect(stats.adoptionTrackedAPIsCount).toBe(2);
@@ -538,7 +565,7 @@ describe('collectApiStatsForPlugin', () => {
     it('handles no adoption-tracked APIs', () => {
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.adoptionTrackedAPIs).toHaveLength(0);
       expect(stats.adoptionTrackedAPIsCount).toBe(0);
@@ -557,7 +584,11 @@ describe('collectApiStatsForPlugin', () => {
 
       const pluginApi = createMockPluginApi();
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, adoptionTrackedAPIs);
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems: {},
+        referencedDeprecations: {},
+        adoptionTrackedAPIs,
+      });
 
       expect(stats.adoptionTrackedAPIs).toHaveLength(0);
       expect(stats.adoptionTrackedAPIsCount).toBe(0);
@@ -591,7 +622,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       // Should flag the child property as missing comment
       // Note: This is current behavior - in Phase 4 we'll fix this to check for property-level JSDoc
@@ -628,7 +659,7 @@ describe('collectApiStatsForPlugin', () => {
         ],
       });
 
-      const stats = collectApiStatsForPlugin(pluginApi, {}, {}, {});
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
 
       expect(stats.missingComments).toHaveLength(1);
       expect(stats.missingComments[0].id).toBe('level3-no-comment');
@@ -678,7 +709,7 @@ describe('collectApiStatsForPlugin', () => {
         },
       };
 
-      const deprecations: ReferencedDeprecationsByPlugin = {
+      const referencedDeprecations: ReferencedDeprecationsByPlugin = {
         'test-plugin': [
           {
             deprecatedApi: createMockApiDeclaration({ id: 'deprecated' }),
@@ -687,7 +718,11 @@ describe('collectApiStatsForPlugin', () => {
         ],
       };
 
-      const stats = collectApiStatsForPlugin(pluginApi, missingApiItems, deprecations, {});
+      const stats = collectApiStatsForPlugin(pluginApi, {
+        missingApiItems,
+        referencedDeprecations,
+        adoptionTrackedAPIs: {},
+      });
 
       expect(stats.apiCount).toBe(5);
       expect(stats.missingComments).toHaveLength(1);

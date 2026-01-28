@@ -124,18 +124,16 @@ beforeAll(async () => {
 
   doc = pluginApiMap.pluginA;
 
-  pluginAStats = collectApiStatsForPlugin(
-    doc,
+  pluginAStats = collectApiStatsForPlugin(doc, {
     missingApiItems,
     referencedDeprecations,
-    adoptionTrackedAPIs
-  );
-  pluginBStats = collectApiStatsForPlugin(
-    pluginApiMap.pluginB,
+    adoptionTrackedAPIs,
+  });
+  pluginBStats = collectApiStatsForPlugin(pluginApiMap.pluginB, {
     missingApiItems,
     referencedDeprecations,
-    adoptionTrackedAPIs
-  );
+    adoptionTrackedAPIs,
+  });
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   await Promise.all([
