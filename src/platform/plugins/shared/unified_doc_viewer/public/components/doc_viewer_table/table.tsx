@@ -83,7 +83,7 @@ export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedField
 
 // we keep writing to localStorage for pinned fields custom here (instead of useRestorableLocalStorage)
 // to keep backward compatibility
-const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
+const getPinnedFieldsFromStorage = (dataViewId: string, storage: Storage): string[] => {
   const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
   if (
     typeof pinnedFieldsEntry === 'object' &&
@@ -153,7 +153,7 @@ const InternalDocViewerTable = ({
 
   const [pinnedFields, setPinnedFields] = useRestorableState(
     'pinnedFields',
-    getPinnedFields(currentDataViewId, storage)
+    getPinnedFieldsFromStorage(currentDataViewId, storage)
   );
 
   const flattened = hit.flattened;
