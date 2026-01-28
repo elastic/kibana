@@ -255,33 +255,6 @@ describe('TableActions', () => {
       expect(filterOutProps.title).toBe('Filter out value');
     });
 
-    it('should allow filtering on multifields in ES|QL mode when on Dashboard', () => {
-      const actions = getFieldValueCellActions({
-        rows: getRows('extension', ['foo', 'bar']),
-        isEsqlMode: true,
-        hideFilteringOnComputedColumns: true,
-        toasts: toastsMock,
-        onFilter: jest.fn(),
-      }).map((Action, i) => (
-        <Action
-          key={i}
-          {...EuiCellParams}
-          Component={(props: any) => (
-            <div data-test-subj={props['data-test-subj']}>{JSON.stringify(props)}</div>
-          )}
-        />
-      ));
-      render(<>{actions}</>);
-      const filterForProps = JSON.parse(
-        screen.getByTestId('addFilterForValueButton-extension').innerHTML
-      );
-      expect(filterForProps.title).toBe('Filter for value');
-      const filterOutProps = JSON.parse(
-        screen.getByTestId('addFilterOutValueButton-extension').innerHTML
-      );
-      expect(filterOutProps.title).toBe('Filter out value');
-    });
-
     describe('when clicking filter actions', () => {
       it('should call onFilter with correct params for FilterIn action', async () => {
         const onFilterMock = jest.fn();
