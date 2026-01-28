@@ -7,6 +7,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 
 import { useNavigation } from '../../common/lib/kibana';
@@ -37,12 +38,12 @@ type WatchlistFilterProps = {
 
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
-  { prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }}/>, id: 'group-prebuilt', label: 'Prebuilt', isGroupLabelOption: true, groupicon: 'pin' },
+  { prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }} />, id: 'group-prebuilt', label: 'Prebuilt', isGroupLabelOption: true, groupicon: 'pin' },
   { id: 'prebuilt-priv', label: 'Privileged users' },
   { id: 'prebuilt-llm', label: 'Unauthorized LLM access' },
   { id: 'prebuilt-depart', label: 'Departing employees' },
 
-  { prepend: <EuiIcon type="gear" aria-label="gear" style={{ marginRight: 8 }}/> , id: 'group-custom', label: 'Custom', isGroupLabelOption: true, groupicon: 'gear' },
+  { prepend: <EuiIcon type="gear" aria-label="gear" style={{ marginRight: 8 }} />, id: 'group-custom', label: 'Custom', isGroupLabelOption: true, groupicon: 'gear' },
   { id: 'custom-clevel', label: 'C-level users' },
   { id: 'custom-highrisk', label: 'High-risk users' },
   { id: 'custom-3', label: 'Custom watchlist #3' },
@@ -52,13 +53,13 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
   // hook this up to real data
   const [options, setOptions] = useState<WatchlistOption[]>(WATCHLIST_OPTIONS);
- 
+
   const selected = options.find((o) => !o.isGroupLabelOption && o.checked === 'on');
 
-  const { navigateTo } = useNavigation();  
+  const { navigateTo } = useNavigation();
 
   const navigateToWatchlist = useCallback(
-    () => {      
+    () => {
       navigateTo({
         path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
       });
@@ -67,21 +68,21 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
   );
 
   const onChangeComboBox = useCallback(
-    (nextOptions: any[]) => {      
+    (nextOptions: any[]) => {
       const newlySelected = nextOptions.find(
         (o) => o && !o.isGroupLabelOption
       ) as WatchlistItem | undefined;
 
-      if (newlySelected?.id) {        
-        onChangeSelectedId?.(newlySelected.id);        
-        navigateToWatchlist();        
+      if (newlySelected?.id) {
+        onChangeSelectedId?.(newlySelected.id);
+        navigateToWatchlist();
       }
     },
     [onChangeSelectedId, navigateToWatchlist]
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row" >
       <EuiFlexItem>
         <EuiComboBox
           prepend="Watchlist"
@@ -96,6 +97,9 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
         <EuiButtonIcon
           iconType="gear"
           aria-label="Watchlist settings"
+          display="base"
+          color="primary"
+          size="m"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
