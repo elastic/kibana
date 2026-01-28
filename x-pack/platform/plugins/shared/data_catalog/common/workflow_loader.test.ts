@@ -309,9 +309,9 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(invalidYaml);
 
-      await expect(loadWorkflows({ directory: TEST_DIR })).rejects.toThrow(
-        /Failed to load workflows from \/path\/to\/workflows:/
-      );
+      const error = await loadWorkflows({ directory: TEST_DIR }).catch((e) => e);
+      expect(error.message).toMatch(/Failed to load workflows from \/path\/to\/workflows:/);
+      expect(error.cause.message).toMatch(/All mapping items must start at the same column/);
     });
   });
 
