@@ -14,8 +14,8 @@ import type { StorageService } from '../services/storage_service/storage_service
 import { createMockStorageService } from '../services/storage_service/storage_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
+  aBulkAlertEventsESQLResponse,
   anAlertEventESQLResponse,
-  anAlertTransitionESQLResponse,
   anEmptyESQLResponse,
 } from './fixtures/query_responses';
 
@@ -42,26 +42,25 @@ describe('AlertActionsClient', () => {
   describe('createAction', () => {
     const actionData: CreateAlertActionData = {
       action_type: 'ack',
+      episode_id: 'episode-1',
     };
 
     it('should successfully create an action', async () => {
-      queryService.executeQuery
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse());
+      queryService.executeQuery.mockResolvedValueOnce(anAlertEventESQLResponse());
 
       await client.createAction({
-        alertSeriesId: 'test-series-id',
+        groupHash: 'test-group-hash',
         action: actionData,
       });
 
-      expect(queryService.executeQuery).toHaveBeenCalledTimes(2);
+      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
 
       expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
       const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.index).toBe('.alerts-actions');
       expect(callArgs.docs).toHaveLength(1);
       expect(callArgs.docs[0]).toMatchObject({
-        alert_series_id: 'test-series-id',
+        group_hash: 'test-group-hash',
         action_type: 'ack',
         episode_id: 'episode-1',
         rule_id: 'test-rule-id',
@@ -72,32 +71,15 @@ describe('AlertActionsClient', () => {
     });
 
     it('should throw when alert event is not found', async () => {
-      queryService.executeQuery
-        .mockResolvedValueOnce(anEmptyESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse());
+      queryService.executeQuery.mockResolvedValueOnce(anEmptyESQLResponse());
 
       await expect(
         client.createAction({
-          alertSeriesId: 'unknown-series-id',
-          action: actionData,
-        })
-      ).rejects.toThrow('Alert event with series id [unknown-series-id] not found');
-
-      expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
-    });
-
-    it('should throw when alert transition is not found', async () => {
-      queryService.executeQuery
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anEmptyESQLResponse());
-
-      await expect(
-        client.createAction({
-          alertSeriesId: 'test-series-id',
+          groupHash: 'unknown-group-hash',
           action: actionData,
         })
       ).rejects.toThrow(
-        'Alert transition with series id [test-series-id] and optional episode id [undefined] not found'
+        'Alert event with group_hash [unknown-group-hash] and episode_id [episode-1] not found'
       );
 
       expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
@@ -109,12 +91,12 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-2',
       };
 
-      queryService.executeQuery
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse({ episode_id: 'episode-2' }));
+      queryService.executeQuery.mockResolvedValueOnce(
+        anAlertEventESQLResponse({ episode_id: 'episode-2' })
+      );
 
       await client.createAction({
-        alertSeriesId: 'test-series-id',
+        groupHash: 'test-group-hash',
         action: actionWithEpisode,
       });
 
@@ -124,9 +106,7 @@ describe('AlertActionsClient', () => {
     });
 
     it('should handle null username when security is not available', async () => {
-      queryService.executeQuery
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse());
+      queryService.executeQuery.mockResolvedValueOnce(anAlertEventESQLResponse());
 
       const clientWithoutSecurity = new AlertActionsClient(
         request,
@@ -136,7 +116,7 @@ describe('AlertActionsClient', () => {
       );
 
       await clientWithoutSecurity.createAction({
-        alertSeriesId: 'test-series-id',
+        groupHash: 'test-group-hash',
         action: actionData,
       });
 
@@ -149,21 +129,21 @@ describe('AlertActionsClient', () => {
   describe('createBulkActions', () => {
     it('should process all actions successfully', async () => {
       const actions = [
-        { alert_series_id: 'test-series-id', action_type: 'ack' as const },
-        { alert_series_id: 'test-series-id', action_type: 'snooze' as const },
+        { group_hash: 'group-hash-1', action_type: 'ack' as const, episode_id: 'episode-1' },
+        { group_hash: 'group-hash-2', action_type: 'snooze' as const },
       ];
 
-      queryService.executeQuery
-        // first action
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse())
-        // second action
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse());
+      queryService.executeQuery.mockResolvedValueOnce(
+        aBulkAlertEventsESQLResponse([
+          { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+          { group_hash: 'group-hash-2', episode_id: 'episode-2' },
+        ])
+      );
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 2, total: 2 });
+      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
       expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
       const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs).toHaveLength(2);
@@ -171,21 +151,19 @@ describe('AlertActionsClient', () => {
 
     it('should handle partial failures and return correct counts', async () => {
       const actions = [
-        { alert_series_id: 'test-series-id', action_type: 'ack' as const },
-        { alert_series_id: 'unknown-series-id', action_type: 'ack' as const },
+        { group_hash: 'group-hash-1', action_type: 'ack' as const, episode_id: 'episode-1' },
+        { group_hash: 'unknown-group-hash', action_type: 'ack' as const, episode_id: 'episode-1' },
       ];
 
-      queryService.executeQuery
-        // first action
-        .mockResolvedValueOnce(anAlertEventESQLResponse())
-        .mockResolvedValueOnce(anAlertTransitionESQLResponse())
-        // second action
-        .mockResolvedValueOnce(anEmptyESQLResponse())
-        .mockResolvedValueOnce(anEmptyESQLResponse());
+      // Only return one matching alert event (the second action's group_hash won't match)
+      queryService.executeQuery.mockResolvedValueOnce(
+        aBulkAlertEventsESQLResponse([{ group_hash: 'group-hash-1', episode_id: 'episode-1' }])
+      );
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 1, total: 2 });
+      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
       expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
       const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs).toHaveLength(1);
@@ -193,18 +171,17 @@ describe('AlertActionsClient', () => {
 
     it('should return processed 0 when all actions fail', async () => {
       const actions = [
-        { alert_series_id: 'unknown-1', action_type: 'ack' as const },
-        { alert_series_id: 'unknown-2', action_type: 'snooze' as const },
+        { group_hash: 'unknown-1', action_type: 'ack' as const, episode_id: 'episode-1' },
+        { group_hash: 'unknown-2', action_type: 'snooze' as const },
       ];
 
-      queryService.executeQuery.mockResolvedValue({
-        columns: [{ name: '@timestamp', type: 'date' }],
-        values: [], // Empty values means not found
-      });
+      // Return empty response - no matching alert events
+      queryService.executeQuery.mockResolvedValueOnce(aBulkAlertEventsESQLResponse([]));
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 0, total: 2 });
+      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
       expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
     });
   });
