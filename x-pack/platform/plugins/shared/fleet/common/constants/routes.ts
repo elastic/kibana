@@ -57,7 +57,8 @@ export const EPM_API_ROUTES = {
   INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
   PACKAGES_DATASTREAM_ASSETS: `${EPM_API_ROOT}/packages/{pkgName}/{pkgVersion}/datastream_assets`,
   ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/rollback`,
-
+  ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/rollback/available_check`,
+  BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
@@ -95,6 +96,7 @@ export const AGENT_POLICY_API_ROUTES = {
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
+  CLEANUP_REVISIONS_PATTERN: `${INTERNAL_ROOT}/agent_policies/_cleanup_revisions`,
 };
 
 // Cloud Connector API routes
@@ -104,6 +106,7 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   CREATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
+  USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
 };
 
 // Kubernetes Manifest API routes
@@ -190,11 +193,14 @@ export const AGENT_API_ROUTES = {
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
   PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
+  ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
+  BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
 };
 
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

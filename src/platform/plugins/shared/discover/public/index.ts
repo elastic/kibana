@@ -15,18 +15,16 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export type { DiscoverAppState } from './application/main/state_management/discover_app_state_container';
-export type { DiscoverStateContainer } from './application/main/state_management/discover_state';
+export type { DiscoverAppState } from './application/main/state_management/redux';
 export type { DataDocumentsMsg } from './application/main/state_management/discover_data_state_container';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
+  ExtendedDiscoverStateContainer,
   CustomizationCallback,
   DiscoverCustomization,
   DiscoverCustomizationService,
-  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
-  TopNavCustomization,
 } from './customizations';
 export {
   SEARCH_EMBEDDABLE_TYPE,

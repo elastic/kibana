@@ -20,7 +20,7 @@ import type {
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformPanelsIn(widgets: DashboardState['panels'] | undefined): {
+export function transformPanelsIn(widgets: Required<DashboardState>['panels']): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -29,7 +29,7 @@ export function transformPanelsIn(widgets: DashboardState['panels'] | undefined)
   const sections: SavedDashboardSection[] = [];
   const panelReferences: SavedObjectReference[] = [];
 
-  widgets?.forEach((widget) => {
+  widgets.forEach((widget) => {
     if (isDashboardSection(widget)) {
       const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
       const idx = uid ?? uuidv4();
@@ -60,10 +60,11 @@ function transformPanelIn(panel: DashboardPanel): {
   const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
+  const panelSchema = transforms?.getSchema?.();
 
-  if (transforms?.schema) {
+  if (panelSchema) {
     try {
-      transforms.schema.validate(config);
+      panelSchema.validate(config);
     } catch (error) {
       throw Boom.badRequest(
         `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`

@@ -13,7 +13,7 @@ import {
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
@@ -43,7 +43,6 @@ export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
-    /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
     expire_time,
@@ -56,7 +55,6 @@ export const exceptionItemToCreateExceptionItem = (
     namespace_type,
     os_types,
     tags,
-    /* eslint-enable @typescript-eslint/naming-convention */
   } = exceptionItem;
 
   return {
@@ -78,7 +76,6 @@ export const exceptionItemToCreateExceptionItem = (
 const exceptionItemToUpdateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchemaWithNonNullProps => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, item_id, _version } = exceptionItem;
   const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
 
@@ -152,7 +149,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): ExceptionListItemSchema {
     return this.generate({
       name: `Endpoint exception (${this.randomString(5)})`,
-      list_id: ENDPOINT_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       entries: this.randomEndpointExceptionEntries(1),
       tags: [],
       ...overrides,
@@ -161,9 +158,18 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateEndpointExceptionForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
-  ): CreateExceptionListItemSchema {
+  ): CreateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToCreateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateEndpointException()),
       ...overrides,
     };
   }

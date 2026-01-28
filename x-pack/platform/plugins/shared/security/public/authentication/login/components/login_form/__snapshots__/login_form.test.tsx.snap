@@ -85,7 +85,7 @@ exports[`LoginForm renders as expected 1`] = `
               "extraSlow": "500ms",
               "fast": "150ms",
               "normal": "250ms",
-              "resistance": "cubic-bezier(.694, .0482, .335, 1)",
+              "resistance": "cubic-bezier(.32, .72, 0, 1)",
               "slow": "350ms",
             },
             "base": 16,
@@ -512,7 +512,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -885,6 +885,7 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#172336",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -931,6 +932,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -942,7 +950,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1315,6 +1323,7 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#ECF1F9",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1361,6 +1370,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2502,72 +2518,80 @@ exports[`LoginForm renders as expected 1`] = `
           <EuiUtilityClasses />
         </EuiCacheProvider>
         <EuiComponentDefaultsProvider>
-          <LoginForm
-            http={
-              Object {
-                "addLoadingCountSource": [MockFunction],
-                "anonymousPaths": Object {
-                  "isAnonymous": [MockFunction],
-                  "register": [MockFunction],
-                },
-                "basePath": BasePath {
-                  "assetsHrefBase": "",
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "publicBaseUrl": undefined,
-                  "remove": [Function],
-                  "serverBasePath": "",
-                },
-                "delete": [MockFunction],
-                "externalUrl": Object {
-                  "isInternalUrl": [MockFunction],
-                  "validateUrl": [MockFunction],
-                },
-                "fetch": [MockFunction],
-                "get": [MockFunction],
-                "getLoadingCount$": [MockFunction],
-                "head": [MockFunction],
-                "intercept": [MockFunction],
-                "options": [MockFunction],
-                "patch": [MockFunction],
-                "post": [MockFunction],
-                "put": [MockFunction],
-                "staticAssets": Object {
-                  "getPluginAssetHref": [MockFunction],
-                },
-              }
-            }
-            loginAssistanceMessage=""
-            notifications={
-              Object {
-                "showErrorDialog": [MockFunction],
-                "toasts": Object {
-                  "add": [MockFunction],
-                  "addDanger": [MockFunction],
-                  "addError": [MockFunction],
-                  "addInfo": [MockFunction],
-                  "addSuccess": [MockFunction],
-                  "addWarning": [MockFunction],
-                  "get$": [MockFunction],
-                  "remove": [MockFunction],
-                },
-              }
-            }
-            selector={
-              Object {
-                "enabled": false,
-                "providers": Array [
-                  Object {
-                    "name": "basic",
-                    "showInSelector": true,
-                    "type": "basic",
-                    "usesLoginForm": true,
+          <EuiFlyoutManager>
+            <LoginForm
+              http={
+                Object {
+                  "addLoadingCountSource": [MockFunction],
+                  "anonymousPaths": Object {
+                    "isAnonymous": [MockFunction],
+                    "register": [MockFunction],
                   },
-                ],
+                  "basePath": BasePath {
+                    "assetsHrefBase": "",
+                    "basePath": "",
+                    "get": [Function],
+                    "prepend": [Function],
+                    "publicBaseUrl": undefined,
+                    "remove": [Function],
+                    "serverBasePath": "",
+                  },
+                  "delete": [MockFunction],
+                  "externalUrl": Object {
+                    "isInternalUrl": [MockFunction],
+                    "validateUrl": [MockFunction],
+                  },
+                  "fetch": [MockFunction],
+                  "get": [MockFunction],
+                  "getLoadingCount$": [MockFunction],
+                  "head": [MockFunction],
+                  "intercept": [MockFunction],
+                  "options": [MockFunction],
+                  "patch": [MockFunction],
+                  "post": [MockFunction],
+                  "put": [MockFunction],
+                  "staticAssets": Object {
+                    "getPluginAssetHref": [MockFunction],
+                  },
+                }
               }
-            }
-          />
+              loginAssistanceMessage=""
+              notifications={
+                Object {
+                  "feedback": Object {
+                    "isEnabled": [MockFunction],
+                  },
+                  "showErrorDialog": [MockFunction],
+                  "toasts": Object {
+                    "add": [MockFunction],
+                    "addDanger": [MockFunction],
+                    "addError": [MockFunction],
+                    "addInfo": [MockFunction],
+                    "addSuccess": [MockFunction],
+                    "addWarning": [MockFunction],
+                    "get$": [MockFunction],
+                    "remove": [MockFunction],
+                  },
+                  "tours": Object {
+                    "isEnabled": [MockFunction],
+                  },
+                }
+              }
+              selector={
+                Object {
+                  "enabled": false,
+                  "providers": Array [
+                    Object {
+                      "name": "basic",
+                      "showInSelector": true,
+                      "type": "basic",
+                      "usesLoginForm": true,
+                    },
+                  ],
+                }
+              }
+            />
+          </EuiFlyoutManager>
         </EuiComponentDefaultsProvider>
       </EuiThemeProvider>
     </EuiSystemDefaultsProvider>

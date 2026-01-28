@@ -1,5 +1,8 @@
 env:
   IGNORE_SHIP_CI_STATS_ERROR: 'true'
+  PACKAGE_REGISTRY_BASE_IMAGE: 'docker.elastic.co/package-registry/distribution:lite'
+  PACKAGE_REGISTRY_TEMP_IMAGE: 'docker.elastic.co/kibana-ci/package-registry-distribution:temp'
+  PACKAGE_REGISTRY_TARGET_IMAGE: 'docker.elastic.co/kibana-ci/package-registry-distribution:lite'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -72,7 +75,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+      diskSizeGb: 105
+    timeout_in_minutes: 75
     parallelism: 20
     key: defend-workflows-stateful
     depends_on: build
@@ -89,7 +93,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+      diskSizeGb: 105
+    timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
     depends_on: build
@@ -130,8 +135,11 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/fleet/promote_package_registry.sh
-    label: Promote docker.elastic.co/package-registry/distribution:lite
+  - command: |
+      echo "--- Promoting base image to temp..."
+      docker buildx imagetools create -t "$PACKAGE_REGISTRY_TEMP_IMAGE" "$PACKAGE_REGISTRY_BASE_IMAGE"
+    label: 'Promote EPR image to temp'
+    key: promote-epr-to-temp
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -142,6 +150,42 @@ steps:
       - jest-integration
       - defend-workflows-stateful
       - defend-workflows-serverless
+    if: "build.branch == 'main'"
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - label: 'Update cache for EPR image'
+    trigger: kibana-vm-images
+    key: epr-image-cache-update
+    build:
+      env:
+        EPR_IMAGE: "$PACKAGE_REGISTRY_TEMP_IMAGE"
+        IMAGES_CONFIG: 'kibana/image_cache.tpl.yml'
+        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+        RETRY: '1'
+    depends_on:
+      - promote-epr-to-temp
+    if: "build.branch == 'main'"
+
+  - command: |
+      echo "--- Promoting temp image to final target..."
+      docker buildx imagetools create -t "$PACKAGE_REGISTRY_TARGET_IMAGE" "$PACKAGE_REGISTRY_TEMP_IMAGE"
+    label: 'Promote EPR image to final target'
+    key: promote-epr-image
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    depends_on:
+      - epr-image-cache-update
+    if: "build.branch == 'main'"
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
 
   - wait: ~
     continue_on_failure: true

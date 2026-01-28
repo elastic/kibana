@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from 'expect';
-import type { ApmFields } from '@kbn/apm-synthtrace-client';
-import { serviceMap, timerange, apm } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/synthtrace-client';
+import { serviceMap, timerange, apm } from '@kbn/synthtrace-client';
 import { Readable } from 'node:stream';
 import { compact } from 'lodash';
 import type { SupertestReturnType } from '../../../../apm_api_integration/common/apm_api_supertest';
@@ -95,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
               query: {
-                dependencyName: 'postgres',
+                dependencies: 'postgres',
                 start: new Date(start).toISOString(),
                 end: new Date(end).toISOString(),
                 environment: 'ENVIRONMENT_ALL',
@@ -110,6 +110,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('returns undefined values', () => {
           expect(response.body.currentPeriod).toEqual({ transactionStats: {} });
+        });
+      });
+
+      describe('/internal/apm/service-map/dependency with sourceServiceName and array of dependencies', () => {
+        let response: DependencyResponse;
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/dependency`,
+            params: {
+              query: {
+                dependencies: ['postgres', 'redis'],
+                sourceServiceName: 'test-service',
+                start: new Date(start).toISOString(),
+                end: new Date(end).toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+              },
+            },
+          });
+        });
+
+        it('returns status code 200', () => {
+          expect(response.status).toBe(200);
+        });
+
+        it('handles edge query with sourceServiceName', () => {
+          expect(response.body.currentPeriod).toBeDefined();
         });
       });
     });

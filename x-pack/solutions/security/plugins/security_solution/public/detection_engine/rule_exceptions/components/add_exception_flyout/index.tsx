@@ -19,11 +19,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -113,12 +112,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
-  const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-    [euiTheme.levels.flyout]
-  );
-
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -369,7 +362,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       switch (listType) {
         case ExceptionListTypeEnum.ENDPOINT: {
           return setInitialExceptionItems(
-            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+            defaultEndpointExceptionItems(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              exceptionItemName,
+              alertData
+            )
           );
         }
         case ExceptionListTypeEnum.RULE_DEFAULT: {
@@ -520,8 +517,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
       aria-labelledby={exceptionFlyoutTitleId}
-      // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-      maskProps={maskProps}
     >
       <ExceptionFlyoutHeader
         listType={listType}

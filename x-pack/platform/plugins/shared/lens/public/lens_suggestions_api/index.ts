@@ -7,6 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   DatasourceMap,
   VisualizationMap,
@@ -84,6 +85,9 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const isInitialSubTypeSupported = preferredChartType
+    ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
@@ -93,14 +97,16 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];
 
-  const activeVisualization = suggestions[0];
+  const primarySuggestion = suggestions[0];
+  const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
-    activeVisualization.incomplete ||
-    excludedVisualizations?.includes(activeVisualization.visualizationId)
+    primarySuggestion.incomplete ||
+    excludedVisualizations?.includes(primarySuggestion.visualizationId)
   ) {
     return [];
   }
@@ -110,12 +116,12 @@ export const suggestionsApi = ({
     datasourceStates: {
       textBased: {
         isLoading: false,
-        state: activeVisualization.datasourceState,
+        state: primarySuggestion.datasourceState,
       },
     },
     visualizationMap,
-    activeVisualization: visualizationMap[activeVisualization.visualizationId],
-    visualizationState: activeVisualization.visualizationState,
+    activeVisualization,
+    visualizationState: primarySuggestion.visualizationState,
     dataViews,
   }).filter(
     (sug) =>
@@ -155,9 +161,27 @@ export const suggestionsApi = ({
 
   const targetChartType = preferredChartType ?? chartTypeFromAttrs;
 
+  // However, for ESQL queries without transformational commands, prefer datatable
+  const query = 'query' in context ? context.query : undefined;
+  const hasTransformations = query ? hasTransformationalCommand(query.esql) : true;
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [activeVisualization, ...newSuggestions];
+  const suggestionsList = [primarySuggestion, ...newSuggestions]
+    .filter((s) => {
+      // if we only have non-transformed ESQL, suggest only table
+      if (!hasTransformations) {
+        return s.visualizationId === 'lnsDatatable';
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      // If has transformations, prioritize lnsXY
+      if (a.visualizationId === 'lnsXY' && b.visualizationId !== 'lnsXY') return -1;
+      if (a.visualizationId !== 'lnsXY' && b.visualizationId === 'lnsXY') return 1;
+      // Both are same type, sort by score
+      return b.score - a.score;
+    });
 
   // Handle preferred chart type logic
   if (targetChartType) {
@@ -188,9 +212,5 @@ export const suggestionsApi = ({
     }
   }
 
-  // if there is no preference from the user, send everything
-  // until we separate the text based suggestions logic from the dataview one,
-  // we want to sort XY first
-  const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
-  return sortXYFirst;
+  return suggestionsList;
 };

@@ -10,7 +10,8 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_value
 import type { ValuesType } from 'utility-types';
 import type { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
 import { meanBy } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';
@@ -235,6 +236,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           }
           bulkOperationSpanEventsResponse = spanEventsResponse.find(findBulkOperation)!;
           bulkOperationSpanMetricsResponse = spanMetricsResponse.find(findBulkOperation)!;
+
+          /**
+           * The sum result of `span.destination.service.response_time.count` from service_destination metrics is synthetically
+           * multiplied by SPANS_PER_DESTINATION_METRIC to simulate muliple span for a single metric aggregation.
+           * We divide by SPANS_PER_DESTINATION_METRIC to get the comparable throughput.
+           **/
+          bulkOperationSpanMetricsResponse.timeseries.throughput =
+            bulkOperationSpanMetricsResponse.timeseries.throughput.map(({ y, x }) => ({
+              y: y === null ? null : y / SPANS_PER_DESTINATION_METRIC,
+              x,
+            }));
+          bulkOperationSpanMetricsResponse.throughput =
+            bulkOperationSpanMetricsResponse.throughput / SPANS_PER_DESTINATION_METRIC;
         });
 
         it('returns same latency', () => {
@@ -258,11 +272,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             bulkOperationSpanMetricsResponse.throughput
           );
 
-          const meanSpanMetrics = meanBy(
+          const meanSpanEvents = meanBy(
             bulkOperationSpanEventsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
             'y'
           );
-          const meanSpanEvents = meanBy(
+          const meanSpanMetrics = meanBy(
             bulkOperationSpanMetricsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
             'y'
           );

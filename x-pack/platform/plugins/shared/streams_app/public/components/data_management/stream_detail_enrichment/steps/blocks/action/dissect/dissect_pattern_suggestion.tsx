@@ -21,6 +21,8 @@ import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { DissectProcessorResult } from '@kbn/dissect-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { useAbortController } from '@kbn/react-hooks';
+import { isNoSuggestionsError } from '../utils/no_suggestions_error';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
@@ -29,6 +31,7 @@ import { AdditionalChargesCallout } from '../grok/additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useDissectPatternSuggestion } from './use_dissect_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
+import { registerDissectSuggestion, clearDissectSuggestion } from '../../../../dev_console_helpers';
 
 export const DissectPatternAISuggestions = ({
   aiFeatures,
@@ -45,9 +48,10 @@ export const DissectPatternAISuggestions = ({
     selectPreviewRecords(snapshot.context)
   );
 
-  const [suggestionsState, refreshSuggestions] = useDissectPatternSuggestion();
+  const abortController = useAbortController();
+  const [suggestionsState, refreshSuggestions] = useDissectPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -56,6 +60,79 @@ export const DissectPatternAISuggestions = ({
         )
     );
   }, [previewDocuments, fieldValue]);
+
+  // Register/clear suggestion in dev console helper
+  React.useEffect(() => {
+    if (suggestionsState.value) {
+      registerDissectSuggestion({
+        dissectProcessor: suggestionsState.value.dissectProcessor,
+        simulationResult: suggestionsState.value.simulationResult,
+      });
+    } else {
+      clearDissectSuggestion();
+    }
+
+    return () => {
+      clearDissectSuggestion();
+    };
+  }, [suggestionsState.value]);
+
+  // Show inline message when LLM couldn't generate suggestions
+  if (
+    suggestionsState.error &&
+    isNoSuggestionsError(suggestionsState.error) &&
+    !suggestionsState.loading
+  ) {
+    return (
+      <>
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.noSuggestionsTitle',
+            { defaultMessage: 'Could not generate suggestions' }
+          )}
+          color="primary"
+          size="s"
+          onDismiss={() => refreshSuggestions(null)}
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.noSuggestionsDescription',
+              {
+                defaultMessage:
+                  'The AI assistant was unable to generate pattern suggestions for your data. You can try again.',
+              }
+            )}
+          </p>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                iconType="refresh"
+                size="s"
+                onClick={(connectorId) => {
+                  refreshSuggestions({
+                    connectorId,
+                    streamName: stream.name,
+                    fieldName: fieldValue,
+                  });
+                }}
+                isLoading={false}
+                isDisabled={!isValidField}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dissectProcessorFlyout.tryAgain',
+                  { defaultMessage: 'Try again' }
+                )}
+              </GenerateSuggestionButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
 
   if (suggestionsState.value) {
     return (
@@ -182,7 +259,14 @@ export function DissectPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+          <EuiButton
+            iconType="check"
+            onClick={onAccept}
+            color="primary"
+            size="s"
+            fill
+            data-test-subj="streamsAppDissectSuggestionAcceptButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.acceptButton',
               {

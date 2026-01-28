@@ -10,19 +10,20 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { System, StreamQuery, Streams } from '@kbn/streams-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { StreamFeatureDetailsFlyout } from '../stream_detail_features/stream_features/stream_feature_details_flyout';
+import { StreamSystemDetailsFlyout } from '../stream_detail_systems/stream_systems/stream_system_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
+import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
+import { SeverityBadge } from '../significant_events_discovery/components/severity_badge';
 
 export function SignificantEventsTable({
   definition,
@@ -45,11 +46,14 @@ export function SignificantEventsTable({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-
-  const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
+  const [selectedSystem, setSelectedSystem] = useState<System>();
+  const { systemsByName, refreshSystems } = useStreamSystems(definition.name);
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const maxYValue = useMemo(
+    () => items.reduce((max, item) => Math.max(max, ...item.occurrences.map(({ y }) => y)), 0),
+    [items]
+  );
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -66,6 +70,7 @@ export function SignificantEventsTable({
             href={discoverLocator.getRedirectUrl(
               buildDiscoverParams(record.query, definition, timeState)
             )}
+            data-test-subj="significant_events_table_discover_link"
           >
             {record.query.title}
           </EuiLink>
@@ -75,35 +80,36 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.feature', {
-        defaultMessage: 'Feature',
+      name: i18n.translate('xpack.streams.significantEventsTable.system', {
+        defaultMessage: 'System',
       }),
       render: (query: StreamQuery) => {
         return (
           <EuiBadge
             color="hollow"
             onClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open feature details',
+                defaultMessage: 'Open system details',
               }
             )}
             onClick={() => {
               if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
+                setSelectedSystem(systemsByName[query.feature.name]);
               }
             }}
             iconOnClick={() => {
               if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
+                setSelectedSystem(systemsByName[query.feature.name]);
               }
             }}
             iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open feature details',
+                defaultMessage: 'Open system details',
               }
             )}
+            data-test-subj="significant_events_table_system_badge"
           >
             {query.feature?.name ?? '--'}
           </EuiBadge>
@@ -124,6 +130,15 @@ export function SignificantEventsTable({
       },
     },
     {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.severityColumnTitle', {
+        defaultMessage: 'Severity',
+      }),
+      render: (query: StreamQuery) => {
+        return <SeverityBadge score={query.severity_score} />;
+      },
+    },
+    {
       field: 'occurrences',
       name: i18n.translate('xpack.streams.significantEventsTable.occurrencesColumnTitle', {
         defaultMessage: 'Occurrences',
@@ -135,8 +150,9 @@ export function SignificantEventsTable({
           <SignificantEventsHistogramChart
             id={item.query.id}
             occurrences={item.occurrences}
-            change={change}
+            changes={change ? [change] : []}
             xFormatter={xFormatter}
+            maxYValue={maxYValue}
           />
         );
       },
@@ -163,6 +179,7 @@ export function SignificantEventsTable({
             discoverLocator?.navigate(buildDiscoverParams(item.query, definition, timeState));
           },
           isPrimary: true,
+          'data-test-subj': 'significant_events_table_open_in_discover_action',
         },
         {
           icon: 'pencil',
@@ -180,6 +197,7 @@ export function SignificantEventsTable({
           onClick: (item) => {
             onEditClick?.(item);
           },
+          'data-test-subj': 'significant_events_table_edit_query_action',
         },
         {
           icon: 'trash',
@@ -217,18 +235,19 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {selectedFeature && (
-        <StreamFeatureDetailsFlyout
+      {selectedSystem && (
+        <StreamSystemDetailsFlyout
           definition={definition}
-          feature={selectedFeature}
+          system={selectedSystem}
           closeFlyout={() => {
-            setSelectedFeature(undefined);
+            setSelectedSystem(undefined);
           }}
-          refreshFeatures={refreshFeatures}
+          refreshSystems={refreshSystems}
         />
       )}
       {isDeleteModalVisible && selectedDeleteItem && (
         <EuiConfirmModal
+          data-test-subj="significant_events_table_delete_confirm_modal"
           aria-labelledby={'deleteSignificantModal'}
           title={i18n.translate(
             'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventLabel',

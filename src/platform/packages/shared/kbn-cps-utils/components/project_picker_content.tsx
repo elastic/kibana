@@ -34,7 +34,7 @@ export interface ProjectPickerContentProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
-  readonlyCustomTitle?: string;
+  settingsComponent?: React.ReactNode;
 }
 
 const projectPickerOptions = [
@@ -55,7 +55,7 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
-  readonlyCustomTitle,
+  settingsComponent,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
@@ -74,37 +74,20 @@ export const ProjectPickerContent = ({
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
       <EuiFlexItem grow={false}>
         <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xxs">
                 <h5>{strings.getProjectPickerPopoverTitle()}</h5>
               </EuiTitle>
             </EuiFlexItem>
-            {/* TODO: Add settings button when cps management is available
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={strings.getManageCrossProjectSearchLabel()} repositionOnScroll>
-                <EuiButtonIcon
-                  display="empty"
-                  iconType="gear"
-                  aria-label={i18n.translate('cpsUtils.projectPicker.settingsButtonLabel', {
-                    defaultMessage: 'Manage cross-project search',
-                  })}
-                  onClick={() => {
-                    // TODO: redirect to the correct project settings page
-                  }}
-                  isDisabled={true}
-                  size="xs"
-                  color="text"
-                />
-              </EuiToolTip>
-            </EuiFlexItem> */}
+            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
           </EuiFlexGroup>
         </EuiPopoverTitle>
         {isReadonly && (
           <EuiCallOut
             size="s"
             css={styles.callout}
-            title={readonlyCustomTitle ?? strings.getProjectPickerReadonlyCallout()}
+            title={strings.getProjectPickerReadonlyCallout()}
             iconType="info"
           />
         )}

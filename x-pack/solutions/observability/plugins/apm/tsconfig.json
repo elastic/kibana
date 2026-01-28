@@ -42,7 +42,7 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-theme",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/lens-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/share-plugin",
@@ -84,7 +84,6 @@
     "@kbn/observability-alert-details",
     "@kbn/custom-integrations-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/controls-plugin",
     "@kbn/core-http-server",
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
@@ -148,10 +147,12 @@
     "@kbn/core-chrome-browser",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/zod",
-    "@kbn/onechat-server",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin"
+    "@kbn/control-group-renderer",
+    "@kbn/agent-builder-plugin",
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/kql",
+    "@kbn/slo-plugin",
+    "@kbn/slo-schema",
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,11 +14,14 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { rulesLocatorID } from '../../../common';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
+import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -32,7 +35,6 @@ import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import type { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
@@ -41,11 +43,7 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import {
-  ALERTS_URL_STORAGE_KEY,
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
+import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
@@ -145,6 +143,8 @@ function InternalAlertsPage() {
       description: '[ttfmp_alerts] The Observability Alerts page has loaded a table of alerts.',
     },
   });
+
+  const useRulesLink = createUseRulesLink(getIsExperimentalFeatureEnabled('unifiedRulesPage'));
 
   const onGroupingsChange = useCallback(
     ({ activeGroups }: { activeGroups: string[] }) => {
@@ -267,7 +267,7 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = useRulesLink().href;
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -279,9 +279,9 @@ function InternalAlertsPage() {
           ),
           rightSideItems: renderRuleStats(
             ruleStats,
-            manageRulesHref,
+            manageRulesHref as string,
             ruleStatsLoading,
-            locators.get<RulesParams>(rulesLocatorID)
+            locators.get<RulesLocatorParams>(rulesLocatorID)
           ),
         }}
       >

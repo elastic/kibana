@@ -40,10 +40,17 @@ export default function ({ getService }: FtrProviderContext) {
   const policyTestResources = getService('endpointPolicyTestResources');
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
+  const config = getService('config');
+
+  const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
+    config.get('kbnTestServer.serverArgs', []) as string[]
+  )
+    .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
+    ?.includes('endpointExceptionsMovedUnderManagement');
 
   // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
-  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
@@ -87,20 +94,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
       }
 
-      const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([
-        rolesUsersProvider.loader.create(artifactManagerRole),
-        rolesUsersProvider.loader.create(globalArtifactManagerRole),
-      ]);
-
-      supertestArtifactManager = await utils.createSuperTest(
-        artifactManagerUser.username,
-        artifactManagerUser.password
-      );
-      supertestGlobalArtifactManager = await utils.createSuperTest(
-        globalArtifactManagerUser.username,
-        globalArtifactManagerUser.password
-      );
-
+      supertestArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'artifactManager',
+        privileges: artifactManagerRole,
+      });
+      supertestGlobalArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'globalArtifactManager',
+        privileges: globalArtifactManagerRole,
+      });
       await Promise.all([
         ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
@@ -121,17 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error
       spaceTwoPolicy = undefined;
 
-      if (artifactManagerRole) {
-        await rolesUsersProvider.loader.delete(artifactManagerRole.name);
-        // @ts-expect-error
-        artifactManagerRole = undefined;
-      }
-
-      if (globalArtifactManagerRole) {
-        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
-        // @ts-expect-error
-        globalArtifactManagerRole = undefined;
-      }
+      await utils.cleanUpCustomRoles();
     });
 
     afterEach(async () => {
@@ -139,9 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).filter(
-      (k) =>
-        k !== 'trustedDevices' && // Todo: remove once trustedDevices are implemented.
-        k !== 'endpointExceptions' // todo: remove once endpointExceptions are per policy and space aware
+      // When the FF is enabled, Endpoint exceptions are space aware.
+      (k) => IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED || k !== 'endpointExceptions' // todo: remove once ff is removed
     );
 
     for (const artifactList of artifactLists) {
@@ -659,129 +649,134 @@ export default function ({ getService }: FtrProviderContext) {
       });
     }
 
-    // Endpoint exceptions are currently ONLY global, but an effort is underway to possibly fold them
-    // into a "regular" artifact, at which point we should just remove this entire `describe()` block
-    // and add endpoint exceptions to the execution of the tests above.
-    describe('and for Endpoint Exceptions', () => {
-      let endpointException: ArtifactTestData;
+    if (!IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
+      // Endpoint exceptions are currently (i.e. without the FF) ONLY global, but an effort is underway to possibly fold them
+      // into a "regular" artifact, at which point we should just remove this entire `describe()` block
+      // and add endpoint exceptions to the execution of the tests above.
+      describe('and for Endpoint Exceptions', () => {
+        let endpointException: ArtifactTestData;
 
-      beforeEach(async () => {
-        endpointException = await endpointArtifactTestResources.createEndpointException(undefined, {
-          supertest: supertestGlobalArtifactManager,
-          spaceId: spaceOneId,
+        beforeEach(async () => {
+          endpointException = await endpointArtifactTestResources.createEndpointException(
+            undefined,
+            {
+              supertest: supertestGlobalArtifactManager,
+              spaceId: spaceOneId,
+            }
+          );
+          afterEachDataCleanup.push(endpointException);
         });
-        afterEachDataCleanup.push(endpointException);
-      });
 
-      afterEach(() => {
-        // @ts-expect-error
-        endpointException = undefined;
-      });
+        afterEach(() => {
+          // @ts-expect-error
+          endpointException = undefined;
+        });
 
-      it('should error on create when user does not have global artifact privilege', async () => {
-        await supertestArtifactManager
-          .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
-          .send(
-            Object.assign(
+        it('should error on create when user does not have global artifact privilege', async () => {
+          await supertestArtifactManager
+            .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(
+              Object.assign(
+                exceptionItemToCreateExceptionItem({
+                  ...endpointException.artifact,
+                }),
+                { item_id: undefined }
+              )
+            )
+            .expect(403);
+        });
+
+        it('should allow create when user has global artifact privilege', async () => {
+          const response = await supertestGlobalArtifactManager
+            .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(
+              Object.assign(
+                exceptionItemToCreateExceptionItem({
+                  ...endpointException.artifact,
+                }),
+                { item_id: undefined }
+              )
+            )
+            .expect(200);
+
+          afterEachDataCleanup.push({
+            cleanup: () =>
+              endpointArtifactTestResources.deleteExceptionItem(
+                response.body as ExceptionListItemSchema
+              ),
+          });
+        });
+
+        it('should error on update when user does not have global artifact privilege', async () => {
+          await supertestArtifactManager
+            .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(
               exceptionItemToCreateExceptionItem({
                 ...endpointException.artifact,
-              }),
-              { item_id: undefined }
+                description: 'item was updated',
+              })
             )
-          )
-          .expect(403);
-      });
+            .expect(403);
+        });
 
-      it('should allow create when user has global artifact privilege', async () => {
-        const response = await supertestGlobalArtifactManager
-          .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
-          .send(
-            Object.assign(
+        it('should allow update when user has global artifact privilege', async () => {
+          await supertestGlobalArtifactManager
+            .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send(
               exceptionItemToCreateExceptionItem({
                 ...endpointException.artifact,
-              }),
-              { item_id: undefined }
+                description: 'item was updated',
+              })
             )
-          )
-          .expect(200);
+            .expect(200);
+        });
 
-        afterEachDataCleanup.push({
-          cleanup: () =>
-            endpointArtifactTestResources.deleteExceptionItem(
-              response.body as ExceptionListItemSchema
-            ),
+        it('should error on delete when user does not have global artifact privilege', async () => {
+          await supertestArtifactManager
+            .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .query({
+              item_id: endpointException.artifact.item_id,
+              namespace_type: endpointException.artifact.namespace_type,
+            })
+            .send()
+            .expect(403);
+        });
+
+        it('should allow delete when user has global artifact privilege', async () => {
+          await supertestGlobalArtifactManager
+            .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .query({
+              item_id: endpointException.artifact.item_id,
+              namespace_type: endpointException.artifact.namespace_type,
+            })
+            .send()
+            .expect(200);
         });
       });
-
-      it('should error on update when user does not have global artifact privilege', async () => {
-        await supertestArtifactManager
-          .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
-          .send(
-            exceptionItemToCreateExceptionItem({
-              ...endpointException.artifact,
-              description: 'item was updated',
-            })
-          )
-          .expect(403);
-      });
-
-      it('should allow update when user has global artifact privilege', async () => {
-        await supertestGlobalArtifactManager
-          .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log))
-          .send(
-            exceptionItemToCreateExceptionItem({
-              ...endpointException.artifact,
-              description: 'item was updated',
-            })
-          )
-          .expect(200);
-      });
-
-      it('should error on delete when user does not have global artifact privilege', async () => {
-        await supertestArtifactManager
-          .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
-          .query({
-            item_id: endpointException.artifact.item_id,
-            namespace_type: endpointException.artifact.namespace_type,
-          })
-          .send()
-          .expect(403);
-      });
-
-      it('should allow delete when user has global artifact privilege', async () => {
-        await supertestGlobalArtifactManager
-          .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
-          .set('elastic-api-version', '2023-10-31')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log))
-          .query({
-            item_id: endpointException.artifact.item_id,
-            namespace_type: endpointException.artifact.namespace_type,
-          })
-          .send()
-          .expect(200);
-      });
-    });
+    }
   });
 }

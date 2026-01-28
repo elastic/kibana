@@ -30,11 +30,11 @@ export const fetchDocuments = (
     inspectorAdapters,
     searchSessionId,
     services,
-    appStateContainer,
     scopedProfilesManager,
+    getCurrentTab,
   }: CommonFetchParams
 ): Promise<RecordsFetchResponse> => {
-  const { sampleSize } = appStateContainer.get();
+  const { sampleSize } = getCurrentTab().appState;
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);

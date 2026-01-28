@@ -23,6 +23,7 @@ export {
   getKibanaCliArg,
   getKibanaCliLoggers,
   cleanupElasticsearch,
+  fipsIsEnabled,
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
@@ -81,9 +82,8 @@ export * from './src/find_test_plugin_paths';
 
 export { getDockerFileMountPath } from '@kbn/es';
 
-// Docker image to use for Fleet API integration tests.
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
-export const fleetPackageRegistryDockerImage =
-  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
+export {
+  fleetPackageRegistryDockerImage,
+  packageRegistryDocker,
+  dockerRegistryPort,
+} from './src/functional_test_runner';

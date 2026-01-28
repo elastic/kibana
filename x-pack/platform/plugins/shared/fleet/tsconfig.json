@@ -10,10 +10,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "tasks/**/*",
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -123,6 +125,9 @@
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
     "@kbn/setup-node-env",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/fs",
+    "@kbn/kql",
+    "@kbn/scout"
   ]
 }

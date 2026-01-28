@@ -81,12 +81,19 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
-      'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(`order_date`, 30 minutes) | SORT order_date ASC'
+    expect(esql).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
+  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+  | STATS bucket_0_0 = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)
+  | SORT order_date ASC`,
+      })
     );
   });
 
-  it('should return undefined if missing row option is set', () => {
+  it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
     const esql = getESQLForLayer(
       [
         [
@@ -121,10 +128,13 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(undefined);
+    expect(esql).toEqual({
+      success: false,
+      reason: 'include_empty_rows_not_supported',
+    });
   });
 
-  it('should return undefined if lens formula is used', () => {
+  it('should return failure with formula_not_supported reason if lens formula is used', () => {
     const esql = getESQLForLayer(
       [
         [
@@ -148,7 +158,10 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(undefined);
+    expect(esql).toEqual({
+      success: false,
+      reason: 'formula_not_supported',
+    });
   });
 
   test('it should add a where condition to esql if timeField is set', () => {
@@ -186,8 +199,15 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
-      'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(`order_date`, 30 minutes) | SORT order_date ASC'
+    expect(esql).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
+  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+  | STATS bucket_0_0 = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -233,12 +253,18 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
-      'FROM myIndexPattern | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(`order_date`, 30 minutes) | SORT order_date ASC'
+    expect(esql).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
+  | STATS bucket_0_0 = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)
+  | SORT order_date ASC`,
+      })
     );
   });
 
-  it('should return undefined if timezone is not UTC', () => {
+  it('should return failure with non_utc_timezone reason if timezone is not UTC', () => {
     uiSettings.get.mockImplementation((key: string) => {
       if (key === 'dateFormat:tz') return 'America/Chicago';
       return defaultUiSettingsGet(key);
@@ -278,7 +304,10 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(undefined);
+    expect(esql).toEqual({
+      success: false,
+      reason: 'non_utc_timezone',
+    });
   });
 
   it('should work with iana timezones that fall under UTC+0', () => {
@@ -322,8 +351,15 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
-      `FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(\`order_date\`, 30 minutes) | SORT order_date ASC`
+    expect(esql).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
+  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+  | STATS bucket_0_0 = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)
+  | SORT order_date ASC`,
+      })
     );
   });
 
@@ -366,8 +402,15 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql?.esql).toEqual(
-      `FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) WHERE KQL("""geo.src:"US"""") BY order_date = BUCKET(\`order_date\`, 30 minutes) | SORT order_date ASC`
+    expect(esql).toEqual(
+      expect.objectContaining({
+        success: true,
+        esql: `FROM myIndexPattern
+  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+  | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
+        BY order_date = BUCKET(order_date, 30 minutes)
+  | SORT order_date ASC`,
+      })
     );
   });
 });

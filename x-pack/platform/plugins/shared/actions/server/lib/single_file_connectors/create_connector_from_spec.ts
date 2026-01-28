@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import type {
   ActionTypeParams,
@@ -23,11 +24,20 @@ import { generateConfigSchema } from './generate_config_schema';
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
-): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, Record<string, unknown>> => {
-  const executor = generateExecutorFunction({
-    actions: spec.actions,
-    getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
-  });
+): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+  const configUtils = actions.getActionsConfigurationUtilities();
+
+  const shouldGenerateExecutor = Boolean(spec.actions);
+  const shouldGenerateParams = Boolean(spec.actions);
+
+  const executor = shouldGenerateExecutor
+    ? generateExecutorFunction({
+        actions: spec.actions,
+        getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+      })
+    : undefined;
+
+  const paramsValidator = shouldGenerateParams ? generateParamsSchema(spec.actions) : undefined;
 
   return {
     id: spec.metadata.id,
@@ -36,9 +46,11 @@ export const createConnectorTypeFromSpec = (
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(spec.schema),
-      secrets: generateSecretsSchema(spec.authTypes),
-      params: generateParamsSchema(spec.actions),
+      secrets: generateSecretsSchema(spec.auth, configUtils),
+      ...(paramsValidator ? { params: paramsValidator } : {}),
     },
-    executor,
+    ...(executor ? { executor } : {}),
+    globalAuthHeaders: spec.auth?.headers,
+    source: ACTION_TYPE_SOURCES.spec,
   };
 };

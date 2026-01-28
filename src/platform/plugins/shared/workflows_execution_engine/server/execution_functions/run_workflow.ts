@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { LogsRepository } from '../repositories/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -22,13 +18,6 @@ export async function runWorkflow({
   workflowRunId,
   spaceId,
   taskAbortController,
-  workflowExecutionRepository,
-  stepExecutionRepository,
-  logsRepository,
-  coreStart,
-  unscopedEsClient,
-  actions,
-  taskManager,
   logger,
   config,
   fakeRequest,
@@ -37,19 +26,13 @@ export async function runWorkflow({
   workflowRunId: string;
   spaceId: string;
   taskAbortController: AbortController;
-  coreStart: CoreStart;
-  unscopedEsClient: ElasticsearchClient;
-  workflowExecutionRepository: WorkflowExecutionRepository;
-  stepExecutionRepository: StepExecutionRepository;
-  logsRepository?: LogsRepository;
-  actions: ActionsPluginStartContract;
-  taskManager: WorkflowsExecutionEnginePluginStartDeps['taskManager'];
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
 }): Promise<void> {
-  const logsRepositoryToUse = logsRepository ?? new LogsRepository(unscopedEsClient);
+  // Span for setup/initialization phase
+  const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -57,38 +40,39 @@ export async function runWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    esClient,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
     workflowTaskManager,
-  } = await setupDependencies(
-    workflowRunId,
-    spaceId,
-    actions,
-    taskManager,
-    logger,
-    config,
     workflowExecutionRepository,
-    stepExecutionRepository,
-    logsRepositoryToUse,
-    coreStart,
-    dependencies,
-    fakeRequest // Provided by Task Manager's first-class API key support
-  );
-  await workflowRuntime.start();
+    esClient,
+  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  setupSpan?.end();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
-    taskAbortController,
-    workflowTaskManager,
-  });
+  // Span for runtime initialization
+  const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
+  await workflowRuntime.start();
+  startSpan?.end();
+
+  // Span for the main execution loop
+  const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+    loopSpan?.setOutcome('success');
+  } catch (error) {
+    loopSpan?.setOutcome('failure');
+    throw error;
+  } finally {
+    loopSpan?.end();
+  }
 }

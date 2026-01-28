@@ -11,26 +11,17 @@ import type { YAMLMap } from 'yaml';
 import { isMap, isScalar } from 'yaml';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
-import {
-  type ConnectorContractUnion,
-  type EnhancedInternalConnectorContract,
-  isEnhancedInternalConnector,
-} from '@kbn/workflows';
+import type { InternalConnectorContract } from '@kbn/workflows';
+import { isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
-import type {
-  ActionContext,
-  ActionInfo,
-  ConnectorExamples,
-  HoverContext,
-} from '../monaco_providers/provider_interfaces';
+import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+
 /**
  * Monaco connector handler for Kibana APIs
- * Provides Monaco editor extensions (hover, actions, etc.) for Kibana connector types
+ * Provides hover information for Kibana connector types
  */
 export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
-  private readonly http?: HttpSetup;
-  private readonly notifications?: NotificationsStart;
   // private readonly kibanaHost?: string;
   private readonly connectorExamples: Map<string, ConnectorExamples>;
 
@@ -49,8 +40,6 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     } = {}
   ) {
     super('KibanaMonacoConnectorHandler', 90, ['kibana.']);
-    this.http = options.http;
-    this.notifications = options.notifications;
     // this.kibanaHost = options.kibanaHost;
     this.connectorExamples = new Map();
 
@@ -75,7 +64,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const connector = this.getConnectorInfo(connectorType);
       const withParams = this.extractWithParams(stepContext.stepNode);
 
-      if (!connector || !isEnhancedInternalConnector(connector)) {
+      if (!connector) {
         return null;
       }
 
@@ -86,7 +75,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       }
 
       // Get documentation URL from connector definition
-      const documentationUrl = this.getDocumentationUrl(connectorType);
+      const documentationUrl = this.getDocumentationUrl(connector);
 
       // Get examples for this connector
       const examples = this.getExamples(connectorType);
@@ -98,15 +87,14 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       const content = [
         `**Endpoint**: \`${apiInfo.method} ${apiInfo.path}\``,
         '',
-        `**Description**: ${
-          apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`
-        }`,
+        apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`,
         '',
         documentationUrl
-          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **[View API Documentation](${documentationUrl})** - Opens in new tab`
+          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`
           : '',
         documentationUrl ? '' : '',
-        `### <span style="text-shadow: 0 0 4px rgba(0,200,0,0.4); opacity: 0.8;">⚡</span> Request Example`,
+        `**Request Example**`,
+        '',
         '```http',
         requestExample,
         '```',
@@ -124,26 +112,6 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // console.warn('KibanaMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
-  }
-
-  /**
-   * Generate floating action buttons for Kibana connectors
-   */
-  async generateActions(context: ActionContext): Promise<ActionInfo[]> {
-    const actions: ActionInfo[] = [];
-
-    // Add actions if we have the necessary services
-    if (this.http && this.notifications) {
-      actions.push(
-        this.createActionInfo('copy-step', 'Copy Step', () => this.copyStep(context), {
-          icon: 'copy',
-          tooltip: 'Copy workflow step',
-          priority: 12,
-        })
-      );
-    }
-
-    return actions;
   }
 
   /**
@@ -180,7 +148,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
    */
   private parseKibanaConnectorType(
     connectorType: string,
-    connector?: EnhancedInternalConnectorContract
+    connector?: InternalConnectorContract
   ): {
     method: string;
     path: string;
@@ -242,14 +210,18 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   /**
    * Get connector information from schema
    */
-  private getConnectorInfo(connectorType: string): ConnectorContractUnion | null {
+  private getConnectorInfo(connectorType: string): InternalConnectorContract | null {
     try {
       const allConnectors = getAllConnectors();
       if (!allConnectors) {
         return null;
       }
 
-      return allConnectors.find((c) => c.type === connectorType) ?? null;
+      const connector = allConnectors.find((c) => c.type === connectorType);
+      if (!connector || !isInternalConnector(connector)) {
+        return null;
+      }
+      return connector;
     } catch (error) {
       // console.warn('KibanaMonacoConnectorHandler: Error getting connector info', error);
       return null;
@@ -259,13 +231,8 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   /**
    * Get documentation URL for the connector type
    */
-  private getDocumentationUrl(connectorType: string): string | null {
+  private getDocumentationUrl(connector: InternalConnectorContract): string | null {
     try {
-      const connector = this.getConnectorInfo(connectorType);
-      if (!connector || !isEnhancedInternalConnector(connector)) {
-        return null;
-      }
-
       if (connector.documentation) {
         // Similar to Console, replace version placeholders with current version
         let docUrl = connector.documentation;
@@ -292,7 +259,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     withParams: Record<string, unknown>
   ): string {
     const lines = [
-      `${apiInfo.method} ${apiInfo.path}`,
+      `${apiInfo.method} ${decodeURIComponent(apiInfo.path)}`,
       'Content-Type: application/json',
       'kbn-xsrf: true',
     ];
@@ -336,34 +303,5 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     }
 
     return withParams;
-  }
-
-  /**
-   * Copy entire workflow step
-   */
-  private async copyStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext) return;
-
-      // Get the entire step YAML
-      const stepYaml = stepContext.stepNode?.toString() || '';
-
-      await navigator.clipboard.writeText(stepYaml);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Workflow step copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('KibanaMonacoConnectorHandler: Error copying step', error);
-      if (this.notifications) {
-        this.notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy step',
-        });
-      }
-    }
   }
 }

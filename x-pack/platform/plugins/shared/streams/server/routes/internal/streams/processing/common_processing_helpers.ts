@@ -5,12 +5,31 @@
  * 2.0.
  */
 
-import type { InferenceClient, Prompt } from '@kbn/inference-common';
+import type {
+  CustomToolChoice,
+  InferenceClient,
+  Prompt,
+  PromptVersion,
+  ToolCallOfToolDefinitions,
+} from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { Streams } from '@kbn/streams-schema';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { NoLLMSuggestionsError } from './no_llm_suggestions_error';
+
+/**
+ * Extracts the tool call arguments type from a Prompt.
+ * This gives us the properly typed arguments from the tool call.
+ */
+type ToolCallArgumentsOfPrompt<TPrompt extends Prompt> = ToolCallOfToolDefinitions<
+  NonNullable<TPrompt['versions'][number]['tools']>
+> extends {
+  function: { arguments: infer TArgs };
+}
+  ? TArgs
+  : never;
 
 /**
  * Determines whether OTEL field names should be used for a given stream.
@@ -29,7 +48,12 @@ export async function determineOtelFieldNameUsage(
  * Calls the LLM inference API with the provided prompt and input data.
  * Returns the parsed tool call arguments from the response.
  */
-export async function callInferenceWithPrompt<TPrompt extends Prompt>(
+export async function callInferenceWithPrompt<
+  TPrompt extends Prompt<
+    any,
+    Array<Omit<PromptVersion, 'toolChoice'> & { toolChoice: CustomToolChoice }>
+  >
+>(
   inferenceClient: InferenceClient,
   connectorId: string,
   prompt: TPrompt,
@@ -47,12 +71,15 @@ export async function callInferenceWithPrompt<TPrompt extends Prompt>(
     abortSignal: signal,
   });
 
-  // Access toolCalls from the response
-  if (!('toolCalls' in response)) {
-    throw new Error('Expected toolCalls in LLM response');
+  if (!('toolCalls' in response) || response.toolCalls.length === 0) {
+    throw new NoLLMSuggestionsError();
   }
 
-  return response.toolCalls[0].function.arguments;
+  const toolCall = response.toolCalls[0] as {
+    function: { arguments: ToolCallArgumentsOfPrompt<TPrompt> };
+  };
+
+  return toolCall.function.arguments;
 }
 
 /**

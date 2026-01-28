@@ -13,6 +13,7 @@ import type {
   PackagePolicyConfigRecord,
 } from '@kbn/fleet-plugin/common';
 import semver from 'semver';
+import { i18n } from '@kbn/i18n';
 
 import type {
   AwsCloudConnectorVars,
@@ -37,8 +38,7 @@ import {
   CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
+  SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
@@ -50,6 +50,46 @@ export type AzureCloudConnectorFieldNames =
 
 export type AwsCloudConnectorFieldNames =
   (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
+
+// Cloud connector name validation constants
+export const CLOUD_CONNECTOR_NAME_MAX_LENGTH = 255;
+
+/**
+ * Validates a cloud connector name
+ * @param name - The name to validate
+ * @returns true if the name is valid, false otherwise
+ */
+export const isCloudConnectorNameValid = (name: string | undefined): boolean => {
+  if (!name) return false;
+  const trimmedLength = name.trim().length;
+  return trimmedLength > 0 && name.length <= CLOUD_CONNECTOR_NAME_MAX_LENGTH;
+};
+
+/**
+ * Gets the validation error message for a cloud connector name
+ * @param name - The name to validate
+ * @returns Error message string or undefined if valid
+ */
+export const getCloudConnectorNameError = (name: string | undefined): string | undefined => {
+  if (!name || name.trim().length === 0) {
+    return i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorNameValidation.requiredError',
+      {
+        defaultMessage: 'Cloud Connector Name is required',
+      }
+    );
+  }
+  if (name.length > CLOUD_CONNECTOR_NAME_MAX_LENGTH) {
+    return i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorNameValidation.tooLongError',
+      {
+        defaultMessage: 'Cloud Connector Name must be {maxLength} characters or less',
+        values: { maxLength: CLOUD_CONNECTOR_NAME_MAX_LENGTH },
+      }
+    );
+  }
+  return undefined;
+};
 
 export const isAwsCloudConnectorVars = (
   vars: CloudConnectorVars,
@@ -101,12 +141,6 @@ export function hasValidNewConnectionCredentials(
   }
 }
 
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
 export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   const match = url.match(/\/deployments\/([^/?#]+)/);
@@ -116,11 +150,18 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
 export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
   if (!cloudId) return undefined;
 
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
+  try {
+    const base64Part = cloudId.split(':')[1];
+    if (!base64Part) return undefined;
 
-  return kibanaComponentId || undefined;
+    const decoded = atob(base64Part);
+    const [, , kibanaComponentId] = decoded.split('$');
+
+    return kibanaComponentId || undefined;
+  } catch (error) {
+    // Return undefined if cloudId is malformed or cannot be decoded
+    return undefined;
+  }
 };
 
 export const getTemplateUrlFromPackageInfo = (
@@ -149,13 +190,10 @@ const getAccountTypeFromInput = (
 ): string | undefined => {
   switch (provider) {
     case AWS_PROVIDER:
-      return (
-        input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? AWS_SINGLE_ACCOUNT
-      );
+      return input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
     case AZURE_PROVIDER:
       return (
-        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ??
-        AZURE_SINGLE_ACCOUNT
+        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT
       );
   }
   return undefined;
@@ -181,11 +219,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const accountType = getAccountTypeFromInput(input, provider);
-
-  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
-
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);

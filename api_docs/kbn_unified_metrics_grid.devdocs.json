@@ -1,10 +1,10 @@
 {
-  "id": "@kbn/unified-metrics-grid",
+  "id": "@kbn/unified-chart-section-viewer",
   "client": {
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "@kbn/unified-metrics-grid",
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.LazyTraceMetricsGrid",
         "type": "Function",
         "tags": [],
@@ -13,22 +13,24 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<any, \"ref\"> & React.RefAttributes<{}>>"
         ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/lazy_trace_metrics_grid.tsx",
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/trace_metrics_grid/lazy_trace_metrics_grid.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
-            "parentPluginId": "@kbn/unified-metrics-grid",
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
             "id": "def-public.LazyTraceMetricsGrid.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -36,7 +38,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/unified-metrics-grid",
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.LazyUnifiedMetricsExperienceGrid",
         "type": "Function",
         "tags": [],
@@ -44,12 +46,8 @@
         "description": [],
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
-          "ChartSectionProps",
-          " & { client?: { getDimensions: (params: { dimensions: string; indices?: string | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
-          "MetricField",
-          "[]; total: number; page: number; }>; searchFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; filters?: Record<string, string[]> | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
-          "MetricField",
-          "[]; total: number; page: number; }>; } | undefined; } & Pick<",
+          "UnifiedMetricsGridProps",
+          " & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
@@ -61,22 +59,24 @@
           "MetricsExperienceRestorableState",
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>, \"ref\"> & { ref?: ((instance: null) => void) | React.RefObject<never> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/lazy_unified_metrics_experience_grid.tsx",
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/lazy_unified_metrics_experience_grid.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
-            "parentPluginId": "@kbn/unified-metrics-grid",
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
             "id": "def-public.LazyUnifiedMetricsExperienceGrid.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,33 +88,31 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "@kbn/unified-metrics-grid",
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.DataSource",
         "type": "Type",
         "tags": [],
         "label": "DataSource",
         "description": [],
-        "signature": [
-          "\"apm\" | \"otel\""
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/index.tsx",
+        "signature": ["\"apm\" | \"otel\""],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/trace_metrics_grid/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/unified-metrics-grid",
+        "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.UnifiedMetricsGridRestorableState",
         "type": "Type",
         "tags": [],
         "label": "UnifiedMetricsGridRestorableState",
         "description": [],
-        "signature": [
-          "MetricsExperienceRestorableState",
-          " | ",
-          "TracesRestorableState"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/restorable_state.ts",
+        "signature": ["MetricsExperienceRestorableState", " | ", "TracesRestorableState"],
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/restorable_state.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

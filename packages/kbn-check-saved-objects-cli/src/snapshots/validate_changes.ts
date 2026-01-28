@@ -11,25 +11,12 @@ import equal from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../types';
 
-interface ValidateChangesParams {
-  from?: MigrationInfoRecord;
-  to: MigrationInfoRecord;
-}
-
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
   to: MigrationInfoRecord;
 }
 
-interface ValidateChangesNewTypeParams {
-  to: MigrationInfoRecord;
-}
-
-export function validateChanges({ from, to }: ValidateChangesParams): void {
-  return from ? validateChangesExistingType({ from, to }) : validateChangesNewType({ to });
-}
-
-function validateChangesExistingType({ from, to }: ValidateChangesExistingTypeParams): void {
+export function validateChangesExistingType({ from, to }: ValidateChangesExistingTypeParams): void {
   const name = to.name;
 
   // check that no migrations have been removed
@@ -52,9 +39,7 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
 
   // check that current changes don't define more than 1 new modelVersion
   if (to.modelVersions.length - from.modelVersions.length > 1) {
-    throw new Error(
-      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
-    );
+    throw new Error(`❌ The SO type '${name}' is defining two (or more) new model versions.`);
   }
 
   // check that existing model versions have not been mutated
@@ -81,7 +66,11 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
   }
 }
 
-function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
+interface ValidateChangesNewTypeParams {
+  to: MigrationInfoRecord;
+}
+
+export function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
   const name = to.name;
 
   if (to.migrationVersions?.length) {
@@ -137,6 +126,13 @@ function validateLastModelVersion(name: string, mvs: ModelVersionSummary[]) {
   if (mv.schemas.create === false) {
     throw new Error(
       `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`
+    );
+  }
+  if (mvs.length === 1 && mv.changeTypes.length) {
+    // Do NOT allow changes in the first (initial) modelVersion, only schema additions.
+    // This guarantees rollback safety towards previous versions.
+    throw new Error(
+      `❌ The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   }
 }

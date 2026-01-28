@@ -11,12 +11,12 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
+  selectEditorYaml,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { TestWrapper } from '../../../shared/test_utils';
 
@@ -41,10 +41,13 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('../../../hooks/use_async_thunk', () => ({
   useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
 }));
+
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectIsTestModalOpen: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
+  selectWorkflow: jest.fn(),
+  selectEditorYaml: jest.fn(),
 }));
 
 // Mock WorkflowExecuteModal
@@ -84,7 +87,6 @@ describe('WorkflowDetailTestModal', () => {
   };
 
   let mockTestWorkflow: jest.Mock;
-  let mockRunWorkflow: jest.Mock;
 
   const renderModal = () => {
     const store = createMockStore();
@@ -99,16 +101,15 @@ describe('WorkflowDetailTestModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTestWorkflow = jest.fn();
-    mockRunWorkflow = jest.fn();
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
+    (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
 
     mockUseAsyncThunk.mockImplementation((thunk) => {
       if (thunk === testWorkflowThunk) {
         return mockTestWorkflow;
-      } else if (thunk === runWorkflowThunk) {
-        return mockRunWorkflow;
       }
     });
 
@@ -183,51 +184,22 @@ describe('WorkflowDetailTestModal', () => {
     });
   });
 
-  describe('when workflow id does not exist', () => {
-    beforeEach(() => {
-      (selectWorkflowId as unknown as jest.Mock).mockReturnValue(undefined);
+  it(`should call testWorkflow workflow when submit button is clicked`, async () => {
+    const expectedCalledFunction = mockTestWorkflow;
+    expectedCalledFunction.mockResolvedValue({ workflowExecutionId: 'exec-123' });
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
     });
 
-    it('should call test workflow when submit button is clicked', async () => {
-      mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'exec-123' });
+    const { getByTestId } = renderModal();
 
-      const mockSetSelectedExecution = jest.fn();
-      mockUseWorkflowUrlState.mockReturnValue({
-        setSelectedExecution: mockSetSelectedExecution,
-      });
+    const submitButton = getByTestId('submit-modal');
+    fireEvent.click(submitButton);
 
-      const { getByTestId } = renderModal();
-
-      const submitButton = getByTestId('submit-modal');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockTestWorkflow).toHaveBeenCalledWith({ inputs: { test: 'input' } });
-      });
-    });
-  });
-
-  describe('when workflow id exists', () => {
-    beforeEach(() => {
-      (selectWorkflowId as unknown as jest.Mock).mockReturnValue('workflow-123');
-    });
-
-    it('should call test workflow when submit button is clicked', async () => {
-      mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'exec-123' });
-
-      const mockSetSelectedExecution = jest.fn();
-      mockUseWorkflowUrlState.mockReturnValue({
-        setSelectedExecution: mockSetSelectedExecution,
-      });
-
-      const { getByTestId } = renderModal();
-
-      const submitButton = getByTestId('submit-modal');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockRunWorkflow).toHaveBeenCalledWith({ inputs: { test: 'input' } });
-      });
+    await waitFor(() => {
+      expect(expectedCalledFunction).toHaveBeenCalledWith({ inputs: { test: 'input' } });
     });
   });
 

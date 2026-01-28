@@ -127,7 +127,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   }
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -262,7 +262,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
-                categories={getColorCategories(currentData?.rows, accessor, [null])}
+                categories={getColorCategories(currentData?.rows, [accessor], [null])}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
               />
@@ -352,7 +352,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           />
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }
 

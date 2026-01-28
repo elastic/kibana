@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateChanges } from './validate_changes';
+import { validateChangesExistingType } from './validate_changes';
 import type { MigrationSnapshot } from '../types';
 import path from 'path';
 import fs from 'fs';
@@ -18,7 +18,7 @@ function loadSnapshot(filename: string): MigrationSnapshot {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-describe('validateChanges', () => {
+describe('validateChangesExistingType', () => {
   beforeEach(() => jest.clearAllMocks());
 
   const validateChangesWrapper = ({
@@ -32,7 +32,7 @@ describe('validateChanges', () => {
   }) => {
     const typeFrom = from.typeDefinitions[name];
     const typeTo = to.typeDefinitions[name];
-    return validateChanges({ from: typeFrom, to: typeTo });
+    return validateChangesExistingType({ from: typeFrom, to: typeTo });
   };
 
   it('should throw if migrations are deleted', () => {
@@ -66,7 +66,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
     expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
-      `❌ The SO type 'task' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
+      `❌ The SO type 'task' is defining two (or more) new model versions.`
     );
   });
 
@@ -94,6 +94,15 @@ describe('validateChanges', () => {
 
     expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
+    );
+  });
+
+  it('should throw if the initial model version defines mapping changes', () => {
+    const from = loadSnapshot('baseline.json');
+    const to = loadSnapshot('changes_in_initial_version.json');
+
+    expect(() => validateChangesWrapper({ from, to, name: 'usage-counter' })).toThrowError(
+      `❌ The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
 });

@@ -13,13 +13,14 @@
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -201,9 +202,10 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string | undefined): void {
+  public setWorkflowError(error: Error | undefined): void {
+    const executionError = error ? ExecutionError.fromError(error) : undefined;
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? String(error) : undefined,
+      error: executionError ? executionError.toSerializableObject() : undefined,
     });
   }
 
@@ -391,14 +393,13 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     if (
-      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-        workflowExecutionUpdate.status as ExecutionStatus
-      )
+      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+      isTerminalStatus(workflowExecution.status)
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
-      const completeDate = new Date();
-      workflowExecutionUpdate.finishedAt = completeDate.toISOString();
-      workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      const finishDate = new Date();
+      workflowExecutionUpdate.finishedAt = finishDate.toISOString();
+      workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
@@ -431,7 +432,6 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
-    await this.workflowExecutionState.flush();
   }
 
   private logWorkflowStart(): void {

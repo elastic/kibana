@@ -7,7 +7,7 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -16,7 +16,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import * as dataContext from '../../hooks/use_has_data';
@@ -26,6 +26,7 @@ import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_availa
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -71,6 +72,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('../../hooks/create_use_rules_link', () => ({
+  createUseRulesLink: jest.fn((unifiedRulesPage: boolean) => () => ({
+    href: unifiedRulesPage ? '/app/rules' : '/app/observability/alerts/rules',
+    onClick: jest.fn(),
+  })),
+}));
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
@@ -124,6 +131,8 @@ const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
 const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 jest.mock('../../hooks/use_get_available_rules_with_descriptions');
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
 const ruleDescriptions = [
   {
@@ -215,6 +224,38 @@ describe('AlertsPage with all capabilities', () => {
     await waitFor(() => {
       expect(wrapper.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Manage rules link', () => {
+    it('should direct to unified rules page when the experimental feature is enabled', async () => {
+      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+      let wrapper;
+      await act(async () => {
+        wrapper = await setup();
+      });
+
+      await waitFor(() => {
+        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
+        expect(manageRulesLink).toBeInTheDocument();
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
+      });
+    });
+
+    it('should direct to oblt rules page when the experimental feature is disabled', async () => {
+      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+
+      let wrapper;
+      await act(async () => {
+        wrapper = await setup();
+      });
+
+      await waitFor(() => {
+        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
+        expect(manageRulesLink).toBeInTheDocument();
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
+      });
     });
   });
 });

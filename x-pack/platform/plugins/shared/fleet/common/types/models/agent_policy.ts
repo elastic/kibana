@@ -12,7 +12,7 @@ import type { BaseSSLSecrets, MonitoringType, SecretReference, ValueOf } from '.
 
 import type { PackagePolicy } from './package_policy';
 import type { Output } from './output';
-
+import type { CloudProvider } from './cloud_connector';
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
@@ -66,6 +66,7 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -74,7 +75,7 @@ export interface AgentTargetVersion {
 }
 
 export interface CloudConnectors {
-  target_csp?: string;
+  target_csp?: CloudProvider;
   enabled?: boolean;
 }
 export interface AgentlessPolicy {
@@ -140,6 +141,7 @@ export interface FullAgentPolicyMetaPackage {
   version: string;
   policy_template?: string;
   release?: string;
+  agentVersion?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
@@ -325,6 +327,14 @@ export enum AgentlessApiDeploymentResponseCode {
 export interface AgentlessApiDeploymentResponse {
   code: AgentlessApiDeploymentResponseCode;
   error: string | null;
+}
+
+export interface AgentlessApiListDeploymentResponse {
+  deployments: Array<{
+    policy_id: string;
+    revision_idx?: number;
+  }>;
+  next_token?: string;
 }
 
 // Definitions for agent policy outputs endpoints

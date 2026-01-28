@@ -17,6 +17,8 @@
           "OverlayRef"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,6 +35,8 @@
               "OpenLazyFlyoutParams"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
+            "lineNumber": 54,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,6 +85,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "lineNumber": 54,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,6 +109,8 @@
           "\nAPI for tracking overlays.\n\nUsed by parent containers (like dashboards) to track opened overlays (e.g. flyouts) and clear them when needed.\n"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,6 +131,8 @@
               " | undefined) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -137,6 +149,8 @@
                   "OverlayRef"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+                "lineNumber": 39,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -155,6 +169,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+                "lineNumber": 39,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -175,6 +191,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_util/src/tracks_overlays.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

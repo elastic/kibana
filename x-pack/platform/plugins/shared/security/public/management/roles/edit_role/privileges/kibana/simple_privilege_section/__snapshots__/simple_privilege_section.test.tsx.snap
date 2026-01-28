@@ -37,7 +37,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "extraSlow": "500ms",
               "fast": "150ms",
               "normal": "250ms",
-              "resistance": "cubic-bezier(.694, .0482, .335, 1)",
+              "resistance": "cubic-bezier(.32, .72, 0, 1)",
               "slow": "350ms",
             },
             "base": 16,
@@ -464,7 +464,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -837,6 +837,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#172336",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -883,6 +884,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -894,7 +902,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1267,6 +1275,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundFilledText",
                   ],
                 },
+                "tableFooterBackground": "#ECF1F9",
                 "tableRowBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1313,6 +1322,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2454,133 +2470,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
           <EuiUtilityClasses />
         </EuiCacheProvider>
         <EuiComponentDefaultsProvider>
-          <SimplePrivilegeSection
-            canCustomizeSubFeaturePrivileges={true}
-            editable={true}
-            features={
-              Array [
-                SecuredFeature {
-                  "config": Object {
-                    "app": Array [
-                      "app",
-                    ],
-                    "category": Object {
-                      "id": "foo",
-                      "label": "foo",
-                    },
-                    "id": "feature1",
-                    "name": "Feature 1",
-                    "privileges": Object {
-                      "all": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "read": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                    },
-                  },
-                  "minimalPrimaryFeaturePrivileges": Array [
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "minimal_all",
-                    },
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "minimal_read",
-                    },
-                  ],
-                  "primaryFeaturePrivileges": Array [
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "all",
-                    },
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "read",
-                    },
-                  ],
-                  "securedSubFeatures": Array [],
-                  "subFeaturePrivileges": Array [],
-                  "subFeatures": Array [],
-                },
-              ]
-            }
-            kibanaPrivileges={
-              KibanaPrivileges {
-                "feature": Map {
-                  "feature1" => SecuredFeature {
+          <EuiFlyoutManager>
+            <SimplePrivilegeSection
+              canCustomizeSubFeaturePrivileges={true}
+              editable={true}
+              features={
+                Array [
+                  SecuredFeature {
                     "config": Object {
                       "app": Array [
                         "app",
@@ -2658,9 +2554,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     ],
                     "primaryFeaturePrivileges": Array [
                       PrimaryFeaturePrivilege {
-                        "actions": Array [
-                          "*",
-                        ],
+                        "actions": Array [],
                         "config": Object {
                           "app": Array [
                             "app",
@@ -2678,9 +2572,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                         "id": "all",
                       },
                       PrimaryFeaturePrivilege {
-                        "actions": Array [
-                          "read",
-                        ],
+                        "actions": Array [],
                         "config": Object {
                           "app": Array [
                             "app",
@@ -2700,26 +2592,152 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "subFeaturePrivileges": Array [],
                     "subFeatures": Array [],
                   },
-                },
-                "global": Map {},
-                "spaces": Map {},
+                ]
               }
-            }
-            onChange={[MockFunction]}
-            role={
-              Object {
-                "elasticsearch": Object {
-                  "cluster": Array [
-                    "manage",
-                  ],
-                  "indices": Array [],
-                  "run_as": Array [],
-                },
-                "kibana": Array [],
-                "name": "",
+              kibanaPrivileges={
+                KibanaPrivileges {
+                  "feature": Map {
+                    "feature1" => SecuredFeature {
+                      "config": Object {
+                        "app": Array [
+                          "app",
+                        ],
+                        "category": Object {
+                          "id": "foo",
+                          "label": "foo",
+                        },
+                        "id": "feature1",
+                        "name": "Feature 1",
+                        "privileges": Object {
+                          "all": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "read": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                        },
+                      },
+                      "minimalPrimaryFeaturePrivileges": Array [
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "minimal_all",
+                        },
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "minimal_read",
+                        },
+                      ],
+                      "primaryFeaturePrivileges": Array [
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [
+                            "*",
+                          ],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "all",
+                        },
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [
+                            "read",
+                          ],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "read",
+                        },
+                      ],
+                      "securedSubFeatures": Array [],
+                      "subFeaturePrivileges": Array [],
+                      "subFeatures": Array [],
+                    },
+                  },
+                  "global": Map {},
+                  "spaces": Map {},
+                }
               }
-            }
-          />
+              onChange={[MockFunction]}
+              role={
+                Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [
+                      "manage",
+                    ],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Array [],
+                  "name": "",
+                }
+              }
+            />
+          </EuiFlyoutManager>
         </EuiComponentDefaultsProvider>
       </EuiThemeProvider>
     </EuiSystemDefaultsProvider>

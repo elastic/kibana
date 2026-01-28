@@ -3033,6 +3033,14 @@ paths:
           required: false
           schema:
             type: string
+        - description: Gap fill statuses
+          in: query
+          name: gap_fill_statuses
+          required: false
+          schema:
+            items:
+              $ref: '#/components/schemas/GapFillStatus'
+            type: array
       responses:
         '200':
           content:
@@ -3128,6 +3136,10 @@ paths:
                     type: integer
                   total:
                     type: integer
+                  warnings:
+                    items:
+                      $ref: '#/components/schemas/WarningSchema'
+                    type: array
                 required:
                   - page
                   - perPage
@@ -3579,34 +3591,11 @@ paths:
           application/json:
             examples:
               add:
-                value:
-                  assignees:
-                    add:
-                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
-                    remove: []
-                  ids:
-                    - >-
-                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+                $ref: '#/components/examples/SetAlertAssigneesBodyAdd'
               remove:
-                value:
-                  assignees:
-                    add: []
-                    remove:
-                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
-                  ids:
-                    - >-
-                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+                $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
             schema:
-              type: object
-              properties:
-                assignees:
-                  $ref: '#/components/schemas/AlertAssignees'
-                  description: Details about the assignees to assign and unassign.
-                ids:
-                  $ref: '#/components/schemas/AlertIds'
-              required:
-                - assignees
-                - ids
+              $ref: '#/components/schemas/SetAlertAssigneesBody'
         required: true
       responses:
         '200':
@@ -3998,36 +3987,8 @@ paths:
                   runtime_mappings: {}
                   size: 0
             schema:
+              $ref: '#/components/schemas/QueryAlertsBodyParams'
               description: Elasticsearch query and aggregation request
-              type: object
-              properties:
-                _source:
-                  oneOf:
-                    - type: boolean
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                aggs:
-                  additionalProperties: true
-                  type: object
-                fields:
-                  items:
-                    type: string
-                  type: array
-                query:
-                  additionalProperties: true
-                  type: object
-                runtime_mappings:
-                  additionalProperties: true
-                  type: object
-                size:
-                  minimum: 0
-                  type: integer
-                sort:
-                  $ref: '#/components/schemas/AlertsSort'
-                track_total_hits:
-                  type: boolean
         description: Search and/or aggregation query
         required: true
       responses:
@@ -4221,33 +4182,11 @@ paths:
           application/json:
             examples:
               add:
-                value:
-                  ids:
-                    - >-
-                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
-                  tags:
-                    tags_to_add:
-                      - Duplicate
-                    tags_to_remove: []
+                $ref: '#/components/examples/SetAlertTagsBodyAdd'
               remove:
-                value:
-                  ids:
-                    - >-
-                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
-                  tags:
-                    tags_to_add: []
-                    tags_to_remove:
-                      - Duplicate
+                $ref: '#/components/examples/SetAlertTagsBodyRemove'
             schema:
-              type: object
-              properties:
-                ids:
-                  $ref: '#/components/schemas/AlertIds'
-                tags:
-                  $ref: '#/components/schemas/SetAlertTags'
-              required:
-                - ids
-                - tags
+              $ref: '#/components/schemas/SetAlertTagsBody'
         description: >-
           An object containing tags to add or remove and alert ids the changes
           will be applied
@@ -4330,6 +4269,39 @@ paths:
         - Security Detections API
         - Tags API
 components:
+  examples:
+    SetAlertAssigneesBodyAdd:
+      value:
+        assignees:
+          add:
+            - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+          remove: []
+        ids:
+          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+    SetAlertAssigneesBodyRemove:
+      value:
+        assignees:
+          add: []
+          remove:
+            - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+        ids:
+          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+    SetAlertTagsBodyAdd:
+      value:
+        ids:
+          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+        tags:
+          tags_to_add:
+            - Duplicate
+          tags_to_remove: []
+    SetAlertTagsBodyRemove:
+      value:
+        ids:
+          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+        tags:
+          tags_to_add: []
+          tags_to_remove:
+            - Duplicate
   schemas:
     AlertAssignees:
       type: object
@@ -4803,6 +4775,13 @@ components:
           enum:
             - delete
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4831,6 +4810,13 @@ components:
           enum:
             - disable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4872,6 +4858,13 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4980,6 +4973,13 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5013,6 +5013,13 @@ components:
           enum:
             - enable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5043,6 +5050,13 @@ components:
           enum:
             - export
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5090,6 +5104,13 @@ components:
           required:
             - start_date
             - end_date
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5119,6 +5140,13 @@ components:
           enum:
             - run
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -6372,6 +6400,12 @@ components:
         - severity
         - updated_at
         - updatedAt
+      type: string
+    GapFillStatus:
+      enum:
+        - unfilled
+        - in_progress
+        - filled
       type: string
     HistoryWindowStart:
       description: >-
@@ -7793,6 +7827,36 @@ components:
       required:
         - command
         - config
+    QueryAlertsBodyParams:
+      type: object
+      properties:
+        _source:
+          oneOf:
+            - type: boolean
+            - type: string
+            - items:
+                type: string
+              type: array
+        aggs:
+          additionalProperties: true
+          type: object
+        fields:
+          items:
+            type: string
+          type: array
+        query:
+          additionalProperties: true
+          type: object
+        runtime_mappings:
+          additionalProperties: true
+          type: object
+        size:
+          minimum: 0
+          type: integer
+        sort:
+          $ref: '#/components/schemas/AlertsSort'
+        track_total_hits:
+          type: boolean
     QueryRule:
       allOf:
         - type: object
@@ -9625,6 +9689,17 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+    SetAlertAssigneesBody:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/AlertAssignees'
+          description: Details about the assignees to assign and unassign.
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+      required:
+        - assignees
+        - ids
     SetAlertsStatusByIds:
       discriminator:
         mapping:
@@ -9687,6 +9762,16 @@ components:
       required:
         - tags_to_add
         - tags_to_remove
+    SetAlertTagsBody:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/AlertIds'
+        tags:
+          $ref: '#/components/schemas/SetAlertTags'
+      required:
+        - ids
+        - tags
     SetupGuide:
       description: >-
         Populates the rule’s setup guide with instructions on rule prerequisites

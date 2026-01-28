@@ -8,7 +8,9 @@
  */
 
 import moment from 'moment-timezone';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { isValidJsonSchema } from './lib/validate_json_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -20,6 +22,7 @@ export const RetryPolicySchema = z.object({
 
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
+  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
   delay: z
     .string()
     .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
@@ -37,7 +40,7 @@ export type BaseStep = z.infer<typeof BaseStepSchema>;
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema.optional(),
   fallback: z.array(BaseStepSchema).min(1).optional(),
-  continue: z.boolean().optional(),
+  continue: z.union([z.boolean(), z.string()]).optional(),
 });
 
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
@@ -55,10 +58,21 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
+export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
+
+export const ConcurrencySettingsSchema = z.object({
+  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
+  strategy: CollisionStrategySchema.optional(), // 'queue', 'drop', or 'cancel-in-progress'
+  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+});
+export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
+  concurrency: ConcurrencySettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -96,7 +110,10 @@ export const ScheduledTriggerSchema = z.object({
       rrule: z.object({
         freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
         interval: z.number().int().positive(),
-        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        tzid: z
+          .enum(moment.tz.names() as [string, ...string[]])
+          .optional()
+          .default('UTC'),
         dtstart: z.string().optional(),
         byhour: z.array(z.number().int().min(0).max(23)).optional(),
         byminute: z.array(z.number().int().min(0).max(59)).optional(),
@@ -118,9 +135,9 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type._def.value,
-  ScheduledTriggerSchema.shape.type._def.value,
-  ManualTriggerSchema.shape.type._def.value,
+  AlertRuleTriggerSchema.shape.type.value,
+  ScheduledTriggerSchema.shape.type.value,
+  ManualTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];
 
@@ -157,6 +174,17 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
+export const BuiltInStepProperties = [
+  'name',
+  'type',
+  'with',
+  'if',
+  'foreach',
+  'timeout',
+  'on-failure',
+];
+export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
+
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
@@ -164,6 +192,12 @@ export const WaitStepSchema = BaseStepSchema.extend({
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const DataSetStepSchema = BaseStepSchema.extend({
+  type: z.literal('data.set'),
+  with: z.record(z.string(), z.unknown()),
+});
+export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
@@ -173,6 +207,7 @@ export const FetcherConfigSchema = z
     max_redirects: z.number().optional(),
     keep_alive: z.boolean().optional(),
   })
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
 export const HttpStepSchema = BaseStepSchema.extend({
@@ -415,6 +450,58 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
 ]);
+export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
+
+// JSON Schema model structure
+// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
+// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
+// structured data models.
+export const JsonModelSchema = z
+  .object({
+    type: z.literal('object').optional(),
+    properties: z.record(z.string(), z.any()).optional(),
+    required: z.array(z.string()).optional(),
+    additionalProperties: z.union([z.boolean(), z.any()]).optional(),
+    definitions: z.record(z.string(), z.any()).optional(),
+    $defs: z.record(z.string(), z.any()).optional(),
+  })
+  .refine(
+    (data) => {
+      // Validate that properties is a valid JSON Schema object
+      if (data.properties) {
+        // Validate each property is a valid JSON Schema
+        for (const value of Object.values(data.properties)) {
+          // $ref objects are valid JSON Schema but can't be validated in isolation
+          // since they reference definitions that exist in the parent schema
+          if (typeof value === 'object' && value !== null && '$ref' in value) {
+            // $ref is a valid JSON Schema construct, skip validation
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+          if (!isValidJsonSchema(value)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    { message: 'properties must contain valid JSON Schema definitions' }
+  )
+  .refine(
+    (data) => {
+      // Validate that required fields exist in properties
+      if (data.required && data.properties) {
+        for (const field of data.required) {
+          if (!(field in data.properties)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    { message: 'required fields must exist in properties' }
+  );
+export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
@@ -434,6 +521,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    DataSetStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -445,39 +533,101 @@ const StepSchema = z.lazy(() =>
 export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
-  ForEachStepSchema.shape.type._def.value,
-  IfStepSchema.shape.type._def.value,
-  ParallelStepSchema.shape.type._def.value,
-  MergeStepSchema.shape.type._def.value,
-  WaitStepSchema.shape.type._def.value,
-  HttpStepSchema.shape.type._def.value,
+  ForEachStepSchema.shape.type.value,
+  IfStepSchema.shape.type.value,
+  ParallelStepSchema.shape.type.value,
+  MergeStepSchema.shape.type.value,
+  DataSetStepSchema.shape.type.value,
+  WaitStepSchema.shape.type.value,
+  HttpStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
-export const WorkflowSchema = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
+// Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
+const WorkflowSchemaBase = z.object({
+  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
   triggers: z.array(TriggerSchema).min(1),
-  inputs: z.array(WorkflowInputSchema).optional(),
+  inputs: z
+    .union([
+      // New JSON Schema format
+      JsonModelSchema,
+      // Legacy array format (for backward compatibility)
+      z.array(WorkflowInputSchema),
+    ])
+    .optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
+
+export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
+  // Transform inputs from legacy array format to JSON Schema format
+  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+  if (data.inputs) {
+    if (
+      'properties' in data.inputs &&
+      typeof data.inputs === 'object' &&
+      !Array.isArray(data.inputs)
+    ) {
+      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+    } else if (Array.isArray(data.inputs)) {
+      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+    }
+  }
+
+  // Return the data with normalized inputs, preserving all other fields as-is
+  // This preserves the optionality of fields since we're not explicitly listing them all
+  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
+  const { inputs: _, ...rest } = data;
+  return {
+    ...rest,
+    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+  };
+});
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaBase };
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
 // Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
-export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
-  .extend({
+// We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
+// Base schema without transform - can be extended
+const WorkflowSchemaForAutocompleteBase = z
+  .object({
+    version: z.literal('1').optional(),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true).optional(),
+    tags: z.array(z.string()).optional(),
     triggers: z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
       .default([]),
+    inputs: z
+      .union([
+        // New JSON Schema format
+        JsonModelSchema,
+        // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
+    consts: WorkflowConstsSchema.optional(),
     steps: z
       .array(
         z
@@ -491,6 +641,17 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
       .default([]),
   })
   .passthrough();
+
+// Final schema with transform - ensure version default is applied
+export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
+  (data) => ({
+    ...data,
+    version: data.version ?? '1',
+  })
+);
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaForAutocompleteBase };
 
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
@@ -508,7 +669,8 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
-// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
+// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
+// Once a Zod-compatible version is available, we should import and use it instead.
 const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
@@ -534,21 +696,25 @@ export const EventSchema = z.object({
   params: z.any(),
 });
 
+// Recursive type for workflow inputs that supports nested objects from JSON Schema
+const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.string()),
+    z.array(z.number()),
+    z.array(z.boolean()),
+    z.record(z.string(), WorkflowInputValueSchema),
+  ])
+);
+
 export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
-  inputs: z
-    .record(
-      z.union([
-        z.string(),
-        z.number(),
-        z.boolean(),
-        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
-      ])
-    )
-    .optional(),
+  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
@@ -580,6 +746,7 @@ export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -589,3 +756,10 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
+
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

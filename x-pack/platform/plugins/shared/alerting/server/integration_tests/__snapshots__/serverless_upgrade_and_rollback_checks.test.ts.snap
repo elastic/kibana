@@ -3200,10 +3200,30 @@ Object {
                           },
                           "filter": Object {
                             "flags": Object {
+                              "default": [Function],
                               "error": [Function],
-                              "presence": "forbidden",
+                              "presence": "optional",
                             },
-                            "type": "any",
+                            "metas": Array [
+                              Object {
+                                "x-oas-optional": true,
+                              },
+                            ],
+                            "rules": Array [
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
+                            ],
+                            "type": "string",
                           },
                           "name": Object {
                             "flags": Object {
@@ -4821,6 +4841,19 @@ Object {
                       },
                     ],
                     "type": "string",
+                  },
+                  "managed": Object {
+                    "flags": Object {
+                      "default": [Function],
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
+                    "type": "boolean",
                   },
                   "name": Object {
                     "flags": Object {

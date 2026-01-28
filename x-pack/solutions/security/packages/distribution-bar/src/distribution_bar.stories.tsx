@@ -46,68 +46,6 @@ const mockStatsAlerts = [
   },
 ];
 
-// Edge case: Flip tooltip when the LEFTMOST segment (green/teal) is very small
-const mockStatsEdgeCase = [
-  {
-    key: 'low',
-    count: 220,
-    color: 'green',
-    label: 'Low',
-  },
-  {
-    key: 'medium',
-    count: 2000,
-    color: 'gold',
-    label: 'Medium',
-  },
-  {
-    key: 'high',
-    count: 1500,
-    color: 'orange',
-    label: 'High',
-  },
-  {
-    key: 'critical',
-    count: 1000,
-    color: 'red',
-    label: 'Critical',
-  },
-];
-
-// Edge case: Multiple small segments at the beginning (leftmost)
-const mockStatsMultipleSmall = [
-  {
-    key: 'low1',
-    count: 3,
-    color: 'green',
-    label: 'Low 1',
-  },
-  {
-    key: 'low2',
-    count: 2,
-    color: 'green',
-    label: 'Low 2',
-  },
-  {
-    key: 'medium',
-    count: 3000,
-    color: 'gold',
-    label: 'Medium',
-  },
-  {
-    key: 'high',
-    count: 2000,
-    color: 'orange',
-    label: 'High',
-  },
-  {
-    key: 'critical',
-    count: 1000,
-    color: 'red',
-    label: 'Critical',
-  },
-];
-
 export default {
   title: 'DistributionBar',
   description: 'Distribution Bar',
@@ -145,27 +83,6 @@ export const DistributionBar = () => {
       </EuiTitle>
       <EuiSpacer size={'s'} />
       <DistributionBarComponent stats={[]} />
-    </React.Fragment>,
-  ];
-};
-
-export const EdgeCaseSmallSegments = () => {
-  return [
-    <React.Fragment key={'edge-case-tooltip-overflow'}>
-      <EuiTitle size={'xs'}>
-        <h4>{'Edge Case: Tooltip Change Direction'}</h4>
-      </EuiTitle>
-      <EuiSpacer size={'s'} />
-      <DistributionBarComponent stats={mockStatsEdgeCase} />
-      <EuiSpacer size={'m'} />
-    </React.Fragment>,
-    <React.Fragment key={'edge-case-multiple-small'}>
-      <EuiTitle size={'xs'}>
-        <h4>{'Edge Case: Multiple Small Segments at Beginning'}</h4>
-      </EuiTitle>
-      <EuiSpacer size={'s'} />
-      <DistributionBarComponent stats={mockStatsMultipleSmall} />
-      <EuiSpacer size={'m'} />
     </React.Fragment>,
   ];
 };

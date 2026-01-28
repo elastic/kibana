@@ -8,7 +8,6 @@
 import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
-  ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
@@ -18,16 +17,6 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
-
-export const DISMISS_ATTACK_DISCOVERY_GENERATION_MUTATION_KEY = (
-  attackDiscoveryPublicApiEnabled: boolean
-) => [
-  'POST',
-  attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS
-    : ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
-];
 
 interface DismissAttackDiscoveryGenerationParams {
   executionUuid: string;
@@ -41,20 +30,10 @@ export const useDismissAttackDiscoveryGeneration = () => {
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
-
-  const route = attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS
-    : ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS;
-
-  const version = attackDiscoveryPublicApiEnabled
-    ? API_VERSIONS.public.v1
-    : API_VERSIONS.internal.v1;
-
   const dismiss = async ({ executionUuid, signal }: DismissAttackDiscoveryGenerationParams) =>
     KibanaServices.get().http.post<PostAttackDiscoveryGenerationsDismissResponse>(
-      replaceParams(route, { execution_uuid: executionUuid }),
-      { version, signal }
+      replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, { execution_uuid: executionUuid }),
+      { version: API_VERSIONS.public.v1, signal }
     );
 
   return useMutation<
@@ -62,7 +41,7 @@ export const useDismissAttackDiscoveryGeneration = () => {
     Error,
     DismissAttackDiscoveryGenerationParams
   >(({ executionUuid }) => dismiss({ executionUuid }), {
-    mutationKey: ['POST', route],
+    mutationKey: ['POST', ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS],
     onSuccess: () => {
       invalidateGetAttackDiscoveryGenerations();
     },

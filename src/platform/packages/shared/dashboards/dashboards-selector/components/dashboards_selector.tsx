@@ -7,25 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { UiActionsStart, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { dashboardServiceProvider, type DashboardItem } from '../services/dashboard_service';
 
 interface DashboardOption {
   value: string;
   label: string;
 }
 
+interface Dashboard {
+  id: string;
+  isManaged: boolean;
+  title: string;
+}
+
+async function searchDashboards(
+  uiActions: UiActionsStart,
+  options: { search?: string; perPage?: number } = {}
+): Promise<Dashboard[]> {
+  const { search, perPage = 100 } = options;
+  const searchAction = await uiActions.getAction('searchDashboardAction');
+  return new Promise(function (resolve) {
+    searchAction.execute({
+      onResults(dashboards: Dashboard[]) {
+        resolve(dashboards);
+      },
+      search: {
+        search,
+        per_page: perPage,
+      },
+      trigger: { id: 'searchDashboards' },
+    } as ActionExecutionContext);
+  });
+}
+
+async function getDashboardsById(uiActions: UiActionsStart, ids: string[]): Promise<Dashboard[]> {
+  if (!ids.length) {
+    return [];
+  }
+  const getDashboardsByIdsAction = await uiActions.getAction('getDashboardsByIdsAction');
+  return new Promise(function (resolve) {
+    getDashboardsByIdsAction.execute({
+      onResults(dashboards: Dashboard[]) {
+        resolve(dashboards);
+      },
+      ids,
+      trigger: { id: 'getDashboardsById' },
+    } as ActionExecutionContext);
+  });
+}
+
 export function DashboardsSelector({
-  contentManagement,
+  uiActions,
   dashboardsFormData,
   onChange,
   placeholder,
 }: {
-  contentManagement: ContentManagementPublicStart;
+  uiActions: UiActionsStart;
   dashboardsFormData: { id: string }[];
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   placeholder?: string;
@@ -41,50 +82,31 @@ export function DashboardsSelector({
   const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
 
   const fetchDashboardTitles = useCallback(async () => {
-    if (!dashboardsFormData?.length || !contentManagement) {
+    if (!dashboardsFormData?.length) {
       return;
     }
 
     try {
-      const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
-        try {
-          const fetchedDashboard = await dashboardServiceProvider(contentManagement).fetchDashboard(
-            dashboard.id
-          );
+      const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
+      const dashboards = await getDashboardsById(uiActions, dashboardIds);
 
-          // Only return the dashboard if it exists, fetch was successful, and has a title
-          if (
-            fetchedDashboard &&
-            fetchedDashboard.status === 'success' &&
-            fetchedDashboard.attributes?.title
-          ) {
-            return {
-              label: fetchedDashboard.attributes.title,
-              value: dashboard.id,
-            };
-          }
-          // Return null if dashboard doesn't have required data
-          return null;
-        } catch (dashboardError) {
-          /**
-           * Swallow the error that is thrown, since this just means the selected dashboard was deleted
-           * Return null when dashboard fetch fails
-           */
-          return null;
-        }
-      });
-
-      const results = await Promise.all(dashboardPromises);
-
-      // Filter out null results and cast to the expected type
-      const validDashboards = results.filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
+      const validDashboards = dashboards.map((dashboard) => ({
+        label: dashboard.title,
+        value: dashboard.id,
+      }));
 
       setSelectedDashboards(validDashboards);
+
+      // if the form contains any invalid dashboard IDs, remove them from the parent form
+      if (validDashboards.length !== dashboardsFormData.length) {
+        onChange(validDashboards);
+      }
     } catch (error) {
       // Set empty array or handle the error appropriately
       setSelectedDashboards([]);
+      onChange([]);
     }
-  }, [dashboardsFormData, contentManagement]);
+  }, [dashboardsFormData, uiActions, onChange]);
 
   useEffect(() => {
     fetchDashboardTitles();
@@ -105,24 +127,25 @@ export function DashboardsSelector({
     []
   );
 
-  const getDashboardItem = (dashboard: DashboardItem) => ({
-    value: dashboard.id,
-    label: dashboard.attributes.title,
-  });
-
   const loadDashboards = useCallback(async () => {
-    if (contentManagement) {
-      setLoading(true);
-      const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
-        .catch(() => {});
-      const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
-        getDashboardItem(dashboard)
-      );
+    setLoading(true);
+    try {
+      const trimmedSearch = searchValue.trim();
+      const dashboards = await searchDashboards(uiActions, {
+        search: trimmedSearch,
+        perPage: 100,
+      });
+      const dashboardOptions = dashboards.map((dashboard) => ({
+        value: dashboard.id,
+        label: dashboard.title,
+      }));
       setDashboardList(dashboardOptions);
+    } catch (error) {
+      setDashboardList([]);
+    } finally {
       setLoading(false);
     }
-  }, [contentManagement, searchValue]);
+  }, [uiActions, searchValue]);
 
   useEffect(() => {
     if (isComboBoxOpen) {

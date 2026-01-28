@@ -91,8 +91,13 @@ function getAllNodes(services: ServicesResponse[], connections: Connection[]) {
 
 function getAllServices(
   allNodes: Map<string, ConnectionNode>,
-  destinationServices: ExitSpanDestination[]
+  destinationServices: ExitSpanDestination[],
+  anomalies: ServiceAnomaliesResponse
 ) {
+  const anomaliesByServiceName = new Map(
+    anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
+  );
+
   const serviceNodes = new Map<string, ServiceConnectionNode>();
 
   for (const { from, to } of destinationServices) {
@@ -100,13 +105,20 @@ function getAllServices(
     const toId = to.id;
 
     if (allNodes.has(fromId) && !allNodes.has(toId)) {
-      serviceNodes.set(toId, { ...to, id: toId });
+      serviceNodes.set(toId, {
+        ...to,
+        id: toId,
+        serviceAnomalyStats: anomaliesByServiceName.get(to.id),
+      });
     }
   }
 
   for (const node of allNodes.values()) {
     if (!isExitSpan(node)) {
-      serviceNodes.set(node.id, node);
+      serviceNodes.set(node.id, {
+        ...node,
+        serviceAnomalyStats: anomaliesByServiceName.get(node.id),
+      });
     }
   }
 
@@ -136,22 +148,17 @@ function exitSpanDestinationsToMap(destinationServices: ExitSpanDestination[]) {
 
 function mapNodes({
   allConnections,
-  anomalies,
   nodes,
   exitSpanDestinations,
   services,
 }: {
   allConnections: Connection[];
-  anomalies: ServiceAnomaliesResponse;
   nodes: Map<string, ConnectionNode>;
   services: Map<string, ServiceConnectionNode>;
   exitSpanDestinations: ExitSpanDestination[];
 }) {
   const exitSpanDestinationsMap = exitSpanDestinationsToMap(exitSpanDestinations);
   const exitSpans = getExitSpans(nodes);
-  const anomaliesByServiceName = new Map(
-    anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
-  );
 
   const messagingSpanIds = new Set(
     allConnections.filter(({ source }) => isExitSpan(source)).map(({ source }) => source.id)
@@ -175,11 +182,15 @@ function mapNodes({
       const serviceNode = services.get(serviceId);
 
       if (serviceNode) {
-        const serviceAnomalyStats = anomaliesByServiceName.get(serviceNode.id);
+        // Preserve the original span.destination.service.resource when mapping exit span to service
+        // This is needed for service-to-service edge metrics
+        const originalResource = isExitSpan(node)
+          ? (node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE]
+          : undefined;
 
         mappedNodes.set(node.id, {
           ...serviceNode,
-          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+          ...(originalResource && { [SPAN_DESTINATION_SERVICE_RESOURCE]: originalResource }),
         });
       }
     } else {
@@ -208,6 +219,8 @@ function mapEdges({
   allConnections: Connection[];
   nodes: Map<string, ConnectionNode>;
 }) {
+  const resourcesMap = new Map<string, Set<string>>();
+
   const connections = allConnections.reduce((acc, connection) => {
     const sourceData = nodes.get(connection.source.id);
     const targetData = nodes.get(connection.destination.id);
@@ -216,10 +229,24 @@ function mapEdges({
       return acc;
     }
 
+    const id = getEdgeId(sourceData.id, targetData.id);
+    const resource = targetData[SPAN_DESTINATION_SERVICE_RESOURCE] as string | undefined;
+
+    const existingEdge = acc.get(id);
+    if (existingEdge) {
+      const resourceSet = resourcesMap.get(id);
+      if (resource && resourceSet && !resourceSet.has(resource)) {
+        resourceSet.add(resource);
+        existingEdge.resources?.push(resource);
+      }
+      return acc;
+    }
+
     const label = `${
       sourceData[SERVICE_NAME] || sourceData[SPAN_DESTINATION_SERVICE_RESOURCE]
     } to ${targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
-    const id = getEdgeId(sourceData.id, targetData.id);
+
+    resourcesMap.set(id, new Set(resource ? [resource] : []));
 
     acc.set(id, {
       source: sourceData.id,
@@ -228,10 +255,11 @@ function mapEdges({
       id,
       sourceData,
       targetData,
+      resources: resource ? [resource] : [],
     });
 
     return acc;
-  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
+  }, new Map<string, ConnectionEdge>());
 
   return [...connections.values()];
 }
@@ -262,14 +290,13 @@ export function getServiceMapNodes({
 }: ServiceMapConnections): GroupResourceNodesResponse {
   const allConnections = addMessagingConnections(connections, exitSpanDestinations);
   const allNodes = getAllNodes(servicesData, allConnections);
-  const allServices = getAllServices(allNodes, exitSpanDestinations);
+  const allServices = getAllServices(allNodes, exitSpanDestinations, anomalies);
 
   const nodes = mapNodes({
     allConnections,
     nodes: allNodes,
     services: allServices,
     exitSpanDestinations,
-    anomalies,
   });
 
   // Build connections with mapped nodes
@@ -279,7 +306,7 @@ export function getServiceMapNodes({
     .flatMap((connection) => [connection.sourceData, connection.targetData])
     .concat(...allServices.values())
     .reduce((acc, node) => {
-      if (!acc.has(node.id)) {
+      if (node && !acc.has(node.id)) {
         acc.set(node.id, node);
       }
       return acc;

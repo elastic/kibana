@@ -22,8 +22,8 @@ const streamsStorageSettings = {
     properties: {
       name: types.keyword(),
       description: types.text(),
+      updated_at: types.date(),
       ingest: types.object({ enabled: false }),
-      group: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;

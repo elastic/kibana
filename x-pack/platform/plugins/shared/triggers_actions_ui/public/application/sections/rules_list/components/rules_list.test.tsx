@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { IToasts } from '@kbn/core/public';
@@ -31,12 +32,9 @@ import type {
 } from '../../../../types';
 import { Percentiles } from '../../../../types';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { CreateRuleButton } from './create_rule_button';
 import { RulesList, percentileFields } from './rules_list';
-import { RulesListDocLink } from './rules_list_doc_link';
 import {
   getDisabledByLicenseRuleTypeFromApi,
   mockedRulesData,
@@ -438,36 +436,6 @@ describe('rules_list ', () => {
       fireEvent.click(screen.getAllByTestId('actionTypetestFilterOption')[0]);
       // couldn't find better way, avoid using container! this is an exception
       expect(screen.getAllByRole('marquee', { name: '1 active filters' })).toHaveLength(1);
-    });
-  });
-
-  describe('setHeaderActions', () => {
-    it('should not render the Create Rule button', async () => {
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
-    });
-
-    it('should set header actions correctly when the user is authorized to create rules', async () => {
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
-    });
-
-    it('should set header actions correctly when the user is not authorized to creat rules', async () => {
-      getRuleTypes.mockResolvedValueOnce([]);
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      // Do not render the create rule button since the user is not authorized
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
     });
   });
 

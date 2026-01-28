@@ -10,16 +10,13 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type {
-  AppMenuActionSubmenuSecondary,
-  AppMenuSubmenuActionSecondary,
-} from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -43,9 +40,7 @@ const CreateAlertFlyout: React.FC<{
   services: DiscoverServices;
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
-  const query = stateContainer.appState.get().query;
-
+}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -56,10 +51,12 @@ const CreateAlertFlyout: React.FC<{
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
   const timeField = getTimeField(dataView);
+  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
    */
+
   const getParams = useCallback(() => {
     if (isEsqlMode) {
       return {
@@ -68,7 +65,6 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
-    const savedQueryId = stateContainer.appState.get().savedQuery;
     return {
       searchType: 'searchSource',
       searchConfiguration: stateContainer.savedSearchState
@@ -76,7 +72,7 @@ const CreateAlertFlyout: React.FC<{
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
+  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -123,77 +119,68 @@ export const getAlertsAppMenuItem = ({
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-}): AppMenuActionSubmenuSecondary => {
+}): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
+  const items: DiscoverAppMenuPopoverItem[] = [];
+
+  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
+    items.push({
+      id: AppMenuActionId.manageRulesAndConnectors,
+      order: Number.MAX_SAFE_INTEGER,
+      label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
+        defaultMessage: 'Manage rules and connectors',
+      }),
+      iconType: 'tableOfContents',
+      testId: 'discoverManageAlertsButton',
+      href: services.application.getUrlForApp(
+        services.application.isAppRegistered('rules')
+          ? 'rules'
+          : 'management/insightsAndAlerting/triggersActions/rules'
+      ),
+    });
+
+    if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
+      items.push({
+        id: AppMenuActionId.createRule,
+        order: 1,
+        label: i18n.translate('discover.alerts.createSearchThreshold', {
+          defaultMessage: 'Create search threshold rule',
+        }),
+        iconType: 'bell',
+        testId: 'discoverCreateAlertButton',
+        disableButton: !hasTimeFieldName,
+        tooltipContent: hasTimeFieldName
+          ? undefined
+          : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
+              defaultMessage: 'Data view does not have a time field.',
+            }),
+        run: ({ context: { onFinishAction } }) => {
+          return (
+            <CreateAlertFlyout
+              onFinishAction={onFinishAction}
+              discoverParams={discoverParams}
+              services={services}
+              stateContainer={stateContainer}
+            />
+          );
+        },
+      });
+    }
+  }
+
   return {
     id: AppMenuActionId.alerts,
-    type: AppMenuActionType.secondary,
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
       defaultMessage: 'Alerts',
     }),
-    description: i18n.translate('discover.localMenu.alertsDescription', {
-      defaultMessage: 'Alerts',
-    }),
     testId: 'discoverAlertsButton',
-    actions: services.capabilities.management?.insightsAndAlerting?.triggersActions
-      ? [
-          ...((discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
-            ? [
-                {
-                  id: AppMenuActionId.createRule,
-                  type: AppMenuActionType.secondary,
-                  controlProps: {
-                    label: i18n.translate('discover.alerts.createSearchThreshold', {
-                      defaultMessage: 'Create search threshold rule',
-                    }),
-                    iconType: 'bell',
-                    testId: 'discoverCreateAlertButton',
-                    disableButton: !hasTimeFieldName,
-                    tooltip: hasTimeFieldName
-                      ? undefined
-                      : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
-                          defaultMessage: 'Data view does not have a time field.',
-                        }),
-                    onClick: async (params) => {
-                      return (
-                        <CreateAlertFlyout
-                          {...params}
-                          discoverParams={discoverParams}
-                          services={services}
-                          stateContainer={stateContainer}
-                        />
-                      );
-                    },
-                  },
-                },
-              ]
-            : []) as AppMenuSubmenuActionSecondary[]),
-          {
-            id: 'alertsDivider',
-            type: AppMenuActionType.submenuHorizontalRule,
-            order: 109,
-          },
-          {
-            id: AppMenuActionId.manageRulesAndConnectors,
-            type: AppMenuActionType.secondary,
-            order: 110,
-            controlProps: {
-              label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
-                defaultMessage: 'Manage rules and connectors',
-              }),
-              iconType: 'tableOfContents',
-              testId: 'discoverManageAlertsButton',
-              href: services.application.getUrlForApp(
-                'management/insightsAndAlerting/triggersActions/rules'
-              ),
-              onClick: undefined,
-            },
-          },
-        ]
-      : [],
+    order: 4,
+    iconType: 'alert',
+    popoverWidth: 250,
+    items,
   };
 };
 

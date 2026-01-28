@@ -18,7 +18,12 @@ import type {
 } from '../../constants';
 import type { CloudConnectors, ValueOf } from '..';
 
-import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecCategory,
+  RegistryVarGroup,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -66,6 +71,7 @@ export enum KibanaAssetType {
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -86,6 +92,7 @@ export enum KibanaSavedObjectType {
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -102,6 +109,7 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
+  esqlView = 'esql_view',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -294,6 +302,7 @@ export enum RegistryInputKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   deployment_modes = 'deployment_modes',
+  hide_in_var_group_options = 'hide_in_var_group_options',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -308,6 +317,7 @@ export interface RegistryInput {
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
   [RegistryInputKeys.deployment_modes]?: string[];
+  [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
 }
 
 export enum RegistryStreamKeys {
@@ -319,6 +329,7 @@ export enum RegistryStreamKeys {
   vars = 'vars',
   template_path = 'template_path',
   ingestion_method = 'ingestion_method',
+  var_groups = 'var_groups',
 }
 
 export interface RegistryStream {
@@ -330,6 +341,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
   [RegistryStreamKeys.ingestion_method]?: string;
+  [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -656,6 +668,7 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
+  INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_RULES = 'create_alerting_rules',

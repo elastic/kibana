@@ -32,7 +32,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import type { SearchBarCustomization } from '../../../../customizations';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
@@ -47,11 +47,6 @@ const mockSearchBarCustomization: SearchBarCustomization = {
     .mockName('CustomDataViewPickerMock'),
 };
 
-const mockFieldListCustomisation: FieldListCustomization = {
-  id: 'field_list',
-  logsFieldsEnabled: true,
-};
-
 let mockUseCustomizations = false;
 
 jest.mock('../../../../customizations', () => ({
@@ -64,8 +59,6 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
-      case 'field_list':
-        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }
@@ -202,10 +195,14 @@ function getStateContainer({
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.set({
-    query: query ?? { query: '', language: 'lucene' },
-    filters: [],
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+      appState: {
+        query: query ?? { query: '', language: 'lucene' },
+        filters: [],
+      },
+    })
+  );
   if (fieldListUiState) {
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
@@ -241,7 +238,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.appState.get());
+    .mockImplementation(() => stateContainer.getCurrentTab().appState);
 
   const component = (
     <DiscoverTestProvider
@@ -325,11 +322,15 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-      appStateContainer.set({
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+          appState: {
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+        })
+      );
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),

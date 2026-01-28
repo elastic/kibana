@@ -3,19 +3,56 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, ready_for_review ]
+    types: [ opened, ready_for_review, synchronize ]
 
 jobs:
+
+  test:
+    name: Test CodeQL queries
+    runs-on: ubuntu-latest
+    if: |
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+        && toJSON(github.event.pull_request.labels) != '[]'
+        && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
+      )
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      with:
+        languages: javascript
+
+    - name: Run CodeQL unit tests
+      run: |
+        set -euo pipefail
+        CODEQL_VERSION=$(ls ${{ runner.tool_cache }}/CodeQL | grep -E '^[0-9]' | head -1)
+        export PATH="${{ runner.tool_cache }}/CodeQL/$CODEQL_VERSION/x64/codeql:$PATH"
+        # Find all unique test directories containing .qlref files
+        mapfile -t TEST_DIRS < <(find .github/codeql/custom-queries -name "*.qlref" -exec dirname {} \; | sort -u)
+        if [ "${#TEST_DIRS[@]}" -eq 0 ]; then
+          echo "No test directories with .qlref files found. Failing the workflow."
+          exit 1
+        fi
+        for testdir in "${TEST_DIRS[@]}"; do
+          echo "Running CodeQL tests in $testdir"
+          codeql test run "$testdir" --additional-packs .github/codeql/custom-queries
+        done
+
   analyze:
     name: Analyze javascript
     runs-on: kibana
-    # Hardcoded list of users will be removed once testing is complete
     if: |
-      contains(fromJSON('["elena-shostak", "SiddharthMantri", "azasypkin", "kc13greiner", "jeramysoucy", "rgodfrey-elastic", "legrego"]'), github.event.pull_request.user.login) ||
-      (contains(github.event.pull_request.labels.*.name, 'ci:codeql') &&
-      contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
-      github.event.pull_request.user.type != 'Bot' &&
-      github.event.pull_request.draft == false)
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+        && toJSON(github.event.pull_request.labels) != '[]'
+        && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft == false
+      )
     permissions:
       security-events: write
       packages: read
@@ -28,7 +65,7 @@ jobs:
         language: [ 'javascript' ]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apm from 'elastic-apm-node';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -174,6 +175,7 @@ describe('Agent policy', () => {
     jest
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    jest.spyOn(apm, 'startTransaction').mockReturnValue({ end: jest.fn() } as any);
   });
 
   afterEach(() => {
@@ -408,7 +410,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -484,7 +486,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -566,7 +568,10 @@ describe('Agent policy', () => {
         enabled: true,
       };
 
-      mockedCreateAgentPolicyWithPackages.mockResolvedValue(mockAgentPolicy as any);
+      mockedCreateAgentPolicyWithPackages.mockResolvedValue({
+        ...mockAgentPolicy,
+        id: 'test-agent-policy',
+      } as any);
       mockedPackagePolicyService.create.mockResolvedValue(mockPackagePolicy as any);
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
@@ -1208,6 +1213,59 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
+      );
+    });
+
+    it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          namespace: 'test-namespace',
+        })
+      ).rejects.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
+      );
+    });
+    it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(
+          soClient,
+          esClient,
+          'test-id',
+          {
+            namespace: 'test-namespace',
+          },
+          { force: true }
+        )
+      ).resolves.not.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
       );
     });
 

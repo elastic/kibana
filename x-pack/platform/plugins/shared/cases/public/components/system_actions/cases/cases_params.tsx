@@ -26,7 +26,11 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
-import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
+import {
+  CASES_CONNECTOR_SUB_ACTION,
+  DEFAULT_MAX_OPEN_CASES,
+  MAX_OPEN_CASES,
+} from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
@@ -162,6 +166,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const onChangeMaxCasesToOpend: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      editSubActionProperty('maximumCasesToOpen', Number(event.target.value));
+    },
+    [editSubActionProperty]
+  );
+
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     if (!dataView) {
       return [];
@@ -176,7 +187,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   }, [dataView]);
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
-  const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
+  const selectedTemplate = useMemo(
+    () => currentConfiguration.templates.find((t) => t.key === templateId),
+    [currentConfiguration.templates, templateId]
+  );
+  const selectedTemplateHasConnector = !!selectedTemplate?.caseFields?.connector;
   const defaultTemplate = useMemo(() => {
     return {
       key: DEFAULT_EMPTY_TEMPLATE_KEY,
@@ -188,6 +203,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const onTemplateChange = useCallback(
     ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
       editSubActionProperty('templateId', key === DEFAULT_EMPTY_TEMPLATE_KEY ? null : key);
+    },
+    [editSubActionProperty]
+  );
+
+  const onAutoPushChange: React.EventHandler<React.ChangeEvent<HTMLInputElement>> = useCallback(
+    (event) => {
+      editSubActionProperty('autoPushCase', event.target.checked);
     },
     [editSubActionProperty]
   );
@@ -251,6 +273,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
               }}
+              aria-label={i18n.TIME_WINDOW_VALUE_LABEL}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -262,6 +285,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
                 handleTimeWindowChange('timeWindowUnit', e.target.value);
               }}
               options={getTimeUnitOptions(timeWindowSize)}
+              aria-label={i18n.TIME_WINDOW_UNIT_LABEL}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -278,7 +302,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         />
       )}
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={true}>
           <TemplateSelector
             key={currentConfiguration.id}
@@ -287,6 +311,40 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
           />
+        </EuiFlexItem>
+        {selectedTemplateHasConnector ? (
+          <EuiFlexItem grow={true}>
+            <EuiCheckbox
+              id={`auto-push-case-${index}`}
+              data-test-subj="auto-push-case"
+              checked={actionParams.subActionParams?.autoPushCase}
+              label={i18n.AUTO_PUSH_CASE_LABEL}
+              disabled={isLoadingCaseConfiguration}
+              onChange={onAutoPushChange}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            fullWidth
+            label={i18n.MAX_CASES_TO_OPEN_LABEL}
+            helpText={i18n.MAX_CASES_TO_OPEN_HELP_TEXT(MAX_OPEN_CASES)}
+          >
+            <EuiFieldNumber
+              fullWidth
+              min={1}
+              max={MAX_OPEN_CASES}
+              step={1}
+              defaultValue={
+                actionParams.subActionParams?.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES
+              }
+              data-test-subj="maximum-case-to-open-input"
+              onChange={onChangeMaxCasesToOpend}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

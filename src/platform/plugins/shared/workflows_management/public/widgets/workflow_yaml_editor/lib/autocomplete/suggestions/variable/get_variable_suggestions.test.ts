@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Document, Scalar } from 'yaml';
+import { Document, LineCounter, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getVariableSuggestions } from './get_variable_suggestions';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
@@ -54,6 +54,7 @@ describe('getVariableSuggestions', () => {
     contextScopedToPath: 'consts',
     focusedStepInfo: null,
     yamlDocument: new Document(),
+    yamlLineCounter: new LineCounter(),
     focusedYamlPair: null,
     scalarType: Scalar.QUOTE_DOUBLE,
     path: ['steps', 0, 'with', 'message'],
@@ -63,6 +64,7 @@ describe('getVariableSuggestions', () => {
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
+    workflowDefinition: null,
     ...overrides,
   });
 
@@ -285,6 +287,54 @@ describe('getVariableSuggestions', () => {
       expect(suggestions).toHaveLength(3);
       expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
     });
+
+    it('should handle empty fullKey string', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: '',
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When fullKey is empty, path validation should pass and show all properties
+      expect(suggestions).toHaveLength(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
+    });
+
+    it('should allow suggestions when fullKey exactly matches contextScopedToPath', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: 'consts',
+          pathSegments: ['consts'],
+          lastPathSegment: null,
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When fullKey exactly matches contextScopedToPath (segmentDiff === 0),
+      // we should show all properties of that level
+      expect(suggestions).toHaveLength(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
+    });
+
+    it('should allow suggestions when typing next valid segment (segmentDiff === 1 with lastPathSegment)', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: 'consts.api',
+          pathSegments: ['consts', 'api'],
+          lastPathSegment: 'api',
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When segmentDiff === 1 and lastPathSegment is not null,
+      // we're typing the next valid segment, so suggestions should be filtered
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey']);
+    });
   });
 
   describe('different variable match types', () => {
@@ -448,6 +498,204 @@ describe('getVariableSuggestions', () => {
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0].label).toBe('value');
       expect(suggestions[0].detail).toContain('string | number');
+    });
+  });
+
+  describe('@ completion curly braces handling', () => {
+    it('should NOT add curly braces when already inside {{ }}', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'message: "{{ consts.@',
+        lineUpToCursor: 'message: "{{ consts.@',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ consts.@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // All suggestions should NOT have curly braces in insertText
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
+    });
+
+    it('should add curly braces when NOT inside existing braces', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'message: @',
+        lineUpToCursor: 'message: @',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // All suggestions should have curly braces in insertText
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).toContain('{{');
+        expect(suggestion.insertText).toContain('}}');
+      });
+    });
+
+    it('should handle nested braces correctly', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'message: "{{ outer {{ consts.@',
+        lineUpToCursor: 'message: "{{ outer {{ consts.@',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ outer {{ consts.@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // Should detect we're inside nested braces and not add extra braces
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
+    });
+
+    it('should handle unclosed braces correctly', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'message: "{{ consts.@',
+        lineUpToCursor: 'message: "{{ consts.@',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ consts.@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // Should detect we're inside unclosed braces and not add extra braces
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
+    });
+
+    it('should handle multiple brace pairs correctly', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'message: "{{ first }} and {{ consts.@',
+        lineUpToCursor: 'message: "{{ first }} and {{ consts.@',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ first }} and {{ consts.@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // Should detect we're inside the second pair of braces and not add extra braces
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
+    });
+
+    it('should NOT add curly braces for foreach variables', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '@',
+        line: 'foreach: @',
+        lineUpToCursor: 'foreach: @',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'foreach'],
+          keyNode: {
+            value: 'foreach',
+          },
+          valueNode: {
+            value: '@',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // Foreach should never have curly braces
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
+    });
+
+    it('should NOT add curly braces for non-@ match types', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '.',
+        line: 'message: "{{ consts.',
+        lineUpToCursor: 'message: "{{ consts.',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'variable-unfinished',
+        }),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ consts.',
+          },
+        } as StepPropInfo,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions.length).toBeGreaterThan(0);
+      // Non-@ match types should not have curly braces added
+      suggestions.forEach((suggestion) => {
+        expect(suggestion.insertText).not.toContain('{{');
+        expect(suggestion.insertText).not.toContain('}}');
+      });
     });
   });
 });
