@@ -87,13 +87,12 @@ export const NO_RETENTION_LABEL = i18n.translate(
 
 export const SUGGESTION_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.suggestionColumnName',
-  { defaultMessage: 'AI Suggestion' }
+  { defaultMessage: 'Suggestions' }
 );
 
 export const SUGGESTION_COLUMN_HEADER_ARIA_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.suggestionColumnHeaderAriaLabel',
   {
-    defaultMessage:
-      'AI Suggestion column - shows availability of AI-generated pipeline suggestions for each stream',
+    defaultMessage: 'Suggestions column - shows the count of available suggestions for each stream',
   }
 );

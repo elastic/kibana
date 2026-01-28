@@ -17,7 +17,8 @@ import {
 } from '../../../fixtures/ai_suggestions_helpers';
 import { MOCK_GROK_PIPELINE } from '../../../fixtures/pipeline_suggestions_helpers';
 
-const STATUS_ENDPOINT_PATTERN = '**/internal/streams/logs-generic-default/_pipeline_suggestion/_status';
+const STATUS_ENDPOINT_PATTERN =
+  '**/internal/streams/logs-generic-default/_pipeline_suggestion/_status';
 
 /**
  * Helper to set up mock pipeline suggestion task endpoints

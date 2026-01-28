@@ -12,9 +12,14 @@ import type {
   PipelineSuggestionTaskPayload,
 } from '../../../../lib/tasks/task_definitions/pipeline_suggestion';
 import { STREAMS_PIPELINE_SUGGESTION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/pipeline_suggestion';
+import {
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+  getFeaturesIdentificationTaskId,
+} from '../../../../lib/tasks/task_definitions/features_identification';
+import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
 import type { TaskResult } from '../../../../lib/tasks/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { PipelineSuggestionBulkStatusItem } from '../../../../../common';
+import type { SuggestionBulkStatusItem } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -182,17 +187,42 @@ const pipelineSuggestionStatusRoute = createServerRoute({
 });
 
 /**
- * Bulk status endpoint for pipeline suggestions.
- * Used by the streams listing page to show suggestion availability for multiple streams.
- * Similar pattern to doc counts endpoint.
+ * Helper to generate task ID for significant events queries generation tasks.
+ */
+function getSignificantEventsQueriesGenerationTaskId(streamName: string): string {
+  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
+}
+
+/**
+ * Helper to extract stream name from a task ID.
+ * Task IDs are formatted as {taskType}_{streamName}
+ */
+function extractStreamNameFromTaskId(taskId: string, taskType: string): string {
+  const prefix = `${taskType}_`;
+  return taskId.startsWith(prefix) ? taskId.slice(prefix.length) : taskId;
+}
+
+/**
+ * All suggestion task types that should be counted in the bulk status endpoint.
+ */
+const SUGGESTION_TASK_TYPES = [
+  STREAMS_PIPELINE_SUGGESTION_TASK_TYPE,
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+  SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
+] as const;
+
+/**
+ * Bulk status endpoint for suggestions.
+ * Used by the streams listing page to show suggestion counts for multiple streams.
+ * Includes pipeline suggestions, feature identification, and significant events queries.
  */
 const pipelineSuggestionBulkStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_pipeline_suggestion/_bulk_status',
   options: {
     access: 'internal',
-    summary: 'Get bulk pipeline suggestion status',
+    summary: 'Get bulk suggestion status',
     description:
-      'Get pipeline suggestion status for multiple streams. Returns status and whether a suggestion is available.',
+      'Get suggestion status for multiple streams. Returns counts of available suggestions across all suggestion types (pipeline, features, significant events).',
   },
   security: {
     authz: {
@@ -206,41 +236,54 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       })
       .optional(),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-  }): Promise<PipelineSuggestionBulkStatusItem[]> => {
+  handler: async ({ params, request, getScopedClients }): Promise<SuggestionBulkStatusItem[]> => {
     const { taskClient } = await getScopedClients({
       request,
     });
 
     const streamName = params?.query?.stream;
 
-    // If a specific stream is requested, only query for that task
-    const taskIds = streamName ? [getPipelineSuggestionTaskId(streamName)] : undefined;
+    // Build a map of stream name -> suggestion count
+    const streamSuggestionCounts = new Map<string, number>();
 
-    const statusMap = await taskClient.getStatusesByType(
-      STREAMS_PIPELINE_SUGGESTION_TASK_TYPE,
-      taskIds
-    );
+    // Query all suggestion task types and aggregate counts
+    for (const taskType of SUGGESTION_TASK_TYPES) {
+      // If a specific stream is requested, only query for that task
+      let taskIds: string[] | undefined;
+      if (streamName) {
+        if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
+          taskIds = [getPipelineSuggestionTaskId(streamName)];
+        } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
+          taskIds = [getFeaturesIdentificationTaskId(streamName)];
+        } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
+          taskIds = [getSignificantEventsQueriesGenerationTaskId(streamName)];
+        }
+      }
 
-    const results: PipelineSuggestionBulkStatusItem[] = [];
+      const statusMap = await taskClient.getStatusesByType(taskType, taskIds);
 
-    for (const [taskId, status] of statusMap.entries()) {
-      // Extract stream name from task ID (format: streams_pipeline_suggestion_{streamName})
-      const taskIdPrefix = `${STREAMS_PIPELINE_SUGGESTION_TASK_TYPE}_`;
-      const extractedStreamName = taskId.startsWith(taskIdPrefix)
-        ? taskId.slice(taskIdPrefix.length)
-        : taskId;
+      for (const [taskId, status] of statusMap.entries()) {
+        const extractedStreamName = extractStreamNameFromTaskId(taskId, taskType);
 
-      // A suggestion is available if the task completed (or acknowledged) successfully
-      const hasSuggestion = status === TaskStatus.Completed || status === TaskStatus.Acknowledged;
+        // A suggestion counts as available if the task completed (or acknowledged) successfully
+        const hasSuggestion = status === TaskStatus.Completed || status === TaskStatus.Acknowledged;
 
+        if (hasSuggestion) {
+          const currentCount = streamSuggestionCounts.get(extractedStreamName) ?? 0;
+          streamSuggestionCounts.set(extractedStreamName, currentCount + 1);
+        } else if (!streamSuggestionCounts.has(extractedStreamName)) {
+          // Ensure stream is in the map even with 0 count
+          streamSuggestionCounts.set(extractedStreamName, 0);
+        }
+      }
+    }
+
+    // Convert map to array of results
+    const results: SuggestionBulkStatusItem[] = [];
+    for (const [stream, suggestionCount] of streamSuggestionCounts.entries()) {
       results.push({
-        stream: extractedStreamName,
-        status,
-        hasSuggestion,
+        stream,
+        suggestionCount,
       });
     }
 

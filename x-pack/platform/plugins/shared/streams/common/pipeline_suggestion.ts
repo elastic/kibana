@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { TaskStatus } from '@kbn/streams-schema';
-
 /**
- * Bulk status response item for pipeline suggestions.
- * Used by the streams listing page to show suggestion availability.
+ * Bulk status response item for suggestions.
+ * Used by the streams listing page to show suggestion counts.
+ * Includes pipeline suggestions, feature identification, and significant events queries.
  */
-export interface PipelineSuggestionBulkStatusItem {
+export interface SuggestionBulkStatusItem {
   stream: string;
-  status: TaskStatus;
-  hasSuggestion: boolean;
+  suggestionCount: number;
 }
