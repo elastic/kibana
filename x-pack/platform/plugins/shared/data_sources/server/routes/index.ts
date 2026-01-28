@@ -334,8 +334,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
           fields: [],
         });
         try {
-          for await (const response of finder.find()) {
-            for (const so of response.saved_objects) {
+          for await (const resp of finder.find()) {
+            for (const so of resp.saved_objects) {
               dataSourceIds.push(so.id);
             }
           }
