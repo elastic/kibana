@@ -47,6 +47,18 @@ export interface StepNameInfo {
   endColumn: number;
 }
 
+export interface WorkflowInputsItem {
+  id: string;
+  workflowId: string | null;
+  inputs: Record<string, unknown> | undefined;
+  inputsNode: import('yaml').YAMLMap | null;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  yamlPath: (string | number)[];
+}
+
 export type YamlValidationErrorSeverity = 'error' | 'warning' | 'info';
 
 interface YamlValidationResultBase {
@@ -121,7 +133,13 @@ interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBa
   owner: 'custom-property-validation';
 }
 
-interface YamlValidationResultWorkflowOutput extends YamlValidationResultBase {
+interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-inputs-validation';
+}
+
+interface YamlValidationResultWorkflowOutputsError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
   owner: 'workflow-output-validation';
@@ -138,6 +156,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'connector-id-validation',
   'json-schema-default-validation',
   'custom-property-validation',
+  'workflow-inputs-validation',
   'workflow-output-validation',
 ] as const;
 
@@ -158,4 +177,5 @@ export type YamlValidationResult =
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid
-  | YamlValidationResultWorkflowOutput;
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultWorkflowOutputsError;
