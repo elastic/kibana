@@ -17,3 +17,9 @@ export const MIN_SAVED_SEARCH_SAMPLE_SIZE = 1;
 export const MAX_SAVED_SEARCH_SAMPLE_SIZE = 10000;
 
 export type SavedSearchContentType = typeof SavedSearchType;
+
+export enum Density {
+  COMPACT = 'compact',
+  EXPANDED = 'expanded',
+  NORMAL = 'normal',
+}

@@ -8,7 +8,7 @@
  */
 
 export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
+export { querySchema, aggregateQuerySchema } from './src/query';
 export { asCodeFilterSchema } from './src/filter';
 export { storedFilterSchema } from './src/stored_filter';
 
