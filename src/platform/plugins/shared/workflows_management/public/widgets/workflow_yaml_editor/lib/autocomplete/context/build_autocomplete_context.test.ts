@@ -160,7 +160,7 @@ steps:
         type: console
         with:
           message: "im true, {{steps.|<-}}"
-    else: 
+    else:
       - name: false-step
         type: console
         with:
