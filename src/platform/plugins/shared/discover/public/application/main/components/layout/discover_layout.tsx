@@ -597,7 +597,7 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    height: 'inherit',
+    height: '100%',
     display: 'flex',
     flex: '1 1 auto',
   }),
