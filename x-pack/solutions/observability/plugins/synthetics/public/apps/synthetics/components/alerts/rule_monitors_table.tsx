@@ -98,6 +98,9 @@ export const RuleMonitorsTable = () => {
         pageSize,
         showPerPageOptions: true,
       }}
+      tableCaption={i18n.translate('xpack.synthetics.ruleDetails.monitorsTable.caption', {
+        defaultMessage: 'Rule monitors',
+      })}
     />
   );
 };

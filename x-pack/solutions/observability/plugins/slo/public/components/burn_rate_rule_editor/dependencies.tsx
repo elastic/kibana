@@ -160,7 +160,13 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiBasicTable columns={columns} items={rows} />
+      <EuiBasicTable
+        columns={columns}
+        items={rows}
+        tableCaption={i18n.translate('xpack.slo.rules.dependencies.tableCaption', {
+          defaultMessage: 'Configured rule dependencies',
+        })}
+      />
       <EuiSpacer size="s" />
       <DependencyEditor
         rules={availableRules}

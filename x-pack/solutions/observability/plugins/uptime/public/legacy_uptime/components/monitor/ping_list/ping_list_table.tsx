@@ -240,6 +240,9 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
               defaultMessage: 'No history found',
             })
       }
+      tableCaption={i18n.translate('xpack.uptime.pingList.pingHistoryCaption', {
+        defaultMessage: 'Ping history',
+      })}
       tableLayout="auto"
       rowProps={getRowProps}
       onChange={onChange}

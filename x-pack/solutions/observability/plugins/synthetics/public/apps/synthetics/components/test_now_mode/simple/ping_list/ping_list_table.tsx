@@ -127,6 +127,9 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
               defaultMessage: 'No history found',
             })
       }
+      tableCaption={i18n.translate('xpack.synthetics.pingList.pingListCaption', {
+        defaultMessage: 'Ping history',
+      })}
       tableLayout="auto"
       onChange={onChange}
     />
