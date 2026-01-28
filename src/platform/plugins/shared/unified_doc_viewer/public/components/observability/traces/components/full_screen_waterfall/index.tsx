@@ -53,6 +53,7 @@ export const FullScreenWaterfall = ({
     typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
   >(null);
   const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
+  const [scrollElement, setScrollElement] = useState<Element | null>(null);
 
   const traceWaterfallTitleId = useGeneratedHtmlId({
     prefix: 'traceWaterfallTitle',
@@ -64,6 +65,12 @@ export const FullScreenWaterfall = ({
       defaultMessage: 'Trace timeline',
     }
   );
+
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
+    }
+  }, []);
 
   const minWidth = euiTheme.base * 30;
 
@@ -125,15 +132,18 @@ export const FullScreenWaterfall = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {serviceName ? (
-          <FullTraceWaterfallFetcher
-            callApmApi={callApmApi}
-            serviceName={serviceName}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            traceId={traceId}
-            onNodeClick={handleNodeClick}
-            onErrorClick={handleErrorClick}
-          />
+          <div ref={containerRef}>
+            <FullTraceWaterfallFetcher
+              callApmApi={callApmApi}
+              serviceName={serviceName}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              traceId={traceId}
+              onNodeClick={handleNodeClick}
+              onErrorClick={handleErrorClick}
+              scrollElement={scrollElement}
+            />
+          </div>
         ) : null}
       </EuiFlyoutBody>
 
