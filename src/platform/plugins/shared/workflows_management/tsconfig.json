@@ -77,7 +77,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/shared-ux-utility",
     "@kbn/licensing-types",
-    "@kbn/core-lifecycle-server-mocks"
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/object-utils"
   ],
   "exclude": ["target/**/*"]
 }
