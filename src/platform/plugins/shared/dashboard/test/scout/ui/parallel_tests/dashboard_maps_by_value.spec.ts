@@ -36,7 +36,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
   const createAndAddMapByValue = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.addMapPanel();
     await pageObjects.maps.waitForRenderComplete();
-    await pageObjects.maps.clickSaveAndReturnButton();
+    await pageObjects.maps.saveAndReturnButton.click();
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
@@ -45,18 +45,19 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
     await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
     await pageObjects.maps.waitForRenderComplete();
 
-    await pageObjects.maps.clickAddLayer();
+    await pageObjects.maps.addLayerButton.click();
+    await pageObjects.maps.layerAddForm.waitFor({ state: 'visible' });
     await pageObjects.maps.selectLayerWizardByTitle(MAPS_LAYER_GROUP_TITLE);
-    await pageObjects.maps.clickImportFileButton();
+    await pageObjects.maps.importFileButton.click();
   };
 
   const saveMapByValueAndReturn = async (pageObjects: PageObjects) => {
-    await pageObjects.maps.clickSaveAndReturnButton();
+    await pageObjects.maps.saveAndReturnButton.click();
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
   const saveMapToLibraryAndReturn = async (pageObjects: PageObjects) => {
-    await pageObjects.maps.clickSaveButton();
+    await pageObjects.maps.saveButton.click();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: true,
     });
@@ -64,7 +65,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
   };
 
   const saveMapToLibraryAndStay = async (pageObjects: PageObjects, page: ScoutPage) => {
-    await pageObjects.maps.clickSaveButton();
+    await pageObjects.maps.saveButton.click();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: false,
     });
@@ -94,7 +95,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
 
     await spaceTest.step('verify panel count and layer', async () => {
       expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
-      expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(true);
+      await expect(pageObjects.maps.getLayerToggleButton(MAPS_LAYER_GROUP_TITLE)).toBeVisible();
     });
   });
 
@@ -109,7 +110,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
     });
 
     await spaceTest.step('verify layer exists', async () => {
-      expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(true);
+      await expect(pageObjects.maps.getLayerToggleButton(MAPS_LAYER_GROUP_TITLE)).toBeVisible();
     });
   });
 
@@ -126,7 +127,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
       });
 
       await spaceTest.step('verify layer does not exist', async () => {
-        expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(false);
+        await expect(pageObjects.maps.getLayerToggleButton(MAPS_LAYER_GROUP_TITLE)).toBeHidden();
       });
     }
   );

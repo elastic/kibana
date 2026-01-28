@@ -13,32 +13,45 @@ import type { ScoutPage } from '..';
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly mapContainer;
+  public readonly mapRenderComplete;
+  public readonly saveAndReturnButton;
+  public readonly saveButton;
+  public readonly addLayerButton;
+  public readonly layerAddForm;
+  public readonly importFileButton;
+  public readonly savedObjectTitleInput;
+  public readonly returnToOriginSwitch;
+  public readonly confirmSaveButton;
+
+  constructor(private readonly page: ScoutPage) {
+    this.mapContainer = this.page.locator('#maps-plugin');
+    this.mapRenderComplete = this.mapContainer.locator(
+      'div[data-dom-id][data-render-complete="true"]'
+    );
+    this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
+    this.saveButton = this.page.testSubj.locator('mapSaveButton');
+    this.addLayerButton = this.page.testSubj.locator('addLayerButton');
+    this.layerAddForm = this.page.testSubj.locator('layerAddForm');
+    this.importFileButton = this.page.testSubj.locator('importFileButton');
+    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
+    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+  }
 
   async gotoNewMap() {
-    return this.page.gotoApp('maps/map');
+    await this.page.gotoApp('maps/map');
+    await this.waitForRenderComplete();
   }
 
   async waitForRenderComplete() {
     // first wait for the top level container to be present
-    await this.page.locator('div#maps-plugin').waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // then wait for the map to be fully rendered
-    return this.page
-      .locator('div[data-dom-id][data-render-complete="true"]')
-      .waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-  }
-
-  async clickSaveAndReturnButton() {
-    await this.page.testSubj.click('mapSaveAndReturnButton');
-  }
-
-  async clickSaveButton() {
-    await this.page.testSubj.click('mapSaveButton');
-  }
-
-  async clickAddLayer() {
-    await this.page.testSubj.click('addLayerButton');
-    await this.page.testSubj.waitForSelector('layerAddForm', { state: 'visible' });
+    return this.mapRenderComplete.waitFor({
+      state: 'attached',
+      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+    });
   }
 
   async selectLayerWizardByTitle(title: string) {
@@ -51,26 +64,20 @@ export class MapsPage {
     await this.page.testSubj.click(wizardTestSubj);
   }
 
-  async clickImportFileButton() {
-    await this.page.testSubj.click('importFileButton');
-  }
-
   async saveFromModal(title: string, { redirectToOrigin = true }: { redirectToOrigin?: boolean }) {
-    await this.page.testSubj.fill('savedObjectTitle', title);
-    const returnToOrigin = this.page.testSubj.locator('returnToOriginModeSwitch');
-    if ((await returnToOrigin.count()) > 0) {
-      const isChecked = (await returnToOrigin.getAttribute('aria-checked')) === 'true';
+    await this.savedObjectTitleInput.fill(title);
+    if (await this.returnToOriginSwitch.isVisible()) {
+      const isChecked = (await this.returnToOriginSwitch.getAttribute('aria-checked')) === 'true';
       if (isChecked !== redirectToOrigin) {
-        await returnToOrigin.click();
+        await this.returnToOriginSwitch.click();
       }
     }
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
+    await this.confirmSaveButton.click();
+    await this.confirmSaveButton.waitFor({ state: 'hidden' });
   }
 
-  async doesLayerExist(displayName: string) {
-    const escapedName = displayName.split(' ').join('_');
-    const locator = this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
-    return (await locator.count()) > 0;
+  getLayerToggleButton(displayName: string) {
+    const escapedName = displayName.replace(/\s+/g, '_');
+    return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
   }
 }
