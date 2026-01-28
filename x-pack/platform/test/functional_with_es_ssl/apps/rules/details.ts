@@ -150,7 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Header', function () {
       const testRunUuid = uuidv4();
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         const rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
@@ -357,7 +357,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should open edit rule flyout', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
 
         // refresh to see rule
         await browser.refresh();
@@ -390,7 +390,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reset rule when canceling an edit', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
 
         // refresh to see rule
         await browser.refresh();
@@ -435,7 +435,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           name: `slack-${testRunUuid}-${0}`,
         });
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         const rule = await createAlwaysFiringRule({
           name: testRunUuid,
           actions: [
@@ -474,7 +474,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.tableFinishedLoading();
 
         // click on first alert
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -508,7 +508,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should convert rule-level params to action-level params and save the alert successfully', async () => {
         const connectors = await createConnectors(testRunUuid);
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         const rule = await createAlwaysFiringRule({
           name: `test-rule-${testRunUuid}`,
           schedule: {
@@ -535,7 +535,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // click on first alert
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -563,7 +563,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const ruleName = uuidv4();
 
       beforeEach(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
       });
 
       after(async () => {
@@ -617,7 +617,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
 
         const alerts = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
         rule = await createRuleWithActionsAndParams(testRunUuid, {
@@ -722,7 +722,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
 
         const alerts = flatten(
           range(10).map((index) => [
@@ -809,7 +809,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the event log list and can filter/sort', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await testSubjects.click('rulesTab');
 
         const alerts = [{ id: 'us-central' }];
@@ -830,7 +830,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .expect(204);
         });
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await testSubjects.click('rulesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
 

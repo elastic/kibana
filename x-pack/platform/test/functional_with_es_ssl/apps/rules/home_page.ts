@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Rules');
       });
@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page but with error', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         const exists = await testSubjects.exists('noPermissionPrompt');
         expect(exists).to.be(true);
       });
@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Loads the app', () => {
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
       });
 
       it('Loads the Alerts page', async () => {

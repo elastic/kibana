@@ -37,7 +37,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('rules list bulk actions', () => {
     before(async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
     });
 

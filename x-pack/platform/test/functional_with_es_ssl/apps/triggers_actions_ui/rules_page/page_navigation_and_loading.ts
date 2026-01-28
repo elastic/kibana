@@ -30,16 +30,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Refresh browser to ensure the newly created rule is visible in the UI
       await browser.refresh();
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('triggersActions');
     });
 
     after(async () => {
       await objectRemover.removeAll();
     });
 
-    it('navigates to /app/rules successfully', async () => {
+    it('navigates to /app/management/insightsAndAlerting/triggersActions successfully', async () => {
       const url = await browser.getCurrentUrl();
-      expect(url).to.contain('/app/rules');
+      expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions');
     });
 
     it('loads with correct page title', async () => {
