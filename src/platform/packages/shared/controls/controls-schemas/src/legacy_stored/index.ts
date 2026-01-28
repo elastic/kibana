@@ -9,8 +9,6 @@
 
 export type {
   LegacyStoredDataControlState,
-  LegacyStoredESQLControlExplicitInput,
-  LegacyStoredOptionsListExplicitInput,
   LegacyStoredPinnedControls,
   LegacyStoredPinnedControlState,
   LegacyStoredRangeSliderExplicitInput,

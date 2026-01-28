@@ -8,11 +8,30 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type {
-  OptionsListESQLControlState,
-  StoredESQLControlExplicitInput,
-} from '@kbn/controls-schemas';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
+interface LegacyStoredESQLControlExplicitInput {
+  availableOptions?: string[];
+  controlType: string;
+  displaySettings?: {
+    placeholder?: string;
+    hideActionBar?: boolean;
+    hideExclude?: boolean;
+    hideExists?: boolean;
+    hideSort?: boolean;
+  };
+  esqlQuery: string;
+  exclude?: boolean;
+  existsSelected?: boolean;
+  runPastTimeout?: boolean;
+  searchTechnique?: string;
+  selectedOptions: string[];
+  singleSelect?: boolean;
+  sort?: { by: string; direction: string };
+  variableName: string;
+  variableType: string;
+}
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {

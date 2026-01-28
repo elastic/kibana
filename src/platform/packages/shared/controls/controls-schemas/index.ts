@@ -32,9 +32,6 @@ export type {
 } from './src/types';
 
 export type {
-  LegacyStoredDataControlState,
-  LegacyStoredESQLControlExplicitInput,
-  LegacyStoredOptionsListExplicitInput,
   LegacyStoredPinnedControls,
   LegacyStoredPinnedControlState,
   LegacyStoredRangeSliderExplicitInput,

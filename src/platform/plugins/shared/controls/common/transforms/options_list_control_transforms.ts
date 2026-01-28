@@ -9,18 +9,36 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredOptionsListExplicitInput,
-  OptionsListDSLControlState,
-} from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
+import {
+  type LegacyStoredDataControlState,
+  transformDataControlIn,
+  transformDataControlOut,
+} from './data_control_transforms';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
 const OPTIONS_LIST_LEGACY_REF_NAMES = [
   'optionsListDataView',
   'optionsListControlDataView',
 ] as const;
+
+type LegacyStoredOptionsListExplicitInput = LegacyStoredDataControlState & {
+  displaySettings?: {
+    placeholder?: string;
+    hideActionBar?: boolean;
+    hideExclude?: boolean;
+    hideExists?: boolean;
+    hideSort?: boolean;
+  };
+  exclude?: boolean;
+  existsSelected?: boolean;
+  runPastTimeout?: boolean;
+  searchTechnique?: string;
+  selectedOptions?: Array<string | number>;
+  singleSelect?: boolean;
+  sort?: { by: string; direction: string };
+};
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {

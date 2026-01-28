@@ -8,8 +8,16 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+
+export interface LegacyStoredDataControlState extends SerializedTitles {
+  fieldName: string;
+  useGlobalFilters?: boolean;
+  ignoreValidations?: boolean;
+  dataViewRefName?: string;
+}
 
 export function transformDataControlIn(
   state: DataControlState,
