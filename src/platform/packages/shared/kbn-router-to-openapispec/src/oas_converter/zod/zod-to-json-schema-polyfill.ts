@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Zod v4-style toJSONSchema Polyfill for Zod v3
  *
@@ -9,7 +18,7 @@
  *   This module polyfills zod v4's `toJSONSchema` function that allows
  *   us to use Zod v4's toJSONSchema function (we are using the
  *   implementation from zod v4.3.6)
- * 
+ *
  * Notes:
  * - This polyfill is temporary. Once zod is upgraded to v4 for
  *   this project, we can remove this polyfill and use the native
@@ -29,30 +38,23 @@
 // =============================================================================
 
 export type JSONSchemaTarget =
-  | "draft-04"
-  | "draft-07"
-  | "draft-2020-12"
-  | "openapi-3.0"
+  | 'draft-04'
+  | 'draft-07'
+  | 'draft-2020-12'
+  | 'openapi-3.0'
   | (string & {});
 
 export interface JSONSchema {
   [k: string]: unknown;
   $schema?:
-    | "https://json-schema.org/draft/2020-12/schema"
-    | "http://json-schema.org/draft-07/schema#"
-    | "http://json-schema.org/draft-04/schema#";
+    | 'https://json-schema.org/draft/2020-12/schema'
+    | 'http://json-schema.org/draft-07/schema#'
+    | 'http://json-schema.org/draft-04/schema#';
   $id?: string;
   $ref?: string;
   $defs?: Record<string, JSONSchema>;
   definitions?: Record<string, JSONSchema>;
-  type?:
-    | "object"
-    | "array"
-    | "string"
-    | "number"
-    | "boolean"
-    | "null"
-    | "integer";
+  type?: 'object' | 'array' | 'string' | 'number' | 'boolean' | 'null' | 'integer';
   properties?: Record<string, JSONSchema>;
   additionalProperties?: boolean | JSONSchema;
   required?: string[];
@@ -108,13 +110,13 @@ export interface ToJSONSchemaParams {
    * - "any": Convert to empty schema {}
    * @default "throw"
    */
-  unrepresentable?: "throw" | "any";
+  unrepresentable?: 'throw' | 'any';
 
   /**
    * Whether to extract "input" or "output" type. Relevant for transforms/defaults.
    * @default "output"
    */
-  io?: "input" | "output";
+  io?: 'input' | 'output';
 
   /**
    * How to handle cyclical schemas.
@@ -122,7 +124,7 @@ export interface ToJSONSchemaParams {
    * - "throw": Throw an error on cycles
    * @default "ref"
    */
-  cycles?: "ref" | "throw";
+  cycles?: 'ref' | 'throw';
 
   /**
    * How to handle reused schemas.
@@ -130,16 +132,12 @@ export interface ToJSONSchemaParams {
    * - "ref": Extract reused schemas to $defs
    * @default "inline"
    */
-  reused?: "ref" | "inline";
+  reused?: 'ref' | 'inline';
 
   /**
    * Custom override function to modify generated JSON Schema.
    */
-  override?: (ctx: {
-    zodSchema: any;
-    jsonSchema: JSONSchema;
-    path: (string | number)[];
-  }) => void;
+  override?: (ctx: { zodSchema: any; jsonSchema: JSONSchema; path: (string | number)[] }) => void;
 }
 
 // =============================================================================
@@ -159,15 +157,11 @@ interface Seen {
 
 interface ToJSONSchemaContext {
   target: JSONSchemaTarget;
-  unrepresentable: "throw" | "any";
-  io: "input" | "output";
-  cycles: "ref" | "throw";
-  reused: "ref" | "inline";
-  override: (ctx: {
-    zodSchema: any;
-    jsonSchema: JSONSchema;
-    path: (string | number)[];
-  }) => void;
+  unrepresentable: 'throw' | 'any';
+  io: 'input' | 'output';
+  cycles: 'ref' | 'throw';
+  reused: 'ref' | 'inline';
+  override: (ctx: { zodSchema: any; jsonSchema: JSONSchema; path: (string | number)[] }) => void;
   counter: number;
   seen: Map<any, Seen>;
 }
@@ -203,7 +197,7 @@ function getRegistryMetadata(schema: any): Record<string, unknown> | undefined {
 
   try {
     const registry = getGlobalRegistry();
-    if (registry && typeof registry.get === "function") {
+    if (registry && typeof registry.get === 'function') {
       return registry.get(schema);
     }
   } catch {
@@ -229,7 +223,7 @@ function getZodTypeName(schema: any): string | undefined {
   if (schema?._def?.typeName) {
     // Convert ZodString -> string, ZodNumber -> number, etc.
     const typeName = schema._def.typeName as string;
-    return typeName.replace(/^Zod/, "").toLowerCase();
+    return typeName.replace(/^Zod/, '').toLowerCase();
   }
   return undefined;
 }
@@ -253,7 +247,7 @@ function isZodV4(schema: any): boolean {
 // =============================================================================
 
 function getEnumValues(entries: Record<string, string | number>): (string | number)[] {
-  const numericValues = Object.values(entries).filter((v) => typeof v === "number");
+  const numericValues = Object.values(entries).filter((v) => typeof v === 'number');
   const values = Object.entries(entries)
     .filter(([k, _]) => numericValues.indexOf(+k) === -1)
     .map(([_, v]) => v);
@@ -272,36 +266,36 @@ type Processor = (
 ) => void;
 
 const stringProcessor: Processor = (schema, ctx, json, _params) => {
-  json.type = "string";
+  json.type = 'string';
   const def = getDef(schema);
 
   // Handle Zod v3 checks
   if (def.checks) {
     for (const check of def.checks) {
-      if (check.kind === "min") json.minLength = check.value;
-      if (check.kind === "max") json.maxLength = check.value;
-      if (check.kind === "length") {
+      if (check.kind === 'min') json.minLength = check.value;
+      if (check.kind === 'max') json.maxLength = check.value;
+      if (check.kind === 'length') {
         json.minLength = check.value;
         json.maxLength = check.value;
       }
-      if (check.kind === "email") json.format = "email";
-      if (check.kind === "url") json.format = "uri";
-      if (check.kind === "uuid") json.format = "uuid";
-      if (check.kind === "cuid") json.format = "cuid";
-      if (check.kind === "cuid2") json.format = "cuid2";
-      if (check.kind === "ulid") json.format = "ulid";
-      if (check.kind === "datetime") json.format = "date-time";
-      if (check.kind === "date") json.format = "date";
-      if (check.kind === "time") json.format = "time";
-      if (check.kind === "ip") json.format = check.version === "v6" ? "ipv6" : "ipv4";
-      if (check.kind === "regex") json.pattern = check.regex.source;
-      if (check.kind === "startsWith") {
+      if (check.kind === 'email') json.format = 'email';
+      if (check.kind === 'url') json.format = 'uri';
+      if (check.kind === 'uuid') json.format = 'uuid';
+      if (check.kind === 'cuid') json.format = 'cuid';
+      if (check.kind === 'cuid2') json.format = 'cuid2';
+      if (check.kind === 'ulid') json.format = 'ulid';
+      if (check.kind === 'datetime') json.format = 'date-time';
+      if (check.kind === 'date') json.format = 'date';
+      if (check.kind === 'time') json.format = 'time';
+      if (check.kind === 'ip') json.format = check.version === 'v6' ? 'ipv6' : 'ipv4';
+      if (check.kind === 'regex') json.pattern = check.regex.source;
+      if (check.kind === 'startsWith') {
         json.pattern = `^${escapeRegex(check.value)}.*`;
       }
-      if (check.kind === "endsWith") {
+      if (check.kind === 'endsWith') {
         json.pattern = `.*${escapeRegex(check.value)}$`;
       }
-      if (check.kind === "includes") {
+      if (check.kind === 'includes') {
         json.pattern = escapeRegex(check.value);
       }
     }
@@ -310,19 +304,19 @@ const stringProcessor: Processor = (schema, ctx, json, _params) => {
   // Handle Zod v4 bag
   if (schema._zod?.bag) {
     const bag = schema._zod.bag;
-    if (typeof bag.minimum === "number") json.minLength = bag.minimum;
-    if (typeof bag.maximum === "number") json.maxLength = bag.maximum;
+    if (typeof bag.minimum === 'number') json.minLength = bag.minimum;
+    if (typeof bag.maximum === 'number') json.maxLength = bag.maximum;
     if (bag.format) {
       const formatMap: Record<string, string | undefined> = {
-        guid: "uuid",
-        url: "uri",
-        datetime: "date-time",
-        json_string: "json-string",
+        guid: 'uuid',
+        url: 'uri',
+        datetime: 'date-time',
+        json_string: 'json-string',
         regex: undefined, // regex format should not be set
       };
       const mappedFormat = formatMap[bag.format] ?? bag.format;
       // Only set format if it's not empty and not "regex"
-      if (mappedFormat && mappedFormat !== "" && mappedFormat !== "regex") {
+      if (mappedFormat && mappedFormat !== '' && mappedFormat !== 'regex') {
         json.format = mappedFormat;
       }
     }
@@ -332,8 +326,8 @@ const stringProcessor: Processor = (schema, ctx, json, _params) => {
         json.pattern = regexes[0]!.source;
       } else if (regexes.length > 1) {
         json.allOf = regexes.map((regex: RegExp) => ({
-          ...(ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0"
-            ? { type: "string" as const }
+          ...(ctx.target === 'draft-07' || ctx.target === 'draft-04' || ctx.target === 'openapi-3.0'
+            ? { type: 'string' as const }
             : {}),
           pattern: regex.source,
         }));
@@ -349,21 +343,21 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
   let isInteger = false;
   if (def.checks) {
     for (const check of def.checks) {
-      if (check.kind === "int") isInteger = true;
+      if (check.kind === 'int') isInteger = true;
     }
   }
-  if (schema._zod?.bag?.format?.includes("int")) {
+  if (schema._zod?.bag?.format?.includes('int')) {
     isInteger = true;
   }
 
-  json.type = isInteger ? "integer" : "number";
+  json.type = isInteger ? 'integer' : 'number';
 
   // Handle Zod v3 checks
   if (def.checks) {
     for (const check of def.checks) {
-      if (check.kind === "min") {
+      if (check.kind === 'min') {
         if (check.inclusive === false) {
-          if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+          if (ctx.target === 'draft-04' || ctx.target === 'openapi-3.0') {
             json.minimum = check.value;
             json.exclusiveMinimum = true;
           } else {
@@ -373,9 +367,9 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
           json.minimum = check.value;
         }
       }
-      if (check.kind === "max") {
+      if (check.kind === 'max') {
         if (check.inclusive === false) {
-          if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+          if (ctx.target === 'draft-04' || ctx.target === 'openapi-3.0') {
             json.maximum = check.value;
             json.exclusiveMaximum = true;
           } else {
@@ -385,10 +379,10 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
           json.maximum = check.value;
         }
       }
-      if (check.kind === "multipleOf") {
+      if (check.kind === 'multipleOf') {
         json.multipleOf = check.value;
       }
-      if (check.kind === "finite") {
+      if (check.kind === 'finite') {
         // Can't represent in JSON Schema, ignore
       }
     }
@@ -399,8 +393,8 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
     const bag = schema._zod.bag;
 
     // Handle exclusiveMinimum
-    if (typeof bag.exclusiveMinimum === "number") {
-      if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+    if (typeof bag.exclusiveMinimum === 'number') {
+      if (ctx.target === 'draft-04' || ctx.target === 'openapi-3.0') {
         json.minimum = bag.exclusiveMinimum;
         json.exclusiveMinimum = true;
       } else {
@@ -409,21 +403,25 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
     }
 
     // Handle minimum (only set if no exclusiveMinimum, or if minimum is more restrictive)
-    if (typeof bag.minimum === "number") {
-      if (typeof bag.exclusiveMinimum === "number" && ctx.target !== "draft-04" && ctx.target !== "openapi-3.0") {
+    if (typeof bag.minimum === 'number') {
+      if (
+        typeof bag.exclusiveMinimum === 'number' &&
+        ctx.target !== 'draft-04' &&
+        ctx.target !== 'openapi-3.0'
+      ) {
         // Only set minimum if it's more restrictive than exclusiveMinimum
         if (bag.minimum > bag.exclusiveMinimum) {
           json.minimum = bag.minimum;
         }
         // Otherwise, exclusiveMinimum already covers it, so skip minimum
-      } else if (typeof bag.exclusiveMinimum !== "number") {
+      } else if (typeof bag.exclusiveMinimum !== 'number') {
         json.minimum = bag.minimum;
       }
     }
 
     // Handle exclusiveMaximum
-    if (typeof bag.exclusiveMaximum === "number") {
-      if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+    if (typeof bag.exclusiveMaximum === 'number') {
+      if (ctx.target === 'draft-04' || ctx.target === 'openapi-3.0') {
         json.maximum = bag.exclusiveMaximum;
         json.exclusiveMaximum = true;
       } else {
@@ -432,57 +430,61 @@ const numberProcessor: Processor = (schema, ctx, json, _params) => {
     }
 
     // Handle maximum (only set if no exclusiveMaximum, or if maximum is more restrictive)
-    if (typeof bag.maximum === "number") {
-      if (typeof bag.exclusiveMaximum === "number" && ctx.target !== "draft-04" && ctx.target !== "openapi-3.0") {
+    if (typeof bag.maximum === 'number') {
+      if (
+        typeof bag.exclusiveMaximum === 'number' &&
+        ctx.target !== 'draft-04' &&
+        ctx.target !== 'openapi-3.0'
+      ) {
         // Only set maximum if it's more restrictive than exclusiveMaximum
         if (bag.maximum < bag.exclusiveMaximum) {
           json.maximum = bag.maximum;
         }
         // Otherwise, exclusiveMaximum already covers it, so skip maximum
-      } else if (typeof bag.exclusiveMaximum !== "number") {
+      } else if (typeof bag.exclusiveMaximum !== 'number') {
         json.maximum = bag.maximum;
       }
     }
 
-    if (typeof bag.multipleOf === "number") json.multipleOf = bag.multipleOf;
+    if (typeof bag.multipleOf === 'number') json.multipleOf = bag.multipleOf;
   }
 };
 
 const booleanProcessor: Processor = (_schema, _ctx, json, _params) => {
-  json.type = "boolean";
+  json.type = 'boolean';
 };
 
 const bigintProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("BigInt cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('BigInt cannot be represented in JSON Schema');
   }
 };
 
 const symbolProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Symbols cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Symbols cannot be represented in JSON Schema');
   }
 };
 
 const nullProcessor: Processor = (_schema, ctx, json, _params) => {
-  if (ctx.target === "openapi-3.0") {
-    json.type = "string";
+  if (ctx.target === 'openapi-3.0') {
+    json.type = 'string';
     json.nullable = true;
     json.enum = [null];
   } else {
-    json.type = "null";
+    json.type = 'null';
   }
 };
 
 const undefinedProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Undefined cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Undefined cannot be represented in JSON Schema');
   }
 };
 
 const voidProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Void cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Void cannot be represented in JSON Schema');
   }
 };
 
@@ -499,8 +501,8 @@ const unknownProcessor: Processor = (_schema, _ctx, _json, _params) => {
 };
 
 const dateProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Date cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Date cannot be represented in JSON Schema');
   }
 };
 
@@ -510,8 +512,8 @@ const enumProcessor: Processor = (schema, _ctx, json, _params) => {
   // Zod v4: def.entries
   const values = def.values ?? (def.entries ? getEnumValues(def.entries) : []);
 
-  if (values.every((v: any) => typeof v === "number")) json.type = "number";
-  if (values.every((v: any) => typeof v === "string")) json.type = "string";
+  if (values.every((v: any) => typeof v === 'number')) json.type = 'number';
+  if (values.every((v: any) => typeof v === 'string')) json.type = 'string';
   json.enum = values;
 };
 
@@ -519,8 +521,8 @@ const nativeEnumProcessor: Processor = (schema, _ctx, json, _params) => {
   const def = getDef(schema);
   const values = getEnumValues(def.enum);
 
-  if (values.every((v) => typeof v === "number")) json.type = "number";
-  if (values.every((v) => typeof v === "string")) json.type = "string";
+  if (values.every((v) => typeof v === 'number')) json.type = 'number';
+  if (values.every((v) => typeof v === 'string')) json.type = 'string';
   json.enum = values;
 };
 
@@ -539,12 +541,12 @@ const literalProcessor: Processor = (schema, ctx, json, _params) => {
   const validValues: (string | number | boolean | null)[] = [];
   for (const val of values) {
     if (val === undefined) {
-      if (ctx.unrepresentable === "throw") {
-        throw new Error("Literal `undefined` cannot be represented in JSON Schema");
+      if (ctx.unrepresentable === 'throw') {
+        throw new Error('Literal `undefined` cannot be represented in JSON Schema');
       }
-    } else if (typeof val === "bigint") {
-      if (ctx.unrepresentable === "throw") {
-        throw new Error("BigInt literals cannot be represented in JSON Schema");
+    } else if (typeof val === 'bigint') {
+      if (ctx.unrepresentable === 'throw') {
+        throw new Error('BigInt literals cannot be represented in JSON Schema');
       } else {
         validValues.push(Number(val));
       }
@@ -557,37 +559,37 @@ const literalProcessor: Processor = (schema, ctx, json, _params) => {
     return;
   } else if (validValues.length === 1) {
     const val = validValues[0]!;
-    json.type = val === null ? "null" : (typeof val as any);
-    if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+    json.type = val === null ? 'null' : (typeof val as any);
+    if (ctx.target === 'draft-04' || ctx.target === 'openapi-3.0') {
       json.enum = [val];
     } else {
       json.const = val;
     }
   } else {
-    if (validValues.every((v) => typeof v === "number")) json.type = "number";
-    if (validValues.every((v) => typeof v === "string")) json.type = "string";
-    if (validValues.every((v) => typeof v === "boolean")) json.type = "boolean";
-    if (validValues.every((v) => v === null)) json.type = "null";
+    if (validValues.every((v) => typeof v === 'number')) json.type = 'number';
+    if (validValues.every((v) => typeof v === 'string')) json.type = 'string';
+    if (validValues.every((v) => typeof v === 'boolean')) json.type = 'boolean';
+    if (validValues.every((v) => v === null)) json.type = 'null';
     json.enum = validValues;
   }
 };
 
 const nanProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("NaN cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('NaN cannot be represented in JSON Schema');
   }
 };
 
 const arrayProcessor: Processor = (schema, ctx, json, params) => {
   const def = getDef(schema);
-  json.type = "array";
+  json.type = 'array';
 
   // Get element type
   // Zod v4: def.element
   // Zod v3: def.type
   const element = def.element ?? def.type;
-  if (element && typeof element === "object") {
-    json.items = process(element, ctx, { ...params, path: [...params.path, "items"] });
+  if (element && typeof element === 'object') {
+    json.items = process(element, ctx, { ...params, path: [...params.path, 'items'] });
   }
 
   // Handle length constraints (Zod v3)
@@ -601,30 +603,33 @@ const arrayProcessor: Processor = (schema, ctx, json, params) => {
   // Handle Zod v4 bag
   if (schema._zod?.bag) {
     const bag = schema._zod.bag;
-    if (typeof bag.minimum === "number") json.minItems = bag.minimum;
-    if (typeof bag.maximum === "number") json.maxItems = bag.maximum;
+    if (typeof bag.minimum === 'number') json.minItems = bag.minimum;
+    if (typeof bag.maximum === 'number') json.maxItems = bag.maximum;
   }
 };
 
 const objectProcessor: Processor = (schema, ctx, json, params) => {
   const def = getDef(schema);
-  json.type = "object";
+  json.type = 'object';
   json.properties = {};
 
   // Get shape - Zod v3: def.shape() is a function, Zod v4: def.shape is an object
-  const shape = typeof def.shape === "function" ? def.shape() : def.shape;
+  const shape = typeof def.shape === 'function' ? def.shape() : def.shape;
 
   if (shape) {
     for (const key in shape) {
-      json.properties[key] = process(shape[key], ctx, {
-        ...params,
-        path: [...params.path, "properties", key],
-      });
+      if (Object.prototype.hasOwnProperty.call(shape, key)) {
+        json.properties[key] = process(shape[key], ctx, {
+          ...params,
+          path: [...params.path, 'properties', key],
+        });
+      }
     }
 
     // Required keys - check for optionality
     const requiredKeys: string[] = [];
     for (const key in shape) {
+      if (!Object.prototype.hasOwnProperty.call(shape, key)) continue;
       const fieldSchema = shape[key];
       const fieldTypeName = getZodTypeName(fieldSchema);
 
@@ -635,16 +640,14 @@ const objectProcessor: Processor = (schema, ctx, json, params) => {
 
       if (isZodV4(fieldSchema)) {
         // Zod v4: check optin/optout for optionality
-        if (ctx.io === "input") {
+        if (ctx.io === 'input') {
           isOptional = fieldSchema._zod.optin !== undefined;
         } else {
           isOptional = fieldSchema._zod.optout !== undefined;
         }
       } else {
         // Zod v3: check type name
-        isOptional =
-          fieldTypeName === "optional" ||
-          fieldSchema?.isOptional?.();
+        isOptional = fieldTypeName === 'optional' || fieldSchema?.isOptional?.();
       }
 
       if (!isOptional) {
@@ -663,21 +666,21 @@ const objectProcessor: Processor = (schema, ctx, json, params) => {
   const catchall = def.catchall;
   if (catchall) {
     const catchallTypeName = getZodTypeName(catchall);
-    if (catchallTypeName === "never") {
+    if (catchallTypeName === 'never') {
       json.additionalProperties = false;
     } else {
       json.additionalProperties = process(catchall, ctx, {
         ...params,
-        path: [...params.path, "additionalProperties"],
+        path: [...params.path, 'additionalProperties'],
       });
     }
-  } else if (def.unknownKeys === "strict") {
+  } else if (def.unknownKeys === 'strict') {
     json.additionalProperties = false;
-  } else if (def.unknownKeys === "passthrough") {
+  } else if (def.unknownKeys === 'passthrough') {
     // Allow any additional properties
   } else {
     // Default: strip unknown keys (output only has known props)
-    if (ctx.io === "output") {
+    if (ctx.io === 'output') {
       json.additionalProperties = false;
     }
   }
@@ -694,7 +697,7 @@ const unionProcessor: Processor = (schema, ctx, json, params) => {
   const processedOptions = options.map((x: any, i: number) =>
     process(x, ctx, {
       ...params,
-      path: [...params.path, isExclusive ? "oneOf" : "anyOf", i],
+      path: [...params.path, isExclusive ? 'oneOf' : 'anyOf', i],
     })
   );
 
@@ -713,7 +716,7 @@ const discriminatedUnionProcessor: Processor = (schema, ctx, json, params) => {
   const processedOptions = options.map((x: any, i: number) =>
     process(x, ctx, {
       ...params,
-      path: [...params.path, "oneOf", i],
+      path: [...params.path, 'oneOf', i],
     })
   );
 
@@ -733,7 +736,7 @@ const unionProcessorV4: Processor = (schema, ctx, json, params) => {
   const processedOptions = options.map((x: any, i: number) =>
     process(x, ctx, {
       ...params,
-      path: [...params.path, isExclusive ? "oneOf" : "anyOf", i],
+      path: [...params.path, isExclusive ? 'oneOf' : 'anyOf', i],
     })
   );
 
@@ -749,10 +752,10 @@ const intersectionProcessor: Processor = (schema, ctx, json, params) => {
   const left = def.left;
   const right = def.right;
 
-  const a = process(left, ctx, { ...params, path: [...params.path, "allOf", 0] });
-  const b = process(right, ctx, { ...params, path: [...params.path, "allOf", 1] });
+  const a = process(left, ctx, { ...params, path: [...params.path, 'allOf', 0] });
+  const b = process(right, ctx, { ...params, path: [...params.path, 'allOf', 1] });
 
-  const isSimple = (val: any) => "allOf" in val && Object.keys(val).length === 1;
+  const isSimple = (val: any) => 'allOf' in val && Object.keys(val).length === 1;
   const allOf = [
     ...(isSimple(a) ? (a.allOf as any[]) : [a]),
     ...(isSimple(b) ? (b.allOf as any[]) : [b]),
@@ -763,18 +766,18 @@ const intersectionProcessor: Processor = (schema, ctx, json, params) => {
 
 const tupleProcessor: Processor = (schema, ctx, json, params) => {
   const def = getDef(schema);
-  json.type = "array";
+  json.type = 'array';
 
   const items = def.items ?? [];
   const rest = def.rest;
 
-  const prefixPath = ctx.target === "draft-2020-12" ? "prefixItems" : "items";
+  const prefixPath = ctx.target === 'draft-2020-12' ? 'prefixItems' : 'items';
   const restPath =
-    ctx.target === "draft-2020-12"
-      ? "items"
-      : ctx.target === "openapi-3.0"
-        ? "items"
-        : "additionalItems";
+    ctx.target === 'draft-2020-12'
+      ? 'items'
+      : ctx.target === 'openapi-3.0'
+      ? 'items'
+      : 'additionalItems';
 
   const prefixItems = items.map((x: any, i: number) =>
     process(x, ctx, {
@@ -790,13 +793,13 @@ const tupleProcessor: Processor = (schema, ctx, json, params) => {
       })
     : null;
 
-  if (ctx.target === "draft-2020-12") {
+  if (ctx.target === 'draft-2020-12') {
     json.prefixItems = prefixItems;
     if (restSchema) {
       json.items = restSchema;
     }
     // Note: Native Zod v4 does NOT add "items: false" when there's no rest
-  } else if (ctx.target === "openapi-3.0") {
+  } else if (ctx.target === 'openapi-3.0') {
     json.items = { anyOf: prefixItems };
     if (restSchema) {
       (json.items as any).anyOf.push(restSchema);
@@ -816,18 +819,18 @@ const tupleProcessor: Processor = (schema, ctx, json, params) => {
 
 const recordProcessor: Processor = (schema, ctx, json, params) => {
   const def = getDef(schema);
-  json.type = "object";
+  json.type = 'object';
 
   // Zod v3: def.keyType, def.valueType
   // Zod v4: def.keyType, def.valueType
   const keyType = def.keyType;
   const valueType = def.valueType;
 
-  if (ctx.target === "draft-07" || ctx.target === "draft-2020-12") {
+  if (ctx.target === 'draft-07' || ctx.target === 'draft-2020-12') {
     if (keyType) {
       json.propertyNames = process(keyType, ctx, {
         ...params,
-        path: [...params.path, "propertyNames"],
+        path: [...params.path, 'propertyNames'],
       });
     }
   }
@@ -835,20 +838,20 @@ const recordProcessor: Processor = (schema, ctx, json, params) => {
   if (valueType) {
     json.additionalProperties = process(valueType, ctx, {
       ...params,
-      path: [...params.path, "additionalProperties"],
+      path: [...params.path, 'additionalProperties'],
     });
   }
 };
 
 const mapProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Map cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Map cannot be represented in JSON Schema');
   }
 };
 
 const setProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Set cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Set cannot be represented in JSON Schema');
   }
 };
 
@@ -858,11 +861,11 @@ const nullableProcessor: Processor = (schema, ctx, json, params) => {
 
   const inner = process(innerType, ctx, params);
 
-  if (ctx.target === "openapi-3.0") {
+  if (ctx.target === 'openapi-3.0') {
     Object.assign(json, inner);
     json.nullable = true;
   } else {
-    json.anyOf = [inner, { type: "null" }];
+    json.anyOf = [inner, { type: 'null' }];
   }
 };
 
@@ -892,7 +895,7 @@ const defaultProcessor: Processor = (schema, ctx, json, params) => {
   if (defaultValue !== undefined) {
     try {
       json.default = JSON.parse(
-        JSON.stringify(typeof defaultValue === "function" ? defaultValue() : defaultValue)
+        JSON.stringify(typeof defaultValue === 'function' ? defaultValue() : defaultValue)
       );
     } catch {
       // Can't serialize default value
@@ -915,7 +918,7 @@ const catchProcessor: Processor = (schema, ctx, json, params) => {
   if (catchValue !== undefined) {
     try {
       json.default = JSON.parse(
-        JSON.stringify(typeof catchValue === "function" ? catchValue(undefined) : catchValue)
+        JSON.stringify(typeof catchValue === 'function' ? catchValue(undefined) : catchValue)
       );
     } catch {
       // Can't serialize catch value
@@ -968,7 +971,7 @@ const pipelineProcessor: Processor = (schema, ctx, _json, params) => {
   const def = getDef(schema);
   // Zod v3: def.in, def.out
   // Zod v4: def.in, def.out
-  const innerType = ctx.io === "input" ? def.in : def.out;
+  const innerType = ctx.io === 'input' ? def.in : def.out;
 
   if (innerType) {
     process(innerType, ctx, params);
@@ -1008,20 +1011,20 @@ const promiseProcessor: Processor = (schema, ctx, _json, params) => {
 };
 
 const functionProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Function types cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Function types cannot be represented in JSON Schema');
   }
 };
 
 const transformProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Transforms cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Transforms cannot be represented in JSON Schema');
   }
 };
 
 const customProcessor: Processor = (_schema, ctx, _json, _params) => {
-  if (ctx.unrepresentable === "throw") {
-    throw new Error("Custom types cannot be represented in JSON Schema");
+  if (ctx.unrepresentable === 'throw') {
+    throw new Error('Custom types cannot be represented in JSON Schema');
   }
 };
 
@@ -1092,7 +1095,7 @@ const processors: Record<string, Processor> = {
 // =============================================================================
 
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 // =============================================================================
@@ -1137,7 +1140,7 @@ function process(schema: any, ctx: ToJSONSchemaContext, params: ProcessParams): 
     processors[typeName](schema, ctx, result.schema, newParams);
   } else if (typeName) {
     // Unknown type - try to handle gracefully
-    if (ctx.unrepresentable === "throw") {
+    if (ctx.unrepresentable === 'throw') {
       throw new Error(`[toJSONSchema]: Unhandled type: ${typeName}`);
     }
     // Return empty schema for unknown types in 'any' mode
@@ -1166,17 +1169,17 @@ function process(schema: any, ctx: ToJSONSchemaContext, params: ProcessParams): 
 
 function extractDefs(ctx: ToJSONSchemaContext, rootSchema: any): void {
   const root = ctx.seen.get(rootSchema);
-  if (!root) throw new Error("Unprocessed schema. This is a bug.");
+  if (!root) throw new Error('Unprocessed schema. This is a bug.');
 
   const makeURI = (entry: [any, Seen]): { ref: string; defId?: string } => {
-    const defsSegment = ctx.target === "draft-2020-12" ? "$defs" : "definitions";
+    const defsSegment = ctx.target === 'draft-2020-12' ? '$defs' : 'definitions';
 
     if (entry[1] === root) {
-      return { ref: "#" };
+      return { ref: '#' };
     }
 
     const schemaId = entry[1].schema.id;
-    const defId = (typeof schemaId === "string" ? schemaId : null) ?? `__schema${ctx.counter++}`;
+    const defId = (typeof schemaId === 'string' ? schemaId : null) ?? `__schema${ctx.counter++}`;
     return { defId, ref: `#/${defsSegment}/${defId}` };
   };
 
@@ -1192,17 +1195,19 @@ function extractDefs(ctx: ToJSONSchemaContext, rootSchema: any): void {
     // Clear schema and set $ref
     const schema = seen.schema;
     for (const key in schema) {
-      delete schema[key];
+      if (Object.prototype.hasOwnProperty.call(schema, key)) {
+        delete schema[key];
+      }
     }
     schema.$ref = ref;
   };
 
   // Throw on cycles if configured
-  if (ctx.cycles === "throw") {
+  if (ctx.cycles === 'throw') {
     for (const entry of ctx.seen.entries()) {
       if (entry[1].cycle) {
         throw new Error(
-          `Cycle detected: #/${entry[1].cycle?.join("/")}/<root>` +
+          `Cycle detected: #/${entry[1].cycle?.join('/')}/<root>` +
             '\n\nSet the `cycles` parameter to `"ref"` to resolve cyclical schemas with defs.'
         );
       }
@@ -1226,7 +1231,7 @@ function extractDefs(ctx: ToJSONSchemaContext, rootSchema: any): void {
     }
 
     // Extract reused schemas
-    if (seen.count > 1 && ctx.reused === "ref") {
+    if (seen.count > 1 && ctx.reused === 'ref') {
       extractToDef(entry);
       continue;
     }
@@ -1235,7 +1240,7 @@ function extractDefs(ctx: ToJSONSchemaContext, rootSchema: any): void {
 
 function finalize(ctx: ToJSONSchemaContext, rootSchema: any): JSONSchema {
   const root = ctx.seen.get(rootSchema);
-  if (!root) throw new Error("Unprocessed schema. This is a bug.");
+  if (!root) throw new Error('Unprocessed schema. This is a bug.');
 
   // Flatten refs
   const flattenRef = (zodSchema: any) => {
@@ -1255,7 +1260,7 @@ function finalize(ctx: ToJSONSchemaContext, rootSchema: any): JSONSchema {
         const refSchema = refSeen.schema;
         if (
           refSchema.$ref &&
-          (ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0")
+          (ctx.target === 'draft-07' || ctx.target === 'draft-04' || ctx.target === 'openapi-3.0')
         ) {
           schema.allOf = schema.allOf ?? [];
           schema.allOf.push(refSchema);
@@ -1281,12 +1286,12 @@ function finalize(ctx: ToJSONSchemaContext, rootSchema: any): JSONSchema {
   // Build result
   const result: JSONSchema = {};
 
-  if (ctx.target === "draft-2020-12") {
-    result.$schema = "https://json-schema.org/draft/2020-12/schema";
-  } else if (ctx.target === "draft-07") {
-    result.$schema = "http://json-schema.org/draft-07/schema#";
-  } else if (ctx.target === "draft-04") {
-    result.$schema = "http://json-schema.org/draft-04/schema#";
+  if (ctx.target === 'draft-2020-12') {
+    result.$schema = 'https://json-schema.org/draft/2020-12/schema';
+  } else if (ctx.target === 'draft-07') {
+    result.$schema = 'http://json-schema.org/draft-07/schema#';
+  } else if (ctx.target === 'draft-04') {
+    result.$schema = 'http://json-schema.org/draft-04/schema#';
   }
   // OpenAPI 3.0 should not include $schema
 
@@ -1302,7 +1307,7 @@ function finalize(ctx: ToJSONSchemaContext, rootSchema: any): JSONSchema {
   }
 
   if (Object.keys(defs).length > 0) {
-    if (ctx.target === "draft-2020-12") {
+    if (ctx.target === 'draft-2020-12') {
       result.$defs = defs;
     } else {
       result.definitions = defs;
@@ -1341,16 +1346,16 @@ function finalize(ctx: ToJSONSchemaContext, rootSchema: any): JSONSchema {
  */
 export function toJSONSchema(schema: any, params?: ToJSONSchemaParams): JSONSchema {
   // Normalize target
-  let target: JSONSchemaTarget = params?.target ?? "draft-2020-12";
-  if (target === "draft-4") target = "draft-04";
-  if (target === "draft-7") target = "draft-07";
+  let target: JSONSchemaTarget = params?.target ?? 'draft-2020-12';
+  if (target === 'draft-4') target = 'draft-04';
+  if (target === 'draft-7') target = 'draft-07';
 
   const ctx: ToJSONSchemaContext = {
     target,
-    unrepresentable: params?.unrepresentable ?? "throw",
-    io: params?.io ?? "output",
-    cycles: params?.cycles ?? "ref",
-    reused: params?.reused ?? "inline",
+    unrepresentable: params?.unrepresentable ?? 'throw',
+    io: params?.io ?? 'output',
+    cycles: params?.cycles ?? 'ref',
+    reused: params?.reused ?? 'inline',
     override: params?.override ?? (() => {}),
     counter: 0,
     seen: new Map(),
@@ -1363,4 +1368,3 @@ export function toJSONSchema(schema: any, params?: ToJSONSchemaParams): JSONSche
 
 // Export types for consumers
 export type { ToJSONSchemaParams as ToJSONSchemaOptions };
-
