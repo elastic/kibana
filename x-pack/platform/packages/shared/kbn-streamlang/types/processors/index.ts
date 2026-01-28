@@ -579,17 +579,17 @@ const networkDirectionWithInternalNetworksFieldSchema = z.object({
 
 interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
   action: 'network_direction';
+  source_ip: string;
+  destination_ip: string;
   target_field?: string;
-  source_ip?: string;
-  destination_ip?: string;
   ignore_missing?: boolean;
 }
 
 const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('network_direction'),
+  source_ip: StreamlangSourceField,
+  destination_ip: StreamlangSourceField,
   target_field: z.optional(StreamlangTargetField),
-  source_ip: z.optional(StreamlangSourceField),
-  destination_ip: z.optional(StreamlangSourceField),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<NetworkDirectionCommonFields>;
 
