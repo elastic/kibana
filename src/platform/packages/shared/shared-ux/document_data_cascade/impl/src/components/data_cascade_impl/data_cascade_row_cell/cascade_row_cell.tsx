@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
@@ -22,6 +23,7 @@ import {
   useDataCascadeActions,
 } from '../../../store_provider';
 import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
+import { useStickyHeaderPortal } from '../../../lib/core/sticky_header_portal';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
@@ -37,6 +39,13 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   const actions = useDataCascadeActions<G, L>();
   const hasPendingRequest = useRef<boolean>(false);
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
+
+  const stickyHeaderPortal = useStickyHeaderPortal();
+  const stickyHeaderElementRef = useRef<React.ReactNode | null>(null);
+
+  const registerElementToActiveStickyHeader = useCallback((element: React.ReactNode) => {
+    stickyHeaderElementRef.current = element;
+  }, []);
 
   const styles = useMemo(() => cascadeRowCellStyles(euiTheme), [euiTheme]);
 
@@ -163,6 +172,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollOffset,
       getScrollMargin,
       preventSizeChangePropagation,
+      registerElementToActiveStickyHeader,
     });
   }, [
     children,
@@ -173,6 +183,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollOffset,
     getScrollMargin,
     preventSizeChangePropagation,
+    registerElementToActiveStickyHeader,
   ]);
 
   return (
@@ -183,6 +194,13 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
           size={size === 'l' ? 'm' : size}
           isLoading={isPendingRowLeafDataFetch || !leafData}
         >
+          <>
+            {stickyHeaderPortal?.isActiveSticky &&
+            stickyHeaderPortal.portalRef.current &&
+            stickyHeaderElementRef.current
+              ? createPortal(stickyHeaderElementRef.current, stickyHeaderPortal.portalRef.current)
+              : null}
+          </>
           <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>
       </EuiFlexItem>

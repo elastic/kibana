@@ -72,6 +72,11 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   data: L[] | null;
   cellId: string;
   nodePath: string[];
+  /**
+   * Allows the caller to register an element that will be portaled cell's header
+   * when it becomes the active sticky row.
+   */
+  registerElementToActiveStickyHeader: (element: React.ReactNode) => void;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
