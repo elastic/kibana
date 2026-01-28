@@ -15,6 +15,7 @@ export * from './user/latest';
 export * from './connector/latest';
 export * from './attachment/latest';
 export * from './observable/latest';
+export * from './template/latest';
 
 // V1
 export * as configureDomainV1 from './configure/v1';
@@ -26,3 +27,4 @@ export * as userDomainV1 from './user/v1';
 export * as connectorDomainV1 from './connector/v1';
 export * as attachmentDomainV1 from './attachment/v1';
 export * as observableDomainV1 from './observable/v1';
+export * as templateDomainV1 from './template/v1';

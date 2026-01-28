@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { type Template } from '../types/domain/template/latest';
+export * from './v1';

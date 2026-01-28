@@ -7,7 +7,34 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { type Template } from '../../../common/types/domain/template/latest';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+
+const mappings = {
+  dynamic: false,
+  properties: {
+    templateId: {
+      type: 'keyword',
+    },
+    name: {
+      type: 'keyword',
+    },
+    templateVersion: {
+      type: 'integer',
+    },
+    owner: {
+      type: 'keyword',
+    },
+    // NOTE: yaml-based template definition
+    definition: {
+      type: 'text',
+    },
+    // NOTE: other timestamp fields are provided by the SO api / model itself
+    deletedAt: {
+      type: 'date',
+    },
+  },
+} as const;
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -20,30 +47,8 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
-  mappings: {
-    dynamic: false,
-    properties: {
-      // this should be used to identify individual templates, not the _id as we are storing revisions for all the templates.
-      templateId: {
-        type: 'keyword',
-      },
-      name: {
-        type: 'keyword',
-      },
-      templateVersion: {
-        type: 'integer',
-      },
-      owner: {
-        type: 'keyword',
-      },
-      // NOTE: yaml-based template definition
-      definition: {
-        type: 'text',
-      },
-      // NOTE: other timestamp fields are provided by the SO api / model itself
-      deletedAt: {
-        type: 'date',
-      },
-    },
-  },
+  mappings,
 };
+
+// NOTE: maintain type "connection" with Domain Schema
+mappings.properties satisfies Record<keyof Template, unknown>;
