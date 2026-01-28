@@ -175,8 +175,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
     const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
-      // filter out potential system fields since we can't simulate them anyway
-      if (field.type === 'system') {
+      // filter out potential system/unmapped fields since we can't simulate them anyway
+      if (field.type === 'system' || field.type === 'unmapped') {
         return [];
       }
       return [field];
@@ -247,7 +247,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    const propertiesForSimulation = Object.fromEntries(
+    const propertiesForSimulation: StreamsMappingProperties = Object.fromEntries(
       userFieldDefinitions.map(({ name, ...field }) => [name, field])
     );
 

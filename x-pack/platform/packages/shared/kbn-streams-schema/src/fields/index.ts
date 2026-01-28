@@ -33,20 +33,34 @@ export const FIELD_DEFINITION_TYPES = [
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
+// All field types including non-mapping types (for UI purposes)
+export const ALL_FIELD_DEFINITION_TYPES = [
+  ...FIELD_DEFINITION_TYPES,
+  'unmapped',
+  'system',
+] as const;
+export type AllFieldDefinitionType = (typeof ALL_FIELD_DEFINITION_TYPES)[number];
+
 // We redefine "first class" parameters
 export type FieldDefinitionConfig =
   | (MappingProperty & {
       type: FieldDefinitionType;
       format?: string;
+      description?: string;
     })
   | {
       type: 'system';
+      description?: string;
+    }
+  | {
+      type: 'unmapped';
+      description?: string;
     };
 
 // Parameters that we provide a generic (JSON blob) experience for
 export type FieldDefinitionConfigAdvancedParameters = Omit<
   FieldDefinitionConfig,
-  'type' | 'format'
+  'type' | 'format' | 'description'
 >;
 
 export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
@@ -55,9 +69,15 @@ export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.in
     z.object({
       type: z.enum(FIELD_DEFINITION_TYPES),
       format: z.optional(NonEmptyString),
+      description: z.optional(z.string()),
     }),
     z.object({
       type: z.literal('system'),
+      description: z.optional(z.string()),
+    }),
+    z.object({
+      type: z.literal('unmapped'),
+      description: z.optional(z.string()),
     }),
   ])
 );
@@ -79,7 +99,7 @@ export type AllowedMappingProperty =
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 
 export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
-  return Object.values(value).every((prop) => prop.type !== 'system');
+  return Object.values(value).every((prop) => prop.type !== 'system' && prop.type !== 'unmapped');
 }
 
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(

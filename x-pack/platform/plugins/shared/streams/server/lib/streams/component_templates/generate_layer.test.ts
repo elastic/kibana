@@ -258,4 +258,77 @@ describe('generateLayer', () => {
       path: fullOtelField,
     });
   });
+
+  it('should skip unmapped fields and not include them in mappings', () => {
+    const definitionWithUnmappedField: Streams.WiredStream.Definition = {
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'match_only_text' },
+            'attributes.documented_field': {
+              type: 'unmapped',
+              description: 'This field is only documented, not mapped',
+            },
+            'attributes.regular_field': { type: 'keyword' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithUnmappedField, false);
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+    // Verify @timestamp and message are in the mappings
+    expect(properties['@timestamp']).toBeDefined();
+    expect(properties.message).toBeDefined();
+
+    // Verify the unmapped field is NOT in the mappings
+    const attributes = properties.attributes as { properties: Record<string, unknown> };
+    expect(attributes.properties.documented_field).toBeUndefined();
+
+    // Verify regular field IS in the mappings
+    expect(attributes.properties.regular_field).toEqual({ type: 'keyword' });
+  });
+
+  it('should not include description in ES mappings', () => {
+    const definitionWithDescription: Streams.WiredStream.Definition = {
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date', description: 'Event timestamp' },
+            message: { type: 'match_only_text', description: 'Log message content' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithDescription, false);
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+    // Verify description is not present in the ES mapping properties
+    const timestamp = properties['@timestamp'] as Record<string, unknown>;
+    const message = properties.message as Record<string, unknown>;
+
+    expect(timestamp.description).toBeUndefined();
+    expect(message.description).toBeUndefined();
+    expect(timestamp.type).toBe('date');
+    expect(message.type).toBe('match_only_text');
+  });
 });

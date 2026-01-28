@@ -41,7 +41,10 @@ import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, validateStreamlang } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import {
+  FIELD_DEFINITION_TYPES,
+  type StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
 import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
@@ -988,10 +991,12 @@ const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSi
   return matchCount / docs.length;
 };
 
-const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
+const computeMappingProperties = (
+  detectedFields: NamedFieldDefinitionConfig[]
+): StreamsMappingProperties => {
   return Object.fromEntries(
     detectedFields.flatMap(({ name, ...config }) => {
-      if (config.type === 'system') {
+      if (config.type === 'system' || config.type === 'unmapped') {
         return [];
       }
       return [[name, { ...config, ignore_malformed: false }]];

@@ -46,19 +46,29 @@ export const getGeoPointSuggestion = ({
   return null;
 };
 
-export const convertToFieldDefinitionConfig = (
-  field: MappedSchemaField
-): FieldDefinitionConfig => ({
-  type: field.type,
-  ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
-  ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
-    ? field.additionalParameters
-    : {}),
-});
+export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => {
+  // Unmapped fields only have type and description
+  if (field.type === 'unmapped') {
+    return {
+      type: 'unmapped',
+      ...(field.description ? { description: field.description } : {}),
+    };
+  }
+
+  return {
+    type: field.type,
+    ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
+    ...(field.description ? { description: field.description } : {}),
+    ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
+      ? field.additionalParameters
+      : {}),
+  };
+};
 
 export function isFieldUncommitted(field: SchemaEditorField, storedFields: SchemaEditorField[]) {
   const fieldDefaults = {
     format: undefined,
+    description: undefined,
     additionalParameters: {},
   };
   // Check if field is new (not in stored fields)

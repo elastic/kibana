@@ -194,6 +194,23 @@ const createCellRenderer =
       return EMPTY_CONTENT;
     }
 
+    if (columnId === 'description') {
+      if (!field.description) {
+        return EMPTY_CONTENT;
+      }
+      // Show full description with tooltip if it's long
+      const maxLength = 50;
+      if (field.description.length > maxLength) {
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <span>{field.description.substring(0, maxLength)}...</span>
+            <EuiIconTip content={field.description} position="right" />
+          </EuiFlexGroup>
+        );
+      }
+      return <>{field.description}</>;
+    }
+
     // @ts-expect-error upgrade typescript v5.9.3
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };

@@ -161,7 +161,7 @@ export function generateLayer(
   const properties: StreamsMappingProperties = {};
 
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
-    if (props.type === 'system') {
+    if (props.type === 'system' || props.type === 'unmapped') {
       return;
     }
     const property: AllowedMappingProperty = {
