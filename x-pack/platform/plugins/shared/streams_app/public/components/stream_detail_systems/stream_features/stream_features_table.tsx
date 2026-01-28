@@ -51,6 +51,7 @@ export function StreamFeaturesTable({
     selectedFeatures,
     setSelectedFeatures,
     isBulkDeleteModalVisible,
+    isIdentifyingFeatures: isTableDisabled,
     showBulkDeleteModal,
     hideBulkDeleteModal,
     handleDeleteFeature,
@@ -75,7 +76,8 @@ export function StreamFeaturesTable({
     onSelectFeature(null);
   }, [onSelectFeature]);
 
-  const isSelectionActionsDisabled = selectedFeatures.length === 0 || isLoadingFeatures;
+  const isSelectionActionsDisabled =
+    selectedFeatures.length === 0 || isLoadingFeatures || isTableDisabled;
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
@@ -84,7 +86,7 @@ export function StreamFeaturesTable({
           <TableTitle
             pageIndex={pagination.pageIndex}
             pageSize={pagination.pageSize}
-            total={isIdentifyingFeatures ? 0 : features.length}
+            total={features.length}
             label={FEATURES_LABEL}
           />
         </EuiFlexItem>
@@ -131,6 +133,7 @@ export function StreamFeaturesTable({
           initialSelected: selectedFeatures,
           onSelectionChange: setSelectedFeatures,
           selected: selectedFeatures,
+          selectable: () => !isTableDisabled,
         }}
       />
       {selectedFeature && (

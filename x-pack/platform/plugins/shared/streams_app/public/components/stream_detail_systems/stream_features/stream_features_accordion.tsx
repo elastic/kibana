@@ -51,9 +51,7 @@ export const StreamFeaturesAccordion = ({
             {BUTTON_LABEL}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {isIdentifyingFeatures ? IDENTIFYING_LABEL : features.length}
-            </EuiBadge>
+            <EuiBadge color="hollow">{features.length}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -75,8 +73,4 @@ export const StreamFeaturesAccordion = ({
 
 const BUTTON_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
   defaultMessage: 'Stream features',
-});
-
-const IDENTIFYING_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.identifyingLabel', {
-  defaultMessage: 'Identifying...',
 });

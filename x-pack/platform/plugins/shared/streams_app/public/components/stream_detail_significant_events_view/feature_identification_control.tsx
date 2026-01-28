@@ -156,10 +156,13 @@ export function FeatureIdentificationControl({
           {TASK_STALE_DESCRIPTION}
         </StateWithCallout>
       );
-
-    default:
-      return null;
   }
+
+  assertNever(task);
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unhandled task status: ${JSON.stringify(value)}`);
 }
 
 // Sub-components
@@ -245,7 +248,7 @@ function InProgressState({ onCancel }: InProgressStateProps) {
       <EuiFlexItem>
         <EuiButton
           iconType="sparkle"
-          iconSide="right"
+          iconSide="left"
           isLoading
           data-test-subj="feature_identification_identify_features_button"
         >

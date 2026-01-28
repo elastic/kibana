@@ -125,7 +125,7 @@ export function SystemIdentificationControl({
         <EuiFlexItem>
           <EuiButton
             iconType="sparkle"
-            iconSide="right"
+            iconSide="left"
             isLoading={true}
             data-test-subj="system_identification_identify_systems_button"
           >
@@ -165,7 +165,7 @@ export function SystemIdentificationControl({
         buttonProps={{
           size: 'm',
           iconType: 'sparkles',
-          iconSide: 'right',
+          iconSide: 'left',
           isDisabled: true,
           isLoading: true,
           'data-test-subj': 'system_identification_identify_systems_button',

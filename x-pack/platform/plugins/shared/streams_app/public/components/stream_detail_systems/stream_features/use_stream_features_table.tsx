@@ -155,12 +155,6 @@ export function useStreamFeaturesTable({
         ),
       },
       {
-        field: 'status',
-        name: STATUS_COLUMN_HEADER_LABEL,
-        width: '80px',
-        render: (status: Feature['status']) => <EuiHealth color={getStatusColor(status)} />,
-      },
-      {
         name: FEATURE_COLUMN_HEADER_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
@@ -199,19 +193,9 @@ export function useStreamFeaturesTable({
           <EuiHealth color={getConfidenceColor(confidence)}>{confidence}</EuiHealth>
         ),
       },
-      {
-        name: CREATED_BY_COLUMN_HEADER_LABEL,
-        width: '12%',
-        render: () => (
-          // TODO: add created by, all features are currently created by LLM
-          <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>
-        ),
-      },
     ],
     [isIdentifyingFeatures, onSelectFeature]
   );
-
-  const noItemsMessage = isIdentifyingFeatures ? IDENTIFYING_FEATURES_MESSAGE : NO_FEATURES_MESSAGE;
 
   return {
     // State
@@ -219,6 +203,7 @@ export function useStreamFeaturesTable({
     selectedFeatures,
     setSelectedFeatures,
     isBulkDeleteModalVisible,
+    isIdentifyingFeatures,
     // Actions
     showBulkDeleteModal,
     hideBulkDeleteModal,
@@ -231,17 +216,10 @@ export function useStreamFeaturesTable({
     isBulkDeleting,
     // Table config
     columns,
-    items: isIdentifyingFeatures ? [] : features,
-    noItemsMessage,
+    items: features,
+    noItemsMessage: NO_FEATURES_MESSAGE,
   };
 }
-
-const STATUS_COLUMN_HEADER_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.statusColumnHeader',
-  {
-    defaultMessage: 'Status',
-  }
-);
 
 const FEATURE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.featureColumnHeader',
@@ -261,13 +239,6 @@ const CONFIDENCE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.confidenceColumnHeader',
   {
     defaultMessage: 'Confidence',
-  }
-);
-
-const CREATED_BY_COLUMN_HEADER_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.createdByColumnHeader',
-  {
-    defaultMessage: 'Created by',
   }
 );
 
@@ -297,15 +268,6 @@ export const DELETE_SELECTED = i18n.translate(
 const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.detailsButtonAriaLabel',
   { defaultMessage: 'View details' }
-);
-
-const CREATED_BY_LLM = i18n.translate('xpack.streams.streamFeaturesTable.createdByLLM', {
-  defaultMessage: 'LLM',
-});
-
-const IDENTIFYING_FEATURES_MESSAGE = i18n.translate(
-  'xpack.streams.streamFeaturesTable.identifyingFeaturesMessage',
-  { defaultMessage: 'Identifying features...' }
 );
 
 const NO_FEATURES_MESSAGE = i18n.translate('xpack.streams.streamFeaturesTable.noFeaturesMessage', {
