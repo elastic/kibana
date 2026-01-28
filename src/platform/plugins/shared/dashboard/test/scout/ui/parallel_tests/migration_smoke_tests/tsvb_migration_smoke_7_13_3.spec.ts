@@ -34,7 +34,7 @@ spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.ESS_AND_SERVERLE
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

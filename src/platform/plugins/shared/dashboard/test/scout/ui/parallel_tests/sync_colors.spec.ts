@@ -48,7 +48,7 @@ spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   });
 
   spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.addInitScript(() => {
       window._echDebugStateFlag = true;
     });

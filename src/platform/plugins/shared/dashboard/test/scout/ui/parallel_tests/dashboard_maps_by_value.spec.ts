@@ -23,7 +23,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AG
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
     dashboardUrl = page.url();

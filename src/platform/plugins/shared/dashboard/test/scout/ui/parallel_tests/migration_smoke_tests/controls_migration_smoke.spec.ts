@@ -62,7 +62,7 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.ESS_ONLY }, (
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

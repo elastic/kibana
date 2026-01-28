@@ -33,7 +33,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.goto();
     });
 

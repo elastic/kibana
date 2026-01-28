@@ -24,7 +24,7 @@ spaceTest.describe('Saved search panels (dashboard)', { tag: tags.DEPLOYMENT_AGN
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
 

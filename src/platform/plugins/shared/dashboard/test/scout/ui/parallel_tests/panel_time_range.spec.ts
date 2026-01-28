@@ -52,7 +52,7 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.DEPLOYMENT_AGNOST
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
