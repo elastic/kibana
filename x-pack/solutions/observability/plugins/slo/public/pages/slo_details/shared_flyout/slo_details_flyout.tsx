@@ -183,7 +183,7 @@ export default function SLODetailsFlyout({
       resizable
     >
       <EuiFlyoutHeader hasBorder={!slo}>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>

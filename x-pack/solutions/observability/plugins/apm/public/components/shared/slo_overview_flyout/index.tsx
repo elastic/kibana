@@ -395,7 +395,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       aria-labelledby={flyoutTitleId}
       // we need this hardcoded size as S is too small and M is too large
       size="550px"
-      ownFocus
+      ownFocus={false}
       session="start"
       resizable
     >
