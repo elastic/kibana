@@ -254,10 +254,14 @@ const prepareAttachment = async ({
   try {
     const formatted = await definition.format(attachment, formatContext);
     const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+    const baseRepresentation = await formatted.getRepresentation();
+    const representation = definition.resolve
+      ? withByReferenceNote({ representation: baseRepresentation, attachment })
+      : baseRepresentation;
 
     return {
       attachment,
-      representation: await formatted.getRepresentation(),
+      representation,
       tools,
     };
   } catch (e) {
@@ -267,6 +271,43 @@ const prepareAttachment = async ({
       tools: [],
     };
   }
+};
+
+const withByReferenceNote = ({
+  representation,
+  attachment,
+}: {
+  representation: AttachmentRepresentation;
+  attachment: Attachment;
+}): AttachmentRepresentation => {
+  if (representation.type !== 'text') {
+    return representation;
+  }
+
+  const parts: string[] = [];
+  const note =
+    'Note: this attachment is by-reference. Use attachment_read to resolve the full content.';
+
+  const trimmedValue = representation.value?.trim();
+  if (trimmedValue) {
+    parts.push(trimmedValue);
+  }
+
+  try {
+    parts.push(`Attachment data:\n${JSON.stringify(attachment.data, null, 2)}`);
+  } catch (e) {
+    // ignore stringify errors; fallback to whatever was already present
+  }
+
+  // Avoid duplicating the note if the formatter already mentioned attachment_read.
+  if (!representation.value?.includes('attachment_read')) {
+    parts.push(note);
+  }
+
+  return {
+    ...representation,
+    value: parts.filter(Boolean).join('\n\n'),
+  };
 };
 
 const inputToFinal = (input: AttachmentInput): Attachment => {

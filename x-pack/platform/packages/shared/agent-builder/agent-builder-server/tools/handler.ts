@@ -89,11 +89,8 @@ export interface ToolHandlerContext {
   esClient: IScopedClusterClient;
   /**
    * Saved objects client scoped to the current user.
-   *
-   * Optional for now to avoid forcing all runner implementations to provide it,
-   * but recommended for tools that need to access saved objects (e.g. by-reference attachments).
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.

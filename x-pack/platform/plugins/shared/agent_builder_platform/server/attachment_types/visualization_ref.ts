@@ -43,13 +43,13 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: formatVisualizationRefAttachment(attachment.data) };
-        },
-      };
-    },
+    format: (attachment) => ({
+      getRepresentation: () => ({
+        // Keep formatting minimal; generic by-ref messaging is added centrally.
+        type: 'text',
+        value: JSON.stringify(attachment.data, null, 2),
+      }),
+    }),
     resolve: async (attachment, context: AttachmentResolveContext) => {
       // Allow this type to be used in environments where SO client isn't available.
       if (!context.savedObjectsClient) return undefined;
@@ -79,26 +79,6 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
     },
     getTools: () => [],
   };
-};
-
-const formatVisualizationRefAttachment = (data: VisualizationRefAttachmentData): string => {
-  const parts: string[] = [];
-
-  parts.push(`[Visualization Reference]`);
-  parts.push(`Type: lens`);
-  parts.push(`ID: ${data.saved_object_id}`);
-
-  if (data.title) {
-    parts.push(`Title: ${data.title}`);
-  }
-
-  if (data.description) {
-    parts.push(`Description: ${data.description}`);
-  }
-
-  parts.push(`\nNote: resolve this reference using attachment_read.`);
-
-  return parts.join('\n');
 };
 
 const toLensAttributes = (
