@@ -908,28 +908,13 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      if (
-        !isNewSessionAuthenticated &&
-        providerInstance.shouldUtilizeCustomOptionsForSessionCookie()
-      ) {
-        this.logger.debug(`Creating intermediate session for provider "${provider.name}".`);
-        newSessionValue = await this.session.create(
-          request,
-          {
-            userProfileId,
-            provider,
-            state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-          },
-          true
-        );
-      } else {
-        newSessionValue = await this.session.create(request, {
-          username: authenticationResult.user?.username,
-          userProfileId,
-          provider,
-          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-        });
-      }
+      newSessionValue = await this.session.create(request, {
+        username: authenticationResult.user?.username,
+        userProfileId,
+        provider,
+        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        stateCookieOptions: authenticationResult.stateCookieOptions,
+      });
 
       const duration = performance.now() - startTime;
 

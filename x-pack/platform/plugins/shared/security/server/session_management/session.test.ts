@@ -409,12 +409,16 @@ describe('Session', () => {
 
       // Properly creates session cookie value.
       expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.set).toHaveBeenCalledWith(mockRequest, {
-        sid: mockSID,
-        aad: mockAAD,
-        idleTimeoutExpiration: now + 123,
-        lifespanExpiration: now + 456,
-      });
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
     });
 
     it('creates session value if optional fields are missing', async () => {
@@ -459,15 +463,19 @@ describe('Session', () => {
 
       // Properly creates session cookie value.
       expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.set).toHaveBeenCalledWith(mockRequest, {
-        sid: mockSID,
-        aad: mockAAD,
-        idleTimeoutExpiration: now + 123,
-        lifespanExpiration: now + 456,
-      });
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
     });
 
-    it('creates intermediate session with custom cookie options when isIntermediateSession is true', async () => {
+    it('creates intermediate session with custom cookie options when stateCookieOptions is provided', async () => {
       const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
@@ -482,16 +490,13 @@ describe('Session', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
       await expect(
-        session.create(
-          mockRequest,
-          {
-            username: mockAuthenticatedUser().username,
-            userProfileId: 'uid',
-            provider: { type: 'saml', name: 'saml1' },
-            state: 'some-state',
-          },
-          true
-        )
+        session.create(mockRequest, {
+          username: mockAuthenticatedUser().username,
+          userProfileId: 'uid',
+          provider: { type: 'saml', name: 'saml1' },
+          state: 'some-state',
+          stateCookieOptions: { isSecure: true, sameSite: 'None' },
+        })
       ).resolves.toEqual({
         sid: mockSID,
         username: 'user',
@@ -531,7 +536,7 @@ describe('Session', () => {
       );
     });
 
-    it('creates regular session with default cookie options when isIntermediateSession is false', async () => {
+    it('creates regular session with default cookie options when stateCookieOptions is not provided', async () => {
       const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
       const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
@@ -545,16 +550,12 @@ describe('Session', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
       await expect(
-        session.create(
-          mockRequest,
-          {
-            username: mockAuthenticatedUser().username,
-            userProfileId: 'uid',
-            provider: { type: 'basic', name: 'basic1' },
-            state: 'some-state',
-          },
-          false
-        )
+        session.create(mockRequest, {
+          username: mockAuthenticatedUser().username,
+          userProfileId: 'uid',
+          provider: { type: 'basic', name: 'basic1' },
+          state: 'some-state',
+        })
       ).resolves.toEqual({
         sid: mockSID,
         username: 'user',
@@ -582,12 +583,16 @@ describe('Session', () => {
 
       // Properly creates session cookie value without custom options.
       expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.set).toHaveBeenCalledWith(mockRequest, {
-        sid: mockSID,
-        aad: mockAAD,
-        idleTimeoutExpiration: now + 123,
-        lifespanExpiration: now + 456,
-      });
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
     });
   });
 

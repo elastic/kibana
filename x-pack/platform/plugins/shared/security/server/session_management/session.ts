@@ -10,7 +10,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SessionStorageSetOptions } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -85,6 +85,8 @@ export interface SessionValue {
    * Additional information about the session value.
    */
   metadata: { index: SessionIndexValue };
+
+  stateCookieOptions?: SessionStorageSetOptions;
 }
 
 export interface SessionOptions {
@@ -236,7 +238,6 @@ export class Session {
    * Creates new session document in the session index encrypting sensitive state.
    * @param request Request instance to create session value for.
    * @param sessionValue Session value parameters.
-   * @param isIntermediateSession flag to indicate whether to create intermediate session with different cookie settings.
    */
   async create(
     request: KibanaRequest,
@@ -245,8 +246,7 @@ export class Session {
         SessionValue,
         'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
       >
-    >,
-    isIntermediateSession: boolean = false
+    >
   ) {
     const [sid, aad] = await Promise.all([
       this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
@@ -257,7 +257,8 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, userProfileId, state, ...publicSessionValue } = sessionValue;
+    const { username, userProfileId, state, stateCookieOptions, ...publicSessionValue } =
+      sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -270,15 +271,11 @@ export class Session {
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
-    if (isIntermediateSession) {
-      await this.options.sessionCookie.set(
-        request,
-        { ...sessionExpirationInfo, sid, aad },
-        { isSecure: true, sameSite: 'None' }
-      );
-    } else {
-      await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
-    }
+    await this.options.sessionCookie.set(
+      request,
+      { ...sessionExpirationInfo, sid, aad },
+      stateCookieOptions
+    );
 
     sessionLogger.debug('Successfully created a new session.');
 
