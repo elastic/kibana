@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorIcon } from './get_connector_icon';
-export { toStackConnectorType } from './to_stack_connector_type';
+export { getConnectorIcon, getConnectorIconType } from './get_connector_icon';
