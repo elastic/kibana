@@ -346,7 +346,7 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is visible
-        expect(visor.firstChild).toHaveStyle({ opacity: 1 });
+        expect(visor).toHaveStyle({ opacity: 1 });
       });
     });
 
@@ -362,7 +362,7 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is hidden
-        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+        expect(visor).toHaveStyle({ opacity: 0 });
       });
     });
 
@@ -378,7 +378,7 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is hidden
-        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+        expect(visor).toHaveStyle({ opacity: 0 });
       });
     });
 
@@ -396,7 +396,7 @@ describe('ESQLEditor', () => {
       await waitFor(() => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
-        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+        expect(visor).toHaveStyle({ opacity: 0 });
       });
     });
   });
