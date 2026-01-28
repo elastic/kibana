@@ -39,7 +39,7 @@ export class AlertActionsClient {
   }): Promise<void> {
     const [username, alertEvent] = await Promise.all([
       this.getUserName(),
-      this.findLastAlertEventOrThrow({
+      this.findLastAlertEventRecordOrThrow({
         groupHash: params.groupHash,
         episodeId: 'episode_id' in params.action ? params.action.episode_id : undefined,
       }),
@@ -60,35 +60,15 @@ export class AlertActionsClient {
   public async createBulkActions(
     actions: BulkCreateAlertActionItemData[]
   ): Promise<{ processed: number; total: number }> {
-    const username = await this.getUserName();
-
-    let whereClause = esql.exp`TRUE`;
-    for (const action of actions) {
-      whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode_id == ${action.episode_id}` : esql.exp`true`
-      })`;
-    }
-
-    const query = esql`
-      FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND (${whereClause})
-      | STATS 
-        last_event_timestamp = MAX(@timestamp), 
-        last_episode_id = LAST(episode_id, @timestamp),
-        rule_id = VALUES(rule.id)
-        BY group_hash
-      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
-      | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
-    `;
-
-    const result = queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.print() })
-    );
+    const [username, records] = await Promise.all([
+      this.getUserName(),
+      this.fetchLastAlertEventRecordsForActions(actions),
+    ]);
 
     const docs = actions
       .map((action) => {
         // we might want to optimize this lookup with a Map if we expect large bulk sizes
-        const matchingAlertEventRecord = result.find(
+        const matchingAlertEventRecord = records.find(
           (record) =>
             record.group_hash === action.group_hash &&
             ('episode_id' in action ? record.episode_id === action.episode_id : true)
@@ -109,6 +89,33 @@ export class AlertActionsClient {
     }
 
     return { processed: docs.length, total: actions.length };
+  }
+
+  private async fetchLastAlertEventRecordsForActions(
+    actions: BulkCreateAlertActionItemData[]
+  ): Promise<AlertEventRecord[]> {
+    let whereClause = esql.exp`TRUE`;
+    for (const action of actions) {
+      whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
+        'episode_id' in action ? esql.exp`episode_id == ${action.episode_id}` : esql.exp`true`
+      })`;
+    }
+
+    const query = esql`
+      FROM ${ALERT_EVENTS_DATA_STREAM}
+      | WHERE type == "alert" AND (${whereClause})
+      | STATS
+        last_event_timestamp = MAX(@timestamp),
+        last_episode_id = LAST(episode_id, @timestamp),
+        rule_id = VALUES(rule.id)
+        BY group_hash
+      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
+      | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
+    `;
+
+    return queryResponseToRecords<AlertEventRecord>(
+      await this.queryService.executeQuery({ query: query.print() })
+    );
   }
 
   private async getUserName(): Promise<string | null> {
@@ -135,7 +142,7 @@ export class AlertActionsClient {
     };
   }
 
-  private async findLastAlertEventOrThrow(params: {
+  private async findLastAlertEventRecordOrThrow(params: {
     groupHash: string;
     episodeId?: string;
   }): Promise<AlertEventRecord> {
