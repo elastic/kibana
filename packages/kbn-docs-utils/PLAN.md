@@ -151,22 +151,22 @@ Key files:
   - Add validation for required vs. optional parameter documentation
 
 ### Phase 4.4: Add Checks for @returns Tags
-- [ ] Add `missingReturns` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
-- [ ] Add `trackMissingReturns` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
-- [ ] Extend `hasCommentIssues` to include `missingReturns`
-- [ ] Update mocks and fixture "Expected issues" blocks
+- [x] Add `missingReturns` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
+- [x] Add `trackMissingReturns` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
+- [x] Extend `hasCommentIssues` to include `missingReturns`
+- [x] Update mocks and fixture "Expected issues" blocks
 
 ### Phase 4.5: Add Param Doc Mismatch Checks
-- [ ] Add `paramDocMismatches` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
-- [ ] Add `trackParamDocMismatches` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
-- [ ] Extend `hasCommentIssues` to include `paramDocMismatches`
-- [ ] Update mocks and fixture "Expected issues" blocks
+- [x] Add `paramDocMismatches` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
+- [x] Add `trackParamDocMismatches` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
+- [x] Extend `hasCommentIssues` to include `paramDocMismatches`
+- [x] Update mocks and fixture "Expected issues" blocks
 
 ### Phase 4.6: Add Complex Type Info Checks
-- [ ] Add `missingComplexTypeInfo` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
-- [ ] Add `trackMissingComplexTypeInfo` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
-- [ ] Extend `hasCommentIssues` to include `missingComplexTypeInfo`
-- [ ] Update mocks and fixture "Expected issues" blocks
+- [x] Add `missingComplexTypeInfo` field to `ApiStats` in [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
+- [x] Add `trackMissingComplexTypeInfo` function in [packages/kbn-docs-utils/src/stats.ts](packages/kbn-docs-utils/src/stats.ts)
+- [x] Extend `hasCommentIssues` to include `missingComplexTypeInfo`
+- [x] Update mocks and fixture "Expected issues" blocks
 
 ### Phase 4.7: Improve Multiple Call Signature Validation
 - [x] Handle interfaces with multiple call signatures
@@ -223,11 +223,11 @@ Key files:
 - [x] Update other affected test files
 
 ## Phase 8: APM Metrics for New Validation Fields
-- [ ] Add APM metrics for `missingReturns` count
-- [ ] Add APM metrics for `paramDocMismatches` count
-- [ ] Add APM metrics for `missingComplexTypeInfo` count
-- [ ] Update `passesAllChecks` logic to include new fields
-- [ ] Add CLI output for new validation fields under `comments` option
+- [x] Add APM metrics for `missingReturns` count
+- [x] Add APM metrics for `paramDocMismatches` count
+- [x] Add APM metrics for `missingComplexTypeInfo` count
+- [x] Update `passesAllChecks` logic to include new fields
+- [x] Add CLI output for new validation fields under `comments` option
 
 ## Implementation Notes
 

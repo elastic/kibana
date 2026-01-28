@@ -133,6 +133,12 @@ export function reportMetrics(
       {
         id,
         meta: { pluginTeam },
+        group: 'API count with param doc mismatches',
+        value: pluginStats.paramDocMismatches.length,
+      },
+      {
+        id,
+        meta: { pluginTeam },
         group: 'API count with any type',
         value: pluginStats.isAnyType.length,
       },
@@ -222,6 +228,7 @@ export function reportMetrics(
       const passesAllChecks =
         pluginStats.isAnyType.length === 0 &&
         pluginStats.missingComments.length === 0 &&
+        pluginStats.paramDocMismatches.length === 0 &&
         pluginStats.deprecatedAPIsReferencedCount === 0 &&
         (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
@@ -242,6 +249,13 @@ export function reportMetrics(
           printIssueTable(
             'API items missing comments',
             pluginStats.missingComments.map((d) => ({
+              id: d.id,
+              link: getLink(d),
+            }))
+          );
+          printIssueTable(
+            'API items with param doc mismatches',
+            pluginStats.paramDocMismatches.map((d) => ({
               id: d.id,
               link: getLink(d),
             }))
