@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
@@ -86,7 +87,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   esqlQuery,
   ruleSource,
 }) => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
+  const {
+    rules: { edit: canEditRules },
+    investigationGuide: { edit: canEditInvestigationGuides },
+    customHighlightedFields: { edit: canEditCustomHighlightedFields },
+  } = useUserPrivileges().rulesPrivileges;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
   const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
@@ -151,6 +157,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       indexPatternsFields: indexPattern.fields,
     });
 
+  const isFieldDisabled = useMemo(() => isLoading || !canEditRules, [canEditRules, isLoading]);
+
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -162,7 +170,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               'data-test-subj': 'detectionEngineStepAboutRuleName',
               euiFieldProps: {
                 fullWidth: true,
-                disabled: isLoading,
+                disabled: isFieldDisabled,
               },
             }}
           />
@@ -173,7 +181,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               idAria: 'detectionEngineStepAboutRuleDescription',
               'data-test-subj': 'detectionEngineStepAboutRuleDescription',
               euiFieldProps: {
-                disabled: isLoading,
+                disabled: isFieldDisabled,
                 compressed: true,
                 fullWidth: true,
               },
@@ -187,7 +195,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
-                isDisabled: isLoading || indexPatternLoading,
+                isDisabled: isFieldDisabled || indexPatternLoading,
                 indices: indexPattern,
                 setRiskScore,
               }}
@@ -201,7 +209,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
-                isDisabled: isLoading || indexPatternLoading,
+                isDisabled: isFieldDisabled || indexPatternLoading,
                 indices: indexPattern,
               }}
             />
@@ -214,7 +222,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleTags',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading || indexPatternLoading,
+                  isDisabled: isFieldDisabled || indexPatternLoading,
                   placeholder: '',
                 },
               }}
@@ -233,7 +241,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 addText: I18n.ADD_REFERENCE,
                 idAria: 'detectionEngineStepAboutRuleReferenceUrls',
-                isDisabled: isLoading,
+                isDisabled: isFieldDisabled,
                 dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
                 validate: isUrlInvalid,
               }}
@@ -244,7 +252,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 addText: I18n.ADD_FALSE_POSITIVE,
                 idAria: 'detectionEngineStepAboutRuleFalsePositives',
-                isDisabled: isLoading,
+                isDisabled: isFieldDisabled,
                 dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
               }}
             />
@@ -253,7 +261,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={AddMitreAttackThreat}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
-                isDisabled: isLoading,
+                isDisabled: isFieldDisabled,
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
               }}
             />
@@ -263,7 +271,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: investigationFields,
-                isDisabled: isLoading || indexPatternLoading || isInvestigationFieldsLoading,
+                isDisabled:
+                  isLoading ||
+                  indexPatternLoading ||
+                  isInvestigationFieldsLoading ||
+                  !canEditCustomHighlightedFields,
                 fullWidth: true,
                 dataTestSubj: 'detectionEngineStepAboutRuleInvestigationFields',
               }}
@@ -274,7 +286,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={MarkdownEditorForm}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleSetup',
-                isDisabled: isLoading,
+                isDisabled: isFieldDisabled,
                 dataTestSubj: 'detectionEngineStepAboutRuleSetup',
                 placeholder: I18n.ADD_RULE_SETUP_HELP_TEXT,
                 includePlugins: false,
@@ -286,7 +298,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               component={MarkdownEditorForm}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleNote',
-                isDisabled: isLoading,
+                isDisabled: isLoading || !canEditInvestigationGuides,
                 dataTestSubj: 'detectionEngineStepAboutRuleNote',
                 placeholder: I18n.ADD_RULE_NOTE_HELP_TEXT,
               }}
@@ -308,7 +320,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
                   euiFieldProps: {
                     fullWidth: true,
-                    isDisabled: isLoading || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
+                    isDisabled: isFieldDisabled || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
                     placeholder: '',
                   },
                 }}
@@ -331,7 +343,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                   euiFieldProps: {
                     fullWidth: true,
-                    disabled: isLoading || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
+                    disabled: isFieldDisabled || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
                     placeholder: '',
                   },
                 }}
@@ -346,7 +358,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                     idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                     'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                     euiFieldProps: {
-                      disabled: isLoading,
+                      disabled: isFieldDisabled,
                     },
                   }}
                 />
@@ -361,7 +373,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    disabled: isLoading,
+                    disabled: isFieldDisabled,
                   },
                 }}
               />
@@ -374,7 +386,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 componentProps={{
                   idAria: 'detectionEngineStepAboutRuleMaxSignals',
                   dataTestSubj: 'detectionEngineStepAboutRuleMaxSignals',
-                  isDisabled: isLoading,
+                  isDisabled: isFieldDisabled,
                   placeholder: DEFAULT_MAX_SIGNALS,
                 }}
               />
@@ -392,7 +404,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType',
                   esqlQuery,
                   fieldType: 'string',
-                  isDisabled: isLoading,
+                  isDisabled: isFieldDisabled,
                 }}
               />
             ) : (
@@ -404,7 +416,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   fieldType: 'string',
                   idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
                   indices: indexPattern,
-                  isDisabled: isLoading || indexPatternLoading,
+                  isDisabled: isFieldDisabled || indexPatternLoading,
                 }}
               />
             )}
@@ -418,7 +430,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
                 indices: indexPattern,
-                isDisabled: isLoading || indexPatternLoading,
+                isDisabled: isFieldDisabled || indexPatternLoading,
               }}
             />
             {!!timestampOverride && timestampOverride !== '@timestamp' && (
@@ -429,7 +441,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                     idAria: 'detectionTimestampOverrideFallbackDisabled',
                     'data-test-subj': 'detectionTimestampOverrideFallbackDisabled',
                     euiFieldProps: {
-                      disabled: isLoading,
+                      disabled: isFieldDisabled,
                     },
                   }}
                 />

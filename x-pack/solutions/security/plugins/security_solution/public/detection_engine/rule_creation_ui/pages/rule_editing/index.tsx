@@ -87,13 +87,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const {
+    rules: { edit: canEditRules, read: canReadRules },
+    investigationGuide: { edit: canEditInvestigationGuides },
+    customHighlightedFields: { edit: canEditCustomHighlightedFields },
+  } = useUserPrivileges().rulesPrivileges;
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
+  const hasRulePermissionsForEditPage =
+    canEditRules ||
+    (canReadRules && canEditInvestigationGuides) ||
+    (canReadRules && canEditCustomHighlightedFields);
 
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
+  const isRuleEditable = isRulesCustomizationEnabled || !rule.immutable;
 
   const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
     'prebuilt_rule_customization_description'
@@ -101,9 +108,15 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
-  const [activeStep, setActiveStep] = useState<RuleStep>(
-    canEditRule ? RuleStep.defineRule : RuleStep.ruleActions
-  );
+  const getStartingActiveStep = () => {
+    if (isRuleEditable) {
+      return canEditRules ? RuleStep.defineRule : RuleStep.aboutRule;
+    } else {
+      return RuleStep.ruleActions;
+    }
+  };
+
+  const [activeStep, setActiveStep] = useState<RuleStep>(getStartingActiveStep());
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
@@ -199,7 +212,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
 
   const customizationDisabledTooltip =
-    !canEditRule && !isRulesCustomizationEnabled
+    !isRuleEditable && !isRulesCustomizationEnabled
       ? prebuiltCustomizationUpsellingMessage
       : undefined;
 
@@ -209,7 +222,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable || !canEditRules,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -249,7 +262,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -283,7 +296,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: !canEditRule,
+        disabled: !isRuleEditable || !canEditRules,
         tooltip: customizationDisabledTooltip,
         content: (
           <div
@@ -339,7 +352,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
-      canEditRule,
+      isRuleEditable,
+      canEditRules,
       customizationDisabledTooltip,
       activeStep,
       loading,
@@ -411,7 +425,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const onSubmit = useCallback(async () => {
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (!canEditRule) {
+    if (!isRuleEditable) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
       if (actionsStepFormValid) {
@@ -455,7 +469,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     await saveChanges();
   }, [
     actionsStepForm,
-    canEditRule,
+    isRuleEditable,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -557,7 +571,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!canEditRules) {
+  } else if (!hasRulePermissionsForEditPage) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
