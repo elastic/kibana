@@ -35,8 +35,9 @@ interface EsqlConversionResult {
   esql: string;
 }
 type EsqlConversion = EsqlConversionResult | EsqlQueryFailure;
-const isValidEsqlConversionItems = (metrics: EsqlConversion[]): metrics is EsqlConversionResult[] =>
-  metrics.every((m) => typeof m === 'object' && 'esql' in m);
+const areValidEsqlConversionItems = (
+  metrics: EsqlConversion[]
+): metrics is EsqlConversionResult[] => metrics.every((m) => typeof m === 'object' && 'esql' in m);
 
 /**
  * Result type for generateEsqlQuery.
@@ -255,11 +256,11 @@ export function generateEsqlQuery(
       }
     }
 
-    return { esql: metricESQL } as EsqlConversionResult;
+    return { esql: metricESQL } satisfies EsqlConversionResult;
   });
 
   // Check for metric conversion errors with a type guard
-  if (!isValidEsqlConversionItems(metricsResult)) {
+  if (!areValidEsqlConversionItems(metricsResult)) {
     const metricError = metricsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(metricError)) {
       return getEsqlQueryFailedResult(
@@ -403,7 +404,7 @@ export function generateEsqlQuery(
   });
 
   // Check for bucket conversion errors with type guard
-  if (!isValidEsqlConversionItems(bucketsResult)) {
+  if (!areValidEsqlConversionItems(bucketsResult)) {
     const bucketError = bucketsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(bucketError)) {
       return getEsqlQueryFailedResult(
