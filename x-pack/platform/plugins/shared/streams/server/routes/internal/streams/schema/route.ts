@@ -310,9 +310,129 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   },
 });
 
+export interface FieldConflict {
+  fieldName: string;
+  proposedType: string;
+  conflictingStreams: Array<{
+    streamName: string;
+    existingType: string;
+  }>;
+}
+
+export interface FieldsConflictsResponse {
+  conflicts: FieldConflict[];
+}
+
+export const schemaFieldsConflictsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/schema/fields_conflicts',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.object({
+      field_definitions: z.array(
+        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
+      ),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    const userFieldDefinitions = params.body.field_definitions.filter(
+      (field) => field.type !== 'system'
+    );
+
+    if (userFieldDefinitions.length === 0) {
+      return { conflicts: [] };
+    }
+
+    // Get all streams and descendants of current stream (to exclude from conflict check)
+    const [allStreams, descendants] = await Promise.all([
+      streamsClient.listStreams(),
+      streamsClient.getDescendants(params.path.name),
+    ]);
+
+    // Build set of stream names to exclude: current stream and its descendants
+    const excludedStreamNames = new Set<string>([
+      params.path.name,
+      ...descendants.map((d) => d.name),
+    ]);
+
+    // Build a map of fieldName -> [{streamName, type}] for all non-excluded streams
+    const fieldMap = new Map<string, Array<{ streamName: string; type: string }>>();
+
+    for (const stream of allStreams) {
+      // Skip the current stream and its descendants
+      if (excludedStreamNames.has(stream.name)) {
+        continue;
+      }
+
+      let fields: Record<string, { type: string }> = {};
+
+      if (Streams.WiredStream.Definition.is(stream)) {
+        fields = stream.ingest.wired.fields;
+      } else if (Streams.ClassicStream.Definition.is(stream)) {
+        fields = stream.ingest.classic?.field_overrides || {};
+      }
+
+      for (const [fieldName, config] of Object.entries(fields)) {
+        // Skip system fields
+        if (config.type === 'system') {
+          continue;
+        }
+
+        const existing = fieldMap.get(fieldName) || [];
+        existing.push({ streamName: stream.name, type: config.type });
+        fieldMap.set(fieldName, existing);
+      }
+    }
+
+    // Find conflicts: proposed fields with same name but different type
+    const conflicts: FieldConflict[] = [];
+
+    for (const proposedField of userFieldDefinitions) {
+      const existingFields = fieldMap.get(proposedField.name);
+
+      if (!existingFields) {
+        continue;
+      }
+
+      const conflictingStreams = existingFields
+        .filter((existing) => existing.type !== proposedField.type)
+        .map((existing) => ({
+          streamName: existing.streamName,
+          existingType: existing.type,
+        }));
+
+      if (conflictingStreams.length > 0) {
+        conflicts.push({
+          fieldName: proposedField.name,
+          proposedType: proposedField.type,
+          conflictingStreams,
+        });
+      }
+    }
+
+    return { conflicts };
+  },
+});
+
 export const internalSchemaRoutes = {
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
+  ...schemaFieldsConflictsRoute,
 };
 
 const DUMMY_PIPELINE_NAME = '__dummy_pipeline__';

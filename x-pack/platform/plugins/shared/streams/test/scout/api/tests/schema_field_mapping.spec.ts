@@ -552,4 +552,198 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     expect(body).toHaveProperty('status');
     // Response should have either success/unknown or failure with error details
   });
+
+  // Field conflicts endpoint tests
+  apiTest(
+    'should return empty conflicts for fields with no conflicts',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [{ name: 'unique.field.name', type: 'keyword' }],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body).toHaveProperty('conflicts');
+      expect(Array.isArray(body.conflicts)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'should handle empty field definitions for conflicts',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body).toStrictEqual({ conflicts: [] });
+    }
+  );
+
+  apiTest(
+    'should return error for non-existent stream in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode } = await apiClient.post(
+        'internal/streams/non-existent-stream/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [{ name: 'test.field', type: 'keyword' }],
+          },
+          responseType: 'json',
+        }
+      );
+
+      // May return 403 (no permission) or 404 (not found) depending on auth check order
+      expect([403, 404]).toContain(statusCode);
+    }
+  );
+
+  apiTest(
+    'should handle missing field name in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_conflicts', {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ type: 'keyword' }],
+        },
+        responseType: 'json',
+      });
+
+      expect(statusCode).toBe(400);
+    }
+  );
+
+  apiTest(
+    'should handle missing field type in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_conflicts', {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ name: 'test.field' }],
+        },
+        responseType: 'json',
+      });
+
+      expect(statusCode).toBe(400);
+    }
+  );
+
+  apiTest(
+    'should return error for invalid field type in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_conflicts', {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ name: 'test.field', type: 'invalid_type' }],
+        },
+        responseType: 'json',
+      });
+
+      expect(statusCode).toBe(400);
+    }
+  );
+
+  apiTest(
+    'should check conflicts for multiple field definitions',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [
+              { name: 'field.one', type: 'keyword' },
+              { name: 'field.two', type: 'long' },
+              { name: 'field.three', type: 'boolean' },
+            ],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body).toHaveProperty('conflicts');
+      expect(Array.isArray(body.conflicts)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'should filter out system type fields in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [{ name: 'system.field', type: 'system' }],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body).toStrictEqual({ conflicts: [] });
+    }
+  );
+
+  apiTest(
+    'should handle all valid field types in conflicts check',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/schema/fields_conflicts',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            field_definitions: [
+              { name: 'field.keyword', type: 'keyword' },
+              { name: 'field.long', type: 'long' },
+              { name: 'field.double', type: 'double' },
+              { name: 'field.date', type: 'date' },
+              { name: 'field.boolean', type: 'boolean' },
+              { name: 'field.ip', type: 'ip' },
+              { name: 'field.geo_point', type: 'geo_point' },
+              { name: 'field.match_only_text', type: 'match_only_text' },
+            ],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body).toHaveProperty('conflicts');
+      expect(Array.isArray(body.conflicts)).toBe(true);
+    }
+  );
 });
