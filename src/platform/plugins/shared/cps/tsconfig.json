@@ -10,6 +10,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-http-server",
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/cps-utils",
