@@ -580,11 +580,9 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
-    // Check if coming from a specific dashboard view (not from library list)
     const isComingFromDashboardView =
       incomingState?.originatingApp &&
       incomingState?.originatingPath &&
-      // Exclude library lists (/list/*) - no "Save and Return" from Dashboards Visualizations tab
       !incomingState.originatingPath.includes('/list/');
 
     const showSaveAndReturn =

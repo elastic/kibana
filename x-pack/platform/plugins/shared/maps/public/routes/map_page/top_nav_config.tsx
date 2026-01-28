@@ -218,9 +218,8 @@ export function getTopNavConfig({
 
         let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-        // Show simplified modal only when editing embedded panel (has both originatingApp and isByValue)
-        // Dashboard Viz tab has originatingApp but is not by-value, so shows full modal
-        if (savedMap.hasOriginatingApp() && savedMap.isByValue()) {
+        // Show simplified modal only when editing an existing embedded by-value panel
+        if (savedMap.hasOriginatingApp() && savedMap.isByValue() && savedMap.getSavedObjectId()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}

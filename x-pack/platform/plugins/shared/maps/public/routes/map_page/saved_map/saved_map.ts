@@ -504,8 +504,10 @@ export class SavedMap {
     }
 
     this._mapEmbeddableState = mapEmbeddableState;
-    // break connection to originating application (keep for dashboard listing breadcrumbs)
-    if (!this._isOriginatingFromDashboardListing()) {
+    // Keep dashboard originating context for breadcrumbs when accessed from Dashboard app
+    // For other apps, break the connection after save
+    const isDashboardOrigin = this._originatingApp === 'dashboards';
+    if (!isDashboardOrigin) {
       this._originatingApp = undefined;
     }
 
@@ -521,16 +523,19 @@ export class SavedMap {
 
     getCoreChrome().docTitle.change(newTitle);
     this.setBreadcrumbs(history);
-    const shouldPreserveOriginQuery = this._isOriginatingFromDashboardListing();
-    const search =
-      shouldPreserveOriginQuery && this._originatingApp
-        ? `?originatingApp=${encodeURIComponent(
-            this._originatingApp
-          )}&originatingPath=${encodeURIComponent(this._originatingPath ?? '')}`
-        : '';
+
+    // Preserve originating app context in URL for dashboard breadcrumbs
+    const searchParams = new URLSearchParams();
+    if (isDashboardOrigin && this._originatingApp) {
+      searchParams.set('originatingApp', this._originatingApp);
+      if (this._originatingPath) {
+        searchParams.set('originatingPath', this._originatingPath);
+      }
+    }
+
     history.push({
       pathname: `/${MAP_PATH}/${this.getSavedObjectId()}`,
-      search,
+      search: searchParams.toString(),
       hash: window.location.hash,
     });
 
