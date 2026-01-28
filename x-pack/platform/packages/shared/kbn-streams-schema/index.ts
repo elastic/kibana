@@ -167,3 +167,5 @@ export {
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
 export { TaskStatus } from './src/tasks/types';
+
+export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';

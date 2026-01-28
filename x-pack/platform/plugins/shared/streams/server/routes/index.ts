@@ -29,6 +29,7 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/streams/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
+import { internalInsightsRoutes } from './internal/streams/insights/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -57,6 +58,7 @@ export const streamsRouteRepository = {
   ...significantEventsRoutes,
   ...queryRoutes,
   ...attachmentRoutes,
+  ...internalInsightsRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
