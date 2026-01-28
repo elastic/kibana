@@ -36,7 +36,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   ): ConcreteTaskInstance => {
     return {
       id: 'task-id',
-      taskType: 'workflow:scheduled',
+      taskType: 'workflow:scheduled:normal',
       params: { workflowId: workflow.id, spaceId, triggerType: 'scheduled' },
       state: {},
       attempts: 1,

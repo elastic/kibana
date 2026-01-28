@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
+import { StepCost } from '../../step_registry/types';
 
 /**
  * Step type ID for the AI summarize step.
@@ -55,4 +56,5 @@ export const AiSummarizeStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
+  cost: StepCost.Heavy,
 };

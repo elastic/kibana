@@ -260,6 +260,10 @@ export function calculateStartingCapacity(
   logger: Logger,
   defaultCapacity: number
 ): number {
+  // TODO: Remove this override - hardcoded for testing
+  logger.info('Using hardcoded capacity of 40 for testing');
+  return 40;
+
   if (config.capacity !== undefined && config.max_workers !== undefined) {
     logger.warn(
       `Both "xpack.task_manager.capacity" and "xpack.task_manager.max_workers" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`

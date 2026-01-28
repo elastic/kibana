@@ -12,6 +12,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowTaskScheduler } from './workflow_task_scheduler';
 
+// Mock the infer_workflow_cost module
+jest.mock('@kbn/workflows-execution-engine/server/lib/infer_workflow_cost', () => ({
+  inferWorkflowCost: jest.fn().mockReturnValue('normal'),
+  getTaskTypeForCost: jest.fn((baseType: string, tier: string) => `${baseType}:${tier}`),
+}));
+
 // Mock logger
 const mockLogger: Logger = {
   debug: jest.fn(),
@@ -81,10 +87,11 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
 
       // Verify the task instance structure includes workflowid
+      // Note: taskType is now cost-tiered (e.g., workflow:scheduled:normal)
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'workflow:test-workflow:scheduled',
-          taskType: 'workflow:scheduled',
+          taskType: 'workflow:scheduled:normal',
           params: expect.objectContaining({
             workflowId: 'test-workflow',
             spaceId: 'default',
