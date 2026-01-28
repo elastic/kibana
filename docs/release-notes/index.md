@@ -21,6 +21,40 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.2.5 [kibana-9.2.5-release-notes]
+
+
+### Fixes [kibana-9.2.5-fixes]
+
+**Alerting**:
+* Fixes timestamp override for {{esql}} CSV scheduled reports with relative time ranges [#248169]({{kib-pull}}248169).
+
+**Dashboards and Visualizations**:
+* Fixes an issue with dashboard PDF/PNG reports being cut off at the end when the dashboard has a markdown panel [#249644]({{kib-pull}}249644).
+
+**Discover**:
+* Fixes an issue with the "Search entire time range" option that could exclude some results if the time field was set to date nanos [#248495]({{kib-pull}}248495).
+* Fixes an issue where document viewer tabs were unnecessarily re-mounting on every refresh, leading to degraded performance [#248203]({{kib-pull}}248203).
+* Fixes an issue causing query drafts to be lost when switching between tabs without running the query first in {{esql}} mode [#247968]({{kib-pull}}247968).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes an issue with the Share menu where all time ranges were being shared as absolute [#248804]({{kib-pull}}248804).
+* Fixes an issue with certain properties causing failures when adding a policy to an index template [#249168]({{kib-pull}}249168).
+* Fixes an issue with duplicated managed ILM policies still appearing as managed [#248586]({{kib-pull}}248586).
+* Fixes Stack Monitoring Recent Log Entries' timestamps to respect Kibana's time zone setting (`dateFormat:tz`) [#249016]({{kib-pull}}249016).
+* Fixes the breadcrumb when navigating to the Stack Monitoring page while using a solution view [#249751]({{kib-pull}}249751).
+
+**Machine Learning**:
+* Fixes occasional file preview corruption during file uploads [#250532]({{kib-pull}}250532).
+* Updates Packetbeat DNS tunneling datafeed to include runtime mappings [#249317]({{kib-pull}}249317).
+
+
 ## 9.2.4 [kibana-9.2.4-release-notes]
 
 % ::::{NOTE}
@@ -44,6 +78,7 @@ For the Elastic Security 9.2.4 release information, refer to [Elastic Security S
 
 **Discover**:
 * Fixes default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+* Fixes an issue with {{esql}} tabs not loading properly [#246941]({{kib-pull}}246941).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.2.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
