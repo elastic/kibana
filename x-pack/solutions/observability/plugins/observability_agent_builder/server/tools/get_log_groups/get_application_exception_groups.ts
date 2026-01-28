@@ -38,7 +38,7 @@ export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>[
 
 // Span exceptions captured by Otel agents are represented as APM error documents
 // This function thus returns both APM error groups and Otel span exceptions
-export async function getErrorGroups({
+export async function getApplicationExceptionGroups({
   apmEventClient,
   startMs,
   endMs,

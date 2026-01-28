@@ -17,7 +17,7 @@ import {
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
-import type { ErrorGroupSample } from './get_error_groups';
+import type { ErrorGroupSample } from './get_application_exception_groups';
 
 /**
  * Fetches the name of the downstream service resource for errors that occurred during outbound calls.

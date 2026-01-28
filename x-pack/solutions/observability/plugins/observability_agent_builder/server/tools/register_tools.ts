@@ -23,9 +23,9 @@ import {
 } from './get_anomaly_detection_jobs/tool';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/tool';
 import {
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
-  createGetLogCategoriesTool,
-} from './get_log_categories/tool';
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  createGetLogGroupsTool,
+} from './get_log_groups/tool';
 import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
@@ -53,10 +53,6 @@ import {
   createGetTraceChangePointsTool,
 } from './get_trace_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
-import {
-  OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
-  createGetExceptionsTool,
-} from './get_exceptions/tool';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
@@ -69,7 +65,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
@@ -79,7 +75,6 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-  OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -99,7 +94,7 @@ export async function registerTools({
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
-    createGetLogCategoriesTool({ core, logger }),
+    createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
@@ -109,7 +104,6 @@ export async function registerTools({
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
-    createGetExceptionsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

@@ -14,13 +14,13 @@
 
 ## 1. Tool-to-Investigation Phase Mapping
 
-| Phase           | Example Tools                                                    |
-| --------------- | ---------------------------------------------------------------- |
-| **Detection**   | `get_alerts`, `get_services`                                     |
-| **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`                 |
-| **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`       |
-| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`             |
-| **Root Cause**  | `get_log_categories`, `get_trace_metrics` (grouped by dimension) |
+| Phase           | Example Tools                                                |
+| --------------- | ------------------------------------------------------------ |
+| **Detection**   | `get_alerts`, `get_services`                                 |
+| **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
+| **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
+| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`         |
+| **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
 
@@ -103,18 +103,15 @@ Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Ob
 
 ### Common Aliases
 
-| Query This (ECS)          | Instead of (OTel)                 |
-| ------------------------- | --------------------------------- |
-| `message`                 | `body.text`                       |
-| `log.level`               | `severity_text`                   |
-| `trace.id`                | `trace_id`                        |
-| `span.id`                 | `span_id`                         |
-| `service.environment`     | `deployment.environment`          |
-| `kubernetes.pod.name`     | `k8s.pod.name`                    |
-| `kubernetes.namespace`    | `k8s.namespace.name`              |
-| `error.stack_trace`       | `attributes.exception.stacktrace` |
-| `error.exception.message` | `attributes.exception.message`    |
-| `error.exception.type`    | `attributes.exception.type`       |
+| ECS Alias              | OTel Field               |
+| ---------------------- | ------------------------ |
+| `message`              | `body.text`              |
+| `log.level`            | `severity_text`          |
+| `trace.id`             | `trace_id`               |
+| `span.id`              | `span_id`                |
+| `service.environment`  | `deployment.environment` |
+| `kubernetes.pod.name`  | `k8s.pod.name`           |
+| `kubernetes.namespace` | `k8s.namespace.name`     |
 
 You can retrieve the full list of OTel aliases in a cluster:
 

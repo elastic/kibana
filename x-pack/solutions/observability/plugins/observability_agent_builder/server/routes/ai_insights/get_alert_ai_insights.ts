@@ -19,7 +19,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -152,24 +152,30 @@ async function fetchAlertContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  async function fetchLogCategories() {
+  async function fetchLogGroups() {
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
-      const result = await getLogCategories({
+      const result = await getLogGroups({
         core,
+        plugins,
+        request,
         logger,
         esClient,
         start,
         end: alertStart,
         kqlFilter: `service.name: "${serviceName}"`,
         fields: ['service.name'],
+        includeStackTrace: false,
+        includeFirstSeen: false,
+        size: 50,
       });
-      const hasCategories =
-        (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
-        (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-      return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
+      const hasGroups =
+        (result.nonExceptionLogGroups?.length ?? 0) > 0 ||
+        (result.applicationExceptionGroups?.length ?? 0) > 0 ||
+        (result.logExceptionGroups?.length ?? 0) > 0;
+      return hasGroups ? { key: 'logGroups' as const, start, data: result } : null;
     } catch (err) {
-      logger.debug(`AI insight: logCategories failed: ${err}`);
+      logger.debug(`AI insight: logGroups failed: ${err}`);
       return null;
     }
   }
@@ -190,7 +196,7 @@ async function fetchAlertContext({
         return null;
       }
     }),
-    fetchLogCategories(),
+    fetchLogGroups(),
   ];
 
   const results = await Promise.all(allFetchers);
