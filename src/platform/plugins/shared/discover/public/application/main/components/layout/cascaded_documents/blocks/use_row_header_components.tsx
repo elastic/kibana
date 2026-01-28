@@ -352,7 +352,7 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   };
 };
 
-const textSlotStyles = {
+const rowHeaderTitleStyles = {
   textWrapper: css({
     minWidth: 0,
     textWrap: 'nowrap',
@@ -362,6 +362,13 @@ const textSlotStyles = {
     textOverflow: 'ellipsis',
   }),
 };
+
+const textSlotStyles = css({
+  width: '20ch',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
 
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
@@ -402,7 +409,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
             }
           >
             {(truncatedText) => {
-              return <h4 css={textSlotStyles.textInner}>{truncatedText}</h4>;
+              return <h4 css={rowHeaderTitleStyles.textInner}>{truncatedText}</h4>;
             }}
           </EuiTextTruncate>
         </EuiText>
@@ -434,17 +441,27 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   selectedColumn,
                   selectedColumnValue: rowData.aggregatedValues[selectedColumn],
                   bold: (chunks) => (
-                    <EuiFlexItem grow={false} css={textSlotStyles.textWrapper}>
-                      <span css={textSlotStyles.textInner}>{chunks}</span>
+                    <EuiFlexItem grow={false} css={rowHeaderTitleStyles.textWrapper}>
+                      <span css={rowHeaderTitleStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
-                  badge: ([chunk]) => {
+                  badge: (badgeContent) => {
                     return (
                       <EuiFlexItem grow={false}>
-                        {Number.isNaN(Number(chunk)) ? (
-                          <EuiBadge color="hollow">{chunk}</EuiBadge>
+                        {badgeContent.length === 1 && badgeContent.filter(Number)[0] ? (
+                          <NumberBadge value={Number(badgeContent[0])} shortenAtExpSize={3} />
                         ) : (
-                          <NumberBadge value={Number(chunk)} shortenAtExpSize={3} />
+                          <EuiBadge color="hollow" css={textSlotStyles}>
+                            {badgeContent
+                              .map(
+                                (chunk) =>
+                                  chunk ||
+                                  i18n.translate('discover.dataCascade.row.action.noValue', {
+                                    defaultMessage: '(blank)',
+                                  })
+                              )
+                              .join(', ')}
+                          </EuiBadge>
                         )}
                       </EuiFlexItem>
                     );

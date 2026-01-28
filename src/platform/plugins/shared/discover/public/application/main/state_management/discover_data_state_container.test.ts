@@ -183,7 +183,9 @@ describe('test getDataStateContainer', () => {
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = stateContainer.dataState;
       const dataUnsub = dataState.subscribe();
-      stateContainer.actions.initializeAndSync();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
       const { scopedProfilesManager$ } = selectTabRuntimeState(
         stateContainer.runtimeStateManager,
         stateContainer.getCurrentTab().id
@@ -224,14 +226,18 @@ describe('test getDataStateContainer', () => {
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
-      stateContainer.actions.stopSyncing();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+      );
     });
 
     it('should not update app state from default profile state', async () => {
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = stateContainer.dataState;
       const dataUnsub = dataState.subscribe();
-      stateContainer.actions.initializeAndSync();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
       const { scopedProfilesManager$ } = selectTabRuntimeState(
         stateContainer.runtimeStateManager,
         stateContainer.getCurrentTab().id
@@ -270,7 +276,9 @@ describe('test getDataStateContainer', () => {
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();
-      stateContainer.actions.stopSyncing();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+      );
     });
   });
 
