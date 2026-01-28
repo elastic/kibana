@@ -14,8 +14,8 @@ import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
-import { loadWorkflows } from '../workflow_loader';
 import { createStackConnector } from '../utils/create_stack_connector';
+import { loadWorkflows } from '../utils/workflow_loader';
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
