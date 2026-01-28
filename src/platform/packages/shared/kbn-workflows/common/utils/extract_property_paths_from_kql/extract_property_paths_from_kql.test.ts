@@ -188,5 +188,41 @@ describe('extractPropertyPathsFromKql', () => {
       const result = extractPropertyPathsFromKql('field:value and broken.field: {{ incomplete');
       expect(result).toEqual(expect.arrayContaining(['field']));
     });
+
+    it('should handle template expressions with spaces and special characters', () => {
+      const result = extractPropertyPathsFromKql('field: {{ consts.my_value }} and other:test');
+      expect(result).toEqual(expect.arrayContaining(['field', 'other', 'consts.my_value']));
+      expect(result).toHaveLength(3);
+    });
+
+    it('should handle very long strings without catastrophic backtracking (ReDoS prevention)', () => {
+      // This test ensures the regex doesn't cause exponential backtracking
+      // Previous vulnerable pattern: /\{\{[^}]*\}\}/g could cause ReDoS
+      // Fixed pattern: /\{\{[^{}]*\}\}/g prevents backtracking
+      const longString = 'a'.repeat(10000);
+      const kql = `field:{{ ${longString} }} and other:value`;
+
+      // This should complete quickly (not hang)
+      const start = Date.now();
+      const result = extractPropertyPathsFromKql(kql);
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(1000); // Should complete in less than 1 second
+      expect(result).toEqual(expect.arrayContaining(['field', 'other']));
+    });
+
+    it('should handle pathological ReDoS input without hanging', () => {
+      // This is a known ReDoS pattern that would cause catastrophic backtracking
+      // with the vulnerable regex /\{\{[^}]*\}\}/g
+      const pathologicalInput = `field:{{ ${'a'.repeat(50)} and other:value`;
+
+      // This should complete quickly (not hang)
+      const start = Date.now();
+      const result = extractPropertyPathsFromKql(pathologicalInput);
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(1000); // Should complete in less than 1 second
+      expect(result).toEqual(expect.arrayContaining(['field']));
+    });
   });
 });

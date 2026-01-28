@@ -10,6 +10,7 @@ import { validateConfig } from './validate_configuration';
 import { validateQuery } from '@kbn/esql-language';
 import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
+import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 jest.mock('@kbn/esql-language', () => ({
   validateQuery: jest.fn(),
@@ -45,7 +46,7 @@ describe('validateConfig', () => {
       const config = {
         query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
-          case_id: { type: 'keyword' as EsqlToolFieldTypes, description: 'Case ID' },
+          case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
         },
       };
 
@@ -105,7 +106,7 @@ describe('validateConfig', () => {
       const config = {
         query: 'FROM my_cases | WHERE case_id == ?case_id AND owner == ?owner',
         params: {
-          case_id: { type: 'keyword' as EsqlToolFieldTypes, description: 'Case ID' },
+          case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
         },
       };
 
@@ -149,8 +150,8 @@ describe('validateConfig', () => {
       const config = {
         query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
-          case_id: { type: 'keyword' as EsqlToolFieldTypes, description: 'Case ID' },
-          owner: { type: 'keyword' as EsqlToolFieldTypes, description: 'Owner' },
+          case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
+          owner: { type: 'string' as EsqlToolFieldTypes, description: 'Owner' },
         },
       };
 
@@ -173,7 +174,7 @@ describe('validateConfig', () => {
       const config = {
         query: 'FROM my_cases | LIMIT 1',
         params: {
-          case_id: { type: 'keyword' as EsqlToolFieldTypes, description: 'Case Id' },
+          case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case Id' },
         },
       };
 
@@ -218,16 +219,11 @@ describe('validateConfig', () => {
 
     describe('valid defaultValue types', () => {
       const validCases = [
-        { type: 'text' as const, value: 'hello' },
-        { type: 'keyword' as const, value: 'active' },
-        { type: 'long' as const, value: 42 },
+        { type: 'string' as const, value: 'hello' },
         { type: 'integer' as const, value: 123 },
-        { type: 'double' as const, value: 3.14 },
         { type: 'float' as const, value: 2.5 },
         { type: 'boolean' as const, value: true },
         { type: 'date' as const, value: '2023-01-01T00:00:00Z' },
-        { type: 'object' as const, value: { key: 'value' } },
-        { type: 'nested' as const, value: [{ id: 1 }] },
       ];
 
       it.each(validCases)(
@@ -241,15 +237,12 @@ describe('validateConfig', () => {
 
     describe('invalid defaultValue types', () => {
       const invalidCases = [
-        { type: 'text' as const, value: 123, expectedError: 'not a string' },
-        { type: 'long' as const, value: 3.14, expectedError: 'not an integer' },
+        { type: 'string' as const, value: 123, expectedError: 'not a string' },
         { type: 'integer' as const, value: 'not a number', expectedError: 'not an integer' },
-        { type: 'double' as const, value: 'not a number', expectedError: 'not a number' },
         { type: 'boolean' as const, value: 'true', expectedError: 'not a boolean' },
-        { type: 'object' as const, value: 'not an object', expectedError: 'not an object' },
-        { type: 'object' as const, value: null, expectedError: 'not an object' },
-        { type: 'object' as const, value: ['not', 'an', 'object'], expectedError: 'not an object' },
-        { type: 'nested' as const, value: { not: 'an array' }, expectedError: 'not an array' },
+        { type: 'integer' as const, value: 3.14, expectedError: 'not an integer' },
+        { type: 'float' as const, value: 'not a number', expectedError: 'not a number' },
+        { type: 'date' as const, value: 123, expectedError: 'not a string' },
       ];
 
       it.each(invalidCases)(
@@ -270,7 +263,7 @@ describe('validateConfig', () => {
           query: 'FROM my_cases | WHERE name == ?param1',
           params: {
             param1: {
-              type: 'text' as EsqlToolFieldTypes,
+              type: 'string' as EsqlToolFieldTypes,
               description: 'Name',
               optional: true,
             },
@@ -280,9 +273,50 @@ describe('validateConfig', () => {
       });
 
       it('should pass validation when parameter has undefined defaultValue', async () => {
-        const config = createConfig('text', undefined);
+        const config = createConfig('string', undefined);
         await expect(validateConfig(config as any)).resolves.toBeUndefined();
       });
+    });
+  });
+
+  describe('schema validation rejects legacy param types', () => {
+    it('should reject object param type on create', () => {
+      expect(() =>
+        configurationSchema.validate({
+          query: 'FROM my_cases | WHERE field == ?param1',
+          params: { param1: { type: 'object', description: 'x' } },
+        })
+      ).toThrow();
+    });
+
+    it('should reject nested param type on update', () => {
+      expect(() =>
+        configurationUpdateSchema.validate({
+          params: { param1: { type: 'nested', description: 'x' } },
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('schema validation for defaultValue', () => {
+    it('should reject defaultValue when optional is false', () => {
+      expect(() =>
+        configurationSchema.validate({
+          query: 'FROM my_cases | WHERE field == ?param1',
+          params: {
+            param1: { type: 'string', description: 'x', optional: false, defaultValue: 'y' },
+          },
+        })
+      ).toThrow();
+    });
+
+    it('should reject defaultValue when optional is not set', () => {
+      expect(() =>
+        configurationSchema.validate({
+          query: 'FROM my_cases | WHERE field == ?param1',
+          params: { param1: { type: 'string', description: 'x', defaultValue: 'y' } },
+        })
+      ).toThrow();
     });
   });
 });

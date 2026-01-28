@@ -18,23 +18,24 @@ import {
   EuiLink,
   EuiCallOut,
   type EuiBasicTableColumn,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSiemReadinessApi, useSiemReadinessCasesByTags } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
-import { navigateToCasesWithTagsFilter } from '../../../utils/navigate_to_cases';
+import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
+import { ViewCasesButton } from '../../components/view_cases_button';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
-const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string> = {
-  Cloud: 'cloudsecurity_cdr',
-  Endpoint: 'edr_xdr',
-  Identity: 'iam',
-  Network: 'network_security',
-  'Application/SaaS': 'siem',
+const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string[]> = {
+  Cloud: ['cloudsecurity_cdr', 'cloud'],
+  Endpoint: ['edr_xdr'],
+  Identity: ['iam'],
+  Network: ['network_security', 'network'],
+  'Application/SaaS': ['siem'],
 };
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
@@ -72,18 +73,39 @@ const buildMissingCategoriesDescription = (
 // Component
 export const DataCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
-  const { getReadinessCategories } = useSiemReadinessApi();
+  const { getReadinessCategories, getIntegrations } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { euiTheme } = useEuiTheme();
-  const casesByTagsQuery = useSiemReadinessCasesByTags(DATA_COVERAGE_CREATE_CASE_TAGS);
 
   const getCategoryIntegrationUrl = useCallback(
     (category: string): string => {
       const baseUrl = `${basePath}/app/integrations/browse/security`;
       const filter = CATEGORY_TO_INTEGRATION_FILTER[category];
-      return filter ? `${baseUrl}/${filter}` : baseUrl;
+      return filter ? `${baseUrl}/${filter[0]}` : baseUrl;
     },
     [basePath]
+  );
+
+  // Get integration options for a specific category
+  const getIntegrationOptionsForCategory = useCallback(
+    (category: string) => {
+      const filterValues = CATEGORY_TO_INTEGRATION_FILTER[category];
+      if (!filterValues || !getIntegrations.data?.items) {
+        return [];
+      }
+
+      const filteredPackages = getIntegrations.data.items.filter(
+        (pkg: SiemReadinessPackageInfo) => {
+          return pkg.categories?.some((cat: string) => filterValues.includes(cat));
+        }
+      );
+
+      return filteredPackages.map((pkg: SiemReadinessPackageInfo) => ({
+        label: pkg.title || pkg.name,
+        key: pkg.name,
+        checked: undefined,
+      }));
+    },
+    [getIntegrations.data?.items]
   );
 
   // Transform raw data into table rows
@@ -131,10 +153,6 @@ export const DataCoveragePanel: React.FC = () => {
       tags: DATA_COVERAGE_CREATE_CASE_TAGS,
     });
   }, [openNewCaseFlyout, caseDescription]);
-
-  const handleViewCases = useCallback(() => {
-    navigateToCasesWithTagsFilter(basePath, DATA_COVERAGE_CREATE_CASE_TAGS);
-  }, [basePath]);
 
   const columns: Array<EuiBasicTableColumn<CategoryCoverageData>> = [
     {
@@ -189,26 +207,9 @@ export const DataCoveragePanel: React.FC = () => {
       ),
       width: '220px',
       render: (row: CategoryCoverageData) => {
-        const integrationUrl = getCategoryIntegrationUrl(row.category);
-        const linkText = row.hasCoverage
-          ? i18n.translate(
-              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.viewInstalled',
-              {
-                defaultMessage: 'View installed integrations',
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.viewMissing',
-              {
-                defaultMessage: 'View missing integrations',
-              }
-            );
+        const options = getIntegrationOptionsForCategory(row.category);
 
-        return (
-          <EuiLink href={integrationUrl} target="_blank" external>
-            {linkText}
-          </EuiLink>
-        );
+        return <IntegrationSelectablePopover options={options} />;
       },
     },
   ];
@@ -247,37 +248,7 @@ export const DataCoveragePanel: React.FC = () => {
               justifyContent="flexEnd"
             >
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="right"
-                      size="s"
-                      onClick={handleViewCases}
-                      data-test-subj="viewCaseButton"
-                    >
-                      {i18n.translate(
-                        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.viewCase',
-                        {
-                          defaultMessage: 'View case',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={() => {}}
-                      color="text"
-                      size="xs"
-                      style={{
-                        backgroundColor: euiTheme.colors.backgroundLightText,
-                        borderRadius: `${euiTheme.size.xs}`,
-                        padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-                      }}
-                    >
-                      {casesByTagsQuery.data?.total ?? 0}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <ViewCasesButton caseTagsArray={DATA_COVERAGE_CREATE_CASE_TAGS} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
