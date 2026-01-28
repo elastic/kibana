@@ -64,7 +64,7 @@ export interface DocViewerTableRestorableState {
   pageNumber: number;
 }
 
-const { withRestorableState, useRestorableLocalStorage } =
+const { withRestorableState, useRestorableState, useRestorableLocalStorage } =
   createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
@@ -312,7 +312,7 @@ const InternalDocViewerTable = ({
     [setInitialPageSizeRaw]
   );
 
-  const [pageNumber, setPageNumber] = useRestorableLocalStorage('pageNumber', '', 0);
+  const [pageNumber, setPageNumber] = useRestorableState('pageNumber', 0);
 
   const onChangePageNumber = useCallback(
     (newPageNumber: number) => {
