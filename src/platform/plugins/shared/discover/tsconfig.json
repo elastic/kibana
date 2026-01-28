@@ -120,12 +120,12 @@
     "@kbn/control-group-renderer",
     "@kbn/react-query",
     "@kbn/shared-ux-document-data-cascade",
-    "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu",
+    "@kbn/es-query-constants",
   ],
   "exclude": ["target/**/*"]
 }
