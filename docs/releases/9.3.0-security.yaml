@@ -1,0 +1,313 @@
+﻿products:
+- product: security
+  target: 9.3.0
+entries:
+- file:
+    name: 233289.yaml
+    checksum: 936304c6d0b726f4e14cdfa8510b963f10a9891d
+- file:
+    name: 240420.yaml
+    checksum: 56526383c97a252d4d5080c79de94679f88fb657
+- file:
+    name: 237911.yaml
+    checksum: 2a20398808638447946223a8c2699c76b48f97bd
+- file:
+    name: 246794.yaml
+    checksum: 41e3519ba3c3d2a0618dc0a8ce4be1be18a1d26f
+- file:
+    name: 236992.yaml
+    checksum: d7229f6e40abf035a098345badec36629523cb87
+- file:
+    name: 247351.yaml
+    checksum: 958292dfa3650fecbf34e74364e6f5bca359ef4a
+- file:
+    name: 236906.yaml
+    checksum: 228f4c56e240372179f145a44a1ffdac810b584d
+- file:
+    name: 242313.yaml
+    checksum: 02d4694b85f3f15149ae6abe2a20e80c4c9ad2a0
+- file:
+    name: 245205.yaml
+    checksum: 71c3e7f43fa5ae0e8a0273e8dcdfcf569a1579ca
+- file:
+    name: 243543.yaml
+    checksum: 64b41aabb50df8e402a8e3c27583a79534f3272b
+- file:
+    name: 246081.yaml
+    checksum: 5934f6f3892d776ffe163bb6457186d1ad50b76f
+- file:
+    name: 243387.yaml
+    checksum: 8c60e841d5967b29abe36c0b7e857a1b48729aff
+- file:
+    name: 237496.yaml
+    checksum: 0152149c56ea7ab493cfeb35fdb52abea8b33b59
+- file:
+    name: 247002.yaml
+    checksum: 216ed13f9ffeab8484b5825134c33d25bf110260
+- file:
+    name: 246150.yaml
+    checksum: dc44f97abf81433c581a979fc6cd8e6c29e8ae56
+- file:
+    name: 237947.yaml
+    checksum: d823798e6d7f81e941baae25a174513ff1db1fce
+- file:
+    name: 242365.yaml
+    checksum: dcd0ef2d4bd73ed5afc977bd212d783e478cf38b
+- file:
+    name: 241153.yaml
+    checksum: 98821ef494105eadc1d03569b1310dd7c36449f4
+- file:
+    name: 239661.yaml
+    checksum: 4810961c969d9e9bbc91ca85d890d9e38008dc06
+- file:
+    name: 246679.yaml
+    checksum: fc8d88a6b91e4c7a21f5bc25ecec94a2f8355684
+- file:
+    name: 245002.yaml
+    checksum: 1cb9bbd61c996ee202a34f36f92c76b84c319b2e
+- file:
+    name: 236756.yaml
+    checksum: 8cb37a6bd6f00b7e363d8367687aa3a9a582338f
+- file:
+    name: 248221.yaml
+    checksum: 786a5bc4f9332a85bf403440ef8f949f90728416
+- file:
+    name: 247707.yaml
+    checksum: 4d47d4cb133bb40a539af916d452b908f583b593
+- file:
+    name: 239122.yaml
+    checksum: a9d3c6d476a56001a8b66baacfbf21752d88a469
+- file:
+    name: 241240.yaml
+    checksum: 6777e38350056b6d4972a333c53e3572854a1ba6
+- file:
+    name: 247678.yaml
+    checksum: 0c1a29cb6d984f1999489ef75a78945a368afc62
+- file:
+    name: 237829.yaml
+    checksum: 1a9aefe238bbb930ed1022e46fc5a74070e68e98
+- file:
+    name: 248020.yaml
+    checksum: 37b260aa6d84afdf04f5495a2fb18dd121d0df67
+- file:
+    name: 237038.yaml
+    checksum: fa2e247f9f7d1d67d9361b59c583c5c624f2e1bd
+- file:
+    name: 241108.yaml
+    checksum: a571f3055abaef004e6d76a4c25c13f778046bb7
+- file:
+    name: 246788.yaml
+    checksum: 78f56ab20f73b209c4b2e8a0d848ddb6cf9b83b4
+- file:
+    name: 242027.yaml
+    checksum: 772ea9e1dec4b150b3d5cb88aa396ef69bdffe79
+- file:
+    name: 245259.yaml
+    checksum: d5bbed5d4cdd2bff11438bbbda100e3d2ac69626
+- file:
+    name: 246770.yaml
+    checksum: ad97644c87767d8de12361f0d345f367dcb58f85
+- file:
+    name: 245449.yaml
+    checksum: 7c25086d0470b70cf5d2de3e700b8ceb59f53923
+- file:
+    name: 238354.yaml
+    checksum: d895d86bc9b6e32fb5617ddfbf5236774d1ac562
+- file:
+    name: 246418.yaml
+    checksum: c64f5e6fe965d9d1caedb468ffecc108df179d9a
+- file:
+    name: 239709.yaml
+    checksum: 832eb08168fd4915e640fb53442c29ae45f081fa
+- file:
+    name: 239436.yaml
+    checksum: 8d71b489bae7c5f9bb82e169d02e2ae4c03e4751
+- file:
+    name: 236110.yaml
+    checksum: d402c262e97bd4a1950ba51f9a5a687a54a1d21d
+- file:
+    name: 239748.yaml
+    checksum: 377ec461212d04edc6d48d920090d27e4f7bde65
+- file:
+    name: 242441.yaml
+    checksum: bfbb001b6dfd7ae40d4e3ffa5a9386f160b807c1
+- file:
+    name: 241390.yaml
+    checksum: 8026b8f32c84280eca5aa3b471776c1299a443ba
+- file:
+    name: 246005.yaml
+    checksum: af5f6354abf1313bb7dff43facc2e04b50e892d1
+- file:
+    name: 234793.yaml
+    checksum: de67a77ca7b6120b0cabafc3c09b50408efbd57b
+- file:
+    name: 241346.yaml
+    checksum: ff9e388fb4ba8020345b409e20b01ec9b661bdcb
+- file:
+    name: 247695.yaml
+    checksum: b59b894b42e8693903e49b02a5d7d5afa2cf113d
+- file:
+    name: 245647.yaml
+    checksum: 13e20bb77a834cc698efc1cb91dde2e960c73a6b
+- file:
+    name: 246180.yaml
+    checksum: 2bc7fe14d5940a84d233a40aff72196bb206163c
+- file:
+    name: 247355.yaml
+    checksum: 05c401304b4ac584a44bf56fa68e680179a3031c
+- file:
+    name: 242045.yaml
+    checksum: 1c64e1bf69872ce5f11aa3b8af09381ead78db1e
+- file:
+    name: 247617.yaml
+    checksum: 8ea07802110d28c70fb2e4e3f4b86d3de30df8dc
+- file:
+    name: 243711.yaml
+    checksum: 2c27fb8bfaf4a860a1175f041d61c8e65475c4a7
+- file:
+    name: 237796.yaml
+    checksum: 5c2d33342bf6888d23d3b6221073b818a79825f3
+- file:
+    name: 243642.yaml
+    checksum: 18562203fbb404a0606b1da4efaca8e14ff255d1
+- file:
+    name: 239634.yaml
+    checksum: affeaa040bffd6c8fa00e4bfe854732d2ff1b071
+- file:
+    name: 238547.yaml
+    checksum: cf0986f17c1a4848c16882adce1b1c951d452c78
+- file:
+    name: 241022.yaml
+    checksum: da14544254ca2f6ee31179b06cb9a90e6a0bbd64
+- file:
+    name: 249500.yaml
+    checksum: 54eb696ed995c2fc5e38aea3f36631e59eb9f70d
+- file:
+    name: 244719.yaml
+    checksum: 856f355de236a0037d5eca6188eea263a25976fd
+- file:
+    name: 243571.yaml
+    checksum: 9f17fcd7e22aec05571668748e521d370bb70453
+- file:
+    name: 238707.yaml
+    checksum: f58534e88a02960d56942c282ccb37cee73a278e
+- file:
+    name: 247964.yaml
+    checksum: 8d9ebcf8c85baedc4a955bdc9b31db1c5971d672
+- file:
+    name: 249891.yaml
+    checksum: 4992d92946cccb0797e3483783ff4caced8e8e83
+- file:
+    name: 240537.yaml
+    checksum: db793c85206a36393731fc05ab96845d0adf1a75
+- file:
+    name: 245488.yaml
+    checksum: f6598e7704682a16cb9cf6713962697a5915419a
+- file:
+    name: 238679.yaml
+    checksum: 29eee854061d79d9ebebacac794d041f351f0818
+- file:
+    name: 246089.yaml
+    checksum: e42cad8ad74a820b8671fa1deaa4728f46cd03f0
+- file:
+    name: 237871.yaml
+    checksum: fca0be5b0779ae97b708858ce2b7049ff58fc4ee
+- file:
+    name: 239245.yaml
+    checksum: ba60f04f208e6a8cc0a1ffdb39eee0225cfa917c
+- file:
+    name: 245888.yaml
+    checksum: e1b3c679f93c3028447307258d300e72671ff67c
+- file:
+    name: 248259.yaml
+    checksum: 87ec23760b7ecaa5d7fdc5bdaf83b6f38ee6c52a
+- file:
+    name: 242592.yaml
+    checksum: 20040652b2594537851edabf6a4577250874c9bd
+- file:
+    name: 240517.yaml
+    checksum: 03b15e4cf8def78509a9e0eac6a5323635911195
+- file:
+    name: 243511.yaml
+    checksum: 1a6b6cd04434f26495d9603ba08efe6d759f2e75
+- file:
+    name: 242171.yaml
+    checksum: 077b74ed8c3ac5f1523c6e337b1d2711d8e4e1cf
+- file:
+    name: 245030.yaml
+    checksum: 0d60962d50f528271ff68a5240180bc57371eb04
+- file:
+    name: 248481.yaml
+    checksum: 278798ba2fd5178fe270766fc7772eb7044b0a2f
+- file:
+    name: 246889.yaml
+    checksum: 8a47c23dbb4f23f2c14fb1a5728845876d647805
+- file:
+    name: 238740.yaml
+    checksum: b3c938658ea0eb45b3d69ccc5f6033c67d9ddb2e
+- file:
+    name: 246763.yaml
+    checksum: b0633094d3ec9dd9be32dc78bf5e666ab691fdd1
+- file:
+    name: 236318.yaml
+    checksum: 51caf3b05a469e07e90833604b66b6875941d151
+- file:
+    name: 244924.yaml
+    checksum: 54d4cdace86bae962083bf065d429cf59cac25b5
+- file:
+    name: 247060.yaml
+    checksum: 881c2ba7b89a8707e2ff44c60594a63dccc56243
+- file:
+    name: 240228.yaml
+    checksum: 3fbac8a752e7805a2fca8506833548e18f675baa
+- file:
+    name: 245712.yaml
+    checksum: 4085e35fc7d8eeb8ca2e7df92fbba888d9776249
+- file:
+    name: 246978.yaml
+    checksum: b6876004b509f1480be2bb014e91df9d2e0c4cbc
+- file:
+    name: 242595.yaml
+    checksum: 544d94ef09a468378f705f40a2cdc4d6d561badd
+- file:
+    name: 241911.yaml
+    checksum: 48ca6d33836c4d780c3e3bb9b0eda9b1aa07f441
+- file:
+    name: 241052.yaml
+    checksum: 82ab8abd4098df67162102427c67e1f99bb51b65
+- file:
+    name: 249032.yaml
+    checksum: f698857ce2870af3d42a346af1920f9c14189d8e
+- file:
+    name: 245857.yaml
+    checksum: b936be99758ea47a13f9634b33412f7da4a24910
+- file:
+    name: 243311.yaml
+    checksum: a553282192669cf3a573264c6916a6a0e482a9e5
+- file:
+    name: 236051.yaml
+    checksum: 72c1053a4720b20b86bcdcd422e030d83692c7af
+- file:
+    name: 237713.yaml
+    checksum: c472c4b5a109508b1e1054a2ad2687db3bb3061c
+- file:
+    name: 239453.yaml
+    checksum: c74ab8aea0ae95d2ccee7df1f44d1495887f6f8f
+- file:
+    name: 238038.yaml
+    checksum: c0f06e8a326ecc278fbf92de503d9aa9665cc118
+- file:
+    name: 242598.yaml
+    checksum: 8dcec386243ffc3ad4f00fb8ff3b96437c84f4be
+- file:
+    name: 237436.yaml
+    checksum: 1363722529736820abff3c1e4767af991da82f17
+- file:
+    name: 240272.yaml
+    checksum: 0cd23e0b92d02e728d4a43888e563d66094288af
+- file:
+    name: 245532.yaml
+    checksum: 4bd412d810ee76cd0972df7ee2c828c2d7e3b713
+- file:
+    name: 245924.yaml
+    checksum: 16857a56fd492428b36fbbc317a9a21baa0c4ff1

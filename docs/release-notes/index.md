@@ -21,6 +21,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+:::{include} _snippets/9.3.0/index.md
+:::
+
 ## 9.2.4 [kibana-9.2.4-release-notes]
 
 % ::::{NOTE}
