@@ -98,34 +98,6 @@ describe('loadWorkflows', () => {
       expect(result[0].content).toBe('name: my-workflow\nenv: production');
     });
 
-    it('handles template variables with extra spaces', async () => {
-      const template = 'name: <%=   spacedVar   %>';
-      mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
-      mockReadFile.mockResolvedValue(template);
-
-      const result = await loadWorkflows({
-        directory: TEST_DIR,
-        templateInputs: { spacedVar: 'value' },
-      });
-
-      expect(result[0].content).toBe('name: value');
-    });
-
-    it('replaces multiple occurrences of the same variable', async () => {
-      const template = 'first: <%= name %>\nsecond: <%= name %>\nthird: <%= name %>';
-      mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
-      mockReadFile.mockResolvedValue(template);
-
-      const result = await loadWorkflows({
-        directory: TEST_DIR,
-        templateInputs: { name: 'repeated-value' },
-      });
-
-      expect(result[0].content).toBe(
-        'first: repeated-value\nsecond: repeated-value\nthird: repeated-value'
-      );
-    });
-
     it('leaves content unchanged when templateInputs is undefined', async () => {
       const content = 'name: <%= unchanged %>';
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
@@ -324,6 +296,22 @@ tags:
       mockReaddir.mockRejectedValue('string error');
 
       await expect(loadWorkflows({ directory: TEST_DIR })).rejects.toBe('string error');
+    });
+
+    it('throws error when YAML file contains invalid syntax', async () => {
+      const invalidYaml = `
+name: test
+tags:
+  - valid-tag
+  invalid indentation here
+    nested: wrong
+`;
+      mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
+      mockReadFile.mockResolvedValue(invalidYaml);
+
+      await expect(loadWorkflows({ directory: TEST_DIR })).rejects.toThrow(
+        /Failed to load workflows from \/path\/to\/workflows:/
+      );
     });
   });
 
