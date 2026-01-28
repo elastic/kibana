@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+
 import { orderBy } from 'lodash';
-import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
@@ -209,7 +211,10 @@ export default ({ getService }: FtrProviderContext) => {
               let chunkCounter = 0;
               const parseStreamCallback = (c: number) => (chunkCounter = c);
 
-              for await (const action of parseStream(stream, parseStreamCallback)) {
+              for await (const action of parseStream(
+                Readable.fromWeb(stream as WebReadableStream),
+                parseStreamCallback
+              )) {
                 expect(action.type).not.to.be('error');
                 data.push(action);
               }

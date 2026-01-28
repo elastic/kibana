@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
