@@ -154,26 +154,32 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
 
   const isAiRuleCreationAvailable = aiAssistedRuleCreationEnabled && isAgentBuilderEnabled;
 
-  if (
-    redirectToDetections(
+  const needsRedirectToDetections = useMemo(() => {
+    return redirectToDetections(
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
       needsListsConfiguration
-    )
-  ) {
-    navigateToApp(APP_UI_ID, {
-      deepLinkId: SecurityPageName.alerts,
-      path: getDetectionEngineUrl(),
-    });
-    return null;
-  } else if (!canEditRules || !isAiRuleCreationAvailable) {
-    navigateToApp(APP_UI_ID, {
-      deepLinkId: SecurityPageName.rules,
-      path: getRulesUrl(),
-    });
-    return null;
-  }
+    );
+  }, [isSignalIndexExists, isAuthenticated, hasEncryptionKey, needsListsConfiguration]);
+
+  const canUserAccessAiAssistedRuleCreation = useMemo(() => {
+    return canEditRules && isAiRuleCreationAvailable;
+  }, [canEditRules, isAiRuleCreationAvailable]);
+
+  useEffect(() => {
+    if (needsRedirectToDetections) {
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.alerts,
+        path: getDetectionEngineUrl(),
+      });
+    } else if (!canUserAccessAiAssistedRuleCreation) {
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRulesUrl(),
+      });
+    }
+  }, [needsRedirectToDetections, navigateToApp, canUserAccessAiAssistedRuleCreation]);
 
   return showForm && rule ? (
     <CreateRulePage rule={rule} backComponent={backComponent} sendToAgentChat />

@@ -106,7 +106,7 @@ export const useAgentBuilderStream = () => {
         const http = KibanaServices.get().http;
         const payload = {
           agent_id: THREAT_HUNTING_AGENT_ID,
-          input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${userQuery}`,
+          input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
           attachments: [
