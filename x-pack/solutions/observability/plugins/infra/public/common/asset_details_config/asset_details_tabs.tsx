@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ContentTabIds, type Tab } from '../../components/asset_details/types';
 
 const overviewTab: Tab = {
@@ -64,6 +66,30 @@ const osqueryTab: Tab = {
   }),
 };
 
+const dashboardsTab: Tab = {
+  id: ContentTabIds.DASHBOARDS,
+  name: i18n.translate('xpack.infra.infra.nodeDetails.tabs.dashboards', {
+    defaultMessage: 'Dashboards',
+  }),
+  append: (
+    <EuiBetaBadge
+      label={i18n.translate('xpack.infra.customDashboards.technicalPreviewBadgeLabel', {
+        defaultMessage: 'Technical preview',
+      })}
+      tooltipContent={i18n.translate(
+        'xpack.infra.customDashboards.technicalPreviewBadgeDescription',
+        {
+          defaultMessage:
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+        }
+      )}
+      iconType="beaker"
+      size="s"
+      style={{ verticalAlign: 'middle' }}
+    />
+  ),
+};
+
 export const hostDetailsTabs: Tab[] = [
   overviewTab,
   metadataTab,
@@ -73,6 +99,7 @@ export const hostDetailsTabs: Tab[] = [
   logsTab,
   anomaliesTab,
   osqueryTab,
+  dashboardsTab,
 ];
 export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs];
 
