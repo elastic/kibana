@@ -105,7 +105,6 @@ export function transformToReactFlow(
   const allNodes = getAllNodes(data.servicesData, allConnections);
   const allServices = getAllServices(allNodes, paths.exitSpanDestinations, data.anomalies);
 
-  // Step 5: Map nodes - resolves exit spans to destinations
   const mappedNodes = mapNodes({
     allConnections,
     nodes: allNodes,
@@ -113,35 +112,35 @@ export function transformToReactFlow(
     exitSpanDestinations: paths.exitSpanDestinations,
   });
 
-  // Step 6: Map edges
   const mappedEdges = mapEdges({ allConnections, nodes: mappedNodes });
 
-  // Step 7: Get unique nodes from edges + standalone services
   const uniqueNodes = mappedEdges
     .flatMap((edge) => [edge.sourceData, edge.targetData])
     .concat([...allServices.values()])
     .reduce((acc, node) => {
-      if (!acc.has(node.id)) {
+      if (node && typeof node.id === 'string' && !acc.has(node.id)) {
         acc.set(node.id, node);
       }
       return acc;
     }, new Map<string, ConnectionNode>());
 
-  // Step 8: Mark bidirectional connections
   const markedEdges = [
     ...markBidirectionalConnections({
       connections: [...mappedEdges].sort((a, b) => a.id.localeCompare(b.id)),
     }),
   ];
 
-  // Step 9: Convert directly to React Flow format
   const reactFlowNodes = [...uniqueNodes.values()]
     .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
     .map(toReactFlowNode);
 
-  const reactFlowEdges = markedEdges.filter((edge) => !edge.isInverseEdge).map(toReactFlowEdge);
+  const reactFlowEdges: ServiceMapEdge[] = [];
+  for (const edge of markedEdges) {
+    if (!edge.isInverseEdge) {
+      reactFlowEdges.push(toReactFlowEdge(edge));
+    }
+  }
 
-  // Step 10: Apply grouping
   const grouped = groupReactFlowNodes(reactFlowNodes, reactFlowEdges);
 
   return {
