@@ -110,7 +110,9 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.dimensionFieldComboBox.selectSingleOption(field);
+    await this.dimensionFieldComboBox.selectSingleOption(field, {
+      optionTestSubj: `lns-fieldOption-${field}`,
+    });
   }
 
   private async openChartSwitchPopover() {

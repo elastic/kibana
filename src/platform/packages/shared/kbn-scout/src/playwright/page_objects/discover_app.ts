@@ -23,14 +23,12 @@ export class DiscoverApp {
   private async getVisibleDataViewSwitch() {
     const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
     const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
-
-    try {
-      await discoverSwitch.waitFor({ state: 'visible', timeout: 30_000 });
+    const anySwitch = discoverSwitch.or(fallbackSwitch);
+    await expect(anySwitch).toBeVisible({ timeout: 30_000 });
+    if (await discoverSwitch.isVisible()) {
       return discoverSwitch;
-    } catch {
-      await fallbackSwitch.waitFor({ state: 'visible', timeout: 30_000 });
-      return fallbackSwitch;
     }
+    return fallbackSwitch;
   }
 
   private async waitForDataViewSwitch() {
@@ -44,7 +42,7 @@ export class DiscoverApp {
       return;
     }
     await dataViewSwitch.click();
-    await this.page.testSubj.waitForSelector('indexPattern-switcher');
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
@@ -54,14 +52,14 @@ export class DiscoverApp {
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
-    return this.page.locator(
-      '[data-test-subj~="discover-dataView-switch-link"], [data-test-subj~="dataView-switch-link"]'
-    );
+    return this.page.testSubj
+      .locator('discover-dataView-switch-link')
+      .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
   async clickNewSearch() {
