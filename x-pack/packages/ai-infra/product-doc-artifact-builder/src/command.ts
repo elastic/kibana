@@ -99,7 +99,7 @@ export function runScript() {
         sourceClusterUrl: argv.sourceClusterUrl!,
         sourceClusterUsername: argv.sourceClusterUsername!,
         sourceClusterPassword: argv.sourceClusterPassword!,
-        sourceClusterApiKey: argv.sourceClusterApiKey,
+        sourceClusterApiKey: argv.sourceClusterApiKey!,
         sourceClusterIndex: argv.sourceClusterIndex!,
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,

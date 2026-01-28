@@ -20,6 +20,6 @@ export const getArtifactManifest = ({
     formatVersion,
     productName,
     productVersion: stackVersion,
-    ts: new Date().toISOString(),
+    ts: `${Date.now()}`,
   };
 };
