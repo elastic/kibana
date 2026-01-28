@@ -69,6 +69,7 @@ export class DispatcherService implements DispatcherServiceContract {
         `Dispatcher found ${nextRuleIds.length} unique rules with alert episodes to dispatch.`,
     });
 
+    // TODO: Rule might have more than one policy attached to it
     const policies = await this.findPoliciesAttachedToRules(nextRuleIds);
     this.logger.info({
       message: () =>
@@ -76,6 +77,7 @@ export class DispatcherService implements DispatcherServiceContract {
     });
 
     for (const alertEpisode of next) {
+      // TODO: Rule might have more than one policy attached to it
       const policy = policies.get(alertEpisode.rule_id);
       if (!policy) {
         this.logger.info({
