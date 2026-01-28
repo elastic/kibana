@@ -719,6 +719,21 @@ describe('validation and stats', () => {
       }
     });
 
+    it.skip('does not flag destructured params when `@param obj` exists', () => {
+      const fn = doc.client.find((c) => c.label === 'crazyFunction');
+      expect(fn).toBeDefined();
+
+      const objParam = fn!.children?.find((c) => c.label === 'obj');
+      expect(objParam).toBeDefined();
+      expect(objParam!.description).toBeDefined();
+      // Expected once fixed: the @param obj comment is captured.
+      expect(objParam!.description!.length).toBeGreaterThan(0);
+
+      const missingComment = pluginAStats.missingComments.find((d) => d.id === objParam!.id);
+      // Expected once fixed: the destructured param should not be flagged as missing.
+      expect(missingComment).toBeUndefined();
+    });
+
     it('validates missingComments does not include APIs with descriptions', () => {
       // notAnArrowFn has complete JSDoc
       const fn = doc.client.find((c) => c.label === 'notAnArrowFn');
