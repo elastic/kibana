@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiPanel, EuiSpacer } from '@
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import type { LinkPanelListItem } from './types';
+import { i18n } from '@kbn/i18n';
 
 const PAGE_SIZE = 5;
 
@@ -133,6 +134,10 @@ const LinkPanelComponent = ({
                   onChange={onTableChange}
                   pagination={pagination}
                   sorting={sorting}
+                  tableCaption={i18n.translate('xpack.securitySolution.linkPanel.tableCaption', {
+                    defaultMessage: '{panelTitle} links',
+                    values: { panelTitle },
+                  })}
                 />
               )}
             </EuiPanel>

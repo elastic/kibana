@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -123,6 +124,12 @@ const SummaryTableComponent: React.FC<Props> = ({
           : undefined
       }
       sorting={sorting}
+      tableCaption={i18n.translate(
+        'xpack.security.solution.dataQualityPanel.summaryTable.caption',
+        {
+          defaultMessage: 'Index summary',
+        }
+      )}
     />
   );
 };

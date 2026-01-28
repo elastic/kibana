@@ -109,6 +109,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
               columns={columns}
               loading={isLoading}
               data-test-subj="severityHostAlertsTable"
+              tableCaption={i18n.HOST_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
