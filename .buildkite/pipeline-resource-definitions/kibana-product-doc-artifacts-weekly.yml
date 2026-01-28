@@ -9,7 +9,7 @@ metadata:
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:kibana-operations'
+  owner: 'group:appex-ai-infra'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -37,6 +37,8 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
+        appex-ai-infra:
+          access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-qa:
@@ -45,7 +47,7 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
         Weekly build:
-          cronline: 0 2 * * 1 America/New_York  # Monday 2 AM EST
+          cronline: 0 9 * * 6 America/Chicago  # Saturday 9 AM CT
           message: Weekly product documentation artifacts build
           branch: main
           env:
