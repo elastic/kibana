@@ -141,29 +141,20 @@ export async function updateDSFailureStore(
   });
 }
 
-let abortController: AbortController;
 export async function loadIndices(
   onIndicesLoaded: (indices: Index[]) => void,
-  onEnrichmentError: (source: string) => void
+  onEnrichmentError: (source: string) => void,
+  abortSignal: AbortSignal
 ) {
-  if (abortController && !abortController.signal.aborted) {
-    abortController.abort();
-  }
-
-  abortController = new AbortController();
-
   const indicesPromise = httpService.httpClient.get<Record<string, Index>>(
     `${API_BASE_PATH}/indices_get`,
     {
-      signal: abortController.signal,
+      signal: abortSignal,
     }
   );
 
   // Run all requests in parallel
-  const enrichedPromises = indexDataEnricher.enrichIndices(
-    httpService.httpClient,
-    abortController.signal
-  );
+  const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient, abortSignal);
 
   // we'll wait for the main request to complete first so the index list has stability
   const indices = await indicesPromise.catch((error) => {

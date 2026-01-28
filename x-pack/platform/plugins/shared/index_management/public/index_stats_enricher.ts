@@ -20,7 +20,7 @@ export const indexStatsEnricher = {
   fn: async (client: HttpSetup, signal: AbortSignal): Promise<EnricherResponse> =>
     client
       .get<IndicesStatsResponse>(`${API_BASE_PATH}/indices_stats`, { signal })
-      .then(async (response) => {
+      .then((response) => {
         const indices = response.indices || {};
         return {
           indices: Object.keys(indices).map((name) => ({
