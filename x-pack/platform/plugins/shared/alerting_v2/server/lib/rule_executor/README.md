@@ -96,10 +96,8 @@ Steps are self-contained units of work that implement `RuleExecutionStep`:
 | `WaitForResourcesStep` | Waits for ES resources to be ready | 
 | `FetchRuleStep` | Fetches rule from Saved Objects | 
 | `ValidateRuleStep` | Validates rule is enabled | 
-| `BuildQueryStep` | Builds ES|QL query payload | 
-| `ExecuteQueryStep` | Executes ES|QL query | 
-| `BuildAlertsStep` | Transforms results to alerts | 
-| `StoreAlertsStep` | Bulk indexes alerts | 
+| `ExecuteRuleQueryStep` | Builds and executes ES|QL query | 
+| `CreateAlertEventsStep` | Builds and stores alert events | 
 
 ## Key Design Principles
 
@@ -216,11 +214,9 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
       get(WaitForResourcesStep),
       get(FetchRuleStep),
       get(ValidateRuleStep),
-      get(BuildQueryStep),
+      get(ExecuteRuleQueryStep),
       get(MyNewStep),          // <-- Insert at desired position
-      get(ExecuteQueryStep),
-      get(BuildAlertsStep),
-      get(StoreAlertsStep),
+      get(CreateAlertEventsStep),
     ])
     .inRequestScope();
 };
@@ -403,10 +399,8 @@ bind(RuleExecutionStepsToken)
       get(FetchRuleStep),
       // Only ValidateRuleStep gets audit logging
       new AuditLoggingDecorator(get(ValidateRuleStep), auditService),
-      get(BuildQueryStep),
-      get(ExecuteQueryStep),
-      get(BuildAlertsStep),
-      get(StoreAlertsStep),
+      get(ExecuteRuleQueryStep),
+      get(CreateAlertEventsStep),
     ];
   })
   .inRequestScope();

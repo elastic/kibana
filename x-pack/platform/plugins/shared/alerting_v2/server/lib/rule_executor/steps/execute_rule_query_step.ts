@@ -12,18 +12,25 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import {
+  QueryService,
+  type QueryServiceContract,
+} from '../../services/query_service/query_service';
 
 @injectable()
-export class BuildQueryStep implements RuleExecutionStep {
-  public readonly name = 'build_query';
+export class ExecuteRuleQueryStep implements RuleExecutionStep {
+  public readonly name = 'execute_rule_query';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  constructor(
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(QueryService) private readonly queryService: QueryServiceContract
+  ) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
     const { rule, input } = state;
 
     if (!rule) {
-      throw new Error('BuildQueryStep requires rule from previous step');
+      throw new Error('ExecuteRuleQueryStep requires rule from previous step');
     }
 
     const queryPayload = getQueryPayload({
@@ -41,6 +48,23 @@ export class BuildQueryStep implements RuleExecutionStep {
         })}`,
     });
 
-    return { type: 'continue', data: { queryPayload } };
+    let esqlResponse;
+
+    try {
+      esqlResponse = await this.queryService.executeQuery({
+        query: rule.query,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+        abortSignal: input.abortSignal,
+      });
+    } catch (error) {
+      if (input.abortSignal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
+      }
+
+      throw error;
+    }
+
+    return { type: 'continue', data: { queryPayload, esqlResponse } };
   }
 }

@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import { buildAlertEventsFromEsqlResponse } from '../build_alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
@@ -16,8 +17,8 @@ import {
 } from '../../services/logger_service/logger_service';
 
 @injectable()
-export class StoreAlertsStep implements RuleExecutionStep {
-  public readonly name = 'store_alerts';
+export class CreateAlertEventsStep implements RuleExecutionStep {
+  public readonly name = 'create_alert_events';
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
@@ -25,11 +26,24 @@ export class StoreAlertsStep implements RuleExecutionStep {
   ) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { alertEvents, input } = state;
+    const { rule, esqlResponse, input } = state;
 
-    if (!alertEvents) {
-      throw new Error('StoreAlertsStep requires alertEvents from previous step');
+    if (!rule) {
+      throw new Error('CreateAlertEventsStep requires rule from previous step');
     }
+
+    if (!esqlResponse) {
+      throw new Error('CreateAlertEventsStep requires esqlResponse from previous step');
+    }
+
+    const alertEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: input.ruleId,
+      spaceId: input.spaceId,
+      ruleAttributes: rule,
+      esqlResponse,
+      scheduledTimestamp: input.scheduledAt,
+      ruleVersion: 1,
+    });
 
     const targetDataStream = ALERT_EVENTS_DATA_STREAM;
 
