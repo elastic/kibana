@@ -125,7 +125,7 @@ beforeAll(async () => {
     referencedDeprecations,
     adoptionTrackedAPIs,
     unnamedExports,
-  } = getPluginApiMap(project, plugins, log, { collectReferences: false });
+  } = getPluginApiMap(project, plugins, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 

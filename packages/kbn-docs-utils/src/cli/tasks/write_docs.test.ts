@@ -69,6 +69,7 @@ describe('writeDocs', () => {
       pathsByPlugin: new Map(),
       project: {} as any,
       initialDocIds: ['doc1', 'doc2'],
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {

@@ -204,23 +204,23 @@ Key files:
 ## Phase 7: Improve Performance of Single Package Builds and Validation
 
 ### Phase 7.1: Optimize TypeScript Project Loading
-- [ ] Update `getTsProject` in [packages/kbn-docs-utils/src/cli/tasks/setup_project.ts](packages/kbn-docs-utils/src/cli/tasks/setup_project.ts):
+- [x] Update `getTsProject` in [packages/kbn-docs-utils/src/cli/tasks/setup_project.ts](packages/kbn-docs-utils/src/cli/tasks/setup_project.ts):
   - For single-plugin builds, only load source files from the target plugin directory
   - Skip `resolveSourceFileDependencies()` for single-plugin builds; rely on lazy resolution
-- [ ] Add `allPlugins` to `SetupProjectResult` for cross-reference resolution
+- [x] Add `allPlugins` to `SetupProjectResult` for cross-reference resolution
 
 ### Phase 7.2: Optimize Documentation Writing
-- [ ] Update `writeDocs` in [packages/kbn-docs-utils/src/cli/tasks/write_docs.ts](packages/kbn-docs-utils/src/cli/tasks/write_docs.ts):
+- [x] Update `writeDocs` in [packages/kbn-docs-utils/src/cli/tasks/write_docs.ts](packages/kbn-docs-utils/src/cli/tasks/write_docs.ts):
   - Skip aggregate docs (plugin directory, deprecation summaries) for filtered builds
   - Move deprecation doc writing outside the per-plugin loop
 
 ### Phase 7.3: Handle Cross-References in Single-Package Builds
-- [ ] Update `removeBrokenLinksFromApi` in [packages/kbn-docs-utils/src/utils.ts](packages/kbn-docs-utils/src/utils.ts):
+- [x] Update `removeBrokenLinksFromApi` in [packages/kbn-docs-utils/src/utils.ts](packages/kbn-docs-utils/src/utils.ts):
   - When validating cross-package links, keep references as-is if the target plugin isn't loaded
 
 ### Phase 7.4: Update Tests
-- [ ] Update [packages/kbn-docs-utils/src/cli/tasks/setup_project.test.ts](packages/kbn-docs-utils/src/cli/tasks/setup_project.test.ts) with single-plugin tests
-- [ ] Update other affected test files
+- [x] Update [packages/kbn-docs-utils/src/cli/tasks/setup_project.test.ts](packages/kbn-docs-utils/src/cli/tasks/setup_project.test.ts) with single-plugin tests
+- [x] Update other affected test files
 
 ## Phase 8: APM Metrics for New Validation Fields
 - [ ] Add APM metrics for `missingReturns` count
