@@ -50,6 +50,11 @@ describe('initialize edit api', () => {
           .mockClear()
           .mockResolvedValueOnce('/base/state-url-for-redirect'); // For urlWithoutLocationState
         jest
+          .spyOn(discoverServiceMock.locator, 'getLocation')
+          .mockClear()
+          .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} })
+          .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} });
+        jest
           .spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For editPath (applied to getRedirectUrl result)
@@ -58,12 +63,16 @@ describe('initialize edit api', () => {
         jest
           .spyOn(discoverServiceMock.locator, 'getUrl')
           .mockClear()
-          .mockResolvedValueOnce('/base/discover-home') // For getUrl({}) -> urlWithoutLocationState
           .mockResolvedValueOnce('/base/mock-url'); // For getUrl(locatorParams) -> raw editUrl
         jest
           .spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For remove('/base/mock-url') -> editPath
+        jest
+          .spyOn(discoverServiceMock.locator, 'getLocation')
+          .mockClear()
+          .mockResolvedValueOnce({ app: 'discover', path: '/discover-home', state: {} })
+          .mockResolvedValueOnce({ app: 'discover', path: '/mock-url', state: {} });
       }
 
       mockedApi.dataViews$.next([currentDataView]);
@@ -93,17 +102,16 @@ describe('initialize edit api', () => {
       urlWithoutLocationState: string;
     }) => {
       const locatorParams = getDiscoverLocatorParams(mockedApi);
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(2);
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith({}); // For urlWithoutLocationState
+      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(1);
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith(locatorParams); // For raw editUrl
-
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(2);
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledTimes(2);
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith({});
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith(locatorParams);
 
       expect(editApp).toBe('discover');
-      expect(editPath).toBe('/base/mock-url'); // Result of basePath.remove
+      expect(editPath).toBe('/mock-url'); // Result of getLocation().path
       expect(editUrl).toBe('/base/mock-url'); // Raw editUrl before basePath.remove
-      expect(urlWithoutLocationState).toBe('/base/discover-home');
+      expect(urlWithoutLocationState).toBe('/discover-home');
     };
 
     it('should correctly output edit link params for by reference saved search', async () => {
@@ -136,19 +144,17 @@ describe('initialize edit api', () => {
       const locatorParams = getDiscoverLocatorParams(mockedApi);
 
       // Assertions for urlWithoutLocationState part (getUrl({}))
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(1);
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith({});
+      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(0);
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledTimes(2);
 
-      // Assertions for redirect part (getRedirectUrl and basePath.remove)
+      // Assertions for redirect part
       expect(discoverServiceMock.locator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(discoverServiceMock.locator.getRedirectUrl).toHaveBeenCalledWith(locatorParams);
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(2);
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
 
       expect(editApp).toBe('r');
-      expect(editPath).toBe('/base/mock-url');
+      expect(editPath).toBe('/state-url-for-redirect');
       expect(editUrl).toBe('/base/mock-url');
-      expect(urlWithoutLocationState).toBe('/base/state-url-for-redirect');
+      expect(urlWithoutLocationState).toBe('/state-url-for-redirect');
     });
   });
 
@@ -166,12 +172,12 @@ describe('initialize edit api', () => {
     jest
       .spyOn(discoverServiceMock.locator, 'getUrl')
       .mockClear()
-      .mockResolvedValueOnce('/base/discover-home-for-onedit') // For getUrl({})
       .mockResolvedValueOnce('/base/mock-url-for-onedit'); // For getUrl(locatorParams)
     jest
-      .spyOn(discoverServiceMock.core.http.basePath, 'remove')
+      .spyOn(discoverServiceMock.locator, 'getLocation')
       .mockClear()
-      .mockReturnValueOnce('/mock-url-for-onedit');
+      .mockResolvedValueOnce({ app: 'discover', path: '/discover-home-for-onedit', state: {} })
+      .mockResolvedValueOnce({ app: 'discover', path: '/mock-url-for-onedit', state: {} });
 
     const { onEdit } = initializeEditApi({
       uuid: 'test',
@@ -190,7 +196,7 @@ describe('initialize edit api', () => {
     await onEdit();
     expect(mockedNavigate).toBeCalledTimes(1);
     expect(mockedNavigate).toBeCalledWith('discover', {
-      path: '/base/mock-url-for-onedit',
+      path: '/mock-url-for-onedit',
       state: expect.objectContaining({
         embeddableId: 'test',
         originatingApp: 'dashboard',

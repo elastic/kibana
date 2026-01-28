@@ -38,23 +38,21 @@ export async function getAppTarget(
   // an ad hoc data view to ensure the data view spec gets encoded in the URL
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
 
-  const urlWithoutLocationState = await discoverServices.locator.getUrl({});
-  const pathWithoutLocationState =
-    discoverServices.core.http.basePath.remove(urlWithoutLocationState);
+  const locationWithoutState = await discoverServices.locator.getLocation({});
 
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
     : await discoverServices.locator.getUrl(locatorParams);
 
-  const editPath = discoverServices.core.http.basePath.remove(editUrl);
+  const editPath = (await discoverServices.locator.getLocation(locatorParams)).path;
   const editApp = useRedirect ? 'r' : 'discover';
 
   return {
     path: editPath,
     app: editApp,
     editUrl,
-    urlWithoutLocationState,
-    pathWithoutLocationState,
+    urlWithoutLocationState: locationWithoutState.path,
+    locationWithoutState,
   };
 }
 
@@ -117,7 +115,7 @@ export function initializeEditApi<
         ({ app, path } = appTarget);
       } else {
         app = 'discover';
-        path = appTarget.pathWithoutLocationState;
+        path = appTarget.urlWithoutLocationState;
       }
 
       await stateTransfer.navigateToEditor(app, {

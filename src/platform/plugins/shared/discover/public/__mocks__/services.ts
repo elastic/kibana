@@ -259,6 +259,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),
       getUrl: jest.fn(() => Promise.resolve('')),
+      getLocation: jest.fn(() => Promise.resolve({ app: '', path: '' })),
       getRedirectUrl: jest.fn(() => ''),
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
