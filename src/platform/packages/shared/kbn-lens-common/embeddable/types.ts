@@ -328,7 +328,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
