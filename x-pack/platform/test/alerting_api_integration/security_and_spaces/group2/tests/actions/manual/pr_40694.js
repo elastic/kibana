@@ -7,8 +7,6 @@
  * 2.0.
  */
 
-const fetch = require('node-fetch');
-
 const KBN_URLBASE = process.env.KBN_URLBASE || 'http://elastic:changeme@localhost:5601';
 
 if (require.main === module) main();
