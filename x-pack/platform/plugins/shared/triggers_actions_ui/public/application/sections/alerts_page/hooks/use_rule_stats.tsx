@@ -31,6 +31,7 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
   const {
     http,
     notifications: { toasts },
+    application: { isAppRegistered },
   } = useKibana().services;
   const [loading, setLoading] = useState<boolean>(false);
   const [stats, setStats] = useState({
@@ -40,9 +41,14 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
     error: 0,
     snoozed: 0,
   });
+
+  const unifiedRulesPageEnabled = isAppRegistered('rules');
   const manageRulesHref = useMemo(
-    () => http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
-    [http.basePath]
+    () =>
+      unifiedRulesPageEnabled
+        ? http.basePath.prepend('/app/rules')
+        : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
+    [http.basePath, unifiedRulesPageEnabled]
   );
 
   const loadRuleStats = useCallback(async () => {

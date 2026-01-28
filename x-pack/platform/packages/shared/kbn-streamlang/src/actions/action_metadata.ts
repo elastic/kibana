@@ -606,6 +606,35 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  concat: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.concat.name', {
+      defaultMessage: 'Concat',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.concat.description', {
+      defaultMessage: 'Concatenate one or more fields and literals',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.concat.usage', {
+      defaultMessage:
+        'Provide a `to` field to store the concatenated value along with a `from` array to specify the values to concatenate. Use `type` to specify the type of from values (field or literal).',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.concat.examples.simple', {
+          defaultMessage: 'Concatenate two fields with an underscore between',
+        }),
+        yaml: `- action: concat
+    from:
+      - type: field
+        value: first_name
+      - type: literal
+        value: _
+      - type: field
+        value: last_name
+    to: full_name`,
+      },
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',
