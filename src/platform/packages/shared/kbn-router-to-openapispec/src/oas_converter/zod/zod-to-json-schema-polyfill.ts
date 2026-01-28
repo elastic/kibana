@@ -593,9 +593,10 @@ const arrayProcessor: Processor = (schema, ctx, json, params) => {
   }
 
   // Handle length constraints (Zod v3)
-  if (def.minLength !== undefined) json.minItems = def.minLength.value;
-  if (def.maxLength !== undefined) json.maxItems = def.maxLength.value;
-  if (def.exactLength !== undefined) {
+  // Note: Zod v3 uses null for unset values, so we need to check for both undefined and null
+  if (def.minLength != null) json.minItems = def.minLength.value;
+  if (def.maxLength != null) json.maxItems = def.maxLength.value;
+  if (def.exactLength != null) {
     json.minItems = def.exactLength.value;
     json.maxItems = def.exactLength.value;
   }
