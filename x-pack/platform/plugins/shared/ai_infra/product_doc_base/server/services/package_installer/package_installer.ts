@@ -118,12 +118,18 @@ export class PackageInstaller {
       if (!availableVersions || !availableVersions.length) {
         return;
       }
-      const shouldInstallLatest =
-        this.isServerless && availableVersions.includes(LATEST_PRODUCT_VERSION);
-      const selectedVersion = shouldInstallLatest
-        ? LATEST_PRODUCT_VERSION
-        : selectVersion(this.currentVersion, availableVersions);
+      // Serverless/"latest" zip file has a special versioning strategy
+      // where we track by last date modified in the bucket
+      const shouldInstallLatest = this.isServerless;
+      const selectedVersion = selectVersion(
+        this.currentVersion,
+        availableVersions,
+        shouldInstallLatest
+      );
       if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
+        this.log.info(
+          `Updating product [${productName}] from version [${productState.version}] to version [${selectedVersion}]`
+        );
         toUpdate.push({
           productName: productName as ProductName,
           productVersion: selectedVersion,
@@ -156,11 +162,12 @@ export class PackageInstaller {
         continue;
       }
 
-      const shouldInstallLatest =
-        this.isServerless && availableVersions.includes(LATEST_PRODUCT_VERSION);
-      const selectedVersion = shouldInstallLatest
-        ? LATEST_PRODUCT_VERSION
-        : selectVersion(this.currentVersion, availableVersions);
+      const shouldInstallLatest = this.isServerless;
+      const selectedVersion = selectVersion(
+        this.currentVersion,
+        availableVersions,
+        shouldInstallLatest
+      );
 
       await this.installPackage({
         productName,
@@ -185,7 +192,13 @@ export class PackageInstaller {
       `Starting installing documentation for product [${productName}] and version [${productVersion}] with inference ID [${inferenceId}]`
     );
 
-    productVersion = this.isServerless ? LATEST_PRODUCT_VERSION : majorMinor(productVersion);
+    // Artifact name will always be {doc}-latest.zip,
+    // but we store the last modified date in productVersion for tracking (e.g. "latest-2026-01-27T23:25:54.727Z")
+    // so that's the artifact product version we will use
+    const artifactProductVersion = this.isServerless ? productVersion : majorMinor(productVersion);
+    const artifactFileNameVersion = this.isServerless
+      ? LATEST_PRODUCT_VERSION
+      : majorMinor(productVersion);
 
     await this.uninstallPackage({ productName, inferenceId });
 
@@ -193,7 +206,7 @@ export class PackageInstaller {
     try {
       await this.productDocClient.setInstallationStarted({
         productName,
-        productVersion,
+        productVersion: artifactProductVersion,
         inferenceId,
       });
 
@@ -217,7 +230,7 @@ export class PackageInstaller {
 
       const artifactFileName = getArtifactName({
         productName,
-        productVersion,
+        productVersion: artifactFileNameVersion,
         inferenceId: customInference?.inference_id ?? this.elserInferenceId,
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
@@ -534,8 +547,22 @@ export class PackageInstaller {
   }
 }
 
-const selectVersion = (currentVersion: string, availableVersions: string[]): string => {
-  return availableVersions.includes(currentVersion)
+const selectVersion = (
+  currentVersion: string,
+  availableVersions: string[],
+  isServerless: boolean
+): string => {
+  const latestAvailableVersion = availableVersions.includes(currentVersion)
     ? currentVersion
     : latestVersion(availableVersions, currentVersion);
+
+  if (isServerless) {
+    const latestServerlessVersions = availableVersions.filter((version) =>
+      version.includes(LATEST_PRODUCT_VERSION)
+    );
+    return latestServerlessVersions.length > 0
+      ? latestServerlessVersions[0]
+      : latestAvailableVersion;
+  }
+  return latestAvailableVersion;
 };

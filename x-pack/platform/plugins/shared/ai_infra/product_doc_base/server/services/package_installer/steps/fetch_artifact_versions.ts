@@ -17,7 +17,7 @@ import Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
-
+import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
 export const fetchArtifactVersions = async ({
@@ -56,10 +56,18 @@ export const fetchArtifactVersions = async ({
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
+        const dateModified = contentEntry.LastModified[0];
         const parsed = parseArtifactName(artifactName);
         if (parsed) {
           const { productName, productVersion } = parsed;
-          record[productName]!.push(productVersion);
+          record[productName]!.push(
+            // If productVersion is `latest`, we want to keep track of the date the artifact was uploaded to bucket
+            // as that's our versioning for latest updated
+            productVersion === LATEST_PRODUCT_VERSION
+              ? // so "latest" ->  "latest-2026-01-27T23:25:54.727Z"
+                `${productVersion}-${dateModified}`
+              : productVersion
+          );
         }
       });
 
