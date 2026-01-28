@@ -60,7 +60,7 @@ describe('Converter Helpers', () => {
         stream: {
           description: '',
           query: {
-            view: 'stream.my-query-stream',
+            view: '$.my-query-stream',
             esql: 'FROM logs | WHERE service.name == "test"',
           },
         },
@@ -70,7 +70,7 @@ describe('Converter Helpers', () => {
 
       expect(Streams.QueryStream.Definition.is(definition)).toEqual(true);
       expect((definition as Streams.QueryStream.Definition).query.view).toEqual(
-        'stream.my-query-stream'
+        '$.my-query-stream'
       );
     });
   });
@@ -168,7 +168,7 @@ describe('Converter Helpers', () => {
           description: '',
           updated_at: new Date().toISOString(),
           query: {
-            view: 'stream.my-query-stream',
+            view: '$.my-query-stream',
             esql: 'FROM logs | WHERE service.name == "test"',
           },
         },
@@ -181,7 +181,7 @@ describe('Converter Helpers', () => {
 
       expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
       expect((upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view).toEqual(
-        'stream.my-query-stream'
+        '$.my-query-stream'
       );
     });
   });
