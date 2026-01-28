@@ -54,7 +54,6 @@ interface StreamsInsightsGeneratedProps {
 interface StreamsProcessingPipelineSuggestedProps {
   duration_ms: number;
   steps_used: number;
-  max_steps: number;
   success: boolean;
   stream_name: string;
   stream_type: StreamType;

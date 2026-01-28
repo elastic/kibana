@@ -264,7 +264,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         telemetry.trackProcessingPipelineSuggested({
           duration_ms: durationMs,
           steps_used: result.metadata.stepsUsed,
-          max_steps: result.metadata.maxSteps,
           success: result.pipeline !== null,
           stream_name: stream.name,
           stream_type: getStreamTypeFromDefinition(stream),

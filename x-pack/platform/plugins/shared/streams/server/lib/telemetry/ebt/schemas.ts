@@ -206,12 +206,6 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
         description: 'The number of reasoning steps the LLM took to generate the suggestion',
       },
     },
-    max_steps: {
-      type: 'long',
-      _meta: {
-        description: 'The maximum number of reasoning steps allowed',
-      },
-    },
     success: {
       type: 'boolean',
       _meta: {

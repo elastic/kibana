@@ -192,7 +192,6 @@ describe('EbtTelemetryClient', () => {
       client.trackProcessingPipelineSuggested({
         duration_ms: 5000,
         steps_used: 4,
-        max_steps: 6,
         success: true,
         stream_name: 'logs-test',
         stream_type: 'wired',
@@ -203,7 +202,6 @@ describe('EbtTelemetryClient', () => {
         {
           duration_ms: 5000,
           steps_used: 4,
-          max_steps: 6,
           success: true,
           stream_name: 'logs-test',
           stream_type: 'wired',
@@ -215,7 +213,6 @@ describe('EbtTelemetryClient', () => {
       client.trackProcessingPipelineSuggested({
         duration_ms: 2000,
         steps_used: 2,
-        max_steps: 6,
         success: false,
         stream_name: 'logs-test',
         stream_type: 'classic',
@@ -226,7 +223,6 @@ describe('EbtTelemetryClient', () => {
         {
           duration_ms: 2000,
           steps_used: 2,
-          max_steps: 6,
           success: false,
           stream_name: 'logs-test',
           stream_type: 'classic',
@@ -238,7 +234,6 @@ describe('EbtTelemetryClient', () => {
       client.trackProcessingPipelineSuggested({
         duration_ms: 100,
         steps_used: 0,
-        max_steps: 6,
         success: false,
         stream_name: 'logs-empty',
         stream_type: 'wired',
@@ -249,7 +244,6 @@ describe('EbtTelemetryClient', () => {
         {
           duration_ms: 100,
           steps_used: 0,
-          max_steps: 6,
           success: false,
           stream_name: 'logs-empty',
           stream_type: 'wired',
