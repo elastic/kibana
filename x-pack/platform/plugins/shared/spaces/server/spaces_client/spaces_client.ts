@@ -103,12 +103,16 @@ export class SpacesClient implements ISpacesClient {
     private readonly buildFlavour: BuildFlavor,
     private readonly features: FeaturesPluginStart,
     private readonly cpsSetup: CPSServerSetup | undefined,
-    private readonly npreClient: INpreClient
+    private readonly npreClient: INpreClient | undefined
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
       features.getKibanaFeatures()
     );
+
+    if (cpsSetup?.getCpsEnabled() && !npreClient) {
+      throw new Error('NpreClient must be provided when CPS is enabled');
+    }
   }
 
   public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
@@ -136,7 +140,7 @@ export class SpacesClient implements ISpacesClient {
     const space = this.transformSavedObjectToSpace(savedObject);
 
     if (this.cpsSetup?.getCpsEnabled()) {
-      space.projectRouting = await this.npreClient.getNpre(getSpaceDefaultNpreName(id));
+      space.projectRouting = await this.npreClient!.getNpre(getSpaceDefaultNpreName(id));
     }
 
     return space;
@@ -180,7 +184,7 @@ export class SpacesClient implements ISpacesClient {
         throw Boom.badRequest(
           'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
         );
-      } else if (!(await this.npreClient.canPutNpre())) {
+      } else if (!(await this.npreClient!.canPutNpre())) {
         throw Boom.forbidden(
           'Unable to update Space, user is not authorized to update projectRouting'
         );
@@ -199,7 +203,7 @@ export class SpacesClient implements ISpacesClient {
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
     if (projectRoutingExpression) {
-      await this.npreClient.putNpre(getSpaceDefaultNpreName(id), projectRoutingExpression);
+      await this.npreClient!.putNpre(getSpaceDefaultNpreName(id), projectRoutingExpression);
     }
 
     this.debugLogger(`SpacesClient.create(), created space object`);
@@ -207,7 +211,7 @@ export class SpacesClient implements ISpacesClient {
     const savedSpace = this.transformSavedObjectToSpace(createdSavedObject);
 
     if (projectRoutingExpression) {
-      savedSpace.projectRouting = await this.npreClient.getNpre(getSpaceDefaultNpreName(id));
+      savedSpace.projectRouting = await this.npreClient!.getNpre(getSpaceDefaultNpreName(id));
     }
 
     return savedSpace;
@@ -240,15 +244,15 @@ export class SpacesClient implements ISpacesClient {
         throw Boom.badRequest(
           'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
         );
-      } else if (!(await this.npreClient.canPutNpre())) {
+      } else if (!(await this.npreClient!.canPutNpre())) {
         throw Boom.forbidden('Unable to update Space, unauthorized to update projectRouting');
       } else {
         projectRoutingUpdated = true;
 
         if (space.projectRouting === undefined) {
-          await this.npreClient.deleteNpre(getSpaceDefaultNpreName(id));
+          await this.npreClient!.deleteNpre(getSpaceDefaultNpreName(id));
         } else {
-          await this.npreClient.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
+          await this.npreClient!.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
         }
 
         // Remove projectRouting from space so it is not saved as part of the saved object
@@ -262,7 +266,7 @@ export class SpacesClient implements ISpacesClient {
     const updatedSpace = this.transformSavedObjectToSpace(updatedSavedObject);
 
     if (projectRoutingUpdated) {
-      updatedSpace.projectRouting = await this.npreClient.getNpre(getSpaceDefaultNpreName(id));
+      updatedSpace.projectRouting = await this.npreClient!.getNpre(getSpaceDefaultNpreName(id));
     }
 
     return updatedSpace;
@@ -282,27 +286,26 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest(`The ${id} space cannot be deleted because it is reserved.`);
     }
 
-    if (
-      this.cpsSetup?.getCpsEnabled() &&
-      !(await this.npreClient.canDeleteNpre()) &&
-      (await this.npreClient.getNpre(getSpaceDefaultNpreName(id)))
-    ) {
-      // CPS is enabled and the user is not authorized to delete an existing npre
-      throw Boom.forbidden(
-        'Unable to delete Space, unauthorized to delete default projectRouting expression.'
-      );
+    let canDeleteNpre = false;
+    let npreExists = false;
+    if (this.cpsSetup?.getCpsEnabled()) {
+      canDeleteNpre = await this.npreClient!.canDeleteNpre();
+      npreExists = !!(await this.npreClient!.getNpre(getSpaceDefaultNpreName(id)));
+
+      if (!canDeleteNpre && npreExists) {
+        // The space has a default NPRE and the user is not authorized to delete it
+        throw Boom.forbidden(
+          'Unable to delete Space, unauthorized to delete default projectRouting expression.'
+        );
+      }
     }
 
     await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
 
-    if (this.cpsSetup?.getCpsEnabled()) {
-      const spaceNpreName = getSpaceDefaultNpreName(id);
-
-      if (await this.npreClient.getNpre(spaceNpreName)) {
-        await this.npreClient.deleteNpre(spaceNpreName);
-      }
+    if (this.cpsSetup?.getCpsEnabled() && npreExists) {
+      await this.npreClient!.deleteNpre(getSpaceDefaultNpreName(id));
     }
   }
 

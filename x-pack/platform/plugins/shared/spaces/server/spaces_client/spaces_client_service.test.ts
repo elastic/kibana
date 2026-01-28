@@ -22,7 +22,7 @@ describe('SpacesClientService', () => {
   describe('#setup', () => {
     it('allows a single repository factory to be set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
       const repositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(repositoryFactory);
@@ -34,7 +34,7 @@ describe('SpacesClientService', () => {
 
     it('allows a single client wrapper to be set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
       const clientWrapper = jest.fn();
       setup.registerClientWrapper(clientWrapper);
@@ -48,9 +48,9 @@ describe('SpacesClientService', () => {
   describe('#start', () => {
     it('throws if config is not available', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      service.setup({ config$: new Rx.Observable<ConfigType>() });
+      service.setup({ config$: new Rx.Observable<ConfigType>() }, undefined);
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart, featuresPluginMock.createStart());
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -62,10 +62,10 @@ describe('SpacesClientService', () => {
     describe('without a custom repository factory or wrapper', () => {
       it('returns an instance of the spaces client using the scoped repository', () => {
         const service = new SpacesClientService(debugLogger, 'traditional');
-        service.setup({ config$: Rx.of(spacesConfig) });
+        service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
         const coreStart = coreMock.createStart();
-        const start = service.start(coreStart, featuresPluginMock.createStart());
+        const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
         const request = httpServerMock.createKibanaRequest();
         const client = start.createSpacesClient(request);
@@ -80,13 +80,13 @@ describe('SpacesClientService', () => {
 
     it('uses the custom repository factory when set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart, featuresPluginMock.createStart());
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);
@@ -100,7 +100,7 @@ describe('SpacesClientService', () => {
 
     it('wraps the client in the wrapper when registered', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
       const wrapper = Symbol() as unknown as ISpacesClient;
 
@@ -108,7 +108,7 @@ describe('SpacesClientService', () => {
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart, featuresPluginMock.createStart());
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);
@@ -125,7 +125,7 @@ describe('SpacesClientService', () => {
 
     it('wraps the client in the wrapper when registered, using the custom repository factory when configured', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) });
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
 
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
@@ -136,7 +136,7 @@ describe('SpacesClientService', () => {
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart, featuresPluginMock.createStart());
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);

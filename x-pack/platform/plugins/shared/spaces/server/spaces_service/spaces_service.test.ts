@@ -70,13 +70,17 @@ const createService = (serverBasePath: string = '') => {
   });
 
   const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
-  spacesClientService.setup({
-    config$: Rx.of(spacesConfig),
-  });
+  spacesClientService.setup(
+    {
+      config$: Rx.of(spacesConfig),
+    },
+    undefined
+  );
 
   const spacesClientServiceStart = spacesClientService.start(
     coreStart,
-    featuresPluginMock.createStart()
+    featuresPluginMock.createStart(),
+    undefined
   );
 
   const spacesServiceStart = spacesService.start({
