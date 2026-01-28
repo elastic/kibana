@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type {
+  DataType,
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
@@ -18,6 +20,18 @@ import type {
 } from '@kbn/lens-common';
 
 import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
+
+// Map Lens DataType to DatatableColumnType
+// Some Lens types (counter, gauge, document) aren't valid DatatableColumnTypes
+const getMetaTypeFromDataType = (dataType: DataType): DatatableColumnType => {
+  if (dataType === 'document') {
+    return 'string';
+  }
+  if (dataType === 'counter' || dataType === 'gauge') {
+    return 'number';
+  }
+  return dataType;
+};
 
 interface LayerConversionData {
   layerId: string;
@@ -89,16 +103,15 @@ function buildTextBasedState(
     const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).map(
       ([esqlFieldName, originalColumns]) => {
         const sourceColumn = originalColumns[0];
-        // Map Lens DataType to DatatableColumnType
         const dataType = sourceColumn.dataType ?? 'string';
-        const metaType = dataType === 'document' ? 'string' : dataType;
+        const metaType = getMetaTypeFromDataType(dataType);
 
         const column: TextBasedLayerColumn = {
           columnId: sourceColumn.id,
           fieldName: esqlFieldName,
           label: sourceColumn.label ?? esqlFieldName,
           meta: {
-            type: metaType as TextBasedLayerColumn['meta'] extends { type: infer T } ? T : never,
+            type: metaType,
           },
         };
 
