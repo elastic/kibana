@@ -69,12 +69,13 @@ steps:
                 2. Output your move in coordinate notation: [from][to] (e.g., "e2e4", "g1f3", "e1g1" for kingside castle)
                 3. For pawn promotion, add the piece letter: "e7e8q" for queen promotion
                 4. Verify the move is legal according to chess rules
-                5. The newBoard field should contain the FEN after your move, but the move field is the primary output
 
-                FEN REMINDER:
-                - Board is from White's view: rank 8 (black's back rank) is first, rank 1 (white's back rank) is last
-                - After a pawn moves 2 squares, en-passant square is the square the pawn PASSED OVER (rank 3 for white pawns, rank 6 for black pawns)
-                - Use "-" for en-passant if no pawn just moved 2 squares
+                CRITICAL FEN REQUIREMENTS:
+                - FEN must have EXACTLY 8 ranks separated by "/"
+                - Format: rank8/rank7/rank6/rank5/rank4/rank3/rank2/rank1 side castling en-passant halfmove fullmove
+                - Each rank must have pieces and numbers that sum to exactly 8
+                - DO NOT truncate the FEN - include ALL 8 ranks and ALL metadata
+                - Example complete FEN: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
 
                 Respond with ONLY a JSON object:
                 {
@@ -120,23 +121,50 @@ steps:
             type: if
             condition: 'not steps.ai_turn.output.content.isCheckmate: true'
             steps:
-              # Wait for human's move
+              # Wait for human's move (or error report about AI's invalid move)
               - name: wait_for_human
                 type: waitForInput
                 with:
                   timeout: 30m
                   message: "Turn {{ foreach.item }}: Your move (you are Black)!"
+                  inputSchema:
+                    type: object
+                    properties:
+                      move:
+                        type: string
+                        description: "Move in coordinate notation: [from][to], e.g., e7e5"
+                      newBoard:
+                        type: string
+                        description: "Board state in FEN notation after the move"
+                      gameOver:
+                        type: boolean
+                        description: "True if the game has ended"
+                      aiMoveInvalid:
+                        type: boolean
+                        description: "True if reporting an invalid AI move"
+                      invalidMove:
+                        type: string
+                        description: "The invalid move that AI attempted (when aiMoveInvalid is true)"
+                      errorMessage:
+                        type: string
+                        description: "Error message describing why the AI move was invalid"
+                      currentBoard:
+                        type: string
+                        description: "The current valid board state (when reporting invalid AI move)"
+                    required: [move, newBoard]
 
-              # Store human's move - this updates variables.board
-              # The NEXT iteration's ai_turn will read this via variables.board
+              # Store human's move - this step runs for ALL human responses
+              # If aiMoveInvalid is true, the board field will be empty, which is fine
+              # because we'll retry with AI and overwrite it
               - name: store_human_move
                 type: data.set
                 with:
-                  board: '{{ steps.wait_for_human.output.input.newBoard }}'
-                  lastMove: '{{ steps.wait_for_human.output.input.move }}'
+                  board: '{{ steps.wait_for_human.output.input.newBoard | default: variables.board }}'
+                  lastMove: '{{ steps.wait_for_human.output.input.move | default: "" }}'
                   lastMoveBy: 'Human'
                   turnNumber: '{{ foreach.item }}'
                   gameOver: '{{ steps.wait_for_human.output.input.gameOver | default: false }}'
+                  aiMoveWasInvalid: '{{ steps.wait_for_human.output.input.aiMoveInvalid | default: false }}'
 
   # Game over summary
   - name: game_summary

@@ -212,8 +212,15 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
     move: string;
     success: boolean;
     error?: string;
+    type?: 'human_move' | 'ai_error_report';
+    url?: string;
+    body?: object;
   } | null>(null);
   const [turnNumber, setTurnNumber] = useState<number>(1);
+  const [invalidAiMove, setInvalidAiMove] = useState<{
+    move: string;
+    error: string;
+  } | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSeenAiMoveRef = useRef<string | null>(null);
   const lastSeenAiMoveCountRef = useRef<number>(0);
@@ -395,51 +402,46 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
       // local move before it's submitted to the workflow
       if ((hasNewAiMove || lastSeenAiMoveCountRef.current === 0) && boardFen && typeof boardFen === 'string') {
         console.log('Syncing board - new AI move detected');
+        console.log('Workflow board FEN:', boardFen);
         
-        // IMPORTANT: Instead of trusting the LLM's FEN (which can have wrong piece colors),
-        // we apply the AI's move to our local board state
-        const aiMove = newAiMove || latestState.lastAiMove || latestState.lastMove;
+        // Validate FEN has 8 ranks (LLM sometimes truncates)
+        const fenParts = boardFen.split(' ');
+        const boardPart = fenParts[0];
+        const ranks = boardPart.split('/');
         
-        if (aiMove && typeof aiMove === 'string' && aiMove.length >= 4) {
-          // Try to apply the AI's move to our local board
-          const gameCopy = new Chess(game.fen());
-          const from = aiMove.slice(0, 2);
-          const to = aiMove.slice(2, 4);
-          const promotion = aiMove.length > 4 ? aiMove[4] : undefined;
-          
-          try {
-            const moveResult = gameCopy.move({ from, to, promotion });
-            if (moveResult) {
-              console.log('Applied AI move locally:', aiMove, 'New FEN:', gameCopy.fen());
-              setGame(gameCopy);
-            } else {
-              // Move failed - fall back to workflow FEN but log warning
-              console.warn('Could not apply AI move locally, falling back to workflow FEN');
-              console.warn('AI move:', aiMove, 'Current board:', game.fen());
-              const newGame = new Chess();
-              newGame.load(boardFen);
-              setGame(newGame);
-            }
-          } catch (moveError) {
-            console.error('Error applying AI move:', moveError);
-            // Fall back to workflow FEN
-            const newGame = new Chess();
-            try {
-              newGame.load(boardFen);
-              setGame(newGame);
-            } catch (fenError) {
-              console.error('Invalid FEN from workflow:', boardFen, fenError);
-            }
+        if (ranks.length !== 8) {
+          console.error('TRUNCATED FEN! Only has', ranks.length, 'ranks instead of 8:', boardFen);
+          const aiMove = newAiMove || latestState.lastAiMove;
+          setInvalidAiMove({
+            move: aiMove || 'unknown',
+            error: `AI produced truncated FEN with only ${ranks.length} ranks (needs 8)`,
+          });
+          // Update count so we don't keep retrying
+          if (hasNewAiMove) {
+            lastSeenAiMoveCountRef.current = aiMoveCount;
           }
-        } else {
-          // No AI move available, use workflow FEN (e.g., initial game setup)
-          console.log('No AI move to apply, using workflow FEN:', boardFen);
-          const newGame = new Chess();
-          try {
-            newGame.load(boardFen);
-            setGame(newGame);
-          } catch (fenError) {
-            console.error('Invalid FEN from workflow:', boardFen, fenError);
+          return;
+        }
+        
+        // Load the board state directly from the workflow
+        // The workflow has the authoritative state including all moves
+        const newGame = new Chess();
+        try {
+          newGame.load(boardFen);
+          console.log('Loaded board from workflow. FEN:', newGame.fen());
+          setGame(newGame);
+          setInvalidAiMove(null);
+        } catch (fenError) {
+          console.error('Invalid FEN from workflow:', boardFen, fenError);
+          // Try to validate the AI's move against the previous board state
+          // by finding the previous board and applying the move
+          const aiMove = newAiMove || latestState.lastAiMove;
+          if (aiMove) {
+            console.log('FEN invalid, AI move was:', aiMove);
+            setInvalidAiMove({
+              move: aiMove,
+              error: `AI produced invalid board state: ${(fenError as Error).message}`,
+            });
           }
         }
         
@@ -579,25 +581,30 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
 
       // Send move to workflow
       const moveStr = `${from}${to}`;
+      const resumeUrl = `/api/workflowExecutions/${executionId}/resume`;
+      const resumeBody = {
+        input: {
+          move: moveStr,
+          newBoard: gameCopy.fen(),
+          gameOver,
+          winner: isCheckmate ? 'Human' : undefined,
+          endReason: isCheckmate
+            ? 'checkmate'
+            : isStalemate
+            ? 'stalemate'
+            : isDraw
+            ? 'draw'
+            : undefined,
+        },
+      };
+      
       console.log('Submitting move to workflow:', moveStr, 'FEN:', gameCopy.fen());
+      console.log('Resume URL:', resumeUrl);
+      console.log('Resume Body:', resumeBody);
       
       try {
-        await http.post(`/api/workflowExecutions/${executionId}/resume`, {
-          body: JSON.stringify({
-            input: {
-              move: moveStr,
-              newBoard: gameCopy.fen(),
-              gameOver,
-              winner: isCheckmate ? 'Human' : undefined,
-              endReason: isCheckmate
-                ? 'checkmate'
-                : isStalemate
-                ? 'stalemate'
-                : isDraw
-                ? 'draw'
-                : undefined,
-            },
-          }),
+        await http.post(resumeUrl, {
+          body: JSON.stringify(resumeBody),
         });
         
         console.log('Resume API call successful for move:', moveStr);
@@ -605,6 +612,9 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
           timestamp: new Date().toISOString(),
           move: moveStr,
           success: true,
+          type: 'human_move',
+          url: resumeUrl,
+          body: resumeBody,
         });
         setStatus('ai_thinking');
       } catch (resumeErr: any) {
@@ -614,6 +624,9 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
           move: moveStr,
           success: false,
           error: resumeErr.body?.message || resumeErr.message || 'Unknown error',
+          type: 'human_move',
+          url: resumeUrl,
+          body: resumeBody,
         });
         throw resumeErr; // Re-throw to be caught by outer catch
       }
@@ -625,6 +638,47 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
       setStatus('waiting_for_input');
       // Revert the move
       setGame(new Chess(game.fen()));
+    }
+  };
+
+  // Report invalid AI move to workflow for retry
+  const reportInvalidAiMove = async () => {
+    if (!executionId || !invalidAiMove) return;
+
+    setStatus('reporting_error');
+    console.log('Reporting invalid AI move to workflow:', invalidAiMove);
+
+    try {
+      await http.post(`/api/workflowExecutions/${executionId}/resume`, {
+        body: JSON.stringify({
+          input: {
+            aiMoveInvalid: true,
+            invalidMove: invalidAiMove.move,
+            errorMessage: invalidAiMove.error,
+            currentBoard: game.fen(), // Send the valid board state
+          },
+        }),
+      });
+
+      console.log('Error report sent successfully');
+      setLastResumeInfo({
+        timestamp: new Date().toISOString(),
+        move: `ERROR: ${invalidAiMove.move}`,
+        success: true,
+        type: 'ai_error_report',
+      });
+      setInvalidAiMove(null); // Clear the error
+      setStatus('ai_thinking'); // AI will retry
+    } catch (err: any) {
+      console.error('Failed to report invalid AI move:', err);
+      setLastResumeInfo({
+        timestamp: new Date().toISOString(),
+        move: `ERROR: ${invalidAiMove.move}`,
+        success: false,
+        error: err.body?.message || err.message || 'Unknown error',
+        type: 'ai_error_report',
+      });
+      setError('Failed to report AI error: ' + (err.body?.message || err.message));
     }
   };
 
@@ -674,6 +728,7 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
     setValidMoves([]);
     setLastResumeInfo(null); // Reset resume tracking
     setTurnNumber(1); // Reset turn number
+    setInvalidAiMove(null); // Reset invalid AI move tracking
   };
 
   const getStatusColor = (): 'primary' | 'success' | 'warning' | 'danger' | 'accent' => {
@@ -863,6 +918,34 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
           </EuiTitle>
           <EuiSpacer size="s" />
 
+          {/* Invalid AI Move Alert */}
+          {invalidAiMove && (
+            <>
+              <EuiCallOut
+                title="AI made an invalid move!"
+                color="danger"
+                iconType="error"
+              >
+                <p>
+                  <strong>Invalid move:</strong> {invalidAiMove.move}
+                </p>
+                <p>
+                  <strong>Error:</strong> {invalidAiMove.error}
+                </p>
+                <EuiSpacer size="s" />
+                <EuiButton
+                  color="danger"
+                  fill
+                  onClick={reportInvalidAiMove}
+                  isLoading={status === 'reporting_error'}
+                >
+                  Report Error &amp; Ask AI to Retry
+                </EuiButton>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
           {/* AI's last move */}
           {lastAiMove && (
             <>
@@ -871,7 +954,7 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
                   <strong>AI&apos;s last move:</strong>
                 </p>
               </EuiText>
-              <EuiBadge color="primary">{lastAiMove}</EuiBadge>
+              <EuiBadge color={invalidAiMove ? 'danger' : 'primary'}>{lastAiMove}</EuiBadge>
               {aiReasoning && (
                 <>
                   <EuiSpacer size="xs" />
@@ -932,14 +1015,27 @@ export const ChessGamePage: React.FC<ChessGamePageProps> = ({ http }) => {
                 <>
                   <EuiText size="s">
                     <p>
-                      <strong>Last Move Submitted:</strong>
+                      <strong>Last API Call:</strong>
                     </p>
                   </EuiText>
                   <EuiCodeBlock fontSize="s" paddingSize="s">
-                    {`Move: ${lastResumeInfo.move}
+                    {`Type: ${lastResumeInfo.type === 'ai_error_report' ? '🔄 AI Error Report' : '♟️ Human Move'}
+${lastResumeInfo.type === 'ai_error_report' ? 'Invalid Move' : 'Move'}: ${lastResumeInfo.move}
 Time: ${new Date(lastResumeInfo.timestamp).toLocaleTimeString()}
-API Call: ${lastResumeInfo.success ? '✅ SUCCESS' : '❌ FAILED'}${lastResumeInfo.error ? `\nError: ${lastResumeInfo.error}` : ''}`}
+Result: ${lastResumeInfo.success ? '✅ SUCCESS' : '❌ FAILED'}${lastResumeInfo.error ? `\nError: ${lastResumeInfo.error}` : ''}
+URL: ${lastResumeInfo.url || 'N/A'}`}
                   </EuiCodeBlock>
+                  {lastResumeInfo.body && (
+                    <>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs">
+                        <strong>Request Body:</strong>
+                      </EuiText>
+                      <EuiCodeBlock fontSize="s" paddingSize="s" language="json" isCopyable>
+                        {JSON.stringify(lastResumeInfo.body, null, 2)}
+                      </EuiCodeBlock>
+                    </>
+                  )}
                   <EuiSpacer size="s" />
                 </>
               )}

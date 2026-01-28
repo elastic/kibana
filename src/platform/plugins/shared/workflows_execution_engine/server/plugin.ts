@@ -834,8 +834,15 @@ export class WorkflowsExecutionEnginePlugin
         await workflowTaskManager.cancelTask(timeoutTaskId);
       }
 
-      // Store the human input in the step's state
+      // Store the human input in the step's state AND update input to show webhook payload
+      const resumeUrl = `/api/workflowExecutions/${workflowExecutionId}/resume`;
       await workflowExecutionRepository.updateStepExecution(waitingStep.id, {
+        input: {
+          ...(waitingStep.input || {}),
+          webhookPayload: input,
+          webhookReceivedAt: new Date().toISOString(),
+          resumeUrl,
+        },
         state: {
           ...(waitingStep.state || {}),
           humanInput: input,

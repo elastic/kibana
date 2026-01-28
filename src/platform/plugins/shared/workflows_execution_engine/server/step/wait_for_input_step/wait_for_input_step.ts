@@ -40,12 +40,25 @@ export class WaitForInputStepImpl implements NodeImplementation {
         `Waiting for human input in step ${this.node.id}${config?.timeout ? ` (timeout: ${config.timeout})` : ''}`
       );
 
+      // Get the execution ID for building the resume URL
+      const executionId = this.workflowRuntime.workflowExecution.id;
+      const resumeUrl = `/api/workflowExecutions/${executionId}/resume`;
+
+      // Store the step configuration as input for UI display
+      this.stepExecutionRuntime.setInput({
+        timeout: config?.timeout,
+        message: config?.message,
+        inputSchema: config?.inputSchema,
+        resumeUrl,
+      });
+
       // Store additional metadata in step state for UI consumption
       const currentState = this.stepExecutionRuntime.getCurrentStepState() || {};
       this.stepExecutionRuntime.setCurrentStepState({
         ...currentState,
         inputSchema: config?.inputSchema,
         message: config?.message,
+        resumeUrl,
       });
 
       return;
