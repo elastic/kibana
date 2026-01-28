@@ -37,12 +37,14 @@ const mockLogHit = buildDataTableRecord(
   dataViewMock
 );
 
-const mockUseSpanFlyoutData = jest.fn();
-const mockUseLogFlyoutData = jest.fn();
+const mockUseDocumentFlyoutData = jest.fn();
+
+jest.mock('./use_document_flyout_data', () => ({
+  useDocumentFlyoutData: (params: any) => mockUseDocumentFlyoutData(params),
+}));
 
 jest.mock('./span_flyout', () => ({
   spanFlyoutId: 'spanDetailFlyout',
-  useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
   SpanFlyoutContent: ({ hit, dataView, activeSection }: any) => (
     <div
       data-test-subj="spanFlyoutContent"
@@ -56,7 +58,6 @@ jest.mock('./span_flyout', () => ({
 
 jest.mock('./logs_flyout', () => ({
   logsFlyoutId: 'logsFlyout',
-  useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
   LogFlyoutContent: ({ hit, logDataView, error }: any) => (
     <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id} data-error={error}>
       Log Flyout Content
@@ -102,50 +103,61 @@ describe('DocumentDetailFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUseSpanFlyoutData.mockReturnValue({
-      hit: mockSpanHit,
-      loading: false,
-      title: 'Span document',
-    });
-
-    mockUseLogFlyoutData.mockReturnValue({
-      hit: mockLogHit,
-      loading: false,
-      title: 'Log document',
-      error: null,
-      logDataView: dataViewMock,
-    });
   });
 
-  describe('hook calls based on type', () => {
-    it('should call useSpanFlyoutData with docId when type is span', () => {
+  describe('hook calls', () => {
+    it('should call useDocumentFlyoutData with correct params for span type', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
-      expect(mockUseSpanFlyoutData).toHaveBeenCalledWith({
-        spanId: 'test-span-id',
+      expect(mockUseDocumentFlyoutData).toHaveBeenCalledWith({
+        type: 'spanDetailFlyout',
+        docId: 'test-span-id',
         traceId: 'test-trace-id',
-      });
-      expect(mockUseLogFlyoutData).toHaveBeenCalledWith({
-        id: '',
+        docIndex: undefined,
       });
     });
 
-    it('should call useLogFlyoutData with docId when type is log', () => {
-      render(<DocumentDetailFlyout {...defaultLogProps} />);
-
-      expect(mockUseSpanFlyoutData).toHaveBeenCalledWith({
-        spanId: '',
-        traceId: 'test-trace-id',
+    it('should call useDocumentFlyoutData with correct params for log type', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'logsFlyout',
+        hit: mockLogHit,
+        loading: false,
+        title: 'Log document',
+        logDataView: dataViewMock,
+        error: null,
       });
-      expect(mockUseLogFlyoutData).toHaveBeenCalledWith({
-        id: 'test-log-id',
+
+      render(<DocumentDetailFlyout {...defaultLogProps} docIndex="logs-*" />);
+
+      expect(mockUseDocumentFlyoutData).toHaveBeenCalledWith({
+        type: 'logsFlyout',
+        docId: 'test-log-id',
+        traceId: 'test-trace-id',
+        docIndex: 'logs-*',
       });
     });
   });
 
   describe('content rendering based on type', () => {
     it('should render SpanFlyoutContent when type is span', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
       expect(screen.getByTestId('spanFlyoutContent')).toBeInTheDocument();
@@ -153,6 +165,15 @@ describe('DocumentDetailFlyout', () => {
     });
 
     it('should render LogFlyoutContent when type is log', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'logsFlyout',
+        hit: mockLogHit,
+        loading: false,
+        title: 'Log document',
+        logDataView: dataViewMock,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultLogProps} />);
 
       expect(screen.getByTestId('logFlyoutContent')).toBeInTheDocument();
@@ -160,6 +181,15 @@ describe('DocumentDetailFlyout', () => {
     });
 
     it('should pass activeSection to SpanFlyoutContent', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultSpanProps} activeSection="errors-table" />);
 
       const spanContent = screen.getByTestId('spanFlyoutContent');
@@ -169,6 +199,15 @@ describe('DocumentDetailFlyout', () => {
 
   describe('WaterfallFlyout props', () => {
     it('should pass correct props to WaterfallFlyout for span type', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
       const flyout = screen.getByTestId('waterfallFlyout');
@@ -178,6 +217,15 @@ describe('DocumentDetailFlyout', () => {
     });
 
     it('should pass correct props to WaterfallFlyout for log type', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'logsFlyout',
+        hit: mockLogHit,
+        loading: false,
+        title: 'Log document',
+        logDataView: dataViewMock,
+        error: null,
+      });
+
       render(<DocumentDetailFlyout {...defaultLogProps} />);
 
       const flyout = screen.getByTestId('waterfallFlyout');
@@ -188,11 +236,14 @@ describe('DocumentDetailFlyout', () => {
   });
 
   describe('loading states', () => {
-    it('should show loading state when span data is loading', () => {
-      mockUseSpanFlyoutData.mockReturnValue({
+    it('should show loading state when data is loading', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
         hit: null,
         loading: true,
         title: 'Span document',
+        logDataView: null,
+        error: null,
       });
 
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
@@ -203,28 +254,14 @@ describe('DocumentDetailFlyout', () => {
       expect(screen.queryByTestId('spanFlyoutContent')).not.toBeInTheDocument();
     });
 
-    it('should show loading state when log data is loading', () => {
-      mockUseLogFlyoutData.mockReturnValue({
-        hit: null,
-        loading: true,
-        title: 'Log document',
-        error: null,
-        logDataView: null,
-      });
-
-      render(<DocumentDetailFlyout {...defaultLogProps} />);
-
-      const flyout = screen.getByTestId('waterfallFlyout');
-      expect(flyout).toHaveAttribute('data-loading', 'true');
-      expect(screen.getByTestId('loadingSkeleton')).toBeInTheDocument();
-      expect(screen.queryByTestId('logFlyoutContent')).not.toBeInTheDocument();
-    });
-
     it('should not render content when hit is null (even if not loading)', () => {
-      mockUseSpanFlyoutData.mockReturnValue({
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
         hit: null,
         loading: false,
         title: 'Span document',
+        logDataView: null,
+        error: null,
       });
 
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
@@ -234,13 +271,14 @@ describe('DocumentDetailFlyout', () => {
   });
 
   describe('log flyout edge cases', () => {
-    it('should render LogFlyoutContent with error when logData has error', () => {
-      mockUseLogFlyoutData.mockReturnValue({
+    it('should render LogFlyoutContent with error when data has error', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'logsFlyout',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
-        error: 'Failed to load data view',
         logDataView: dataViewMock,
+        error: 'Failed to load data view',
       });
 
       render(<DocumentDetailFlyout {...defaultLogProps} />);
@@ -250,12 +288,13 @@ describe('DocumentDetailFlyout', () => {
     });
 
     it('should not render LogFlyoutContent when logDataView is null', () => {
-      mockUseLogFlyoutData.mockReturnValue({
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'logsFlyout',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
-        error: null,
         logDataView: null,
+        error: null,
       });
 
       render(<DocumentDetailFlyout {...defaultLogProps} />);
@@ -266,6 +305,24 @@ describe('DocumentDetailFlyout', () => {
 
   describe('switching between types', () => {
     it('should correctly switch from span to log type', () => {
+      mockUseDocumentFlyoutData
+        .mockReturnValueOnce({
+          type: 'spanDetailFlyout',
+          hit: mockSpanHit,
+          loading: false,
+          title: 'Span document',
+          logDataView: null,
+          error: null,
+        })
+        .mockReturnValueOnce({
+          type: 'logsFlyout',
+          hit: mockLogHit,
+          loading: false,
+          title: 'Log document',
+          logDataView: dataViewMock,
+          error: null,
+        });
+
       const { rerender } = render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
       expect(screen.getByTestId('spanFlyoutContent')).toBeInTheDocument();
@@ -275,18 +332,6 @@ describe('DocumentDetailFlyout', () => {
 
       expect(screen.queryByTestId('spanFlyoutContent')).not.toBeInTheDocument();
       expect(screen.getByTestId('logFlyoutContent')).toBeInTheDocument();
-    });
-
-    it('should correctly switch from log to span type', () => {
-      const { rerender } = render(<DocumentDetailFlyout {...defaultLogProps} />);
-
-      expect(screen.getByTestId('logFlyoutContent')).toBeInTheDocument();
-      expect(screen.queryByTestId('spanFlyoutContent')).not.toBeInTheDocument();
-
-      rerender(<DocumentDetailFlyout {...defaultSpanProps} />);
-
-      expect(screen.getByTestId('spanFlyoutContent')).toBeInTheDocument();
-      expect(screen.queryByTestId('logFlyoutContent')).not.toBeInTheDocument();
     });
   });
 });

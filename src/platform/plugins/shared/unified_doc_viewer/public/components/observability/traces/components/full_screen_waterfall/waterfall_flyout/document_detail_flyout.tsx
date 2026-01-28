@@ -12,26 +12,32 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
-import { spanFlyoutId, useSpanFlyoutData, SpanFlyoutContent } from './span_flyout';
-import type { logsFlyoutId } from './logs_flyout';
-import { useLogFlyoutData, LogFlyoutContent, type LogFlyoutData } from './logs_flyout';
+import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
+import { logsFlyoutId, LogFlyoutContent } from './logs_flyout';
+import {
+  useDocumentFlyoutData,
+  type DocumentType,
+  type DocumentFlyoutData,
+} from './use_document_flyout_data';
 
-export type DocumentType = typeof spanFlyoutId | typeof logsFlyoutId;
+export type { DocumentType } from './use_document_flyout_data';
 
 interface FlyoutContentProps {
-  type: DocumentType;
+  data: DocumentFlyoutData;
   hit: DataTableRecord;
-  spanData: { dataView: DocViewRenderProps['dataView']; activeSection?: TraceOverviewSections };
-  logData: LogFlyoutData;
+  dataView: DocViewRenderProps['dataView'];
+  activeSection?: TraceOverviewSections;
 }
 
-function FlyoutContent({ type, hit, spanData, logData }: FlyoutContentProps) {
-  if (type === spanFlyoutId) {
-    return <SpanFlyoutContent hit={hit} {...spanData} />;
+function FlyoutContent({ data, hit, dataView, activeSection }: FlyoutContentProps) {
+  const isSpanType = data.type === spanFlyoutId;
+  if (isSpanType) {
+    return <SpanFlyoutContent hit={hit} dataView={dataView} activeSection={activeSection} />;
   }
 
-  if (logData.logDataView) {
-    return <LogFlyoutContent hit={hit} logDataView={logData.logDataView} error={logData.error} />;
+  const isLogType = data.type === logsFlyoutId;
+  if (isLogType && data.logDataView) {
+    return <LogFlyoutContent hit={hit} logDataView={data.logDataView} error={data.error ?? null} />;
   }
 
   return null;
@@ -56,37 +62,22 @@ export function DocumentDetailFlyout({
   onCloseFlyout,
   activeSection,
 }: DocumentDetailFlyoutProps) {
-  const isSpanType = type === spanFlyoutId;
-
-  // Both hooks are called here to provide hit, loading, and title to WaterfallFlyout.
-  // They short-circuit with empty strings, so no unnecessary API calls are made.
-  const spanData = useSpanFlyoutData({
-    spanId: isSpanType ? docId : '',
-    traceId,
-  });
-
-  const logData = useLogFlyoutData({
-    id: isSpanType ? '' : docId,
-    index: docIndex,
-  });
-
-  const { hit, loading, title } = isSpanType ? spanData : logData;
+  const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
   return (
     <WaterfallFlyout
-      flyoutId={type}
       onCloseFlyout={onCloseFlyout}
       dataView={dataView}
-      hit={hit}
-      loading={loading}
-      title={title}
+      hit={data.hit}
+      loading={data.loading}
+      title={data.title}
     >
-      {hit ? (
+      {data.hit ? (
         <FlyoutContent
-          type={type}
-          hit={hit}
-          spanData={{ dataView, activeSection }}
-          logData={logData}
+          data={data}
+          hit={data.hit}
+          dataView={dataView}
+          activeSection={activeSection}
         />
       ) : null}
     </WaterfallFlyout>
