@@ -21,7 +21,7 @@ import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_st
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
@@ -67,9 +67,9 @@ async function mountComponent({
   };
 
   const component = mountWithIntl(
-    <WrappedDiscoverTestProvider toolkit={toolkit}>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverDocuments {...props} />
-    </WrappedDiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {

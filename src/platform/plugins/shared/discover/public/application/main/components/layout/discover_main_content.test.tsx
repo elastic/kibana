@@ -27,7 +27,7 @@ import { PatternAnalysisTab } from '../pattern_analysis';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataSource } from '../../../../../common/data_sources';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { internalStateActions } from '../../state_management/redux';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
@@ -115,9 +115,9 @@ const mountComponent = async ({
   };
 
   const component = mountWithIntl(
-    <WrappedDiscoverTestProvider toolkit={toolkit}>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverMainContent {...props} />
-    </WrappedDiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {

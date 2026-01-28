@@ -12,7 +12,7 @@ import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 
@@ -57,7 +57,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
       () => useUnifiedHistogramRuntimeState(stateContainer, localStorageKeyPrefix),
       {
         wrapper: ({ children }) => (
-          <WrappedDiscoverTestProvider toolkit={toolkit}>{children}</WrappedDiscoverTestProvider>
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
         ),
       }
     );

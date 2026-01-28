@@ -21,7 +21,7 @@ import type { DiscoverNoResultsProps } from './no_results';
 import { DiscoverNoResults } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { of } from 'rxjs';
 
 const services = createDiscoverServicesMock();
@@ -63,14 +63,14 @@ async function mountAndFindSubjects(
 
   act(() => {
     component = mountWithIntl(
-      <WrappedDiscoverTestProvider toolkit={toolkit}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DiscoverNoResults
           stateContainer={stateContainer}
           isTimeBased={isTimeBased}
           onDisableFilters={() => {}}
           {...props}
         />
-      </WrappedDiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
   });
 

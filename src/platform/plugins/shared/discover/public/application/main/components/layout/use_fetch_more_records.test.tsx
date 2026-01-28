@@ -15,7 +15,7 @@ import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_st
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../../types';
 import React from 'react';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions } from '../../state_management/redux';
 
 const setup = async () => {
@@ -53,7 +53,7 @@ const renderUseFetchMoreRecords = async ({
 
   const { result } = renderHook((props) => useFetchMoreRecords(props), {
     wrapper: ({ children }) => (
-      <WrappedDiscoverTestProvider toolkit={toolkit}>{children}</WrappedDiscoverTestProvider>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
     ),
     initialProps: { stateContainer },
   });

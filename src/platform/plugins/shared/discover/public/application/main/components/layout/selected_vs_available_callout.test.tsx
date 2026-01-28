@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions } from '../../state_management/redux';
 
 describe('SelectedVSAvailableCallout', () => {
@@ -27,7 +27,7 @@ describe('SelectedVSAvailableCallout', () => {
     );
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <WrappedDiscoverTestProvider toolkit={toolkit}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [
@@ -38,7 +38,7 @@ describe('SelectedVSAvailableCallout', () => {
           }
           selectedColumns={['bytes']}
         />
-      </WrappedDiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(true);
   });
@@ -48,9 +48,9 @@ describe('SelectedVSAvailableCallout', () => {
     await toolkit.initializeTabs();
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <WrappedDiscoverTestProvider toolkit={toolkit}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout esqlQueryColumns={undefined} selectedColumns={['bytes']} />
-      </WrappedDiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });
@@ -60,14 +60,14 @@ describe('SelectedVSAvailableCallout', () => {
     await toolkit.initializeTabs();
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <WrappedDiscoverTestProvider toolkit={toolkit}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [{ id: '2', name: 'bytes', meta: { type: 'number' } }] as DatatableColumn[]
           }
           selectedColumns={['bytes']}
         />
-      </WrappedDiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });

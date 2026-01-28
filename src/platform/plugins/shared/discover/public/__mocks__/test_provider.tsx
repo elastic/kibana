@@ -31,11 +31,15 @@ import { ChartPortalsRenderer } from '../application/main/components/chart';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ScopedDiscoverEBTManager } from '../ebt_manager';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
-import type { InternalStateMockToolkit } from './discover_state.mock';
+import { type InternalStateMockToolkit } from './discover_state.mock';
 import { from } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
-export const WrappedDiscoverTestProvider = ({
+/**
+ * Similar to {@link DiscoverTestProvider} but accepts an {@link InternalStateMockToolkit}
+ * returned by `getDiscoverInternalStateMock`, which is generally preferred for component tests.
+ */
+export const DiscoverToolkitTestProvider = ({
   toolkit,
   ...props
 }: Pick<DiscoverTestProviderProps, 'usePortalsRenderer' | 'children'> & {
@@ -81,6 +85,11 @@ export type DiscoverTestProviderProps = PropsWithChildren<{
   usePortalsRenderer?: boolean;
 }>;
 
+/**
+ * **Prefer {@link DiscoverToolkitTestProvider} when possible.**
+ * Can be used to wrap Discover components in tests
+ * to provide all necessary context providers and state.
+ */
 export const DiscoverTestProvider = ({
   services: originalServices,
   stateContainer,

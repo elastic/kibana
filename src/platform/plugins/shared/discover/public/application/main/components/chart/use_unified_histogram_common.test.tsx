@@ -13,7 +13,7 @@ import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 
 describe('useUnifiedHistogramCommon', () => {
@@ -48,7 +48,7 @@ describe('useUnifiedHistogramCommon', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <WrappedDiscoverTestProvider toolkit={toolkit}>{children}</WrappedDiscoverTestProvider>
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
         ),
         initialProps: {
           stateContainerProp: stateContainer,

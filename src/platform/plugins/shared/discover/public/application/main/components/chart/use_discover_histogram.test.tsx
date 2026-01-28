@@ -31,7 +31,7 @@ import type { UnifiedHistogramCustomization } from '../../../../customizations/c
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
 
@@ -122,7 +122,7 @@ describe('useDiscoverHistogram', () => {
     ).stateContainer$.getValue()!;
 
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <WrappedDiscoverTestProvider toolkit={toolkit}>{children}</WrappedDiscoverTestProvider>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
     );
 
     const hook = renderHook(() => useDiscoverHistogram(stateContainer, options), {

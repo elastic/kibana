@@ -20,7 +20,7 @@ import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { render, screen } from '@testing-library/react';
@@ -115,9 +115,9 @@ const setup = async ({
   };
 
   render(
-    <WrappedDiscoverTestProvider toolkit={toolkit} usePortalsRenderer>
+    <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
       <DiscoverHistogramLayout {...props} />
-    </WrappedDiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   // wait for lazy modules

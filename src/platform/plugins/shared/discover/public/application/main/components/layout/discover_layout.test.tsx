@@ -20,7 +20,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { act } from 'react-dom/test-utils';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
-import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { render, screen } from '@testing-library/react';
 
@@ -96,9 +96,9 @@ const setup = async ({
   stateContainer.dataState.data$.main$.next(dataMainMsg);
 
   render(
-    <WrappedDiscoverTestProvider toolkit={toolkit} usePortalsRenderer>
+    <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
       <DiscoverLayout stateContainer={stateContainer} />
-    </WrappedDiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   // wait for lazy modules
