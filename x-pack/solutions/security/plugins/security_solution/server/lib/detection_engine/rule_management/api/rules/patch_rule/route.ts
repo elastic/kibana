@@ -54,23 +54,16 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+          const securitySolutionCtx = await context.securitySolution;
 
-          if (params.response_actions) {
-            const ruleResponseActionsError = await validateRuleResponseActions({
-              ruleResponseActions: request.body.response_actions,
-              endpointService: (await context.securitySolution).getEndpointService(),
-            });
-
-            if (ruleResponseActionsError) {
-              return siemResponse.error({
-                statusCode: ruleResponseActionsError.statusCode,
-                body: ruleResponseActionsError,
-              });
-            }
-          }
+          await validateRuleResponseActions({
+            ruleResponseActions: request.body.response_actions,
+            endpointService: securitySolutionCtx.getEndpointService(),
+            spaceId: securitySolutionCtx.getSpaceId(),
+          });
 
           const rulesClient = await (await context.alerting).getRulesClient();
-          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
+          const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
