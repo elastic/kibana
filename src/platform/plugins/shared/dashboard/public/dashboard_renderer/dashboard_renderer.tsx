@@ -8,9 +8,14 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingElastic,
+  EuiLoadingSpinner,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -18,6 +23,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import type { DashboardCreationOptions } from '..';
@@ -25,11 +31,12 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices, screenshotModeService } from '../services/kibana_services';
+import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
 
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 /**
  * Props for the {@link DashboardRenderer} component.
@@ -52,6 +59,8 @@ export interface DashboardRendererProps {
    * @param internalApi - The {@link DashboardInternalApi} instance.
    */
   onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
+  /** Whether to render the control group above the dashboard viewport. Disable if the control group is rendered elsewhere. */
+  showControlGroup?: boolean;
 }
 
 export function DashboardRenderer({
@@ -61,6 +70,7 @@ export function DashboardRenderer({
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
+  showControlGroup = true,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -69,6 +79,26 @@ export function DashboardRenderer({
     DashboardInternalApi | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
+
+  const euiPaddingS = useEuiPaddingSize('s');
+  const styles = useMemo(
+    () => ({
+      renderer: css({
+        display: 'flex',
+        flex: 'auto',
+        width: '100%',
+        flexDirection: 'column',
+        '&.dashboardViewport--loading': {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        '& .controlGroup': {
+          padding: `0 ${euiPaddingS}`,
+        },
+      }),
+    }),
+    [euiPaddingS]
+  );
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
@@ -166,11 +196,14 @@ export function DashboardRenderer({
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
-          <DashboardContext.Provider value={dashboardApi}>
-            <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport />
-            </DashboardInternalContext.Provider>
-          </DashboardContext.Provider>
+          <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+            <DashboardContext.Provider value={dashboardApi}>
+              <DashboardInternalContext.Provider value={dashboardInternalApi}>
+                {showControlGroup && <DashboardControlsRenderer />}
+                <DashboardViewport />
+              </DashboardInternalContext.Provider>
+            </DashboardContext.Provider>
+          </KibanaContextProvider>
         </ExitFullScreenButtonKibanaProvider>
       </div>
     ) : (
@@ -190,18 +223,6 @@ export function DashboardRenderer({
     </div>
   );
 }
-
-const styles = {
-  renderer: css({
-    display: 'flex',
-    flex: 'auto',
-    width: '100%',
-    '&.dashboardViewport--loading': {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  }),
-};
 
 /**
  * Maximizing a panel in Dashboard only works if the parent div has a certain class. This

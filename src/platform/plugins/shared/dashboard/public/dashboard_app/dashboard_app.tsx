@@ -272,6 +272,7 @@ export function DashboardApp({
         savedObjectId={savedDashboardId}
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
+        showControlGroup={false}
       />
     </>
   );
