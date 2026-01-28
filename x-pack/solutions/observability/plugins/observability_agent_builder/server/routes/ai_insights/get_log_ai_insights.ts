@@ -6,17 +6,13 @@
  */
 import moment from 'moment';
 import { MessageRole, type InferenceClient } from '@kbn/inference-common';
-import type { IScopedClusterClient, KibanaRequest, CoreSetup, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getLogDocumentById } from './get_log_document_by_id';
-import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from './get_log_severity';
