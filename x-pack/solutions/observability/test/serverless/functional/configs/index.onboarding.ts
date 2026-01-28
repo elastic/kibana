@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless observability onboarding', function () {
+  describe('serverless observability UI - onboarding', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/onboarding'));
