@@ -26,8 +26,9 @@ import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -78,9 +79,13 @@ export const useDiscoverHistogram = (
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
+
+  const query = useAppStateSelector((state) => state.query);
   const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
+    if (!isOfAggregateQueryType(query)) return false;
+    if (!hasTransformationalCommand(query.esql)) return false;
+    return documentsState?.fetchStatus === FetchStatus.LOADING;
+  }, [documentsState?.fetchStatus, query]);
 
   /**
    * API initialization
@@ -204,7 +209,6 @@ export const useDiscoverHistogram = (
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const query = useAppStateSelector((state) => state.query);
   const appFilters = useAppStateSelector((state) => state.filters);
   const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
 
@@ -505,6 +509,8 @@ function getUnifiedHistogramTableForEsql({
   documentsValue: DataDocumentsMsg | undefined;
   isEsqlMode: boolean;
 }) {
+  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+
   if (
     !isEsqlMode ||
     !documentsValue?.result ||
@@ -512,11 +518,10 @@ function getUnifiedHistogramTableForEsql({
   ) {
     return {
       table: undefined,
-      esqlQueryColumns: EMPTY_ESQL_COLUMNS,
+      esqlQueryColumns,
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
   return {
     table: {
       type: 'datatable' as const,

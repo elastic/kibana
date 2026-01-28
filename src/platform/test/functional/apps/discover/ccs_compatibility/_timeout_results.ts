@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
+  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -27,6 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const esArchiver = getService('esArchiver');
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
+
+  async function openWarningInspector() {
+    await testSubjects.click('searchResponseWarningsViewDetails');
+
+    if (await testSubjects.exists('viewDetailsContextMenu')) {
+      await find.clickByButtonText('Table');
+    }
+
+    await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+  }
 
   describe('discover search CCS timeout', () => {
     before(async () => {
@@ -186,9 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(title).to.contain('Timed out');
 
         // View cluster details shows timed out
-        await testSubjects.click('searchResponseWarningsViewDetails');
-
-        await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        await openWarningInspector();
         const txt = await testSubjects.getVisibleText(
           'inspectorRequestClustersTableCell-Status-ftr-remote'
         );
