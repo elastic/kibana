@@ -599,8 +599,15 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           };
         }),
         storeDataStreamDetails: assign(({ event }) => {
-          if (!('output' in event)) return {};
-          return { dataStreamDetails: event.output as DataStreamDetails };
+          // Handle XState v5 actor done events (output property)
+          if ('output' in event) {
+            return { dataStreamDetails: event.output as DataStreamDetails };
+          }
+          // Handle UPDATE_FAILURE_STORE event (dataStreamsDetails property)
+          if ('dataStreamsDetails' in event) {
+            return { dataStreamDetails: event.dataStreamsDetails as DataStreamDetails };
+          }
+          return {};
         }),
         storeQualityIssuesChart: assign(({ event }) => {
           return 'qualityIssuesChart' in event
