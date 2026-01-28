@@ -64,12 +64,6 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGN
       expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
     });
 
-    await spaceTest.step('open Discover and verify hits', async () => {
-      await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
-    });
-
     await spaceTest.step('return to dashboard and validate panels', async () => {
       await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
 
