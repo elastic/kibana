@@ -228,63 +228,67 @@ const runFastHelp = () => {
   return true;
 };
 
-const args = process.argv.slice(2);
-const command = args[0];
-const repoRoot = process.cwd();
+function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+  const repoRoot = process.cwd();
 
-const hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
+  const hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 
-// For subcommand-level help, prefer the full CLI help output.
-if (hasHelpFlag && (command === 'list' || command === 'env')) {
+  // For subcommand-level help, prefer the full CLI help output.
+  if (hasHelpFlag && (command === 'list' || command === 'env')) {
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals').cli.run();
+    return;
+  }
+
+  if (command === 'list' && !hasFlag(args, '--refresh')) {
+    if (runFastList(repoRoot, args)) {
+      return;
+    }
+  }
+
+  if (command === 'list' && hasFlag(args, '--refresh') && !hasFlag(args, '--json')) {
+    const metadata = readMetadata(repoRoot);
+    if (metadata.length > 0) {
+      const suites = metadata.map((entry) => normalizeSuite(entry, repoRoot));
+      logInfo(`Cached suites (${suites.length}):`);
+      printSuiteTable(suites);
+      logInfo('Refreshing suite discovery...');
+      process.env.KBN_EVALS_LIST_CACHE_PRINTED = 'true';
+    }
+  }
+
+  if (command === 'ci-map') {
+    if (runFastCiMap(repoRoot, args)) {
+      return;
+    }
+  }
+
+  if (command === 'env') {
+    if (runFastEnv()) {
+      return;
+    }
+  }
+
+  if (!command || command === 'help' || hasHelpFlag) {
+    if (runFastHelp()) {
+      return;
+    }
+  }
+
+  if (hasFlag(args, '--full-help')) {
+    process.argv = [process.argv[0], process.argv[1], '--help'];
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals').cli.run();
+    return;
+  }
+
   process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
   require('@kbn/setup-node-env');
   void require('@kbn/evals').cli.run();
-  return;
 }
 
-if (command === 'list' && !hasFlag(args, '--refresh')) {
-  if (runFastList(repoRoot, args)) {
-    return;
-  }
-}
-
-if (command === 'list' && hasFlag(args, '--refresh') && !hasFlag(args, '--json')) {
-  const metadata = readMetadata(repoRoot);
-  if (metadata.length > 0) {
-    const suites = metadata.map((entry) => normalizeSuite(entry, repoRoot));
-    logInfo(`Cached suites (${suites.length}):`);
-    printSuiteTable(suites);
-    logInfo('Refreshing suite discovery...');
-    process.env.KBN_EVALS_LIST_CACHE_PRINTED = 'true';
-  }
-}
-
-if (command === 'ci-map') {
-  if (runFastCiMap(repoRoot, args)) {
-    return;
-  }
-}
-
-if (command === 'env') {
-  if (runFastEnv()) {
-    return;
-  }
-}
-
-if (!command || command === 'help' || hasHelpFlag) {
-  if (runFastHelp()) {
-    return;
-  }
-}
-
-if (hasFlag(args, '--full-help')) {
-  process.argv = [process.argv[0], process.argv[1], '--help'];
-  process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
-  require('@kbn/setup-node-env');
-  void require('@kbn/evals').cli.run();
-  return;
-}
-
-process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
-require('@kbn/setup-node-env');
-void require('@kbn/evals').cli.run();
+main();
