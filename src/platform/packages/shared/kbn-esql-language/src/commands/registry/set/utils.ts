@@ -100,7 +100,7 @@ const getApproximateCompletionItems = (
   return [
     {
       label: 'false',
-      text: 'false;',
+      text: 'false',
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
@@ -112,7 +112,7 @@ const getApproximateCompletionItems = (
     },
     {
       label: 'true',
-      text: 'true;',
+      text: 'true',
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
@@ -129,7 +129,7 @@ const getApproximateCompletionItems = (
           defaultMessage: 'Approximate with parameters',
         }
       ),
-      text: '{ $0 };',
+      text: '{ $0 }',
       asSnippet: true,
       kind: 'Reference',
       detail: i18n.translate(
