@@ -7,9 +7,9 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { FetchRuleStep } from './fetch_rule_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
-import { createRuleExecutionInput } from '../test_utils';
+import type { RuleSavedObjectAttributes } from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { createRuleExecutionInput, createRulePipelineState } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRulesClient } from '../../rules_client/rules_client.mock';
 
@@ -17,6 +17,9 @@ import { createRulesClient } from '../../rules_client/rules_client.mock';
 // so we test by triggering SO errors and verifying the step handles the resulting Boom errors.
 
 describe('FetchRuleStep', () => {
+  let step: FetchRuleStep;
+  let mockSavedObjectsClient: ReturnType<typeof createRulesClient>['mockSavedObjectsClient'];
+
   const createRuleAttributes = (
     overrides: Partial<RuleSavedObjectAttributes> = {}
   ): RuleSavedObjectAttributes => ({
@@ -35,12 +38,14 @@ describe('FetchRuleStep', () => {
     ...overrides,
   });
 
-  const createState = (input: RuleExecutionInput): RulePipelineState => ({ input });
+  beforeEach(() => {
+    const { loggerService } = createLoggerService();
+    const { rulesClient, mockSavedObjectsClient: soClient } = createRulesClient();
+    mockSavedObjectsClient = soClient;
+    step = new FetchRuleStep(loggerService, rulesClient);
+  });
 
   it('returns rule when rule exists', async () => {
-    const { loggerService } = createLoggerService();
-    const { rulesClient, mockSavedObjectsClient } = createRulesClient();
-
     const ruleAttributes = createRuleAttributes();
     mockSavedObjectsClient.get.mockResolvedValue({
       id: 'rule-1',
@@ -49,10 +54,7 @@ describe('FetchRuleStep', () => {
       references: [],
     });
 
-    const step = new FetchRuleStep(loggerService, rulesClient);
-    const input = createRuleExecutionInput();
-    const state = createState(input);
-
+    const state = createRulePipelineState();
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
@@ -65,17 +67,11 @@ describe('FetchRuleStep', () => {
   });
 
   it('halts with rule_deleted when rule is not found', async () => {
-    const { loggerService } = createLoggerService();
-    const { rulesClient, mockSavedObjectsClient } = createRulesClient();
-
     mockSavedObjectsClient.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-1')
     );
 
-    const step = new FetchRuleStep(loggerService, rulesClient);
-    const input = createRuleExecutionInput();
-    const state = createState(input);
-
+    const state = createRulePipelineState();
     const result = await step.execute(state);
 
     expect(result).toEqual({
@@ -84,23 +80,15 @@ describe('FetchRuleStep', () => {
     });
   });
 
-  it('propagates non-NotFound errors', async () => {
-    const { loggerService } = createLoggerService();
-    const { rulesClient, mockSavedObjectsClient } = createRulesClient();
-
+  it('propagates errors other than NotFoundError', async () => {
     mockSavedObjectsClient.get.mockRejectedValue(new Error('Failed'));
 
-    const step = new FetchRuleStep(loggerService, rulesClient);
-    const input = createRuleExecutionInput();
-    const state = createState(input);
+    const state = createRulePipelineState();
 
     await expect(step.execute(state)).rejects.toThrow('Failed');
   });
 
   it('calls the ruleClient with correct params', async () => {
-    const { loggerService } = createLoggerService();
-    const { rulesClient, mockSavedObjectsClient } = createRulesClient();
-
     const ruleAttributes = createRuleAttributes();
     mockSavedObjectsClient.get.mockResolvedValue({
       id: 'custom-rule',
@@ -109,9 +97,9 @@ describe('FetchRuleStep', () => {
       references: [],
     });
 
-    const step = new FetchRuleStep(loggerService, rulesClient);
-    const input = createRuleExecutionInput({ ruleId: 'custom-rule' });
-    const state = createState(input);
+    const state = createRulePipelineState({
+      input: createRuleExecutionInput({ ruleId: 'custom-rule' }),
+    });
 
     await step.execute(state);
 

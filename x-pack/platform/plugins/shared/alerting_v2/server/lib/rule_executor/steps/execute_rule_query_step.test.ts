@@ -7,28 +7,32 @@
 
 import { of, throwError } from 'rxjs';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
-import type { RuleResponse } from '../../rules_client';
-import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from '../test_utils';
+import {
+  createRuleExecutionInput,
+  createRuleResponse,
+  createEsqlResponse,
+  createRulePipelineState,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 
 describe('ExecuteRuleQueryStep', () => {
-  const createState = (input: RuleExecutionInput, rule?: RuleResponse): RulePipelineState => ({
-    input,
-    rule,
+  let step: ExecuteRuleQueryStep;
+  let mockSearchClient: ReturnType<typeof createQueryService>['mockSearchClient'];
+
+  beforeEach(() => {
+    const { loggerService } = createLoggerService();
+    const { queryService, mockSearchClient: searchClient } = createQueryService();
+    mockSearchClient = searchClient;
+    step = new ExecuteRuleQueryStep(loggerService, queryService);
   });
 
   it('builds query payload and executes query', async () => {
-    const { loggerService } = createLoggerService();
-    const { queryService, mockSearchClient } = createQueryService();
     const esqlResponse = createEsqlResponse();
 
     mockSearchClient.search.mockReturnValue(of({ isRunning: false, rawResponse: esqlResponse }));
 
-    const step = new ExecuteRuleQueryStep(loggerService, queryService);
-    const state = createState(createRuleExecutionInput(), createRuleResponse());
-
+    const state = createRulePipelineState({ rule: createRuleResponse() });
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
@@ -40,19 +44,16 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('passes correct parameters to query service', async () => {
-    const { loggerService } = createLoggerService();
-    const { queryService, mockSearchClient } = createQueryService();
     mockSearchClient.search.mockReturnValue(
       of({ isRunning: false, rawResponse: createEsqlResponse() })
     );
 
-    const step = new ExecuteRuleQueryStep(loggerService, queryService);
     const rule = createRuleResponse();
     const abortController = new AbortController();
-    const state = createState(
-      createRuleExecutionInput({ abortSignal: abortController.signal }),
-      rule
-    );
+    const state = createRulePipelineState({
+      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
+      rule,
+    });
 
     await step.execute(state);
 
@@ -73,18 +74,15 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('throws abort error when signal is aborted', async () => {
-    const { loggerService } = createLoggerService();
-    const { queryService, mockSearchClient } = createQueryService();
     const abortController = new AbortController();
     abortController.abort();
 
     mockSearchClient.search.mockReturnValue(throwError(() => new Error('Request aborted')));
 
-    const step = new ExecuteRuleQueryStep(loggerService, queryService);
-    const state = createState(
-      createRuleExecutionInput({ abortSignal: abortController.signal }),
-      createRuleResponse()
-    );
+    const state = createRulePipelineState({
+      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
+      rule: createRuleResponse(),
+    });
 
     await expect(step.execute(state)).rejects.toThrow(
       'Search has been aborted due to cancelled execution'
@@ -92,22 +90,15 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('propagates non-abort errors', async () => {
-    const { loggerService } = createLoggerService();
-    const { queryService, mockSearchClient } = createQueryService();
     mockSearchClient.search.mockReturnValue(throwError(() => new Error('Query execution failed')));
 
-    const step = new ExecuteRuleQueryStep(loggerService, queryService);
-    const state = createState(createRuleExecutionInput(), createRuleResponse());
+    const state = createRulePipelineState({ rule: createRuleResponse() });
 
     await expect(step.execute(state)).rejects.toThrow('Query execution failed');
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
-    const { loggerService } = createLoggerService();
-    const { queryService } = createQueryService();
-
-    const step = new ExecuteRuleQueryStep(loggerService, queryService);
-    const state = createState(createRuleExecutionInput(), undefined);
+    const state = createRulePipelineState();
 
     const result = await step.execute(state);
 

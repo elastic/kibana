@@ -6,19 +6,17 @@
  */
 
 import { ValidateRuleStep } from './validate_rule_step';
-import type { RulePipelineState } from '../types';
-import type { RuleResponse } from '../../rules_client';
-import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createRuleResponse, createRulePipelineState } from '../test_utils';
 
 describe('ValidateRuleStep', () => {
-  const createState = (rule?: RuleResponse): RulePipelineState => ({
-    input: createRuleExecutionInput(),
-    rule,
+  let step: ValidateRuleStep;
+
+  beforeEach(() => {
+    step = new ValidateRuleStep();
   });
 
   it('continues when rule is enabled', async () => {
-    const step = new ValidateRuleStep();
-    const state = createState(createRuleResponse({ enabled: true }));
+    const state = createRulePipelineState({ rule: createRuleResponse({ enabled: true }) });
 
     const result = await step.execute(state);
 
@@ -26,8 +24,7 @@ describe('ValidateRuleStep', () => {
   });
 
   it('halts with rule_disabled when rule is disabled', async () => {
-    const step = new ValidateRuleStep();
-    const state = createState(createRuleResponse({ enabled: false }));
+    const state = createRulePipelineState({ rule: createRuleResponse({ enabled: false }) });
 
     const result = await step.execute(state);
 
@@ -38,8 +35,7 @@ describe('ValidateRuleStep', () => {
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
-    const step = new ValidateRuleStep();
-    const state = createState(undefined);
+    const state = createRulePipelineState();
 
     const result = await step.execute(state);
 

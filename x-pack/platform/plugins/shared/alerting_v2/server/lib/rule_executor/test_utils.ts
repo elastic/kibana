@@ -30,10 +30,10 @@ export function createRuleExecutionInput(
   };
 }
 
-export function createPipelineState(overrides: Partial<RulePipelineState> = {}): RulePipelineState {
+export function createRulePipelineState(state?: Partial<RulePipelineState>): RulePipelineState {
   return {
     input: createRuleExecutionInput(),
-    ...overrides,
+    ...state,
   };
 }
 

@@ -6,22 +6,22 @@
  */
 
 import { WaitForResourcesStep } from './wait_for_resources_step';
-import type { RulePipelineState } from '../types';
-import { createRuleExecutionInput } from '../test_utils';
+import { createRulePipelineState } from '../test_utils';
 import { createMockResourceManager } from '../../services/resource_service/resource_manager.mock';
 
 describe('WaitForResourcesStep', () => {
-  const createState = (): RulePipelineState => ({
-    input: createRuleExecutionInput(),
+  let step: WaitForResourcesStep;
+  let resourceManager: ReturnType<typeof createMockResourceManager>;
+
+  beforeEach(() => {
+    resourceManager = createMockResourceManager();
+    step = new WaitForResourcesStep(resourceManager);
   });
 
   it('waits for resources and continues execution', async () => {
-    const resourceManager = createMockResourceManager();
     resourceManager.waitUntilReady.mockResolvedValue(undefined);
 
-    const step = new WaitForResourcesStep(resourceManager);
-    const state = createState();
-
+    const state = createRulePipelineState();
     const result = await step.execute(state);
 
     expect(result).toEqual({ type: 'continue' });
@@ -29,12 +29,10 @@ describe('WaitForResourcesStep', () => {
   });
 
   it('propagates errors from resource manager', async () => {
-    const resourceManager = createMockResourceManager();
     const error = new Error('Resource initialization failed');
     resourceManager.waitUntilReady.mockRejectedValue(error);
 
-    const step = new WaitForResourcesStep(resourceManager);
-    const state = createState();
+    const state = createRulePipelineState();
 
     await expect(step.execute(state)).rejects.toThrow('Resource initialization failed');
   });

@@ -9,9 +9,13 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
-import { createRuleExecutionInput } from './test_utils';
+import { createRuleExecutionInput, createRulePipelineState } from './test_utils';
 
 describe('RuleExecutorTaskRunner', () => {
+  let runner: RuleExecutorTaskRunner;
+  let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
+  let abortController: AbortController;
+
   // @ts-expect-error: not all fields are required
   const taskInstance: ConcreteTaskInstance = {
     id: 'task-1',
@@ -21,20 +25,14 @@ describe('RuleExecutorTaskRunner', () => {
     startedAt: new Date('2025-01-01T00:00:10.000Z'),
   };
 
-  const createMockPipeline = (): jest.Mocked<RuleExecutionPipelineContract> => ({
-    execute: jest.fn(),
+  beforeEach(() => {
+    pipeline = { execute: jest.fn() };
+    runner = new RuleExecutorTaskRunner(pipeline);
+    abortController = new AbortController();
   });
-
-  const createRunner = () => {
-    const pipeline = createMockPipeline();
-    const runner = new RuleExecutorTaskRunner(pipeline);
-    return { runner, pipeline };
-  };
 
   describe('extractExecutionInput', () => {
     it('constructs the pipeline input from task instance correctly', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
       const input = createRuleExecutionInput({
         abortSignal: abortController.signal,
         scheduledAt: taskInstance.scheduledAt?.toISOString(),
@@ -42,7 +40,7 @@ describe('RuleExecutorTaskRunner', () => {
 
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: { input },
+        finalState: createRulePipelineState({ input }),
       });
 
       await runner.run({ taskInstance, abortController });
@@ -51,10 +49,6 @@ describe('RuleExecutorTaskRunner', () => {
     });
 
     it('uses startedAt when scheduledAt is a string', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-
       const taskWithDateScheduledAt = {
         ...taskInstance,
         scheduledAt: '2025-01-01T00:00:00.000Z',
@@ -62,9 +56,7 @@ describe('RuleExecutorTaskRunner', () => {
 
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: {
-          input,
-        },
+        finalState: createRulePipelineState(),
       });
 
       // @ts-expect-error: testing the scheduledAt as a string
@@ -80,13 +72,9 @@ describe('RuleExecutorTaskRunner', () => {
 
   describe('buildRunResult', () => {
     it('returns empty state when pipeline completes successfully', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: { input },
+        finalState: createRulePipelineState(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -95,14 +83,10 @@ describe('RuleExecutorTaskRunner', () => {
     });
 
     it('preserves previous state when pipeline halts with rule_deleted', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_deleted',
-        finalState: { input },
+        finalState: createRulePipelineState(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -111,14 +95,10 @@ describe('RuleExecutorTaskRunner', () => {
     });
 
     it('preserves previous state when pipeline halts with rule_disabled', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_disabled',
-        finalState: { input },
+        finalState: createRulePipelineState(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -127,14 +107,10 @@ describe('RuleExecutorTaskRunner', () => {
     });
 
     it('returns empty state for unknown halt reasons', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: undefined,
-        finalState: { input },
+        finalState: createRulePipelineState(),
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -145,11 +121,7 @@ describe('RuleExecutorTaskRunner', () => {
 
   describe('error handling', () => {
     it('propagates pipeline errors', async () => {
-      const { runner, pipeline } = createRunner();
-      const abortController = new AbortController();
-      const error = new Error('Pipeline failed');
-
-      pipeline.execute.mockRejectedValue(error);
+      pipeline.execute.mockRejectedValue(new Error('Pipeline failed'));
 
       await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
         'Pipeline failed'

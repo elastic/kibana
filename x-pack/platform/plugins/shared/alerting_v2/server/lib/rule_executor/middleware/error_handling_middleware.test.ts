@@ -7,19 +7,13 @@
 
 import type { Logger } from '@kbn/logging';
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
-import type { RuleExecutionMiddlewareContext } from './types';
 import type { RuleStepOutput } from '../types';
-import { createRuleExecutionInput } from '../test_utils';
+import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('ErrorHandlingMiddleware', () => {
   let middleware: ErrorHandlingMiddleware;
   let logger: jest.Mocked<Logger>;
-
-  const createContext = (): RuleExecutionMiddlewareContext => ({
-    step: { name: 'test_step', execute: jest.fn() },
-    state: { input: createRuleExecutionInput() },
-  });
 
   beforeEach(() => {
     const { loggerService, mockLogger } = createLoggerService();
@@ -31,7 +25,7 @@ describe('ErrorHandlingMiddleware', () => {
     const expectedResult: RuleStepOutput = { type: 'continue' };
     const next = jest.fn().mockResolvedValue(expectedResult);
 
-    const context = createContext();
+    const context = createRuleExecutionMiddlewareContext();
     const result = await middleware.execute(context, next);
 
     expect(result).toEqual(expectedResult);
@@ -42,7 +36,7 @@ describe('ErrorHandlingMiddleware', () => {
   it('logs error and rethrows on failure', async () => {
     const error = new Error('Step failed');
     const next = jest.fn().mockRejectedValue(error);
-    const context = createContext();
+    const context = createRuleExecutionMiddlewareContext();
 
     await expect(middleware.execute(context, next)).rejects.toThrow('Step failed');
     expect(logger.error).toHaveBeenCalled();

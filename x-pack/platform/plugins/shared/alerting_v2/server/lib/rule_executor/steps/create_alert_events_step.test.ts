@@ -6,28 +6,28 @@
  */
 
 import { CreateAlertEventsStep } from './create_alert_events_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
-import type { RuleResponse } from '../../rules_client';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from '../test_utils';
+import {
+  createRuleExecutionInput,
+  createRuleResponse,
+  createEsqlResponse,
+  createRulePipelineState,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createStorageService } from '../../services/storage_service/storage_service.mock';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 
 describe('CreateAlertEventsStep', () => {
-  const createState = (
-    input: RuleExecutionInput,
-    rule?: RuleResponse,
-    esqlResponse?: ESQLSearchResponse
-  ): RulePipelineState => ({
-    input,
-    rule,
-    esqlResponse,
+  let step: CreateAlertEventsStep;
+  let mockEsClient: ReturnType<typeof createStorageService>['mockEsClient'];
+
+  beforeEach(() => {
+    const { loggerService } = createLoggerService();
+    const { storageService, mockEsClient: esClient } = createStorageService();
+    mockEsClient = esClient;
+    step = new CreateAlertEventsStep(loggerService, storageService);
   });
 
   it('builds alert events and stores them correctly', async () => {
-    const { loggerService } = createLoggerService();
-    const { storageService, mockEsClient } = createStorageService();
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();
     const esqlResponse = createEsqlResponse();
@@ -38,8 +38,7 @@ describe('CreateAlertEventsStep', () => {
       took: 1,
     });
 
-    const step = new CreateAlertEventsStep(loggerService, storageService);
-    const state = createState(input, rule, esqlResponse);
+    const state = createRulePipelineState({ input, rule, esqlResponse });
     const result = await step.execute(state);
 
     expect(result).toEqual({ type: 'continue' });
@@ -82,11 +81,7 @@ describe('CreateAlertEventsStep', () => {
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
-    const { loggerService } = createLoggerService();
-    const { storageService } = createStorageService();
-
-    const step = new CreateAlertEventsStep(loggerService, storageService);
-    const state = createState(createRuleExecutionInput(), undefined, createEsqlResponse());
+    const state = createRulePipelineState({ esqlResponse: createEsqlResponse() });
 
     const result = await step.execute(state);
 
@@ -94,11 +89,7 @@ describe('CreateAlertEventsStep', () => {
   });
 
   it('halts with state_not_ready when esqlResponse is missing from state', async () => {
-    const { loggerService } = createLoggerService();
-    const { storageService } = createStorageService();
-
-    const step = new CreateAlertEventsStep(loggerService, storageService);
-    const state = createState(createRuleExecutionInput(), createRuleResponse(), undefined);
+    const state = createRulePipelineState({ rule: createRuleResponse() });
 
     const result = await step.execute(state);
 
@@ -106,17 +97,12 @@ describe('CreateAlertEventsStep', () => {
   });
 
   it('propagates storage service errors', async () => {
-    const { loggerService } = createLoggerService();
-    const { storageService, mockEsClient } = createStorageService();
-
     mockEsClient.bulk.mockRejectedValue(new Error('Bulk index failed'));
 
-    const step = new CreateAlertEventsStep(loggerService, storageService);
-    const state = createState(
-      createRuleExecutionInput(),
-      createRuleResponse(),
-      createEsqlResponse()
-    );
+    const state = createRulePipelineState({
+      rule: createRuleResponse(),
+      esqlResponse: createEsqlResponse(),
+    });
 
     await expect(step.execute(state)).rejects.toThrow('Bulk index failed');
   });
