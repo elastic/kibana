@@ -81,8 +81,8 @@
 #   - security
 #   - other
 
-pr: "233289"
-type: deprecation
+pr: "248481"
+type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: Filter endpoint list exceptions  in DE logic
+title: Fixes incorrect pagination count in Security Solution Notes tab that showed "1-0 of 0" when no notes exist.

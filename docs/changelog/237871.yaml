@@ -81,8 +81,8 @@
 #   - security
 #   - other
 
-pr: "233289"
-type: deprecation
+pr: "237871"
+type: enhancement
 products:
 - product: kibana
   target: 9.3.0
@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: Filter endpoint list exceptions  in DE logic
+title: '[Risk Score] Use ESQL for calculating risk scores'

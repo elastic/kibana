@@ -81,8 +81,10 @@
 #   - security
 #   - other
 
-pr: "233289"
-type: deprecation
+pr: "244924"
+issues:
+- https://github.com/elastic/security-team/issues/14588
+type: feature
 products:
 - product: kibana
   target: 9.3.0
@@ -90,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: Filter endpoint list exceptions  in DE logic
+title: Adds Support for QRadar Reference Sets as Lookups
