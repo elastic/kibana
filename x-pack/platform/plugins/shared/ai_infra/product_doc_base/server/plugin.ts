@@ -44,8 +44,6 @@ export class ProductDocBasePlugin
     coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
     { taskManager }: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
-    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
-
     const getServices = () => {
       if (!this.internalServices) {
         throw new Error('getServices called before #start');
@@ -81,7 +79,6 @@ export class ProductDocBasePlugin
     const productDocClient = new ProductDocInstallClient({
       soClient,
       log: this.logger,
-      isServerless,
     });
 
     const packageInstaller = new PackageInstaller({
@@ -98,7 +95,6 @@ export class ProductDocBasePlugin
     const searchService = new SearchService({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger.get('search-service'),
-      isServerless,
     });
 
     const documentationManager = new DocumentationManager({
@@ -108,7 +104,6 @@ export class ProductDocBasePlugin
       taskManager,
       auditService: core.security.audit,
       packageInstaller,
-      isServerless,
     });
 
     this.internalServices = {

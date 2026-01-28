@@ -16,6 +16,7 @@ export interface TaskConfig {
   sourceClusterUsername?: string;
   sourceClusterPassword?: string;
   sourceClusterApiKey?: string;
+  sourceClusterIndex?: string;
   embeddingClusterUrl: string;
   embeddingClusterUsername: string;
   embeddingClusterPassword: string;

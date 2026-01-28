@@ -32,21 +32,20 @@ import { getSemanticTextMapping } from './tasks/create_index';
 const getSourceClient = (config: TaskConfig) => {
   const auth = config.sourceClusterApiKey
     ? { apiKey: config.sourceClusterApiKey }
-    : {
+    : config.sourceClusterUsername && config.sourceClusterPassword
+    ? {
         username: config.sourceClusterUsername,
         password: config.sourceClusterPassword,
-      };
+      }
+    : undefined;
 
   return new ElasticsearchClient8({
     compression: true,
     nodes: [config.sourceClusterUrl],
     sniffOnStart: false,
-    auth,
+    ...(auth ? { auth } : {}),
     Connection: Elasticsearch8HttpConnection,
     requestTimeout: 30_000,
-    ssl: {
-      rejectUnauthorized: false,
-    },
     tls: {
       rejectUnauthorized: false,
     },
@@ -64,9 +63,6 @@ const getEmbeddingClient = (config: TaskConfig) => {
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
     Connection: HttpConnection,
-    ssl: {
-      rejectUnauthorized: false,
-    },
     tls: {
       rejectUnauthorized: false,
     },

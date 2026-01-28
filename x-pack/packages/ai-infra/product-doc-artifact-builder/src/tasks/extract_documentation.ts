@@ -103,7 +103,7 @@ export const extractDocumentation = async ({
 }) => {
   log.info(`Starting to extract documents from source cluster`);
 
-  const productName = productNameParam.toLowerCase();
+  const productName = productNameParam.toLowerCase() as ProductName;
   const query = {
     index,
     size: 10000,

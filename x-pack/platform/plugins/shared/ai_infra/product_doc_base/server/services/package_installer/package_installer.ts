@@ -49,6 +49,7 @@ interface PackageInstallerOpts {
   artifactRepositoryUrl: string;
   kibanaVersion: string;
   elserInferenceId?: string;
+  isServerless?: boolean;
 }
 
 export class PackageInstaller {
@@ -78,7 +79,7 @@ export class PackageInstaller {
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
-    this.isServerless = isServerless;
+    this.isServerless = isServerless ?? false;
   }
 
   private async getInferenceInfo(inferenceId?: string) {
@@ -252,7 +253,7 @@ export class PackageInstaller {
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
 
-      const createdIndex = await createIndex({
+      await createIndex({
         indexName,
         mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
         manifestVersion,
@@ -260,7 +261,7 @@ export class PackageInstaller {
         log: this.log,
       });
 
-      const populatedIndex = await populateIndex({
+      await populateIndex({
         indexName,
         manifestVersion,
         archive: zipArchive,

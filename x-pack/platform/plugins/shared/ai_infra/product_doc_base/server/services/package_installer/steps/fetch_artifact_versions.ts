@@ -56,7 +56,7 @@ export const fetchArtifactVersions = async ({
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
-        const dateModified = contentEntry.LastModified[0];
+        const dateModified = contentEntry.LastModified?.[0];
         const parsed = parseArtifactName(artifactName);
         if (parsed) {
           const { productName, productVersion } = parsed;
@@ -95,7 +95,7 @@ interface ListBucketResponse {
   ListBucketResult: {
     Name?: string[];
     IsTruncated?: string[];
-    Contents?: Array<{ Key: string[] }>;
+    Contents?: Array<{ Key: string[]; LastModified: string[] }>;
   };
 }
 
