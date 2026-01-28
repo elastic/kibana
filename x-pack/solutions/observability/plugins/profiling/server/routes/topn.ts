@@ -69,9 +69,6 @@ export async function topNElasticSearchQuery({
       highCardinality,
       fixedInterval: `${bucketWidth}s`,
     }),
-    // Adrien and Dario found out this is a work-around for some bug in 8.1.
-    // It reduces the query time by avoiding unneeded searches.
-    pre_filter_shard_size: 1,
   });
 
   const { aggregations } = resEvents;
