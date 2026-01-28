@@ -1,0 +1,66 @@
+{
+   "attributes": {
+      "fieldAttrs": "{\"products.manufacturer\":{\"count\":1},\"products.price\":{\"count\":1},\"products.product_name\":{\"count\":1},\"total_quantity\":{\"count\":1}}",
+      "fieldFormatMap": "{\"taxful_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.[00]\"}},\"products.price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"taxless_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxless_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxful_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.min_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_unit_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}}}",
+      "fields": "[]",
+      "name": "Kibana Sample Data eCommerce",
+      "runtimeFieldMap": "{}",
+      "timeFieldName": "order_date",
+      "title": "kibana_sample_data_ecommerce",
+      "typeMeta": "{}"
+   },
+   "coreMigrationVersion": "8.6.0",
+   "created_at": "2022-10-27T09:53:09.176Z",
+   "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+   "migrationVersion": {
+      "index-pattern": "8.0.0"
+   },
+   "references": [],
+   "type": "index-pattern",
+   "updated_at": "2022-10-27T09:53:09.176Z",
+   "version": "WzE0MywxXQ=="
+}
+
+{
+  "accessControl": {
+    "accessMode": "default",
+    "owner": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+  },
+  "attributes": {
+    "controlGroupInput": {
+      "panelsJSON": "{}"
+    },
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"Transactions per day\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"attributes\":{\"state\":{\"datasourceStates\":{\"formBased\":{\"layers\":{\"b6093a53-884f-42c2-9fcc-ba56cfb66c53\":{\"columnOrder\":[\"15c45f89-a149-443a-a830-aa8c3a9317db\",\"2b41b3d8-2f62-407a-a866-960f254c679d\",\"eadae280-2da3-4d1d-a0e1-f9733f89c15b\",\"ddc92e50-4d5c-413e-b91b-3e504889fa65\",\"5e31e5d3-2aaa-4475-a130-3b69bf2f748a\"],\"columns\":{\"15c45f89-a149-443a-a830-aa8c3a9317db\":{\"dataType\":\"date\",\"isBucketed\":true,\"label\":\"order_date\",\"operationType\":\"date_histogram\",\"params\":{\"interval\":\"1d\",\"includeEmptyRows\":true},\"scale\":\"interval\",\"sourceField\":\"order_date\"},\"2b41b3d8-2f62-407a-a866-960f254c679d\":{\"customLabel\":true,\"dataType\":\"number\",\"isBucketed\":false,\"label\":\"Total items\",\"operationType\":\"sum\",\"scale\":\"ratio\",\"sourceField\":\"products.quantity\"},\"5e31e5d3-2aaa-4475-a130-3b69bf2f748a\":{\"customLabel\":true,\"dataType\":\"number\",\"isBucketed\":false,\"label\":\"Tx. last week\",\"operationType\":\"count\",\"scale\":\"ratio\",\"sourceField\":\"___records___\",\"timeShift\":\"1w\"},\"ddc92e50-4d5c-413e-b91b-3e504889fa65\":{\"customLabel\":true,\"dataType\":\"number\",\"isBucketed\":false,\"label\":\"Transactions\",\"operationType\":\"count\",\"scale\":\"ratio\",\"sourceField\":\"___records___\"},\"eadae280-2da3-4d1d-a0e1-f9733f89c15b\":{\"customLabel\":true,\"dataType\":\"number\",\"isBucketed\":false,\"label\":\"Last week\",\"operationType\":\"sum\",\"scale\":\"ratio\",\"sourceField\":\"products.quantity\",\"timeShift\":\"1w\"}},\"incompleteColumns\":{}}}}},\"filters\":[],\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"visualization\":{\"axisTitlesVisibilitySettings\":{\"x\":false,\"yLeft\":false,\"yRight\":true},\"curveType\":\"LINEAR\",\"fittingFunction\":\"None\",\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"layers\":[{\"accessors\":[\"2b41b3d8-2f62-407a-a866-960f254c679d\",\"eadae280-2da3-4d1d-a0e1-f9733f89c15b\",\"5e31e5d3-2aaa-4475-a130-3b69bf2f748a\",\"ddc92e50-4d5c-413e-b91b-3e504889fa65\"],\"layerId\":\"b6093a53-884f-42c2-9fcc-ba56cfb66c53\",\"position\":\"top\",\"seriesType\":\"line\",\"showGridlines\":false,\"xAccessor\":\"15c45f89-a149-443a-a830-aa8c3a9317db\",\"yConfig\":[],\"layerType\":\"data\"}],\"legend\":{\"isVisible\":true,\"position\":\"right\",\"legendSize\":\"auto\"},\"preferredSeriesType\":\"line\",\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"valueLabels\":\"hide\",\"yLeftExtent\":{\"mode\":\"full\"},\"yRightExtent\":{\"mode\":\"full\"}}},\"visualizationType\":\"lnsXY\",\"references\":[{\"id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"name\":\"indexpattern-datasource-current-indexpattern\",\"type\":\"index-pattern\"},{\"id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"name\":\"indexpattern-datasource-layer-b6093a53-884f-42c2-9fcc-ba56cfb66c53\",\"type\":\"index-pattern\"}],\"version\":2}},\"panelIndex\":\"4dc30866-8677-45f8-ae50-68fc4a29423f\",\"gridData\":{\"y\":0,\"x\":0,\"w\":25,\"h\":10,\"i\":\"4dc30866-8677-45f8-ae50-68fc4a29423f\"}}]",
+    "timeTo": "2022-10-25T20:00:00.000Z",
+    "timeFrom": "2022-10-18T20:00:00.000Z",
+    "timeRestore": true,
+   "title": "[eCommerce] Lens Only"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-01-28T18:11:55.518Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "4d57f291-5ab3-4915-aa1b-d6eb52d11040",
+  "managed": false,
+  "references": [
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "4dc30866-8677-45f8-ae50-68fc4a29423f:indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "4dc30866-8677-45f8-ae50-68fc4a29423f:indexpattern-datasource-layer-b6093a53-884f-42c2-9fcc-ba56cfb66c53",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-01-28T18:11:55.518Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzE0LDFd"
+}
