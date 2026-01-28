@@ -11,7 +11,6 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   PackageInfo,
-  PackagePolicyConfigRecordEntry,
   CloudConnectorSecretReference,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
@@ -21,6 +20,7 @@ import {
   extractRawCredentialVars,
   getCredentialSchema,
   getAllVarKeys,
+  findFirstVarEntry,
 } from '../../../common/services/cloud_connectors';
 import type { NewPackagePolicy } from '../../types';
 import { CloudConnectorInvalidVarsError } from '../../errors';
@@ -80,22 +80,11 @@ async function extractAwsCloudConnectorSecrets(
   const externalIdKeys = getAllVarKeys(schema.fields.externalId);
 
   // Look for role_arn using schema-defined keys
-  let roleArn: string | undefined;
-  for (const key of roleArnKeys) {
-    if (vars[key]?.value) {
-      roleArn = vars[key].value;
-      break;
-    }
-  }
+  const roleArnVar = findFirstVarEntry(vars, roleArnKeys);
+  const roleArn = roleArnVar?.value as string | undefined;
 
   // Look for external_id using schema-defined keys
-  let externalIdVar: PackagePolicyConfigRecordEntry | undefined;
-  for (const key of externalIdKeys) {
-    if (vars[key]) {
-      externalIdVar = vars[key];
-      break;
-    }
-  }
+  const externalIdVar = findFirstVarEntry(vars, externalIdKeys);
 
   if (roleArn && externalIdVar) {
     let externalIdWithSecretRef: { type: 'password'; value: CloudConnectorSecretReference };
@@ -168,32 +157,10 @@ async function extractAzureCloudConnectorSecrets(
   const clientIdKeys = getAllVarKeys(schema.fields.clientId);
   const connectorIdKeys = getAllVarKeys(schema.fields.azureCredentialsCloudConnectorId);
 
-  // Look for tenant_id using schema-defined keys
-  let tenantIdVar: PackagePolicyConfigRecordEntry | undefined;
-  for (const key of tenantIdKeys) {
-    if (vars[key]) {
-      tenantIdVar = vars[key];
-      break;
-    }
-  }
-
-  // Look for client_id using schema-defined keys
-  let clientIdVar: PackagePolicyConfigRecordEntry | undefined;
-  for (const key of clientIdKeys) {
-    if (vars[key]) {
-      clientIdVar = vars[key];
-      break;
-    }
-  }
-
-  // Look for azure_credentials_cloud_connector_id using schema-defined keys
-  let azureCredentials: PackagePolicyConfigRecordEntry | undefined;
-  for (const key of connectorIdKeys) {
-    if (vars[key]) {
-      azureCredentials = vars[key];
-      break;
-    }
-  }
+  // Look for Azure vars using schema-defined keys
+  const tenantIdVar = findFirstVarEntry(vars, tenantIdKeys);
+  const clientIdVar = findFirstVarEntry(vars, clientIdKeys);
+  const azureCredentials = findFirstVarEntry(vars, connectorIdKeys);
 
   if (tenantIdVar && clientIdVar && azureCredentials) {
     let tenantIdWithSecretRef: CloudConnectorSecretVar = {

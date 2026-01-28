@@ -18,6 +18,9 @@ export type {
   NormalizedCloudConnectorCredentials,
 } from './types';
 
+// Constants
+export { INVALID_INDEX } from './constants';
+
 // Schemas
 export {
   AWS_CREDENTIAL_SCHEMA,
@@ -31,10 +34,12 @@ export {
 
 // Accessor functions
 export {
-  detectStorageMode,
+  getCredentialStorageScope,
   resolveVarTarget,
+  applyVarsAtTarget,
   extractRawCredentialVars,
   readCredentials,
   writeCredentials,
   getVarTarget,
+  findFirstVarEntry,
 } from './var_accessor';

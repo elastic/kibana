@@ -23,18 +23,24 @@ import type {
   NormalizedCloudConnectorCredentials,
 } from './types';
 
+import { INVALID_INDEX } from './constants';
+
 import { getCredentialSchema, getAllVarKeys, getAllSupportedVarNames } from './schemas';
 
 /**
- * Detects the storage mode for cloud connector variables based on PackageInfo
+ * Determines the storage scope for cloud connector credential variables based on PackageInfo.
  *
- * Package-level mode is used when PackageInfo.vars contains cloud connector credential var definitions.
- * Input-level mode is the default when credentials are defined at the stream level.
+ * Cloud connector credentials can be stored at two different scopes:
+ * - Package scope: Variables stored at policy.vars (global to the package)
+ * - Input/stream scope: Variables stored at policy.inputs[].streams[].vars
+ *
+ * Package scope is used when PackageInfo.vars contains cloud connector credential var definitions.
+ * Input/stream scope is the default when credentials are defined at the stream level.
  *
  * @param packageInfo - The package info containing var definitions
- * @returns The storage mode ('package' or 'input')
+ * @returns The storage scope ('package' or 'input')
  */
-export function detectStorageMode(packageInfo: PackageInfo): CloudConnectorVarStorageMode {
+export function getCredentialStorageScope(packageInfo: PackageInfo): CloudConnectorVarStorageMode {
   const packageVars: RegistryVarsEntry[] = packageInfo.vars || [];
   const supportedVarNames = getAllSupportedVarNames();
 
@@ -68,19 +74,20 @@ export function resolveVarTarget(
 
   // Input mode: find enabled input and stream
   const enabledInputIndex = packagePolicy.inputs.findIndex((input) => input.enabled);
-  if (enabledInputIndex === -1) {
+  if (enabledInputIndex === INVALID_INDEX) {
     return {
-      target: { mode: 'input', inputIndex: -1, streamIndex: -1 },
+      target: { mode: 'input', inputIndex: INVALID_INDEX, streamIndex: INVALID_INDEX },
       vars: undefined,
     };
   }
 
   const enabledInput = packagePolicy.inputs[enabledInputIndex];
-  const enabledStreamIndex = enabledInput.streams?.findIndex((stream) => stream.enabled) ?? -1;
+  const enabledStreamIndex =
+    enabledInput.streams?.findIndex((stream) => stream.enabled) ?? INVALID_INDEX;
 
-  if (enabledStreamIndex === -1) {
+  if (enabledStreamIndex === INVALID_INDEX) {
     return {
-      target: { mode: 'input', inputIndex: enabledInputIndex, streamIndex: -1 },
+      target: { mode: 'input', inputIndex: enabledInputIndex, streamIndex: INVALID_INDEX },
       vars: undefined,
     };
   }
@@ -89,6 +96,53 @@ export function resolveVarTarget(
     target: { mode: 'input', inputIndex: enabledInputIndex, streamIndex: enabledStreamIndex },
     vars: enabledInput.streams[enabledStreamIndex].vars,
   };
+}
+
+/**
+ * Applies updated vars at the correct location based on the resolved target.
+ *
+ * This is the write-side complement to resolveVarTarget (which handles reading).
+ * - Package scope: Updates policy.vars (global to the package)
+ * - Input/stream scope: Updates policy.inputs[].streams[].vars
+ *
+ * @param policy - The package policy to update
+ * @param updatedVars - The updated vars to apply
+ * @param target - The resolved target indicating where to apply vars
+ * @returns A new policy with updated vars at the correct location
+ */
+export function applyVarsAtTarget<T extends NewPackagePolicy | PackagePolicy>(
+  policy: T,
+  updatedVars: PackagePolicyConfigRecord,
+  target: CloudConnectorVarTarget
+): T {
+  // Package scope: update policy.vars
+  if (target.mode === 'package') {
+    return {
+      ...policy,
+      vars: updatedVars,
+    };
+  }
+
+  // Input/stream scope: update the nested stream vars
+  const { inputIndex, streamIndex } = target;
+  if (inputIndex === INVALID_INDEX || streamIndex === INVALID_INDEX) {
+    return policy;
+  }
+
+  const updatedInputs = [...policy.inputs];
+  const updatedInput = { ...updatedInputs[inputIndex] };
+  const updatedStreams = [...updatedInput.streams];
+  updatedStreams[streamIndex] = {
+    ...updatedStreams[streamIndex],
+    vars: updatedVars,
+  };
+  updatedInput.streams = updatedStreams;
+  updatedInputs[inputIndex] = updatedInput;
+
+  return {
+    ...policy,
+    inputs: updatedInputs,
+  } as T;
 }
 
 /**
@@ -122,6 +176,29 @@ function extractVarValue(
 }
 
 /**
+ * Finds the first existing var entry by checking primary key and all aliases
+ *
+ * @param vars - The vars container to search
+ * @param varKeys - Array of var key names to check (primary and aliases)
+ * @returns The found var entry or undefined
+ */
+export function findFirstVarEntry(
+  vars: PackagePolicyConfigRecord | undefined,
+  varKeys: string[]
+): PackagePolicyConfigRecordEntry | undefined {
+  if (!vars) {
+    return undefined;
+  }
+
+  for (const key of varKeys) {
+    if (vars[key]) {
+      return vars[key];
+    }
+  }
+  return undefined;
+}
+
+/**
  * Finds a var value by checking primary key and all aliases
  *
  * @param vars - The vars container to search
@@ -136,14 +213,8 @@ function findVarValue(
     return undefined;
   }
 
-  for (const key of varKeys) {
-    const value = extractVarValue(vars[key]);
-    if (value !== undefined) {
-      return value;
-    }
-  }
-
-  return undefined;
+  const entry = findFirstVarEntry(vars, varKeys);
+  return entry ? extractVarValue(entry) : undefined;
 }
 
 /**
@@ -160,7 +231,7 @@ export function extractRawCredentialVars(
   packagePolicy: NewPackagePolicy | PackagePolicy,
   packageInfo: PackageInfo
 ): PackagePolicyConfigRecord | undefined {
-  const mode = detectStorageMode(packageInfo);
+  const mode = getCredentialStorageScope(packageInfo);
   const { vars } = resolveVarTarget(packagePolicy, mode);
   return vars;
 }
@@ -355,7 +426,7 @@ export function writeCredentials<T extends NewPackagePolicy | PackagePolicy>(
   provider: CloudProvider,
   packageInfo: PackageInfo
 ): T {
-  const mode = detectStorageMode(packageInfo);
+  const mode = getCredentialStorageScope(packageInfo);
   const { target, vars } = resolveVarTarget(packagePolicy, mode);
 
   if (!vars) {
@@ -418,7 +489,7 @@ export function getVarTarget(
   packagePolicy: NewPackagePolicy | PackagePolicy,
   packageInfo: PackageInfo
 ): CloudConnectorVarTarget {
-  const mode = detectStorageMode(packageInfo);
+  const mode = getCredentialStorageScope(packageInfo);
   const { target } = resolveVarTarget(packagePolicy, mode);
   return target;
 }

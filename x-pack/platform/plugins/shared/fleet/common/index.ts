@@ -93,8 +93,9 @@ export {
   removeSOAttributes,
   getSortConfig,
   // Cloud Connector accessor functions
-  detectStorageMode,
+  getCredentialStorageScope,
   resolveVarTarget,
+  applyVarsAtTarget,
   extractRawCredentialVars,
   readCredentials,
   writeCredentials,
@@ -102,6 +103,7 @@ export {
   getCredentialSchema,
   getAllVarKeys,
   getAllSupportedVarNames,
+  findFirstVarEntry,
 } from './services';
 
 export type {

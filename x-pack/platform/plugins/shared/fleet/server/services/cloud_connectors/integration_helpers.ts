@@ -11,8 +11,9 @@ import {
 } from '../../../common/services/cloud_connector_helpers';
 import {
   extractRawCredentialVars,
-  detectStorageMode,
+  getCredentialStorageScope,
   resolveVarTarget,
+  applyVarsAtTarget,
   getCredentialSchema,
   getAllVarKeys,
 } from '../../../common/services/cloud_connectors';
@@ -102,7 +103,7 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
   cloudProvider: CloudProvider,
   packageInfo: PackageInfo
 ): NewPackagePolicy {
-  const mode = detectStorageMode(packageInfo);
+  const mode = getCredentialStorageScope(packageInfo);
   const { target, vars: currentVars } = resolveVarTarget(packagePolicy, mode);
 
   if (!currentVars) {
@@ -150,30 +151,8 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
     }
   }
 
-  // Apply updated vars at the correct location
-  if (target.mode === 'package') {
-    return {
-      ...packagePolicy,
-      vars: updatedVars,
-    };
-  }
-
-  // Input mode: update the correct stream
-  const { inputIndex, streamIndex } = target;
-  const updatedInputs = [...packagePolicy.inputs];
-  const updatedInput = { ...updatedInputs[inputIndex] };
-  const updatedStreams = [...updatedInput.streams];
-  updatedStreams[streamIndex] = {
-    ...updatedStreams[streamIndex],
-    vars: updatedVars,
-  };
-  updatedInput.streams = updatedStreams;
-  updatedInputs[inputIndex] = updatedInput;
-
-  return {
-    ...packagePolicy,
-    inputs: updatedInputs,
-  };
+  // Apply updated vars at the correct location based on storage scope
+  return applyVarsAtTarget(packagePolicy, updatedVars, target);
 }
 
 /**

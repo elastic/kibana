@@ -8,15 +8,15 @@
 import { useState, useCallback } from 'react';
 import type {
   NewPackagePolicy,
-  NewPackagePolicyInput,
   PackageInfo,
   PackagePolicyConfigRecord,
 } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/public/types';
 import {
   extractRawCredentialVars,
-  detectStorageMode,
+  getCredentialStorageScope,
   resolveVarTarget,
+  applyVarsAtTarget,
 } from '@kbn/fleet-plugin/common';
 
 import type { UpdatePolicy } from '../../types';
@@ -93,47 +93,24 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
 };
 
 /**
- * Updates the vars at the correct location based on storage mode
+ * Updates the vars at the correct location based on credential storage scope.
+ *
+ * Cloud connector credentials can be stored at two scopes:
+ * - Package scope: policy.vars (global to the package)
+ * - Input/stream scope: policy.inputs[].streams[].vars
  */
-const updatePolicyVarsAtTarget = (
+const updatePolicyVarsByScope = (
   policy: NewPackagePolicy,
   updatedVars: PackagePolicyConfigRecord,
   packageInfo: PackageInfo
 ): NewPackagePolicy => {
-  const mode = detectStorageMode(packageInfo);
-  const { target } = resolveVarTarget(policy, mode);
+  const scope = getCredentialStorageScope(packageInfo);
+  const { target } = resolveVarTarget(policy, scope);
 
-  if (target.mode === 'package') {
-    return {
-      ...policy,
-      vars: updatedVars,
-    };
-  }
-
-  // Input mode: update the correct stream
-  const { inputIndex, streamIndex } = target;
-  if (inputIndex === -1 || streamIndex === -1) {
-    return policy;
-  }
-
-  const updatedInputs = [...policy.inputs];
-  const updatedInput = { ...updatedInputs[inputIndex] };
-  const updatedStreams = [...updatedInput.streams];
-  updatedStreams[streamIndex] = {
-    ...updatedStreams[streamIndex],
-    vars: updatedVars,
-  };
-  updatedInput.streams = updatedStreams;
-  updatedInputs[inputIndex] = updatedInput;
-
-  return {
-    ...policy,
-    inputs: updatedInputs,
-  };
+  return applyVarsAtTarget(policy, updatedVars, target);
 };
 
 export const useCloudConnectorSetup = (
-  input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   packageInfo: PackageInfo
@@ -166,7 +143,7 @@ export const useCloudConnectorSetup = (
       );
 
       // Create updated policy with vars at the correct location
-      let updatedPolicy = updatePolicyVarsAtTarget(
+      let updatedPolicy = updatePolicyVarsByScope(
         { ...newPolicy },
         updatedInputVars as PackagePolicyConfigRecord,
         packageInfo
@@ -204,7 +181,7 @@ export const useCloudConnectorSetup = (
       // Create updated policy with vars at the correct location
       let updatedPolicy = newPolicy;
       if (updatedInputVars) {
-        updatedPolicy = updatePolicyVarsAtTarget({ ...newPolicy }, updatedInputVars, packageInfo);
+        updatedPolicy = updatePolicyVarsByScope({ ...newPolicy }, updatedInputVars, packageInfo);
       }
 
       // Set cloud connector ID if provided

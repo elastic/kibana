@@ -9,11 +9,14 @@ import type { PackageInfo } from '../../types/models/epm';
 import type { NewPackagePolicy } from '../../types/models/package_policy';
 
 import {
-  detectStorageMode,
+  getCredentialStorageScope,
   resolveVarTarget,
+  applyVarsAtTarget,
   extractRawCredentialVars,
   readCredentials,
   writeCredentials,
+  getVarTarget,
+  findFirstVarEntry,
 } from './var_accessor';
 
 // Mock PackageInfo with package-level vars (package mode)
@@ -126,22 +129,22 @@ const createAzureInputLevelPolicy = (): NewPackagePolicy => ({
 });
 
 describe('Cloud Connector Var Accessor', () => {
-  describe('detectStorageMode', () => {
+  describe('getCredentialStorageScope', () => {
     it('should detect package mode when PackageInfo.vars contains credential vars', () => {
       const packageInfo = createPackageLevelPackageInfo();
-      const mode = detectStorageMode(packageInfo);
+      const mode = getCredentialStorageScope(packageInfo);
       expect(mode).toBe('package');
     });
 
     it('should detect input mode when PackageInfo.vars does not contain credential vars', () => {
       const packageInfo = createInputLevelPackageInfo();
-      const mode = detectStorageMode(packageInfo);
+      const mode = getCredentialStorageScope(packageInfo);
       expect(mode).toBe('input');
     });
 
     it('should detect input mode when PackageInfo.vars is undefined', () => {
       const packageInfo = { ...createInputLevelPackageInfo(), vars: undefined } as PackageInfo;
-      const mode = detectStorageMode(packageInfo);
+      const mode = getCredentialStorageScope(packageInfo);
       expect(mode).toBe('input');
     });
   });
@@ -188,6 +191,210 @@ describe('Cloud Connector Var Accessor', () => {
 
       expect(result.target).toEqual({ mode: 'input', inputIndex: 0, streamIndex: -1 });
       expect(result.vars).toBeUndefined();
+    });
+  });
+
+  describe('applyVarsAtTarget', () => {
+    it('should apply vars at package level when target mode is package', () => {
+      const policy = createPackageLevelPolicy();
+      const updatedVars = {
+        role_arn: { value: 'arn:aws:iam::999999999999:role/UpdatedRole' },
+        external_id: { value: 'updated-external-id' },
+      };
+
+      const result = applyVarsAtTarget(policy, updatedVars, { mode: 'package' });
+
+      expect(result.vars).toEqual(updatedVars);
+      // Original should not be mutated
+      expect(policy.vars?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/TestRole');
+    });
+
+    it('should apply vars at stream level when target mode is input', () => {
+      const policy = createInputLevelPolicy();
+      const updatedVars = {
+        role_arn: { value: 'arn:aws:iam::999999999999:role/UpdatedRole' },
+        external_id: { value: 'updated-external-id' },
+      };
+
+      const result = applyVarsAtTarget(policy, updatedVars, {
+        mode: 'input',
+        inputIndex: 0,
+        streamIndex: 0,
+      });
+
+      expect(result.inputs[0].streams[0].vars).toEqual(updatedVars);
+      // Original should not be mutated
+      expect(policy.inputs[0].streams[0].vars?.role_arn?.value).toBe(
+        'arn:aws:iam::123456789012:role/TestRole'
+      );
+    });
+
+    it('should return original policy when inputIndex is invalid', () => {
+      const policy = createInputLevelPolicy();
+      const updatedVars = { role_arn: { value: 'new-role' } };
+
+      const result = applyVarsAtTarget(policy, updatedVars, {
+        mode: 'input',
+        inputIndex: -1,
+        streamIndex: 0,
+      });
+
+      expect(result).toEqual(policy);
+    });
+
+    it('should return original policy when streamIndex is invalid', () => {
+      const policy = createInputLevelPolicy();
+      const updatedVars = { role_arn: { value: 'new-role' } };
+
+      const result = applyVarsAtTarget(policy, updatedVars, {
+        mode: 'input',
+        inputIndex: 0,
+        streamIndex: -1,
+      });
+
+      expect(result).toEqual(policy);
+    });
+
+    it('should preserve other inputs when updating specific stream', () => {
+      const policy: NewPackagePolicy = {
+        ...createInputLevelPolicy(),
+        inputs: [
+          {
+            type: 'first-input',
+            enabled: false,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'first' },
+                vars: { first_var: { value: 'first-value' } },
+              },
+            ],
+          },
+          {
+            type: 'second-input',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'second' },
+                vars: { role_arn: { value: 'original-role' } },
+              },
+            ],
+          },
+        ],
+      };
+      const updatedVars = { role_arn: { value: 'updated-role' } };
+
+      const result = applyVarsAtTarget(policy, updatedVars, {
+        mode: 'input',
+        inputIndex: 1,
+        streamIndex: 0,
+      });
+
+      // First input should be unchanged
+      expect(result.inputs[0].streams[0].vars).toEqual({ first_var: { value: 'first-value' } });
+      // Second input should be updated
+      expect(result.inputs[1].streams[0].vars).toEqual(updatedVars);
+    });
+  });
+
+  describe('findFirstVarEntry', () => {
+    it('should return the first matching var entry', () => {
+      const vars = {
+        role_arn: { value: 'test-role-arn' },
+        other_var: { value: 'other-value' },
+      };
+
+      const result = findFirstVarEntry(vars, ['role_arn', 'aws.role_arn']);
+
+      expect(result).toEqual({ value: 'test-role-arn' });
+    });
+
+    it('should return entry from alias when primary key does not exist', () => {
+      const vars = {
+        'aws.role_arn': { value: 'aliased-role-arn' },
+        other_var: { value: 'other-value' },
+      };
+
+      const result = findFirstVarEntry(vars, ['role_arn', 'aws.role_arn']);
+
+      expect(result).toEqual({ value: 'aliased-role-arn' });
+    });
+
+    it('should return undefined when no matching key exists', () => {
+      const vars = {
+        other_var: { value: 'other-value' },
+      };
+
+      const result = findFirstVarEntry(vars, ['role_arn', 'aws.role_arn']);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when vars is undefined', () => {
+      const result = findFirstVarEntry(undefined, ['role_arn', 'aws.role_arn']);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return the first key in order when multiple keys exist', () => {
+      const vars = {
+        role_arn: { value: 'primary-value' },
+        'aws.role_arn': { value: 'alias-value' },
+      };
+
+      const result = findFirstVarEntry(vars, ['role_arn', 'aws.role_arn']);
+
+      expect(result).toEqual({ value: 'primary-value' });
+    });
+  });
+
+  describe('getVarTarget', () => {
+    it('should return package target for package mode', () => {
+      const packageInfo = createPackageLevelPackageInfo();
+      const policy = createPackageLevelPolicy();
+
+      const target = getVarTarget(policy, packageInfo);
+
+      expect(target).toEqual({ mode: 'package' });
+    });
+
+    it('should return input target for input mode', () => {
+      const packageInfo = createInputLevelPackageInfo();
+      const policy = createInputLevelPolicy();
+
+      const target = getVarTarget(policy, packageInfo);
+
+      expect(target).toEqual({ mode: 'input', inputIndex: 0, streamIndex: 0 });
+    });
+
+    it('should return invalid indices when no enabled input exists', () => {
+      const packageInfo = createInputLevelPackageInfo();
+      const policy = {
+        ...createInputLevelPolicy(),
+        inputs: [{ ...createInputLevelPolicy().inputs[0], enabled: false }],
+      };
+
+      const target = getVarTarget(policy, packageInfo);
+
+      expect(target).toEqual({ mode: 'input', inputIndex: -1, streamIndex: -1 });
+    });
+
+    it('should return invalid stream index when no enabled stream exists', () => {
+      const packageInfo = createInputLevelPackageInfo();
+      const policy = {
+        ...createInputLevelPolicy(),
+        inputs: [
+          {
+            ...createInputLevelPolicy().inputs[0],
+            streams: [{ ...createInputLevelPolicy().inputs[0].streams[0], enabled: false }],
+          },
+        ],
+      };
+
+      const target = getVarTarget(policy, packageInfo);
+
+      expect(target).toEqual({ mode: 'input', inputIndex: 0, streamIndex: -1 });
     });
   });
 

@@ -72,7 +72,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     existingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
-  } = useCloudConnectorSetup(input, newPolicy, updatePolicy, packageInfo);
+  } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
   if (!newPolicy.supports_cloud_connector) {
