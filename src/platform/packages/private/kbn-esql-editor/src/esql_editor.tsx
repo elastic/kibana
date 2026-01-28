@@ -1338,7 +1338,6 @@ const ESQLEditorInternal = function ESQLEditor({
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
-        code={code}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         onPrettifyQuery={onPrettifyQuery}
         hideRunQueryText={hideRunQueryText}

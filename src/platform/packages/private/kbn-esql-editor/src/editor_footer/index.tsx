@@ -44,7 +44,6 @@ interface EditorFooterProps {
     bottomContainer: Interpolation<Theme>;
     historyContainer: Interpolation<Theme>;
   };
-  code: string;
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
   onErrorClick: (error: MonacoMessage) => void;
@@ -85,7 +84,6 @@ export const EditorFooter = memo(function EditorFooter({
   hideQuickSearch,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
-  code,
   errors,
   warnings,
   onErrorClick,
