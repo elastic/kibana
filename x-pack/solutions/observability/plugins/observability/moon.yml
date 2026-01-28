@@ -146,7 +146,6 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/synthtrace'
-  - '@kbn/fleet-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/observability-agent-builder-plugin'
