@@ -175,8 +175,6 @@ export interface FieldSummary {
    *  arg: <AST node representing 'field'>,
    *  definition: <AST node representing 'field'>
    * }
-   *
-   * // TODO: IMO this is a derivative of arg, and should not be here. We should provide a function to extract it when needed.
    */
   definition: ESQLProperNode;
 }
