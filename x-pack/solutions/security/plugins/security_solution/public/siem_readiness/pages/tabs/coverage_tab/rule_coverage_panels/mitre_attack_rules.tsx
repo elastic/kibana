@@ -21,7 +21,6 @@ import {
   useMitreAttackIndicesDocCounts,
   useIntegrationDisplayNames,
 } from '@kbn/siem-readiness';
-import { useBasePath } from '../../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
 interface DetectionRule {
@@ -76,11 +75,7 @@ const MITRE_TACTICS_LIST = [
   'Reconnaissance',
 ];
 
-const buildIntegrationUrl = (basePath: string, pkgName: string) =>
-  `${basePath}/app/integrations/detail${pkgName ? `/${pkgName}` : ''}`;
-
 export const MitreAttackRuleCoveragePanel: React.FC = () => {
-  const basePath = useBasePath();
   const { euiTheme } = useEuiTheme();
   const [activeTacticPopover, setActiveTacticPopover] = useState<string | null>(null);
 
@@ -286,11 +281,6 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   label: integrationDisplayNames.data?.get(pkg) || pkg,
                   key: pkg,
                 }))}
-                onChange={(options) => {
-                  const selected = options.find((o) => o.checked === 'on');
-                  if (selected)
-                    window.open(buildIntegrationUrl(basePath, selected.key as string), '_blank');
-                }}
                 showOnlySelectable
               />
             </EuiPopover>

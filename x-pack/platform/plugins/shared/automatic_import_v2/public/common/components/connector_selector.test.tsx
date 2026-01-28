@@ -14,7 +14,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorSelector } from './connector_selector';
 import { ConnectorSetup } from './connector_setup';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
+import { useLoadConnectors } from '..';
 
 const mockConnectors = [
   {
@@ -110,14 +110,18 @@ const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-const renderConnectorSelector = (props = {}) => {
-  return render(
-    <TestProviders>
-      <FormWrapper>
-        <ConnectorSelector {...props} />
-      </FormWrapper>
-    </TestProviders>
-  );
+const renderConnectorSelector = async (props = {}) => {
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(
+      <TestProviders>
+        <FormWrapper>
+          <ConnectorSelector {...props} />
+        </FormWrapper>
+      </TestProviders>
+    );
+  });
+  return result!;
 };
 
 const renderConnectorSetup = (props: { onClose: jest.Mock; onConnectorCreated?: jest.Mock }) => {
@@ -139,35 +143,35 @@ describe('ConnectorSelector', () => {
   });
 
   describe('rendering', () => {
-    it('should render the connector selector button', () => {
-      const { getByTestId } = renderConnectorSelector();
+    it('should render the connector selector button', async () => {
+      const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('connector-selector')).toBeInTheDocument();
     });
 
-    it('should show loading spinner when connectors are loading', () => {
+    it('should show loading spinner when connectors are loading', async () => {
       mockUseLoadConnectors.mockReturnValue({
         connectors: mockConnectors,
         isLoading: true,
         refetch: mockRefetch,
       });
 
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('connectorSelectorLoading')).toBeInTheDocument();
     });
 
-    it('should show "Add connector" button when no connectors exist', () => {
+    it('should show "Add connector" button when no connectors exist', async () => {
       mockUseLoadConnectors.mockReturnValue({
         connectors: [],
         isLoading: false,
         refetch: mockRefetch,
       });
 
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
     });
 
     it('should display the selected connector name on the button', async () => {
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
         expect(getByTestId('connector-selector')).toHaveTextContent('Elastic Managed LLM');
@@ -177,7 +181,7 @@ describe('ConnectorSelector', () => {
 
   describe('default connector selection', () => {
     it('should select Elastic Managed LLM as default when available', async () => {
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
         expect(getByTestId('connector-selector')).toHaveTextContent('Elastic Managed LLM');
@@ -187,7 +191,7 @@ describe('ConnectorSelector', () => {
     it('should select user settings default connector when set', async () => {
       mockSettingsGet.mockReturnValue('connector-1');
 
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
         expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
@@ -201,7 +205,7 @@ describe('ConnectorSelector', () => {
         refetch: mockRefetch,
       });
 
-      const { getByTestId } = renderConnectorSelector();
+      const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
         expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
@@ -211,7 +215,7 @@ describe('ConnectorSelector', () => {
 
   describe('popover interactions', () => {
     it('should open popover when button is clicked', async () => {
-      const { getByTestId, queryByTestId } = renderConnectorSelector();
+      const { getByTestId, queryByTestId } = await renderConnectorSelector();
 
       await act(async () => {
         fireEvent.click(getByTestId('connector-selector'));
@@ -231,7 +235,7 @@ describe('ConnectorSelector', () => {
         refetch: mockRefetch,
       });
 
-      const { getByTestId, findByTestId } = renderConnectorSelector();
+      const { getByTestId, findByTestId } = await renderConnectorSelector();
 
       await act(async () => {
         fireEvent.click(getByTestId('addNewConnectorButton'));

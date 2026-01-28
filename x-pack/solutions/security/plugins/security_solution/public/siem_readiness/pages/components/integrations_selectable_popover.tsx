@@ -18,17 +18,29 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useBasePath } from '../../../common/lib/kibana';
 
-interface IntegrationSelectablePopoverProps
-  extends Pick<EuiSelectableProps, 'options' | 'onChange'> {
-  buttonLabel?: string;
+interface IntegrationSelectablePopoverProps extends Pick<EuiSelectableProps, 'options'> {
   showOnlySelectable?: boolean;
 }
 
 export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, onChange, buttonLabel, showOnlySelectable = false } = props;
+  const { options, showOnlySelectable } = props;
   const { euiTheme } = useEuiTheme();
+  const basePath = useBasePath();
+
+  const handleChange: EuiSelectableProps['onChange'] = (newOptions) => {
+    // Find the selected option
+    const selectedOption = newOptions.find((option) => option.checked === 'on');
+
+    if (selectedOption?.key) {
+      // Navigate to the integration detail page
+      const integrationUrl = `${basePath}/app/integrations/detail/${selectedOption.key}`;
+      window.open(integrationUrl, '_blank', 'noopener,noreferrer');
+      setIsPopoverOpen(false);
+    }
+  };
 
   const selectableComponent = (
     <EuiSelectable
@@ -50,9 +62,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
         compressed: true,
       }}
       options={options}
-      onChange={(newOptions, event, changedOption) => {
-        onChange?.(newOptions, event, changedOption);
-      }}
+      onChange={handleChange}
     >
       {(list, search) => (
         <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
@@ -75,13 +85,12 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
           <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
             <EuiFlexItem grow={false}>
               <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-                {buttonLabel ||
-                  i18n.translate(
-                    'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewIntegrationsLabel',
-                    {
-                      defaultMessage: 'View Integrations',
-                    }
-                  )}
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewIntegrationsLabel',
+                  {
+                    defaultMessage: 'View Integrations',
+                  }
+                )}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -104,7 +113,34 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
     >
-      {selectableComponent}
+      <EuiSelectable
+        aria-label={i18n.translate(
+          'xpack.securitySolution.siemReadiness.integrationSelectablePopover.ariaLabel',
+          {
+            defaultMessage: 'Select integration to see details',
+          }
+        )}
+        searchable
+        singleSelection="always"
+        searchProps={{
+          placeholder: i18n.translate(
+            'xpack.securitySolution.siemReadiness.integrationSelectablePopover.searchPlaceholder',
+            {
+              defaultMessage: 'Filter list',
+            }
+          ),
+          compressed: true,
+        }}
+        options={options}
+        onChange={handleChange}
+      >
+        {(list, search) => (
+          <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
