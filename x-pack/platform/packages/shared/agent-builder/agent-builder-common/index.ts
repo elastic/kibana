@@ -86,6 +86,7 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
+  type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,
@@ -121,6 +122,8 @@ export {
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,
+  type ToolUiEventData,
+  type ToolUiEvent,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -152,3 +155,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
+export type { VersionedAttachment } from './attachments';

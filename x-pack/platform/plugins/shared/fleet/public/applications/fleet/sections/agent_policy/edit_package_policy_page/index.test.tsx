@@ -18,6 +18,7 @@ import {
   sendUpgradePackagePolicyDryRun,
   sendUpdatePackagePolicy,
   useStartServices,
+  sendGetPackageInfoByKey,
   sendCreateAgentPolicy,
   sendBulkGetAgentPolicies,
   useGetAgentPolicies,
@@ -30,6 +31,8 @@ import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
+
+let lastStepConfigureProps: any;
 
 jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
   return {
@@ -168,6 +171,17 @@ jest.mock('../../../../integrations/hooks', () => {
   };
 });
 
+jest.mock('../create_package_policy_page/components', () => {
+  const actual = jest.requireActual('../create_package_policy_page/components');
+  return {
+    ...actual,
+    StepConfigurePackagePolicy: jest.fn((props) => {
+      lastStepConfigureProps = props;
+      return (actual as any).StepConfigurePackagePolicy(props);
+    }),
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn().mockReturnValue({
@@ -236,6 +250,7 @@ describe('edit package policy page', () => {
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    lastStepConfigureProps = undefined;
 
     (useGetOnePackagePolicy as MockFn).mockReturnValue({
       data: {
@@ -525,6 +540,110 @@ describe('edit package policy page', () => {
     render();
 
     expect(renderResult.queryByTestId('agentPolicyMultiSelect')).not.toBeInTheDocument();
+  });
+
+  it('passes existing var_group selections to configure step', async () => {
+    const varGroupSelections = { auth_method: 'oauth' };
+
+    (useGetOnePackagePolicy as MockFn).mockReturnValueOnce({
+      data: {
+        item: { ...mockPackagePolicy, var_group_selections: varGroupSelections },
+      },
+    });
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValueOnce({
+      data: {
+        item: { ...mockPackagePolicy, var_group_selections: varGroupSelections },
+      },
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(lastStepConfigureProps?.varGroupSelections).toEqual(varGroupSelections);
+    });
+  });
+
+  it('computes default var_group selections when missing', async () => {
+    (sendGetPackageInfoByKey as MockFn).mockImplementationOnce((name: string, version: string) =>
+      Promise.resolve({
+        data: {
+          item: {
+            name,
+            title: 'Nginx',
+            version,
+            release: 'ga',
+            description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
+            policy_templates: [
+              {
+                name: 'nginx',
+                title: 'Nginx logs and metrics',
+                description: 'Collect logs and metrics from Nginx instances',
+                inputs: [
+                  {
+                    type: 'logfile',
+                    title: 'Collect logs from Nginx instances',
+                    description: 'Collecting Nginx access and error logs',
+                  },
+                ],
+                multiple: true,
+              },
+            ],
+            var_groups: [
+              {
+                name: 'auth_method',
+                title: 'Auth method',
+                selector_title: 'Select auth method',
+                options: [
+                  { name: 'api_key', title: 'API key', vars: ['api_key'] },
+                  { name: 'oauth', title: 'OAuth', vars: ['client_id'] },
+                ],
+              },
+            ],
+            data_streams: [
+              {
+                type: 'logs',
+                dataset: 'nginx.access',
+                title: 'Nginx access logs',
+                release: 'experimental',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'logfile',
+                    vars: [
+                      {
+                        name: 'paths',
+                        type: 'text',
+                        title: 'Paths',
+                        multi: true,
+                        required: true,
+                        show_user: true,
+                        default: ['/var/log/nginx/access.log*'],
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    title: 'Nginx access logs',
+                    description: 'Collect Nginx access logs',
+                    enabled: true,
+                  },
+                ],
+                package: 'nginx',
+                path: 'access',
+              },
+            ],
+            latestVersion: version,
+            keepPoliciesUpToDate: false,
+            status: 'not_installed',
+          },
+        },
+        isLoading: false,
+      })
+    );
+
+    render();
+
+    await waitFor(() => {
+      expect(lastStepConfigureProps?.varGroupSelections).toEqual({ auth_method: 'api_key' });
+    });
   });
 
   describe('modify agent policies', () => {

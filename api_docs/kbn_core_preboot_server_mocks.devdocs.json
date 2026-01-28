@@ -26,6 +26,8 @@
           "InternalPrebootServicePreboot"
         ],
         "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -42,6 +44,8 @@
           "PrebootServicePreboot"
         ],
         "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -56,6 +60,8 @@
         "label": "prebootServiceMock",
         "description": [],
         "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,6 +76,8 @@
               "() => jest.Mocked<PrebootServiceContract>"
             ],
             "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -87,6 +95,8 @@
               "InternalPrebootServicePrebootMock"
             ],
             "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -104,6 +114,8 @@
               "PrebootServicePrebootMock"
             ],
             "path": "src/core/packages/preboot/server-mocks/src/preboot_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

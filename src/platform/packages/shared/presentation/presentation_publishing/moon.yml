@@ -25,8 +25,9 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/utility-types'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/esql-types'
 tags:
-  - shared-browser
+  - shared-common
   - package
   - prod
   - group-platform

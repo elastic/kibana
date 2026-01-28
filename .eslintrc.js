@@ -933,6 +933,7 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
@@ -1139,7 +1140,7 @@ module.exports = {
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-unified-metrics-grid/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -2716,6 +2717,7 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
@@ -2738,6 +2740,7 @@ module.exports = {
         'src/platform/plugins/shared/**/*.ts',
         'x-pack/solutions/**/*.ts',
         'x-pack/plugins/**/*.ts',
+        'x-pack/platform/plugins/shared/**/*.ts',
       ],
       excludedFiles: [
         '**/*.{test,spec}.ts',
@@ -2753,12 +2756,21 @@ module.exports = {
         '**/json_schemas/**',
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
+        'x-pack/solutions/security/packages/test-api-clients/**',
+        // Will be migrated to automatic_import_v2 that relies on SOs
+        'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
-          'warn',
+          'error',
           {
-            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            restrictedMethods: [
+              'writeFile',
+              'writeFileSync',
+              'createWriteStream',
+              'appendFile',
+              'appendFileSync',
+            ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },

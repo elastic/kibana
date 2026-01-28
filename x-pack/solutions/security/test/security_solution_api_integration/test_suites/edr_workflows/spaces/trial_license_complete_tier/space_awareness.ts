@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/247374
+  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
     let adminSupertest: TestAgent;
     let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
     let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
