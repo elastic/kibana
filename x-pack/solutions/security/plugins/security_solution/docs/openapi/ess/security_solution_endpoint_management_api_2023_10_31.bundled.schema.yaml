@@ -987,6 +987,7 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+        - fileSize
       example: updatedAt
       type: string
     Cancel:
