@@ -386,51 +386,51 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         // Clean up UI setting before test
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
-            query: {
-              bool: {
-                filter: {
-                  terms: {
-                    'data_stream.namespace': [],
-                  },
-                },
-              },
-            },
-          }),
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: `{
+            "query": {
+              "bool": {
+                "filter": {
+                  "terms": {
+                    "data_stream.namespace": []
+                  }
+                }
+              }
+            }
+          }`,
         });
       });
 
       after(async () => {
         // Clean up UI setting
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
-            query: {
-              bool: {
-                filter: {
-                  terms: {
-                    'data_stream.namespace': [],
-                  },
-                },
-              },
-            },
-          }),
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: `{
+            "query": {
+              "bool": {
+                "filter": {
+                  "terms": {
+                    "data_stream.namespace": []
+                  }
+                }
+              }
+            }
+          }`,
         });
       });
 
       it('should include namespace filter in ML anomaly query when filter is configured', async () => {
         // Set UI setting to include only namespace1 and namespace2
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
-            query: {
-              bool: {
-                filter: {
-                  terms: {
-                    'data_stream.namespace': ['namespace1', 'namespace2'],
-                  },
-                },
-              },
-            },
-          }),
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: `{
+            "query": {
+              "bool": {
+                "filter": {
+                  "terms": {
+                    "data_stream.namespace": ["namespace1", "namespace2"]
+                  }
+                }
+              }
+            }
+          }`,
         });
 
         const { logs } = await previewRule({

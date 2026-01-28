@@ -46,7 +46,7 @@ export const getDataStreamNamespaceFilter = async ({
     // If JSON parsing fails, throw an error that will be caught by rule executors
     throw new Error(
       `The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted. ` +
-        `Expected JSON format: { "meta": { "negate": false }, "query": { "bool": { "filter": { "terms": { "data_stream.namespace": ["namespace1", "namespace2"] } } } } }. ` +
+        `Expected JSON format: { "query": { "bool": { "filter": { "terms": { "data_stream.namespace": ["namespace1", "namespace2"] } } } } }. ` +
         `Error: ${error instanceof Error ? error.message : String(error)}`
     );
   }

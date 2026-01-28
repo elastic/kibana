@@ -1500,17 +1500,17 @@ export default ({ getService }: FtrProviderContext) => {
         );
         // Clean up UI setting
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
-            query: {
-              bool: {
-                filter: {
-                  terms: {
-                    'data_stream.namespace': [],
-                  },
-                },
-              },
-            },
-          }),
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: `{
+            "query": {
+              "bool": {
+                "filter": {
+                  "terms": {
+                    "data_stream.namespace": []
+                  }
+                }
+              }
+            }
+          }`,
         });
       });
 
@@ -1569,17 +1569,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Set UI setting to include only namespace1 and namespace2
         await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: JSON.stringify({
-            query: {
-              bool: {
-                filter: {
-                  terms: {
-                    'data_stream.namespace': ['namespace1', 'namespace2'],
-                  },
-                },
-              },
-            },
-          }),
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: `{
+            "query": {
+              "bool": {
+                "filter": {
+                  "terms": {
+                    "data_stream.namespace": ["namespace1", "namespace2"]
+                  }
+                }
+              }
+            }
+          }`,
         });
 
         const rule: NewTermsRuleCreateProps = {
