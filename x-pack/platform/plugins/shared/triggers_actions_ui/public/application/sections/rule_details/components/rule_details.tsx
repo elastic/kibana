@@ -377,11 +377,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         data-test-subj="ruleDetailsTitle"
         bottomBorder
         pageTitle={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
-            defaultMessage="{ruleName}"
-            values={{ ruleName: rule.name }}
-          />
+          <span data-test-subj="ruleName">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
+              defaultMessage="{ruleName}"
+              values={{ ruleName: rule.name }}
+            />
+          </span>
         }
         description={
           <EuiFlexGroup gutterSize="m">

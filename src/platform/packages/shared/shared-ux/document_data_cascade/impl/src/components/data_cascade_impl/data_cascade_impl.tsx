@@ -29,6 +29,7 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
+import { ScrollSyncProvider } from '../../lib/core/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
@@ -147,6 +148,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
     scrollOffset: virtualizerScrollOffset,
+    isScrolling,
   } = virtualizerInstance.current;
 
   useRegisterCascadeAccessibilityHelpers<G>({
@@ -214,15 +216,17 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 </>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
-                    <VirtualizedCascadeRowList<G>
-                      {...{
-                        activeStickyIndex,
-                        getVirtualItems,
-                        virtualizedRowComputedTranslateValue,
-                        rows,
-                        listItemRenderer: virtualCascadeRowRenderer,
-                      }}
-                    />
+                    <ScrollSyncProvider disableScrollSync={isScrolling}>
+                      <VirtualizedCascadeRowList<G>
+                        {...{
+                          activeStickyIndex,
+                          getVirtualItems,
+                          virtualizedRowComputedTranslateValue,
+                          rows,
+                          listItemRenderer: virtualCascadeRowRenderer,
+                        }}
+                      />
+                    </ScrollSyncProvider>
                   </div>
                 </div>
               </div>
