@@ -20,9 +20,9 @@ import { setupTestServers } from './setup_test_servers';
 /**
  * Test dataset representing alert events for a single rule with multiple episodes:
  *
- * Episode 1: breach -> breach -> breach -> recovering -> inactive
- * Episode 2: breach -> recovering -> inactive
- * Episode 3: breach (still active)
+ * Episode 1: active -> inactive
+ * Episode 2: active -> inactive
+ * Episode 3: active
  */
 const ALERT_EVENTS_TEST_DATA = [
   {
@@ -36,55 +36,13 @@ const ALERT_EVENTS_TEST_DATA = [
     source: 'internal',
   },
   {
-    '@timestamp': '2026-01-22T07:45:00.000Z',
-    type: 'alert',
-    rule: { id: 'rule-1' },
-    group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-2',
-    status: 'recover',
-    episode_status: 'inactive',
-    source: 'internal',
-  },
-  {
-    '@timestamp': '2026-01-22T07:40:00.000Z',
-    type: 'alert',
-    rule: { id: 'rule-1' },
-    group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-2',
-    status: 'recover',
-    episode_status: 'recovering',
-    episode_status_count: 1,
-    source: 'internal',
-  },
-  {
-    '@timestamp': '2026-01-22T07:35:00.000Z',
-    type: 'alert',
-    rule: { id: 'rule-1' },
-    group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-2',
-    status: 'breach',
-    episode_status: 'active',
-    source: 'internal',
-  },
-  {
-    '@timestamp': '2026-01-22T07:30:00.000Z',
-    type: 'alert',
-    rule: { id: 'rule-1' },
-    group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-1',
-    status: 'recover',
-    episode_status: 'inactive',
-    source: 'internal',
-  },
-  {
     '@timestamp': '2026-01-22T07:25:00.000Z',
     type: 'alert',
     rule: { id: 'rule-1' },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-1',
-    status: 'recover',
-    episode_status: 'recovering',
-    episode_status_count: 1,
+    episode_id: 'rule-1-series-1-episode-2',
+    status: 'recovered',
+    episode_status: 'inactive',
     source: 'internal',
   },
   {
@@ -92,8 +50,8 @@ const ALERT_EVENTS_TEST_DATA = [
     type: 'alert',
     rule: { id: 'rule-1' },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-1',
-    status: 'breach',
+    episode_id: 'rule-1-series-1-episode-2',
+    status: 'breached',
     episode_status: 'active',
     source: 'internal',
   },
@@ -103,8 +61,8 @@ const ALERT_EVENTS_TEST_DATA = [
     rule: { id: 'rule-1' },
     group_hash: 'rule-1-series-1',
     episode_id: 'rule-1-series-1-episode-1',
-    status: 'breach',
-    episode_status: 'active',
+    status: 'recovered',
+    episode_status: 'inactive',
     source: 'internal',
   },
   {
@@ -113,7 +71,7 @@ const ALERT_EVENTS_TEST_DATA = [
     rule: { id: 'rule-1' },
     group_hash: 'rule-1-series-1',
     episode_id: 'rule-1-series-1-episode-1',
-    status: 'breach',
+    status: 'breached',
     episode_status: 'active',
     source: 'internal',
   },
@@ -133,7 +91,7 @@ describe('DispatcherService integration tests', () => {
     kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
-    await new Promise((res) => setTimeout(res, 10000));
+    await new Promise((res) => setTimeout(res, 5000));
   });
 
   afterAll(async () => {
@@ -145,13 +103,9 @@ describe('DispatcherService integration tests', () => {
     }
   });
 
-  afterEach(async () => {
-    // Clean up data streams after each test
-    await cleanupDataStreams(esClient);
-  });
-
   beforeEach(async () => {
-    // Setup services
+    await cleanupDataStreams(esClient);
+
     mockLoggerService = createMockLoggerService();
     storageService = new StorageService(esClient, mockLoggerService.loggerService);
     dispatcherService = new DispatcherService(
@@ -169,7 +123,6 @@ describe('DispatcherService integration tests', () => {
 
       expect(result.startedAt).toBeDefined();
 
-      // Verify no fire-events were created
       const actionsResponse = await esClient.search({
         index: ALERT_ACTIONS_DATA_STREAM,
         query: { match_all: {} },
@@ -189,10 +142,8 @@ describe('DispatcherService integration tests', () => {
 
       expect(result.startedAt).toBeDefined();
 
-      // Wait for ES to refresh
       await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
 
-      // Verify fire-events were created for each episode
       const actionsResponse = await esClient.search({
         index: ALERT_ACTIONS_DATA_STREAM,
         query: { match_all: {} },
@@ -201,10 +152,7 @@ describe('DispatcherService integration tests', () => {
 
       const fireEvents = actionsResponse.hits.hits.map((hit) => hit._source as Record<string, any>);
 
-      // Should have dispatched 3 episodes
-      expect(fireEvents).toHaveLength(3);
-
-      // Verify all fire-events have the correct structure
+      expect(fireEvents).toHaveLength(5);
       fireEvents.forEach((event) => {
         expect(event).toMatchObject({
           '@timestamp': expect.any(String),
@@ -215,51 +163,51 @@ describe('DispatcherService integration tests', () => {
           source: 'internal',
         });
       });
-
-      // Verify all three episodes are present by checking their last_series_event_timestamp
       const timestamps = fireEvents.map((event) => event.last_series_event_timestamp).sort();
       expect(timestamps).toEqual([
-        '2026-01-22T07:30:00.000Z', // Episode 1
-        '2026-01-22T07:45:00.000Z', // Episode 2
+        '2026-01-22T07:10:00.000Z', // Episode 1
+        '2026-01-22T07:15:00.000Z', // Episode 1
+        '2026-01-22T07:20:00.000Z', // Episode 2
+        '2026-01-22T07:25:00.000Z', // Episode 2
         '2026-01-22T07:50:00.000Z', // Episode 3
       ]);
     });
   });
 
   describe('when some episodes already have fire-events', () => {
-    it('should only dispatch episodes that need it', async () => {
+    it('should only dispatch the new events', async () => {
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
-      // Seed a fire-event for episode-1 that is newer than its last event
-      await seedAlertActions(esClient, [
+      await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
+      });
+
+      await seedAlertEvents(esClient, [
         {
-          '@timestamp': '2026-01-22T07:31:00.000Z', // After episode-1's last event (07:30)
+          '@timestamp': '2026-01-22T07:55:00.000Z',
+          type: 'alert',
+          rule: { id: 'rule-1' },
           group_hash: 'rule-1-series-1',
-          last_series_event_timestamp: '2026-01-22T07:30:00.000Z',
-          actor: 'system',
-          action_type: 'fire-event',
-          rule_id: 'rule-1',
+          episode_id: 'rule-1-series-1-episode-3',
+          status: 'recovered',
+          episode_status: 'inactive',
           source: 'internal',
         },
       ]);
 
-      const result = await dispatcherService.run({
+      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
+
+      await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
       });
 
-      expect(result.startedAt).toBeDefined();
-
-      // Wait for ES to refresh
-      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
-
-      // Verify fire-events
       const actionsResponse = await esClient.search({
         index: ALERT_ACTIONS_DATA_STREAM,
         query: {
           bool: {
             must: [
               { term: { action_type: 'fire-event' } },
-              { range: { '@timestamp': { gte: '2026-01-22T07:31:01.000Z' } } },
+              { range: { last_series_event_timestamp: { gte: '2026-01-22T07:55:00.000Z' } } },
             ],
           },
         },
@@ -270,87 +218,21 @@ describe('DispatcherService integration tests', () => {
         (hit) => hit._source as Record<string, any>
       );
 
-      // Should have dispatched only 2 episodes (episode-2 and episode-3)
-      // episode-1 already has a fire-event newer than its last event
-      expect(newFireEvents).toHaveLength(2);
-
+      expect(newFireEvents).toHaveLength(1);
       const timestamps = newFireEvents.map((event) => event.last_series_event_timestamp).sort();
-      expect(timestamps).toEqual([
-        '2026-01-22T07:45:00.000Z', // Episode 2
-        '2026-01-22T07:50:00.000Z', // Episode 3
-      ]);
-    });
-  });
-
-  describe('when fire-event is older than latest alert event', () => {
-    it('should re-dispatch episodes with newer events', async () => {
-      await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
-
-      // Seed a fire-event for episode-3 that is OLDER than its last event
-      await seedAlertActions(esClient, [
-        {
-          '@timestamp': '2026-01-22T07:49:00.000Z', // Before episode-3's last event (07:50)
-          group_hash: 'rule-1-series-1',
-          last_series_event_timestamp: '2026-01-22T07:48:00.000Z',
-          actor: 'system',
-          action_type: 'fire-event',
-          rule_id: 'rule-1',
-          source: 'internal',
-        },
-      ]);
-      const result = await dispatcherService.run({
-        previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
-      });
-
-      expect(result.startedAt).toBeDefined();
-
-      // Wait for ES to refresh
-      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
-
-      // Verify fire-events
-      const actionsResponse = await esClient.search({
-        index: ALERT_ACTIONS_DATA_STREAM,
-        query: {
-          bool: {
-            must: [
-              { term: { action_type: 'fire-event' } },
-              { range: { '@timestamp': { gte: '2026-01-22T07:49:01.000Z' } } },
-            ],
-          },
-        },
-        size: 100,
-      });
-
-      const newFireEvents = actionsResponse.hits.hits.map(
-        (hit) => hit._source as Record<string, any>
-      );
-
-      // Should have dispatched all 3 episodes because:
-      // - episode-3 has a newer event than its fire-event
-      // - episode-1 and episode-2 have no fire-events
-      expect(newFireEvents).toHaveLength(3);
-
-      const timestamps = newFireEvents.map((event) => event.last_series_event_timestamp).sort();
-      expect(timestamps).toEqual([
-        '2026-01-22T07:30:00.000Z', // Episode 1
-        '2026-01-22T07:45:00.000Z', // Episode 2
-        '2026-01-22T07:50:00.000Z', // Episode 3
-      ]);
+      expect(timestamps).toEqual(['2026-01-22T07:55:00.000Z']);
     });
   });
 });
 
 async function cleanupDataStreams(esClient: ElasticsearchClient): Promise<void> {
   try {
-    // Delete all documents from both data streams
     await esClient.deleteByQuery({
       index: ALERT_EVENTS_DATA_STREAM,
       query: { match_all: {} },
       refresh: true,
     });
-  } catch (error) {
-    // Ignore errors if the data stream doesn't exist or is empty
-  }
+  } catch (error) {}
 
   try {
     await esClient.deleteByQuery({
@@ -358,9 +240,7 @@ async function cleanupDataStreams(esClient: ElasticsearchClient): Promise<void> 
       query: { match_all: {} },
       refresh: true,
     });
-  } catch (error) {
-    // Ignore errors if the data stream doesn't exist or is empty
-  }
+  } catch (error) {}
 }
 
 async function seedAlertEvents(
@@ -369,21 +249,6 @@ async function seedAlertEvents(
 ): Promise<void> {
   const operations = events.flatMap((doc) => [
     { create: { _index: ALERT_EVENTS_DATA_STREAM } },
-    doc,
-  ]);
-
-  await esClient.bulk({
-    operations,
-    refresh: 'wait_for',
-  });
-}
-
-async function seedAlertActions(
-  esClient: ElasticsearchClient,
-  actions: Array<Record<string, any>>
-): Promise<void> {
-  const operations = actions.flatMap((doc) => [
-    { create: { _index: ALERT_ACTIONS_DATA_STREAM } },
     doc,
   ]);
 
