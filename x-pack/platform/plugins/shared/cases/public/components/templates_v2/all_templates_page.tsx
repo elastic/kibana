@@ -14,6 +14,7 @@ import {
   EuiSkeletonText,
   EuiEmptyPrompt,
   EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from '../templates/translations';
@@ -26,11 +27,14 @@ import { useTemplatesPagination } from './use_templates_pagination';
 import { useGetTemplates } from './use_get_templates';
 import { useTemplatesActions } from './use_templates_actions';
 import { TemplatesListHeader } from './templates_list_header';
+import { TemplatesTableFilters } from './templates_table_filters';
+import { TemplatesInfoPanel } from './templates_info_panel';
+import { TemplatesBulkActions } from './templates_bulk_actions';
 
 interface Props {
   props: { test: string };
 }
-export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
+export const AllTemplatesPage: React.FC<Props> = () => {
   const { euiTheme } = useEuiTheme();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -38,7 +42,7 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection } =
     useTemplatesState();
 
-  const { data, isLoading } = useGetTemplates({
+  const { data, isLoading, refetch } = useGetTemplates({
     page: queryParams.page,
     perPage: queryParams.perPage,
   });
@@ -72,6 +76,12 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
   const isDataEmpty = data?.templates.length === 0;
   const isInitialLoading = isLoading && isDataEmpty;
 
+  const showClearFiltersButton = queryParams.search.length > 0;
+
+  const handleClearFilters = useCallback(() => {
+    setQueryParams({ search: '', page: 1 });
+  }, [setQueryParams]);
+
   const totalTemplates = pagination.totalItemCount;
   const rangeStart = pagination.pageIndex * pagination.pageSize + 1;
   const rangeEnd = Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalTemplates);
@@ -79,7 +89,13 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
   return (
     <>
       <TemplatesListHeader />
-
+      <TemplatesInfoPanel />
+      <TemplatesTableFilters
+        queryParams={queryParams}
+        onQueryParamsChange={setQueryParams}
+        onRefresh={refetch}
+        isLoading={isLoading}
+      />
       {isInitialLoading ? (
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
       ) : (
@@ -94,7 +110,14 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
               padding-bottom: ${euiTheme.size.s};
             `}
           >
-            <EuiFlexItem grow={false} data-test-subj="templates-table-count">
+            <EuiFlexItem
+              grow={false}
+              data-test-subj="templates-table-count"
+              css={css`
+                border-right: ${euiTheme.border.thin};
+                padding-right: ${euiTheme.size.s};
+              `}
+            >
               <EuiText size="xs" color="subdued">
                 {i18n.SHOWING}{' '}
                 <strong>
@@ -105,6 +128,21 @@ export const AllTemplatesPage: React.FC<Props> = ({ props }) => {
                 {i18n.SHOWING_TEMPLATES(totalTemplates)}
               </EuiText>
             </EuiFlexItem>
+            <TemplatesBulkActions selectedTemplates={selectedTemplates} />
+            {showClearFiltersButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={handleClearFilters}
+                  size="xs"
+                  iconSide="left"
+                  iconType="cross"
+                  flush="left"
+                  data-test-subj="templates-clear-filters-link-icon"
+                >
+                  {i18n.CLEAR_FILTERS}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiBasicTable
             columns={columns}

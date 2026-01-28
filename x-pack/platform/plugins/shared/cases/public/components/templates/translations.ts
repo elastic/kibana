@@ -21,6 +21,34 @@ export const NO_TEMPLATES = i18n.translate('xpack.cases.templates.noTemplates', 
   defaultMessage: 'You do not have any templates yet',
 });
 
+export const SEARCH_TEMPLATES = i18n.translate('xpack.cases.templates.searchTemplates', {
+  defaultMessage: 'Search templates',
+});
+
+export const SEARCH_TEMPLATES_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.searchPlaceholder',
+  {
+    defaultMessage: 'Search templates',
+  }
+);
+
+export const REFRESH_TEMPLATES = i18n.translate('xpack.cases.templates.refreshTemplates', {
+  defaultMessage: 'Refresh templates',
+});
+
+export const TEMPLATES_INFO_TITLE = i18n.translate('xpack.cases.templates.infoTitle', {
+  defaultMessage: 'Create custom templates for your needs',
+});
+
+export const TEMPLATES_INFO_DESCRIPTION = i18n.translate('xpack.cases.templates.infoDescription', {
+  defaultMessage:
+    'Create templates with custom set of fields, that can automatically populate values in new cases.',
+});
+
+export const LEARN_MORE = i18n.translate('xpack.cases.templates.learnMore', {
+  defaultMessage: 'Learn more',
+});
+
 export const ADD_TEMPLATE = i18n.translate('xpack.cases.templates.addTemplate', {
   defaultMessage: 'Add template',
 });
@@ -218,6 +246,28 @@ export const SHOWING_TEMPLATES = (total: number) =>
     values: { total },
     defaultMessage: 'of {total}',
   });
+
+export const SHOWING_SELECTED_TEMPLATES = (count: number) =>
+  i18n.translate('xpack.cases.templates.selectedTemplatesTitle', {
+    values: { count },
+    defaultMessage: 'Selected {count} {count, plural, =1 {template} other {templates}}',
+  });
+
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.templates.clearFilters', {
+  defaultMessage: 'Clear filters',
+});
+
+export const BULK_ACTIONS = i18n.translate('xpack.cases.templates.bulkActions', {
+  defaultMessage: 'Bulk actions',
+});
+
+export const BULK_EXPORT_TEMPLATES = i18n.translate('xpack.cases.templates.bulkExportTemplates', {
+  defaultMessage: 'Export',
+});
+
+export const BULK_DELETE_TEMPLATES = i18n.translate('xpack.cases.templates.bulkDeleteTemplates', {
+  defaultMessage: 'Delete',
+});
 
 export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
   defaultMessage: 'Showing',

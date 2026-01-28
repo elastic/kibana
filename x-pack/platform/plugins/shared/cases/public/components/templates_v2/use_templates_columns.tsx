@@ -24,6 +24,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getEmptyCellValue } from '../empty_value';
@@ -81,7 +82,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-
   const handleEdit = useCallback(() => {
     closePopover();
     onEdit(template);
@@ -225,6 +225,7 @@ export const useTemplatesColumns = ({
   onDelete,
   disableActions = false,
 }: UseTemplatesColumnsProps): UseTemplatesColumnsReturnValue => {
+  const { euiTheme } = useEuiTheme();
   const columns: TemplatesColumns[] = useMemo(
     () => [
       {
@@ -310,12 +311,13 @@ export const useTemplatesColumns = ({
               <EuiBadgeGroup
                 data-test-subj="template-column-tags"
                 css={getLineClampedCss}
-                gutterSize="xs"
+                gutterSize="s"
               >
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
                     css={css`
                       max-width: 100px;
+                      margin-right: ${euiTheme.size.xs};
                     `}
                     color="hollow"
                     key={`${tag}-${i}`}
@@ -328,7 +330,7 @@ export const useTemplatesColumns = ({
             );
 
             const unclampedBadges = (
-              <EuiBadgeGroup data-test-subj="template-column-tags-tooltip-content">
+              <EuiBadgeGroup data-test-subj="template-column-tags-tooltip-content" gutterSize="xs">
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge color="hollow" key={`${tag}-${i}`}>
                     {tag}
@@ -407,7 +409,16 @@ export const useTemplatesColumns = ({
         width: '80px',
       },
     ],
-    [onEdit, onClone, onSetAsDefault, onExport, onPreview, onDelete, disableActions]
+    [
+      onEdit,
+      euiTheme.size.xs,
+      onClone,
+      onSetAsDefault,
+      onExport,
+      onPreview,
+      onDelete,
+      disableActions,
+    ]
   );
 
   return { columns };

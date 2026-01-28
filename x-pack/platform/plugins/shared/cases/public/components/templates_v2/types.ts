@@ -46,4 +46,5 @@ export interface QueryParams {
   perPage: number;
   sortField: SortField;
   sortOrder: SortOrder;
+  search: string;
 }

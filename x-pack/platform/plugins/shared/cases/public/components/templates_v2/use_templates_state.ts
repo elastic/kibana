@@ -15,6 +15,7 @@ const DEFAULT_QUERY_PARAMS: QueryParams = {
   perPage: PAGE_SIZE_OPTIONS[0],
   sortField: 'name',
   sortOrder: 'asc',
+  search: '',
 };
 
 export interface UseTemplatesStateReturnValue {
