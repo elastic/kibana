@@ -144,6 +144,8 @@ function InternalAlertsPage() {
     },
   });
 
+  const useRulesLink = createUseRulesLink(getIsExperimentalFeatureEnabled('unifiedRulesPage'));
+
   const onGroupingsChange = useCallback(
     ({ activeGroups }: { activeGroups: string[] }) => {
       alertSearchBarStateProps.onGroupingsChange(activeGroups);
@@ -265,9 +267,7 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = getIsExperimentalFeatureEnabled('unifiedRulesPage')
-    ? http.basePath.prepend('/app/rules')
-    : http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = useRulesLink().href;
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -279,7 +279,7 @@ function InternalAlertsPage() {
           ),
           rightSideItems: renderRuleStats(
             ruleStats,
-            manageRulesHref,
+            manageRulesHref as string,
             ruleStatsLoading,
             locators.get<RulesLocatorParams>(rulesLocatorID)
           ),

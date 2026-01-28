@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import { actions } from './actions';
+import * as actions from './actions';
 
 export {
   type DiscoverInternalState,
@@ -46,6 +46,7 @@ export {
   selectAllTabs,
   selectRecentlyClosedTabs,
   selectTab,
+  selectTabAppState,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
 } from './selectors';

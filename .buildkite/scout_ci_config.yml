@@ -17,10 +17,12 @@ plugins:
     - security_solution
     - slo
     - spaces
+    - streams
     - streams_app
     - workflows_extensions
     - transform
     - fleet
+    - entity_store
   disabled:
 
 packages:

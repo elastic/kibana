@@ -42,9 +42,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+import {
+  getIsExperimentalFeatureEnabled,
+  type TriggersAndActionsUIPublicPluginSetup,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
@@ -323,6 +324,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
+      coreSetup.getStartServices,
       logsLocator
     );
 
@@ -489,9 +491,11 @@ export class Plugin
       )
     );
 
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -515,10 +519,12 @@ export class Plugin
       );
     });
 
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
     };
   }
 }

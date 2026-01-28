@@ -64,7 +64,8 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "agentBuilder"
+      "agentBuilder",
+      "slo",
     ],
     "requiredBundles": [
       "fleet",
