@@ -327,16 +327,7 @@ test('should throw an error when custom validators fail', () => {
 
 describe('validateSecretes', () => {
   test('should not run validation when secrets are undefined', () => {
-    const schemaValidator = {
-      parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
-    };
-    const customValidator = (
-      value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
-      services: ValidatorServices
-    ) => {
-      throw new Error('test error');
-    };
-
+    const schemaValidator = z3.object({ foo: z3.string() }).strict();
     const actionType: ActionType = {
       id: 'foo',
       name: 'bar',
@@ -352,7 +343,6 @@ describe('validateSecretes', () => {
         },
         secrets: {
           schema: schemaValidator,
-          customValidator,
         },
       },
     };
@@ -363,16 +353,7 @@ describe('validateSecretes', () => {
   });
 
   test('should not run validation when secrets are null', () => {
-    const schemaValidator = {
-      parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
-    };
-    const customValidator = (
-      value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
-      services: ValidatorServices
-    ) => {
-      throw new Error('test error');
-    };
-
+    const schemaValidator = z3.object({ foo: z3.string() }).strict();
     const actionType: ActionType = {
       id: 'foo',
       name: 'bar',
@@ -388,7 +369,6 @@ describe('validateSecretes', () => {
         },
         secrets: {
           schema: schemaValidator,
-          customValidator,
         },
       },
     };
