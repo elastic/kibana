@@ -606,6 +606,8 @@ Do not use setters, they cause more problems than they can solve.
 
 ### Avoid circular dependencies
 
+### Avoid circular dependencies
+
 As part of a future effort to use correct and idempotent build tools we need our code to be
 able to be represented as a directed acyclic graph. We must avoid having circular dependencies
 both on code and type imports to achieve that. One of the most critical parts is the plugins
@@ -619,7 +621,7 @@ new circular dependencies.
 
 - **TypeScript does not catch circular dependencies between files at compile time.** TypeScript (and ES6 modules) allow circular imports between files, so circular dependencies will compile successfully but can cause runtime issues.
 
-- **TypeScript project references can detect circular dependencies between projects** when building with `tsc -b`. If you're using TypeScript project references (see [TypeScript documentation](docs/extend/typescript.md)), circular dependencies between projects will be caught during the build process.
+- **TypeScript project references can detect circular dependencies between projects** when building with the TypeScript compiler. If you're using TypeScript project references (see [TypeScript documentation](docs/extend/typescript.md)), circular dependencies between projects will be caught during the build process. You can check for circular dependencies by running `node scripts/type_check` or `./node_modules/.bin/tsc -b` on your project.
 
 - **The Kibana plugin system detects circular dependencies at runtime.** When plugins are loaded, the system performs topological sorting and will throw an error if circular dependencies are detected between plugins, preventing the application from starting.
 
