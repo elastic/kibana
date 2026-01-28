@@ -48,7 +48,8 @@ export const executeEsqlRequest = async ({
 
     return results;
   } catch (error) {
-    logger.debug(`Error executing ES|QL request: ${error.message}`);
-    return [];
+    const message = `Error executing ES|QL request: ${error.message}`;
+    logger.debug(message);
+    throw new Error(message);
   }
 };
