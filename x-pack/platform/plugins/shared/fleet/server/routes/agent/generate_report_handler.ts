@@ -30,11 +30,6 @@ export const generateReportHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const { agents, fields, timezone, sort } = request.body;
   const logger = appContextService.getLogger();
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
-
-  if (!user) {
-    throw new FleetError('User not authenticated');
-  }
 
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
   const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
@@ -122,6 +117,8 @@ const getJobParams = (
 
   const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
+  const filterQuery = toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query)));
+
   const searchSource: SearchSourceFields = {
     query: {
       query: '',
@@ -132,7 +129,7 @@ const getJobParams = (
         index: 'fleet-agents',
         params: {},
       },
-      query: toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query))),
+      query: filterQuery,
     },
     fields,
     index,
