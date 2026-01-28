@@ -28,7 +28,6 @@ import { getColumns } from './get_columns';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 export const Flyout = ({
-  flyoutId,
   api,
   coreStart,
   usageCollector,
@@ -41,7 +40,6 @@ export const Flyout = ({
   onBackgroundSearchOpened,
   onClose,
 }: {
-  flyoutId: string;
   api: SearchSessionsMgmtAPI;
   coreStart: CoreStart;
   usageCollector: SearchUsageCollector;

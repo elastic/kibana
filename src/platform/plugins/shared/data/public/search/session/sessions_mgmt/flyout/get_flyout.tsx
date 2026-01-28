@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import type { SearchUsageCollector } from '../../../collectors';
@@ -19,6 +20,8 @@ import { Flyout } from './flyout';
 import type { BackgroundSearchOpenedHandler } from '../types';
 import { FLYOUT_WIDTH } from './constants';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
+
+const flyoutIdGenerator = htmlIdGenerator('searchSessionsFlyout');
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -41,6 +44,7 @@ export function openSearchSessionsFlyout({
     appId: string;
     trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+    onClose?: () => void;
   }) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
@@ -49,12 +53,18 @@ export function openSearchSessionsFlyout({
       featureFlags: coreStart.featureFlags,
     });
 
+    const flyoutId = flyoutIdGenerator();
+    const closeFlyout = async () => {
+      await flyout.close();
+      attrs.onClose?.();
+    };
+
     const flyout = coreStart.overlays.openSystemFlyout(
       <Flyout
-        onClose={() => flyout.close()}
+        onClose={closeFlyout}
         onBackgroundSearchOpened={(params) => {
           attrs.onBackgroundSearchOpened?.(params);
-          flyout.close();
+          closeFlyout();
         }}
         appId={attrs.appId}
         api={api}
@@ -77,6 +87,8 @@ export function openSearchSessionsFlyout({
         type: 'overlay',
         ownFocus: true,
         outsideClickCloses: false,
+        ['aria-labelledby']: flyoutId,
+        onClose: closeFlyout,
       }
     );
 
