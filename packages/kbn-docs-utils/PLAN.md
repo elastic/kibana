@@ -182,10 +182,10 @@ Key files:
 - [x] Add tests for unnamed export detection
 
 ## Phase 5: CLI Output Improvements
-- [ ] Improve `getLink` in [packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts](packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts) to use line numbers when available
-- [ ] Add `printIssueTable` helper for consistent output formatting
-- [ ] Add `printMissingExportsTable` helper for missing exports output
-- [ ] Refactor existing console output to use helper functions
+- [x] Improve `getLink` in [packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts](packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts) to use line numbers when available
+- [x] Add `printIssueTable` helper for consistent output formatting
+- [x] Add `printMissingExportsTable` helper for missing exports output
+- [x] Refactor existing console output to use helper functions
 
 ## Phase 6: Flat Stats Output and MCP Auto-Fix Tooling
 

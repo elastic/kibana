@@ -16,10 +16,17 @@ import type { AllPluginStats, BuildApiMapResult, CliOptions, SetupProjectResult 
 /**
  * Generates a link to the GitHub source for an API declaration.
  *
+ * TODO: clintandrewhall - allow `base` to be overridden in the instance of a CI build
+ * associated with a PR.
+ *
  * @param declaration - API declaration to generate link for.
  * @returns GitHub link to the source code.
  */
 function getLink(declaration: ApiDeclaration): string {
+  const base = `https://github.com/elastic/kibana/blob/main/${declaration.path}`;
+  if (declaration.lineNumber) {
+    return `${base}#L${declaration.lineNumber}`;
+  }
   return `https://github.com/elastic/kibana/tree/main/${
     declaration.path
   }#:~:text=${encodeURIComponent(declaration.label)}`;
@@ -52,6 +59,40 @@ export function reportMetrics(
   const { plugins } = setupResult;
   const { missingApiItems, referencedDeprecations } = apiMapResult;
   const reporter = CiStatsReporter.fromEnv(log);
+
+  const printIssueTable = (
+    title: string,
+    rows: Array<{ id: string; link: string; line?: number }>
+  ) => {
+    const count = rows.length;
+    if (count === 0) {
+      log.info(`${title}: none`);
+      return;
+    }
+    log.info(`${title} (${count})`);
+    // eslint-disable-next-line no-console
+    console.table(rows);
+  };
+
+  const printMissingExportsTable = (
+    title: string,
+    entries: Array<{ source: string; references: string }>
+  ) => {
+    const header = title.toUpperCase();
+    const count = entries.length;
+    if (count === 0) {
+      log.info(`${header}: none`);
+      return;
+    }
+    log.info(`${header} (${count})`);
+    // eslint-disable-next-line no-console
+    console.table(
+      entries.map(({ source, references }) => ({
+        'Not exported source': source,
+        references,
+      }))
+    );
+  };
 
   for (const plugin of plugins) {
     // Note that the filtering is done here (per-plugin), rather than earlier in the pipeline.
@@ -187,11 +228,9 @@ export function reportMetrics(
       log.info(`--- Plugin '${id}' ${passesAllChecks ? 'passes all checks ----' : '----'}`);
 
       if (!passesAllChecks) {
-        log.info(`${pluginStats.isAnyType.length} API items with ANY`);
-
         if (options.stats.includes('any')) {
-          // eslint-disable-next-line no-console
-          console.table(
+          printIssueTable(
+            'API items with ANY',
             pluginStats.isAnyType.map((d) => ({
               id: d.id,
               link: getLink(d),
@@ -199,10 +238,9 @@ export function reportMetrics(
           );
         }
 
-        log.info(`${pluginStats.missingComments.length} API items missing comments`);
         if (options.stats.includes('comments')) {
-          // eslint-disable-next-line no-console
-          console.table(
+          printIssueTable(
+            'API items missing comments',
             pluginStats.missingComments.map((d) => ({
               id: d.id,
               link: getLink(d),
@@ -211,15 +249,12 @@ export function reportMetrics(
         }
 
         if (missingApiItems[id]) {
-          log.info(`${Object.keys(missingApiItems[id]).length} referenced API items not exported`);
           if (options.stats.includes('exports')) {
-            // eslint-disable-next-line no-console
-            console.table(
-              Object.keys(missingApiItems[id]).map((key) => ({
-                'Not exported source': key,
-                references: missingApiItems[id][key].join(', '),
-              }))
-            );
+            const exportsTable = Object.keys(missingApiItems[id]).map((key) => ({
+              source: key,
+              references: missingApiItems[id][key].join(', '),
+            }));
+            printMissingExportsTable('Referenced API items not exported', exportsTable);
           }
         }
       }
