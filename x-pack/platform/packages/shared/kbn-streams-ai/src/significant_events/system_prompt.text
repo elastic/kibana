@@ -33,15 +33,14 @@ Each inferred feature includes:
 - `meta`: High-cardinality or variable data (e.g., availability zones, API endpoints)
 
 ### Computed Features (category: "computed")
-These are automatically computed metadata about the dataset.
+These are automatically computed metadata about the dataset. Each computed feature type and how to use it:
 
-**Dataset Analysis Feature** (`type: "dataset_analysis"`):
-This special feature contains the full schema, field distributions, and sample values from the log dataset.
+{{{computed_feature_instructions}}}
 
 **Understanding `dataset_analysis_source`:**
 The `dataset_analysis` input indicates its source:
 - `source: "filtered"` — A fresh analysis was generated specifically for this request because a filter was applied. Use the `dataset_analysis` content directly as it represents the filtered subset of data.
-- `source: "features"` — No filter was applied, so the analysis comes from the pre-computed `dataset_analysis` feature in the features list. When the `dataset_analysis` field is empty, look for the feature with `type: "dataset_analysis"` in the features array and use its `meta.analysis` content.
+- `source: "features"` — No filter was applied, so the analysis comes from a pre-computed feature in the features list. When the `dataset_analysis` field is empty, look for the appropriate computed feature in the features array and use its `value` content.
 
 ### Using Features to Generate Queries
 

@@ -17,6 +17,9 @@ export { generateSignificantEvents } from './src/significant_events/generate_sig
 export { sumTokens } from './src/helpers/sum_tokens';
 export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
 export {
-  generateDatasetAnalysisFeature,
-  type GenerateDatasetAnalysisFeatureOptions,
-} from './src/features/generate_dataset_analysis_feature';
+  generateAllComputedFeatures,
+  computedFeatureGenerators,
+  getComputedFeatureInstructions,
+  type ComputedFeatureGenerator,
+  type ComputedFeatureGeneratorOptions,
+} from './src/features/computed';

@@ -8,7 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { BaseFeature } from '@kbn/streams-schema';
-import { identifyFeatures, generateDatasetAnalysisFeature } from '@kbn/streams-ai';
+import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { v4 as uuid } from 'uuid';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -71,29 +71,28 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const [{ features: inferredBaseFeatures }, datasetAnalysisFeature] =
-                  await Promise.all([
-                    identifyFeatures({
-                      start,
-                      end,
-                      esClient,
-                      inferenceClient: boundInferenceClient,
-                      logger: taskContext.logger.get('features_identification'),
-                      stream,
-                      signal: runContext.abortController.signal,
-                      systemPrompt: featurePromptOverride,
-                    }),
-                    generateDatasetAnalysisFeature({
-                      stream,
-                      start,
-                      end,
-                      esClient,
-                    }),
-                  ]);
+                const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
+                  identifyFeatures({
+                    start,
+                    end,
+                    esClient,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskContext.logger.get('features_identification'),
+                    stream,
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                  }),
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                  }),
+                ]);
 
                 const identifiedFeatures: BaseFeature[] = [
                   ...inferredBaseFeatures,
-                  datasetAnalysisFeature,
+                  ...computedFeatures,
                 ];
 
                 const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {

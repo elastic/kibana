@@ -19,6 +19,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
+import { getComputedFeatureInstructions } from '../features/computed';
 
 interface Query {
   kql: string;
@@ -98,6 +99,7 @@ export async function generateSignificantEvents({
         features: JSON.stringify(
           features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
         ),
+        computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,
