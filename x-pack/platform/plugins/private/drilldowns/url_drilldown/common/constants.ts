@@ -10,7 +10,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/common';
-//import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
+// import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
 
 // Do not change constan value - part of public REST API
 export const URL_DRILLDOWN_TYPE = 'url_drilldown';
