@@ -13,7 +13,7 @@ import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import { getEsqlView, upsertEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
+import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.
@@ -106,10 +106,9 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
-    const { streamsClient, queryClient, attachmentClient, scopedClusterClient } =
-      await getScopedClients({
-        request,
-      });
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+      request,
+    });
 
     const core = await context.core;
     const queryStreamsEnabled = await core.uiSettings.client.get(
@@ -126,17 +125,10 @@ const upsertQueryStreamRoute = createServerRoute({
     // Generate the view name from the stream name
     const viewName = getEsqlViewName(name);
 
-    // Create/update the ES|QL view first (source of truth for the query)
-    await upsertEsqlView({
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
-      name: viewName,
-      query: esql,
-    });
-
-    // The query reference to store in the definition
+    // The query reference to include in the definition (with esql for validation and view creation)
     const queryReference: Streams.QueryStream.Definition['query'] = {
       view: viewName,
+      esql,
     };
 
     let definition: Streams.all.Definition;
@@ -144,6 +136,7 @@ const upsertQueryStreamRoute = createServerRoute({
       definition = await streamsClient.getStream(name);
     } catch (error) {
       if (error instanceof DefinitionNotFoundError) {
+        // Create new query stream - the state management will handle view creation
         return await streamsClient.createQueryStream({ name, query: queryReference });
       }
       throw error;
@@ -153,6 +146,7 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`Cannot update query capabilities of non-query stream`);
     }
 
+    // Get existing assets and attachments to preserve them
     const [assets, attachments] = await Promise.all([
       queryClient.getAssets(name),
       attachmentClient.getAttachments(name),
@@ -183,6 +177,7 @@ const upsertQueryStreamRoute = createServerRoute({
       rules,
     };
 
+    // The state management will handle ES|QL view creation/update and validation
     return await streamsClient.upsertStream({
       request: upsertRequest,
       name,
