@@ -45,11 +45,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...(options.kbnServerArgs || []),
           ...(options.esServerlessOptions?.uiam
             ? [
-              '--mockIdpPlugin.uiam.enabled=true',
-              `--xpack.security.uiam.enabled=true`,
-              `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
-              `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
-            ]
+                '--mockIdpPlugin.uiam.enabled=true',
+                `--xpack.security.uiam.enabled=true`,
+                `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+                `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+              ]
             : []),
           ...(enableFleetDockerRegistry && dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
