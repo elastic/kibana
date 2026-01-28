@@ -138,9 +138,9 @@ export function registerExtractEntityTasks({
 export async function scheduleExtractEntityTask({
   logger,
   taskManager,
-  frequency,
   type,
   namespace,
+  frequency,
   request,
 }: {
   logger: Logger;
@@ -153,7 +153,7 @@ export async function scheduleExtractEntityTask({
   try {
     const taskType = getTaskType(type);
     const taskId = getTaskId(type, namespace);
-    const interval = frequency || TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
+    const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
