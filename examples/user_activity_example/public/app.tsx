@@ -80,6 +80,7 @@ function UserActivityExample({ coreStart }: Props) {
 
           {result && (
             <EuiCallOut
+              announceOnMount
               title={result.success ? 'Success!' : 'Error'}
               color={result.success ? 'success' : 'danger'}
               iconType={result.success ? 'check' : 'warning'}
