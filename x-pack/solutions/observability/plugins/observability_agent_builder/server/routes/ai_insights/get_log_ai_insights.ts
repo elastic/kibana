@@ -49,11 +49,10 @@ export async function getLogAiInsights({
   dataRegistry,
   inferenceClient,
   connectorId,
+  core,
+  plugins,
+  logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
-  const systemPrompt = dedent(`
-    You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.`);
-
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
