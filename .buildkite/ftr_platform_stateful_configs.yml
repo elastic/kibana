@@ -51,6 +51,9 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
+  # Not ready yet
+  - x-pack/platform/test/functional_with_es_ssl/apps/rules/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
