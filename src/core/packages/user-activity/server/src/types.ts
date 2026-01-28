@@ -14,11 +14,29 @@ export interface ObjectParams {
   tags: string[];
 }
 
+// https://www.elastic.co/guide/en/ecs/1.12/ecs-allowed-values-event-type.html
+type EventType =
+  | 'access'
+  | 'admin'
+  | 'allowed'
+  | 'change'
+  | 'connection'
+  | 'creation'
+  | 'deletion'
+  | 'denied'
+  | 'end'
+  | 'error'
+  | 'group'
+  | 'indicator'
+  | 'info'
+  | 'installation'
+  | 'protocol'
+  | 'start'
+  | 'user';
+
 export interface EventParams {
   action: string;
-  // type should be a fixed list of possibilities, not any string, we should fix that later:
-  // https://www.elastic.co/guide/en/ecs/1.12/ecs-allowed-values-event-type.html
-  type: string;
+  type: EventType;
 }
 
 export interface TrackUserActionParams {
