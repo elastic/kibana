@@ -158,7 +158,9 @@ export const DimensionsSelector = ({
   const popoverContentBelowSearch = useMemo(() => {
     const count = selectedDimensions.length;
     return (
-      <EuiText size="xs" color="subdued" css={{ padding: '8px 0' }}>
+      <EuiText size="xs" color="subdued" css={css`
+        padding: 8px 0;
+      `}>
         <FormattedMessage
           id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
           defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
