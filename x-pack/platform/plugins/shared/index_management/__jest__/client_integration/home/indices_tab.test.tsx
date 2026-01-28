@@ -426,7 +426,10 @@ describe('<IndexManagementHome />', () => {
     test('shows a warning callout when an index enricher fails', async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
       const originalEnrichers = [...indexDataEnricher.enrichers];
-      indexDataEnricher.add(async () => ({ source: 'test enricher', error: true }));
+      indexDataEnricher.add({
+        name: 'test enricher',
+        fn: async () => ({ source: 'test enricher', error: true }),
+      });
 
       try {
         await renderHome(httpSetup);
@@ -630,11 +633,14 @@ describe('<IndexManagementHome />', () => {
       ]);
 
       const originalEnrichers = [...indexDataEnricher.enrichers];
-      indexDataEnricher.add(async () => ({
-        source: 'alias enricher',
-        applyToAliases: true,
-        indices: [{ name: aliasName, isRollupIndex: true }],
-      }));
+      indexDataEnricher.add({
+        name: 'alias enricher',
+        fn: async () => ({
+          source: 'alias enricher',
+          applyToAliases: true,
+          indices: [{ name: aliasName, isRollupIndex: true }],
+        }),
+      });
 
       try {
         await renderHome(httpSetup, {
