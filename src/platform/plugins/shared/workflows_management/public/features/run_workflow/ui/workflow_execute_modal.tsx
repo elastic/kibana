@@ -75,13 +75,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       selectedTrigger,
     });
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
+    const [normalizeDataEnabled, setNormalizeDataEnabled] = useState(false);
 
     const { euiTheme } = useEuiTheme();
 
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput));
+      const inputs = JSON.parse(executionInput);
+      onSubmit({ ...inputs, _normalizeData: normalizeDataEnabled });
       onClose();
-    }, [onSubmit, onClose, executionInput]);
+    }, [onSubmit, onClose, executionInput, normalizeDataEnabled]);
 
     const handleChangeTrigger = useCallback(
       (trigger: TriggerType): void => {
@@ -168,6 +170,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         the modal and its overlay don't block it.
       */}
         <Global
+          // eslint-disable-next-line @elastic/eui/no-static-z-index
           styles={css`
             .euiOverlayMask:has(.workflowExecuteModal) {
               z-index: 4000;
@@ -270,6 +273,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 errors={executionInputErrors}
                 setErrors={setExecutionInputErrors}
                 setValue={setExecutionInput}
+                onNormalizeDataChange={setNormalizeDataEnabled}
               />
             )}
             {selectedTrigger === 'index' && (

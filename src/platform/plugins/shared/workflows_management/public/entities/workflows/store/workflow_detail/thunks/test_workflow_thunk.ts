@@ -37,15 +37,19 @@ export const testWorkflowThunk = createAsyncThunk<
         return rejectWithValue('No YAML content to test');
       }
 
+      const { _normalizeData, ...actualInputs } = inputs;
       const requestBody: Record<string, unknown> = {
         workflowYaml: yamlString,
-        inputs,
+        inputs: actualInputs,
       };
 
       if (workflow?.id) {
         requestBody.workflowId = workflow.id;
       }
 
+      if (_normalizeData !== undefined) {
+        requestBody.normalizeData = _normalizeData;
+      }
       // Make the API call to test the workflow
       const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
         body: JSON.stringify(requestBody),

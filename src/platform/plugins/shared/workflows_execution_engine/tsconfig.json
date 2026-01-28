@@ -26,6 +26,7 @@
     "@kbn/core-data-streams-server",
     "@kbn/data-streams",
     "@kbn/es-mappings",
+    "@kbn/object-utils",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
   ],

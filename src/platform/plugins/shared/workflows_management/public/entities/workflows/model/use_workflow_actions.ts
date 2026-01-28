@@ -172,8 +172,12 @@ export function useWorkflowActions() {
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
+      const { _normalizeData, ...actualInputs } = inputs;
       return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
+        body: JSON.stringify({
+          inputs: actualInputs,
+          normalizeData: _normalizeData,
+        }),
       });
     },
     onSuccess: (_, { id }) => {

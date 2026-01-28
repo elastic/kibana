@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -115,6 +124,7 @@ interface WorkflowExecuteManualFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
+  onNormalizeDataChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -192,7 +202,9 @@ export const WorkflowExecuteManualForm = ({
   setValue,
   errors,
   setErrors,
+  onNormalizeDataChange,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
+  const [normalizeDataEnabled, setNormalizeDataEnabled] = useState(false);
   const inputsValidator = useMemo(
     () => makeWorkflowInputsValidator(definition?.inputs),
     [definition?.inputs]
@@ -246,6 +258,13 @@ export const WorkflowExecuteManualForm = ({
     }
   }, [definition?.inputs, inputsValidator, value, setErrors]);
 
+  // Reset toggle when value is cleared
+  useEffect(() => {
+    if (!value || value.trim() === '') {
+      setNormalizeDataEnabled(false);
+    }
+  }, [value]);
+
   // Set defaults if value is empty or only contains empty object
   useEffect(() => {
     if (definition) {
@@ -283,6 +302,38 @@ export const WorkflowExecuteManualForm = ({
           label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
             defaultMessage: 'Input Data',
           })}
+          labelAppend={
+            <EuiToolTip
+              content={i18n.translate('workflows.workflowExecuteManualForm.normalizeDataTooltip', {
+                defaultMessage:
+                  'When enabled, workflow engine will expands flat ECS-style field names (e.g., "kibana.alert.rule.name") into nested objects while preserving original flat keys for backward compatibility.',
+              })}
+            >
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label=""
+                    checked={normalizeDataEnabled}
+                    onChange={(e) => {
+                      const enabled = e.target.checked;
+                      setNormalizeDataEnabled(enabled);
+                      onNormalizeDataChange?.(enabled);
+                    }}
+                    compressed
+                    showLabel={false}
+                    data-test-subj="workflow-manual-normalize-data-toggle"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('workflows.workflowExecuteManualForm.normalizeDataLabel', {
+                      defaultMessage: 'Normalize data',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiToolTip>
+          }
           helpText={i18n.translate('workflows.workflowExecuteManualForm.inputDataHelpText', {
             defaultMessage: 'JSON payload that will be passed to the workflow',
           })}

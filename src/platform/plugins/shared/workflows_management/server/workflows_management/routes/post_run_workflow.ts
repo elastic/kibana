@@ -13,6 +13,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { normalizeData } from '../../../common/utils/normalize_data';
 import { withLicenseCheck } from '../lib/with_license_check';
 import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
 
@@ -28,6 +29,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         }),
         body: schema.object({
           inputs: schema.recordOf(schema.string(), schema.any()),
+          normalizeData: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -61,7 +63,10 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
             },
           });
         }
-        const { inputs } = request.body as { inputs: Record<string, unknown> };
+        const { inputs, normalizeData: shouldNormalize } = request.body as {
+          inputs: Record<string, unknown>;
+          normalizeData?: boolean;
+        };
 
         let processedInputs = inputs;
         const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
@@ -69,6 +74,8 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
           event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
         if (hasAlertTrigger) {
           processedInputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
+        } else if (shouldNormalize) {
+          processedInputs = normalizeData(inputs) as Record<string, unknown>;
         }
 
         const workflowForExecution: WorkflowExecutionEngineModel = {

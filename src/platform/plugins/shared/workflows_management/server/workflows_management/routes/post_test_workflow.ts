@@ -13,6 +13,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { normalizeData } from '../../../common/utils/normalize_data';
 import { withLicenseCheck } from '../lib/with_license_check';
 import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
 
@@ -29,6 +30,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
               workflowId: z.string().optional(),
               workflowYaml: z.string().optional(),
               inputs: z.record(z.string(), z.any()),
+              normalizeData: z.boolean().optional(),
             })
             .refine((data) => data.workflowId || data.workflowYaml, {
               message: "Either 'workflowId' or 'workflowYaml' or both must be provided",
@@ -42,6 +44,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
         const spaceId = spaces.getSpaceId(request);
 
         let inputs = request.body.inputs;
+        const { normalizeData: shouldNormalize } = request.body;
         const event = request.body.inputs.event as
           | { triggerType?: string; alertIds?: unknown[] }
           | undefined;
@@ -50,6 +53,8 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
           event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
         if (hasAlertTrigger) {
           inputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
+        } else if (shouldNormalize) {
+          inputs = normalizeData(inputs) as Record<string, unknown>;
         }
 
         const workflowExecutionId = await api.testWorkflow({

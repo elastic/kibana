@@ -8,12 +8,17 @@
  */
 
 import type { CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
+import { normalizeAlert } from './normalize_alert';
 import type { AlertEvent, AlertEventRule } from '../types/alert_types';
 
 /**
  * Builds the alert event structure used in workflow execution.
  * This function creates the standardized event format that contains
  * alerts, rule information, and context.
+ *
+ * Each alert is normalized to expand flat ECS-style field names
+ * (e.g., "kibana.alert.rule.name") into nested objects that can be
+ * accessed using dot notation in workflow templates.
  */
 export function buildAlertEvent(params: {
   alerts: CombinedSummarizedAlerts;
@@ -22,7 +27,7 @@ export function buildAlertEvent(params: {
   spaceId: string;
 }): AlertEvent {
   return {
-    alerts: params.alerts.new.data,
+    alerts: params.alerts.new.data.map(normalizeAlert),
     rule: {
       id: params.rule.id,
       name: params.rule.name,
