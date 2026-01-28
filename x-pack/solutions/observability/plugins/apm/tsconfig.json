@@ -117,7 +117,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/test-jest-helpers",
     "@kbn/security-plugin-types-common",
-    "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
     "@kbn/serverless",
@@ -153,6 +152,7 @@
     "@kbn/kql",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
+    "@kbn/apm-api-client",
   ],
   "exclude": ["target/**/*"]
 }

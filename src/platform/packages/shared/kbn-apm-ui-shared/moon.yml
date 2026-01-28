@@ -22,6 +22,11 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/apm-types-shared'
   - '@kbn/custom-icons'
+  - '@kbn/apm-api-client'
+  - '@kbn/react-hooks'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/apm-types'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - shared-browser
   - package
