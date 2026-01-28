@@ -221,11 +221,11 @@ export class TaskStore {
 
   private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
     const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const apiKeyIdsToRemoveMap = new Map<string, string>();
 
     // If a task with an API key is updated with a request
     if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
-      const apiKeyIdsToRemoveMap = new Map<string, string>();
 
       docs.forEach((taskInstance) => {
         const { apiKey, userScope } = taskInstance;
@@ -247,7 +247,7 @@ export class TaskStore {
       }
     }
 
-    return null;
+    return { apiKeyAndUserScopeMap: null, apiKeyIdsToRemoveMap };
   }
 
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
@@ -582,8 +582,8 @@ export class TaskStore {
   ): Promise<BulkUpdateResult[]> {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
     const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
-    const apiKeyAndUserScopeMap = regenerateResult?.apiKeyAndUserScopeMap || new Map();
-    const apiKeyIdsToRemoveMap = regenerateResult?.apiKeyIdsToRemoveMap || new Map();
+    const apiKeyAndUserScopeMap = regenerateResult.apiKeyAndUserScopeMap || new Map();
+    const apiKeyIdsToRemoveMap = regenerateResult.apiKeyIdsToRemoveMap;
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
