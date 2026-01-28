@@ -42,11 +42,11 @@
     "@kbn/es-errors",
     "@kbn/alerting-v2-schemas",
     "@kbn/zod",
-    "@kbn/esql-composer",
     "@kbn/safer-lodash-set",
     "@kbn/core-di-internal",
     "@kbn/i18n",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/esql-language"
   ],
   "exclude": ["target/**/*"]
 }
