@@ -15,5 +15,5 @@ export function getErrorName<T extends ProxiedApmEvent<Partial<FlattenedApmEvent
   event: T,
   exception: Exception
 ): string {
-  return event[ERROR_LOG_MESSAGE] || exception.message || NOT_AVAILABLE_LABEL;
+  return event[ERROR_LOG_MESSAGE] || exception.message || event['error.message'] || NOT_AVAILABLE_LABEL;
 }
