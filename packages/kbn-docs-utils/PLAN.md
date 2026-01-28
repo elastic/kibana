@@ -190,10 +190,10 @@ Key files:
 ## Phase 6: Flat Stats Output and MCP Auto-Fix Tooling
 
 ### Phase 6.1: Emit Flat Stats File
-- [ ] Add `--write` CLI flag to `check_package_docs` to emit validation stats as a flat JSON file
-- [ ] Write stats to each plugin's `target/api_docs/stats.json` (follows Kibana convention for build artifacts)
-- [ ] Include line-anchored GitHub URLs when line numbers are present
-- [ ] Stats include counts and detailed entries for: missing comments, any types, no references, missing returns, param doc mismatches, missing complex type info, and missing exports
+- [x] Add `--write` CLI flag to `check_package_docs` to emit validation stats as a flat JSON file
+- [x] Write stats to each plugin's `target/api_docs/stats.json` (follows Kibana convention for build artifacts)
+- [x] Include line-anchored GitHub URLs when line numbers are present
+- [x] Stats include counts and detailed entries for: missing comments, any types, no references, missing returns, param doc mismatches, missing complex type info, and missing exports
 
 ### Phase 6.2: MCP Tools for Documentation Checking and Fixing
 - [ ] Create `check_package_docs` MCP tool for quick validation checks
