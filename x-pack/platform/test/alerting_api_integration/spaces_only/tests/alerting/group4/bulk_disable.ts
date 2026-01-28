@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -28,14 +27,17 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            rule_type_id: 'test.always-firing-alert-as-data',
-            schedule: { interval: '24h' },
-            throttle: undefined,
-            notify_when: undefined,
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
             params: {
-              index: ES_TEST_INDEX_NAME,
-              reference: 'test',
+              pattern: {
+                alertA: [true],
+                alertB: [true],
+              },
             },
+            actions: [],
           })
         )
         .expect(200);
@@ -63,7 +65,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertsAsDataIndex,
         query,
       });
 
@@ -89,7 +91,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertsAsDataIndex,
         query,
       });
 
@@ -98,7 +100,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
     afterEach(async () => {
       await es.deleteByQuery({
-        index: alertAsDataIndex,
+        index: alertsAsDataIndex,
         query: {
           match_all: {},
         },
