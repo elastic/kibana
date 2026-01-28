@@ -9,6 +9,7 @@ import { isEqual, xorWith } from 'lodash';
 import type { RuleAlertType } from '../../rule_schema';
 import type {
   BaseOptionalFields,
+  PatchRuleRequestBody,
   ResponseAction,
   RuleCreateProps,
   RuleResponseAction,
@@ -45,7 +46,7 @@ export const validateRuleResponseActionsPayload = async ({
   endpointService,
   spaceId,
 }: ValidateRuleResponseActionsOptions): Promise<void> => {
-  const logger = endpointService.createLogger('ruleResponseActions');
+  const logger = endpointService.createLogger('validateRuleResponseActionsPayload');
 
   if (!ruleResponseActions || ruleResponseActions.length === 0) {
     return;
@@ -60,7 +61,9 @@ export const validateRuleResponseActionsPayload = async ({
   for (const responseAction of ruleResponseActions) {
     logger.debug(() => `Rule response action: ${stringify(responseAction)}`);
 
+    // -----------------------------------------------
     // Validations for RunScript
+    // -----------------------------------------------
     if (
       responseAction.action_type_id === ResponseActionTypesEnum['.endpoint'] &&
       responseAction.params.command === 'runscript'
@@ -113,13 +116,20 @@ export const validateRuleResponseActionsPayload = async ({
  */
 export const validateResponseActionsPermissions = async (
   securitySolution: SecuritySolutionApiRequestHandlerContext,
-  ruleUpdate: RuleCreateProps | RuleUpdateProps,
+  ruleUpdate: RuleCreateProps | RuleUpdateProps | PatchRuleRequestBody,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
+  const endpointService = securitySolution.getEndpointService();
+  const logger = endpointService.createLogger('validateResponseActionsPermissions');
+
+  logger.debug(() => `Validating response actions permissions for rule: ${stringify(ruleUpdate)}`);
+
   if (
     !rulePayloadContainsResponseActions(ruleUpdate) ||
+    // FIXME:PT fix this condition below - it seems unnecessary
     (existingRule && !ruleObjectContainsResponseActions(existingRule))
   ) {
+    logger.debug(() => `Nothing to do - no response action in payload`);
     return;
   }
 
@@ -127,6 +137,7 @@ export const validateResponseActionsPermissions = async (
     ruleUpdate.response_actions?.length === 0 &&
     existingRule?.params?.responseActions?.length === 0
   ) {
+    logger.debug(() => `No response actions in payload to validate`);
     return;
   }
 
@@ -137,6 +148,10 @@ export const validateResponseActionsPermissions = async (
     ruleUpdate.response_actions,
     existingRule?.params?.responseActions,
     isEqual
+  );
+
+  logger.debug(
+    () => `Validating the following response actions from rule: ${stringify(symmetricDifference)}`
   );
 
   symmetricDifference.forEach((action) => {
@@ -159,7 +174,9 @@ export const validateResponseActionsPermissions = async (
   });
 };
 
-function rulePayloadContainsResponseActions(rule: RuleCreateProps | RuleUpdateProps) {
+function rulePayloadContainsResponseActions<T extends Pick<BaseOptionalFields, 'response_actions'>>(
+  rule: T
+) {
   return 'response_actions' in rule;
 }
 
