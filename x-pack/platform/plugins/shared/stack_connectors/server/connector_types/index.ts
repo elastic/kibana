@@ -64,12 +64,12 @@ export function registerConnectorTypes({
   actions.registerType(getServiceNowITSMConnectorType());
   actions.registerType(getServiceNowSIRConnectorType());
   actions.registerType(getServiceNowITOMConnectorType());
-  actions.registerType(getJiraConnectorType());
+  // actions.registerType(getJiraConnectorType()); // Commented out: using spec-based .jira from kbn-connector-specs
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
-  actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
+  // actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());

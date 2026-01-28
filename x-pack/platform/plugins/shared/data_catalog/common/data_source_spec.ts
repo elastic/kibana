@@ -25,6 +25,7 @@ export enum EARSSupportedOAuthProvider {
   GITHUB = 'github',
   GOOGLE = 'google',
   NOTION = 'notion',
+  ATLASSIAN = 'atlassian',
 }
 
 /**
