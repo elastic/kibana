@@ -127,25 +127,18 @@ export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
   );
 };
 
+// TODO: Keep in ES; solve the discrepancy with signatures.
+const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
+  'instant vector': 'instant_vector',
+  'range vector': 'range_vector',
+  scalar: 'scalar',
+  string: 'string',
+};
+
 function normalizePromqlReturnType(
   returnType: string | undefined
 ): PromQLFunctionParamType | undefined {
-  if (!returnType) {
-    return undefined;
-  }
-
-  switch (returnType) {
-    case 'instant vector':
-      return 'instant_vector';
-    case 'range vector':
-      return 'range_vector';
-    case 'scalar':
-      return 'scalar';
-    case 'string':
-      return 'string';
-    default:
-      return undefined;
-  }
+  return returnType ? PROMQL_RETURN_TYPE_MAP[returnType] : undefined;
 }
 
 export function getIndexFromPromQLParams({

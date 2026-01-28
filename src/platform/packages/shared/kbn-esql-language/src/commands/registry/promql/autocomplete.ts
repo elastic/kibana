@@ -347,17 +347,18 @@ function buildFieldSuggestions(
 
   return Array.from(context.columns.values())
     .filter((column) => !column.userDefined && types.includes(column.type))
-    .map((column) => ({
-      label: column.name,
-      text:
-        wrap === 'wrap'
-          ? `(${buildMetricSuggestionText(column.name, useRangeVector)})`
-          : buildMetricSuggestionText(column.name, useRangeVector),
-      asSnippet: useRangeVector,
-      kind: 'Field',
-      detail: column.type,
-      category: SuggestionCategory.FIELD,
-    }));
+    .map((column) => {
+      const metricText = buildMetricSuggestionText(column.name, useRangeVector);
+
+      return {
+        label: column.name,
+        text: wrap === 'wrap' ? `(${metricText})` : metricText,
+        asSnippet: useRangeVector,
+        kind: 'Field',
+        detail: column.type,
+        category: SuggestionCategory.FIELD,
+      };
+    });
 }
 
 // ============================================================================
@@ -368,41 +369,32 @@ function isScalarOnlyParam(types: PromQLFunctionParamType[]): boolean {
   return types.length > 0 && types.every((type) => type === 'scalar');
 }
 
-/* Maps PromQL function signature types to ESQL field types for metric suggestions. */
-const PROMQL_PARAM_TYPE_TO_ESQL_TYPES: Record<PromQLFunctionParamType, readonly string[]> = {
-  instant_vector: ESQL_NUMBER_TYPES,
-  range_vector: ESQL_NUMBER_TYPES,
-  scalar: ESQL_NUMBER_TYPES,
-  string: ESQL_STRING_TYPES,
-};
-const COUNTER_TYPES = ['counter_integer', 'counter_long', 'counter_double'] as const;
-const COUNTER_ONLY_FUNCTIONS = new Set(['rate', 'irate', 'increase']);
+/* PromQL scalars and vector samples are float64 (no ints); we treat them as numeric ESQL types for suggestions. */
+function getEsqlTypesForPromqlParam(paramType: PromQLFunctionParamType): readonly string[] {
+  return paramType === 'string' ? ESQL_STRING_TYPES : ESQL_NUMBER_TYPES;
+}
 
 /** Derives metric suggestion types and range-vector formatting from function signatures. */
 function getMetricSuggestionConfig(
   name: string | undefined,
   signatureTypes: PromQLFunctionParamType[]
 ): { types: readonly string[]; useRangeVector: boolean } {
-  const isCounterOnly = name ? COUNTER_ONLY_FUNCTIONS.has(name.toLowerCase()) : false;
   const expectsRangeVector = signatureTypes.includes('range_vector');
   const expectsInstantVector = signatureTypes.includes('instant_vector');
 
   if (!signatureTypes.length) {
     return {
-      types: isCounterOnly ? COUNTER_TYPES : ESQL_NUMBER_TYPES,
+      types: ESQL_NUMBER_TYPES,
       useRangeVector: false,
     };
   }
 
-  const types = signatureTypes.flatMap((paramType) => PROMQL_PARAM_TYPE_TO_ESQL_TYPES[paramType]);
+  const types = signatureTypes.flatMap(getEsqlTypesForPromqlParam);
   const uniqueTypes = Array.from(new Set(types));
   const baseTypes = uniqueTypes.length ? uniqueTypes : ESQL_NUMBER_TYPES;
-  const filteredTypes = isCounterOnly
-    ? baseTypes.filter((type) => COUNTER_TYPES.includes(type as (typeof COUNTER_TYPES)[number]))
-    : baseTypes;
 
   return {
-    types: filteredTypes,
+    types: baseTypes,
     useRangeVector: expectsRangeVector && !expectsInstantVector,
   };
 }

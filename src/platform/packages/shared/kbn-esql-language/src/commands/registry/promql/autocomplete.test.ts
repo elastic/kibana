@@ -31,8 +31,6 @@ const promqlFunctionLabels = promqlFunctionSuggestions.map(({ label }) => label)
 const promqlFunctionWrappedTexts = promqlFunctionSuggestions
   .slice(0, 1)
   .map(({ text }) => `(${text})`);
-const promqlCounterTypes = ['counter_integer', 'counter_long', 'counter_double'] as const;
-
 let mockCallbacks: ICommandCallbacks;
 
 beforeEach(() => {
@@ -264,10 +262,13 @@ describe('inside query', () => {
     });
   });
 
-  test('does not suggest function args when cursor is inside label selector value', async () => {
+  test.each([
+    ['label selector value', 'api'],
+    ['label selector name', 'job'],
+  ])('does not suggest function args when cursor is inside %s', async (_label, searchText) => {
     const metricNames = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
     const query = 'PROMQL rate(http_requests_total{job="api"}[5m])';
-    const cursorPosition = query.indexOf('api') + 1;
+    const cursorPosition = query.indexOf(searchText) + 1;
 
     await expectPromqlSuggestions(
       query,
@@ -278,29 +279,14 @@ describe('inside query', () => {
     );
   });
 
-  test('does not suggest function args when cursor is inside label selector name', async () => {
-    const metricNames = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-    const query = 'PROMQL rate(http_requests_total{job="api"}[5m])';
-    const cursorPosition = query.indexOf('job') + 1;
-
-    await expectPromqlSuggestions(
-      query,
-      { labelsNotContain: [...promqlFunctionLabels, ...metricNames] },
-      mockCallbacks,
-      undefined,
-      cursorPosition
-    );
-  });
-
-  test('suggests only counter fields for rate()', async () => {
-    const counterFields = getFieldNamesByType(promqlCounterTypes, true);
+  test('suggests numeric fields for rate()', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
     const rangeSuffix = '[${0:5m}]';
-    const counterTexts = counterFields.map((name) => `${name}${rangeSuffix}`);
+    const numericTexts = numericFields.map((name) => `${name}${rangeSuffix}`);
 
     await expectPromqlSuggestions('PROMQL rate(', {
-      labelsContain: counterFields,
-      labelsNotContain: ['doubleField', 'integerField', 'longField'],
-      textsContain: counterTexts,
+      labelsContain: numericFields,
+      textsContain: numericTexts,
     });
   });
 
