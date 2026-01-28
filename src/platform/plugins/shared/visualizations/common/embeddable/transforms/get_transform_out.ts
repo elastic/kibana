@@ -8,15 +8,21 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
-import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { flow } from 'lodash';
 import { injectVisReferences } from '../../references/inject_vis_references';
+import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    const state = transformDrilldownsOut(storedState, references);
+    const transformsFlow = flow(
+      transformTitlesOut<StoredVisualizeEmbeddableState>,
+      (state: StoredVisualizeEmbeddableState) => transformDrilldownsOut(state, references)
+    );
+    const state = transformsFlow(storedState);
 
     // by ref
     const savedObjectRef = (references ?? []).find(

@@ -6,10 +6,12 @@
  */
 
 import type { LensSerializedState } from '@kbn/lens-common';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { flow } from 'lodash';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
 import { injectLensReferences } from '../references';
@@ -22,14 +24,18 @@ import { findLensReference, isByRefLensState } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 
 /**
- * Transform from Lens Serialized State to Lens API format
+ * Transform from Lens Stored State to Lens API format
  */
 export const getTransformOut = (
   builder: LensConfigBuilder,
   transformDrilldownsOut: DrilldownTransforms['transformOut']
 ): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
-    const state = transformDrilldownsOut(storedState, panelReferences) as LensSerializedState;
+    const transformsFlow = flow(
+      transformTitlesOut<LensSerializedState>,
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
+    );
+    const state = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 

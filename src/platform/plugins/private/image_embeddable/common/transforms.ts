@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(drilldownTransforms: DrilldownTransforms) {
@@ -16,8 +17,12 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms) {
     transformIn: (state: ImageEmbeddableState) => {
       return drilldownTransforms.transformIn(state);
     },
-    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      return drilldownTransforms.transformOut(state, references);
+    transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
+      const transformsFlow = flow(
+        transformTitlesOut<ImageEmbeddableState>,
+        (state: ImageEmbeddableState) => drilldownTransforms.transformOut(state, references)
+      );
+      return transformsFlow(storedState);
     },
   };
 }

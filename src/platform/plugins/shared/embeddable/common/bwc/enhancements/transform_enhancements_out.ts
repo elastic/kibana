@@ -11,9 +11,9 @@ import type { DrilldownsState } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
-export function transformEnhancementsOut(
-  state: DrilldownsState & { enhancements?: { dynamicActions?: DynamicActionsState } }
-): DrilldownsState {
+export function transformEnhancementsOut<StoredState extends DrilldownsState>(
+  state: StoredState & { enhancements?: { dynamicActions?: DynamicActionsState } }
+): StoredState {
   const { enhancements, ...restOfState } = state;
 
   if (
@@ -21,7 +21,7 @@ export function transformEnhancementsOut(
     !Array(enhancements.dynamicActions.events) ||
     !enhancements.dynamicActions.events.length
   ) {
-    return restOfState;
+    return restOfState as StoredState;
   }
 
   const drilldownsFromEnhancements = enhancements.dynamicActions.events
@@ -42,10 +42,10 @@ export function transformEnhancementsOut(
 
   return drilldownsFromEnhancements.length
     ? {
-        ...restOfState,
+        ...restOfState as StoredState,
         drilldowns: [...drilldownsFromEnhancements, ...(restOfState.drilldowns ?? [])],
       }
-    : restOfState;
+    : restOfState as StoredState;
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {

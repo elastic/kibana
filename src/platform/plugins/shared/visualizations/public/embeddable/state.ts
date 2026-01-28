@@ -57,7 +57,8 @@ export const deserializeSavedObjectState = async ({
   timeRange,
   title: embeddableTitle,
   description: embeddableDescription,
-  hidePanelTitles,
+
+  hide_title,
 }: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
   const {
@@ -101,7 +102,7 @@ export const deserializeSavedObjectState = async ({
     },
     title: panelTitle,
     description: panelDescription,
-    hidePanelTitles,
+    hide_title,
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,

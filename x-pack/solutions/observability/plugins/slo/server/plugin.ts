@@ -291,6 +291,7 @@ export class SLOPlugin
           esClient: internalEsClient,
           scopedClusterClient: core.elasticsearch.client.asScoped(request),
           spaceId,
+          logger: this.logger,
         });
       },
     };
