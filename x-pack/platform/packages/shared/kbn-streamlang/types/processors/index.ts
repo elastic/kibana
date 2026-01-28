@@ -579,15 +579,17 @@ const networkDirectionWithInternalNetworksFieldSchema = z.object({
 
 interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
   action: 'network_direction';
-  source_ip: string;
-  destination_ip: string;
+  target_field?: string;
+  source_ip?: string;
+  destination_ip?: string;
   ignore_missing?: boolean;
 }
 
 const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('network_direction'),
-  source_ip: StreamlangSourceField,
-  destination_ip: StreamlangSourceField,
+  target_field: z.optional(StreamlangTargetField),
+  source_ip: z.optional(StreamlangSourceField),
+  destination_ip: z.optional(StreamlangSourceField),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<NetworkDirectionCommonFields>;
 
@@ -700,6 +702,11 @@ export const processorTypes: ProcessorType[] = (
 ).map((schema) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
   let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+
+  // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
+  if ('_def' in baseSchema && 'left' in baseSchema._def) {
+    baseSchema = baseSchema._def.left;
+  }
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
