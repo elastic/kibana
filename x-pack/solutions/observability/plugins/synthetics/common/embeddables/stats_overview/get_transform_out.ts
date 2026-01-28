@@ -6,13 +6,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { OverviewStatsEmbeddableState } from './types';
 
 export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
-  function transformOut(state: OverviewStatsEmbeddableState, references?: Reference[]) {
+  function transformOut(storedState: OverviewStatsEmbeddableState, references?: Reference[]) {
+    const state = transformTitlesOut(storedState);
     const { enhancements, ...rest } = state;
     const enhancementsState = enhancements
       ? transformEnhancementsOut(enhancements, references ?? [])
