@@ -21,7 +21,42 @@ export const getAnnouncementsSettings = (): Record<string, UiSettingsParams> => 
       description: i18n.translate('core.ui_settings.params.hideAnnouncementsText', {
         defaultMessage: 'Stop showing messages and tours that highlight new features.',
       }),
+      deprecation: {
+        message: i18n.translate('core.ui_settings.params.hideAnnouncementsDeprecation', {
+          defaultMessage:
+            'This setting is deprecated and will be removed in Kibana 10.0. Use the global setting "Hide announcements" instead.',
+        }),
+        docLinksKey: 'uiSettings',
+      },
       schema: schema.boolean(),
+    },
+  };
+};
+
+export const getGlobalAnnouncementsSettings = (): Record<string, UiSettingsParams> => {
+  return {
+    hideAnnouncements: {
+      name: i18n.translate('core.ui_settings.params.hideAnnouncementsGlobal', {
+        defaultMessage: 'Hide announcements',
+      }),
+      value: false,
+      description: i18n.translate('core.ui_settings.params.hideAnnouncementsGlobalText', {
+        defaultMessage: 'Stop showing messages and tours that highlight new features.',
+      }),
+      schema: schema.boolean(),
+      scope: 'global',
+    },
+    hideFeedback: {
+      name: i18n.translate('core.ui_settings.params.hideFeedback', {
+        defaultMessage: 'Hide feedback',
+      }),
+      value: false,
+      description: i18n.translate('core.ui_settings.params.hideFeedbackText', {
+        defaultMessage: 'Stop showing elements requesting user feedback.',
+      }),
+      schema: schema.boolean(),
+      scope: 'global',
+      readonly: true,
     },
   };
 };
