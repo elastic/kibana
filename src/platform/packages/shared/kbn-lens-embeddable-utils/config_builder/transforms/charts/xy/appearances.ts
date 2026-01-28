@@ -8,21 +8,22 @@
  */
 
 import type { XYState as XYLensState } from '@kbn/lens-common';
-import { XYCurveTypes } from '@kbn/expression-xy-plugin/common';
-
+import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import type { $Values } from 'utility-types';
 import { XY_API_LINE_INTERPOLATION, type XYDecorations } from '../../../schema/charts/xy';
+import { stripUndefined } from '../utils';
 
-const curveTypeAPItoState = {
-  [XY_API_LINE_INTERPOLATION.LINEAR]: XYCurveTypes.LINEAR,
-  [XY_API_LINE_INTERPOLATION.SMOOTH]: XYCurveTypes.CURVE_MONOTONE_X,
-  [XY_API_LINE_INTERPOLATION.STEPPED]: XYCurveTypes.CURVE_STEP_AFTER,
-} as const;
+const curveTypeAPItoState: Record<$Values<typeof XY_API_LINE_INTERPOLATION>, XYCurveType> = {
+  [XY_API_LINE_INTERPOLATION.LINEAR]: 'LINEAR',
+  [XY_API_LINE_INTERPOLATION.SMOOTH]: 'CURVE_MONOTONE_X',
+  [XY_API_LINE_INTERPOLATION.STEPPED]: 'CURVE_STEP_AFTER',
+};
 
-const curveTypeStateToAPI = {
-  [XYCurveTypes.LINEAR]: XY_API_LINE_INTERPOLATION.LINEAR,
-  [XYCurveTypes.CURVE_MONOTONE_X]: XY_API_LINE_INTERPOLATION.SMOOTH,
-  [XYCurveTypes.CURVE_STEP_AFTER]: XY_API_LINE_INTERPOLATION.STEPPED,
-} as const;
+const curveTypeStateToAPI: Record<XYCurveType, $Values<typeof XY_API_LINE_INTERPOLATION>> = {
+  LINEAR: XY_API_LINE_INTERPOLATION.LINEAR,
+  CURVE_MONOTONE_X: XY_API_LINE_INTERPOLATION.SMOOTH,
+  CURVE_STEP_AFTER: XY_API_LINE_INTERPOLATION.STEPPED,
+};
 
 type XYLensAppearanceState = Pick<
   XYLensState,
@@ -35,55 +36,33 @@ type XYLensAppearanceState = Pick<
   | 'pointVisibility'
 >;
 
-// testing tool to write partial with type saftly
-function partialBuilder<T extends object>() {
-  return <K extends keyof T>(key: K, value: T[K]): Partial<T> => {
-    return value != null ? ({ [key]: value } as Partial<T>) : {};
-  };
-}
-
 export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYDecorations {
-  const b = partialBuilder<XYDecorations>();
-
-  return {
-    ...b(
-      'show_value_labels',
-      config.valueLabels != null ? config.valueLabels === 'show' : undefined
-    ),
-    ...b(
-      'line_interpolation',
-      config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined
-    ),
-    ...b('fill_opacity', config.fillOpacity != null ? config.fillOpacity : undefined),
-    ...b('minimum_bar_height', config.minBarHeight != null ? config.minBarHeight : undefined),
-    ...b('show_end_zones', config.hideEndzones != null ? !config.hideEndzones : undefined),
-    ...b(
-      'show_current_time_marker',
-      config.showCurrentTimeMarker != null ? config.showCurrentTimeMarker : undefined
-    ),
-    ...b('point_visibility', config.pointVisibility != null ? config.pointVisibility : undefined),
-  } satisfies XYDecorations;
+  return stripUndefined<XYDecorations>({
+    show_value_labels: config.valueLabels != null ? config.valueLabels === 'show' : undefined,
+    line_interpolation:
+      config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined,
+    fill_opacity: config.fillOpacity != null ? config.fillOpacity : undefined,
+    minimum_bar_height: config.minBarHeight != null ? config.minBarHeight : undefined,
+    show_end_zones: config.hideEndzones != null ? !config.hideEndzones : undefined,
+    show_current_time_marker:
+      config.showCurrentTimeMarker != null ? config.showCurrentTimeMarker : undefined,
+    point_visibility: config.pointVisibility != null ? config.pointVisibility : undefined,
+  });
 }
 
 export function convertAppearanceToStateFormat(config: XYDecorations): XYLensAppearanceState {
-  const b = partialBuilder<XYLensAppearanceState>();
-
-  return {
-    ...b(
-      'valueLabels',
-      config.show_value_labels != null ? (config.show_value_labels ? 'show' : 'hide') : undefined
-    ),
-    ...b(
-      'curveType',
-      config.line_interpolation != null ? curveTypeAPItoState[config.line_interpolation] : undefined
-    ),
-    ...b('fillOpacity', config.fill_opacity != null ? config.fill_opacity : undefined),
-    ...b('minBarHeight', config.minimum_bar_height != null ? config.minimum_bar_height : undefined),
-    ...b('hideEndzones', config.show_end_zones != null ? !config.show_end_zones : undefined),
-    ...b(
-      'showCurrentTimeMarker',
-      config.show_current_time_marker != null ? config.show_current_time_marker : undefined
-    ),
-    ...b('pointVisibility', config.point_visibility != null ? config.point_visibility : undefined),
-  } satisfies XYLensAppearanceState;
+  return stripUndefined<XYLensAppearanceState>({
+    valueLabels:
+      config.show_value_labels != null ? (config.show_value_labels ? 'show' : 'hide') : undefined,
+    curveType:
+      config.line_interpolation != null
+        ? curveTypeAPItoState[config.line_interpolation]
+        : undefined,
+    fillOpacity: config.fill_opacity != null ? config.fill_opacity : undefined,
+    minBarHeight: config.minimum_bar_height != null ? config.minimum_bar_height : undefined,
+    hideEndzones: config.show_end_zones != null ? !config.show_end_zones : undefined,
+    showCurrentTimeMarker:
+      config.show_current_time_marker != null ? config.show_current_time_marker : undefined,
+    pointVisibility: config.point_visibility != null ? config.point_visibility : undefined,
+  });
 }

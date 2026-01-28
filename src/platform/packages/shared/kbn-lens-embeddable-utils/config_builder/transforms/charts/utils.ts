@@ -79,7 +79,7 @@ export function getLensStateLayer(
   return visLayer ?? mainLayers[0];
 }
 
-type OptionalProperties<T extends Record<string, unknown> | undefined> = Pick<
+type OptionalProperties<T extends Record<string, any> | undefined> = Pick<
   T,
   { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T]
 >;
@@ -89,7 +89,7 @@ type OptionalProperties<T extends Record<string, unknown> | undefined> = Pick<
  *
  * Pass only properties that can be undefined.
  */
-export function stripUndefined<T extends Record<string, unknown> | undefined>(
+export function stripUndefined<T extends Record<string, any> | undefined>(
   obj: OptionalProperties<T>
 ): OptionalProperties<T> {
   return pickBy(obj, (value) => value !== undefined) as OptionalProperties<T>;
