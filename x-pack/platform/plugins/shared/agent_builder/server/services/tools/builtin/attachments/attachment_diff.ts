@@ -36,7 +36,7 @@ export const createAttachmentDiffTool = ({
     from_version: fromVersion,
     to_version: toVersion,
   }) => {
-    const attachment = attachmentManager.get(attachmentId);
+    const attachment = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!attachment) {
       return {
@@ -66,8 +66,8 @@ export const createAttachmentDiffTool = ({
       };
     }
 
-    const fromVersionData = attachmentManager.getVersion(attachmentId, fromVersion);
-    const toVersionData = attachmentManager.getVersion(attachmentId, toVersion);
+    const fromVersionData = await attachmentManager.get(attachmentId, { version: fromVersion });
+    const toVersionData = await attachmentManager.get(attachmentId, { version: toVersion });
 
     return {
       results: [

@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
@@ -42,7 +42,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   resolve?: (
     attachment: Attachment<TType, TContent>,
     context: AttachmentResolveContext
-  ) => MaybePromise<unknown>;
+  ) => MaybePromise<AttachmentVersion>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.

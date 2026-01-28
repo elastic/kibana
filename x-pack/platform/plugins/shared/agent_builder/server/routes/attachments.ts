@@ -200,7 +200,7 @@ export function registerAttachmentRoutes({
         });
 
         // Check for duplicate ID if provided
-        if (id && stateManager.get(id)) {
+        if (id && stateManager.getAttachmentRecord(id)) {
           return response.conflict({
             body: { message: `Attachment with ID '${id}' already exists` },
           });
@@ -286,7 +286,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -393,7 +393,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -419,7 +419,7 @@ export function registerAttachmentRoutes({
           }
 
           // Check if attachment has client_id (from flyout config)
-          const latestVersion = stateManager.getLatest(attachmentId);
+          const latestVersion = await stateManager.get(attachmentId);
           const versionData = latestVersion?.data as Record<string, unknown> | undefined;
           if (versionData?.client_id) {
             return response.conflict({
@@ -516,7 +516,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -538,7 +538,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const restored = stateManager.get(attachmentId)!;
+        const restored = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({
@@ -625,7 +625,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const renamed = stateManager.get(attachmentId)!;
+        const renamed = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({

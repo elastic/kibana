@@ -36,7 +36,10 @@ export const createAttachmentReadTool = ({
   schema: attachmentReadSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, version }, context) => {
-    const attachment = attachmentManager.get(attachmentId);
+    const attachment = await attachmentManager.get(attachmentId, {
+      version,
+      context,
+    });
 
     if (!attachment) {
       return {
@@ -49,37 +52,7 @@ export const createAttachmentReadTool = ({
       };
     }
 
-    const versionData = version
-      ? attachmentManager.getVersion(attachmentId, version)
-      : attachmentManager.getLatest(attachmentId);
-
-    if (!versionData) {
-      return {
-        results: [
-          createErrorResult({
-            message: `Version ${version} not found for attachment '${attachmentId}'`,
-            metadata: { attachment_id: attachmentId, version },
-          }),
-        ],
-      };
-    }
-
-    let resolved: unknown;
-    const definition = getTypeDefinition?.(attachment.type);
-    if (definition?.resolve && context) {
-      resolved = await definition.resolve(
-        {
-          id: attachmentId,
-          type: attachment.type,
-          data: versionData.data,
-        },
-        {
-          request: context.request,
-          spaceId: context.spaceId,
-          savedObjectsClient: context.savedObjectsClient,
-        }
-      );
-    }
+    const { data, type } = attachment;
 
     return {
       results: [
@@ -88,10 +61,9 @@ export const createAttachmentReadTool = ({
           type: ToolResultType.other,
           data: {
             attachment_id: attachmentId,
-            type: attachment.type,
-            version: versionData.version,
-            data: versionData.data,
-            ...(resolved !== undefined ? { resolved } : {}),
+            type,
+            version,
+            data,
           },
         },
       ],
@@ -117,3 +89,4 @@ export const createAttachmentReadTool = ({
     ];
   },
 });
+
