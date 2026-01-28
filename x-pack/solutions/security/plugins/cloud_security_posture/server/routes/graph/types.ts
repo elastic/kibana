@@ -51,15 +51,25 @@ export interface GraphEdge {
 /**
  * Represents a relationship edge from the entity store.
  * Used for static/configuration-based relationships between entities.
+ * Source and target entities are grouped by type/subtype similar to event actors/targets.
  */
 export interface RelationshipEdge {
-  entityId: string; // Source entity ID
   relationship: string; // "Owns", "Supervised_by", "Depends_on", etc.
   count: number; // Count of relationships
-  targetIds: string[]; // Target entity IDs
-  sourceDocData?: string; // Source entity metadata as JSON string
+  // Source entity grouping (like actors in events)
+  sourceNodeId: string; // Grouped source node ID (single ID or MD5 hash)
+  sourceIds: string[]; // All source entity IDs in this group
+  sourceIdsCount: number; // Count of unique source entities
+  sourceEntityType?: string; // Source entity type
+  sourceEntitySubType?: string; // Source entity sub_type
+  sourceDocData?: string[]; // Source entities metadata as JSON strings
+  // Target entity grouping (like targets in events)
+  targetNodeId: string; // Grouped target node ID (single ID or MD5 hash)
+  targetIds: string[]; // All target entity IDs in this group
+  targetIdsCount: number; // Count of unique target entities
+  targetEntityType?: string; // Target entity type
+  targetEntitySubType?: string; // Target entity sub_type
   targetDocData?: string[]; // Target entities metadata as JSON strings
-  isOrigin: boolean; // Whether this entity is the origin of the graph
 }
 
 /**

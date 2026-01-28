@@ -35,6 +35,17 @@ interface ConnectorEdges {
   edgeType: EdgeDataModel['type'];
 }
 
+/**
+ * Relationship connector edges - supports multiple sources for consolidated relationship nodes.
+ * When multiple entities have the same relationship with the same target, they share a single
+ * relationship node with edges from all sources to that node.
+ */
+interface RelationshipConnectorEdges {
+  sources: string[]; // Multiple sources can connect to the same relationship node
+  target: string;
+  edgeType: EdgeDataModel['type'];
+}
+
 interface ParseContext {
   readonly nodesLimit?: number;
   readonly nodesMap: Record<string, NodeDataModel>;
@@ -42,9 +53,8 @@ interface ParseContext {
   // Label nodes (events/actions)
   readonly edgeLabelsNodes: Record<string, string[]>;
   readonly labelEdges: Record<string, ConnectorEdges>;
-  // Relationship nodes
-  readonly edgeRelationshipsNodes: Record<string, string[]>;
-  readonly relationshipEdges: Record<string, ConnectorEdges>;
+  // Relationship nodes - consolidated by relationship + target
+  readonly relationshipEdges: Record<string, RelationshipConnectorEdges>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -69,7 +79,6 @@ export const parseRecords = (
     edgeLabelsNodes: {},
     edgesMap: {},
     labelEdges: {},
-    edgeRelationshipsNodes: {},
     relationshipEdges: {},
     messages: [],
   };
@@ -383,47 +392,51 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
 
 /**
  * Creates a relationship node for static/configuration-based relationships.
+ * The node ID is based on relationship + targetId to consolidate nodes when
+ * multiple sources have the same relationship with the same target.
  */
 const createRelationshipNode = (
-  sourceId: string,
-  targetId: string,
   relationship: string,
-  edgeId: string,
-  isOrigin: boolean
+  targetId: string
 ): RelationshipNodeDataModel => {
   return {
-    id: `${edgeId}rel(${relationship})oe(${isOrigin ? 1 : 0})`,
+    id: `rel(${relationship})-target(${targetId})`,
     label: relationship.replace(/_/g, ' '), // "Depends_on" -> "Depends on"
     shape: 'relationship',
   };
 };
 
 /**
- * Processes relationship nodes similar to processLabelNodes.
+ * Processes relationship nodes with consolidation.
+ * Multiple sources with the same relationship to the same target share a single node.
  */
 const processRelationshipNodes = (
   context: ParseContext,
   nodeData: {
-    edgeId: string;
     sourceId: string;
     targetId: string;
     relationshipNode: RelationshipNodeDataModel;
   }
 ) => {
-  const { nodesMap, edgeRelationshipsNodes, relationshipEdges } = context;
-  const { edgeId, sourceId, targetId, relationshipNode } = nodeData;
+  const { nodesMap, relationshipEdges } = context;
+  const { sourceId, targetId, relationshipNode } = nodeData;
 
-  if (edgeRelationshipsNodes[edgeId] === undefined) {
-    edgeRelationshipsNodes[edgeId] = [];
+  // Check if this relationship node already exists (consolidation)
+  const existingEdges = relationshipEdges[relationshipNode.id];
+  if (existingEdges) {
+    // Add this source to the existing node's sources if not already present
+    if (!existingEdges.sources.includes(sourceId)) {
+      existingEdges.sources.push(sourceId);
+    }
+  } else {
+    // Create new relationship node
+    nodesMap[relationshipNode.id] = relationshipNode;
+    relationshipEdges[relationshipNode.id] = {
+      sources: [sourceId],
+      target: targetId,
+      edgeType: 'solid',
+    };
   }
-
-  nodesMap[relationshipNode.id] = relationshipNode;
-  edgeRelationshipsNodes[edgeId].push(relationshipNode.id);
-  relationshipEdges[relationshipNode.id] = {
-    source: sourceId,
-    target: targetId,
-    edgeType: 'solid',
-  };
 };
 
 /**
@@ -456,20 +469,21 @@ const parseEntityDocData = (
   // Derive visual properties from entity type
   const visualProps = entityType
     ? deriveEntityAttributesFromType(entityType)
-    : { shape: 'ellipse' as const };
+    : { shape: 'rectangle' as const };
 
   return {
     id: targetId,
     label,
     color: 'primary',
     ...visualProps,
-    ...(entitySubType && { tag: entitySubType }),
+    ...(entityType && { tag: entityType }),
     documentsData: entityData ? [entityData] : undefined,
   } as EntityNodeDataModel;
 };
 
 /**
  * Creates relationship nodes from relationship records.
+ * Source entities are grouped by type/subtype (similar to event actors).
  */
 const createRelationshipNodes = (
   relationshipRecords: RelationshipEdge[],
@@ -481,41 +495,119 @@ const createRelationshipNodes = (
       break;
     }
 
-    const sourceId = record.entityId;
+    // Create or update source entity node (may be grouped)
+    // Use sourceNodeId for the node key (can be a single ID or MD5 hash for grouped entities)
+    const sourceNodeId = record.sourceNodeId;
 
-    // Create source entity node if it doesn't exist
-    // This can happen when the source entity is not part of any event in the records
-    if (!context.nodesMap[sourceId]) {
-      // Use enriched source entity data if available
-      context.nodesMap[sourceId] = parseEntityDocData(sourceId, record.sourceDocData);
-    }
+    if (!context.nodesMap[sourceNodeId]) {
+      // For grouped entities (count > 1), create a grouped node
+      if (record.sourceIdsCount > 1) {
+        // Parse all source doc data to collect documents and entity names
+        const documentsData: NodeDocumentDataModel[] = [];
+        const entityNames: string[] = [];
+        record.sourceDocData?.forEach((docDataJson) => {
+          try {
+            const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
+            documentsData.push(docData);
+            if (docData.entity?.name) {
+              entityNames.push(docData.entity.name);
+            }
+          } catch {
+            // Skip invalid JSON
+          }
+        });
 
-    // For each target in the relationship
-    for (let i = 0; i < record.targetIds.length; i++) {
-      const targetId = record.targetIds[i];
-      const targetDocDataJson = record.targetDocData?.[i];
+        // Get visual props from entity type with fallback
+        const visualProps = transformEntityTypeToIconAndShape(record.sourceEntityType ?? '');
+        const shape = visualProps.shape ?? 'recantgle';
 
-      // Create target entity node if it doesn't exist
-      if (!context.nodesMap[targetId]) {
-        context.nodesMap[targetId] = parseEntityDocData(targetId, targetDocDataJson);
+        // Generate label using same logic as events
+        const label = generateEntityLabel(
+          record.sourceIdsCount,
+          sourceNodeId,
+          record.sourceEntityType ?? '',
+          entityNames.length > 0 ? entityNames : null,
+          record.sourceEntitySubType ?? null
+        );
+
+        context.nodesMap[sourceNodeId] = {
+          id: sourceNodeId,
+          label,
+          color: 'primary',
+          shape,
+          ...(visualProps.icon && { icon: visualProps.icon }),
+          ...(record.sourceEntityType && { tag: record.sourceEntityType }),
+          ...(record.sourceIdsCount > 1 && { count: record.sourceIdsCount }),
+          documentsData,
+        } as EntityNodeDataModel;
+      } else {
+        // Single entity - use the first source doc data
+        const sourceDocDataJson = record.sourceDocData?.[0];
+        context.nodesMap[sourceNodeId] = parseEntityDocData(sourceNodeId, sourceDocDataJson);
       }
-
-      const edgeId = `a(${sourceId})-b(${targetId})`;
-      const relationshipNode = createRelationshipNode(
-        sourceId,
-        targetId,
-        record.relationship,
-        edgeId,
-        record.isOrigin
-      );
-
-      processRelationshipNodes(context, {
-        edgeId,
-        sourceId,
-        targetId,
-        relationshipNode,
-      });
     }
+
+    // Create or update target entity node (may be grouped)
+    // Use targetNodeId for the node key (can be a single ID or MD5 hash for grouped entities)
+    const targetNodeId = record.targetNodeId;
+
+    if (!context.nodesMap[targetNodeId]) {
+      // For grouped entities (count > 1), create a grouped node
+      if (record.targetIdsCount > 1) {
+        // Parse all target doc data to collect documents and entity names
+        const documentsData: NodeDocumentDataModel[] = [];
+        const entityNames: string[] = [];
+        record.targetDocData?.forEach((docDataJson) => {
+          try {
+            const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
+            documentsData.push(docData);
+            if (docData.entity?.name) {
+              entityNames.push(docData.entity.name);
+            }
+          } catch {
+            // Skip invalid JSON
+          }
+        });
+
+        // Get visual props from entity type with fallback
+        const visualProps = transformEntityTypeToIconAndShape(record.targetEntityType ?? '');
+        const shape = visualProps.shape ?? 'rectangle';
+
+        // Generate label using same logic as events
+        const label = generateEntityLabel(
+          record.targetIdsCount,
+          targetNodeId,
+          record.targetEntityType ?? '',
+          entityNames.length > 0 ? entityNames : null,
+          record.targetEntitySubType ?? null
+        );
+
+        context.nodesMap[targetNodeId] = {
+          id: targetNodeId,
+          label,
+          color: 'primary',
+          shape,
+          ...(visualProps.icon && { icon: visualProps.icon }),
+          ...(record.targetEntityType && { tag: record.targetEntityType }),
+          ...(record.targetIdsCount > 1 && { count: record.targetIdsCount }),
+          documentsData,
+        } as EntityNodeDataModel;
+      } else {
+        // Single entity - use the first target doc data
+        const targetDocDataJson = record.targetDocData?.[0];
+        context.nodesMap[targetNodeId] = parseEntityDocData(targetNodeId, targetDocDataJson);
+      }
+    }
+
+    // Create relationship node - ID is based on relationship + targetNodeId
+    // so multiple sources with the same relationship to the same target share a node
+    const relationshipNode = createRelationshipNode(record.relationship, targetNodeId);
+
+    processRelationshipNodes(context, {
+      sourceId: sourceNodeId,
+      targetId: targetNodeId,
+      relationshipNode,
+    });
   }
 };
 
@@ -599,30 +691,26 @@ const processConnectorGroup = (
 };
 
 const createEdgesAndGroups = (context: ParseContext) => {
-  const {
-    edgeLabelsNodes,
-    edgeRelationshipsNodes,
-    edgesMap,
-    nodesMap,
-    labelEdges,
-    relationshipEdges,
-  } = context;
+  const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges, relationshipEdges } = context;
 
   // Process label nodes (events) - existing logic
   Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
     processConnectorGroup(edgeId, edgeLabelsIds, labelEdges, edgesMap, nodesMap, 'label');
   });
 
-  // Process relationship nodes
-  Object.entries(edgeRelationshipsNodes).forEach(([edgeId, edgeRelationshipIds]) => {
-    processConnectorGroup(
-      edgeId,
-      edgeRelationshipIds,
-      relationshipEdges,
-      edgesMap,
-      nodesMap,
-      'relationship'
-    );
+  // Process relationship nodes - each relationship node can have multiple sources
+  Object.entries(relationshipEdges).forEach(([relationshipNodeId, edges]) => {
+    // Create edges from all sources to the relationship node, and from the node to the target
+    edges.sources.forEach((sourceId) => {
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        sourceId,
+        relationshipNodeId,
+        edges.target,
+        edges.edgeType
+      );
+    });
   });
 };
 

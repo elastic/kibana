@@ -1408,3 +1408,70 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "relationships-event-1",
+    "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "name": "relationships-test-user",
+        "entity": {
+          "id": "relationships-test-user"
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "relationships-test-account"
+        },
+        "provider": "aws"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "AssumeRole",
+        "agent_id_status": "missing",
+        "category": [
+          "authentication"
+        ],
+        "id": "relationships-event-id-12345",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "access"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "relationships-test-user"
+        ]
+      },
+      "service": {
+        "target": {
+          "entity": {
+            "id": "relationships-target-service"
+          }
+        },
+        "name": "sts.amazonaws.com"
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "AWS SDK",
+        "original": "aws-sdk-go/1.44.0"
+      }
+    }
+  }
+}

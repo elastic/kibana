@@ -18,6 +18,7 @@ import {
 import {
   getEnrichPolicyId,
   getEntitiesLatestIndexName,
+  getEntitiesLatestIndexNameV1,
 } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   ENTITY_RELATIONSHIP_FIELDS,
@@ -465,7 +466,6 @@ interface BuildRelationshipsEsqlQueryParams {
   relationshipFields: readonly string[];
   isLookupIndexAvailable: boolean;
   spaceId: string;
-  originEntityIds: string[]; // Entity IDs that are origins of the graph
 }
 
 /**
@@ -479,15 +479,8 @@ const buildRelationshipsEsqlQuery = ({
   relationshipFields,
   isLookupIndexAvailable,
   spaceId,
-  originEntityIds,
 }: BuildRelationshipsEsqlQueryParams): string => {
   const enrichPolicyName = getEnrichPolicyId(spaceId);
-
-  // Build isOrigin evaluation - check if entity.id is in the list of origin entity IDs
-  const isOriginEval =
-    originEntityIds.length > 0
-      ? `| EVAL isOrigin = entity.id IN (${originEntityIds.map((id) => `"${id}"`).join(', ')})`
-      : '| EVAL isOrigin = false';
 
   // Build COALESCE statements for each relationship field
   const coalesceStatements = relationshipFields
@@ -547,7 +540,6 @@ ${coalesceStatements}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
-${isOriginEval}
 ${enrichmentSection}
 // Build enriched source doc data with entity metadata (from the queried entity)
 | EVAL sourceDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
@@ -565,8 +557,25 @@ ${enrichmentSection}
     "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
   "}}")
-| STATS count = COUNT(*), targetIds = VALUES(_target_id), targetDocData = VALUES(targetDocData), sourceDocData = VALUES(sourceDocData)
-    BY entity.id, _relationship, isOrigin`;
+// Group by source entity type/subtype and relationship (like events group by actor type)
+| STATS count = COUNT(*),
+  // Source entity grouping
+  sourceIds = VALUES(entity.id),
+  sourceNodeId = CASE(
+    MV_COUNT(VALUES(entity.id)) == 1, TO_STRING(VALUES(entity.id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(entity.id)), ","))
+  ),
+  sourceIdsCount = COUNT_DISTINCT(entity.id),
+  sourceDocData = VALUES(sourceDocData),
+  // Target entity grouping
+  targetIds = VALUES(_target_id),
+  targetNodeId = CASE(
+    MV_COUNT(VALUES(_target_id)) == 1, TO_STRING(VALUES(_target_id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(_target_id)), ","))
+  ),
+  targetIdsCount = COUNT_DISTINCT(_target_id),
+  targetDocData = VALUES(targetDocData)
+    BY sourceEntityType = entity.type, sourceEntitySubType = entity.sub_type, targetEntityType = _target_type, targetEntitySubType = _target_sub_type, _relationship`;
 };
 
 /**
@@ -578,18 +587,31 @@ const parseRelationshipRecords = (
   const records: RelationshipEdge[] = [];
 
   for (const record of response.records) {
-    const entityId = record['entity.id'] as string;
     const relationship = record._relationship as string;
     const count = record.count as number;
+
+    // Source entity grouping (like actors in events)
+    const sourceNodeId = record.sourceNodeId as string;
+    const sourceIds = Array.isArray(record.sourceIds)
+      ? (record.sourceIds as string[])
+      : [record.sourceIds as string];
+    const sourceIdsCount = record.sourceIdsCount as number;
+    const sourceEntityType = record.sourceEntityType as string | undefined;
+    const sourceEntitySubType = record.sourceEntitySubType as string | undefined;
+    const sourceDocData = record.sourceDocData
+      ? Array.isArray(record.sourceDocData)
+        ? (record.sourceDocData as string[])
+        : [record.sourceDocData as string]
+      : undefined;
+
+    // Target entity grouping (like targets in events)
+    const targetNodeId = record.targetNodeId as string;
     const targetIds = Array.isArray(record.targetIds)
       ? (record.targetIds as string[])
       : [record.targetIds as string];
-    // sourceDocData is a single value (same for all relationships from this entity)
-    const sourceDocData = record.sourceDocData
-      ? Array.isArray(record.sourceDocData)
-        ? (record.sourceDocData[0] as string)
-        : (record.sourceDocData as string)
-      : undefined;
+    const targetIdsCount = record.targetIdsCount as number;
+    const targetEntityType = record.targetEntityType as string | undefined;
+    const targetEntitySubType = record.targetEntitySubType as string | undefined;
     const targetDocData = record.targetDocData
       ? Array.isArray(record.targetDocData)
         ? (record.targetDocData as string[])
@@ -597,13 +619,20 @@ const parseRelationshipRecords = (
       : undefined;
 
     records.push({
-      entityId,
       relationship,
       count,
-      targetIds,
+      sourceNodeId,
+      sourceIds,
+      sourceIdsCount,
+      sourceEntityType,
+      sourceEntitySubType,
       sourceDocData,
+      targetNodeId,
+      targetIds,
+      targetIdsCount,
+      targetEntityType,
+      targetEntitySubType,
       targetDocData,
-      isOrigin: Boolean(record.isOrigin),
     });
   }
 
@@ -650,23 +679,24 @@ export const fetchEntityRelationships = async ({
   entityIds: EntityId[];
   spaceId: string;
 }): Promise<RelationshipEdge[]> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
-
-  logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
-
   // Check if the entities lookup index exists and is in lookup mode (preferred)
-  // If not, fall back to using enrich policy (deprecated)
+  // If not, fall back to using enrich policy (deprecated) with v1 index
   const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
-  // Extract origin entity IDs (entities that are the center of the graph)
-  const originEntityIds = entityIds.filter((e) => e.isOrigin).map((e) => e.id);
+  // Use v2 index for LOOKUP JOIN, v1 index for ENRICH policy
+  const indexName = isLookupIndexAvailable
+    ? getEntitiesLatestIndexName(spaceId)
+    : getEntitiesLatestIndexNameV1(spaceId);
+
+  logger.trace(
+    `Fetching relationships from index [${indexName}] for ${entityIds.length} entities (lookup mode: ${isLookupIndexAvailable})`
+  );
 
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
     isLookupIndexAvailable,
     spaceId,
-    originEntityIds,
   });
   const filter = buildRelationshipDslFilter(entityIds);
 

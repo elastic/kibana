@@ -163,8 +163,9 @@ export interface GraphInvestigationProps {
 
     /**
      * The origin events for the graph investigation view.
+     * Optional - may be empty when opening from entity flyout.
      */
-    originEventIds: Array<{
+    originEventIds?: Array<{
       /**
        * The ID of the origin event.
        */
@@ -266,7 +267,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       const hasKqlQuery = query.query.trim() !== '';
 
-      if (originEventIds.length > 0) {
+      if (originEventIds && originEventIds.length > 0) {
         if (!hasKqlQuery || searchFilters.length > 0) {
           filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
             return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
@@ -372,7 +373,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       const alertIds = new Set<string>();
       const entityIdsWithOrigin = new Set<string>();
 
-      originEventIds.forEach(({ id, isAlert }) => {
+      // Add origin event IDs (for centering when opening from events flyout)
+      originEventIds?.forEach(({ id, isAlert }) => {
         if (isAlert) {
           alertIds.add(id);
         } else {
@@ -393,6 +395,21 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         originEntityIdsSet: entityIdsWithOrigin,
       };
     }, [originEventIds, entityIds]);
+
+    // Build a map of relationship node IDs to their source entities (from edges)
+    // This allows us to determine if a relationship node is connected to an origin entity
+    const relationshipNodeSources = useMemo(() => {
+      const sourcesMap = new Map<string, string[]>();
+      data?.edges?.forEach((edge) => {
+        // Check if target is a relationship node by checking if it starts with 'rel('
+        if (edge.target.startsWith('rel(')) {
+          const sources = sourcesMap.get(edge.target) || [];
+          sources.push(edge.source);
+          sourcesMap.set(edge.target, sources);
+        }
+      });
+      return sourcesMap;
+    }, [data?.edges]);
 
     const nodes = useMemo(() => {
       return (
@@ -430,12 +447,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               eventClickHandler: createEventClickHandler(analysis, text),
             };
           } else if (isRelationshipNode(node)) {
-            // Relationship node IDs follow pattern: a(sourceId)-b(targetId)rel(relationship)
-            // Extract source entity ID to check if it's an origin entity
-            const sourceEntityMatch = node.id.match(/^a\(([^)]+)\)-b\(/);
-            const sourceEntityId = sourceEntityMatch ? sourceEntityMatch[1] : null;
-            const isOrigin = sourceEntityId ? originEntityIdsSet.has(sourceEntityId) : false;
-
+            // Check if any source entity connected to this relationship node is an origin
+            const sources = relationshipNodeSources.get(node.id) || [];
+            const isOrigin = sources.some((sourceId) => originEntityIdsSet.has(sourceId));
             return {
               ...node,
               ...(isOrigin && { isOrigin }),
@@ -446,7 +460,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes, originEventIdsSet, originAlertIdsSet, originEntityIdsSet]);
+    }, [
+      data?.nodes,
+      originEventIdsSet,
+      originAlertIdsSet,
+      originEntityIdsSet,
+      relationshipNodeSources,
+    ]);
 
     // Get callout state based on current graph state
     const calloutState = useGraphCallout(nodes);

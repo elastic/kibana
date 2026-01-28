@@ -203,8 +203,18 @@ export const getEnrichPolicyId = (space: string = 'default'): string => {
 };
 
 /**
- * Gets the entities latest index name for a specific space
+ * Gets the entities latest index name (v2) for a specific space.
+ * Used for LOOKUP JOIN queries.
  */
 export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
   return ENTITIES_LATEST_INDEX.replace('<space>', spaceId);
+};
+
+/**
+ * Gets the entities latest index name (v1) for a specific space.
+ * Used for ENRICH policy queries when v2 index is not available.
+ * Derives v1 index name from v2 pattern.
+ */
+export const getEntitiesLatestIndexNameV1 = (spaceId: string = 'default'): string => {
+  return ENTITIES_LATEST_INDEX.replace('<space>', spaceId).replace('.v2.', '.v1.');
 };

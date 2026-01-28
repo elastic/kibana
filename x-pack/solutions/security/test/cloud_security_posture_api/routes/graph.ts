@@ -1869,7 +1869,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: `.entities.v1.latest.security_generic_${entitiesSpaceId}`,
-              expectedCount: 13,
+              expectedCount: 17,
             });
 
             // Wait for enrich policy to be created and execute it
@@ -1878,6 +1878,195 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           runEnrichmentTests();
+
+          describe('Entity Relationships', () => {
+            it('should return both event and relationship nodes when originEventIds and entityIds are provided', async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'relationships-event-id-12345', isAlert: false }],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [{ id: 'relationships-test-user', isOrigin: false }],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              expect(response.body).to.have.property('nodes').length(5);
+              expect(response.body).to.have.property('edges').length(4);
+
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              expect(entityNodes.length).to.equal(3);
+
+              const userActorNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'relationships-test-user'
+              ) as EntityNodeDataModel;
+
+              expect(userActorNode).not.to.be(undefined);
+              expect(userActorNode.label).to.equal('Relationships Test User');
+              expect(userActorNode.shape).to.equal('ellipse');
+              expect(userActorNode.tag).to.equal('Identity');
+              expect(userActorNode.icon).to.equal('user');
+              expect(userActorNode!.documentsData!.length).to.equal(1);
+
+              expectExpect(userActorNode!.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-test-user',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'user',
+                    name: 'Relationships Test User',
+                    type: 'Identity',
+                    sub_type: 'AWS IAM User',
+                  }),
+                })
+              );
+
+              const serviceTargetNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'relationships-target-service'
+              ) as EntityNodeDataModel;
+              expect(serviceTargetNode).not.to.be(undefined);
+              expect(serviceTargetNode.label).to.equal('Relationships Target Service');
+              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.tag).to.equal('Service');
+              expect(serviceTargetNode.icon).to.equal('cloudStormy');
+              expect(serviceTargetNode!.documentsData!.length).to.equal(1);
+              expectExpect(serviceTargetNode!.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-target-service',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Relationships Target Service',
+                    type: 'Service',
+                    sub_type: 'AWS Lambda',
+                    ecsParentField: 'service',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              const relationshipGroupedNodeTarget = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === '2773bf5fc5525b52a7b79d31b59834d5'
+              ) as EntityNodeDataModel;
+              expect(relationshipGroupedNodeTarget).not.to.be(undefined);
+              expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
+              expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+              expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
+              expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
+
+              expect(relationshipGroupedNodeTarget.documentsData!.length).to.equal(2);
+              expectExpect(relationshipGroupedNodeTarget.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-target-host-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Relationships Target Host 1',
+                    type: 'Host',
+                    sub_type: 'AWS EC2 Instance',
+                    ecsParentField: 'entity',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Should have label nodes for events
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(1);
+
+              // Should have relationship nodes for entity relationships (Owns)
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              expect(relationshipNodes.length).to.equal(1);
+
+              // Verify relationship node properties
+              relationshipNodes.forEach((node: NodeDataModel) => {
+                expect(node.shape).to.equal('relationship');
+                expect(node.label).to.equal('Owns');
+              });
+            });
+
+            it('should return only relationship nodes when only entityIds are provided', async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [{ id: 'relationships-test-user', isOrigin: true }],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              // Should have no label nodes (no events)
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(0);
+
+              // Should have relationship nodes for entity relationships (Owns)
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              expect(relationshipNodes.length).to.be.greaterThan(0);
+
+              // Should have entity nodes for source and targets
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              expect(entityNodes.length).to.be.greaterThan(0);
+
+              // Verify we have the source entity and both target hosts
+              const entityIds = entityNodes.map((n: EntityNodeDataModel) => n.id);
+              expect(entityIds).to.contain('relationships-test-user');
+              expect(entityIds).to.contain('relationships-target-host-1');
+              expect(entityIds).to.contain('relationships-target-host-2');
+            });
+
+            it('should consolidate relationship nodes when multiple sources have same relationship to same target', async () => {
+              // This test verifies that relationship nodes are consolidated
+              // The relationships-test-user has Owns relationship to two targets
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [{ id: 'relationships-test-user', isOrigin: true }],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              // Should have relationship nodes with consolidated IDs
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+
+              // Each relationship node ID should follow pattern: rel(relationship)-target(targetId)
+              relationshipNodes.forEach((node: NodeDataModel) => {
+                expect(node.id).to.match(/^rel\([^)]+\)-target\([^)]+\)$/);
+              });
+
+              // Should have 2 relationship nodes (one for each target)
+              expect(relationshipNodes.length).to.equal(2);
+            });
+          });
         });
 
         describe('via LOOKUP JOIN (v2)', () => {
