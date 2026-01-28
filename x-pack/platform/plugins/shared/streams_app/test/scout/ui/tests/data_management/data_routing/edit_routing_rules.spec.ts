@@ -159,4 +159,28 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     const errorMessage = page.getByText('The condition is invalid or in unrecognized format.');
     await expect(errorMessage).toBeVisible();
   });
+
+  test('should disable Update button when no changes have been made', async ({
+    page,
+    pageObjects,
+  }) => {
+    const routingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+    // Without making any changes, verify Update button is disabled
+    const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+    await expect(updateButton).toBeDisabled();
+
+    // Make a change
+    await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
+
+    // Now the Update button should be enabled
+    await expect(updateButton).toBeEnabled();
+
+    // Revert the change back to original value
+    await pageObjects.streams.fillConditionEditor({ value: 'test-service' });
+
+    // Update button should be disabled again since we're back to original state
+    await expect(updateButton).toBeDisabled();
+  });
 });

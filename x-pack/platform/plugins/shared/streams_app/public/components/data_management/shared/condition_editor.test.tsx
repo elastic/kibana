@@ -128,7 +128,7 @@ describe('ConditionEditor', () => {
       ).toBeInTheDocument();
     });
 
-    it('should call onConditionChange with invalid condition when JSON parsing fails in syntax editor', async () => {
+    it('should NOT call onConditionChange when JSON parsing fails in syntax editor', async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ConditionEditor
@@ -141,17 +141,21 @@ describe('ConditionEditor', () => {
       // Toggle to syntax editor
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
       // Clear the editor to simulate empty/invalid JSON
       await user.clear(codeEditor);
 
-      // Verify onConditionChange was called with empty object (invalid condition)
-      expect(mockOnConditionChange).toHaveBeenCalledWith({});
+      // Verify onConditionChange was NOT called - invalid JSON should be silently ignored
+      // to avoid overwriting user input while they're typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
 
-    it('should call onConditionChange with invalid condition when syntax editor contains invalid JSON', async () => {
+    it('should NOT call onConditionChange when syntax editor contains invalid JSON', async () => {
       const user = userEvent.setup();
       renderWithProviders(
         <ConditionEditor
@@ -164,6 +168,9 @@ describe('ConditionEditor', () => {
       // Toggle to syntax editor
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
@@ -171,8 +178,36 @@ describe('ConditionEditor', () => {
       await user.clear(codeEditor);
       await user.type(codeEditor, '{{invalid');
 
-      // Verify onConditionChange was called with empty object (invalid condition)
-      expect(mockOnConditionChange).toHaveBeenCalledWith({});
+      // Verify onConditionChange was NOT called - invalid JSON should be silently ignored
+      // to avoid overwriting user input while they're typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should call onConditionChange when syntax editor contains valid JSON', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Type valid JSON
+      await user.clear(codeEditor);
+      await user.type(codeEditor, '{{"field": "test", "eq": "value"}}');
+
+      // Verify onConditionChange was called with the parsed JSON
+      expect(mockOnConditionChange).toHaveBeenCalled();
     });
 
     it('should show error message when condition becomes invalid via syntax editor', () => {

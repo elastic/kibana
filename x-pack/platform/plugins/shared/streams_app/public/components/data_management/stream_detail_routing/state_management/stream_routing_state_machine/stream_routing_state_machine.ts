@@ -129,7 +129,7 @@ export const streamRoutingMachine = setup({
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
-    canUpdateStream: and(['hasManagePrivileges', 'isValidRouting']),
+    canUpdateStream: and(['hasManagePrivileges', 'isValidRouting', 'hasRoutingChanges']),
     canSaveSuggestion: and(['hasManagePrivileges', 'isValidEditedSuggestion']),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
@@ -137,6 +137,12 @@ export const streamRoutingMachine = setup({
     isAlreadyEditing: ({ context }, params: { id: string }) => context.currentRuleId === params.id,
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
+    hasRoutingChanges: ({ context }) => {
+      // Compare current routing with initial routing to detect changes
+      const currentRouting = context.routing.map(routingConverter.toAPIDefinition);
+      const initialRouting = context.initialRouting.map(routingConverter.toAPIDefinition);
+      return JSON.stringify(currentRouting) !== JSON.stringify(initialRouting);
+    },
     isValidEditedSuggestion: ({ context }) => {
       if (!context.editedSuggestion) return false;
       const { name, condition } = context.editedSuggestion;

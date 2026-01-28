@@ -150,9 +150,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
             try {
               handleConditionChange(JSON.parse(value));
             } catch (error: unknown) {
-              // Pass an invalid condition to trigger validation error display
-              // and disable the Update button when JSON is invalid/empty
-              handleConditionChange({} as Condition);
+              // Silently ignore JSON parse errors - user may be mid-edit
+              // The Update button will remain disabled because no valid change has been made
             }
           }}
           options={{
