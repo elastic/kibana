@@ -202,13 +202,11 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       );
 
       const response = await getServiceSlos({ serviceName });
+      const { statusCounts } = response.body;
 
       expect(response.status).to.be(200);
-      expect(response.body.statusCounts.violated).to.be.a('number');
-      expect(response.body.statusCounts.degrading).to.be.a('number');
-      expect(response.body.statusCounts.healthy).to.be.a('number');
-      expect(response.body.statusCounts.noData).to.be.a('number');
-      expect(response.body.statusCounts.noData).to.be(1);
+      expect(statusCounts).to.have.keys(['violated', 'degrading', 'healthy', 'noData']);
+      expect(statusCounts.noData).to.be(1);
 
       await sloApi.delete(createdSlo.id, adminRoleAuthc);
     });
