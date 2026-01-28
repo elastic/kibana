@@ -44,6 +44,51 @@ describe('buildElasticsearchRequest', () => {
     expect(result.bulkBody).toEqual([{ index: { _index: 'test-index' } }, { message: 'test' }]);
   });
 
+  it('should support bulk operations in old format with just documents in operations', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [{ message: 'test' }, { field1: 'value1' }, { field2: 'value2' }],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { index: {} },
+      { message: 'test' },
+      { index: {} },
+      { field1: 'value1' },
+      { index: {} },
+      { field2: 'value2' },
+    ]);
+  });
+
+  it('should handle complex bulk operations with index, create, update, delete', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [
+        { index: { _index: 'test-index' } },
+        { message: 'test' },
+        { create: { _index: 'test-index' } },
+        { message: 'test' },
+        { update: { _index: 'test-index' } },
+        { doc: { message: 'test' } },
+        { message: 'test' },
+        { delete: { _index: 'test-index' } },
+      ],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { index: { _index: 'test-index' } },
+      { message: 'test' },
+      { create: { _index: 'test-index' } },
+      { message: 'test' },
+      { update: { _index: 'test-index' } },
+      { doc: { message: 'test' } },
+      { message: 'test' },
+      { delete: { _index: 'test-index' } },
+    ]);
+  });
+
   it('should return document as a body for elasticsearch.index step', () => {
     const result = buildElasticsearchRequest('elasticsearch.index', {
       index: 'test-index',
