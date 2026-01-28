@@ -111,19 +111,6 @@ export function generateEsqlQuery(
     }
   }
 
-  // Also check esAggEntries for unsupported features (in case columns differ)
-  for (const [, col] of esAggEntries) {
-    if (col.operationType === 'formula') {
-      return getEsqlQueryFailedResult('formula_not_supported');
-    }
-    if (col.timeShift) {
-      return getEsqlQueryFailedResult('time_shift_not_supported');
-    }
-    if ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime) {
-      return getEsqlQueryFailedResult('runtime_field_not_supported');
-    }
-  }
-
   // indexPattern.title is the actual ES pattern
   // Build query parts as strings, then combine with esql() for proper parameterization
   // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
