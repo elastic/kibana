@@ -220,6 +220,8 @@ export type {
   PackageSpecConditions,
   PackageSpecIcon,
   PackageSpecScreenshot,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
   RegistryPolicyTemplate,
   RegistrySearchResult,
   RegistryInput,

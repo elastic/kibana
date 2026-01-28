@@ -425,6 +425,9 @@ export class RemoteClusterTable extends Component {
         sorting={sorting}
         selection={selection}
         data-test-subj="remoteClusterListTable"
+        tableCaption={i18n.translate('xpack.remoteClusters.remoteClusterList.tableCaption', {
+          defaultMessage: 'Remote clusters list',
+        })}
       />
     );
   }
