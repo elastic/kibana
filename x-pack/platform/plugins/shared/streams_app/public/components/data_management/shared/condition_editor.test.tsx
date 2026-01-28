@@ -127,6 +127,70 @@ describe('ConditionEditor', () => {
         screen.getByText(/The condition is invalid or in unrecognized format/i)
       ).toBeInTheDocument();
     });
+
+    it('should call onConditionChange with invalid condition when JSON parsing fails in syntax editor', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Clear the editor to simulate empty/invalid JSON
+      await user.clear(codeEditor);
+
+      // Verify onConditionChange was called with empty object (invalid condition)
+      expect(mockOnConditionChange).toHaveBeenCalledWith({});
+    });
+
+    it('should call onConditionChange with invalid condition when syntax editor contains invalid JSON', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Type invalid JSON
+      await user.clear(codeEditor);
+      await user.type(codeEditor, '{{invalid');
+
+      // Verify onConditionChange was called with empty object (invalid condition)
+      expect(mockOnConditionChange).toHaveBeenCalledWith({});
+    });
+
+    it('should show error message when condition becomes invalid via syntax editor', () => {
+      // Render with an invalid condition (simulating what happens after the fix)
+      const invalidCondition = {} as any;
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={invalidCondition}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      expect(
+        screen.getByText(/The condition is invalid or in unrecognized format/i)
+      ).toBeInTheDocument();
+    });
   });
 
   describe('help text for date math', () => {

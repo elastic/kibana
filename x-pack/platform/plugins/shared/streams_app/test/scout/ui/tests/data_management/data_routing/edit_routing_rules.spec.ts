@@ -115,4 +115,48 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     // Verify rule still exists
     await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
   });
+
+  test('should disable Update button when syntax editor has empty condition', async ({
+    page,
+    pageObjects,
+  }) => {
+    const routingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+    // Switch to syntax editor
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+    // Clear the condition (empty JSON)
+    await pageObjects.streams.fillConditionEditorWithSyntax('');
+
+    // Verify Update button is disabled
+    const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+    await expect(updateButton).toBeDisabled();
+
+    // Verify error message is shown
+    const errorMessage = page.getByText('The condition is invalid or in unrecognized format.');
+    await expect(errorMessage).toBeVisible();
+  });
+
+  test('should disable Update button when syntax editor has invalid JSON', async ({
+    page,
+    pageObjects,
+  }) => {
+    const routingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+    // Switch to syntax editor
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+    // Enter invalid JSON
+    await pageObjects.streams.fillConditionEditorWithSyntax('{ invalid json }');
+
+    // Verify Update button is disabled
+    const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+    await expect(updateButton).toBeDisabled();
+
+    // Verify error message is shown
+    const errorMessage = page.getByText('The condition is invalid or in unrecognized format.');
+    await expect(errorMessage).toBeVisible();
+  });
 });
