@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../../../utils/rule_response_actions_validators';
+import { validateRuleResponseActionsPayload } from '../../../utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -73,7 +73,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateRuleResponseActions({
+          await validateRuleResponseActionsPayload({
             ruleResponseActions: request.body.response_actions,
             endpointService: securitySolutionCtx.getEndpointService(),
             spaceId: securitySolutionCtx.getSpaceId(),

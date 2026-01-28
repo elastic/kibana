@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import type { BaseOptionalFields } from '../../../../../common/api/detection_engine';
+import { isEqual, xorWith } from 'lodash';
+import type { RuleAlertType } from '../../rule_schema';
+import type {
+  BaseOptionalFields,
+  ResponseAction,
+  RuleCreateProps,
+  RuleResponseAction,
+  RuleUpdateProps,
+} from '../../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { stringify } from '../../../../endpoint/utils/stringify';
 import { EndpointHttpError } from '../../../../endpoint/errors';
 import type { EndpointScript } from '../../../../../common/endpoint/types';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../../../../../common/endpoint/service/response_actions/constants';
+import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 interface ValidateRuleResponseActionsOptions {
   spaceId: string;
@@ -26,7 +40,7 @@ interface ValidateRuleResponseActionsOptions {
  * @param endpointService
  * @param spaceId
  */
-export const validateRuleResponseActions = async ({
+export const validateRuleResponseActionsPayload = async ({
   ruleResponseActions,
   endpointService,
   spaceId,
@@ -88,3 +102,67 @@ export const validateRuleResponseActions = async ({
     }
   }
 };
+
+/**
+ * Used in Rule Management APIs to validate that users have Authz to Elastic Defend response actions that may
+ * be included in rule definitions
+ *
+ * @param securitySolution
+ * @param ruleUpdate
+ * @param existingRule
+ */
+export const validateResponseActionsPermissions = async (
+  securitySolution: SecuritySolutionApiRequestHandlerContext,
+  ruleUpdate: RuleCreateProps | RuleUpdateProps,
+  existingRule?: RuleAlertType | null
+): Promise<void> => {
+  if (
+    !rulePayloadContainsResponseActions(ruleUpdate) ||
+    (existingRule && !ruleObjectContainsResponseActions(existingRule))
+  ) {
+    return;
+  }
+
+  if (
+    ruleUpdate.response_actions?.length === 0 &&
+    existingRule?.params?.responseActions?.length === 0
+  ) {
+    return;
+  }
+
+  const endpointAuthz = await securitySolution.getEndpointAuthz();
+
+  // finds elements that are not included in both arrays
+  const symmetricDifference = xorWith<ResponseAction | RuleResponseAction>(
+    ruleUpdate.response_actions,
+    existingRule?.params?.responseActions,
+    isEqual
+  );
+
+  symmetricDifference.forEach((action) => {
+    if (!('command' in action?.params)) {
+      return;
+    }
+    const authzPropName =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
+        RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
+      ];
+
+    const isValid = endpointAuthz[authzPropName];
+
+    if (!isValid) {
+      throw new CustomHttpRequestError(
+        `User is not authorized to change ${action.params.command} response actions`,
+        403
+      );
+    }
+  });
+};
+
+function rulePayloadContainsResponseActions(rule: RuleCreateProps | RuleUpdateProps) {
+  return 'response_actions' in rule;
+}
+
+function ruleObjectContainsResponseActions(rule?: RuleAlertType) {
+  return rule != null && 'params' in rule && 'responseActions' in rule?.params;
+}

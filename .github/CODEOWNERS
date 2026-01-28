@@ -2903,6 +2903,7 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
+x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/utils/rule_response_actions_validators.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
