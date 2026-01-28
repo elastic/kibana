@@ -108,6 +108,32 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
   const { data: MitreAttackIndicesDocCounts } = useMitreAttackIndicesDocCounts(activeRuleIndices);
 
+  // Calculate total unique MITRE-related rules
+  const totalMitreRules = useMemo((): number => {
+    const uniqueRuleIds = new Set<string>();
+
+    enabledRules.forEach((rule: DetectionRule) => {
+      if (rule.threat) {
+        rule.threat.forEach((threat: ThreatElement) => {
+          if (threat.tactic?.name) {
+            const tacticName = threat.tactic.name.trim();
+
+            // Check if this tactic matches any of our static tactics
+            const matchingStaticTactic = MITRE_TACTICS_LIST.find(
+              (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
+            );
+
+            if (matchingStaticTactic) {
+              uniqueRuleIds.add(rule.rule_id || rule.id || '');
+            }
+          }
+        });
+      }
+    });
+
+    return uniqueRuleIds.size;
+  }, [enabledRules]);
+
   // 2. Map each MITRE tactic to its specific coverage status
   const tacticCoverageMap = useMemo(() => {
     return MITRE_TACTICS_LIST.map((tacticName, index) => {
@@ -185,14 +211,33 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               }
             )}
           </h4>
-          <p>
+        </EuiText>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.summary',
+            {
+              defaultMessage:
+                'This diagram shows which MITRE ATT&CK tactics have enabled rules mapped to them and whether any of those rules are missing required integrations',
+            }
+          )}
+        </EuiText>
+        <EuiText size="s">
+          <>
+            <strong>{totalMitreRules}</strong>{' '}
             {i18n.translate(
-              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.desc',
+              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttackCount.summary.middle',
               {
-                defaultMessage: 'Visualizing rule health and integration requirements per tactic.',
+                defaultMessage: 'out of',
+              }
+            )}{' '}
+            <strong>{getDetectionRules.data?.data.length || 0}</strong>{' '}
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttackCount.summary.end',
+              {
+                defaultMessage: 'enabled rules are mapped to a MITRE ATT&CK tactic.',
               }
             )}
-          </p>
+          </>
         </EuiText>
 
         {/* Tactical Grid Visualization */}
