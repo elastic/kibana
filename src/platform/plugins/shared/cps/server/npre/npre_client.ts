@@ -8,8 +8,6 @@
  */
 import type { CoreStart, IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProjectRouting } from '@kbn/es-query';
-import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
-import type { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 import { errors } from '@elastic/elasticsearch';
 
 /**
@@ -39,7 +37,7 @@ export interface INpreClient {
    * @param expressionName the name of the expression.
    * @param expression the Lucene expression string.
    */
-  putNpre(expressionName: string, expression: string): Promise<AcknowledgeResponse>;
+  putNpre(expressionName: string, expression: string): Promise<{ acknowledged: boolean }>;
 
   /**
    * Checks if the current user has permission to delete named project routing expressions.
@@ -50,7 +48,7 @@ export interface INpreClient {
    * Deletes a project routing expression.
    * @param expressionName the name of the expression to delete.
    */
-  deleteNpre(expressionName: string): Promise<AcknowledgeResponse>;
+  deleteNpre(expressionName: string): Promise<{ acknowledged: boolean }>;
 }
 
 /**
@@ -85,9 +83,7 @@ export class NpreClient implements INpreClient {
         }
 
         this.logger.error(
-          `Failed to get project routing expression ${expressionName}: ${getDetailedErrorMessage(
-            error.message
-          )}`
+          `Failed to get project routing expression ${expressionName}: ${error.message}`
         );
         throw error;
       });
@@ -106,12 +102,15 @@ export class NpreClient implements INpreClient {
     return this.canWriteNpre();
   }
 
-  public async putNpre(expressionName: string, expression: string): Promise<AcknowledgeResponse> {
+  public async putNpre(
+    expressionName: string,
+    expression: string
+  ): Promise<{ acknowledged: boolean }> {
     this.logger.debug(`Putting NPRE for expression: ${expressionName} with value: ${expression}`);
 
     return this.getClient()
       .asScoped(this.request)
-      .asCurrentUser.transport.request<AcknowledgeResponse>({
+      .asCurrentUser.transport.request<{ acknowledged: boolean }>({
         method: 'PUT',
         path: `/_project_routing/${expressionName}`,
         body: {
@@ -130,12 +129,12 @@ export class NpreClient implements INpreClient {
     return this.canWriteNpre();
   }
 
-  public async deleteNpre(expressionName: string): Promise<AcknowledgeResponse> {
+  public async deleteNpre(expressionName: string): Promise<{ acknowledged: boolean }> {
     this.logger.debug(`Deleting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
       .asScoped(this.request)
-      .asCurrentUser.transport.request<AcknowledgeResponse>({
+      .asCurrentUser.transport.request<{ acknowledged: boolean }>({
         method: 'DELETE',
         path: `/_project_routing/${expressionName}`,
       })
