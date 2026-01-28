@@ -113,7 +113,6 @@ export const esqlAsyncSearchStrategyProvider = (
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
       ...requestParams,
-      project_routing: options.projectRouting,
     };
 
     return esClient.asCurrentUser.transport.request<SqlGetAsyncResponse>(
