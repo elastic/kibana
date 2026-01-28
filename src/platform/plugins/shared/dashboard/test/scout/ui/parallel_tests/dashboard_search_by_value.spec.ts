@@ -16,7 +16,7 @@ const DASHBOARD_TIME_RANGE = {
   to: 'Sep 23, 2015 @ 00:00:00.000',
 };
 
-spaceTest.describe('Saved search panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Saved search panels (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);

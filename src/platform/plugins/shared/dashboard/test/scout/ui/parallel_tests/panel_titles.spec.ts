@@ -22,7 +22,7 @@ const PANEL_TITLES_CUSTOM_TITLE = 'Custom title';
 const PANEL_TITLES_CUSTOM_TITLE_CAPS = 'Custom Title';
 const PANEL_TITLES_CUSTOM_DESCRIPTION = 'Custom description';
 
-spaceTest.describe('Panel titles (dashboard)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let lensSavedObjectId = '';
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

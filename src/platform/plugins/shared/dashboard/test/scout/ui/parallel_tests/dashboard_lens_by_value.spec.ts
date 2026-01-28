@@ -16,7 +16,7 @@ import {
   LENS_BASIC_TIME_RANGE,
 } from '../constants';
 
-spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let lensSavedObjectId = '';
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

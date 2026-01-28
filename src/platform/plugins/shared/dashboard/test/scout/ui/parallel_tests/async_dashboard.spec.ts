@@ -17,7 +17,7 @@ import {
   SAMPLE_DATA_RANGE,
 } from '../constants';
 
-spaceTest.describe('Flights dashboard (sample data)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
