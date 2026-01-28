@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
+import { useKibana } from '../common/lib/kibana';
 
 enum Section {
   LiveQueries = 'live_queries',
@@ -21,6 +22,8 @@ enum Section {
 }
 
 export const MainNavigation = () => {
+  const { notifications } = useKibana().services;
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
   const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
@@ -60,18 +63,20 @@ export const MainNavigation = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" direction="row">
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                href="https://ela.st/osquery-feedback"
-                target="_blank"
-                aria-label={feedbackButtonLabel}
-                iconType="popout"
-                iconSide="right"
-                color="primary"
-              >
-                {feedbackButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {isFeedbackEnabled && (
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  href="https://ela.st/osquery-feedback"
+                  target="_blank"
+                  aria-label={feedbackButtonLabel}
+                  iconType="popout"
+                  iconSide="right"
+                  color="primary"
+                >
+                  {feedbackButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <ManageIntegrationLink />
           </EuiFlexGroup>
         </EuiFlexItem>
