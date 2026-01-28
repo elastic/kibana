@@ -48,10 +48,21 @@ export class KibanaClient {
   fetch(pathname: string, options: KibanaClientFetchOptionsWithIgnore) {
     const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
     const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
+
+    // Extract credentials from URL and add them to headers (native fetch doesn't support credentials in URLs)
+    const authHeaders: Record<string, string> = {};
+    if (url.username || url.password) {
+      const credentials = `${url.username}:${url.password}`;
+      authHeaders.Authorization = `Basic ${Buffer.from(credentials).toString('base64')}`;
+      url.username = '';
+      url.password = '';
+    }
+
     const normalizedUrl = normalizeUrl(url.toString());
     return fetch(normalizedUrl, {
       ...options,
       headers: {
+        ...authHeaders,
         ...this.headers,
         ...options.headers,
       },
