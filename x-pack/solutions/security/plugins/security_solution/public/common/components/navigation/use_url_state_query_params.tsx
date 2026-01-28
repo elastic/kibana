@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { SecurityPageName } from '../../../app/types';
-import {
-  useGlobalQueryString,
-  useGlobalQueryStringWithOverrides,
-} from '../../utils/global_query_string';
+import { useGlobalQueryString } from '../../utils/global_query_string';
 import { useGetLinkInfo } from '../../links/links_hooks';
 
 export const useUrlStateQueryParams = (pageName: SecurityPageName) => {
@@ -23,17 +20,15 @@ export const useUrlStateQueryParams = (pageName: SecurityPageName) => {
 };
 
 export const useGetUrlStateQueryParams = (override?: Record<string, unknown>) => {
-  const globalQueryString = useGlobalQueryString();
-  const globalQueryStringWithOverride = useGlobalQueryStringWithOverrides(override);
+  const queryString = useGlobalQueryString(override);
   const getLinkInfo = useGetLinkInfo();
 
   return useCallback(
     (pageName: SecurityPageName) => {
       const { skipUrlState = false } = getLinkInfo(pageName) ?? {};
-      const queryString = override ? globalQueryStringWithOverride : globalQueryString;
 
       return !skipUrlState && queryString ? `?${queryString}` : '';
     },
-    [getLinkInfo, globalQueryString, globalQueryStringWithOverride, override]
+    [getLinkInfo, queryString]
   );
 };

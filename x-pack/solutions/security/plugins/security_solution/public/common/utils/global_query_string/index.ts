@@ -98,19 +98,7 @@ const encodeGlobalUrlParams = (params: Record<string, unknown>) => {
   return encodeQueryString(pickBy((value) => !isEmpty(value), encoded));
 };
 
-export const useGlobalQueryString = (): string => {
-  const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
-
-  return useMemo(() => {
-    if (!globalUrlParam) {
-      return '';
-    }
-
-    return encodeGlobalUrlParams(globalUrlParam);
-  }, [globalUrlParam]);
-};
-
-export const useGlobalQueryStringWithOverrides = (overrides?: Record<string, unknown>) => {
+export const useGlobalQueryString = (overrides?: Record<string, unknown>): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
   return useMemo(() => {
     const merged = { ...(globalUrlParam ?? {}) } as Record<string, unknown>;

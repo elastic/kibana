@@ -10,7 +10,6 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import {
   useInitializeUrlParam,
   useGlobalQueryString,
-  useGlobalQueryStringWithOverrides,
   useSyncGlobalQueryString,
   useUpdateUrlParam,
 } from '.';
@@ -207,7 +206,7 @@ describe('global query string', () => {
     });
   });
 
-  describe('useGlobalQueryStringWithOverrides', () => {
+  describe('useGlobalQueryString with overrides', () => {
     it.each([
       ['undefined', undefined],
       ['empty object', {}],
@@ -223,7 +222,7 @@ describe('global query string', () => {
         <TestProviders store={store}>{children}</TestProviders>
       );
 
-      const { result } = renderHook(() => useGlobalQueryStringWithOverrides(overrides), {
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
         wrapper,
       });
 
@@ -243,7 +242,7 @@ describe('global query string', () => {
       );
 
       const overrides = { timeline: { isOpen: false } };
-      const { result } = renderHook(() => useGlobalQueryStringWithOverrides(overrides), {
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
         wrapper,
       });
 
@@ -268,7 +267,7 @@ describe('global query string', () => {
         timeline: { isOpen: false },
         testObject: { key: 'overridden' },
       };
-      const { result } = renderHook(() => useGlobalQueryStringWithOverrides(overrides), {
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
         wrapper,
       });
 
@@ -289,7 +288,7 @@ describe('global query string', () => {
       );
 
       const overrides = { nonExistentKey: { value: 'test' } };
-      const { result } = renderHook(() => useGlobalQueryStringWithOverrides(overrides), {
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
         wrapper,
       });
 
@@ -315,33 +314,13 @@ describe('global query string', () => {
         );
 
         const overrides = { testKey: overrideValue };
-        const { result } = renderHook(() => useGlobalQueryStringWithOverrides(overrides), {
+        const { result } = renderHook(() => useGlobalQueryString(overrides), {
           wrapper,
         });
 
         expect(result.current).toEqual(`otherKey=123`);
       }
     );
-
-    it('returns same result as useGlobalQueryString when no overrides provided', () => {
-      const store = createMockStore({
-        ...mockGlobalState,
-        globalUrlParam: {
-          testNumber: 123,
-          testObject: { testKey: 321 },
-        },
-      });
-      const wrapper = ({ children }: React.PropsWithChildren) => (
-        <TestProviders store={store}>{children}</TestProviders>
-      );
-
-      const { result: withoutOverrides } = renderHook(() => useGlobalQueryStringWithOverrides(), {
-        wrapper,
-      });
-      const { result: globalQueryString } = renderHook(() => useGlobalQueryString(), { wrapper });
-
-      expect(withoutOverrides.current).toEqual(globalQueryString.current);
-    });
   });
 
   describe('useSyncGlobalQueryString', () => {
