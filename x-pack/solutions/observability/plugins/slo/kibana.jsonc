@@ -45,6 +45,7 @@
       "discover",
       "embeddableEnhanced",
       "observabilityAIAssistant",
+      "observabilityAgentBuilder",
       "security",
       "serverless",
       "spaces"
@@ -54,7 +55,8 @@
       "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch"
+      "unifiedSearch",
+      "observabilityAgentBuilder"
     ]
   }
 }

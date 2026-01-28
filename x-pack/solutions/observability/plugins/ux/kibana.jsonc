@@ -37,13 +37,15 @@
       "maps",
       "lens",
       "observabilityAIAssistant",
+      "observabilityAgentBuilder",
       "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",
       "exploratoryView",
       "observability",
-      "maps"
+      "maps",
+      "observabilityAgentBuilder"
     ]
   }
 }
