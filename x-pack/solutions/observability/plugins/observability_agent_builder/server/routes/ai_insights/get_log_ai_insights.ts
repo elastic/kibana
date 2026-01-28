@@ -30,10 +30,7 @@ export interface GetLogAiInsightsParams {
   connectorId: string;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }
