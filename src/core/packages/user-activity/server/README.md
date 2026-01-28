@@ -4,7 +4,7 @@ This package contains the public types for Core's server-side user activity serv
 
 ## Usage
 
-Use `trackUserAction` to record user actions for auditing and compliance:
+Use `trackUserAction` to record user actions:
 
 ```ts
 core.userActivity.trackUserAction({
