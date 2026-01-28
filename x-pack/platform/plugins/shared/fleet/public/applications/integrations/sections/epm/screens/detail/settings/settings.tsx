@@ -48,6 +48,8 @@ import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
+import { DeprecationCallout } from '../overview/overview';
+
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
@@ -107,6 +109,7 @@ export const SettingsPage: React.FC<Props> = memo(
       setIsChangelogModalOpen(!isChangelogModalOpen);
     }, [isChangelogModalOpen]);
     const getPackageInstallStatus = useGetPackageInstallStatus();
+    const { getHref } = useLink();
 
     const { data: packagePoliciesData } = useGetPackagePoliciesQuery({
       perPage: SO_SEARCH_LIMIT,
@@ -249,6 +252,12 @@ export const SettingsPage: React.FC<Props> = memo(
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
+              {packageInfo?.deprecated && (
+                <>
+                  <DeprecationCallout packageInfo={packageInfo} />
+                  <EuiSpacer size="l" />
+                </>
+              )}
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>

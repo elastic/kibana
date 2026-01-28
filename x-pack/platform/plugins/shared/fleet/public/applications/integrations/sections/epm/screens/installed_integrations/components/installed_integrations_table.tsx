@@ -14,6 +14,7 @@ import {
   type CriteriaWithPagination,
   EuiText,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -142,6 +143,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
+              const isDeprecated = !!item.deprecated;
 
               return (
                 <EuiLink href={url}>
@@ -159,7 +161,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       grow={false}
                     >
                       {item.title}
+                      {isDeprecated ? ' (deprecated)' : ''}
                     </EuiFlexItem>
+                    {isDeprecated && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                            {
+                              defaultMessage: 'This integration is deprecated',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiLink>
               );

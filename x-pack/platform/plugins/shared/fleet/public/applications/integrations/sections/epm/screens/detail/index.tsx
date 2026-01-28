@@ -364,7 +364,10 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      <h1>
+                        {integrationInfo?.title || packageInfo?.title || '\u00A0'}
+                        {packageInfo?.deprecated ? ' (deprecated)' : ''}
+                      </h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>

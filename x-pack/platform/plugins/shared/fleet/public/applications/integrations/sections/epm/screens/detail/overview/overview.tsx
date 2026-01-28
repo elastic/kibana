@@ -31,6 +31,7 @@ import {
   useStartServices,
   sendGetFileByPath,
   useConfig,
+  useLink,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -130,6 +131,55 @@ const LogsEssentialsCallout: React.FC = () => {
   );
 };
 
+export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
+  const { getHref } = useLink();
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiCallOut
+        announceOnMount
+        data-test-subj="deprecationCallout"
+        title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
+          defaultMessage: 'This integration is deprecated',
+        })}
+        color="warning"
+        iconType="warning"
+      >
+        <p>{packageInfo?.deprecated?.description}</p>
+        {packageInfo?.deprecated?.since && (
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.epm.deprecatedSinceVersion"
+              defaultMessage="Deprecated since version {version}"
+              values={{ version: packageInfo?.deprecated?.since }}
+            />
+          </p>
+        )}
+        {packageInfo?.deprecated?.replaced_by?.package && (
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.epm.replacedByPackage"
+              defaultMessage="Please use {link} instead."
+              values={{
+                link: (
+                  <EuiLink
+                    href={getHref('integration_details_overview', {
+                      pkgkey: packageInfo?.deprecated?.replaced_by?.package,
+                    })}
+                  >
+                    {packageInfo?.deprecated?.replaced_by?.package}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        )}
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  );
+};
+
 // some names are too long so they're trimmed at 12 characters long
 export const getAnchorId = (name: string | undefined, index?: number) => {
   if (!name) return '';
@@ -140,6 +190,7 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
     const config = useConfig();
+
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
@@ -294,6 +345,7 @@ export const OverviewPage: React.FC<Props> = memo(
           </EuiFlexGroup>
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
+          {packageInfo?.deprecated && <DeprecationCallout packageInfo={packageInfo} />}
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
           <EuiSpacer size="l" />
 

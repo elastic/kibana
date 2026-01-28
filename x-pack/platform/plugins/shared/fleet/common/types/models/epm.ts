@@ -237,6 +237,12 @@ export interface ConfigurationLink {
   content?: string;
 }
 
+export interface DeprecationInfo {
+  description: string;
+  since?: string;
+  replaced_by?: Record<string, string>;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -256,6 +262,7 @@ export enum RegistryPolicyTemplateKeys {
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
+  deprecated = 'deprecated',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -267,6 +274,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
   [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
+  [RegistryPolicyTemplateKeys.deprecated]?: DeprecationInfo;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;

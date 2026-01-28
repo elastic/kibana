@@ -59,6 +59,7 @@ export function PackageCard({
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
+  isDeprecated,
   showLabels = true,
   showInstallationStatus,
   showCompressedInstallationStatus,
@@ -140,6 +141,23 @@ export function PackageCard({
             <FormattedMessage
               id="xpack.fleet.packageCard.updateAvailableLabel"
               defaultMessage="Update available"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let deprecatedBadge: React.ReactNode | null = null;
+  if (isDeprecated && showLabels) {
+    deprecatedBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning" iconType="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.deprecatedLabel"
+              defaultMessage="Deprecated"
             />
           </EuiBadge>
         </span>
@@ -243,7 +261,12 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={<CardTitle title={title} titleBadge={titleBadge} />}
+        title={
+          <CardTitle
+            title={isDeprecated ? `${title} (deprecated)` : title}
+            titleBadge={titleBadge}
+          />
+        }
         titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder
@@ -282,6 +305,7 @@ export function PackageCard({
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
           {verifiedBadge}
           {updateAvailableBadge}
+          {deprecatedBadge}
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}

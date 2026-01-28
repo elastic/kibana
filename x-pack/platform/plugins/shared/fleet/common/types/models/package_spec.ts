@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type {
+  DeprecationInfo,
+  RegistryElasticsearch,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
+} from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -42,6 +47,7 @@ export interface PackageSpecManifest {
     }>;
     datasets?: DiscoveryDataset[];
   };
+  deprecated?: DeprecationInfo;
 }
 export interface DiscoveryDataset {
   name: string;
