@@ -129,13 +129,13 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     // Clear the condition (empty JSON)
     await pageObjects.streams.fillConditionEditorWithSyntax('');
 
-    // Verify Update button is disabled
+    // Verify Update button is disabled (condition stays at last valid value, no changes made)
     const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
     await expect(updateButton).toBeDisabled();
 
-    // Verify error message is shown
-    const errorMessage = page.getByText('The condition is invalid or in unrecognized format.');
-    await expect(errorMessage).toBeVisible();
+    // Note: Error message is NOT shown because invalid JSON is silently ignored
+    // and the condition remains at its last valid value. This allows users to type
+    // partial JSON without the state being overridden.
   });
 
   test('should disable Update button when syntax editor has invalid JSON', async ({
@@ -151,13 +151,13 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     // Enter invalid JSON
     await pageObjects.streams.fillConditionEditorWithSyntax('{ invalid json }');
 
-    // Verify Update button is disabled
+    // Verify Update button is disabled (condition stays at last valid value, no changes made)
     const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
     await expect(updateButton).toBeDisabled();
 
-    // Verify error message is shown
-    const errorMessage = page.getByText('The condition is invalid or in unrecognized format.');
-    await expect(errorMessage).toBeVisible();
+    // Note: Error message is NOT shown because invalid JSON is silently ignored
+    // and the condition remains at its last valid value. This allows users to type
+    // partial JSON without the state being overridden.
   });
 
   test('should disable Update button when no changes have been made', async ({

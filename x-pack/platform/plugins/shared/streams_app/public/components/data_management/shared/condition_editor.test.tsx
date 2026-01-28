@@ -150,8 +150,8 @@ describe('ConditionEditor', () => {
       // Clear the editor to simulate empty/invalid JSON
       await user.clear(codeEditor);
 
-      // Verify onConditionChange was NOT called - invalid JSON should be silently ignored
-      // to avoid overwriting user input while they're typing
+      // Verify onConditionChange was NOT called when JSON is invalid
+      // This prevents overriding user's partial input while typing
       expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
 
@@ -178,8 +178,8 @@ describe('ConditionEditor', () => {
       await user.clear(codeEditor);
       await user.type(codeEditor, '{{invalid');
 
-      // Verify onConditionChange was NOT called - invalid JSON should be silently ignored
-      // to avoid overwriting user input while they're typing
+      // Verify onConditionChange was NOT called when JSON is invalid
+      // This prevents overriding user's partial input while typing
       expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
 
