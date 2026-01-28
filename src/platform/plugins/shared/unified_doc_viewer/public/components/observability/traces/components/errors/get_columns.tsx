@@ -32,7 +32,11 @@ const getErrorMessage = (error: ErrorData) => {
   if (error?.log?.message) {
     return error.log.message;
   }
-
+  
+ if (error?.message) {
+    return error.message;
+  }
+  
   return NOT_AVAILABLE_LABEL;
 };
 
@@ -53,7 +57,11 @@ export const getColumns = ({
       'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error',
       { defaultMessage: 'Error message and culprit' }
     ),
-    sortable: (item) => item.error?.exception?.message || '',
+      sortable: (item) =>
+  item.error?.exception?.message ||
+  item.error?.log?.message ||
+  item.error?.message ||
+  '',
     render: (_, item) => {
       const href = generateDiscoverLink({
         [TRACE_ID]: traceId,
