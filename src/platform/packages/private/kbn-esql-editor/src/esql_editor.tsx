@@ -70,7 +70,6 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import { useQueryStatusDecorations } from './use_query_status_decorations';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
@@ -225,14 +224,6 @@ const ESQLEditorInternal = function ESQLEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  const { cleanupQueryStatusDecorations, queryStatusDecorationsStyles } = useQueryStatusDecorations(
-    {
-      editor: editorRef.current,
-      errors: editorMessages.errors,
-      warnings: editorMessages.warnings,
-      dataErrorsControl,
-    }
-  );
   // The visor opens automatically if:
   // - the user has not dismissed the auto open behavior
   // - the query contains only a source command
@@ -1028,7 +1019,6 @@ const ESQLEditorInternal = function ESQLEditor({
           disposablesMap.delete(currentEditor);
         }
       }
-      cleanupQueryStatusDecorations();
 
       resetPendingTracking();
 
@@ -1037,7 +1027,7 @@ const ESQLEditorInternal = function ESQLEditor({
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, [cleanupQueryStatusDecorations, resetPendingTracking]);
+  }, [resetPendingTracking]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -1116,7 +1106,6 @@ const ESQLEditorInternal = function ESQLEditor({
       <Global
         styles={css`
           ${lookupIndexBadgeStyle}
-          ${queryStatusDecorationsStyles}
         `}
       />
       {Boolean(editorIsInline) && (
