@@ -166,7 +166,16 @@ export async function loadIndices(
   );
 
   // we'll wait for the main request to complete first so the index list has stability
-  const indices = await indicesPromise;
+  const indices = await indicesPromise.catch((error) => {
+    if (error.name === 'AbortError') {
+      // return undefined and exit early if the request was aborted
+      return;
+    }
+  });
+
+  if (!indices) {
+    return;
+  }
 
   // Pre-compute an alias -> index names lookup for enrichers that return data keyed by alias.
   const aliasToIndexNames = new Map<string, string[]>();
