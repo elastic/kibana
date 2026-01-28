@@ -1334,6 +1334,135 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.SearchSLODefinitionItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSLODefinitionItem",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionItem.groupBy",
+            "type": "Array",
+            "tags": [],
+            "label": "groupBy",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionItem.remote",
+            "type": "Object",
+            "tags": [],
+            "label": "remote",
+            "description": [],
+            "signature": [
+              "{ remoteName: string; kibanaUrl: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.SearchSLODefinitionResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSLODefinitionResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.SearchSLODefinitionItem",
+                "text": "SearchSLODefinitionItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.SearchSLODefinitionResponse.searchAfter",
+            "type": "string",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -2388,6 +2517,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/reset.ts",
         "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.SearchSLODefinitionsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchSLODefinitionsParams",
+        "description": [],
+        "signature": [
+          "{ search?: string | undefined; size?: number | undefined; searchAfter?: string | undefined; remoteName?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17513,6 +17659,34 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/time_window.ts",
         "lineNumber": 11,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.searchSLODefinitionsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "searchSLODefinitionsParamsSchema",
+        "description": [],
+        "signature": [
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ search: ",
+          "StringC",
+          "; size: ",
+          "Type",
+          "<number, number, unknown>; searchAfter: ",
+          "StringC",
+          "; remoteName: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/search_slo_definitions.ts",
+        "lineNumber": 10,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,

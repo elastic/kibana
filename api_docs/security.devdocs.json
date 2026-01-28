@@ -6767,6 +6767,10 @@
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "entityStore",
+              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
             }
           ]
         },

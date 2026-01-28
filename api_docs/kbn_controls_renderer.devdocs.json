@@ -21,7 +21,7 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 19,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37,7 +37,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 19,
+            "lineNumber": 23,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +65,7 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 12,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -81,7 +81,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 12,
+            "lineNumber": 16,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -110,7 +110,7 @@
           "; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -123,7 +123,7 @@
             "label": "{ parentApi }",
             "description": [],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
@@ -191,7 +191,7 @@
                   ">; isCompressed?: (() => boolean) | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 36,
+                "lineNumber": 38,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false

@@ -491,6 +491,22 @@
           },
           {
             "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
             "id": "def-common.Error.parent",
             "type": "Object",
             "tags": [],
@@ -500,7 +516,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -516,7 +532,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -532,7 +548,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -548,7 +564,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -564,7 +580,7 @@
               "{ name: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -580,7 +596,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -602,7 +618,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -624,7 +640,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1076,7 +1092,7 @@
         "label": "ErrorsByTraceId",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1099,7 +1115,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1115,7 +1131,7 @@
               "\"apm\" | \"unprocessedOtel\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

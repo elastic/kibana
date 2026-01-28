@@ -1655,7 +1655,7 @@
           "\nDefines a task which can be scheduled and run by the Kibana\ntask manager."
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-        "lineNumber": 43,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1673,7 +1673,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1691,7 +1691,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 52,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1716,7 +1716,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 59,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1741,7 +1741,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 65,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1759,7 +1759,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 69,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1795,7 +1795,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 74,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1838,7 +1838,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 80,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1856,7 +1856,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 85,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1880,7 +1880,7 @@
               "<any>; up: (state: Record<string, unknown>) => Record<string, unknown>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 92,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1903,7 +1903,7 @@
               "<any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-            "lineNumber": 100,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2020,7 +2020,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task_type_dictionary.ts",
-        "lineNumber": 103,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
