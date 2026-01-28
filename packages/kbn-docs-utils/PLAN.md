@@ -169,9 +169,9 @@ Key files:
 - [ ] Update mocks and fixture "Expected issues" blocks
 
 ### Phase 4.7: Improve Multiple Call Signature Validation
-- [ ] Handle interfaces with multiple call signatures
-- [ ] Extract parameter documentation from first overload signature
-- [ ] Add test cases for overloaded functions
+- [x] Handle interfaces with multiple call signatures
+- [x] Extract parameter documentation from first overload signature
+- [x] Add test cases for overloaded functions
 
 ### Phase 4.8: Unnamed Exports Validator
 - [ ] Add `UnnamedExport` type to [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
