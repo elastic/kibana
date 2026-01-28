@@ -196,10 +196,10 @@ Key files:
 - [x] Stats include counts and detailed entries for: missing comments, any types, no references, missing returns, param doc mismatches, missing complex type info, and missing exports
 
 ### Phase 6.2: MCP Tools for Documentation Checking and Fixing
-- [ ] Create `check_package_docs` MCP tool for quick validation checks
-- [ ] Create `fix_package_docs` MCP tool for detailed issue reporting with code snippets
-- [ ] Both tools registered in `kbn-mcp-dev-server`
-- [ ] Add usage docs and basic tests for the MCP tools
+- [x] Create `check_package_docs` MCP tool for quick validation checks
+- [x] Create `fix_package_docs` MCP tool for detailed issue reporting with code snippets
+- [x] Both tools registered in `kbn-mcp-dev-server`
+- [x] Add usage docs and basic tests for the MCP tools
 
 ## Phase 7: Improve Performance of Single Package Builds and Validation
 
