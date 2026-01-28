@@ -36,7 +36,7 @@ import {
 } from './state_management/stream_routing_state_machine';
 
 interface IdleQueryStreamEntryProps {
-  streamDefinition: Streams.QueryStream.Definition;
+  streamName: string;
   onEdit?: (name: string) => void;
   isLast: boolean;
   isFirst: boolean;
@@ -46,7 +46,7 @@ interface IdleQueryStreamEntryProps {
  * Displays an existing query stream in idle state
  */
 export function IdleQueryStreamEntry({
-  streamDefinition,
+  streamName,
   onEdit,
   isLast,
   isFirst,
@@ -65,16 +65,17 @@ export function IdleQueryStreamEntry({
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
         signal,
-        params: { path: { name: streamDefinition.name } },
+        params: { path: { name: streamName } },
       });
     },
-    [streamsRepositoryClient, streamDefinition.name]
+    [streamsRepositoryClient, streamName]
   );
 
+  const viewName = getEsqlViewName(streamName);
   const esqlQuery =
     streamDetailsFetch.value && Streams.QueryStream.GetResponse.is(streamDetailsFetch.value)
       ? streamDetailsFetch.value.stream.query.esql
-      : `FROM ${streamDefinition.query.view}`;
+      : `FROM ${viewName}`;
 
   return (
     <NestedView last={isLast} first={isFirst}>
@@ -92,7 +93,7 @@ export function IdleQueryStreamEntry({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <strong>{streamDefinition.name}</strong>
+              <strong>{streamName}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -110,7 +111,7 @@ export function IdleQueryStreamEntry({
                 aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
                   defaultMessage: 'Edit query stream',
                 })}
-                onClick={() => onEdit(streamDefinition.name)}
+                onClick={() => onEdit(streamName)}
               />
             </EuiFlexItem>
           )}

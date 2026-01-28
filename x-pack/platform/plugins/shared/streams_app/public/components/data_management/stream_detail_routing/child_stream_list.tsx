@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React, { useMemo } from 'react';
-import { MAX_NESTING_LEVEL, getSegments, Streams, isChildOf } from '@kbn/streams-schema';
+import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -37,8 +37,6 @@ import {
   useStreamsRoutingSelector,
   useIsQueryModeCreating,
 } from './state_management/stream_routing_state_machine';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
@@ -352,39 +350,17 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
 function QueryModeChildrenList() {
   const { euiTheme } = useEuiTheme();
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const isCreating = useIsQueryModeCreating();
   const { createQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
-  // Fetch all streams to find child query streams
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal });
-    },
-    [streamsRepositoryClient, definition]
-  );
-
-  // Filter for child query streams of the current stream
-  const childQueryStreams = useMemo(() => {
-    if (!streamsListFetch.value?.streams) return [];
-
-    return streamsListFetch.value.streams.filter(
-      (stream): stream is Streams.QueryStream.Definition =>
-        Streams.QueryStream.Definition.is(stream) &&
-        isChildOf(definition.stream.name, stream.name)
-    );
-  }, [streamsListFetch.value?.streams, definition.stream.name]);
-
-  const isLoading = streamsListFetch.loading;
+  // Get child query stream names from the definition
+  const childQueryStreamNames = useMemo(() => {
+    const queryStreams = definition.stream.query_streams ?? [];
+    return queryStreams.map((ref) => ref.name);
+  }, [definition.stream.query_streams]);
 
   return (
     <EuiFlexGroup
@@ -405,12 +381,12 @@ function QueryModeChildrenList() {
         `}
       >
         <EuiFlexGroup direction="column" gutterSize="xs">
-          {childQueryStreams.map((streamDef, index) => (
-            <EuiFlexItem key={streamDef.name} grow={false}>
+          {childQueryStreamNames.map((streamName, index) => (
+            <EuiFlexItem key={streamName} grow={false}>
               <IdleQueryStreamEntry
-                streamDefinition={streamDef}
+                streamName={streamName}
                 isFirst={index === 0}
-                isLast={index === childQueryStreams.length - 1 && !isCreating}
+                isLast={index === childQueryStreamNames.length - 1 && !isCreating}
               />
             </EuiFlexItem>
           ))}
@@ -456,8 +432,7 @@ function QueryModeChildrenList() {
                   size="s"
                   data-test-subj="streamsAppQueryModeCreateButton"
                   onClick={createQueryStream}
-                  disabled={!canManage || isLoading}
-                  isLoading={isLoading}
+                  disabled={!canManage}
                 >
                   {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
                     defaultMessage: 'Create query stream',

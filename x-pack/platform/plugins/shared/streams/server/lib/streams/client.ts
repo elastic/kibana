@@ -375,6 +375,7 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
+            updated_at: new Date().toISOString(),
             query,
           },
         },

@@ -15,7 +15,7 @@ import type {
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle, isInheritLifecycle, Streams, isChildOf } from '@kbn/streams-schema';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
@@ -47,6 +47,7 @@ interface ClassicStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -56,6 +57,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     lifecycle: false,
     failure_store: false,
     settings: false,
+    query_streams: false,
   };
 
   private _effectiveSettings?: IngestStreamSettings;
@@ -121,6 +123,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         startingStateStreamDefinition.ingest.failure_store
       );
 
+    this._changes.query_streams =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
+      );
+
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
     if (startingStateStreamDefinition && !this._changes.processing) {
@@ -140,7 +149,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    return { cascadingChanges: [], changeStatus: 'deleted' };
+    const cascadingChanges: StreamChange[] = [];
+
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidateUpsertion(
@@ -250,6 +270,81 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
+
+    // Validate query_streams array
+    const queryStreamChildren = new Set<string>();
+    const queryStreams = this._definition.query_streams ?? [];
+
+    for (const childRef of queryStreams) {
+      const childName = childRef.name;
+
+      // Validate naming convention - child must follow parent.childname pattern
+      if (!isChildOf(this._definition.name, childName)) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Child query stream "${childName}" must follow naming convention: "${this._definition.name}.<childname>"`
+            ),
+          ],
+        };
+      }
+
+      // Check for duplicates
+      if (queryStreamChildren.has(childName)) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Duplicate child query stream "${childName}" in query_streams of "${this._definition.name}"`
+            ),
+          ],
+        };
+      }
+      queryStreamChildren.add(childName);
+
+      // Validate that child exists in desired state as a query stream
+      const childStream = desiredState.get(childName);
+      if (!childStream) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Child query stream "${childName}" referenced in query_streams does not exist`
+            ),
+          ],
+        };
+      }
+      if (!childStream.isDeleted() && !Streams.QueryStream.Definition.is(childStream.definition)) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Child "${childName}" in query_streams must be a query stream, but is a different type`
+            ),
+          ],
+        };
+      }
+    }
+
+    // Validate that all child query streams (by naming convention) are in query_streams array
+    for (const stream of desiredState.all()) {
+      if (
+        !stream.isDeleted() &&
+        isChildOf(this._definition.name, stream.definition.name) &&
+        Streams.QueryStream.Definition.is(stream.definition) &&
+        !queryStreamChildren.has(stream.definition.name)
+      ) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Child query stream "${stream.definition.name}" is not listed in query_streams of its parent "${this._definition.name}"`
+            ),
+          ],
+        };
+      }
+    }
 
     return { isValid: true, errors: [] };
   }

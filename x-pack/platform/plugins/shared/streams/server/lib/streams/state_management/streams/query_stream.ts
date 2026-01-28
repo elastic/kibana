@@ -7,19 +7,28 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import { validateQuery } from '@kbn/esql-language';
-import { Streams, getEsqlViewName } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type {
   StreamChangeStatus,
+  StreamChanges,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
 
+interface QueryStreamChanges extends StreamChanges {
+  query_streams: boolean;
+}
+
 export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definition> {
+  protected _changes: QueryStreamChanges = {
+    query_streams: false,
+  };
+
   constructor(definition: Streams.QueryStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
@@ -41,9 +50,49 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       throw new StatusError('Cannot change stream types', 400);
     }
 
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
+
     this._definition = definition;
 
+    // Track if query_streams changed
+    if (
+      startingStateStreamDefinition &&
+      Streams.QueryStream.Definition.is(startingStateStreamDefinition)
+    ) {
+      this._changes.query_streams = !isEqual(
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
+      );
+    } else {
+      // New stream - mark as changed if it has children
+      this._changes.query_streams = (this._definition.query_streams ?? []).length > 0;
+    }
+
     const cascadingChanges: StreamChange[] = [];
+    const now = new Date().toISOString();
+
+    // Handle adding this stream to parent's query_streams array
+    const parentId = getParentId(this._definition.name);
+    if (parentId) {
+      const parentStream = desiredState.get(parentId);
+      if (parentStream && !parentStream.hasChanged()) {
+        const parentDef = parentStream.definition;
+        const parentQueryStreams = parentDef.query_streams ?? [];
+        const hasChild = parentQueryStreams.some((ref) => ref.name === this._definition.name);
+
+        if (!hasChild) {
+          // Need to update parent to include this child in query_streams
+          cascadingChanges.push({
+            type: 'upsert',
+            definition: {
+              ...parentDef,
+              updated_at: now,
+              query_streams: [...parentQueryStreams, { name: this._definition.name }],
+            },
+          });
+        }
+      }
+    }
 
     return { cascadingChanges, changeStatus: 'upserted' };
   }
@@ -53,16 +102,44 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-    if (target === this._definition.name) {
-      return { cascadingChanges: [], changeStatus: 'deleted' };
+    if (target !== this._definition.name) {
+      return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    if (!this.isDeleted()) {
-      // We need to run validation to check that all related streams still exist
-      return { cascadingChanges: [], changeStatus: 'upserted' };
+    const cascadingChanges: StreamChange[] = [];
+
+    // Remove this stream from parent's query_streams array
+    const parentId = getParentId(this._definition.name);
+    if (parentId) {
+      const parentStream = desiredState.get(parentId);
+      if (parentStream && !parentStream.hasChanged()) {
+        const parentDef = parentStream.definition;
+        const parentQueryStreams = parentDef.query_streams ?? [];
+        const hasChild = parentQueryStreams.some((ref) => ref.name === this._definition.name);
+
+        if (hasChild) {
+          cascadingChanges.push({
+            type: 'upsert',
+            definition: {
+              ...parentDef,
+              updated_at: new Date().toISOString(),
+              query_streams: parentQueryStreams.filter((ref) => ref.name !== this._definition.name),
+            },
+          });
+        }
+      }
     }
 
-    return { cascadingChanges: [], changeStatus: this.changeStatus };
+    // Cascade delete to all children in query_streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidateUpsertion(
@@ -147,6 +224,66 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       );
     }
 
+    // Validate query_streams array
+    const queryStreams = this._definition.query_streams ?? [];
+    const children = new Set<string>();
+
+    for (const childRef of queryStreams) {
+      const childName = childRef.name;
+
+      // Validate naming convention - child must follow parent.childname pattern
+      if (!isChildOf(this._definition.name, childName)) {
+        errors.push(
+          new Error(
+            `Child query stream "${childName}" must follow naming convention: "${this._definition.name}.<childname>"`
+          )
+        );
+      }
+
+      // Check for duplicates
+      if (children.has(childName)) {
+        errors.push(
+          new Error(
+            `Duplicate child query stream "${childName}" in query_streams of "${this._definition.name}"`
+          )
+        );
+      }
+      children.add(childName);
+
+      // Validate that child exists in desired state as a query stream
+      const childStream = desiredState.get(childName);
+      if (!childStream) {
+        errors.push(
+          new Error(`Child query stream "${childName}" referenced in query_streams does not exist`)
+        );
+      } else if (
+        !childStream.isDeleted() &&
+        !Streams.QueryStream.Definition.is(childStream.definition)
+      ) {
+        errors.push(
+          new Error(
+            `Child "${childName}" in query_streams must be a query stream, but is a different type`
+          )
+        );
+      }
+    }
+
+    // Validate that all child query streams (by naming convention) are in query_streams array
+    for (const stream of desiredState.all()) {
+      if (
+        !stream.isDeleted() &&
+        isChildOf(this._definition.name, stream.definition.name) &&
+        Streams.QueryStream.Definition.is(stream.definition) &&
+        !children.has(stream.definition.name)
+      ) {
+        errors.push(
+          new Error(
+            `Child query stream "${stream.definition.name}" is not listed in query_streams of its parent "${this._definition.name}"`
+          )
+        );
+      }
+    }
+
     return { isValid: errors.length === 0, errors };
   }
 
@@ -173,35 +310,22 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       return { isValid: false, errors };
     }
 
-    // Check if any other streams depend on this query stream
-    // Query streams might be used as data sources in other streams
-    const dependentStreams: string[] = [];
-    for (const stream of startingState.all()) {
-      if (stream.name === this._definition.name) {
-        continue;
-      }
-
-      // Check if this stream references our query stream
-      const definition = stream.definition;
+    // Check if any other streams have this stream in their query_streams array
+    const parentId = getParentId(this._definition.name);
+    if (parentId) {
+      const parentStream = desiredState.get(parentId);
       if (
-        Streams.WiredStream.Definition.is(definition) &&
-        definition.ingest.wired.routing.some(
-          (route: { destination: string }) => route.destination === this._definition.name
-        )
+        parentStream &&
+        !parentStream.isDeleted() &&
+        parentStream.definition.query_streams?.some((ref) => ref.name === this._definition.name)
       ) {
-        dependentStreams.push(stream.name);
+        // Parent will be updated via cascading change, so this is okay
+        // The cascading change in doHandleDeleteChange removes this from parent
       }
     }
 
-    if (dependentStreams.length > 0) {
-      errors.push(
-        new Error(
-          `Cannot delete query stream "${
-            this._definition.name
-          }": it is referenced by other streams: ${dependentStreams.join(', ')}`
-        )
-      );
-    }
+    // Note: Children will be cascade deleted via doHandleDeleteChange, so we don't need to block deletion
+    // if there are children - they will be deleted along with this stream
 
     return { isValid: errors.length === 0, errors };
   }
@@ -230,11 +354,14 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
 
     // 2. Create the stream definition document (without the esql, only the view reference)
     // The stored definition only includes the view reference, not the actual esql query
+    const { query, ...restDefinition } = this._definition;
     const definitionToStore = {
-      ...this._definition,
+      ...restDefinition,
       query: {
-        view: this._definition.query.view,
+        view: query.view,
       },
+      // Include query_streams array if present
+      ...(this._definition.query_streams && { query_streams: this._definition.query_streams }),
     };
 
     actions.push({
@@ -255,9 +382,16 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     // Check if the query has changed
     const queryChanged = this._definition.query.esql !== startingStateStream.definition.query.esql;
 
-    // Check if other parts of the definition changed (excluding query)
-    const { query: currentQuery, ...currentRest } = this._definition;
-    const { query: startingQuery, ...startingRest } = startingStateStream.definition;
+    // Check if query_streams changed
+    const queryStreamsChanged = this._changes.query_streams;
+
+    // Check if other parts of the definition changed (excluding query and query_streams)
+    const { query: currentQuery, query_streams: currentQS, ...currentRest } = this._definition;
+    const {
+      query: startingQuery,
+      query_streams: startingQS,
+      ...startingRest
+    } = startingStateStream.definition;
     const definitionChanged = !isEqual(currentRest, startingRest);
 
     // 1. Update the ES|QL view if the query changed
@@ -290,13 +424,16 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     }
 
     // 2. Update the definition document if anything changed
-    if (queryChanged || definitionChanged) {
+    if (queryChanged || definitionChanged || queryStreamsChanged) {
       // Strip the esql from the stored definition as it's only stored in the view
+      const { query, ...restDefinition } = this._definition;
       const definitionToStore = {
-        ...this._definition,
+        ...restDefinition,
         query: {
-          view: this._definition.query.view,
+          view: query.view,
         },
+        // Include query_streams array if present
+        ...(this._definition.query_streams && { query_streams: this._definition.query_streams }),
       };
 
       actions.push({

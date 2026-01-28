@@ -76,6 +76,7 @@ export async function readStream({
     });
 
     // Build response with both view reference and resolved esql
+    // query_streams is already part of the stream definition (from BaseStream.Definition)
     const queryStreamResponse: Streams.QueryStream.GetResponse = {
       stream: {
         ...streamDefinition,
@@ -88,7 +89,6 @@ export async function readStream({
       rules,
       queries,
       inherited_fields: {},
-      sub_query_streams: [],
     };
 
     return queryStreamResponse;
