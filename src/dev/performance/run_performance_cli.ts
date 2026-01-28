@@ -157,6 +157,18 @@ async function runFunctionalTest(props: TestRunProps) {
   });
 }
 
+const cleanupAndExit = (procRunner: ProcRunner, eventName: string) => {
+  process.stdout.write(`\n--- Received ${eventName}, cleaning up...\n`);
+  procRunner
+    .stop('es')
+    .catch((e) => {
+      process.stderr.write(`\nError during cleanup: ${e}`);
+    })
+    .finally(() => {
+      process.exit(1);
+    });
+};
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     const skipWarmup = flagsReader.boolean('skip-warmup');
@@ -171,6 +183,10 @@ run(
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
+
+    ['SIGINT', 'SIGTERM', 'SIGHUP', 'unhandledRejection', 'uncaughtException'].forEach((event) => {
+      process.on(event, () => cleanupAndExit(procRunner, event));
+    });
 
     const journeys = getJourneysToRun({ journeyPath, group });
 
