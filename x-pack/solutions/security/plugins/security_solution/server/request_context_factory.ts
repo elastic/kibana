@@ -44,6 +44,7 @@ import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_an
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 export interface IRequestContextFactory {
   create(
@@ -364,6 +365,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           ml: plugins.ml,
           request,
           savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
+      getRulesAuthz: memoize(() => {
+        return calculateRulesAuthz({
+          coreStart,
+          request,
         });
       }),
     };

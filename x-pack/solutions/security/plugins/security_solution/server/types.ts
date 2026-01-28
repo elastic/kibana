@@ -50,6 +50,7 @@ import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/pr
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
 import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import type { DetectionRulesAuthz } from '../common/detection_engine/rule_management/authz';
 
 export { AppClient };
 
@@ -88,6 +89,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
+  getRulesAuthz: () => Promise<DetectionRulesAuthz>;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
