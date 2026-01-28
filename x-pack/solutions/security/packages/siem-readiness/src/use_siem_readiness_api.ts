@@ -12,7 +12,7 @@ import type {
   CategoriesResponse,
   SiemReadinessPackageInfo,
   RelatedIntegrationRuleResponse,
-  ResultDocument,
+  DataQualityResultDocument,
 } from './types';
 import {
   GET_SIEM_READINESS_CATEGORIES_API_PATH,
@@ -57,7 +57,7 @@ export const useSiemReadinessApi = () => {
   const getIndexQualityResultsLatest = useQuery({
     queryKey: GET_INDEX_RESULTS_LATEST_QUERY_KEY,
     queryFn: () => {
-      return http.get<ResultDocument[]>(`${GET_INDEX_RESULTS_LATEST_API_PATH}/*`, {
+      return http.get<DataQualityResultDocument[]>(`${GET_INDEX_RESULTS_LATEST_API_PATH}/*`, {
         version: '1',
       });
     },

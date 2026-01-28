@@ -20,7 +20,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { IndexInfo, ResultDocument } from '@kbn/siem-readiness';
+import type { IndexInfo, DataQualityResultDocument } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -51,7 +51,7 @@ export const QualityTab: React.FC = () => {
 
   // Create a lookup map for index results by indexName
   const indexDataQualityMap = useMemo(() => {
-    if (!getIndexQualityData) return new Map<string, ResultDocument>();
+    if (!getIndexQualityData) return new Map<string, DataQualityResultDocument>();
 
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
