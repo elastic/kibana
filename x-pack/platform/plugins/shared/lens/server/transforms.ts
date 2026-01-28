@@ -11,6 +11,7 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { isByRefLensConfig } from '../common/transforms/utils';
 import { lensItemDataSchemaV2 } from './content_management';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
@@ -28,8 +29,10 @@ export function registerLensEmbeddableTransforms(
     getSchema: () => {
       return builder.isEnabled ? lensPanelSchema : undefined;
     },
-    throwOnUnmappedPanel: (state: LensSerializedAPIConfig) => {
-      const chartType = builder.getType(state.attributes);
+    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
+      if (isByRefLensConfig(config)) return;
+
+      const chartType = builder.getType(config.attributes);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
@@ -39,7 +42,10 @@ export function registerLensEmbeddableTransforms(
 }
 
 const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
-  type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
+  // Why are these added to the panel attributes?
+  // See https://github.com/elastic/kibana/issues/250115
+  id: schema.maybe(schema.string()),
+  type: schema.maybe(schema.literal('lens')),
 });
 
 const lensByValuePanelSchema = schema.object(
