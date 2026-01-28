@@ -27,8 +27,7 @@ import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
@@ -44,7 +43,6 @@ import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
-import { createTabActionInjector } from './utils';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -509,55 +507,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
-    },
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.setAppState,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-
-      withTab(
-        listenerApi.getState(),
-        action.payload,
-        ({ appState, cascadedDocumentsState, id: tabId }) => {
-          if (
-            isOfAggregateQueryType(appState.query) &&
-            services.discoverFeatureFlags.getCascadeLayoutEnabled()
-          ) {
-            const availableCascadeGroups = getESQLStatsQueryMeta(
-              (appState.query as AggregateQuery).esql
-            ).groupByFields.map((group) => group.field);
-
-            const computeSelectedCascadeGroups = (cascadeGroups: string[]) => {
-              // if the proposed available groups is different in length or contains a value the existing one doesn't have,
-              // we want to reset by defaulting to the first group
-              if (
-                cascadeGroups.length !== cascadedDocumentsState.availableCascadeGroups.length ||
-                cascadeGroups.some(
-                  (group) => cascadedDocumentsState.availableCascadeGroups.indexOf(group) < 0
-                )
-              ) {
-                return [cascadeGroups[0]].filter(Boolean);
-              }
-
-              // return existing selection since we've asserted that there's been no change to the available groups default
-              return cascadedDocumentsState.selectedCascadeGroups;
-            };
-
-            const injectCurrentTab = createTabActionInjector(tabId);
-
-            listenerApi.dispatch(
-              injectCurrentTab(internalStateSlice.actions.setCascadedDocumentsState)({
-                cascadedDocumentsState: {
-                  availableCascadeGroups,
-                  selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
-                },
-              })
-            );
-          }
-        }
-      );
     },
   });
 

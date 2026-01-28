@@ -29,6 +29,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { isEqual, sortBy } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -357,7 +359,8 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
+          const query = getCurrentTab().appState.query;
+          const isEsqlQuery = isOfAggregateQueryType(query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
@@ -384,6 +387,46 @@ export function getDataStateContainer({
               if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
                 fetchChart$.next(latestFetchDetails);
+              }
+
+              // Update cascaded documents state based on the fetched query,
+              // defaulting to the first available group whenever the available groups change
+              if (isEsqlQuery && services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
+                const { availableCascadeGroups, selectedCascadeGroups } =
+                  getCurrentTab().cascadedDocumentsState;
+
+                const newAvailableGroups = getESQLStatsQueryMeta(query.esql).groupByFields.map(
+                  (group) => group.field
+                );
+
+                const haveAvilableGroupsChanged = !isEqual(
+                  sortBy(availableCascadeGroups),
+                  sortBy(newAvailableGroups)
+                );
+
+                const newSelectedGroups = haveAvilableGroupsChanged
+                  ? newAvailableGroups.length > 0
+                    ? [newAvailableGroups[0]]
+                    : []
+                  : selectedCascadeGroups;
+
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                    cascadedDocumentsState: {
+                      availableCascadeGroups: newAvailableGroups,
+                      selectedCascadeGroups: newSelectedGroups,
+                    },
+                  })
+                );
+              } else {
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                    cascadedDocumentsState: {
+                      availableCascadeGroups: [],
+                      selectedCascadeGroups: [],
+                    },
+                  })
+                );
               }
 
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
