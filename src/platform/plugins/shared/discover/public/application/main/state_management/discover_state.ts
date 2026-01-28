@@ -10,10 +10,6 @@
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { from, type Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
-import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
-import { isEqual } from 'lodash';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';

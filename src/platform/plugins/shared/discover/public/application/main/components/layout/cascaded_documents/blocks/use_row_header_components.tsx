@@ -436,30 +436,32 @@ export function useEsqlDataCascadeRowHeaderComponents(
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <FormattedMessage
                 id="discover.dataCascade.grouping.function"
-                defaultMessage="<bold>{selectedColumn}: </bold><badge>{selectedColumnValue}</badge>"
+                defaultMessage="<bold>{selectedColumn}:</bold> <badge></badge>"
                 values={{
                   selectedColumn,
-                  selectedColumnValue: rowData.aggregatedValues[selectedColumn],
                   bold: (chunks) => (
                     <EuiFlexItem grow={false} css={rowHeaderTitleStyles.textWrapper}>
                       <span css={rowHeaderTitleStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
-                  badge: (badgeContent) => {
+                  badge: () => {
+                    const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+
                     return (
                       <EuiFlexItem grow={false}>
-                        {badgeContent.length === 1 && badgeContent.filter(Number)[0] ? (
-                          <NumberBadge value={Number(badgeContent[0])} shortenAtExpSize={3} />
+                        {typeof aggregatedValue === 'number' ? (
+                          <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
                         ) : (
                           <EuiBadge color="hollow" css={textSlotStyles}>
-                            {badgeContent
-                              .map(
-                                (chunk) =>
-                                  chunk ||
+                            {aggregatedValue
+                              .map((value) => {
+                                return (
+                                  value ||
                                   i18n.translate('discover.dataCascade.row.action.noValue', {
                                     defaultMessage: '(blank)',
                                   })
-                              )
+                                );
+                              })
                               .join(', ')}
                           </EuiBadge>
                         )}

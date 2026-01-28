@@ -24,6 +24,7 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v5 as uuidv5 } from 'uuid';
+import { isNil } from 'lodash';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
@@ -78,11 +79,31 @@ export const useGroupedCascadeData = ({
             aggregatedValues: groupRows.reduce<ESQLDataGroupNode['aggregatedValues']>(
               (allValues, row) => {
                 queryMeta.appliedFunctions.forEach(({ identifier }) => {
-                  if (row.flattened[identifier]) {
-                    allValues[identifier] =
-                      (allValues[identifier] ?? 0) + Number(row.flattened[identifier]);
+                  const currentValue = row.flattened[identifier];
+
+                  if (isNil(currentValue)) {
+                    return;
+                  }
+
+                  const existingValue = allValues[identifier];
+
+                  if (typeof currentValue === 'number') {
+                    if (typeof existingValue === 'number') {
+                      allValues[identifier] = existingValue + currentValue;
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = currentValue;
+                    }
+                  } else if (Array.isArray(currentValue)) {
+                    const valuesArray = currentValue.map(String);
+
+                    if (Array.isArray(existingValue)) {
+                      allValues[identifier] = [...existingValue, ...valuesArray];
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = valuesArray;
+                    }
                   }
                 });
+
                 return allValues;
               },
               {}

@@ -32,7 +32,6 @@ import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
-import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;

@@ -181,7 +181,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: mockRows,
           queryMeta: queryMetaWithMultipleFunctions,
           esqlVariables: undefined,
@@ -189,8 +189,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].count).toBe(15);
-      expect(result.current[0].ext).toEqual(['css', 'js', 'deb', 'rpm']);
+      expect(result.current[0].aggregatedValues.count).toBe(15);
+      expect(result.current[0].aggregatedValues.ext).toEqual(['css', 'js', 'deb', 'rpm']);
     });
 
     it('should resolve esql variable for group key', () => {
