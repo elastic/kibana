@@ -70,7 +70,7 @@ export interface StackConnectorConfig {
 export interface WorkflowsConfig {
   /** Absolute path to directory containing workflow YAML files (use join(__dirname, 'workflows')) */
   directory: string;
-  /** Template variables to inject into workflow YAMLs (replaces {{key}} patterns) */
+  /** Template variables to inject into workflow YAMLs (replaces <%= key %> patterns) */
   templateInputs?: Record<string, string>;
 }
 
@@ -96,7 +96,10 @@ export interface DataSource {
    */
   iconType: string;
 
-  /** How to load up workflows definitions for this data source type */
+  /**
+   * How to load up workflows definitions for this data source type.
+   * Workflows are the only model for "taking action" against the third party.
+   * */
   workflows: WorkflowsConfig;
 
   /**
