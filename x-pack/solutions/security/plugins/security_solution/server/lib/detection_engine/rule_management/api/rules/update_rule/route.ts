@@ -53,19 +53,11 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
-          if (request.body.response_actions) {
-            const ruleResponseActionsError = await validateRuleResponseActions({
-              ruleResponseActions: request.body.response_actions,
-              endpointService: ctx.securitySolution.getEndpointService(),
-            });
-
-            if (ruleResponseActionsError) {
-              return siemResponse.error({
-                statusCode: ruleResponseActionsError.statusCode,
-                body: ruleResponseActionsError,
-              });
-            }
-          }
+          await validateRuleResponseActions({
+            ruleResponseActions: request.body.response_actions,
+            endpointService: ctx.securitySolution.getEndpointService(),
+            spaceId: ctx.securitySolution.getSpaceId(),
+          });
           const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
