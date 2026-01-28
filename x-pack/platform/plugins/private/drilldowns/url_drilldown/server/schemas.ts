@@ -6,10 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  DEFAULT_ENCODE_URL,
-  DEFAULT_OPEN_IN_NEW_TAB,
-} from '../common/constants';
+import { DEFAULT_ENCODE_URL, DEFAULT_OPEN_IN_NEW_TAB } from '../common/constants';
 
 export const urlDrilldownSchema = schema.object({
   encode_url: schema.boolean({

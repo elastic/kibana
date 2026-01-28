@@ -42,10 +42,10 @@ export function transformEnhancementsOut<StoredState extends DrilldownsState>(
 
   return drilldownsFromEnhancements.length
     ? {
-        ...restOfState as StoredState,
+        ...(restOfState as StoredState),
         drilldowns: [...drilldownsFromEnhancements, ...(restOfState.drilldowns ?? [])],
       }
-    : restOfState as StoredState;
+    : (restOfState as StoredState);
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {

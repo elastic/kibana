@@ -37,7 +37,7 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
       getTransforms: () => ({
         transformIn,
         transformOut,
-      })
+      }),
     });
   }
 

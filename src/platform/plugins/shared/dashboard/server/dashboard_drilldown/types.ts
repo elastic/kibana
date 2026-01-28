@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DrilldownState } from '@kbn/embeddable-plugin/server';
+import type { DrilldownState } from '@kbn/embeddable-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { dashboardDrilldownSchema } from './schemas';
 

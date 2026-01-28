@@ -16,17 +16,20 @@ export function getTransformDrilldownsOut(
     type: string
   ) => ((state: DrilldownState, references?: Reference[]) => DrilldownState) | undefined
 ) {
-  function transformDrilldownsOut<StoredState extends DrilldownsState>(storedState: StoredState, references?: Reference[]): StoredState {
+  function transformDrilldownsOut<StoredState extends DrilldownsState>(
+    storedState: StoredState,
+    references?: Reference[]
+  ): StoredState {
     const { drilldowns, ...restOfState } = transformEnhancementsOut(storedState);
     return drilldowns?.length
       ? {
-          ...restOfState as StoredState,
+          ...(restOfState as StoredState),
           drilldowns: drilldowns.map((drilldownState) => {
             const transformOut = getTranformOut(drilldownState.type);
             return transformOut ? transformOut(drilldownState, references) : drilldownState;
           }),
         }
-      : restOfState as StoredState;
+      : (restOfState as StoredState);
   }
   return transformDrilldownsOut;
 }

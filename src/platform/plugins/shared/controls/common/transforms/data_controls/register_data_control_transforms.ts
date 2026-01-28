@@ -21,6 +21,6 @@ export const registerDataControlTransforms = (
       transformIn: (state) => extractReferences(state, refName),
       transformOut: (state, panelReferences, containerReferences, id) =>
         injectReferences(id, state, legacyRefNames, panelReferences, containerReferences),
-    })
+    }),
   });
 };

@@ -87,21 +87,21 @@ export class AiopsPlugin
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
-      })
+      }),
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
       getTransforms: () => ({
         transformIn: patternAnalysisTransformIn,
         transformOut: patternAnalysisTransformOut,
-      })
+      }),
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,
-      })
+      }),
     });
 
     return {};
