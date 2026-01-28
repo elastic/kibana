@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiFlexGroupProps } from '@elastic/eui';
-import React, { type VFC, type ReactElement } from 'react';
+import React, { type VFC, type ReactElement, useCallback } from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
@@ -35,6 +35,10 @@ export interface ExpandableSectionProps {
    */
   localStorageKey?: string;
   /**
+   * Optional string, if provided it will be used as the key to store the expanded/collapsed state boolean by section local storage
+   */
+  sectionId?: string;
+  /**
    * Prefix data-test-subj to use for the header and expandable section of the accordion
    */
   ['data-test-subj']?: string;
@@ -51,6 +55,7 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   children,
   gutterSize = 'none',
   localStorageKey,
+  sectionId,
   'data-test-subj': dataTestSub,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
@@ -65,13 +70,12 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
     </EuiTitle>
   );
 
+  const onToggle = useCallback(() => {
+    toggle({ localStorageKey, title: sectionId });
+  }, [toggle, localStorageKey, sectionId]);
+
   return (
-    <EuiAccordion
-      forceState={state}
-      onToggle={() => toggle(localStorageKey)}
-      id={accordionId}
-      buttonContent={header}
-    >
+    <EuiAccordion forceState={state} onToggle={onToggle} id={accordionId} buttonContent={header}>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize={gutterSize} direction="column" data-test-subj={contentDataTestSub}>
         {renderContent && children}
