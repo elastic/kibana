@@ -18,7 +18,7 @@ interface Measurements {
   content: Measurement;
 }
 
-interface AutoSizerProps {
+export interface AutoSizerProps {
   detectAnyWindowResize?: boolean | 'height' | 'width';
   bounds?: boolean;
   content?: boolean;
