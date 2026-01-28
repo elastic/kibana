@@ -723,30 +723,6 @@ const discriminatedUnionProcessor: Processor = (schema, ctx, json, params) => {
   json.oneOf = processedOptions;
 };
 
-// Zod v4 uses "union" type for both regular unions and discriminated unions
-// Need to check the "inclusive" property - if false, it's a discriminated/exclusive union
-const unionProcessorV4: Processor = (schema, ctx, json, params) => {
-  const def = getDef(schema);
-  const options = def.options ?? [];
-
-  // Check if this is an exclusive union (discriminated union in v4)
-  // Zod v4: def.inclusive === false means it's exclusive (oneOf)
-  const isExclusive = def.inclusive === false;
-
-  const processedOptions = options.map((x: any, i: number) =>
-    process(x, ctx, {
-      ...params,
-      path: [...params.path, isExclusive ? 'oneOf' : 'anyOf', i],
-    })
-  );
-
-  if (isExclusive) {
-    json.oneOf = processedOptions;
-  } else {
-    json.anyOf = processedOptions;
-  }
-};
-
 const intersectionProcessor: Processor = (schema, ctx, json, params) => {
   const def = getDef(schema);
   const left = def.left;

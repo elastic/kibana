@@ -117,11 +117,6 @@ const unwrapZodType = (type: z.core.$ZodType, unwrapPreprocess: boolean): z.core
   return type;
 };
 
-interface NativeEnumType {
-  [k: string]: string | number;
-  [nu: number]: string;
-}
-
 type ZodTypeLikeString =
   | z.ZodString
   | z.ZodOptional
