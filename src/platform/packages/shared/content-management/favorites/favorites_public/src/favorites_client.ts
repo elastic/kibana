@@ -64,7 +64,8 @@ export class FavoritesClient<Metadata extends object | void = void>
   }
 
   private getUnavailableFavoritesResponse(): GetFavoritesResponse<Metadata> {
-    return { favoriteIds: [], favoriteMetadata: {} };
+    const favoriteMetadata = {} as GetFavoritesResponse<Metadata>['favoriteMetadata'];
+    return { favoriteIds: [], favoriteMetadata };
   }
 
   public async getFavorites(): Promise<GetFavoritesResponse<Metadata>> {
