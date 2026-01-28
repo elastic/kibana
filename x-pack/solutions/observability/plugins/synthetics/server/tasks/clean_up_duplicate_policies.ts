@@ -54,15 +54,24 @@ export async function cleanUpDuplicatedPackagePolicies(
         monitor.attributes.locations?.forEach((location) => {
           const spaceId = monitor.namespaces?.[0];
           if (!location.isServiceManaged && spaceId) {
-            const policyId = privateLocationAPI.getPolicyId(
+            // Add new format (space-agnostic) policy ID
+            const newPolicyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
                 id: monitor.attributes.id,
               },
+              location.id
+            );
+            expectedPackagePolicies.add(newPolicyId);
+
+            // Add legacy format (with spaceId) for backward compatibility
+            // This ensures we don't delete valid legacy policies that haven't been migrated yet
+            const legacyPolicyId = privateLocationAPI.getLegacyPolicyId(
+              monitor.attributes.id,
               location.id,
               spaceId
             );
-            expectedPackagePolicies.add(policyId);
+            expectedPackagePolicies.add(legacyPolicyId);
           }
         });
       });

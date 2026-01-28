@@ -65,11 +65,22 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
-    if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-      return `${config.id}-${locId}`;
-    }
-    return `${config.id}-${locId}-${spaceId}`;
+  /**
+   * Returns the new (space-agnostic) policy ID format.
+   * Format: `${configId}-${locationId}`
+   * This removes the spaceId dependency to support multispace monitors.
+   */
+  getPolicyId(config: { origin?: string; id: string }, locId: string, _spaceId?: string) {
+    return `${config.id}-${locId}`;
+  }
+
+  /**
+   * Returns the legacy policy ID format that included spaceId.
+   * Format: `${configId}-${locationId}-${spaceId}`
+   * Used for backward compatibility when looking up existing policies.
+   */
+  getLegacyPolicyId(configId: string, locId: string, spaceId: string) {
+    return `${configId}-${locId}-${spaceId}`;
   }
 
   async generateNewPolicy(
@@ -188,7 +199,7 @@ export class SyntheticsPrivateLocation {
             } else {
               newPolicies.push({
                 ...newPolicy,
-                id: this.getPolicyId(config, location.id, spaceId),
+                id: this.getPolicyId(config, location.id),
               });
             }
           }
@@ -252,7 +263,7 @@ export class SyntheticsPrivateLocation {
 
       const pkgPolicy = {
         ...newPolicy,
-        id: this.getPolicyId(config, location.id, spaceId),
+        id: this.getPolicyId(config, location.id),
       } as NewPackagePolicyWithId;
 
       return await this.server.fleet.packagePolicyService.inspect(soClient, pkgPolicy);
@@ -286,6 +297,8 @@ export class SyntheticsPrivateLocation {
     const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
+    // Track legacy policies that need migration (delete old, create with new ID)
+    const legacyPoliciesToMigrate: string[] = [];
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -294,8 +307,14 @@ export class SyntheticsPrivateLocation {
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        const hasPolicy = existingPolicies?.some((policy) => policy.id === currId);
+        const newId = this.getPolicyId(config, privateLocation.id);
+        const legacyId = this.getLegacyPolicyId(config.id, privateLocation.id, spaceId);
+
+        // Check for both new and legacy format policies
+        const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId);
+        const hasLegacyFormatPolicy = existingPolicies?.some((policy) => policy.id === legacyId);
+        const hasPolicy = hasNewFormatPolicy || hasLegacyFormatPolicy;
+
         try {
           if (hasLocation) {
             const newPolicy = await this.generateNewPolicy(
@@ -311,13 +330,26 @@ export class SyntheticsPrivateLocation {
               throwAddEditError(hasPolicy, privateLocation.label);
             }
 
-            if (hasPolicy) {
-              policiesToUpdate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+            if (hasNewFormatPolicy) {
+              // Policy already exists with new format, just update it
+              policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+            } else if (hasLegacyFormatPolicy) {
+              // Policy exists with legacy format - migrate to new format
+              // Delete the old one and create with new ID
+              legacyPoliciesToMigrate.push(legacyId);
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+              // No policy exists, create with new format
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
-          } else if (hasPolicy) {
-            policiesToDelete.push(currId);
+          } else {
+            // Location removed from monitor - delete policy in any format
+            if (hasNewFormatPolicy) {
+              policiesToDelete.push(newId);
+            }
+            if (hasLegacyFormatPolicy) {
+              policiesToDelete.push(legacyId);
+            }
           }
         } catch (e) {
           this.server.logger.error(e);
@@ -327,13 +359,16 @@ export class SyntheticsPrivateLocation {
     }
 
     this.server.logger.debug(
-      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
+      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, deleting ${policiesToDelete.length} policies, and migrating ${legacyPoliciesToMigrate.length} legacy policies`
     );
 
-    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
+    // Delete legacy policies first before creating new ones (to avoid potential ID conflicts during migration)
+    const allPoliciesToDelete = [...policiesToDelete, ...legacyPoliciesToMigrate];
+
+    const [_deleteResponse, _createResponse, failedUpdatesRes] = await Promise.all([
+      this.deletePolicyBulk(allPoliciesToDelete),
       this.createPolicyBulk(policiesToCreate),
       this.updatePolicyBulk(policiesToUpdate),
-      this.deletePolicyBulk(policiesToDelete),
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
@@ -342,7 +377,7 @@ export class SyntheticsPrivateLocation {
 
         const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
         for (const privateLocation of monitorPrivateLocations) {
-          const currId = this.getPolicyId(config, privateLocation.id, spaceId);
+          const currId = this.getPolicyId(config, privateLocation.id);
           return currId === packagePolicy.id;
         }
       });
@@ -358,6 +393,11 @@ export class SyntheticsPrivateLocation {
     };
   }
 
+  /**
+   * Fetches existing package policies for the given configs and locations.
+   * Looks for both new (space-agnostic) and legacy (with spaceId) policy ID formats
+   * for backward compatibility.
+   */
   async getExistingPolicies(
     configs: HeartbeatConfig[],
     allPrivateLocations: SyntheticsPrivateLocations,
@@ -368,8 +408,15 @@ export class SyntheticsPrivateLocation {
     const listOfPolicies: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        listOfPolicies.push(currId);
+        // Add new format (space-agnostic)
+        const newId = this.getPolicyId(config, privateLocation.id);
+        listOfPolicies.push(newId);
+
+        // Add legacy format (with spaceId) for backward compatibility
+        const legacyId = this.getLegacyPolicyId(config.id, privateLocation.id, spaceId);
+        if (!listOfPolicies.includes(legacyId)) {
+          listOfPolicies.push(legacyId);
+        }
       }
     }
     return (
@@ -435,14 +482,22 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
 
-    const policyIdsToDelete = [];
+    const policyIdsToDelete: string[] = [];
     for (const config of configs) {
       const { locations } = config;
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
+        // Add new format ID
+        const newId = this.getPolicyId(config, privateLocation.id);
+        policyIdsToDelete.push(newId);
+
+        // Add legacy format ID for backward compatibility
+        const legacyId = this.getLegacyPolicyId(config.id, privateLocation.id, spaceId);
+        if (!policyIdsToDelete.includes(legacyId)) {
+          policyIdsToDelete.push(legacyId);
+        }
       }
     }
     if (policyIdsToDelete.length > 0) {
@@ -456,9 +511,12 @@ export class SyntheticsPrivateLocation {
         }
       );
       const failedPolicies = result?.filter((policy) => {
+        // Ignore 404s as the policy might exist in only one format (new or legacy)
         return !policy.success && policy?.statusCode !== 404;
       });
-      if (failedPolicies?.length === policyIdsToDelete.length) {
+      // Only throw error if all policies failed (not just 404s from the other format)
+      const actualDeleteAttempts = policyIdsToDelete.length / 2; // We try both formats
+      if (failedPolicies?.length >= actualDeleteAttempts) {
         throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
       return result;
