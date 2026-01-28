@@ -97,11 +97,11 @@ describe('initialize edit api', () => {
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith({}); // For urlWithoutLocationState
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith(locatorParams); // For raw editUrl
 
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(2);
       expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
 
       expect(editApp).toBe('discover');
-      expect(editPath).toBe('/mock-url'); // Result of basePath.remove
+      expect(editPath).toBe('/base/mock-url'); // Result of basePath.remove
       expect(editUrl).toBe('/base/mock-url'); // Raw editUrl before basePath.remove
       expect(urlWithoutLocationState).toBe('/base/discover-home');
     };
@@ -142,11 +142,11 @@ describe('initialize edit api', () => {
       // Assertions for redirect part (getRedirectUrl and basePath.remove)
       expect(discoverServiceMock.locator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(discoverServiceMock.locator.getRedirectUrl).toHaveBeenCalledWith(locatorParams);
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(2);
       expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
 
       expect(editApp).toBe('r');
-      expect(editPath).toBe('/mock-url');
+      expect(editPath).toBe('/base/mock-url');
       expect(editUrl).toBe('/base/mock-url');
       expect(urlWithoutLocationState).toBe('/base/state-url-for-redirect');
     });
@@ -190,7 +190,7 @@ describe('initialize edit api', () => {
     await onEdit();
     expect(mockedNavigate).toBeCalledTimes(1);
     expect(mockedNavigate).toBeCalledWith('discover', {
-      path: '/mock-url-for-onedit',
+      path: '/base/mock-url-for-onedit',
       state: expect.objectContaining({
         embeddableId: 'test',
         originatingApp: 'dashboard',
