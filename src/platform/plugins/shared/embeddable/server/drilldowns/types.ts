@@ -21,9 +21,9 @@ export type DrilldownSetup<
   State extends DrilldownState = DrilldownState
 > = {
   /**
-   * Schema for drilldown state
+   * Schema defining distinct state for the drilldown type
    */
-  schema: ObjectType<{ type: Type<string> }>;
+  schema: ObjectType;
   /**
    * List of triggers supported by this drilldown type
    * Used to

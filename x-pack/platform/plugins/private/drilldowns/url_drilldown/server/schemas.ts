@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
-  URL_DRILLDOWN_TYPE,
 } from '../common/constants';
 
 export const urlDrilldownSchema = schema.object({
@@ -22,7 +21,6 @@ export const urlDrilldownSchema = schema.object({
   open_in_new_tab: schema.boolean({
     defaultValue: DEFAULT_OPEN_IN_NEW_TAB,
   }),
-  type: schema.literal(URL_DRILLDOWN_TYPE),
   url: schema.string({
     meta: {
       description:

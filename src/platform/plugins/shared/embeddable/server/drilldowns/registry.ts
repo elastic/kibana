@@ -37,13 +37,13 @@ export function getDrilldownRegistry() {
       transformOut: getTransformDrilldownsOut(getTransformOut),
     },
     getSchema: (supportedTriggers: string[]) => {
-      const drilldownSchemas = Object.values(registry)
-        .filter((drilldownSetup) => {
+      const drilldownSchemas = Object.entries(registry)
+        .filter(([type, drilldownSetup]) => {
           return supportedTriggers.some((trigger) =>
             drilldownSetup.supportedTriggers.includes(trigger)
           );
         })
-        .map((drilldownSetup) =>
+        .map(([type, drilldownSetup]) =>
           drilldownSetup.schema.extends({
             label: schema.string(),
             triggers: schema.arrayOf(
@@ -53,6 +53,7 @@ export function getDrilldownRegistry() {
                 ]
               )
             ),
+            type: schema.literal(type),
           })
         );
 

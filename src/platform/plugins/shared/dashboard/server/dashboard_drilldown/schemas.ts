@@ -8,10 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DASHBOARD_DRILLDOWN_TYPE } from '../../common/page_bundle_constants';
 import { dashboardNavigationOptionsSchema } from '../dashboard_navigation';
 
 export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
   dashboard_id: schema.string(),
-  type: schema.literal(DASHBOARD_DRILLDOWN_TYPE),
 });
