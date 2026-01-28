@@ -8,11 +8,11 @@
 
 import { downloadAndStoreAgent, isAgentDownloadFromDiskAvailable } from './agent_downloads_service';
 import fs from 'fs';
-import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
 
+const mockedFetch = jest.spyOn(global, 'fetch');
+
 jest.mock('fs');
-jest.mock('node-fetch');
 jest.mock('stream/promises', () => ({
   finished: jest.fn(),
 }));
@@ -37,7 +37,8 @@ describe('AgentDownloadStorage', () => {
       on: jest.fn(),
       end: jest.fn(),
     });
-    (nodeFetch as unknown as jest.Mock).mockResolvedValue({ body: { pipe: jest.fn() } });
+    const mockReadable = new ReadableStream();
+    mockedFetch.mockResolvedValue(new Response(mockReadable, { status: 200 }));
     (finished as unknown as jest.Mock).mockResolvedValue(undefined);
 
     const result = await downloadAndStoreAgent(url, fileName);

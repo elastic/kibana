@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
