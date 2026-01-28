@@ -48,55 +48,33 @@ export const createLogsWithErrors = async ({
   const warningMessage = 'High latency detected in payment processing';
   const infoMessage = 'Payment request received';
 
+  const getLogLevelAndMessage = (index: number) => {
+    if (index === 0) return { logLevel: 'error' as const, message: errorMessage };
+    if (index === 1) return { logLevel: 'warn' as const, message: warningMessage };
+    return { logLevel: 'info' as const, message: infoMessage };
+  };
+
   const logs = range
     .interval('10s')
     .rate(1)
     .generator((timestamp, index) => {
-      if (index === 0) {
-        return log
-          .create()
-          .message(errorMessage)
-          .logLevel('error')
-          .service(SERVICE_NAME)
-          .defaults({
-            'service.environment': environment,
-            'trace.id': traceId,
-            'host.name': 'payment-host-1',
-            'container.id': 'container-123',
-          })
-          .timestamp(timestamp);
-      } else if (index === 1) {
-        return log
-          .create()
-          .message(warningMessage)
-          .logLevel('warn')
-          .service(SERVICE_NAME)
-          .defaults({
-            'service.environment': environment,
-            'trace.id': traceId,
-            'host.name': 'payment-host-1',
-            'container.id': 'container-123',
-          })
-          .timestamp(timestamp);
-      } else {
-        return log
-          .create()
-          .message(infoMessage)
-          .logLevel('info')
-          .service(SERVICE_NAME)
-          .defaults({
-            'service.environment': environment,
-            'trace.id': traceId,
-            'host.name': 'payment-host-1',
-            'container.id': 'container-123',
-          })
-          .timestamp(timestamp);
-      }
+      const { logLevel, message } = getLogLevelAndMessage(index);
+      return log
+        .create()
+        .message(message)
+        .logLevel(logLevel)
+        .service(SERVICE_NAME)
+        .defaults({
+          'service.environment': environment,
+          'trace.id': traceId,
+          'host.name': 'payment-host-1',
+          'container.id': 'container-123',
+        })
+        .timestamp(timestamp);
     });
 
   await logsSynthtraceEsClient.index([logs]);
-
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await logsSynthtraceEsClient.refresh();
 
   const es = getService('es');
   const searchResponse = await es.search({
