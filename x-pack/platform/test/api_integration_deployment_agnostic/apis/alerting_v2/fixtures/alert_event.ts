@@ -10,20 +10,15 @@ import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_
 export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
   '@timestamp': new Date().toISOString(),
   scheduled_timestamp: new Date().toISOString(),
-  alert_id: 'test-alert-id',
-  alert_series_id: 'test-alert-series-id',
-  parent_rule_id: undefined,
   rule: {
     id: 'test-rule-id',
-    tags: ['test-alert-tag-1', 'test-alert-tag-2'],
+    version: 1,
   },
-  grouping: {
-    key: 'instance.id',
-    value: 'i-1234567890abcdef0',
-  },
+  group_hash: 'test-group-hash',
   data: {},
-  status: 'active',
+  status: 'breached',
   source: 'test-source',
-  tags: ['alert-tag-1', 'alert-tag-2'],
+  type: 'alert',
+  episode_id: 'test-episode-id',
   ...overrides,
 });

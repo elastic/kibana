@@ -6,4 +6,3 @@
  */
 
 export { createAlertEvent } from './alert_event';
-export { createAlertTransition } from './alert_transition';

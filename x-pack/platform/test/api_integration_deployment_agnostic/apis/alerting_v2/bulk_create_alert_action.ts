@@ -8,11 +8,10 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
-import { createAlertEvent, createAlertTransition } from './fixtures';
+import { createAlertEvent } from './fixtures';
 
 const BULK_ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts/action/_bulk';
 const ALERTS_EVENTS_INDEX = '.alerts-events';
-const ALERTS_TRANSITIONS_INDEX = '.alerts-transitions';
 const ALERTS_ACTIONS_INDEX = '.alerts-actions';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -26,17 +25,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
-      // Create alert events and transitions for two different alert series
-      const alertEvent1 = createAlertEvent({ alert_series_id: 'series-1' });
-      const alertEvent2 = createAlertEvent({ alert_series_id: 'series-2' });
-      const alertTransition1 = createAlertTransition({
-        alert_series_id: 'series-1',
-        episode_id: 'episode-1',
-      });
-      const alertTransition2 = createAlertTransition({
-        alert_series_id: 'series-2',
-        episode_id: 'episode-2',
-      });
+      // Create alert events for two different group hashes
+      const alertEvent1 = createAlertEvent({ group_hash: 'group-1', episode_id: 'episode-1' });
+      const alertEvent2 = createAlertEvent({ group_hash: 'group-2', episode_id: 'episode-2' });
 
       await Promise.all([
         esClient.index({
@@ -49,16 +40,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           document: alertEvent2,
           refresh: 'wait_for',
         }),
-        esClient.index({
-          index: ALERTS_TRANSITIONS_INDEX,
-          document: alertTransition1,
-          refresh: 'wait_for',
-        }),
-        esClient.index({
-          index: ALERTS_TRANSITIONS_INDEX,
-          document: alertTransition2,
-          refresh: 'wait_for',
-        }),
       ]);
     });
 
@@ -67,12 +48,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await Promise.all([
         esClient.deleteByQuery({
           index: ALERTS_EVENTS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-        }),
-        esClient.deleteByQuery({
-          index: ALERTS_TRANSITIONS_INDEX,
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
@@ -120,14 +95,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send([{ alert_series_id: 'series-1', action_type: 'ack' }]);
+        .send([{ group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' }]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 1, total: 1 });
 
       const actions = await getAllActions();
       expect(actions.length).to.be(1);
-      expect(actions[0].alert_series_id).to.be('series-1');
+      expect(actions[0].group_hash).to.be('group-1');
       expect(actions[0].action_type).to.be('ack');
     });
 
@@ -137,8 +112,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { alert_series_id: 'series-1', action_type: 'ack' },
-          { alert_series_id: 'series-2', action_type: 'snooze' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'group-2', action_type: 'snooze' },
         ]);
 
       expect(response.status).to.be(200);
@@ -147,22 +122,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const actions = await getAllActions();
       expect(actions.length).to.be(2);
 
-      const series1Action = actions.find((a) => a.alert_series_id === 'series-1');
-      const series2Action = actions.find((a) => a.alert_series_id === 'series-2');
+      const group1Action = actions.find((a) => a.group_hash === 'group-1');
+      const group2Action = actions.find((a) => a.group_hash === 'group-2');
 
-      expect(series1Action!.action_type).to.be('ack');
-      expect(series2Action!.action_type).to.be('snooze');
+      expect(group1Action!.action_type).to.be('ack');
+      expect(group2Action!.action_type).to.be('snooze');
     });
 
-    it('should handle mixed valid/invalid alert_series_ids with partial success', async () => {
+    it('should handle mixed valid/invalid group hashes with partial success', async () => {
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { alert_series_id: 'series-1', action_type: 'ack' },
-          { alert_series_id: 'unknown-series', action_type: 'ack' },
-          { alert_series_id: 'series-2', action_type: 'unack' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'unknown-group', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'group-2', action_type: 'unack', episode_id: 'episode-2' },
         ]);
 
       expect(response.status).to.be(200);
@@ -171,20 +146,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const actions = await getAllActions();
       expect(actions.length).to.be(2);
 
-      const seriesIds = actions.map((a) => a.alert_series_id);
-      expect(seriesIds).to.contain('series-1');
-      expect(seriesIds).to.contain('series-2');
-      expect(seriesIds).not.to.contain('unknown-series');
+      const groupHashes = actions.map((a) => a.group_hash);
+      expect(groupHashes).to.contain('group-1');
+      expect(groupHashes).to.contain('group-2');
+      expect(groupHashes).not.to.contain('unknown-group');
     });
 
-    it('should return processed 0 when all alert_series_ids are invalid', async () => {
+    it('should return processed 0 when all group hashes are invalid', async () => {
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { alert_series_id: 'unknown-1', action_type: 'ack' },
-          { alert_series_id: 'unknown-2', action_type: 'snooze' },
+          { group_hash: 'unknown-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'unknown-2', action_type: 'snooze' },
         ]);
 
       expect(response.status).to.be(200);
@@ -200,10 +175,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { alert_series_id: 'series-1', action_type: 'ack' },
-          { alert_series_id: 'series-1', action_type: 'tag', tags: ['important', 'reviewed'] },
-          { alert_series_id: 'series-2', action_type: 'snooze' },
-          { alert_series_id: 'series-2', action_type: 'activate', reason: 'needs attention' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'group-1', action_type: 'tag', tags: ['important', 'reviewed'] },
+          { group_hash: 'group-2', action_type: 'snooze' },
+          { group_hash: 'group-2', action_type: 'activate', reason: 'needs attention' },
         ]);
 
       expect(response.status).to.be(200);
