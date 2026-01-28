@@ -24,8 +24,8 @@ const BASE_ENTITY_INDEX_MAPPING = {
   // 'entity.source': { type: 'keyword' },
 } as const satisfies MappingProperties;
 
-export const getComponentTemplateName = (definitionId: string) =>
-  `${ENTITY_BASE_PREFIX}-${definitionId}-latest@platform`;
+export const getComponentTemplateName = (namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
   return {
@@ -46,12 +46,15 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
   },
 });
 
-export const getUpdatesComponentTemplateName = (definitionId: string) =>
-  `${ENTITY_BASE_PREFIX}-${definitionId}-updates@platform`;
+export const getUpdatesComponentTemplateName = (namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-${namespace}-updates@platform`;
 
-export const getUpdatesEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
+export const getUpdatesEntityDefinitionComponentTemplate = (
+  definition: EntityDefinition,
+  namespace: string
+) => {
   return {
-    name: getUpdatesComponentTemplateName(definition.id),
+    name: getUpdatesComponentTemplateName(namespace),
     template: { settings: { hidden: true }, mappings: getUpdatesIndexMappings(definition) },
   };
 };

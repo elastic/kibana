@@ -47,13 +47,12 @@ export async function installElasticsearchAssets({
   definition,
   namespace,
 }: ElasticsearchAssetOptions): Promise<void> {
-  const { type } = definition;
   try {
-    await installComponentTemplates(esClient, definition, logger, type);
-    await installIndexTemplates(esClient, definition, logger, type);
-    await installIndicesAndDataStreams(esClient, definition, namespace, logger, type);
+    await installComponentTemplates(esClient, definition, namespace, logger);
+    await installIndexTemplates(esClient, namespace, logger);
+    await installIndicesAndDataStreams(esClient, namespace, logger);
   } catch (error) {
-    logger.error(`error installing assets for ${type}: ${error}`);
+    logger.error(`error installing assets: ${error}`);
 
     // TODO: We need to uninstall everything, as currently we are in a partial state
     throw error;
@@ -62,42 +61,36 @@ export async function installElasticsearchAssets({
 
 async function installIndicesAndDataStreams(
   esClient: ElasticsearchClient,
-  definition: ManagedEntityDefinition,
   namespace: string,
-  logger: Logger,
-  type: string
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await createIndex(esClient, getLatestEntitiesIndexName(definition.type, namespace));
-      logger.debug(`created latest entity index for: ${type}`);
+      await createIndex(esClient, getLatestEntitiesIndexName(namespace));
+      logger.debug(`created latest entity index`);
     })(),
 
     (async () => {
-      await createDataStream(
-        esClient,
-        getUpdatesEntitiesDataStreamName(definition.type, namespace)
-      );
-      logger.debug(`created updates entity data stream for: ${type}`);
+      await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
+      logger.debug(`created updates entity data stream`);
     })(),
   ]);
 }
 
 async function installIndexTemplates(
   esClient: ElasticsearchClient,
-  definition: ManagedEntityDefinition,
-  logger: Logger,
-  type: string
+  namespace: string,
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(definition));
-      logger.debug(`installed latest index template for: ${type}`);
+      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace));
+      logger.debug(`installed latest index template`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(definition));
-      logger.debug(`installed updates index template for: ${type}`);
+      await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace));
+      logger.debug(`installed updates index template`);
     })(),
   ]);
 }
@@ -105,18 +98,21 @@ async function installIndexTemplates(
 async function installComponentTemplates(
   esClient: ElasticsearchClient,
   definition: ManagedEntityDefinition,
-  logger: Logger,
-  type: string
+  namespace: string,
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
       await putComponentTemplate(esClient, getEntityDefinitionComponentTemplate(definition));
-      logger.debug(`installed latest component template for: ${type}`);
+      logger.debug(`installed latest component template`);
     })(),
 
     (async () => {
-      await putComponentTemplate(esClient, getUpdatesEntityDefinitionComponentTemplate(definition));
-      logger.debug(`installed updates component template for: ${type}`);
+      await putComponentTemplate(
+        esClient,
+        getUpdatesEntityDefinitionComponentTemplate(definition, namespace)
+      );
+      logger.debug(`installed updates component template`);
     })(),
   ]);
 }
@@ -128,13 +124,12 @@ export async function uninstallElasticsearchAssets({
   definition,
   namespace,
 }: ElasticsearchAssetOptions): Promise<void> {
-  const { type } = definition;
   try {
-    await uninstallIndicesAndDataStreams(esClient, definition, namespace, logger, type);
-    await uninstallIndexTemplates(esClient, definition, logger, type);
-    await uninstallComponentTemplates(esClient, definition, logger, type);
+    await uninstallIndicesAndDataStreams(esClient, namespace, logger);
+    await uninstallIndexTemplates(esClient, namespace, logger);
+    await uninstallComponentTemplates(esClient, namespace, logger);
   } catch (error) {
-    logger.error(`error uninstalling assets for ${type}: ${error}`);
+    logger.error(`error uninstalling assets: ${error}`);
     // TODO: degrade status?
     throw error;
   }
@@ -142,58 +137,51 @@ export async function uninstallElasticsearchAssets({
 
 async function uninstallComponentTemplates(
   esClient: ElasticsearchClient,
-  definition: ManagedEntityDefinition,
-  logger: Logger,
-  type: string
+  namespace: string,
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await deleteComponentTemplate(esClient, getComponentTemplateName(definition.id));
-      logger.debug(`deleted entity index component template: ${type}`);
+      await deleteComponentTemplate(esClient, getComponentTemplateName(namespace));
+      logger.debug(`deleted entity index component template`);
     })(),
     (async () => {
-      await deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(definition.id));
-      logger.debug(`deleted entity index updates component template: ${type}`);
+      await deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(namespace));
+      logger.debug(`deleted entity index updates component template`);
     })(),
   ]);
 }
 
 async function uninstallIndexTemplates(
   esClient: ElasticsearchClient,
-  definition: ManagedEntityDefinition,
-  logger: Logger,
-  type: string
+  namespace: string,
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await deleteIndexTemplate(esClient, getLatestIndexTemplateId(definition));
-      logger.debug(`deleted entity index template: ${type}`);
+      await deleteIndexTemplate(esClient, getLatestIndexTemplateId(namespace));
+      logger.debug(`deleted entity index template`);
     })(),
     (async () => {
-      await deleteIndexTemplate(esClient, getUpdatesIndexTemplateId(definition));
-      logger.debug(`deleted entity updates index template: ${type}`);
+      await deleteIndexTemplate(esClient, getUpdatesIndexTemplateId(namespace));
+      logger.debug(`deleted entity updates index template`);
     })(),
   ]);
 }
 
 async function uninstallIndicesAndDataStreams(
   esClient: ElasticsearchClient,
-  definition: ManagedEntityDefinition,
   namespace: string,
-  logger: Logger,
-  type: string
+  logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await deleteIndex(esClient, getLatestEntitiesIndexName(definition.type, namespace));
-      logger.debug(`deleted entity index: ${type}`);
+      await deleteIndex(esClient, getLatestEntitiesIndexName(namespace));
+      logger.debug(`deleted entity index`);
     })(),
     (async () => {
-      await deleteDataStream(
-        esClient,
-        getUpdatesEntitiesDataStreamName(definition.type, namespace)
-      );
-      logger.debug(`deleted entity updates data stream: ${type}`);
+      await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
+      logger.debug(`deleted entity updates data stream`);
     })(),
   ]);
 }
