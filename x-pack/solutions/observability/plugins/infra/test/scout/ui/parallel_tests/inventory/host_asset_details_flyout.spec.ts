@@ -49,7 +49,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices: { inventoryViews } }) => {
-      await inventoryViews.deleteOne(savedViewId);
+      await inventoryViews.deleteById(savedViewId);
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {
