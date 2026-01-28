@@ -132,6 +132,8 @@ describe('DispatcherService integration tests', () => {
     esServer = servers.esServer;
     kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+
+    await new Promise((res) => setTimeout(res, 10000));
   });
 
   afterAll(async () => {
@@ -143,10 +145,12 @@ describe('DispatcherService integration tests', () => {
     }
   });
 
-  beforeEach(async () => {
-    // Clean up data streams before each test
+  afterEach(async () => {
+    // Clean up data streams after each test
     await cleanupDataStreams(esClient);
+  });
 
+  beforeEach(async () => {
     // Setup services
     mockLoggerService = createMockLoggerService();
     storageService = new StorageService(esClient, mockLoggerService.loggerService);
@@ -176,12 +180,9 @@ describe('DispatcherService integration tests', () => {
   });
 
   describe('when there are alert events without prior fire-events', () => {
-    beforeEach(async () => {
-      // Seed test data
-      await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
-    });
-
     it('should dispatch all unique episodes', async () => {
+      await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
+
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
       });
@@ -226,8 +227,7 @@ describe('DispatcherService integration tests', () => {
   });
 
   describe('when some episodes already have fire-events', () => {
-    beforeEach(async () => {
-      // Seed alert events
+    it('should only dispatch episodes that need it', async () => {
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
       // Seed a fire-event for episode-1 that is newer than its last event
@@ -242,9 +242,7 @@ describe('DispatcherService integration tests', () => {
           source: 'internal',
         },
       ]);
-    });
 
-    it('should only dispatch episodes that need it', async () => {
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
       });
@@ -285,8 +283,7 @@ describe('DispatcherService integration tests', () => {
   });
 
   describe('when fire-event is older than latest alert event', () => {
-    beforeEach(async () => {
-      // Seed alert events
+    it('should re-dispatch episodes with newer events', async () => {
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
       // Seed a fire-event for episode-3 that is OLDER than its last event
@@ -301,9 +298,6 @@ describe('DispatcherService integration tests', () => {
           source: 'internal',
         },
       ]);
-    });
-
-    it('should re-dispatch episodes with newer events', async () => {
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
       });

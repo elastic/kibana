@@ -35,6 +35,7 @@ export class DispatcherService implements DispatcherServiceContract {
   public async run({ previousStartedAt = new Date() }: { previousStartedAt?: Date } = {}) {
     const startedAt = new Date();
 
+    // TODO: Use QueryService as soon as it uses esClient instead of data plugin client
     const result = await this.esClient.esql.query({
       query: `
       FROM .alerts-events,.alerts-actions METADATA _index
@@ -124,6 +125,7 @@ export class DispatcherService implements DispatcherServiceContract {
   }
 }
 
+// TODO: Use toRecords from QueryService as soon as it uses esClient instead of data plugin client
 function toRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[] {
   const objects: T[] = [];
 
