@@ -28,12 +28,14 @@ export function filterToolsByNamespace(
     return tools;
   }
 
-  const namespaceList = namespaces
-    .split(',')
-    .map((ns) => ns.trim())
-    .filter(Boolean);
+  const namespaceSet = new Set(
+    namespaces
+      .split(',')
+      .map((ns) => ns.trim())
+      .filter(Boolean)
+  );
 
-  if (namespaceList.length === 0) {
+  if (namespaceSet.size === 0) {
     return tools;
   }
 
@@ -43,7 +45,7 @@ export function filterToolsByNamespace(
       return false;
     }
     const toolNamespace = tool.id.substring(0, lastDotIndex);
-    return namespaceList.includes(toolNamespace);
+    return namespaceSet.has(toolNamespace);
   });
 }
 
