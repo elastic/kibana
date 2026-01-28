@@ -164,16 +164,16 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
         {isServerless ? (
-          <EuiButtonEmpty {...props} data-test-subj="obsAiAssistantAppNavControlButtonEmpty" />
+          <EuiButtonEmpty {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
         ) : (
-          <EuiButton {...props} data-test-subj="obsAiAssistantAppNavControlButton" />
+          <EuiButton {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
         )}
       </EuiShowFor>
       <EuiShowFor sizes={['xs', 's']}>
         <EuiButtonIcon
           {...props}
           display={isServerless ? 'empty' : 'base'}
-          data-test-subj="obsAiAssistantAppNavControlButtonIcon"
+          data-test-subj="observabilityAiAssistantAppNavControlButtonIcon"
         />
       </EuiShowFor>
     </>

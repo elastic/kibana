@@ -69,16 +69,16 @@ export const AssistantNavLink: FC = () => {
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
         {chromeStyle === 'project' ? (
-          <EuiButtonEmpty {...props} data-test-subj="assistantNavLinkButtonEmpty" />
+          <EuiButtonEmpty {...props} data-test-subj="assistantNavLink" />
         ) : (
-          <EuiButton {...props} data-test-subj="assistantNavLinkButton" />
+          <EuiButton {...props} data-test-subj="assistantNavLink" />
         )}
       </EuiShowFor>
       <EuiShowFor sizes={['xs', 's']}>
         <EuiButtonIcon
           {...props}
-          display={chromeStyle === 'project' ? 'empty' : 'base'}
           data-test-subj="assistantNavLinkButtonIcon"
+          display={chromeStyle === 'project' ? 'empty' : 'base'}
         />
       </EuiShowFor>
     </>

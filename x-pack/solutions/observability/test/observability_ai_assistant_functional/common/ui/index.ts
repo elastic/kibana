@@ -86,7 +86,7 @@ const pages = {
   },
   links: {
     solutionMenuLink: 'observability-nav-observabilityAIAssistant-ai_assistant',
-    globalHeaderButton: 'obsAiAssistantAppNavControlButton',
+    globalHeaderButton: 'observabilityAiAssistantAppNavControlButton',
   },
   settings: {
     settingsPage: 'aiAssistantSettingsPage',

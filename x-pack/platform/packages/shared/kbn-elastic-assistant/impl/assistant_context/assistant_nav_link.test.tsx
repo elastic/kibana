@@ -48,7 +48,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    expect(queryByTestId('assistantNavLinkButtonEmpty')).not.toHaveStyle(
+    expect(queryByTestId('assistantNavLink')).not.toHaveStyle(
       'background-color: rgb(204, 228, 245)'
     );
   });
@@ -61,9 +61,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    expect(queryByTestId('assistantNavLinkButton')).toHaveStyle(
-      'background-color: rgb(217, 232, 255)'
-    );
+    expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(217, 232, 255)');
   });
 
   it('should render the header link text', () => {
@@ -72,7 +70,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    expect(queryByTestId('assistantNavLinkButton')).toBeInTheDocument();
+    expect(queryByTestId('assistantNavLink')).toBeInTheDocument();
     expect(queryByText('AI Assistant')).toBeInTheDocument();
   });
 
@@ -89,7 +87,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    expect(queryByTestId('assistantNavLinkButton')).not.toBeInTheDocument();
+    expect(queryByTestId('assistantNavLink')).not.toBeInTheDocument();
     expect(queryByText('AI Assistant')).not.toBeInTheDocument();
   });
 
@@ -99,7 +97,7 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink />
       </>
     );
-    queryByTestId('assistantNavLinkButton')?.click();
+    queryByTestId('assistantNavLink')?.click();
     expect(mockShowAssistantOverlay).toHaveBeenCalledTimes(1);
     expect(mockShowAssistantOverlay).toHaveBeenCalledWith({ showOverlay: true });
   });
