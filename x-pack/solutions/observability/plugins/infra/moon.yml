@@ -138,6 +138,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/presentation-publishing'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
