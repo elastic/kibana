@@ -27,7 +27,7 @@ export function useESQLQueryStats(
       if (stats) {
         const updatedStats = {
           durationInMs: stats.queryTime?.value,
-          totalDocumentsProcessed: stats.documentsProcessed?.value,
+          totalDocumentsQueried: stats.documentsQueried?.value,
           lastRunAt: stats.requestTimestamp?.value,
         };
         setQueryStats((currentStats) => {

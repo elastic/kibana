@@ -332,18 +332,18 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     }),
                     ...(rawResponse &&
                       'documents_found' in rawResponse && {
-                        documentsProcessed: {
-                          label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
-                            defaultMessage: 'Documents processed',
+                        documentsQueried: {
+                          label: i18n.translate('data.search.es_search.documentsQueriedLabel', {
+                            defaultMessage: 'Documents queried',
                           }),
-                          value: i18n.translate('data.search.es_search.documentsProcessedValue', {
-                            defaultMessage: '{documentsProcessed}',
-                            values: { documentsProcessed: rawResponse.documents_found },
+                          value: i18n.translate('data.search.es_search.documentsQueriedValue', {
+                            defaultMessage: '{documentsQueried}',
+                            values: { documentsQueried: rawResponse.documents_found },
                           }),
                           description: i18n.translate(
-                            'data.search.es_search.documentsProcessedDescription',
+                            'data.search.es_search.documentsQueriedDescription',
                             {
-                              defaultMessage: 'The number of documents processed by the query.',
+                              defaultMessage: 'The number of documents queried by the query.',
                             }
                           ),
                         },
