@@ -32,7 +32,9 @@ export const functions = {
           {
             defaultMessage: `
   ### ADD \`+\`
-  Add two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Add two values. In case of numeric fields, if either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  For dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate null result.
+
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -80,9 +82,12 @@ export const functions = {
           {
             defaultMessage: `
   ### DIVIDE \`/\`
-  Divide one number by another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Divide one value by another. For numeric operands, if either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields)
+  then the result is \`null\`.
+  note = "Division of two integer types will yield an integer result, rounding towards 0. "
+  + "If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
+  For dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate null result.
 
-  Note: Division of two integer types will yield an integer result, rounding towards 0. If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -403,7 +408,10 @@ export const functions = {
           {
             defaultMessage: `
   ### MULTIPLY \`*\`
-  Multiply two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Multiply two values together. For numeric fields, if either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields)
+  then the result is \`null\`. For dense_vector operations, both arguments should be dense_vectors. Inequal vector dimensions generate
+  null result.
+
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -502,7 +510,10 @@ export const functions = {
           {
             defaultMessage: `
   ### SUBTRACT \`-\`
-  Subtract one number from another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Subtract one value from another. In case of numeric fields, if either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields)
+  then the result is \`null\`. For dense_vector fields, both arguments should be dense_vectors. Inequal vector dimensions generate
+  null result.
+
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
