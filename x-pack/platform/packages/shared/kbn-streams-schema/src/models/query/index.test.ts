@@ -14,8 +14,10 @@ describe('QueryStream', () => {
       {
         name: 'query-stream',
         description: '',
+        updated_at: new Date().toISOString(),
         query: {
           view: 'stream.query-stream',
+          esql: 'FROM logs | WHERE service.name == "query-child"',
         },
       },
     ])('is valid', (val) => {
@@ -54,6 +56,7 @@ describe('QueryStream', () => {
         stream: {
           name: 'query-stream',
           description: '',
+          updated_at: new Date().toISOString(),
           query: {
             view: 'stream.query-stream',
             esql: 'FROM logs | WHERE service.name == "query-child"',
@@ -109,6 +112,7 @@ describe('QueryStream', () => {
           description: '',
           query: {
             view: 'stream.query-stream',
+            esql: 'FROM logs | WHERE service.name == "query-child"',
           },
         },
         ...emptyAssets,

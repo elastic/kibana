@@ -50,7 +50,7 @@ export namespace QueryStream {
   }
 
   export interface Definition extends BaseStream.Definition {
-    query: Query;
+    query: QueryWithEsql;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -75,7 +75,7 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
   {
     Source: z.object({}),
     Definition: z.object({
-      query: Query.right,
+      query: QueryWithEsql.right,
     }),
     GetResponse: z.object({
       stream: z
