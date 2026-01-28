@@ -6,7 +6,7 @@
  */
 import { getFlattenedObject } from '@kbn/std';
 import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -370,34 +370,15 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     // Get the root stream name to limit conflict checking to the same tree
     const rootStreamName = getRoot(params.path.name);
 
-    // Get all streams and descendants of current stream (to exclude from conflict check)
-    const [allStreams, descendants] = await Promise.all([
-      streamsClient.listStreams(),
-      streamsClient.getDescendants(params.path.name),
-    ]);
+    // Get all wired streams in the same tree (getDescendants already returns only wired streams)
+    const treeStreams = await streamsClient.getDescendants(rootStreamName);
 
-    // Build set of stream names to exclude: current stream and its descendants
-    const excludedStreamNames = new Set<string>([
-      params.path.name,
-      ...descendants.map((d) => d.name),
-    ]);
-
-    // Build a map of fieldName -> [{streamName, type}] for all non-excluded wired streams in the same root tree
+    // Build a map of fieldName -> [{streamName, type}] for all non-excluded streams
     const fieldMap = new Map<string, Array<{ streamName: string; type: string }>>();
 
-    for (const stream of allStreams) {
-      // Only check wired streams
-      if (!Streams.WiredStream.Definition.is(stream)) {
-        continue;
-      }
-
-      // Only check streams within the same root tree
-      if (getRoot(stream.name) !== rootStreamName) {
-        continue;
-      }
-
+    for (const stream of treeStreams) {
       // Skip the current stream and its descendants
-      if (excludedStreamNames.has(stream.name)) {
+      if (stream.name === params.path.name || isDescendantOf(params.path.name, stream.name)) {
         continue;
       }
 
