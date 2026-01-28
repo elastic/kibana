@@ -90,7 +90,7 @@ export const CreateTemplateInputSchema = TemplateSchema.omit({
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
 
 /**
- * Input for updating an existing template
+ * Input for updating an existing template (PUT - full replacement)
  */
 export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
@@ -99,3 +99,15 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;
+
+/**
+ * Input for patching an existing template (PATCH - partial update)
+ * All fields are optional to allow partial updates
+ */
+export const PatchTemplateInputSchema = TemplateSchema.omit({
+  templateId: true,
+  templateVersion: true,
+  deletedAt: true,
+}).partial();
+
+export type PatchTemplateInput = z.infer<typeof PatchTemplateInputSchema>;

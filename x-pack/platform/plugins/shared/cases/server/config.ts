@@ -56,6 +56,7 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
   templates: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
