@@ -21,7 +21,7 @@ export const CopyInput: React.FC<CopyInputProps> = ({ value, onCopyClick }) => {
 
   return (
     <EuiPanel borderRadius="none" hasShadow={false} color={'subdued'} grow={false}>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         <EuiFlexItem>
           <EuiText
             size={'s'}

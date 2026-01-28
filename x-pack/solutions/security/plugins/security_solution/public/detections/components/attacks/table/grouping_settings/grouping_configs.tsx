@@ -8,7 +8,7 @@
 import type { GroupOption, GroupSettings } from '@kbn/grouping/src';
 import { i18n } from '@kbn/i18n';
 
-import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
+import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
 
 const ATTACK_NAME = i18n.translate('xpack.securitySolution.attacks.alertsTable.groups.attackName', {
   defaultMessage: 'Attack',
