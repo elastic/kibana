@@ -54,6 +54,8 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "licenseManagement",
+      "presentationPanel",
+      "unifiedChartSectionViewer",
       "serverless"
     ],
     "requiredBundles": [

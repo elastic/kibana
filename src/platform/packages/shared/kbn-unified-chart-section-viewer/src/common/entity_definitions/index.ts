@@ -7,19 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/observability/metrics/lazy_unified_metrics_experience_grid';
-export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/observability/traces/lazy_trace_metrics_grid';
-export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
-
-// Entity definitions
-export type { EntityDefinition, EntityCategory } from './src/common/entity_definitions';
+export type { EntityDefinition, EntityCategory } from './types';
+export { ENTITY_DEFINITIONS, CATEGORY_ORDER, CATEGORY_LABELS } from './definitions';
 export {
-  ENTITY_DEFINITIONS,
-  CATEGORY_ORDER,
-  CATEGORY_LABELS,
   findAvailableEntities,
   findEntityByAttribute,
   findMetricsForEntity,
   getAllEntityAttributes,
   getAllMetricPrefixes,
-} from './src/common/entity_definitions';
+} from './utils';

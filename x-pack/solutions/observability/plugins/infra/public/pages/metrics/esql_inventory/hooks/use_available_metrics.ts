@@ -14,8 +14,8 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { getESQLAdHocDataview, getStartEndParams } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { findEntityByAttribute, type EntityDefinition } from '@kbn/unified-chart-section-viewer';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { findEntityByAttribute, type EntityDefinition } from '../types/entity_definitions';
 
 /** Numeric field types that can be used as metrics */
 const NUMERIC_TYPES = new Set<string>([

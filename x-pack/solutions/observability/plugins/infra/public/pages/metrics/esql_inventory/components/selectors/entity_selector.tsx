@@ -17,12 +17,14 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EntityFieldInfo } from '../../hooks/use_available_metrics';
 import {
   findAvailableEntities,
   findEntityByAttribute,
+  CATEGORY_ORDER,
+  CATEGORY_LABELS,
   type EntityDefinition,
-} from '../../types/entity_definitions';
+} from '@kbn/unified-chart-section-viewer';
+import type { EntityFieldInfo } from '../../hooks/use_available_metrics';
 
 interface EntitySelectorProps {
   /** Currently selected entity attribute (e.g., 'host.name') */
@@ -43,47 +45,6 @@ interface EntityOption {
   entity?: EntityDefinition;
   isCustom?: boolean;
 }
-
-const CATEGORY_ORDER = [
-  'infrastructure',
-  'kubernetes',
-  'application',
-  'aws',
-  'cloud',
-  'serverless',
-  'database',
-  'messaging',
-] as const;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  infrastructure: i18n.translate(
-    'xpack.infra.esqlInventory.entitySelector.categoryInfrastructure',
-    {
-      defaultMessage: 'Infrastructure',
-    }
-  ),
-  kubernetes: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryKubernetes', {
-    defaultMessage: 'Kubernetes',
-  }),
-  application: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryApplication', {
-    defaultMessage: 'Application',
-  }),
-  aws: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryAws', {
-    defaultMessage: 'AWS',
-  }),
-  cloud: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryCloud', {
-    defaultMessage: 'Cloud',
-  }),
-  serverless: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryServerless', {
-    defaultMessage: 'Serverless',
-  }),
-  database: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryDatabase', {
-    defaultMessage: 'Databases',
-  }),
-  messaging: i18n.translate('xpack.infra.esqlInventory.entitySelector.categoryMessaging', {
-    defaultMessage: 'Messaging',
-  }),
-};
 
 export const EntitySelector: React.FC<EntitySelectorProps> = ({
   value,
