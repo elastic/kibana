@@ -32,14 +32,18 @@ export class DispatcherService {
     const startedAt = new Date();
 
     const result = await this.esClient.esql.query({
-      query: `FROM .alerts-events,.alerts-actions METADATA _index
-        | EVAL rule_id = COALESCE(rule.id, rule_id)
-        | STATS
-            last_fire = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event",
-            last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*" and type == "alert"
-              BY rule_id, group_hash, episode_id, episode_status
-        | WHERE last_fire IS NULL OR last_event_timestamp > last_fire
-        | LIMIT 10000`,
+      query: `
+      FROM .alerts-events,.alerts-actions METADATA _index
+      | EVAL rule_id = COALESCE(rule.id, rule_id)
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event" BY rule_id, group_hash
+      | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ".ds-.alerts-actions-*")
+      | STATS
+          last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*"
+          BY rule_id, group_hash, episode_id, episode_status
+      | WHERE last_event_timestamp IS NOT NULL
+      | keep last_event_timestamp, rule_id, group_hash, episode_id, episode_status
+      | SORT last_event_timestamp desc
+      | LIMIT 10000`,
       filter: {
         range: {
           '@timestamp': {
@@ -91,7 +95,6 @@ export class DispatcherService {
             last_series_event_timestamp: alertEpisode.last_event_timestamp,
             actor: 'system',
             action_type: 'fire-event',
-            episode_id: alertEpisode.episode_id,
             rule_id: alertEpisode.rule_id,
             source: 'internal',
           },

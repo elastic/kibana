@@ -15,7 +15,6 @@ export interface Policy {
 
 export interface AlertEpisode {
   last_event_timestamp: string;
-  last_fire: string | null;
   rule_id: RuleId;
   group_hash: string;
   episode_id: string;
