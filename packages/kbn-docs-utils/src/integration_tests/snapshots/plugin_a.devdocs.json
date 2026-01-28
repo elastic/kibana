@@ -1512,7 +1512,7 @@
             "section": "def-public.MyProps",
             "text": "MyProps"
           },
-          ", string | React.JSXElementConstructor<any>>"
+          ">"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "lineNumber": 65,

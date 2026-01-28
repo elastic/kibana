@@ -144,8 +144,8 @@ it('Function inside interface has a label', () => {
   expect(fn?.type).toBe(TypeKind.FunctionKind);
 });
 
-// FAILING: https://github.com/elastic/kibana/issues/120125
-it.skip('Test ReactElement signature', () => {
+// https://github.com/elastic/kibana/issues/120125
+it('Test ReactElement signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'AReactElementFn');
   expect(node).toBeDefined();
   const def = buildApiDeclarationTopNode(node!, {

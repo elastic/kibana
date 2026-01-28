@@ -71,6 +71,8 @@ export function getSignature(
       );
   }
 
+  signature = normalizeReactElementSignature(signature);
+
   // Don't return the signature if it's the same as the type (string, string)
   if (getTypeKind(node).toString() === signature) return undefined;
 
@@ -97,4 +99,13 @@ export function getSignature(
       return '>';
     } else return link;
   });
+}
+
+function normalizeReactElementSignature(signature: string): string {
+  // ReactElement has a second generic default (`string | React.JSXElementConstructor<any>`)
+  // that expands into verbose output; strip it for readability while keeping the first generic.
+  return signature.replace(
+    /React(?:\.ReactElement|Element)<([^,>]+),\s*string \|\s*React\.JSXElementConstructor<any>>/g,
+    'React.ReactElement<$1>'
+  );
 }
