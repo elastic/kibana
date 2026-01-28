@@ -8,7 +8,7 @@
  */
 
 import type { XYState as XYLensState } from '@kbn/lens-common';
-import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { type AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
 import { capitalize } from 'lodash';
@@ -24,6 +24,7 @@ import {
   buildAPIReferenceLinesLayer,
 } from './api_layers';
 import { stripUndefined } from '../utils';
+import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
   return {
@@ -143,41 +144,6 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
-const curveType = {
-  linear: 'LINEAR',
-  smooth: 'CURVE_MONOTONE_X',
-  stepped: 'CURVE_STEP_AFTER',
-} as const;
-
-function convertAppearanceToStateFormat(
-  config: XYState
-): Pick<
-  XYLensState,
-  | 'valueLabels'
-  | 'labelsOrientation'
-  | 'curveType'
-  | 'fillOpacity'
-  | 'minBarHeight'
-  | 'hideEndzones'
-  | 'showCurrentTimeMarker'
-  | 'pointVisibility'
-> {
-  return {
-    ...(config.decorations?.value_labels != null
-      ? { valueLabels: config.decorations?.value_labels ? 'show' : 'hide' }
-      : {}),
-    ...(config.decorations?.line_interpolation
-      ? { curveType: curveType[config.decorations?.line_interpolation] }
-      : {}),
-    ...(config.decorations?.fill_opacity != null
-      ? { fillOpacity: config.decorations?.fill_opacity }
-      : {}),
-    ...(config.decorations?.minimum_bar_height
-      ? { minBarHeight: config.decorations?.minimum_bar_height }
-      : {}),
-  };
-}
-
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
@@ -192,7 +158,7 @@ export function buildVisualizationState(
     ...convertLegendToStateFormat(config.legend),
     ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...convertAppearanceToStateFormat(config),
+    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
     layers,
   };
 }
@@ -213,12 +179,13 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
+  const decorations = convertAppearanceToAPIFormat(config);
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config),
-    ...convertAppearanceToAPIFormat(config),
+    ...(decorations ? { decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
 }
@@ -386,27 +353,6 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
   }
 
   return { axis };
-}
-
-function convertAppearanceToAPIFormat(config: XYLensState): Pick<XYState, 'decorations'> | {} {
-  const decorations: XYState['decorations'] = {
-    ...(config.valueLabels != null ? { value_labels: config.valueLabels === 'show' } : {}),
-    ...(config.curveType
-      ? {
-          line_interpolation: (Object.entries(curveType).find(
-            ([_, value]) => value === config.curveType
-          )?.[0] || 'linear') as 'linear' | 'smooth' | 'stepped',
-        }
-      : {}),
-    ...(config.fillOpacity != null ? { fill_opacity: config.fillOpacity } : {}),
-    ...(config.minBarHeight != null ? { minimum_bar_height: config.minBarHeight } : {}),
-  };
-
-  if (Object.keys(decorations).length === 0) {
-    return {};
-  }
-
-  return { decorations };
 }
 
 function buildXYLayerAPI(

@@ -13,8 +13,9 @@ const options = {
 };
 
 export function shouldLogStateDiff() {
+  return true;
   // @ts-expect-error
-  return Boolean(window?.ELASTIC_PRESENTATION_LOGGER);
+  // return Boolean(window?.ELASTIC_PRESENTATION_LOGGER);
 }
 
 /**

@@ -179,6 +179,54 @@ const sharedLegendSchema = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
 };
 
+export const XY_API_LINE_INTERPOLATION = {
+  LINEAR: 'linear',
+  SMOOTH: 'smooth',
+  STEPPED: 'stepped',
+} as const;
+
+const decorationsSchema = schema.object(
+  {
+    show_end_zones: schema.maybe(
+      schema.boolean({ meta: { description: 'Show end zones for partial buckets' } })
+    ),
+    show_current_time_marker: schema.maybe(
+      schema.boolean({ meta: { description: 'Show current time marker line' } })
+    ),
+    point_visibility: schema.maybe(
+      schema.oneOf([schema.literal('auto'), schema.literal('always'), schema.literal('never')], {
+        meta: { description: 'Show data points on lines' },
+      })
+    ),
+    line_interpolation: schema.maybe(
+      schema.oneOf([
+        schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
+        schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
+        schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
+      ])
+    ),
+    minimum_bar_height: schema.maybe(
+      schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
+    ),
+    show_value_labels: schema.maybe(
+      schema.boolean({ meta: { description: 'Display value labels on data points' } })
+    ),
+    fill_opacity: schema.maybe(
+      schema.number({
+        min: 0,
+        max: 2,
+        meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyDecorations',
+      description: 'Visual enhancements and styling options for the chart',
+    },
+  }
+);
+
 /**
  * Shared settings that apply to the entire XY chart visualization
  */
@@ -313,50 +361,7 @@ const xySharedSettings = {
       { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
     )
   ),
-  decorations: schema.maybe(
-    schema.object(
-      {
-        end_zones: schema.maybe(
-          schema.boolean({ meta: { description: 'Show end zones for partial buckets' } })
-        ),
-        current_time_marker: schema.maybe(
-          schema.boolean({ meta: { description: 'Show current time marker line' } })
-        ),
-        point_visibility: schema.maybe(
-          schema.boolean({ meta: { description: 'Show data points on lines' } })
-        ),
-        line_interpolation: schema.maybe(
-          schema.oneOf([
-            schema.literal('linear'),
-            schema.literal('smooth'),
-            schema.literal('stepped'),
-          ])
-        ),
-        minimum_bar_height: schema.maybe(
-          schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
-        ),
-        show_value_labels: schema.maybe(
-          schema.boolean({ meta: { description: 'Display value labels on data points' } })
-        ),
-        fill_opacity: schema.maybe(
-          schema.number({
-            min: 0,
-            max: 2,
-            meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
-          })
-        ),
-        value_labels: schema.maybe(
-          schema.boolean({ meta: { description: 'Show value labels (alternative property)' } })
-        ),
-      },
-      {
-        meta: {
-          id: 'xyDecorations',
-          description: 'Visual enhancements and styling options for the chart',
-        },
-      }
-    )
-  ),
+  decorations: schema.maybe(decorationsSchema),
 };
 
 /**
@@ -727,3 +732,5 @@ export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
+
+export type XYDecorations = TypeOf<typeof decorationsSchema>;

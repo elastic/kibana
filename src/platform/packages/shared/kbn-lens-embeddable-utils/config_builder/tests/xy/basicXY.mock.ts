@@ -1104,7 +1104,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     },
   },
   decorations: {
-    value_labels: false,
+    show_value_labels: false,
   },
   layers: [
     {
@@ -1189,7 +1189,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     },
   },
   decorations: {
-    value_labels: false,
+    show_value_labels: false,
   },
   layers: [
     {
