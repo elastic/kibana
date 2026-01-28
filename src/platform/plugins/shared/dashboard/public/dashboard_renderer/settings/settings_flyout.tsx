@@ -225,7 +225,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               helpText={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                  defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                  defaultMessage="If selected, the Cross-project search scope currently in use will be saved along with this dashboard. When you or other users open the dashboard, it will always load with that CPS scope."
                 />
               }
             >
@@ -238,7 +238,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                 label={
                   <FormattedMessage
                     id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
-                    defaultMessage="Store project routing with dashboard"
+                    defaultMessage="Store CPS scope with dashboard"
                   />
                 }
               />
