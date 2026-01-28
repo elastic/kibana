@@ -119,8 +119,13 @@ beforeAll(async () => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
-    getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs,
+    unnamedExports,
+  } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 
@@ -128,11 +133,13 @@ beforeAll(async () => {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
   pluginBStats = collectApiStatsForPlugin(pluginApiMap.pluginB, {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
@@ -155,11 +162,21 @@ beforeAll(async () => {
       paramDocMismatches: pluginAStats.paramDocMismatches.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
+      unnamedExports: pluginAStats.unnamedExports.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
     paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
+    unnamedExports: pluginAStats.unnamedExports.map(
+      ({ pluginId, scope, path, lineNumber, textSnippet }) => ({
+        pluginId,
+        scope,
+        path,
+        lineNumber,
+        textSnippet,
+      })
+    ),
   };
   fs.writeFileSync(
     Path.resolve(mdxOutputFolder, 'plugin_a.stats.json'),

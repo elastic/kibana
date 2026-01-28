@@ -85,7 +85,7 @@ describe('parseCliFlags', () => {
 
     const result = parseCliFlags(flags);
 
-    expect(result.stats).toEqual(['comments', 'any', 'exports']);
+    expect(result.stats).toEqual(['comments', 'any', 'exports', 'unnamed']);
   });
 
   it('dedupes overlapping stats and check flags', () => {
@@ -113,7 +113,7 @@ describe('parseCliFlags', () => {
     };
 
     expect(() => parseCliFlags(flags)).toThrow(
-      'expected --stats must only contain `any`, `comments` and/or `exports`'
+      'expected --stats must only contain `any`, `comments`, `exports`, and/or `unnamed`'
     );
   });
 
@@ -123,18 +123,18 @@ describe('parseCliFlags', () => {
     };
 
     expect(() => parseCliFlags(flags)).toThrow(
-      'expected --stats must only contain `any`, `comments` and/or `exports`'
+      'expected --stats must only contain `any`, `comments`, `exports`, and/or `unnamed`'
     );
   });
 
   it('accepts valid stats values', () => {
     const flags: CliFlags = {
-      stats: ['any', 'comments', 'exports'],
+      stats: ['any', 'comments', 'exports', 'unnamed'],
     };
 
     const result = parseCliFlags(flags);
 
-    expect(result.stats).toEqual(['any', 'comments', 'exports']);
+    expect(result.stats).toEqual(['any', 'comments', 'exports', 'unnamed']);
   });
 
   it('handles references flag correctly', () => {
