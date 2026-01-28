@@ -403,16 +403,13 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   SAVE_TOTAL_DOCS_STATS: {
-                    target: '.loaded',
                     actions: ['storeTotalDocStats', 'storeDatasets'],
                   },
                   NOTIFY_TOTAL_DOCS_STATS_FAILED: [
                     {
-                      target: '.unauthorized',
                       guard: 'checkIfActionForbidden',
                     },
                     {
-                      target: '.loaded',
                       actions: ['notifyFetchTotalDocsFailed'],
                     },
                   ],
