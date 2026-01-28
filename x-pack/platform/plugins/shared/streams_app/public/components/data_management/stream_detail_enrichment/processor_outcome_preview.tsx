@@ -35,6 +35,10 @@ import { RowSelectionContext } from '../shared/preview_table';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
+  createOriginalGrokFieldValuesMap,
+  getGrokFieldDisplayValue,
+} from './processor_outcome_preview_helpers';
+import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
@@ -331,15 +335,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from) &&
-    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
-      const fieldName = draftProcessor.processor?.from;
-      return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
-      );
-    });
+    !isEmpty(draftProcessor.processor.from);
 
   const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
   const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
@@ -393,6 +389,17 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     () => (validGrokField ? [validGrokField] : undefined),
     [validGrokField]
   );
+
+  /**
+   * Map from preview document to the original (pre-transformation) value of the grok field.
+   * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
+   * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
+   */
+  const originalGrokFieldValues = useMemo(() => {
+    if (!grokMode || !validGrokField || !originalSamples) return undefined;
+
+    return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
+  }, [grokMode, validGrokField, originalSamples, previewDocuments]);
 
   const previewColumns = grokColumns ?? availableColumns;
 
@@ -466,10 +473,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const renderCellValue = useMemo(
     () =>
-      grokMode
+      grokMode && validGrokField
         ? (document: SampleDocument, columnId: string) => {
-            const value = document[columnId];
-            if (typeof value === 'string' && columnId === validGrokField) {
+            // Use the original (pre-transformation) value for the grok field.
+            // This ensures highlighting works even when grok extracts into the same field it reads from.
+            const value = getGrokFieldDisplayValue(
+              document,
+              columnId,
+              validGrokField,
+              originalGrokFieldValues
+            );
+
+            if (typeof value === 'string') {
               return (
                 <Sample
                   grokCollection={grokCollection}
@@ -477,12 +492,17 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
                   sample={value}
                 />
               );
-            } else {
-              return <>&nbsp;</>;
             }
+            return <>&nbsp;</>;
           }
         : undefined,
-    [draftProcessor.resources?.grokExpressions, grokCollection, grokMode, validGrokField]
+    [
+      draftProcessor.resources?.grokExpressions,
+      grokCollection,
+      grokMode,
+      originalGrokFieldValues,
+      validGrokField,
+    ]
   );
 
   const hits = useMemo(() => {
