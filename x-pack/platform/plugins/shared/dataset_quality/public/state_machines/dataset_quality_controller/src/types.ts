@@ -177,5 +177,5 @@ export type DatasetQualityControllerEvent =
       type: 'UPDATE_FAILURE_STORE';
       dataStream: DataStreamStat;
     }
-  | { type: 'SAVE_TOTAL_DOCS_STATS'; data: DataStreamDocsStat[] }
+  | { type: 'SAVE_TOTAL_DOCS_STATS'; data: DataStreamDocsStat[]; dataStreamType: DataStreamType }
   | { type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED'; data: Error };

@@ -613,12 +613,11 @@ export const createDatasetQualityControllerStateMachine = ({
         };
       }),
       storeTotalDocStats: assign(({ context, event }) => {
-        if (!('data' in event)) return {};
-        // For callback actors, data comes through event
+        if (!('data' in event) || !('dataStreamType' in event)) return {};
         return {
           totalDocsStats: {
             ...context.totalDocsStats,
-            // Type is passed through the event from callback
+            [event.dataStreamType]: event.data,
           },
         };
       }),
@@ -692,9 +691,9 @@ export const createDatasetQualityControllerStateMachine = ({
             const totalDocsStats = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getDataStreamsTotalDocs({ type, start, end })
               : Promise.resolve([]));
-            sendBack({ type: 'SAVE_TOTAL_DOCS_STATS', data: totalDocsStats });
+            sendBack({ type: 'SAVE_TOTAL_DOCS_STATS', data: totalDocsStats, dataStreamType: type });
           } catch (e) {
-            sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', data: e });
+            sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', data: e as Error });
           }
         };
         fetchDocs();
