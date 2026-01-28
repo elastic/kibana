@@ -18,10 +18,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
-import {
-  DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-  DEFAULT_LOG_SOURCE_FIELDS,
-} from '../../tools/get_correlated_logs/constants';
+import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from './get_log_severity';
 import type { AiInsightResult, ContextEvent } from './types';
 
@@ -69,7 +66,8 @@ export async function getLogAiInsights({
 
         - **What happened**: Summarize the error in plain language
         - **Where it originated**: Identify the service, component, or code path
-        - **Root cause**: Analyze using CorrelatedLogSequence to understand what happened before and after the error
+        - **Root cause**: Analyze using CorrelatedLogSequence and LogCategories to understand what happened before and after the error
+        - **Pattern analysis**: Use LogCategories to identify if this is a recurring pattern or anomaly
         - **Impact**: Note any affected downstream services or dependencies
         - **Next steps**: Suggest specific actions for investigation or remediation
 
@@ -80,7 +78,7 @@ export async function getLogAiInsights({
 
         - Explain what the log message means in context
         - Identify the source (service, host, container)
-        - Use ServiceSummary if available to provide service context
+        - Use LogCategories to show common log patterns in the time window
 
         Base your analysis strictly on the provided data. Be specific and reference actual field values.
       `);
@@ -103,10 +101,6 @@ export async function getLogAiInsights({
   const windowStart = moment(logTimestamp).subtract(1, 'hours').toISOString();
   const windowEnd = moment(logTimestamp).add(1, 'hours').toISOString();
 
-  const resourceAttrs = logEntry.resource?.attributes;
-  const serviceName = logEntry.service?.name ?? (resourceAttrs?.['service.name'] as string) ?? '';
-  const serviceEnvironment = logEntry.service?.environment ?? '';
-
   interface ContextPart {
     name: string;
     handler: () => Promise<unknown>;
@@ -122,14 +116,11 @@ export async function getLogAiInsights({
           core,
           logger,
           esClient,
+          index,
           start: windowStart,
           end: windowEnd,
           logId: id,
           errorLogsOnly: true,
-          correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-          logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
-          maxSequences: 1,
-          maxLogsPerSequence: 50,
         });
 
         return sequences[0] || null;
@@ -140,19 +131,26 @@ export async function getLogAiInsights({
     },
   });
 
-  if (serviceName) {
-    contextParts.push({
-      name: 'ServiceSummary',
-      handler: () =>
-        dataRegistry.getData('apmServiceSummary', {
-          request,
-          serviceName,
-          serviceEnvironment,
+  contextParts.push({
+    name: 'LogCategories',
+    handler: async () => {
+      try {
+        const categories = await getLogCategories({
+          core,
+          logger,
+          esClient,
+          index,
           start: windowStart,
           end: windowEnd,
-        }),
-    });
-  }
+          fields: ['service.name', 'host.name', 'container.id'],
+        });
+        return categories;
+      } catch (error) {
+        logger.debug(`Failed to fetch log categories: ${error.message}`);
+        return null;
+      }
+    },
+  });
 
   const results = await Promise.allSettled(
     contextParts.map(async (part) => {

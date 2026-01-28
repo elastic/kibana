@@ -8,28 +8,29 @@
 import { WARNING_AND_ABOVE_VALUES } from '../../utils/warning_and_above_log_filter';
 import type { LogDocument } from './get_log_document_by_id';
 
+const ERROR_PATTERNS = [/\berror\b/i, /\bexception\b/i, /\bfail(?:ed|ure|ing)?\b/i, /\btimeout\b/i];
+
 /**
  * Analyzes a log entry to determine if it is warning level or above
  * (warn, error, critical, fatal)
  */
 export function isWarningOrAbove(logDocument: LogDocument): boolean {
-  // Check log.level (ECS field, resolves aliases for OTel)
   const logLevel = logDocument['log.level'];
   if (typeof logLevel === 'string' && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
     return true;
   }
 
-  // Check HTTP 5xx error status codes
-  const httpStatus = logDocument['http.response.status_code'];
-  if (httpStatus != null) {
-    const statusCode = parseInt(httpStatus, 10);
-    if (typeof statusCode === 'number' && statusCode >= 500) {
-      return true;
-    }
+  const statusCode = Number(logDocument['http.response.status_code']);
+  if (statusCode >= 500) {
+    return true;
   }
 
-  // Check for exception/error message presence
   if (logDocument['exception.message'] || logDocument['error.message']) {
+    return true;
+  }
+
+  const message = logDocument.message;
+  if (typeof message === 'string' && ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
     return true;
   }
 
