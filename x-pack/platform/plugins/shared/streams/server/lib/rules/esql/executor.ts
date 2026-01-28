@@ -53,6 +53,14 @@ export async function getRuleExecutor(
     logger,
   });
 
+  if (results.length === 0) {
+    return {
+      state: {
+        previousOriginalDocumentIds: [],
+      },
+    };
+  }
+
   const alertDocIdToDocumentIdMap = new Map<string, string>();
   const alerts = results.map((result) => {
     const alertDocId = objectHash([result._id, rule.id, spaceId]);
