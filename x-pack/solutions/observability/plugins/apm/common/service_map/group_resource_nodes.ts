@@ -17,8 +17,7 @@ import type {
   GroupedNode,
 } from './types';
 import { getEdgeId, isSpanGroupingSupported } from './utils';
-
-const MINIMUM_GROUP_SIZE = 4;
+import { MINIMUM_GROUP_SIZE } from './constants';
 
 const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
   Boolean(el.data.source && el.data.target);
