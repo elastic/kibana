@@ -9,8 +9,6 @@
 
 /* eslint-disable max-classes-per-file*/
 
-import fetch from 'node-fetch';
-import type { RequestInit } from 'node-fetch';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
@@ -57,8 +55,8 @@ export class KibanaClient {
         ...this.headers,
         ...options.headers,
       },
-      agent: getFetchAgent(normalizedUrl),
-    }).then(async (response) => {
+      dispatcher: getFetchAgent(normalizedUrl),
+    } as RequestInit).then(async (response) => {
       if (options.ignore && options.ignore.includes(response.status)) {
         return undefined;
       }
