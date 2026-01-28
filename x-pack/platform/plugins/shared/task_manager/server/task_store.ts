@@ -63,6 +63,7 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import type { ApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
@@ -222,6 +223,7 @@ export class TaskStore {
   private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
     const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
     const apiKeyIdsToRemoveMap = new Map<string, string>();
+    let apiKeyAndUserScopeMap: Map<string, ApiKeyAndUserScope> | null = null;
 
     // If a task with an API key is updated with a request
     if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
@@ -239,15 +241,11 @@ export class TaskStore {
 
       // and create new API keys using the new request
       if (docsWithApiKeys.length) {
-        const apiKeyAndUserScopeMap = await this.getApiKeyFromRequest(
-          docsWithApiKeys,
-          options.request
-        );
-        return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
+        apiKeyAndUserScopeMap = await this.getApiKeyFromRequest(docsWithApiKeys, options.request);
       }
     }
 
-    return { apiKeyAndUserScopeMap: null, apiKeyIdsToRemoveMap };
+    return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
   }
 
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
