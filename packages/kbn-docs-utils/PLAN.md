@@ -174,12 +174,12 @@ Key files:
 - [x] Add test cases for overloaded functions
 
 ### Phase 4.8: Unnamed Exports Validator
-- [ ] Add `UnnamedExport` type to [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
-- [ ] Extend `IssuesByPlugin` with optional `unnamedExports` field
-- [ ] Update `getDeclarationNodesForPluginScope` in [packages/kbn-docs-utils/src/get_declaration_nodes_for_plugin.ts](packages/kbn-docs-utils/src/get_declaration_nodes_for_plugin.ts) to detect unnamed exports
-- [ ] Update `getPluginApi` in [packages/kbn-docs-utils/src/get_plugin_api.ts](packages/kbn-docs-utils/src/get_plugin_api.ts) to propagate unnamed exports
-- [ ] Add `--check unnamed` CLI flag
-- [ ] Add tests for unnamed export detection
+- [x] Add `UnnamedExport` type to [packages/kbn-docs-utils/src/types.ts](packages/kbn-docs-utils/src/types.ts)
+- [x] Extend `IssuesByPlugin` with optional `unnamedExports` field
+- [x] Update `getDeclarationNodesForPluginScope` in [packages/kbn-docs-utils/src/get_declaration_nodes_for_plugin.ts](packages/kbn-docs-utils/src/get_declaration_nodes_for_plugin.ts) to detect unnamed exports
+- [x] Update `getPluginApi` in [packages/kbn-docs-utils/src/get_plugin_api.ts](packages/kbn-docs-utils/src/get_plugin_api.ts) to propagate unnamed exports
+- [x] Add `--check unnamed` CLI flag
+- [x] Add tests for unnamed export detection
 
 ## Phase 5: CLI Output Improvements
 - [ ] Improve `getLink` in [packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts](packages/kbn-docs-utils/src/cli/tasks/report_metrics.ts) to use line numbers when available

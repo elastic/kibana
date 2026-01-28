@@ -152,6 +152,29 @@ describe('getJSDocParamComment', () => {
     const commentUpper = getJSDocParamComment(node!, 'A');
     expect(commentUpper.length).toBe(0); // Case-sensitive, so 'A' won't match 'a'
   });
+
+  it('handles malformed @param with type but no name', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * @param {Object}
+       */
+      function malformedParam(obj: object) {}
+      `
+    );
+
+    const func = testSourceFile.getFunction('malformedParam');
+    expect(func).toBeDefined();
+
+    // Should not throw, and should return empty array since param name is missing in JSDoc.
+    const comment = getJSDocParamComment(func!, 'obj');
+    expect(comment).toEqual([]);
+  });
 });
 
 describe('getJSDocReturnTagComment', () => {

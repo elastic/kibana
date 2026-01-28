@@ -795,7 +795,7 @@
           }
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-        "lineNumber": 98,
+        "lineNumber": 100,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1493,7 +1493,7 @@
                   "number"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-                "lineNumber": 86,
+                "lineNumber": 88,
                 "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1517,7 +1517,7 @@
               "any"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1535,7 +1535,7 @@
                   "string[]"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
-                "lineNumber": 92,
+                "lineNumber": 94,
                 "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false,

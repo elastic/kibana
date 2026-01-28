@@ -49,7 +49,13 @@ beforeAll(() => {
 
   plugins = [getKibanaPlatformPlugin('pluginA')];
 
-  nodes = getDeclarationNodesForPluginScope(project, plugins[0], ApiScope.CLIENT, log);
+  const { nodes: decNodes } = getDeclarationNodesForPluginScope(
+    project,
+    plugins[0],
+    ApiScope.CLIENT,
+    log
+  );
+  nodes = decNodes;
 });
 
 it('Test number primitive doc def', () => {
