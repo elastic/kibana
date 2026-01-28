@@ -54,8 +54,11 @@ export function setBreadcrumbs({
   services: DiscoverServices;
 }) {
   const embeddable = services.embeddableEditor;
+  const byValueTitle = embeddable.getByValueInput()?.label;
 
-  if (titleBreadcrumbText) {
+  const breadcrumbTitle = titleBreadcrumbText || byValueTitle;
+
+  if (breadcrumbTitle) {
     const rootBreadcrumbs = getRootBreadcrumbs({
       breadcrumb: rootBreadcrumbPath,
       embeddable,
@@ -67,9 +70,9 @@ export function setBreadcrumbs({
         text: embeddable.isEmbeddedEditor()
           ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
               defaultMessage: 'Editing {title}',
-              values: { title: titleBreadcrumbText },
+              values: { title: breadcrumbTitle },
             })
-          : titleBreadcrumbText,
+          : breadcrumbTitle,
       },
     ]);
   } else {

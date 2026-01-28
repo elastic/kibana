@@ -184,6 +184,7 @@ describe('initialize edit api', () => {
       partialApi: mockedApi,
       isEditable: () => true,
       discoverServices: discoverServiceMock,
+      getTitle: () => 'test-title',
     });
 
     await onEdit();

@@ -275,6 +275,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
+      getByValueInput: jest.fn(),
     },
   } as unknown as DiscoverServices;
 }

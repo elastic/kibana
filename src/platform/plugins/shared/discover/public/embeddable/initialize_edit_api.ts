@@ -67,6 +67,7 @@ export function initializeEditApi<
   partialApi,
   isEditable,
   discoverServices,
+  getTitle,
 }: {
   uuid: string;
   parentApi?: ParentApiType;
@@ -74,6 +75,7 @@ export function initializeEditApi<
     PublishesSavedObjectId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
+  getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
 }): ReturnType {
   /**
@@ -99,9 +101,11 @@ export function initializeEditApi<
         : fromSavedSearchToSavedObjectTab({
             tab: {
               id: uuid,
-              label: i18n.translate('discover.embeddable.byValueTabName', {
-                defaultMessage: 'By-value Discover session',
-              }),
+              label:
+                getTitle() ??
+                i18n.translate('discover.embeddable.byValueTabName', {
+                  defaultMessage: 'By-value Discover session',
+                }),
             },
             savedSearch: partialApi.savedSearch$.getValue(),
             services: discoverServices,
