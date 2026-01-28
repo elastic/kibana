@@ -307,11 +307,11 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   UPDATE_TIME_RANGE: {
-                    target: 'datasets.fetching',
+                    target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
                   REFRESH_DATA: {
-                    target: 'datasets.fetching',
+                    target: '.fetching',
                   },
                 },
               },
@@ -343,11 +343,11 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   UPDATE_TIME_RANGE: {
-                    target: 'degradedDocs.fetching',
+                    target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
                   REFRESH_DATA: {
-                    target: 'degradedDocs.fetching',
+                    target: '.fetching',
                   },
                 },
               },
@@ -384,11 +384,11 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   UPDATE_TIME_RANGE: {
-                    target: 'failedDocs.fetching',
+                    target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
                   REFRESH_DATA: {
-                    target: 'failedDocs.fetching',
+                    target: '.fetching',
                   },
                 },
               },
@@ -403,25 +403,25 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   SAVE_TOTAL_DOCS_STATS: {
-                    target: 'docsStats.loaded',
+                    target: '.loaded',
                     actions: ['storeTotalDocStats', 'storeDatasets'],
                   },
                   NOTIFY_TOTAL_DOCS_STATS_FAILED: [
                     {
-                      target: 'docsStats.unauthorized',
+                      target: '.unauthorized',
                       guard: 'checkIfActionForbidden',
                     },
                     {
-                      target: 'docsStats.loaded',
+                      target: '.loaded',
                       actions: ['notifyFetchTotalDocsFailed'],
                     },
                   ],
                   UPDATE_TIME_RANGE: {
-                    target: 'docsStats.fetching',
+                    target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
                   REFRESH_DATA: {
-                    target: 'docsStats.fetching',
+                    target: '.fetching',
                   },
                 },
               },
@@ -453,10 +453,10 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   UPDATE_TIME_RANGE: {
-                    target: 'nonAggregatableDatasets.fetching',
+                    target: '.fetching',
                   },
                   REFRESH_DATA: {
-                    target: 'nonAggregatableDatasets.fetching',
+                    target: '.fetching',
                   },
                 },
               },
@@ -501,22 +501,22 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
             on: {
               UPDATE_TIME_RANGE: {
-                target: 'integrations.fetching',
+                target: '.fetching',
                 actions: ['storeTimeRange'],
               },
               REFRESH_DATA: {
-                target: 'integrations.fetching',
+                target: '.fetching',
               },
               UPDATE_INTEGRATIONS: {
-                target: 'integrations.loaded',
+                target: '.loaded',
                 actions: ['storeIntegrationsFilter'],
               },
               UPDATE_NAMESPACES: {
-                target: 'integrations.loaded',
+                target: '.loaded',
                 actions: ['storeNamespaces'],
               },
               UPDATE_QUALITIES: {
-                target: 'integrations.loaded',
+                target: '.loaded',
                 actions: ['storeQualities'],
               },
               UPDATE_TYPES: {
