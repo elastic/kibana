@@ -51,6 +51,15 @@ export interface GroupedConnectionInfo {
 }
 
 /**
+ * Group info
+ */
+export interface GroupInfo {
+  id: string;
+  sources: string[];
+  targets: string[];
+}
+
+/**
  * Data for grouped resource nodes
  */
 export interface GroupedNodeData extends BaseNodeData {
@@ -60,6 +69,15 @@ export interface GroupedNodeData extends BaseNodeData {
   spanSubtype?: string;
   groupedConnections: GroupedConnectionInfo[];
   count: number;
+}
+
+/**
+ * Result of grouping React Flow nodes
+ */
+export interface GroupReactFlowNodesResult {
+  nodes: ServiceMapNode[];
+  edges: ServiceMapEdge[];
+  nodesCount: number;
 }
 
 /**
@@ -131,4 +149,12 @@ export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNod
  */
 export function isGroupedNode(node: ServiceMapNode): node is Node<GroupedNodeData> {
   return 'isGrouped' in node.data && node.data.isGrouped === true;
+}
+
+/**
+ * Type guard to check if node data is dependency/external node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isDependencyNodeData(data: ServiceMapNodeData): data is DependencyNodeData {
+  return data.isService === false && !('isGrouped' in data);
 }

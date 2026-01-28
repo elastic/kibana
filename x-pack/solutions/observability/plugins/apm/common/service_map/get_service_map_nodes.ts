@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
@@ -291,7 +290,7 @@ export function getServiceMapNodes({
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
   const edges = markBidirectionalConnections({
-    connections: sortBy(mappedEdges, 'id'),
+    connections: [...mappedEdges].sort((a, b) => a.id.localeCompare(b.id)),
   });
 
   // Put everything together in elements, with everything in the "data" property

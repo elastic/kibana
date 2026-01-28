@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { euiLightVars as theme } from '@kbn/ui-theme';
+
 export const MINIMUM_GROUP_SIZE = 4;
 
-export const DEFAULT_EDGE_COLOR = '#98A2B3';
+export const DEFAULT_EDGE_COLOR = theme.euiColorMediumShade;
 export const DEFAULT_EDGE_STROKE_WIDTH = 1;
 
 export const DEFAULT_MARKER_SIZE = 12;
@@ -31,3 +33,7 @@ export const NONGROUPED_SPANS: Record<string, string[]> = {
   external: ['graphql', 'grpc', 'websocket'],
   template: ['handlebars'],
 };
+
+// 'external' with 'http' subtype are groupable nodes used in the tests
+export const GROUPABLE_SPAN_TYPE = 'external';
+export const GROUPABLE_SPAN_SUBTYPE = 'http';

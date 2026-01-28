@@ -23,3 +23,9 @@ export const NODE_SEPARATION = 80;
 
 /** Margin around the graph edges */
 export const GRAPH_MARGIN = 50;
+
+/** Padding around the graph when fitting the view (as a ratio) */
+export const FIT_VIEW_PADDING = 0.2;
+
+/** Duration of the fit view animation in milliseconds */
+export const FIT_VIEW_DURATION = 200;

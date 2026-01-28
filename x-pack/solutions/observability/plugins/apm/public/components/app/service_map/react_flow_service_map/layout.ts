@@ -17,7 +17,7 @@ import {
 
 export interface LayoutOptions {
   /** Direction of the graph layout */
-  rankdir?: 'TB' | 'BT' | 'LR' | 'RL';
+  rankdir?: 'TB' | 'LR';
   /** Vertical spacing between ranks */
   ranksep?: number;
   /** Horizontal spacing between nodes */

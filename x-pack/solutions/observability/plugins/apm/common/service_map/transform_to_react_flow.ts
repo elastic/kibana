@@ -9,7 +9,6 @@
  * Transform service map API response directly to React Flow format.
  */
 
-import { sortBy } from 'lodash';
 import {
   SERVICE_NAME,
   AGENT_NAME,
@@ -100,16 +99,10 @@ export function transformToReactFlow(
 ): ReactFlowServiceMapResponse {
   const tracesCount = 'tracesCount' in data ? data.tracesCount : 0;
 
-  // Step 1: Extract paths from spans
   const paths = getPaths({ spans: data.spans });
 
-  // Step 2: Add messaging connections
   const allConnections = addMessagingConnections(paths.connections, paths.exitSpanDestinations);
-
-  // Step 3: Get all nodes
   const allNodes = getAllNodes(data.servicesData, allConnections);
-
-  // Step 4: Get all services with anomaly stats
   const allServices = getAllServices(allNodes, paths.exitSpanDestinations, data.anomalies);
 
   // Step 5: Map nodes - resolves exit spans to destinations
@@ -137,7 +130,7 @@ export function transformToReactFlow(
   // Step 8: Mark bidirectional connections
   const markedEdges = [
     ...markBidirectionalConnections({
-      connections: sortBy(mappedEdges, 'id'),
+      connections: [...mappedEdges].sort((a, b) => a.id.localeCompare(b.id)),
     }),
   ];
 

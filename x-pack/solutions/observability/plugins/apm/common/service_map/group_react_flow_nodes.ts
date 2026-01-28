@@ -15,32 +15,24 @@ import type {
   ServiceMapNode,
   ServiceMapEdge,
   GroupedNodeData,
-  DependencyNodeData,
+  GroupInfo,
+  GroupReactFlowNodesResult,
 } from './react_flow_types';
+import { isDependencyNodeData } from './react_flow_types';
 import { isSpanGroupingSupported, getEdgeId, createEdgeMarker } from './utils';
 import { MINIMUM_GROUP_SIZE, DEFAULT_EDGE_STYLE } from './constants';
 
-interface GroupInfo {
-  id: string;
-  sources: string[];
-  targets: string[];
-}
-
 /**
- * Check if a node is eligible for grouping (external dependency with supported span type)
+ * Check if a node is eligible for grouping (external dependency with supported span type).
  */
 function isGroupableNode(node: ServiceMapNode): boolean {
-  const data = node.data;
-  if (data.isService) return false;
+  if (!isDependencyNodeData(node.data)) return false;
 
-  const spanType = 'spanType' in data ? data.spanType : undefined;
-  const spanSubtype = 'spanSubtype' in data ? data.spanSubtype : undefined;
-
-  return isSpanGroupingSupported(spanType, spanSubtype);
+  return isSpanGroupingSupported(node.data.spanType, node.data.spanSubtype);
 }
 
 /**
- * Find groups of nodes that share the same sources and have 4+ targets
+ * Find groups of nodes that share the same sources and have ≥ `MINIMUM_GROUP_SIZE` targets.
  */
 function findGroups(nodes: ServiceMapNode[], edges: ServiceMapEdge[]): GroupInfo[] {
   const groupableNodeIds = new Set(nodes.filter(isGroupableNode).map((n) => n.id));
@@ -64,33 +56,33 @@ function findGroups(nodes: ServiceMapNode[], edges: ServiceMapEdge[]): GroupInfo
     groups.set(groupId, group);
   }
 
-  // Only keep groups with 4+ targets
+  // Only keep groups with ≥ `MINIMUM_GROUP_SIZE` targets
   return [...groups.values()].filter((g) => g.targets.length >= MINIMUM_GROUP_SIZE);
 }
 
 /**
- * Create a grouped node from a group of nodes
+ * Create a grouped node from a group of nodes.
  */
 function createGroupedNode(
   group: GroupInfo,
   nodesById: Map<string, ServiceMapNode>
 ): ServiceMapNode {
   const firstTarget = nodesById.get(group.targets[0]);
-  const firstData = firstTarget?.data as DependencyNodeData | undefined;
+  const firstData =
+    firstTarget && isDependencyNodeData(firstTarget.data) ? firstTarget.data : undefined;
 
-  const groupedConnections = group.targets
-    .map((targetId) => {
-      const node = nodesById.get(targetId);
-      if (!node) return undefined;
-      const data = node.data as DependencyNodeData;
-      return {
-        id: data.id,
-        label: data.label,
-        spanType: data.spanType,
-        spanSubtype: data.spanSubtype,
-      };
-    })
-    .filter((c): c is NonNullable<typeof c> => c !== undefined);
+  const groupedConnections: GroupedNodeData['groupedConnections'] = [];
+  for (const targetId of group.targets) {
+    const node = nodesById.get(targetId);
+    if (node && isDependencyNodeData(node.data)) {
+      groupedConnections.push({
+        id: node.data.id,
+        label: node.data.label,
+        spanType: node.data.spanType,
+        spanSubtype: node.data.spanSubtype,
+      });
+    }
+  }
 
   const groupedData: GroupedNodeData = {
     id: group.id,
@@ -127,12 +119,6 @@ function createGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
     markerEnd: createEdgeMarker(),
     data: { isBidirectional: false },
   }));
-}
-
-export interface GroupReactFlowNodesResult {
-  nodes: ServiceMapNode[];
-  edges: ServiceMapEdge[];
-  nodesCount: number;
 }
 
 /**

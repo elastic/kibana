@@ -13,12 +13,7 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
 } from './react_flow_types';
-import { DEFAULT_EDGE_COLOR } from './constants';
-
-// Note: 'db' and 'cache' types with 'all' are NOT groupable per NONGROUPED_SPANS config.
-// Use 'external' with 'http' subtype are groupable nodes.
-const GROUPABLE_SPAN_TYPE = 'external';
-const GROUPABLE_SPAN_SUBTYPE = 'http';
+import { DEFAULT_EDGE_COLOR, GROUPABLE_SPAN_SUBTYPE, GROUPABLE_SPAN_TYPE } from './constants';
 
 function createServiceNode(id: string, label?: string): ServiceMapNode {
   return {
@@ -67,7 +62,7 @@ function createEdge(source: string, target: string): ServiceMapEdge {
 
 describe('groupReactFlowNodes', () => {
   describe('when there are no groupable nodes', () => {
-    it('should return nodes and edges unchanged', () => {
+    it('returns nodes and edges unchanged', () => {
       const nodes = [
         createServiceNode('service-a'),
         createServiceNode('service-b'),
@@ -77,14 +72,16 @@ describe('groupReactFlowNodes', () => {
 
       const result = groupReactFlowNodes(nodes, edges);
 
-      expect(result.nodes).toHaveLength(3);
-      expect(result.edges).toHaveLength(2);
-      expect(result.nodesCount).toBe(3);
+      expect({ ...result, nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+        nodesCount: 3,
+      });
     });
   });
 
   describe('when there are less than 4 groupable nodes', () => {
-    it('should NOT group 3 external nodes from the same source', () => {
+    it('does NOT group 3 external nodes from the same source', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -99,8 +96,10 @@ describe('groupReactFlowNodes', () => {
 
       const result = groupReactFlowNodes(nodes, edges);
 
-      expect(result.nodes).toHaveLength(4);
-      expect(result.edges).toHaveLength(3);
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 4,
+        edges: 3,
+      });
 
       const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
       expect(groupedNodes).toHaveLength(0);
@@ -108,7 +107,7 @@ describe('groupReactFlowNodes', () => {
   });
 
   describe('when there are 4+ groupable nodes from the same source', () => {
-    it('should group 4 external nodes into a single grouped node', () => {
+    it('groups 4 external nodes into a single grouped node', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -126,20 +125,25 @@ describe('groupReactFlowNodes', () => {
       const result = groupReactFlowNodes(nodes, edges);
 
       // Should have: api-service + 1 grouped node = 2 nodes
-      expect(result.nodes).toHaveLength(2);
-      expect(result.edges).toHaveLength(1);
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 2,
+        edges: 1,
+      });
 
       const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
-      expect(groupedNode!.data.isService).toBe(false);
-
-      const groupedData = groupedNode!.data as GroupedNodeData;
-      expect(groupedData.isGrouped).toBe(true);
-      expect(groupedData.count).toBe(4);
-      expect(groupedData.groupedConnections).toHaveLength(4);
+      expect(groupedNode!.data).toEqual(
+        expect.objectContaining({
+          isService: false,
+          isGrouped: true,
+          count: 4,
+          groupedConnections: expect.arrayContaining([expect.anything()]),
+        })
+      );
+      expect((groupedNode!.data as GroupedNodeData).groupedConnections).toHaveLength(4);
     });
 
-    it('should group 5+ external nodes', () => {
+    it('groups 5+ external nodes', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -167,7 +171,7 @@ describe('groupReactFlowNodes', () => {
   });
 
   describe('when nodes have different sources', () => {
-    it('should NOT group nodes from different sources', () => {
+    it('does NOT group nodes from different sources', () => {
       const nodes = [
         createServiceNode('service-a'),
         createServiceNode('service-b'),
@@ -193,7 +197,7 @@ describe('groupReactFlowNodes', () => {
   });
 
   describe('when nodes share the same sources', () => {
-    it('should group nodes that share the same sources', () => {
+    it('groups nodes that share the same sources', () => {
       const nodes = [
         createServiceNode('service-a'),
         createServiceNode('service-b'),
@@ -217,16 +221,16 @@ describe('groupReactFlowNodes', () => {
       const result = groupReactFlowNodes(nodes, edges);
 
       // Should have: 2 services + 1 grouped node
-      expect(result.nodes).toHaveLength(3);
-      expect(result.edges).toHaveLength(2);
-
-      const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
-      expect(groupedNode).toBeDefined();
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+      });
+      expect(result.nodes.find((n) => n.type === 'groupedResources')).toBeDefined();
     });
   });
 
   describe('edge styling', () => {
-    it('should style grouped edges correctly', () => {
+    it('styles grouped edges correctly', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -244,18 +248,21 @@ describe('groupReactFlowNodes', () => {
       const result = groupReactFlowNodes(nodes, edges);
 
       expect(result.edges).toHaveLength(1);
-      const groupedEdge = result.edges[0];
-      expect(groupedEdge.type).toBe('default');
-      expect(groupedEdge.style).toEqual({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 });
-      expect(groupedEdge.markerEnd).toMatchObject({
-        type: MarkerType.ArrowClosed,
-        color: DEFAULT_EDGE_COLOR,
-      });
+      expect(result.edges[0]).toEqual(
+        expect.objectContaining({
+          type: 'default',
+          style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+          markerEnd: expect.objectContaining({
+            type: MarkerType.ArrowClosed,
+            color: DEFAULT_EDGE_COLOR,
+          }),
+        })
+      );
     });
   });
 
   describe('node data preservation', () => {
-    it('should preserve spanType and spanSubtype in grouped node', () => {
+    it('preserves spanType and spanSubtype in grouped node', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -274,13 +281,15 @@ describe('groupReactFlowNodes', () => {
 
       const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
-
-      const groupedData = groupedNode!.data as GroupedNodeData;
-      expect(groupedData.spanType).toBe(GROUPABLE_SPAN_TYPE);
-      expect(groupedData.spanSubtype).toBe(GROUPABLE_SPAN_SUBTYPE);
+      expect(groupedNode!.data).toEqual(
+        expect.objectContaining({
+          spanType: GROUPABLE_SPAN_TYPE,
+          spanSubtype: GROUPABLE_SPAN_SUBTYPE,
+        })
+      );
     });
 
-    it('should include original node data in groupedConnections', () => {
+    it('includes original node data in groupedConnections', () => {
       const nodes = [
         createServiceNode('api-service'),
         createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
@@ -302,17 +311,21 @@ describe('groupReactFlowNodes', () => {
 
       const groupedData = groupedNode!.data as GroupedNodeData;
       expect(groupedData.groupedConnections).toHaveLength(4);
-
-      const resource1 = groupedData.groupedConnections.find((c) => c.id === 'resource1');
-      expect(resource1).toBeDefined();
-      expect(resource1!.label).toBe('resource1');
-      expect(resource1!.spanType).toBe(GROUPABLE_SPAN_TYPE);
-      expect(resource1!.spanSubtype).toBe(GROUPABLE_SPAN_SUBTYPE);
+      expect(groupedData.groupedConnections).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'resource1',
+            label: 'resource1',
+            spanType: GROUPABLE_SPAN_TYPE,
+            spanSubtype: GROUPABLE_SPAN_SUBTYPE,
+          }),
+        ])
+      );
     });
   });
 
   describe('mixed groupable and non-groupable nodes', () => {
-    it('should only group eligible external nodes', () => {
+    it('only groups eligible external nodes', () => {
       const nodes = [
         createServiceNode('api-service'),
         createServiceNode('backend-service'),
@@ -332,14 +345,16 @@ describe('groupReactFlowNodes', () => {
       const result = groupReactFlowNodes(nodes, edges);
 
       // Should have: api-service + backend-service + grouped node = 3 nodes
-      expect(result.nodes).toHaveLength(3);
-      expect(result.edges).toHaveLength(2);
-
-      expect(result.nodes.find((n) => n.id === 'api-service')).toBeDefined();
-      expect(result.nodes.find((n) => n.id === 'backend-service')).toBeDefined();
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+      });
+      expect(result.nodes.map((n) => n.id)).toEqual(
+        expect.arrayContaining(['api-service', 'backend-service'])
+      );
     });
 
-    it('should NOT group non-groupable span types like db', () => {
+    it('does NOT group non-groupable span types like db', () => {
       const nodes = [
         createServiceNode('api-service'),
         // db spans are NOT groupable (NONGROUPED_SPANS has db: ['all'])
@@ -358,11 +373,15 @@ describe('groupReactFlowNodes', () => {
       const result = groupReactFlowNodes(nodes, edges);
 
       // Should NOT group db nodes - all 5 nodes should remain
-      expect(result.nodes).toHaveLength(5);
-      expect(result.edges).toHaveLength(4);
-
-      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
-      expect(groupedNodes).toHaveLength(0);
+      expect({
+        nodes: result.nodes.length,
+        edges: result.edges.length,
+        groupedNodes: result.nodes.filter((n) => n.type === 'groupedResources').length,
+      }).toEqual({
+        nodes: 5,
+        edges: 4,
+        groupedNodes: 0,
+      });
     });
   });
 });

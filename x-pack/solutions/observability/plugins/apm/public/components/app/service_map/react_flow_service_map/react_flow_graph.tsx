@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import type { FitViewOptions } from '@xyflow/react';
 import {
   ReactFlow,
   Background,
@@ -22,12 +23,15 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import '@xyflow/react/dist/style.css';
 import { applyDagreLayout } from './layout';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION } from './constants';
 
 interface ReactFlowGraphProps {
   height: number;
   nodes: Node[];
   edges: Edge[];
 }
+
+const fitViewOptions: FitViewOptions = { padding: FIT_VIEW_PADDING, duration: FIT_VIEW_DURATION };
 
 function ReactFlowGraphInner({
   height,
@@ -47,7 +51,7 @@ function ReactFlowGraphInner({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Update nodes and edges when props change
-  React.useEffect(() => {
+  useEffect(() => {
     setNodes(layoutedNodes);
     setEdges(initialEdges);
 
@@ -55,7 +59,7 @@ function ReactFlowGraphInner({
     if (layoutedNodes.length > 0) {
       // Small delay to allow React Flow to render nodes first
       requestAnimationFrame(() => {
-        fitView({ padding: 0.2, duration: 200 });
+        fitView(fitViewOptions);
       });
     }
   }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView]);
@@ -85,7 +89,7 @@ function ReactFlowGraphInner({
 
   const onInit = useCallback(() => {
     if (layoutedNodes.length > 0) {
-      fitView({ padding: 0.2, duration: 200 });
+      fitView(fitViewOptions);
     }
   }, [fitView, layoutedNodes.length]);
 
@@ -98,7 +102,7 @@ function ReactFlowGraphInner({
         onEdgesChange={onEdgesChange}
         onInit={onInit}
         fitView
-        fitViewOptions={{ padding: 0.2, duration: 200 }}
+        fitViewOptions={fitViewOptions}
         minZoom={0.2}
         maxZoom={3}
         proOptions={{ hideAttribution: true }}

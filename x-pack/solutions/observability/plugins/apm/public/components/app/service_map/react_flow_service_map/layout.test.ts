@@ -31,29 +31,34 @@ function createEdge(source: string, target: string): Edge {
 
 describe('applyDagreLayout', () => {
   describe('with empty input', () => {
-    it('should return empty array for empty nodes', () => {
+    it('returns empty array for empty nodes', () => {
       const result = applyDagreLayout([], []);
       expect(result).toEqual([]);
     });
   });
 
   describe('with single node', () => {
-    it('should position a single node', () => {
+    it('positions a single node', () => {
       const nodes = [createNode('a', 'Node A')];
       const edges: Edge[] = [];
 
       const result = applyDagreLayout(nodes, edges);
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('a');
-      expect(result[0].position).toBeDefined();
-      expect(typeof result[0].position.x).toBe('number');
-      expect(typeof result[0].position.y).toBe('number');
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'a',
+          position: expect.objectContaining({
+            x: expect.any(Number),
+            y: expect.any(Number),
+          }),
+        })
+      );
     });
   });
 
   describe('with linear chain', () => {
-    it('should position nodes in a horizontal line (LR layout)', () => {
+    it('positions nodes in a horizontal line (LR layout)', () => {
       const nodes = [
         createNode('a', 'Node A'),
         createNode('b', 'Node B'),
@@ -70,11 +75,10 @@ describe('applyDagreLayout', () => {
       const nodeB = result.find((n) => n.id === 'b')!;
       const nodeC = result.find((n) => n.id === 'c')!;
 
-      expect(nodeA.position.x).toBeLessThan(nodeB.position.x);
-      expect(nodeB.position.x).toBeLessThan(nodeC.position.x);
+      expect(nodeA.position.x < nodeB.position.x && nodeB.position.x < nodeC.position.x).toBe(true);
     });
 
-    it('should position nodes in a vertical line (TB layout)', () => {
+    it('positions nodes in a vertical line (TB layout)', () => {
       const nodes = [
         createNode('a', 'Node A'),
         createNode('b', 'Node B'),
@@ -91,13 +95,12 @@ describe('applyDagreLayout', () => {
       const nodeB = result.find((n) => n.id === 'b')!;
       const nodeC = result.find((n) => n.id === 'c')!;
 
-      expect(nodeA.position.y).toBeLessThan(nodeB.position.y);
-      expect(nodeB.position.y).toBeLessThan(nodeC.position.y);
+      expect(nodeA.position.y < nodeB.position.y && nodeB.position.y < nodeC.position.y).toBe(true);
     });
   });
 
   describe('with branching graph', () => {
-    it('should position nodes with multiple targets', () => {
+    it('positions nodes with multiple targets', () => {
       //     ┌─► B
       // A ──┤
       //     └─► C
@@ -114,20 +117,23 @@ describe('applyDagreLayout', () => {
       const nodeB = result.find((n) => n.id === 'b')!;
       const nodeC = result.find((n) => n.id === 'c')!;
 
-      // A should be to the left of both B and C
-      expect(nodeA.position.x).toBeLessThan(nodeB.position.x);
-      expect(nodeA.position.x).toBeLessThan(nodeC.position.x);
-
-      // B and C should be at the same x position (same rank)
-      expect(nodeB.position.x).toBe(nodeC.position.x);
-
-      // B and C should have different y positions
-      expect(nodeB.position.y).not.toBe(nodeC.position.y);
+      // A should be to the left of both B and C, B and C at same x but different y
+      expect({
+        aLeftOfB: nodeA.position.x < nodeB.position.x,
+        aLeftOfC: nodeA.position.x < nodeC.position.x,
+        bAndCSameRank: nodeB.position.x === nodeC.position.x,
+        bAndCDifferentY: nodeB.position.y !== nodeC.position.y,
+      }).toEqual({
+        aLeftOfB: true,
+        aLeftOfC: true,
+        bAndCSameRank: true,
+        bAndCDifferentY: true,
+      });
     });
   });
 
   describe('with disconnected nodes', () => {
-    it('should position nodes even without edges', () => {
+    it('positions nodes even without edges', () => {
       const nodes = [
         createNode('a', 'Node A'),
         createNode('b', 'Node B'),
@@ -138,18 +144,13 @@ describe('applyDagreLayout', () => {
       const result = applyDagreLayout(nodes, edges);
 
       expect(result).toHaveLength(3);
-
       // All nodes should have positions
-      result.forEach((node) => {
-        expect(node.position).toBeDefined();
-        expect(typeof node.position.x).toBe('number');
-        expect(typeof node.position.y).toBe('number');
-      });
+      expect(result.every((node) => node.position !== undefined)).toBe(true);
     });
   });
 
   describe('with edges referencing non-existent nodes', () => {
-    it('should ignore edges with missing source or target', () => {
+    it('ignores edges with missing source or target', () => {
       const nodes = [createNode('a', 'Node A'), createNode('b', 'Node B')];
       const edges = [
         createEdge('a', 'b'), // Valid
@@ -165,7 +166,7 @@ describe('applyDagreLayout', () => {
   });
 
   describe('with custom options', () => {
-    it('should use custom node dimensions', () => {
+    it('uses custom node dimensions', () => {
       const nodes = [createNode('a', 'Node A'), createNode('b', 'Node B')];
       const edges = [createEdge('a', 'b')];
 
@@ -179,12 +180,10 @@ describe('applyDagreLayout', () => {
 
       // Positions should be calculated with custom dimensions
       expect(result).toHaveLength(2);
-      result.forEach((node) => {
-        expect(node.position).toBeDefined();
-      });
+      expect(result.every((node) => node.position !== undefined)).toBe(true);
     });
 
-    it('should use custom spacing', () => {
+    it('uses custom spacing', () => {
       const nodes = [
         createNode('a', 'Node A'),
         createNode('b', 'Node B'),
@@ -207,7 +206,7 @@ describe('applyDagreLayout', () => {
   });
 
   describe('node data preservation', () => {
-    it('should preserve original node data', () => {
+    it('preserves original node data', () => {
       const nodes: Node<TestNodeData>[] = [
         {
           id: 'a',
@@ -219,14 +218,20 @@ describe('applyDagreLayout', () => {
 
       const result = applyDagreLayout(nodes, []);
 
-      expect(result[0].type).toBe('service');
-      expect(result[0].data.label).toBe('Node A');
-      expect(result[0].data.customField).toBe('value');
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          type: 'service',
+          data: expect.objectContaining({
+            label: 'Node A',
+            customField: 'value',
+          }),
+        })
+      );
     });
   });
 
   describe('position calculation', () => {
-    it('should center nodes based on width and height', () => {
+    it('centers nodes based on width and height', () => {
       const nodes = [createNode('a', 'Node A')];
 
       const result = applyDagreLayout(nodes, [], {
@@ -235,11 +240,15 @@ describe('applyDagreLayout', () => {
       });
 
       // Position should be adjusted by half width/height
-      expect(result[0].position.x).toBeDefined();
-      expect(result[0].position.y).toBeDefined();
+      expect(result[0].position).toEqual(
+        expect.objectContaining({
+          x: expect.any(Number),
+          y: expect.any(Number),
+        })
+      );
     });
 
-    it('should return integer positions', () => {
+    it('returns integer positions', () => {
       const nodes = [
         createNode('a', 'Node A'),
         createNode('b', 'Node B'),
@@ -249,10 +258,11 @@ describe('applyDagreLayout', () => {
 
       const result = applyDagreLayout(nodes, edges);
 
-      result.forEach((node) => {
-        expect(Number.isInteger(node.position.x)).toBe(true);
-        expect(Number.isInteger(node.position.y)).toBe(true);
-      });
+      expect(
+        result.every(
+          (node) => Number.isInteger(node.position.x) && Number.isInteger(node.position.y)
+        )
+      ).toBe(true);
     });
   });
 });

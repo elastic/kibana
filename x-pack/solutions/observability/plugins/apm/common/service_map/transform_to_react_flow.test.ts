@@ -10,7 +10,7 @@ import { ServiceHealthStatus } from '../service_health_status';
 import { transformToReactFlow } from './transform_to_react_flow';
 import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { ServiceNodeData, GroupedNodeData } from './react_flow_types';
+import type { GroupedNodeData } from './react_flow_types';
 import { DEFAULT_EDGE_COLOR } from './constants';
 
 // Helper to create a minimal raw response
@@ -80,42 +80,50 @@ function createServiceData(
 
 describe('transformToReactFlow', () => {
   describe('when transforming an empty response', () => {
-    it('should return empty nodes and edges', () => {
+    it('returns empty nodes and edges', () => {
       const rawResponse = createMockRawResponse();
 
       const result = transformToReactFlow(rawResponse);
 
-      expect(result.nodes).toHaveLength(0);
-      expect(result.edges).toHaveLength(0);
-      expect(result.nodesCount).toBe(0);
-      expect(result.tracesCount).toBe(0);
+      expect(result).toEqual(
+        expect.objectContaining({
+          nodes: [],
+          edges: [],
+          nodesCount: 0,
+          tracesCount: 0,
+        })
+      );
     });
   });
 
   describe('when transforming service nodes', () => {
-    it('should transform a standalone service correctly', () => {
+    it('transforms a standalone service correctly', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('opbeans-java', 'java', 'production')],
       });
 
       const result = transformToReactFlow(rawResponse);
 
-      expect(result.nodes).toHaveLength(1);
-      expect(result.edges).toHaveLength(0);
-
-      const node = result.nodes[0];
-      expect(node.id).toBe('opbeans-java');
-      expect(node.type).toBe('service');
-      expect(node.position).toEqual({ x: 0, y: 0 });
-      expect(node.data).toMatchObject({
-        id: 'opbeans-java',
-        label: 'opbeans-java',
-        agentName: 'java',
-        isService: true,
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 1,
+        edges: 0,
       });
+      expect(result.nodes[0]).toEqual(
+        expect.objectContaining({
+          id: 'opbeans-java',
+          type: 'service',
+          position: { x: 0, y: 0 },
+          data: expect.objectContaining({
+            id: 'opbeans-java',
+            label: 'opbeans-java',
+            agentName: 'java',
+            isService: true,
+          }),
+        })
+      );
     });
 
-    it('should transform multiple standalone services', () => {
+    it('transforms multiple standalone services', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('opbeans-java', 'java'),
@@ -126,22 +134,20 @@ describe('transformToReactFlow', () => {
 
       const result = transformToReactFlow(rawResponse);
 
-      expect(result.nodes).toHaveLength(3);
-      expect(result.nodesCount).toBe(3);
-
-      const nodeIds = result.nodes.map((n) => n.id);
-      expect(nodeIds).toContain('opbeans-java');
-      expect(nodeIds).toContain('opbeans-python');
-      expect(nodeIds).toContain('opbeans-node');
-
-      // All should be service nodes
-      result.nodes.forEach((node) => {
-        expect(node.type).toBe('service');
-        expect(node.data.isService).toBe(true);
+      expect({ nodes: result.nodes.length, nodesCount: result.nodesCount }).toEqual({
+        nodes: 3,
+        nodesCount: 3,
       });
+      expect(result.nodes.map((n) => n.id)).toEqual(
+        expect.arrayContaining(['opbeans-java', 'opbeans-python', 'opbeans-node'])
+      );
+      // All should be service nodes
+      expect(result.nodes.every((n) => n.type === 'service' && n.data.isService === true)).toBe(
+        true
+      );
     });
 
-    it('should include serviceAnomalyStats when present', () => {
+    it('includes serviceAnomalyStats when present', () => {
       const anomalies: ServiceAnomaliesResponse = {
         mlJobIds: ['apm-job-1'],
         serviceAnomalies: [
@@ -164,15 +170,18 @@ describe('transformToReactFlow', () => {
       const result = transformToReactFlow(rawResponse);
 
       expect(result.nodes).toHaveLength(1);
-
-      const serviceData = result.nodes[0].data as ServiceNodeData;
-      expect(serviceData.serviceAnomalyStats).toBeDefined();
-      expect(serviceData.serviceAnomalyStats!.healthStatus).toBe(ServiceHealthStatus.warning);
+      expect(result.nodes[0].data).toEqual(
+        expect.objectContaining({
+          serviceAnomalyStats: expect.objectContaining({
+            healthStatus: ServiceHealthStatus.warning,
+          }),
+        })
+      );
     });
   });
 
   describe('when transforming dependency nodes', () => {
-    it('should transform an external dependency correctly', () => {
+    it('transforms an external dependency correctly', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('opbeans-java', 'java')],
         spans: [createExitSpan('opbeans-java', 'java', 'postgresql', 'db', 'postgresql')],
@@ -185,14 +194,18 @@ describe('transformToReactFlow', () => {
 
       const dependencyNode = result.nodes.find((n) => n.type === 'dependency');
       expect(dependencyNode).toBeDefined();
-      expect(dependencyNode!.data.isService).toBe(false);
-      expect(dependencyNode!.data.spanType).toBe('db');
-      expect(dependencyNode!.data.spanSubtype).toBe('postgresql');
+      expect(dependencyNode!.data).toEqual(
+        expect.objectContaining({
+          isService: false,
+          spanType: 'db',
+          spanSubtype: 'postgresql',
+        })
+      );
     });
   });
 
   describe('when transforming edges', () => {
-    it('should create edges between connected services', () => {
+    it('creates edges between connected services', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('opbeans-java', 'java'),
@@ -209,19 +222,21 @@ describe('transformToReactFlow', () => {
       const result = transformToReactFlow(rawResponse);
 
       expect(result.edges.length).toBeGreaterThanOrEqual(1);
-
-      const edge = result.edges[0];
-      expect(edge.type).toBe('default');
-      expect(edge.style).toEqual({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 });
-      expect(edge.markerEnd).toEqual({
-        type: MarkerType.ArrowClosed,
-        width: 12,
-        height: 12,
-        color: DEFAULT_EDGE_COLOR,
-      });
+      expect(result.edges[0]).toEqual(
+        expect.objectContaining({
+          type: 'default',
+          style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 12,
+            height: 12,
+            color: DEFAULT_EDGE_COLOR,
+          },
+        })
+      );
     });
 
-    it('should create edges for bidirectional connections', () => {
+    it('creates edges for bidirectional connections', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('service-a', 'java'),
@@ -245,15 +260,13 @@ describe('transformToReactFlow', () => {
 
       // Should have edges connecting the services
       expect(result.edges.length).toBeGreaterThanOrEqual(1);
-
       // All edges should have proper styling
-      result.edges.forEach((edge) => {
-        expect(edge.type).toBe('default');
-        expect(edge.markerEnd).toBeDefined();
-      });
+      expect(result.edges.every((e) => e.type === 'default' && e.markerEnd !== undefined)).toBe(
+        true
+      );
     });
 
-    it('should mark bidirectional edges with markers on both ends', () => {
+    it('marks bidirectional edges with markers on both ends', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('service-a', 'java'),
@@ -292,30 +305,38 @@ describe('transformToReactFlow', () => {
         // - Only ONE edge between the two services (inverse filtered out)
         // - markerStart and markerEnd both defined
         expect(edgesBetweenAB).toHaveLength(1);
-        expect(bidirectionalEdge.markerStart).toEqual({
-          type: MarkerType.ArrowClosed,
-          width: 12,
-          height: 12,
-          color: DEFAULT_EDGE_COLOR,
-        });
-        expect(bidirectionalEdge.markerEnd).toEqual({
-          type: MarkerType.ArrowClosed,
-          width: 12,
-          height: 12,
-          color: DEFAULT_EDGE_COLOR,
-        });
+        expect(bidirectionalEdge).toEqual(
+          expect.objectContaining({
+            markerStart: {
+              type: MarkerType.ArrowClosed,
+              width: 12,
+              height: 12,
+              color: DEFAULT_EDGE_COLOR,
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 12,
+              height: 12,
+              color: DEFAULT_EDGE_COLOR,
+            },
+          })
+        );
       } else {
         // If bidirectional detection isn't triggered (e.g., due to test data setup),
         // verify edges still have valid structure and styling
-        edgesBetweenAB.forEach((edge) => {
-          expect(edge.type).toBe('default');
-          expect(edge.style).toEqual({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 });
-          expect(edge.markerEnd).toBeDefined();
-        });
+        expect(
+          edgesBetweenAB.every(
+            (e) =>
+              e.type === 'default' &&
+              JSON.stringify(e.style) ===
+                JSON.stringify({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 }) &&
+              e.markerEnd !== undefined
+          )
+        ).toBe(true);
       }
     });
 
-    it('should filter out inverse edges for bidirectional connections', () => {
+    it('filters out inverse edges for bidirectional connections', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('service-a', 'java'),
@@ -356,7 +377,7 @@ describe('transformToReactFlow', () => {
   });
 
   describe('when transforming complex service maps', () => {
-    it('should handle a realistic service map with multiple services and dependencies', () => {
+    it('handles a realistic service map with multiple services and dependencies', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('frontend', 'rum-js', 'production'),
@@ -412,33 +433,43 @@ describe('transformToReactFlow', () => {
       // Check anomaly stats on payment service
       const paymentNode = result.nodes.find((n) => n.id === 'payment-service');
       expect(paymentNode).toBeDefined();
-      expect(paymentNode!.data.isService).toBe(true);
-
-      const serviceData = paymentNode!.data as ServiceNodeData;
-      expect(serviceData.serviceAnomalyStats?.healthStatus).toBe(ServiceHealthStatus.critical);
+      expect(paymentNode!.data).toEqual(
+        expect.objectContaining({
+          isService: true,
+          serviceAnomalyStats: expect.objectContaining({
+            healthStatus: ServiceHealthStatus.critical,
+          }),
+        })
+      );
 
       // Check all nodes have required structure
-      result.nodes.forEach((node) => {
-        expect(node.id).toBeDefined();
-        expect(node.type).toMatch(/^(service|dependency|groupedResources)$/);
-        expect(node.position).toEqual({ x: 0, y: 0 });
-        expect(node.data.id).toBeDefined();
-        expect(node.data.label).toBeDefined();
-        expect(typeof node.data.isService).toBe('boolean');
-      });
+      expect(
+        result.nodes.every(
+          (node) =>
+            node.id !== undefined &&
+            /^(service|dependency|groupedResources)$/.test(node.type || '') &&
+            node.position.x === 0 &&
+            node.position.y === 0 &&
+            node.data.id !== undefined &&
+            node.data.label !== undefined &&
+            typeof node.data.isService === 'boolean'
+        )
+      ).toBe(true);
 
       // Check all edges have required styling
-      result.edges.forEach((edge) => {
-        expect(edge.id).toBeDefined();
-        expect(edge.source).toBeDefined();
-        expect(edge.target).toBeDefined();
-        expect(edge.type).toBe('default');
-        expect(edge.style).toEqual({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 });
-        expect(edge.markerEnd).toMatchObject({
-          type: MarkerType.ArrowClosed,
-          color: DEFAULT_EDGE_COLOR,
-        });
-      });
+      expect(
+        result.edges.every(
+          (edge) =>
+            edge.id !== undefined &&
+            edge.source !== undefined &&
+            edge.target !== undefined &&
+            edge.type === 'default' &&
+            JSON.stringify(edge.style) ===
+              JSON.stringify({ stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 }) &&
+            edge.markerEnd?.type === MarkerType.ArrowClosed &&
+            edge.markerEnd?.color === DEFAULT_EDGE_COLOR
+        )
+      ).toBe(true);
     });
   });
 
@@ -448,7 +479,7 @@ describe('transformToReactFlow', () => {
     const GROUPABLE_TYPE = 'external';
     const GROUPABLE_SUBTYPE = 'http';
 
-    it('should group 4+ external resources from the same source into a grouped node', () => {
+    it('groups 4+ external resources from the same source into a grouped node', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('api-service', 'java')],
         spans: [
@@ -497,14 +528,17 @@ describe('transformToReactFlow', () => {
       expect(groupedNodes).toHaveLength(1);
 
       const groupedNode = groupedNodes[0];
-      expect(groupedNode.data.isService).toBe(false);
-
-      const groupedData = groupedNode.data as GroupedNodeData;
-      expect(groupedData.isGrouped).toBe(true);
-      expect(groupedData.count).toBeGreaterThanOrEqual(4);
+      expect(groupedNode.data).toEqual(
+        expect.objectContaining({
+          isService: false,
+          isGrouped: true,
+          count: expect.any(Number),
+        })
+      );
+      expect((groupedNode.data as GroupedNodeData).count).toBeGreaterThanOrEqual(4);
     });
 
-    it('should NOT group less than 4 external resources', () => {
+    it('does NOT group less than 4 external resources', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('api-service', 'java')],
         spans: [
@@ -539,7 +573,7 @@ describe('transformToReactFlow', () => {
       expect(groupedNodes).toHaveLength(0);
     });
 
-    it('should NOT group db span types (they are in NONGROUPED_SPANS)', () => {
+    it('does NOT group db span types (they are in NONGROUPED_SPANS)', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('api-service', 'java')],
         spans: [
@@ -561,7 +595,7 @@ describe('transformToReactFlow', () => {
   });
 
   describe('edge cases', () => {
-    it('should not create self-referencing edges', () => {
+    it('does not create self-referencing edges', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [createServiceData('opbeans-java', 'java')],
         spans: [
@@ -578,7 +612,7 @@ describe('transformToReactFlow', () => {
       expect(selfEdges).toHaveLength(0);
     });
 
-    it('should handle services with forbidden names', () => {
+    it('handles services with forbidden names', () => {
       const rawResponse = createMockRawResponse({
         servicesData: [
           createServiceData('constructor', 'java'), // Forbidden name
