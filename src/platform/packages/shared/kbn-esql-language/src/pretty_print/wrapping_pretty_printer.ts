@@ -384,12 +384,14 @@ export class WrappingPrettyPrinter {
     }
 
     const isAssignmentMap = ctx.node.type === 'map' && ctx.node.representation === 'assignment';
+    const isBareList = ctx.node.type === 'list' && ctx.node.subtype === 'bare';
 
     if (isAssignmentMap && lines > 1) {
       oneArgumentPerLine = true;
     }
 
-    let indent = inp.indent + this.opts.tab;
+    // For bare lists, don't add extra indentation since there's no opening bracket
+    let indent = isBareList ? inp.indent : inp.indent + this.opts.tab;
 
     if (ctx instanceof CommandVisitorContext) {
       const isFirstCommand =
@@ -401,7 +403,7 @@ export class WrappingPrettyPrinter {
 
     if (oneArgumentPerLine) {
       lines = 1;
-      txt = ctx instanceof CommandVisitorContext || isAssignmentMap ? '' : '\n';
+      txt = ctx instanceof CommandVisitorContext || isAssignmentMap || isBareList ? '' : '\n';
       const args = [...ctx.arguments()].filter((arg) => {
         if (!arg) return false;
         if (arg.type === 'option') return arg.name === 'as';
@@ -668,10 +670,12 @@ export class WrappingPrettyPrinter {
         remaining: inp.remaining - 1,
       });
       const node = ctx.node;
-      const isTuple = node.subtype === 'tuple';
-      const leftParenthesis = isTuple ? '(' : '[';
-      const rightParenthesis = isTuple ? ')' : ']';
-      const rightParenthesisIndent = args.oneArgumentPerLine ? '\n' + inp.indent : '';
+      const subtype = node.subtype;
+      const isBare = subtype === 'bare';
+      const isTuple = subtype === 'tuple';
+      const leftParenthesis = isBare ? '' : isTuple ? '(' : '[';
+      const rightParenthesis = isBare ? '' : isTuple ? ')' : ']';
+      const rightParenthesisIndent = !isBare && args.oneArgumentPerLine ? '\n' + inp.indent : '';
       const formatted = leftParenthesis + args.txt + rightParenthesisIndent + rightParenthesis;
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
