@@ -10,8 +10,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
 import { createMockLoggerService } from '../../services/logger_service/logger_service.mock';
-import { StorageService } from '../../services/storage_service/storage_service';
-import { DispatcherService } from '../dispatcher';
+import {
+  StorageService,
+  type StorageServiceContract,
+} from '../../services/storage_service/storage_service';
+import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
 import { setupTestServers } from './setup_test_servers';
 
 /**
@@ -120,8 +123,8 @@ describe('DispatcherService integration tests', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;
-  let dispatcherService: DispatcherService;
-  let storageService: StorageService;
+  let dispatcherService: DispatcherServiceContract;
+  let storageService: StorageServiceContract;
   let mockLoggerService: ReturnType<typeof createMockLoggerService>;
 
   beforeAll(async () => {
@@ -212,12 +215,12 @@ describe('DispatcherService integration tests', () => {
         });
       });
 
-      // Verify all three episodes are present
-      const episodeIds = fireEvents.map((event) => event.episode_id).sort();
-      expect(episodeIds).toEqual([
-        'rule-1-series-1-episode-1',
-        'rule-1-series-1-episode-2',
-        'rule-1-series-1-episode-3',
+      // Verify all three episodes are present by checking their last_series_event_timestamp
+      const timestamps = fireEvents.map((event) => event.last_series_event_timestamp).sort();
+      expect(timestamps).toEqual([
+        '2026-01-22T07:30:00.000Z', // Episode 1
+        '2026-01-22T07:45:00.000Z', // Episode 2
+        '2026-01-22T07:50:00.000Z', // Episode 3
       ]);
     });
   });
@@ -235,7 +238,6 @@ describe('DispatcherService integration tests', () => {
           last_series_event_timestamp: '2026-01-22T07:30:00.000Z',
           actor: 'system',
           action_type: 'fire-event',
-          episode_id: 'rule-1-series-1-episode-1',
           rule_id: 'rule-1',
           source: 'internal',
         },
@@ -274,8 +276,11 @@ describe('DispatcherService integration tests', () => {
       // episode-1 already has a fire-event newer than its last event
       expect(newFireEvents).toHaveLength(2);
 
-      const episodeIds = newFireEvents.map((event) => event.episode_id).sort();
-      expect(episodeIds).toEqual(['rule-1-series-1-episode-2', 'rule-1-series-1-episode-3']);
+      const timestamps = newFireEvents.map((event) => event.last_series_event_timestamp).sort();
+      expect(timestamps).toEqual([
+        '2026-01-22T07:45:00.000Z', // Episode 2
+        '2026-01-22T07:50:00.000Z', // Episode 3
+      ]);
     });
   });
 
@@ -292,7 +297,6 @@ describe('DispatcherService integration tests', () => {
           last_series_event_timestamp: '2026-01-22T07:48:00.000Z',
           actor: 'system',
           action_type: 'fire-event',
-          episode_id: 'rule-1-series-1-episode-3',
           rule_id: 'rule-1',
           source: 'internal',
         },
@@ -332,11 +336,11 @@ describe('DispatcherService integration tests', () => {
       // - episode-1 and episode-2 have no fire-events
       expect(newFireEvents).toHaveLength(3);
 
-      const episodeIds = newFireEvents.map((event) => event.episode_id).sort();
-      expect(episodeIds).toEqual([
-        'rule-1-series-1-episode-1',
-        'rule-1-series-1-episode-2',
-        'rule-1-series-1-episode-3',
+      const timestamps = newFireEvents.map((event) => event.last_series_event_timestamp).sort();
+      expect(timestamps).toEqual([
+        '2026-01-22T07:30:00.000Z', // Episode 1
+        '2026-01-22T07:45:00.000Z', // Episode 2
+        '2026-01-22T07:50:00.000Z', // Episode 3
       ]);
     });
   });

@@ -20,8 +20,12 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { AlertEpisode, Policy, RuleId } from './types';
 
+export interface DispatcherServiceContract {
+  run({ previousStartedAt }: { previousStartedAt?: Date }): Promise<{ startedAt: Date }>;
+}
+
 @injectable()
-export class DispatcherService {
+export class DispatcherService implements DispatcherServiceContract {
   constructor(
     @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
@@ -34,6 +38,7 @@ export class DispatcherService {
     const result = await this.esClient.esql.query({
       query: `
       FROM .alerts-events,.alerts-actions METADATA _index
+      | WHERE (_index LIKE ".ds-.alerts-actions-*") OR (_index LIKE ".ds-.alerts-events-*" and type == "alert")
       | EVAL rule_id = COALESCE(rule.id, rule_id)
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event" BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ".ds-.alerts-actions-*")
