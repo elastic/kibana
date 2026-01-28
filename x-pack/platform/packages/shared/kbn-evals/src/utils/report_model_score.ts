@@ -5,72 +5,131 @@
  * 2.0.
  */
 
-import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
+import { createHash } from 'crypto';
 import { hostname } from 'os';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
-  parseScoreDocuments,
+  type ModelInfo,
 } from './score_repository';
-import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
-import type { EvaluationReport } from '../types';
+import { getGitMetadata } from './git_metadata';
+import { getCurrentTraceId } from './tracing';
 
-export async function buildEvaluationReport({
-  phoenixClient,
+function computeInputHash(input: unknown): string {
+  try {
+    const json = JSON.stringify(input);
+    return createHash('sha256').update(json).digest('hex').substring(0, 16);
+  } catch {
+    return '';
+  }
+}
+
+export function buildFlattenedScoreDocuments({
   experiments,
-  model,
+  taskModel,
   evaluatorModel,
-  repetitions,
   runId,
+  totalRepetitions,
 }: {
-  phoenixClient: KibanaPhoenixClient;
   experiments: RanExperiment[];
-  model: Model;
-  evaluatorModel: Model;
-  repetitions: number;
-  runId?: string;
-}): Promise<EvaluationReport> {
-  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
+  taskModel: ModelInfo;
+  evaluatorModel: ModelInfo | null;
+  runId: string;
+  totalRepetitions: number;
+}): EvaluationScoreDocument[] {
+  const documents: EvaluationScoreDocument[] = [];
+  const timestamp = new Date().toISOString();
+  const gitMetadata = getGitMetadata();
+  const hostName = hostname();
 
-  const datasetScoresWithStats = datasetScores.map((dataset) => ({
-    ...dataset,
-    evaluatorStats: new Map(
-      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
-        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
-        return [evaluatorName, stats];
-      })
-    ),
-  }));
+  for (const experiment of experiments) {
+    const { datasetId, evaluationRuns, runs } = experiment;
+    const datasetName = datasetId;
 
-  const currentRunId = runId || process.env.TEST_RUN_ID;
+    const exampleIndexMap = new Map<string, number>();
+    if (runs) {
+      let idx = 0;
+      for (const exampleId of Object.keys(runs)) {
+        exampleIndexMap.set(exampleId, idx++);
+      }
+    }
 
-  if (!currentRunId) {
-    throw new Error(
-      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
-    );
+    if (!evaluationRuns) {
+      continue;
+    }
+
+    for (const evalRun of evaluationRuns) {
+      const evalRunInfo = evalRun as {
+        exampleId?: string;
+        repetitionIndex?: number;
+        traceId?: string;
+        name: string;
+        result?: {
+          score?: number | null;
+          label?: string | null;
+          explanation?: string | null;
+          metadata?: Record<string, unknown> | null;
+        };
+      };
+      const exampleId = evalRunInfo.exampleId ?? '';
+      const repetitionIndex = evalRunInfo.repetitionIndex ?? 0;
+      const exampleIndex = exampleIndexMap.get(exampleId) ?? 0;
+      const runData = runs?.[exampleId] as { input?: unknown; traceId?: string } | undefined;
+      const inputHash = runData?.input ? computeInputHash(runData.input) : '';
+
+      documents.push({
+        '@timestamp': timestamp,
+        run_id: runId,
+        experiment_id: experiment.id ?? '',
+        example: {
+          id: exampleId,
+          index: exampleIndex,
+          input_hash: inputHash,
+          dataset: {
+            id: datasetId,
+            name: datasetName,
+          },
+        },
+        task: {
+          trace_id: runData?.traceId ?? getCurrentTraceId(),
+          repetition_index: repetitionIndex,
+          model: taskModel,
+        },
+        evaluator: {
+          name: evalRunInfo.name,
+          score: evalRunInfo.result?.score ?? null,
+          label: evalRunInfo.result?.label ?? null,
+          explanation: evalRunInfo.result?.explanation ?? null,
+          metadata: evalRunInfo.result?.metadata ?? null,
+          trace_id: evalRunInfo.traceId ?? getCurrentTraceId(),
+          model: evaluatorModel,
+        },
+        run_metadata: {
+          git_branch: gitMetadata.branch,
+          git_commit_sha: gitMetadata.commitSha,
+          total_repetitions: totalRepetitions,
+        },
+        environment: {
+          hostname: hostName,
+        },
+      });
+    }
   }
 
-  return {
-    datasetScoresWithStats,
-    model,
-    evaluatorModel,
-    repetitions,
-    runId: currentRunId,
-  };
+  return documents;
 }
 
 export async function exportEvaluations(
-  report: EvaluationReport,
+  documents: EvaluationScoreDocument[],
   esClient: EsClient,
   log: SomeDevLog
 ): Promise<void> {
-  if (report.datasetScoresWithStats.length === 0) {
-    log.warning('No dataset scores available to export to Elasticsearch');
+  if (documents.length === 0) {
+    log.warning('No evaluation scores to export');
     return;
   }
 
@@ -78,40 +137,19 @@ export async function exportEvaluations(
 
   const exporter = new EvaluationScoreRepository(esClient, log);
 
-  await exporter.exportScores({
-    datasetScoresWithStats: report.datasetScoresWithStats,
-    model: report.model,
-    evaluatorModel: report.evaluatorModel,
-    runId: report.runId,
-    repetitions: report.repetitions,
-  });
+  await exporter.exportScores(documents);
 
-  const modelId = report.model.id || 'unknown';
+  const modelId = documents[0]?.task.model.id || 'unknown';
+  const hostName = documents[0]?.environment.hostname || hostname();
+  const runId = documents[0]?.run_id;
 
-  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
-  log.info(
-    chalk.gray(
-      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${
-        report.runId
-      }"`
-    )
-  );
-}
-
-export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
-  if (scores.length === 0) {
-    throw new Error('No documents to format');
+  log.info(chalk.green('✅ Evaluation scores exported successfully!'));
+  if (runId) {
+    log.info(
+      chalk.gray(
+        `You can query the data using: environment.hostname:"${hostName}" AND task.model.id:"${modelId}" AND run_id:"${runId}"`
+      )
+    );
   }
-
-  const scoresWithStats = parseScoreDocuments(scores);
-
-  const repetitions = scores[0].repetitions ?? 1;
-
-  return {
-    datasetScoresWithStats: scoresWithStats,
-    model: scores[0].model as Model,
-    evaluatorModel: scores[0].evaluator_model as Model,
-    repetitions,
-    runId: scores[0].run_id,
-  };
 }
+

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { keyBy } from 'lodash';
 import { mean, median, deviation, min, max } from 'd3';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import type { DatasetEvaluatorStats } from './score_repository';
 
 export interface EvaluatorStats {
   mean: number;
@@ -58,43 +56,6 @@ export function calculateEvaluatorStats(scores: number[], totalExamples: number)
     count: scores.length,
     percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
   };
-}
-
-/**
- * Process experiments into dataset scores with aggregated evaluator scores
- */
-export async function processExperimentsToDatasetScores(
-  experiments: RanExperiment[],
-  phoenixClient: KibanaPhoenixClient
-): Promise<DatasetScore[]> {
-  const datasetIds = experiments.map((experiment) => experiment.datasetId);
-  const datasetInfos = await phoenixClient.getDatasets(datasetIds);
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
-
-  return experiments.map((experiment) => {
-    const { datasetId, evaluationRuns, runs, id } = experiment;
-    const numExamples = runs ? Object.keys(runs).length : 0;
-
-    const evaluatorScores = new Map<string, number[]>();
-
-    if (evaluationRuns) {
-      evaluationRuns.forEach((evalRun) => {
-        const score = evalRun.result?.score ?? 0;
-        if (!evaluatorScores.has(evalRun.name)) {
-          evaluatorScores.set(evalRun.name, []);
-        }
-        evaluatorScores.get(evalRun.name)!.push(score);
-      });
-    }
-
-    return {
-      id: datasetId,
-      name: datasetInfosById[datasetId]?.name ?? datasetId,
-      numExamples,
-      evaluatorScores,
-      experimentId: id ?? '',
-    };
-  });
 }
 
 /**
@@ -156,18 +117,35 @@ export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string
   return overallStats;
 }
 
-/**
- * Complete evaluation results processing - composition function for common workflow
- */
-export async function buildEvaluationResults(
-  experiments: RanExperiment[],
-  phoenixClient: KibanaPhoenixClient
-): Promise<{
-  datasetScores: DatasetScore[];
-  overallStats: Map<string, EvaluatorStats>;
-}> {
-  const datasetScores = await processExperimentsToDatasetScores(experiments, phoenixClient);
-  const overallStats = calculateOverallStats(datasetScores);
+export function convertAggregationToDatasetScores(
+  aggStats: DatasetEvaluatorStats[]
+): DatasetScoreWithStats[] {
+  const datasetMap = new Map<string, DatasetScoreWithStats>();
 
-  return { datasetScores, overallStats };
+  for (const stat of aggStats) {
+    if (!datasetMap.has(stat.datasetId)) {
+      datasetMap.set(stat.datasetId, {
+        id: stat.datasetId,
+        name: stat.datasetName,
+        numExamples: stat.numExamples,
+        evaluatorScores: new Map(),
+        evaluatorStats: new Map(),
+        experimentId: '',
+      });
+    }
+
+    const dataset = datasetMap.get(stat.datasetId)!;
+    dataset.evaluatorStats.set(stat.evaluatorName, {
+      mean: stat.stats.mean,
+      median: stat.stats.median,
+      stdDev: stat.stats.stdDev,
+      min: stat.stats.min,
+      max: stat.stats.max,
+      count: stat.stats.count,
+      percentage:
+        stat.stats.count > 0 ? (stat.stats.mean * stat.stats.count) / stat.numExamples : 0,
+    });
+  }
+
+  return Array.from(datasetMap.values());
 }

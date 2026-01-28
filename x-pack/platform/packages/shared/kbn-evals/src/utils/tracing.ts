@@ -7,7 +7,7 @@
 
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
-import { ROOT_CONTEXT, context } from '@opentelemetry/api';
+import { ROOT_CONTEXT, context, trace } from '@opentelemetry/api';
 
 /**
  * Use this wrapper when you want to include trace-based metrics with evaluations and use qualitative evaluators within the
@@ -29,4 +29,22 @@ export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb:
       cb
     );
   });
+}
+
+export function getCurrentTraceId(): string | null {
+  try {
+    const activeSpan = trace.getActiveSpan();
+    if (!activeSpan) {
+      return null;
+    }
+
+    const spanContext = activeSpan.spanContext();
+    if (!spanContext.traceId || spanContext.traceId === '00000000000000000000000000000000') {
+      return null;
+    }
+
+    return spanContext.traceId;
+  } catch {
+    return null;
+  }
 }

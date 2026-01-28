@@ -7,43 +7,50 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { hostname } from 'os';
-import type { DatasetScoreWithStats } from './evaluation_stats';
-import type { EvaluationReport } from '../types';
+
+export interface ModelInfo {
+  id: string;
+  family: string;
+  provider: string;
+}
 
 export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
   experiment_id: string;
-  repetitions: number;
-  model: {
+
+  example: {
     id: string;
-    family: string;
-    provider: string;
+    index: number;
+    input_hash: string;
+    dataset: {
+      id: string;
+      name: string;
+    };
   };
-  evaluator_model: {
-    id: string;
-    family: string;
-    provider: string;
+
+  task: {
+    trace_id: string | null;
+    repetition_index: number;
+    model: ModelInfo;
   };
-  dataset: {
-    id: string;
-    name: string;
-    examples_count: number;
-  };
+
   evaluator: {
     name: string;
-    stats: {
-      mean: number;
-      median: number;
-      std_dev: number;
-      min: number;
-      max: number;
-      count: number;
-      percentage: number;
-    };
-    scores: number[];
+    score: number | null;
+    label: string | null;
+    explanation: string | null;
+    metadata: Record<string, unknown> | null;
+    trace_id: string | null;
+    model: ModelInfo | null;
   };
+
+  run_metadata: {
+    git_branch: string | null;
+    git_commit_sha: string | null;
+    total_repetitions: number;
+  };
+
   environment: {
     hostname: string;
   };
@@ -53,36 +60,26 @@ export interface EvaluationScoreDocument {
  * Parses Elasticsearch EvaluationScoreDocuments to DatasetScoreWithStats array
  * This is the core transformation logic shared across different reporters
  */
-export function parseScoreDocuments(documents: EvaluationScoreDocument[]): DatasetScoreWithStats[] {
-  const datasetMap = new Map<string, DatasetScoreWithStats>();
+export interface DatasetEvaluatorStats {
+  datasetId: string;
+  datasetName: string;
+  evaluatorName: string;
+  numExamples: number;
+  stats: {
+    mean: number;
+    median: number;
+    stdDev: number;
+    min: number;
+    max: number;
+    count: number;
+  };
+}
 
-  for (const doc of documents) {
-    if (!datasetMap.has(doc.dataset.id)) {
-      datasetMap.set(doc.dataset.id, {
-        id: doc.dataset.id,
-        name: doc.dataset.name,
-        numExamples: doc.dataset.examples_count,
-        evaluatorScores: new Map(),
-        evaluatorStats: new Map(),
-        experimentId: doc.experiment_id,
-      });
-    }
-
-    const dataset = datasetMap.get(doc.dataset.id)!;
-
-    dataset.evaluatorScores.set(doc.evaluator.name, doc.evaluator.scores);
-    dataset.evaluatorStats.set(doc.evaluator.name, {
-      mean: doc.evaluator.stats.mean,
-      median: doc.evaluator.stats.median,
-      stdDev: doc.evaluator.stats.std_dev,
-      min: doc.evaluator.stats.min,
-      max: doc.evaluator.stats.max,
-      count: doc.evaluator.stats.count,
-      percentage: doc.evaluator.stats.percentage,
-    });
-  }
-
-  return Array.from(datasetMap.values());
+export interface RunStats {
+  stats: DatasetEvaluatorStats[];
+  taskModel: ModelInfo;
+  evaluatorModel: ModelInfo | null;
+  totalRepetitions: number;
 }
 
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
@@ -110,51 +107,61 @@ export class EvaluationScoreRepository {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
             experiment_id: { type: 'keyword' },
-            repetitions: { type: 'integer' },
-            model: {
+            example: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
-                family: { type: 'keyword' },
-                provider: { type: 'keyword' },
+                index: { type: 'integer' },
+                input_hash: { type: 'keyword' },
+                dataset: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    name: { type: 'keyword' },
+                  },
+                },
               },
             },
-            evaluator_model: {
+            task: {
               type: 'object',
               properties: {
-                id: { type: 'keyword' },
-                family: { type: 'keyword' },
-                provider: { type: 'keyword' },
-              },
-            },
-            dataset: {
-              type: 'object',
-              properties: {
-                id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                examples_count: { type: 'integer' },
+                trace_id: { type: 'keyword' },
+                repetition_index: { type: 'integer' },
+                model: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
+                  },
+                },
               },
             },
             evaluator: {
               type: 'object',
               properties: {
                 name: { type: 'keyword' },
-                stats: {
+                score: { type: 'float' },
+                label: { type: 'keyword' },
+                explanation: { type: 'text', index: false },
+                metadata: { type: 'flattened' },
+                trace_id: { type: 'keyword' },
+                model: {
                   type: 'object',
                   properties: {
-                    mean: { type: 'float' },
-                    median: { type: 'float' },
-                    std_dev: { type: 'float' },
-                    min: { type: 'float' },
-                    max: { type: 'float' },
-                    count: { type: 'integer' },
-                    percentage: { type: 'float' },
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
                   },
                 },
-                scores: {
-                  type: 'float',
-                  index: false,
-                },
+              },
+            },
+            run_metadata: {
+              type: 'object',
+              properties: {
+                git_branch: { type: 'keyword' },
+                git_commit_sha: { type: 'keyword' },
+                total_repetitions: { type: 'integer' },
               },
             },
             environment: {
@@ -210,82 +217,33 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async exportScores({
-    datasetScoresWithStats,
-    model,
-    evaluatorModel,
-    runId,
-    repetitions,
-  }: EvaluationReport): Promise<void> {
+  async exportScores(documents: EvaluationScoreDocument[]): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
 
-      if (datasetScoresWithStats.length === 0) {
-        this.log.warning('No dataset scores found to export');
+      if (documents.length === 0) {
+        this.log.warning('No evaluation scores to export');
         return;
       }
 
-      const documents: EvaluationScoreDocument[] = [];
-      const timestamp = new Date().toISOString();
-
-      for (const dataset of datasetScoresWithStats) {
-        for (const [evaluatorName, stats] of dataset.evaluatorStats.entries()) {
-          const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          if (stats.count === 0) {
-            continue;
-          }
-
-          const document: EvaluationScoreDocument = {
-            '@timestamp': timestamp,
-            run_id: runId,
-            experiment_id: dataset.experimentId,
-            repetitions,
-            model: {
-              id: model.id || 'unknown',
-              family: model.family,
-              provider: model.provider,
-            },
-            evaluator_model: {
-              id: evaluatorModel.id || 'unknown',
-              family: evaluatorModel.family,
-              provider: evaluatorModel.provider,
-            },
-            dataset: {
-              id: dataset.id,
-              name: dataset.name,
-              examples_count: dataset.numExamples,
-            },
-            evaluator: {
-              name: evaluatorName,
-              stats: {
-                mean: stats.mean,
-                median: stats.median,
-                std_dev: stats.stdDev,
-                min: stats.min,
-                max: stats.max,
-                count: stats.count,
-                percentage: stats.percentage,
-              },
-              scores,
-            },
-            environment: {
-              hostname: hostname(),
-            },
-          };
-
-          documents.push(document);
-        }
-      }
       // Bulk index documents
       if (documents.length > 0) {
         const stats = await this.esClient.helpers.bulk({
           datasource: documents,
           onDocument: (doc) => {
+            const docId = [
+              doc.run_id,
+              doc.example.dataset.id,
+              doc.example.id,
+              doc.evaluator.name,
+              doc.task.repetition_index,
+            ].join('-');
+
             return {
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
+                _id: docId,
               },
             };
           },
@@ -302,13 +260,120 @@ export class EvaluationScoreRepository {
           );
         }
 
-        this.log.debug(
-          `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
-        );
+        this.log.debug(`Successfully indexed ${stats.successful} evaluation scores`);
       }
     } catch (error) {
       this.log.error('Failed to export scores to Elasticsearch:', error);
       throw error;
+    }
+  }
+
+  async getStatsByRunId(runId: string): Promise<RunStats | null> {
+    try {
+      const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
+        index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        query: { term: { run_id: runId } },
+        size: 1,
+      });
+
+      const firstDoc = metadataResponse.hits?.hits[0]?._source;
+      if (!firstDoc) {
+        return null;
+      }
+
+      const aggResponse = await this.esClient.search({
+        index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        size: 0,
+        query: { term: { run_id: runId } },
+        aggs: {
+          by_dataset: {
+            terms: { field: 'example.dataset.id', size: 100 },
+            aggs: {
+              dataset_name: {
+                terms: { field: 'example.dataset.name', size: 1 },
+              },
+              unique_examples: {
+                cardinality: { field: 'example.id' },
+              },
+              by_evaluator: {
+                terms: { field: 'evaluator.name', size: 50 },
+                aggs: {
+                  score_stats: {
+                    extended_stats: { field: 'evaluator.score' },
+                  },
+                  score_median: {
+                    percentiles: { field: 'evaluator.score', percents: [50] },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const stats: DatasetEvaluatorStats[] = [];
+      const aggregations = aggResponse.aggregations as
+        | {
+            by_dataset?: {
+              buckets?: Array<{
+                key: string;
+                dataset_name?: { buckets?: Array<{ key: string }> };
+                unique_examples?: { value?: number };
+                by_evaluator?: {
+                  buckets?: Array<{
+                    key: string;
+                    score_stats?: {
+                      avg?: number;
+                      std_deviation?: number;
+                      min?: number;
+                      max?: number;
+                      count?: number;
+                    };
+                    score_median?: { values?: Record<string, number> };
+                  }>;
+                };
+              }>;
+            };
+          }
+        | undefined;
+
+      const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
+      for (const datasetBucket of datasetBuckets) {
+        const datasetId = datasetBucket.key;
+        const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
+        const numExamples = datasetBucket.unique_examples?.value ?? 0;
+
+        const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
+        for (const evalBucket of evaluatorBuckets) {
+          const scoreStats = evalBucket.score_stats;
+          const median = evalBucket.score_median?.values?.['50.0'];
+
+          stats.push({
+            datasetId,
+            datasetName,
+            evaluatorName: evalBucket.key,
+            numExamples,
+            stats: {
+              mean: scoreStats?.avg ?? 0,
+              median: median ?? 0,
+              stdDev: scoreStats?.std_deviation ?? 0,
+              min: scoreStats?.min ?? 0,
+              max: scoreStats?.max ?? 0,
+              count: scoreStats?.count ?? 0,
+            },
+          });
+        }
+      }
+
+      return {
+        stats,
+        taskModel: firstDoc.task.model,
+        evaluatorModel: firstDoc.evaluator.model,
+        totalRepetitions: firstDoc.run_metadata.total_repetitions,
+      };
+    } catch (error) {
+      this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
+      return null;
     }
   }
 
@@ -324,10 +389,12 @@ export class EvaluationScoreRepository {
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
         query,
         sort: [
-          { 'dataset.name': { order: 'asc' as const } },
+          { 'example.dataset.name': { order: 'asc' as const } },
+          { 'example.index': { order: 'asc' as const } },
           { 'evaluator.name': { order: 'asc' as const } },
+          { 'task.repetition_index': { order: 'asc' as const } },
         ],
-        size: 1000,
+        size: 10000,
       });
 
       const hits = response.hits?.hits || [];

@@ -17,7 +17,7 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import { buildEvaluationReport, exportEvaluations } from './utils/report_model_score';
+import { buildFlattenedScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
@@ -189,21 +189,29 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(phoenixClient);
 
-      const report = await buildEvaluationReport({
-        phoenixClient,
-        experiments: await phoenixClient.getRanExperiments(),
-        model,
+      const experiments = await phoenixClient.getRanExperiments();
+      const currentRunId = process.env.TEST_RUN_ID;
+
+      if (!currentRunId) {
+        throw new Error(
+          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
+        );
+      }
+
+      const documents = buildFlattenedScoreDocuments({
+        experiments,
+        taskModel: model,
         evaluatorModel,
-        repetitions,
-        runId: process.env.TEST_RUN_ID,
+        runId: currentRunId,
+        totalRepetitions: repetitions,
       });
 
       try {
-        await exportEvaluations(report, esClient, log);
+        await exportEvaluations(documents, esClient, log);
       } catch (error) {
         log.error(
           new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${report.runId}.`,
+            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
             { cause: error }
           )
         );
@@ -211,7 +219,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       }
 
       const scoreRepository = new EvaluationScoreRepository(esClient, log);
-      await reportModelScore(scoreRepository, report.runId, log);
+      await reportModelScore(scoreRepository, currentRunId, log);
     },
     {
       scope: 'worker',
