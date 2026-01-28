@@ -25,6 +25,10 @@ jest.mock('../../services/epm/archive/storage');
 jest.mock('../../services/epm/packages/bundled_packages');
 jest.mock('../../services/epm/packages/get');
 
+// Mock Readable.fromWeb to return the mock body directly since we're testing with mock responses
+import { Readable } from 'stream';
+jest.spyOn(Readable, 'fromWeb').mockImplementation((webStream: any) => webStream);
+
 const mockedGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedGetInstallation = jest.mocked(getInstallation);
 const mockedGetFile = jest.mocked(getFile);
