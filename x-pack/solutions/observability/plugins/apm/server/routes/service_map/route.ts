@@ -24,6 +24,12 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import {
+  installServiceMapTransforms,
+  uninstallServiceMapTransforms,
+  getServiceMapTransformsStatus,
+  type ServiceMapTransformStatus,
+} from './transforms';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -59,10 +65,12 @@ const serviceMapRoute = createApmServerRoute({
       query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
     } = params;
 
+    const coreContext = await context.core;
     const {
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
-    } = await context.core;
+      elasticsearch: { client: scopedClusterClient },
+    } = coreContext;
 
     const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
       getMlClient(resources),
@@ -88,6 +96,7 @@ const serviceMapRoute = createApmServerRoute({
       mlClient,
       config,
       apmEventClient,
+      esClient: scopedClusterClient.asCurrentUser,
       serviceName,
       environment,
       searchAggregatedTransactions,
@@ -97,6 +106,7 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
+      usePrecomputedServiceMap: config.serviceMapEnabled, // Enable when service map is enabled
     });
   },
 });
@@ -180,8 +190,116 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
+/**
+ * Install and start service map transforms.
+ *
+ * The calling user must have permissions to:
+ * - Read from APM source indices (traces-apm*, etc.)
+ * - Create and write to transform destination indices (.apm-service-map-*)
+ * - Manage transforms
+ */
+const serviceMapTransformsInstallRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/service-map/transforms',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ success: boolean; status: ServiceMapTransformStatus }> => {
+    const { config, context, logger, getApmIndices } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const coreContext = await context.core;
+    const scopedClusterClient = coreContext.elasticsearch.client;
+    const apmIndices = await getApmIndices();
+
+    await installServiceMapTransforms({
+      scopedClusterClient,
+      logger,
+      apmIndices,
+    });
+
+    const status = await getServiceMapTransformsStatus({
+      scopedClusterClient,
+      logger,
+      apmIndices,
+    });
+
+    return { success: true, status };
+  },
+});
+
+/**
+ * Get the status of service map transforms.
+ */
+const serviceMapTransformsStatusRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/transforms/status',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceMapTransformStatus> => {
+    const { config, context, logger, getApmIndices } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const coreContext = await context.core;
+    const scopedClusterClient = coreContext.elasticsearch.client;
+    const apmIndices = await getApmIndices();
+
+    return getServiceMapTransformsStatus({
+      scopedClusterClient,
+      logger,
+      apmIndices,
+    });
+  },
+});
+
+/**
+ * Stop and uninstall service map transforms.
+ */
+const serviceMapTransformsDeleteRoute = createApmServerRoute({
+  endpoint: 'DELETE /internal/apm/service-map/transforms',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ success: boolean }> => {
+    const { config, context, logger, getApmIndices } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const coreContext = await context.core;
+    const scopedClusterClient = coreContext.elasticsearch.client;
+    const apmIndices = await getApmIndices();
+
+    await uninstallServiceMapTransforms({
+      scopedClusterClient,
+      logger,
+      apmIndices,
+    });
+
+    return { success: true };
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
+  ...serviceMapTransformsInstallRoute,
+  ...serviceMapTransformsStatusRoute,
+  ...serviceMapTransformsDeleteRoute,
 };
