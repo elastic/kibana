@@ -237,12 +237,13 @@ const createConversationActions = ({
       conversationId: string;
       title: string;
     }) => {
-      const current = queryClient.getQueryData<Conversation>(queryKey);
+      // Read from newConversationId cache to avoid race conditions during navigation
+      const newConvQueryKey = queryKeys.conversations.byId(newConversationId);
+      const current = queryClient.getQueryData<Conversation>(newConvQueryKey);
+
       if (!current) {
         throw new Error('Conversation not created');
       }
-
-      // Update individual conversation cache (with rounds)
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(id),
         produce(current, (draft) => {
@@ -250,6 +251,9 @@ const createConversationActions = ({
           draft.title = title;
         })
       );
+
+      // Remove temporary cache
+      queryClient.removeQueries({ queryKey: newConvQueryKey });
 
       // Invalidate conversation list to get updated data from server
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });

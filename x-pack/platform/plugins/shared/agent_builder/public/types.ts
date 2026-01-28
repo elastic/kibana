@@ -114,4 +114,11 @@ export interface AgentBuilderPluginStart {
   toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
+  /**
+   * Returns a React component that can be embedded in your UI.
+   * This component can render in two modes:
+   * - 'full': Complete conversation with history (default)
+   * - 'input-only': Just the conversation input (for getting started pages)
+   */
+  getEmbeddableConversationComponent: () => React.ComponentType<EmbeddableConversationProps>;
 }
