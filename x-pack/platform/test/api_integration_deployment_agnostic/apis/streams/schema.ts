@@ -432,5 +432,147 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+
+    describe('Fields conflicts API', () => {
+      it('Returns empty conflicts for fields with no conflicts', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'unique.field.name', type: 'keyword' }],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
+      });
+
+      it('Returns empty conflicts for empty field definitions', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body).to.eql({ conflicts: [] });
+      });
+
+      it('Returns error for non-existent stream', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'non-existent-stream' },
+              body: {
+                field_definitions: [{ name: 'test.field', type: 'keyword' }],
+              },
+            },
+          })
+          .expect(404);
+      });
+
+      it('Returns error for missing field name', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ type: 'keyword' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Returns error for missing field type', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'test.field' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Returns error for invalid field type', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'test.field', type: 'invalid_type' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Checks conflicts for multiple field definitions', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [
+                  { name: 'field.one', type: 'keyword' },
+                  { name: 'field.two', type: 'long' },
+                  { name: 'field.three', type: 'boolean' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
+      });
+
+      it('Filters out system type fields', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'system.field', type: 'system' }],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body).to.eql({ conflicts: [] });
+      });
+
+      it('Handles all valid field types', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [
+                  { name: 'field.keyword', type: 'keyword' },
+                  { name: 'field.long', type: 'long' },
+                  { name: 'field.double', type: 'double' },
+                  { name: 'field.date', type: 'date' },
+                  { name: 'field.boolean', type: 'boolean' },
+                  { name: 'field.ip', type: 'ip' },
+                  { name: 'field.geo_point', type: 'geo_point' },
+                  { name: 'field.match_only_text', type: 'match_only_text' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
+      });
+    });
   });
 }
