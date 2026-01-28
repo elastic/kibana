@@ -182,7 +182,16 @@ export function mapNodes({
       const serviceNode = services.get(serviceId);
 
       if (serviceNode) {
-        mappedNodes.set(node.id, serviceNode);
+        // Preserve the original span.destination.service.resource when mapping exit span to service
+        // This is needed for service-to-service edge metrics
+        const originalResource = isExitSpan(node)
+          ? (node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE]
+          : undefined;
+
+        mappedNodes.set(node.id, {
+          ...serviceNode,
+          ...(originalResource && { [SPAN_DESTINATION_SERVICE_RESOURCE]: originalResource }),
+        });
       }
     } else {
       const exitSpanNodes = exitSpans.get(id) ?? [];
@@ -210,6 +219,8 @@ export function mapEdges({
   allConnections: Connection[];
   nodes: Map<string, ConnectionNode>;
 }) {
+  const resourcesMap = new Map<string, Set<string>>();
+
   const connections = allConnections.reduce((acc, connection) => {
     const sourceData = nodes.get(connection.source.id);
     const targetData = nodes.get(connection.destination.id);
@@ -218,10 +229,24 @@ export function mapEdges({
       return acc;
     }
 
+    const id = getEdgeId(sourceData.id, targetData.id);
+    const resource = targetData[SPAN_DESTINATION_SERVICE_RESOURCE] as string | undefined;
+
+    const existingEdge = acc.get(id);
+    if (existingEdge) {
+      const resourceSet = resourcesMap.get(id);
+      if (resource && resourceSet && !resourceSet.has(resource)) {
+        resourceSet.add(resource);
+        existingEdge.resources?.push(resource);
+      }
+      return acc;
+    }
+
     const label = `${
       sourceData[SERVICE_NAME] || sourceData[SPAN_DESTINATION_SERVICE_RESOURCE]
     } to ${targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
-    const id = getEdgeId(sourceData.id, targetData.id);
+
+    resourcesMap.set(id, new Set(resource ? [resource] : []));
 
     acc.set(id, {
       source: sourceData.id,
@@ -230,10 +255,11 @@ export function mapEdges({
       id,
       sourceData,
       targetData,
+      resources: resource ? [resource] : [],
     });
 
     return acc;
-  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
+  }, new Map<string, ConnectionEdge>());
 
   return [...connections.values()];
 }
@@ -280,7 +306,7 @@ export function getServiceMapNodes({
     .flatMap((connection) => [connection.sourceData, connection.targetData])
     .concat(...allServices.values())
     .reduce((acc, node) => {
-      if (!acc.has(node.id)) {
+      if (node && !acc.has(node.id)) {
         acc.set(node.id, node);
       }
       return acc;
