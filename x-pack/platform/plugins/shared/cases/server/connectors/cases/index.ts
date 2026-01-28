@@ -145,6 +145,7 @@ export const getCasesConnectorAdapter = ({
 
       const subActionParams = {
         alerts: caseAlerts,
+        autoPushCase: params.subActionParams.autoPushCase,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
         groupingBy: params.subActionParams.groupingBy,
         groupedAlerts,
