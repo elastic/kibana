@@ -97,23 +97,23 @@ describe('SuggestionStatusColumn', () => {
   });
 
   describe('Badge Display', () => {
-    it('should show badge with pipeline and features count (excluding significant events)', () => {
+    it('should show badge with pipeline count only', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
           status={{
             stream: 'test-stream',
             suggestionCount: 3,
-            pipelineCount: 1,
+            pipelineCount: 2,
             featuresCount: 1,
-            significantEventsCount: 1,
+            significantEventsCount: 0,
           }}
           isLoading={false}
         />
       );
 
       expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
-      // Badge shows pipelineCount + featuresCount = 2, not suggestionCount = 3
+      // Badge shows only pipelineCount = 2
       expect(screen.getByText('2')).toBeInTheDocument();
     });
 
@@ -124,16 +124,36 @@ describe('SuggestionStatusColumn', () => {
           status={{
             stream: 'test-stream',
             suggestionCount: 5,
-            pipelineCount: 2,
+            pipelineCount: 3,
             featuresCount: 2,
-            significantEventsCount: 1,
+            significantEventsCount: 0,
           }}
           isLoading={false}
         />
       );
 
-      // Aria label shows pipelineCount + featuresCount = 4, not suggestionCount = 5
-      expect(screen.getByLabelText('4 suggestions available')).toBeInTheDocument();
+      // Aria label shows only pipelineCount = 3
+      expect(screen.getByLabelText('3 suggestions available')).toBeInTheDocument();
+    });
+
+    it('should show dash when only features exist (pipelines are excluded)', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 2,
+            pipelineCount: 0,
+            featuresCount: 2,
+            significantEventsCount: 0,
+          }}
+          isLoading={false}
+        />
+      );
+
+      // Even though featuresCount is 2, badge shows dash because only pipelines are shown
+      expect(screen.getByText('-')).toBeInTheDocument();
+      expect(screen.queryByTestId('suggestionStatusBadge-test-stream')).not.toBeInTheDocument();
     });
   });
 
@@ -147,9 +167,9 @@ describe('SuggestionStatusColumn', () => {
           status={{
             stream: 'test-stream',
             suggestionCount: 3,
-            pipelineCount: 1,
+            pipelineCount: 2,
             featuresCount: 1,
-            significantEventsCount: 1,
+            significantEventsCount: 0,
           }}
           isLoading={false}
         />
@@ -157,50 +177,21 @@ describe('SuggestionStatusColumn', () => {
 
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
-      // Only partitioning and processing are shown (significant events excluded)
+      // Only processing suggestions are shown (partitioning and significant events excluded)
       await waitFor(() => {
-        expect(screen.getByTestId('suggestionLink-test-stream-partitioning')).toBeInTheDocument();
         expect(screen.getByTestId('suggestionLink-test-stream-processing')).toBeInTheDocument();
       });
 
-      // Significant events should not be shown
+      // Partitioning and significant events should not be shown
+      expect(
+        screen.queryByTestId('suggestionLink-test-stream-partitioning')
+      ).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('suggestionLink-test-stream-significantEvents')
       ).not.toBeInTheDocument();
     });
 
-    it('should only show suggestion types with count > 0', async () => {
-      const user = userEvent.setup();
-
-      renderWithProviders(
-        <SuggestionStatusColumn
-          streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 2,
-            pipelineCount: 0,
-            featuresCount: 1,
-            significantEventsCount: 1,
-          }}
-          isLoading={false}
-        />
-      );
-
-      await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('suggestionLink-test-stream-partitioning')).toBeInTheDocument();
-      });
-
-      // Processing should not be shown because pipelineCount is 0
-      expect(screen.queryByTestId('suggestionLink-test-stream-processing')).not.toBeInTheDocument();
-      // Significant events are always excluded
-      expect(
-        screen.queryByTestId('suggestionLink-test-stream-significantEvents')
-      ).not.toBeInTheDocument();
-    });
-
-    it('should show correct labels for each suggestion type', async () => {
+    it('should show correct labels for pipeline suggestions', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -220,11 +211,11 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
       await waitFor(() => {
-        expect(screen.getByText('3 partitioning suggestions')).toBeInTheDocument();
         expect(screen.getByText('2 processing suggestions')).toBeInTheDocument();
       });
 
-      // Significant events are excluded from the popover
+      // Partitioning and significant events are excluded from the popover
+      expect(screen.queryByText('3 partitioning suggestions')).not.toBeInTheDocument();
       expect(screen.queryByText('1 significant events suggestion')).not.toBeInTheDocument();
     });
 
@@ -248,17 +239,17 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
       await waitFor(() => {
-        expect(screen.getByText('1 partitioning suggestion')).toBeInTheDocument();
         expect(screen.getByText('1 processing suggestion')).toBeInTheDocument();
       });
 
-      // Significant events are excluded from the popover
+      // Partitioning and significant events are excluded from the popover
+      expect(screen.queryByText('1 partitioning suggestion')).not.toBeInTheDocument();
       expect(screen.queryByText('1 significant events suggestion')).not.toBeInTheDocument();
     });
   });
 
   describe('Suggestion Links', () => {
-    it('should generate correct links for each suggestion type', async () => {
+    it('should generate correct link for processing suggestions only', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
@@ -278,16 +269,16 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-logs'));
 
       await waitFor(() => {
-        // Only partitioning and processing links are generated (significant events excluded)
-        expect(mockRouterLink).toHaveBeenCalledWith('/{key}/management/{tab}', {
-          path: { key: 'logs', tab: 'partitioning' },
-        });
+        // Only processing link is generated (partitioning and significant events excluded)
         expect(mockRouterLink).toHaveBeenCalledWith('/{key}/management/{tab}', {
           path: { key: 'logs', tab: 'processing' },
         });
       });
 
-      // Significant events link should not be generated
+      // Partitioning and significant events links should not be generated
+      expect(mockRouterLink).not.toHaveBeenCalledWith('/{key}/management/{tab}', {
+        path: { key: 'logs', tab: 'partitioning' },
+      });
       expect(mockRouterLink).not.toHaveBeenCalledWith('/{key}/management/{tab}', {
         path: { key: 'logs', tab: 'significantEvents' },
       });

@@ -18,6 +18,7 @@ import {
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import {
@@ -141,7 +142,15 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
       throw new Error('Pipeline suggestion was cancelled');
     }
 
-    taskResult = await getStatus();
+    try {
+      taskResult = await getStatus();
+    } catch (error) {
+      // If aborted during network request, throw a cancellation error
+      if (isRequestAbortedError(error)) {
+        throw new Error('Pipeline suggestion was cancelled');
+      }
+      throw error;
+    }
   }
 
   // Step 4: Handle terminal states
@@ -242,6 +251,11 @@ export const createNotifySuggestionFailureNotifier =
       return;
     }
 
+    // Don't show toast for abort errors - they're expected when user cancels or switches streams
+    if (isRequestAbortedError(event.error)) {
+      return;
+    }
+
     const formattedError = getFormattedError(event.error);
     toasts.addError(formattedError, {
       title: i18n.translate(
@@ -297,7 +311,16 @@ export async function loadExistingSuggestionLogic(
     );
   };
 
-  let taskResult = await getStatus();
+  let taskResult;
+  try {
+    taskResult = await getStatus();
+  } catch (error) {
+    // If aborted during initial fetch, return 'none' gracefully
+    if (isRequestAbortedError(error)) {
+      return { type: 'none' };
+    }
+    throw error;
+  }
 
   // If in progress, poll until complete or terminal state
   while (
@@ -317,7 +340,15 @@ export async function loadExistingSuggestionLogic(
       return { type: 'none' };
     }
 
-    taskResult = await getStatus();
+    try {
+      taskResult = await getStatus();
+    } catch (error) {
+      // If aborted during network request, return 'none' gracefully
+      if (isRequestAbortedError(error)) {
+        return { type: 'none' };
+      }
+      throw error;
+    }
   }
 
   // Handle terminal states

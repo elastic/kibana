@@ -352,6 +352,10 @@ export const interactiveModeMachine = setup({
     hasSimulatePrivileges: ({ context }) => {
       return context.privileges.simulate;
     },
+    hasNoInitialSteps: ({ context }) => {
+      // Don't show suggestions if stream already has processing steps
+      return context.initialStepRefs.length === 0;
+    },
   },
 }).createMachine({
   id: 'interactiveMode',
@@ -404,7 +408,9 @@ export const interactiveModeMachine = setup({
             }),
             onDone: [
               {
-                guard: ({ event }) => event.output.type === 'completed',
+                // Only show suggestion if stream has no initial steps (not already configured)
+                guard: ({ context, event }) =>
+                  event.output.type === 'completed' && context.initialStepRefs.length === 0,
                 target: 'viewingSuggestion',
                 actions: enqueueActions(({ event, enqueue }) => {
                   // Type guard is satisfied by the guard above, but TypeScript needs help
@@ -420,11 +426,13 @@ export const interactiveModeMachine = setup({
                 }),
               },
               {
-                guard: ({ event }) => event.output.type === 'in_progress',
+                // Only continue polling if stream has no initial steps
+                guard: ({ context, event }) =>
+                  event.output.type === 'in_progress' && context.initialStepRefs.length === 0,
                 target: 'generatingSuggestion',
               },
               {
-                // For 'none' or 'failed' - go to idle
+                // For 'none', 'failed', or when stream already has steps - go to idle
                 target: 'idle',
               },
             ],

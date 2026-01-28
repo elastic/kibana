@@ -43,10 +43,10 @@ export function SuggestionStatusColumn({
     );
   }
 
-  // Calculate badge count excluding significant events (only pipelines + features)
-  const badgeCount = status ? status.pipelineCount + status.featuresCount : 0;
+  // Calculate badge count - only show pipeline suggestions for now
+  const badgeCount = status ? status.pipelineCount : 0;
 
-  // No suggestions available for this stream (excluding significant events)
+  // No suggestions available for this stream
   if (!status || badgeCount === 0) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
@@ -60,16 +60,8 @@ export function SuggestionStatusColumn({
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
 
-  // Build suggestion items for the popover (excluding significant events)
+  // Build suggestion items for the popover - only show pipeline suggestions for now
   const suggestionItems: Array<{ count: number; label: string; tab: string }> = [];
-
-  if (status.featuresCount > 0) {
-    suggestionItems.push({
-      count: status.featuresCount,
-      label: getPartitioningSuggestionLabel(status.featuresCount),
-      tab: 'partitioning',
-    });
-  }
 
   if (status.pipelineCount > 0) {
     suggestionItems.push({
@@ -141,14 +133,6 @@ const OPEN_SUGGESTIONS_POPOVER_ARIA_LABEL = i18n.translate(
 function getSuggestionAriaLabel(count: number): string {
   return i18n.translate('xpack.streams.suggestionStatusColumn.availableAriaLabel', {
     defaultMessage: '{count, plural, one {# suggestion} other {# suggestions}} available',
-    values: { count },
-  });
-}
-
-function getPartitioningSuggestionLabel(count: number): string {
-  return i18n.translate('xpack.streams.suggestionStatusColumn.partitioningSuggestionLabel', {
-    defaultMessage:
-      '{count, plural, one {# partitioning suggestion} other {# partitioning suggestions}}',
     values: { count },
   });
 }
