@@ -127,6 +127,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
+    "@kbn/es-query-server",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
