@@ -9,7 +9,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
-import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../../common';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  type SearchSessionRequestInfo,
+  type SearchSessionRequestStatus,
+} from '../../../../common';
 import { SearchStatus } from '../types';
 
 function requestByStrategy({
@@ -21,7 +25,7 @@ function requestByStrategy({
   asyncId: string;
   esClient: ElasticsearchClient;
 }) {
-  if (search.strategy === 'esql_async') {
+  if (search.strategy === ESQL_ASYNC_SEARCH_STRATEGY) {
     return esClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
   }
 

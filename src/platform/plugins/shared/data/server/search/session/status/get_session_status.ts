@@ -24,7 +24,7 @@ export async function getSessionStatus(
   deps: { esClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   // When true it will try to use the cached status if present, otherwise it will fall back to checking the actual status from ES.
-  opts: { preferCachedStatus: boolean }
+  opts: { preferCachedStatus: boolean } = { preferCachedStatus: false }
 ): Promise<SessionStatus> {
   if (session.isCanceled === true) {
     return { status: SearchSessionStatus.CANCELLED };

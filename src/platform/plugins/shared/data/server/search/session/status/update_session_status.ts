@@ -21,9 +21,7 @@ export async function updateSessionStatus(
   deps: { esClient: ElasticsearchClient; savedObjectsClient: SavedObjectsClientContract },
   session: SavedObject<SearchSessionSavedObjectAttributes>
 ): Promise<SessionStatus> {
-  const sessionStatus = await getSessionStatus(deps, session.attributes, {
-    preferCachedStatus: false,
-  });
+  const sessionStatus = await getSessionStatus(deps, session.attributes);
   const updatedIdMapping = getUpdatedIdMappings(
     session.attributes,
     sessionStatus.searchStatuses || []

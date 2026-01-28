@@ -184,12 +184,18 @@ describe('getSessionStatus', () => {
     });
   });
 
-  describe('when preferCachedStatus is false', () => {
+  describe.each([
+    { value: { preferCachedStatus: false }, description: 'false' },
+    { value: undefined, description: 'not present' },
+  ])('when preferCachedStatus is $description', ({ value }) => {
     describe('when there are some errors', () => {
       it('should return an error status', async () => {
         // Given
         const deps = getDeps();
-        mockGetSearchStatus.mockResolvedValue({ status: SearchStatus.ERROR, error: { code: 500 } });
+        mockGetSearchStatus.mockResolvedValue({
+          status: SearchStatus.ERROR,
+          error: { code: 500 },
+        });
         const session = createSearchSessionSavedObjectAttributesMock({
           idMapping: {
             '1234': createSearchSessionRequestInfoMock(),
@@ -197,7 +203,7 @@ describe('getSessionStatus', () => {
         });
 
         // When
-        const res = await getSessionStatus(deps, session, { preferCachedStatus: false });
+        const res = await getSessionStatus(deps, session, value);
 
         // Then
         expect(res).toEqual({
@@ -226,7 +232,7 @@ describe('getSessionStatus', () => {
         });
 
         // When
-        const res = await getSessionStatus(deps, session, { preferCachedStatus: false });
+        const res = await getSessionStatus(deps, session, value);
 
         // Then
         expect(res).toEqual({
@@ -263,7 +269,7 @@ describe('getSessionStatus', () => {
         });
 
         // When
-        const res = await getSessionStatus(deps, session, { preferCachedStatus: false });
+        const res = await getSessionStatus(deps, session, value);
 
         // Then
         expect(res).toEqual({
