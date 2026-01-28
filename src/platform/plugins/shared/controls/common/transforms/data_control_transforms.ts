@@ -76,11 +76,11 @@ export function transformDataControlOut<
     /**
      * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
      */
-    ...(typeof useGlobalFilters === 'boolean' ? { use_global_filters: useGlobalFilters } : {}),
-    ...(typeof use_global_filters === 'boolean' ? { use_global_filters } : {}),
-    ...(typeof ignoreValidations === 'boolean' ? { ignore_validations: ignoreValidations } : {}),
-    ...(typeof ignore_validations === 'boolean' ? { ignore_validations } : {}),
-    ...(fieldName ? { field_name: fieldName } : {}),
+    ...(typeof useGlobalFilters === 'boolean' && { use_global_filters: useGlobalFilters }),
+    ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
+    ...(typeof ignoreValidations === 'boolean' && { ignore_validations: ignoreValidations }),
+    ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
+    ...(fieldName && { field_name: fieldName }),
     ...(field_name ? { field_name } : { field_name: '' }),
   };
 }
