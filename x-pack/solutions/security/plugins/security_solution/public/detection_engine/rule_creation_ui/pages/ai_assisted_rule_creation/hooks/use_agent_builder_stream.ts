@@ -35,7 +35,8 @@ const parseRuleResponse = (ruleData: unknown) => {
   // Values required by rule response schema
   // AI assisted rule creation returns only fields that required for rule create API schema
   // but we need to return a complete rule response schema to satisfy UI form type requirements
-  const requiredFields = {
+  // these fields are technical fields that generated on server side and not be used in rule creation form on UI
+  const placeholderFields = {
     version: 1,
     enabled: false,
     id: uuidv4(),
@@ -51,7 +52,7 @@ const parseRuleResponse = (ruleData: unknown) => {
     revision: 0,
   };
 
-  return RuleResponse.safeParse({ ...ruleData, ...requiredFields });
+  return RuleResponse.safeParse({ ...ruleData, ...placeholderFields });
 };
 
 export const useAgentBuilderStream = () => {
