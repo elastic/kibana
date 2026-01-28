@@ -65,6 +65,8 @@ export async function getAlertAiInsight({
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AiInsightResult> {
+  const basePath = core.http.basePath.serverBasePath;
+
   const relatedContext = await fetchAlertContext({
     core,
     plugins,
@@ -77,6 +79,7 @@ export async function getAlertAiInsight({
     inferenceClient,
     connectorId,
     alertDoc,
+    basePath,
     spaceId,
     context: relatedContext,
   });
@@ -214,12 +217,14 @@ function generateAlertSummary({
   inferenceClient,
   connectorId,
   alertDoc,
+  basePath,
   spaceId,
   context,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
   alertDoc: AlertDocForInsight;
+  basePath: string;
   spaceId: string;
   context: string;
 }): Observable<ChatCompletionEvent> {
@@ -249,7 +254,7 @@ function generateAlertSummary({
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
 
-    ${getEntityLinkingInstructions(spaceId)}
+    ${getEntityLinkingInstructions({ basePath, spaceId })}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;

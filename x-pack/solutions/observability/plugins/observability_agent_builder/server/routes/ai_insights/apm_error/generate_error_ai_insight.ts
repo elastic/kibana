@@ -20,7 +20,13 @@ import { fetchApmErrorContext } from './fetch_apm_error_context';
 import { getEntityLinkingInstructions } from '../../../agent/register_observability_agent';
 import type { AiInsightResult, ContextEvent } from '../types';
 
-function getErrorAiInsightSystemPrompt(spaceId?: string) {
+function getErrorAiInsightSystemPrompt({
+  basePath,
+  spaceId,
+}: {
+  basePath: string;
+  spaceId: string;
+}) {
   return dedent(`
     You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
 
@@ -47,7 +53,7 @@ function getErrorAiInsightSystemPrompt(spaceId?: string) {
     - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)
     - <TraceLogCategories>: Categorized log patterns tied to the trace (errorCategory, docCount, sampleMessage)
 
-    ${getEntityLinkingInstructions(spaceId)}
+    ${getEntityLinkingInstructions({ basePath, spaceId })}
   `);
 }
 
@@ -94,6 +100,8 @@ export async function generateErrorAiInsight({
   inferenceClient,
   dataRegistry,
 }: GenerateErrorAiInsightParams): Promise<AiInsightResult> {
+  const basePath = core.http.basePath.serverBasePath;
+
   const errorContext = await fetchApmErrorContext({
     core,
     plugins,
@@ -110,7 +118,7 @@ export async function generateErrorAiInsight({
   const userPrompt = buildUserPrompt(errorContext);
 
   const events$ = inferenceClient.chatComplete({
-    system: getErrorAiInsightSystemPrompt(spaceId),
+    system: getErrorAiInsightSystemPrompt({ basePath, spaceId }),
     messages: [
       {
         role: MessageRole.User,

@@ -36,18 +36,22 @@ export async function registerObservabilityAgent({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    configuration: ({ spaceId }) => ({
-      instructions:
-        dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
+    configuration: ({ spaceId }) => {
+      const basePath = core.http.basePath.serverBasePath;
+
+      return {
+        instructions:
+          dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
-        ${getEntityLinkingInstructions(spaceId)}
+        ${getEntityLinkingInstructions({ basePath, spaceId })}
       `),
-      tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
-    }),
+        tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
+      };
+    },
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
@@ -100,11 +104,19 @@ function getKqlInstructions() {
 }
 
 /**
- * Entity Linking instructions for the Observability Agent
+ * Entity Linking instructions for the Observability Agent.
  * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
  */
-export function getEntityLinkingInstructions(spaceId?: string) {
-  const prefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+export function getEntityLinkingInstructions({
+  basePath,
+  spaceId,
+}: {
+  basePath: string;
+  spaceId?: string;
+}): string {
+  const spacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const prefix = `${basePath}${spacePrefix}`;
+
   return dedent(`
   ### Entity Linking Guidelines
   Use markdown for readability. When referencing entities, create clickable links.

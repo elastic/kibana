@@ -95,7 +95,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-
       const spaceId = getCurrentSpaceId({ spaces, request });
 
       const result = await generateErrorAiInsight({
@@ -147,10 +146,10 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
-
       const spaceId = getCurrentSpaceId({ spaces, request });
 
       const result = await getLogAiInsights({
+        core,
         index,
         id,
         spaceId,
