@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useInterpret, useSelector } from '@xstate/react';
+import { useActorRef, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
-import { waitFor } from 'xstate/lib/waitFor';
+import { waitFor } from 'xstate';
 import type { LogViewAttributes, LogViewReference } from '../../common/log_views';
 import { DEFAULT_LOG_VIEW } from '../../common/log_views';
 import type {
@@ -40,20 +40,20 @@ export const useLogView = ({
 }) => {
   const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
 
-  const logViewStateService = useInterpret(
-    () =>
-      createLogViewStateMachine({
-        initialContext: {
-          logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
-        },
-        logViews,
-        notificationChannel: logViewStateNotifications,
-        initializeFromUrl,
-        updateContextInUrl,
-        listenForUrlChanges,
-      }),
+  const logViewStateService = useActorRef(
+    createLogViewStateMachine({
+      initialContext: {
+        logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
+      },
+      logViews,
+      notificationChannel: logViewStateNotifications,
+      initializeFromUrl,
+      updateContextInUrl,
+      listenForUrlChanges,
+    }),
     {
-      devTools: useDevTools,
+      // eslint-disable-next-line no-console
+      inspect: useDevTools ? console.log : undefined,
     }
   );
 
@@ -73,24 +73,27 @@ export const useLogView = ({
   );
 
   const logView = useSelector(logViewStateService, (state) =>
-    state.matches('resolving') ||
-    state.matches('checkingStatus') ||
-    state.matches('resolvedPersistedLogView') ||
-    state.matches('resolvedInlineLogView')
+    (state.matches('resolving') ||
+      state.matches('checkingStatus') ||
+      state.matches('resolvedPersistedLogView') ||
+      state.matches('resolvedInlineLogView')) &&
+    'logView' in state.context
       ? state.context.logView
       : undefined
   );
 
   const resolvedLogView = useSelector(logViewStateService, (state) =>
-    state.matches('checkingStatus') ||
-    state.matches('resolvedPersistedLogView') ||
-    state.matches('resolvedInlineLogView')
+    (state.matches('checkingStatus') ||
+      state.matches('resolvedPersistedLogView') ||
+      state.matches('resolvedInlineLogView')) &&
+    'resolvedLogView' in state.context
       ? state.context.resolvedLogView
       : undefined
   );
 
   const logViewStatus = useSelector(logViewStateService, (state) =>
-    state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')
+    (state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')) &&
+    'status' in state.context
       ? state.context.status
       : undefined
   );
@@ -129,9 +132,10 @@ export const useLogView = ({
   const isInlineLogView = !isPersistedLogView;
 
   const latestLoadLogViewFailures = useSelector(logViewStateService, (state) =>
-    state.matches('loadingFailed') ||
-    state.matches('resolutionFailed') ||
-    state.matches('checkingStatusFailed')
+    (state.matches('loadingFailed') ||
+      state.matches('resolutionFailed') ||
+      state.matches('checkingStatusFailed')) &&
+    'error' in state.context
       ? [state.context.error]
       : []
   );
@@ -161,7 +165,7 @@ export const useLogView = ({
           state.matches('resolvedInlineLogView')
       );
 
-      if (doneState.matches('updatingFailed')) {
+      if (doneState.matches('updatingFailed') && 'error' in doneState.context) {
         throw doneState.context.error;
       }
     },
