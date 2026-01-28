@@ -8,7 +8,6 @@
 import type { IngestStreamIndexMode } from '../models/ingest/base';
 import type { Streams } from '../models/streams';
 import { getIndexPatternsForStream } from './hierarchy_helpers';
-import { isTSDBMode } from './is_tsdb_mode';
 
 export interface GetDiscoverEsqlQueryOptions {
   /**
@@ -57,7 +56,7 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
     return undefined;
   }
 
-  const sourceCommand = isTSDBMode(indexMode) ? 'TS' : 'FROM';
+  const sourceCommand = indexMode === 'time_series' ? 'TS' : 'FROM';
   const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
 
   return `${sourceCommand} ${indexPatterns.join(', ')}${metadataSuffix}`;
