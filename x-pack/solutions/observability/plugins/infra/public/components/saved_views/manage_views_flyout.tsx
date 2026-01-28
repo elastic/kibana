@@ -93,9 +93,11 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
           defaultMessage: 'Mark as default',
         })}
         key={item.id}
-        data-test-subj={`infraRenderMakeDefaultActionButton-${
-          item.attributes.isDefault ? 'filled' : 'empty'
-        }`}
+        data-test-subj={
+          item.attributes.isDefault
+            ? 'infraRenderMakeDefaultActionButton-filled'
+            : 'infraRenderMakeDefaultActionButton-empty'
+        }
         iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
         size="s"
         onClick={() => {
