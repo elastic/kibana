@@ -31,7 +31,7 @@ inputs:
 steps:
   - name: search-pull-requests
     type: mcp.callTool
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       name: "search_pull_requests"
       arguments:

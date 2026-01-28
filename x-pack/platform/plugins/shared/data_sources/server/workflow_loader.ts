@@ -48,7 +48,7 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
       yamlFiles.map(async (fileName) => {
         const filePath = join(directory, fileName);
         const rawContent = await fs.readFile(filePath, 'utf-8');
-        const content = Mustache.render(rawContent, templateInputs);
+        const content = Mustache.render(rawContent, templateInputs, {}, ['<%=', '%>']);
         const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {

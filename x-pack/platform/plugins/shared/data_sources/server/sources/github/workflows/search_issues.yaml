@@ -31,7 +31,7 @@ inputs:
 steps:
   - name: search-issues
     type: mcp.callTool
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       name: "search_issues"
       arguments:

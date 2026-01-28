@@ -28,7 +28,7 @@ inputs:
 steps:
   - name: search-repositories
     type: mcp.callTool
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       name: "search_repositories"
       arguments:

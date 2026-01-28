@@ -25,7 +25,7 @@ inputs:
 steps:
   - name: search-users
     type: mcp.callTool
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       name: "search_users"
       arguments:

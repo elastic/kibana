@@ -11,6 +11,6 @@ inputs:
 steps:
   - name: get-page
     type: notion.getPage
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       pageId: "${{inputs.page_id}}"

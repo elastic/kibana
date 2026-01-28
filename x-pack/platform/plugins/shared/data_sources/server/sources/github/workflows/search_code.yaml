@@ -21,7 +21,7 @@ inputs:
 steps:
   - name: search-code
     type: mcp.callTool
-    connector-id: {{ stackConnectorId }}
+    connector-id: <%= stackConnectorId %>
     with:
       name: "search_code"
       arguments:
