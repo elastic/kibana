@@ -60,7 +60,7 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getClassicHeaderComponentForGridLayout.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getClassicHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
 
     http = httpServiceMock.createStartContract();
 
