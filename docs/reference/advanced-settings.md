@@ -388,7 +388,7 @@ $$$observability-apm-labs$$$`observability:apmLabsButton` {applies_to}`stack: re
 $$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration` {applies_to}`stack: preview 9.0, removed 9.1`
 :   Enables the Profiling view in Host details within Infrastructure. `true` by default.
 
-$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards` {applies_to}`stack: preview 9.0, removed 9.1`
+$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards` {applies_to}`stack: preview 9.0`
 :   Enables the option to link custom dashboards in the Asset Details view. `false` by default.
 
 $$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics` {applies_to}`stack: preview 9.0, removed 9.1`
