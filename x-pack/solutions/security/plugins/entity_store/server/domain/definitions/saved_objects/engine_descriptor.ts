@@ -10,7 +10,7 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { EntityType } from '../entity_schema';
+import { type EntityType } from '../entity_schema';
 import type { EngineDescriptor } from './constants';
 import { LogExtractionState, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './engine_descriptor_type';
@@ -21,7 +21,7 @@ export class EngineDescriptorClient {
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
     return this.soClient.find<EngineDescriptor>({
@@ -29,6 +29,15 @@ export class EngineDescriptorClient {
       filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
       namespaces: [this.namespace],
     });
+  }
+
+  async getAll(): Promise<EngineDescriptor[]> {
+    const { saved_objects } = await this.soClient.find<EngineDescriptor>({
+      type: EngineDescriptorTypeName,
+      namespaces: [this.namespace]
+    });
+    
+    return saved_objects.map((engine) => engine.attributes);
   }
 
   async init(

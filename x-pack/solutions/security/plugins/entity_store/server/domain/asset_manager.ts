@@ -12,9 +12,10 @@ import { getEntityDefinition } from './definitions/registry';
 import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
+import type { EngineDescriptor, EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
 import type { LogExtractionBodyParams } from '../routes/constants';
-import { ENGINE_STATUS } from './constants';
+import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
+import { EntityStoreStatus } from './types';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -122,5 +123,30 @@ export class AssetManager {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}: ${error}`);
       throw error;
     }
+  }
+
+  public async getStatus() {
+    const engines = await this.engineDescriptorClient.getAll();
+    const status = this.calculateEntityStoreStatus(engines);
+    
+    return {
+      status,
+      engines,
+    };
+  }
+
+  private calculateEntityStoreStatus(engines: EngineDescriptor[]): EntityStoreStatus {
+    let status = ENTITY_STORE_STATUS.RUNNING;
+    if (engines.length === 0) {
+      status = ENTITY_STORE_STATUS.NOT_INSTALLED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+      status = ENTITY_STORE_STATUS.ERROR;
+    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+      status = ENTITY_STORE_STATUS.STOPPED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+      status = ENTITY_STORE_STATUS.INSTALLING;
+    }
+
+    return status;
   }
 }

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { registerInstall } from './install';
-export { registerStop } from './stop';
-export { registerStatus } from './status';
-export { registerForceLogExtraction } from './force_log_extraction';
-export { registerUninstall } from './uninstall';
+import { z } from '@kbn/zod';
+
+export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
+export const EntityStoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);

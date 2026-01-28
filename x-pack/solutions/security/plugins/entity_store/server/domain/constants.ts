@@ -6,6 +6,7 @@
  */
 
 import type { EngineStatus } from './definitions/saved_objects';
+import { EntityStoreStatus } from './types';
 
 export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_UPDATES = 'updates' as const;
@@ -47,5 +48,13 @@ export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   STARTED: 'started',
   STOPPED: 'stopped',
   UPDATING: 'updating',
+  ERROR: 'error',
+};
+
+export const ENTITY_STORE_STATUS: Record<Uppercase<EntityStoreStatus>, EntityStoreStatus> = {
+  RUNNING: 'running',
+  STOPPED: 'stopped',
+  INSTALLING: 'installing',
+  NOT_INSTALLED: 'not_installed',
   ERROR: 'error',
 };
