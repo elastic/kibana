@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/user-activity-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "A simple example of how to use the User Activity Service",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "userActivityExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}

@@ -2430,6 +2430,8 @@
       "@kbn/use-observable/*": ["src/platform/packages/shared/react/use_observable/*"],
       "@kbn/use-tracked-promise": ["src/platform/packages/shared/kbn-use-tracked-promise"],
       "@kbn/use-tracked-promise/*": ["src/platform/packages/shared/kbn-use-tracked-promise/*"],
+      "@kbn/user-activity-example-plugin": ["examples/user_activity_example"],
+      "@kbn/user-activity-example-plugin/*": ["examples/user_activity_example/*"],
       "@kbn/user-profile-components": ["src/platform/packages/shared/kbn-user-profile-components"],
       "@kbn/user-profile-components/*": ["src/platform/packages/shared/kbn-user-profile-components/*"],
       "@kbn/user-profile-examples-plugin": ["examples/user_profile_examples"],
