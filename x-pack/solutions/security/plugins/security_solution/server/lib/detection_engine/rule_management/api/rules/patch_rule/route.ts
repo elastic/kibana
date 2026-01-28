@@ -9,7 +9,10 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActionsPayload } from '../../../utils/rule_response_actions_validators';
+import {
+  validateResponseActionsPermissions,
+  validateRuleResponseActionsPayload,
+} from '../../../utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -73,12 +76,13 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
+          await validateResponseActionsPermissions(securitySolutionCtx, params, existingRule);
+
           await validateRuleResponseActionsPayload({
             ruleResponseActions: request.body.response_actions,
             endpointService: securitySolutionCtx.getEndpointService(),
             spaceId: securitySolutionCtx.getSpaceId(),
           });
-          // FIXME:PT need to add Authz validations for Endpoint response actions
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({

@@ -62,12 +62,6 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             'lists',
           ]);
 
-          await validateRuleResponseActionsPayload({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: ctx.securitySolution.getEndpointService(),
-            spaceId: ctx.securitySolution.getSpaceId(),
-          });
-
           const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
@@ -100,6 +94,12 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
           });
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
+
+          await validateRuleResponseActionsPayload({
+            ruleResponseActions: request.body.response_actions,
+            endpointService: ctx.securitySolution.getEndpointService(),
+            spaceId: ctx.securitySolution.getSpaceId(),
+          });
 
           const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
