@@ -1,15 +1,12 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiInputPopover,
-  EuiFormControlLayout,
   EuiIcon,
-  EuiFieldText,
-  EuiFormLabel,
-  EuiSelectable,
-  type EuiSelectableOption,
-  EuiSpacer,
+
   EuiComboBox,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { useNavigation } from '../../common/lib/kibana';
@@ -84,13 +81,23 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
   );
 
   return (
-    <EuiComboBox
-      prepend="Watchlist"
-      placeholder='Select watchlist'
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={selected ? [selected] : []}
-      onChange={onChangeComboBox}
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem>
+        <EuiComboBox
+          prepend="Watchlist"
+          placeholder='Select watchlist'
+          singleSelection={{ asPlainText: true }}
+          options={options}
+          selectedOptions={selected ? [selected] : []}
+          onChange={onChangeComboBox}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="gear"
+          aria-label="Watchlist settings"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   )
 };
