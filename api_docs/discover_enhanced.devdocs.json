@@ -38,6 +38,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,6 +76,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -87,6 +93,8 @@
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 39,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -123,6 +131,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -146,6 +156,8 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -167,6 +179,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -195,6 +209,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -209,6 +225,8 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 75,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -230,6 +248,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 75,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -248,6 +268,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -288,6 +310,8 @@
           ", object>"
         ],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,6 +326,8 @@
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -316,6 +342,8 @@
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,6 +358,8 @@
               "200"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -346,6 +376,8 @@
               ") => Promise<boolean>"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -360,6 +392,8 @@
                   "ExploreDataChartActionContext"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "lineNumber": 37,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -382,6 +416,8 @@
               "<object>>"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -396,6 +432,8 @@
                   "ExploreDataChartActionContext"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -444,6 +482,8 @@
           ", object>"
         ],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -458,6 +498,8 @@
               "\"ACTION_EXPLORE_DATA\""
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,6 +514,8 @@
               "\"ACTION_EXPLORE_DATA\""
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,6 +530,8 @@
               "200"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -503,6 +549,8 @@
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +571,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,6 +593,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,6 +616,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -626,6 +680,8 @@
               "<any, {}>>) => void; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -640,6 +696,8 @@
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -660,6 +718,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -680,6 +740,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,6 +763,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,6 +863,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -830,6 +896,8 @@
         "label": "Config",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/common/config.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -844,6 +912,8 @@
               "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/common/config.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

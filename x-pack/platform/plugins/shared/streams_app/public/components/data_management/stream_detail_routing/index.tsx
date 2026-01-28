@@ -190,7 +190,6 @@ export function StreamDetailRoutingImpl() {
                   minSize="400px"
                   tabIndex={0}
                   paddingSize="l"
-                  color="subdued"
                   className={css`
                     overflow: auto;
                     display: flex;

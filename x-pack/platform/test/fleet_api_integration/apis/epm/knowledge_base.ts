@@ -82,7 +82,8 @@ export default function (providerContext: FtrProviderContext) {
     });
   };
 
-  describe('Knowledge Base', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/246983
+  describe.skip('Knowledge Base', () => {
     skipIfNoDockerRegistry(providerContext);
 
     const knowledgeBasePkgName = 'knowledge_base_test';

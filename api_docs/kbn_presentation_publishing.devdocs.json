@@ -21,6 +21,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 18,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +81,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 26,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,6 +111,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +127,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "lineNumber": 25,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +155,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +171,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+            "lineNumber": 20,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,6 +199,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,6 +215,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -223,6 +243,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,6 +259,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "lineNumber": 16,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,6 +287,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +303,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -304,6 +332,8 @@
           "<StateT, object>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -318,6 +348,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -347,6 +379,8 @@
           "<unknown>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -361,6 +395,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+            "lineNumber": 17,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -388,6 +424,8 @@
           "<object>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -402,6 +440,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+            "lineNumber": 18,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -428,6 +468,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,6 +484,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "lineNumber": 14,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -469,6 +513,8 @@
           "<string>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -483,6 +529,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 19,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -509,6 +557,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +573,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "lineNumber": 14,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -549,6 +601,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -563,6 +617,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -590,6 +646,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,6 +662,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -619,6 +679,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -645,6 +707,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -659,6 +723,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -685,6 +751,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -699,6 +767,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -725,6 +795,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -739,6 +811,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -765,6 +839,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -779,6 +855,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -807,6 +885,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -821,6 +901,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -847,6 +929,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -861,6 +945,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -887,6 +973,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -901,6 +989,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 62,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -928,6 +1018,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -942,6 +1034,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -968,6 +1062,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -982,6 +1078,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1008,6 +1106,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1022,6 +1122,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1048,6 +1150,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1062,6 +1166,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1088,6 +1194,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1102,6 +1210,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1128,6 +1238,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1142,6 +1254,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+            "lineNumber": 16,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1168,6 +1282,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1182,6 +1298,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1210,6 +1328,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1224,6 +1344,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1250,6 +1372,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1264,6 +1388,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1290,6 +1416,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1304,6 +1432,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1330,6 +1460,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1344,6 +1476,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 27,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1370,6 +1504,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1384,6 +1520,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1410,6 +1548,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1424,6 +1564,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "lineNumber": 18,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1452,6 +1594,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1466,6 +1610,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1492,6 +1638,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1506,6 +1654,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1532,6 +1682,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1546,6 +1698,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1572,6 +1726,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 87,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1586,6 +1742,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1612,6 +1770,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1626,6 +1786,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1655,6 +1817,8 @@
           "<StateType>, lastSavedState?: StateType | undefined, currentState?: StateType | undefined, defaultState?: Partial<StateType> | undefined, getCustomLogLabel?: ((key: string) => string) | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1676,6 +1840,8 @@
               "<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1691,6 +1857,8 @@
               "StateType | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1706,6 +1874,8 @@
               "StateType | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1721,6 +1891,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1736,6 +1908,8 @@
               "((key: string) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1755,6 +1929,8 @@
           "(api: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1769,6 +1945,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "lineNumber": 20,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1797,6 +1975,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1811,6 +1991,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1840,6 +2022,8 @@
           "<StateType>, lastSavedState?: Partial<StateType> | undefined, latestState?: Partial<StateType> | undefined, defaultState?: Partial<StateType> | undefined) => Partial<StateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1861,6 +2045,8 @@
               "<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1876,6 +2062,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1891,6 +2079,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1906,6 +2096,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1935,6 +2127,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1949,6 +2143,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "lineNumber": 134,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1984,6 +2180,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1998,6 +2196,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "lineNumber": 14,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2020,6 +2220,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "lineNumber": 14,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2047,6 +2249,8 @@
           ">) => string | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2069,6 +2273,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+            "lineNumber": 17,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2098,6 +2304,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2112,6 +2320,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "lineNumber": 33,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2139,6 +2349,8 @@
           ">) => string | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2161,6 +2373,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 18,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2196,6 +2410,8 @@
           "> | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2210,6 +2426,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "lineNumber": 40,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2229,6 +2447,8 @@
           "(api: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2243,6 +2463,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "lineNumber": 24,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2271,6 +2493,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2285,6 +2509,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "lineNumber": 27,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2313,6 +2539,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2327,6 +2555,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+            "lineNumber": 26,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2366,6 +2596,8 @@
           "<StateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2382,6 +2614,8 @@
               "Partial<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2406,6 +2640,8 @@
               "<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2430,6 +2666,8 @@
               "<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2467,6 +2705,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2487,6 +2727,8 @@
               }
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2532,6 +2774,8 @@
           "<boolean | undefined>; setHideTitle: (hide: boolean | undefined) => void; }; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2553,6 +2797,8 @@
               "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2579,6 +2825,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2593,6 +2841,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+            "lineNumber": 18,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2614,6 +2864,8 @@
           "(label: string, lastValue: unknown, currentValue: unknown) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2628,6 +2880,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "lineNumber": 23,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2643,6 +2897,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "lineNumber": 23,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2658,6 +2914,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "lineNumber": 23,
+            "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2685,6 +2943,8 @@
           "<StateType>[keyof StateType], lastSavedState?: Partial<StateType> | undefined, latestState?: Partial<StateType> | undefined, lastSavedValue?: StateType[keyof StateType] | undefined, latestValue?: StateType[keyof StateType] | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2706,6 +2966,8 @@
               "<StateType>[keyof StateType]"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2721,6 +2983,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2736,6 +3000,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2751,6 +3017,8 @@
               "StateType[keyof StateType] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2766,6 +3034,8 @@
               "StateType[keyof StateType] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2785,6 +3055,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2810,6 +3082,8 @@
           "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2824,6 +3098,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+            "lineNumber": 31,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2849,6 +3125,8 @@
           "<SubjectsType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -2895,6 +3173,8 @@
               "[...SubjectsType]"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2926,6 +3206,8 @@
           "<SubjectsType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "lineNumber": 115,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2942,6 +3224,8 @@
               "[...SubjectsType]"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2968,6 +3252,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "lineNumber": 182,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2982,6 +3268,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "lineNumber": 182,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3011,6 +3299,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3027,6 +3317,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3118,6 +3410,8 @@
           " | undefined>; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3129,6 +3423,8 @@
             "label": "{\n  filters,\n  query,\n  timeRange,\n}",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 105,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3150,6 +3446,8 @@
                   "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "lineNumber": 106,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3179,6 +3477,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "lineNumber": 107,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3200,6 +3500,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "lineNumber": 108,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3232,6 +3534,8 @@
           "<SubjectType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3248,6 +3552,8 @@
               "SubjectType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3266,6 +3572,8 @@
         "label": "AppliesFilters",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3430,6 +3738,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3794,6 +4104,8 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3808,6 +4120,8 @@
         "label": "AppliesTimeslice",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3972,6 +4286,8 @@
               "; }; toPromise: { (): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructor): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<[number, number] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3988,6 +4304,8 @@
           "\nThis API can lock hover actions"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4152,6 +4470,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4166,6 +4486,8 @@
               "(lock: boolean) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4180,6 +4502,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+                "lineNumber": 17,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4200,6 +4524,8 @@
           "\nAn interface which determines whether the hover actions are overridden by the embeddable"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4364,6 +4690,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4378,6 +4706,8 @@
               "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_override_hover_actions.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4392,6 +4722,8 @@
         "label": "EmbeddableApiContext",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4408,6 +4740,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4422,6 +4756,8 @@
         "label": "EmbeddableAppContext",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4438,6 +4774,8 @@
               "(() => string) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4451,6 +4789,8 @@
             "label": "currentAppId",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4465,6 +4805,8 @@
         "label": "FetchContext",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4476,6 +4818,8 @@
             "label": "isReload",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4497,6 +4841,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4526,6 +4872,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4540,6 +4888,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4561,6 +4911,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4575,6 +4927,8 @@
               "[number, number] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4596,6 +4950,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4610,6 +4966,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4624,6 +4982,8 @@
         "label": "HasAppContext",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4645,6 +5005,8 @@
               }
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4661,6 +5023,8 @@
         "label": "HasDisableTriggers",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4672,6 +5036,8 @@
             "label": "disableTriggers",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4705,6 +5071,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4719,6 +5087,8 @@
               "({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4730,6 +5100,8 @@
                 "label": "{ isNewPanel }",
                 "description": [],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+                "lineNumber": 19,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4744,6 +5116,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 31,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4763,6 +5137,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4779,6 +5155,8 @@
               "(() => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4795,6 +5173,8 @@
         "label": "HasExecutionContext",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4811,6 +5191,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4837,6 +5219,8 @@
           "<ByReferenceSerializedState, ByValueSerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4851,6 +5235,8 @@
               "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4865,6 +5251,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "lineNumber": 18,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4880,6 +5268,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4895,6 +5285,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4915,6 +5307,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4935,6 +5329,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4955,6 +5351,8 @@
               "(title: string) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4969,6 +5367,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "lineNumber": 42,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4991,6 +5391,8 @@
               "(newId: string) => ByReferenceSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5005,6 +5407,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "lineNumber": 49,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5027,6 +5431,8 @@
               "() => ByValueSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5055,6 +5461,8 @@
           "<ParentApiType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5069,6 +5477,8 @@
               "ParentApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5102,6 +5512,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5116,6 +5528,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5132,6 +5546,8 @@
               "() => { read: boolean; write: boolean; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5158,6 +5574,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5174,6 +5592,8 @@
               "() => SerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5190,6 +5610,8 @@
         "label": "HasSupportedTriggers",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5204,6 +5626,8 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_supported_triggers.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5230,6 +5654,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5244,6 +5670,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5258,6 +5686,8 @@
         "label": "HasTypeDisplayName",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5272,6 +5702,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5288,6 +5720,8 @@
               "(() => string) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_type.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5304,6 +5738,8 @@
         "label": "HasUniqueId",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5315,6 +5751,8 @@
             "label": "uuid",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5329,6 +5767,8 @@
         "label": "HasUseGlobalFiltersSetting",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5493,6 +5933,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/applies_filters.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5507,6 +5949,8 @@
         "label": "PhaseEvent",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5518,6 +5962,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5532,6 +5978,8 @@
               "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5553,6 +6001,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5564,6 +6014,8 @@
             "label": "timeToEvent",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5578,6 +6030,8 @@
         "label": "PublishesBlockingError",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5742,6 +6196,8 @@
               "; }; toPromise: { (): Promise<Error | undefined>; (PromiseCtor: PromiseConstructor): Promise<Error | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Error | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5756,6 +6212,8 @@
         "label": "PublishesDataLoading",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5920,6 +6378,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5936,6 +6396,8 @@
           "\nThis API publishes a list of data views that it uses."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6300,6 +6762,8 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6314,6 +6778,8 @@
         "label": "PublishesDescription",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6478,6 +6944,8 @@
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6499,6 +6967,8 @@
               "<string | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6513,6 +6983,8 @@
         "label": "PublishesDisabledActionIds",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6677,6 +7149,8 @@
               "; }; toPromise: { (): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6691,6 +7165,8 @@
               "(ids: string[] | undefined) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6705,6 +7181,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "lineNumber": 14,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6723,6 +7201,8 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6756,6 +7236,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6770,6 +7252,8 @@
               "(paused: boolean) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6784,6 +7268,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+                "lineNumber": 17,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6802,6 +7288,8 @@
         "label": "PublishesFilters",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7166,6 +7654,8 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7180,6 +7670,8 @@
         "label": "PublishesPauseFetch",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7195,6 +7687,8 @@
               "<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7209,6 +7703,8 @@
         "label": "PublishesPhaseEvents",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7573,6 +8069,8 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7587,6 +8085,8 @@
         "label": "PublishesProjectRouting",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7951,6 +8451,8 @@
               ">; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7965,6 +8467,8 @@
         "label": "PublishesProjectRoutingOverrides",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8329,6 +8833,8 @@
               ">; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8343,6 +8849,8 @@
         "label": "PublishesReload",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8358,6 +8866,8 @@
               "<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8372,6 +8882,8 @@
         "label": "PublishesRendered",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8536,6 +9048,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_rendered.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8552,6 +9066,8 @@
           "\nThis API publishes a saved object id which can be used to determine which saved object this API is linked to."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8716,6 +9232,8 @@
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8748,6 +9266,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9112,6 +9632,8 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9133,6 +9655,8 @@
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9147,6 +9671,8 @@
         "label": "PublishesTimeslice",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9311,6 +9837,8 @@
               "; }; toPromise: { (): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructor): Promise<[number, number] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<[number, number] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9325,6 +9853,8 @@
         "label": "PublishesTitle",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9489,6 +10019,8 @@
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9653,6 +10185,8 @@
               "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9674,6 +10208,8 @@
               "<string | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9688,6 +10224,8 @@
         "label": "PublishesUnsavedChanges",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9703,6 +10241,8 @@
               "<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9725,6 +10265,8 @@
               "<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9743,6 +10285,8 @@
           "\nThis API publishes a universal view mode which can change compatibility of actions and the\nvisibility of components."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10107,6 +10651,8 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10121,6 +10667,8 @@
         "label": "SerializedTimeRange",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10142,6 +10690,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10181,6 +10731,8 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -10226,6 +10778,8 @@
           ">>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10241,6 +10795,8 @@
           "(last: StateType[KeyType] | undefined, current: StateType[KeyType] | undefined, lastState?: Partial<StateType> | undefined, currentState?: Partial<StateType> | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -10256,6 +10812,8 @@
               "StateType[KeyType] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10270,6 +10828,8 @@
               "StateType[KeyType] | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10284,6 +10844,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10298,6 +10860,8 @@
               "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10317,6 +10881,8 @@
           "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10332,6 +10898,8 @@
           "{ name?: string | undefined; value: string; }[] | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_project_routing.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10386,6 +10954,8 @@
           " | undefined>; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10416,6 +10986,8 @@
           "[]) => void; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10438,6 +11010,8 @@
           " & { setDescription: (newTitle: string | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_description.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10460,6 +11034,8 @@
           " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_title.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10538,6 +11114,8 @@
           " | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10570,6 +11148,8 @@
           ") => void; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10737,6 +11317,8 @@
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10752,6 +11334,8 @@
           "\"savedObjectRef\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10767,6 +11351,8 @@
           "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10792,6 +11378,8 @@
           "<StateType, KeyType>; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10807,6 +11395,8 @@
           "\"view\" | \"edit\" | \"print\" | \"preview\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10822,6 +11412,8 @@
           "{ [Key in keyof Required<T>]: T[Key]; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10836,6 +11428,8 @@
         "label": "timeRangeComparators",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10850,6 +11444,8 @@
               "\"deepEquality\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/time_range_manager.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10864,6 +11460,8 @@
         "label": "titleComparators",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10878,6 +11476,8 @@
               "\"referenceEquality\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10892,6 +11492,8 @@
               "\"referenceEquality\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -10906,6 +11508,8 @@
               "(a: boolean | undefined, b: boolean | undefined) => boolean"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10920,6 +11524,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+                "lineNumber": 28,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -10935,6 +11541,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
+                "lineNumber": 28,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false

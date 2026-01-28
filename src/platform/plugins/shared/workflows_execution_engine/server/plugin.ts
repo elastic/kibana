@@ -108,6 +108,28 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
@@ -155,6 +177,33 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const resumeDelayMs = runAt ? now - runAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (resumeDelayMs !== null) {
+                  currentTransaction.setLabel('resume_delay_ms', resumeDelayMs);
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
@@ -205,6 +254,40 @@ export class WorkflowsExecutionEnginePlugin
                 spaceId: string;
                 triggerType: string;
               };
+
+              // Add queue delay metrics to APM trace for observability
+              // This shows how long the task waited in the queue before execution
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const scheduleDelayMs = runAt ? now - runAt : null;
+
+              // Add labels to current APM transaction for queue visibility
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (scheduleDelayMs !== null) {
+                  currentTransaction.setLabel('schedule_delay_ms', scheduleDelayMs);
+                }
+                currentTransaction.setLabel('workflow_id', workflowId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
+              logger.debug(
+                `Workflow ${workflowId} queue metrics: queueDelayMs=${queueDelayMs}, scheduleDelayMs=${scheduleDelayMs}`
+              );
+
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
@@ -233,6 +316,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflow,
                 spaceId,
                 workflowExecutionRepository,
+                taskInstance,
                 logger
               );
               if (wasSkipped) {
@@ -270,9 +354,25 @@ export class WorkflowsExecutionEnginePlugin
                 yaml: workflow.yaml,
                 context: executionContext,
                 status: ExecutionStatus.PENDING,
+                // Store task's runAt to link execution to specific scheduled run
+                // runAt is stable across retries (retries use the same runAt but get a new startedAt)
+                // This allows us to detect stale executions from previous scheduled runs
+                taskRunAt: taskInstance.runAt?.toISOString() || null,
                 createdAt: workflowCreatedAt.toISOString(),
                 createdBy: '',
                 triggeredBy: 'scheduled',
+                // Store queue delay metrics for observability (only if enabled in config)
+                ...(this.config.collectQueueMetrics
+                  ? {
+                      queueMetrics: {
+                        scheduledAt: taskInstance.scheduledAt?.toString(),
+                        runAt: taskInstance.runAt?.toString(),
+                        startedAt: new Date(now).toISOString(),
+                        queueDelayMs,
+                        scheduleDelayMs,
+                      },
+                    }
+                  : {}),
               };
 
               const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -285,7 +385,11 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
+              // for deduplication checks by subsequent scheduled tasks
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                refresh: 'wait_for',
+              });
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);

@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
 import { suggestProcessingPipeline } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -36,6 +35,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
 import { handleProcessingDissectSuggestions } from '../processing/dissect_suggestions_handler';
+import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -140,9 +140,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
-        if (!Streams.ingest.all.Definition.is(stream)) {
-          throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
-        }
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -174,6 +171,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
+              }).catch((error) => {
+                if (isNoLLMSuggestionsError(error)) {
+                  logger.debug('[suggest_pipeline] No LLM suggestions available for grok');
+                  return null;
+                }
+                throw error;
               })
             );
           }
@@ -194,6 +197,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
+              }).catch((error) => {
+                if (isNoLLMSuggestionsError(error)) {
+                  logger.debug('[suggest_pipeline] No LLM suggestions available for dissect');
+                  return null;
+                }
+                throw error;
               })
             );
           }
@@ -224,7 +233,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 4, // Limit reasoning steps for latency and token cost
+          maxSteps: 6, // Limit reasoning steps for latency and token cost
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
@@ -247,6 +256,16 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         pipeline,
       })),
       catchError((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for pipeline generation');
+          // Return null pipeline instead of error - frontend will handle this gracefully
+          return [
+            {
+              type: 'suggested_processing_pipeline' as const,
+              pipeline: null,
+            },
+          ];
+        }
         logger.error('Failed to generate pipeline suggestion:', error);
         // Convert error to SSE error event so it's sent to client with full message
         throw createSSEInternalError(error.message || 'Failed to generate pipeline suggestion');
@@ -336,9 +355,8 @@ async function processGrokPatterns({
     if (result.status === 'fulfilled') {
       acc.push(result.value);
     } else {
-      // Re-throw the first error to fail the entire suggestion
       logger.error('[suggest_pipeline][grok] LLM review failed:', result.reason);
-      throw result.reason;
+      // Don't re-throw - allow partial success
     }
     return acc;
   }, []);
