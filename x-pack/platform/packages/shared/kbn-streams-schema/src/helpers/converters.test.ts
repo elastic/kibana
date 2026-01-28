@@ -61,6 +61,7 @@ describe('Converter Helpers', () => {
           description: '',
           query: {
             view: 'stream.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
           },
         },
       };
@@ -179,9 +180,9 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-      expect(
-        (upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view
-      ).toEqual('stream.my-query-stream');
+      expect((upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view).toEqual(
+        'stream.my-query-stream'
+      );
     });
   });
 });

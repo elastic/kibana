@@ -55,7 +55,11 @@ export namespace QueryStream {
     sub_query_streams: string[];
   }
 
-  export type UpsertRequest = BaseStream.UpsertRequest<Definition>;
+  export interface UpsertRequest extends BaseStream.UpsertRequest<Definition> {
+    stream: Omit<BaseStream.UpsertRequest<Definition>['stream'], 'query'> & {
+      query: QueryWithEsql;
+    };
+  }
 }
 
 export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> = modelValidation(
@@ -77,7 +81,16 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
       inherited_fields: inheritedFieldDefinitionSchema,
       sub_query_streams: z.array(z.string()),
     }),
-    UpsertRequest: z.object({}),
+    UpsertRequest: z.object({
+      stream: z
+        .object({
+          query: z.object({
+            view: z.string(),
+            esql: z.string(),
+          }),
+        })
+        .passthrough(),
+    }),
   }
 );
 
