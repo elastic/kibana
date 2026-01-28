@@ -12,8 +12,8 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
   EuiPopover,
-  EuiLink,
-  EuiText,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
@@ -43,8 +43,11 @@ export function SuggestionStatusColumn({
     );
   }
 
-  // No suggestions available for this stream
-  if (!status || status.suggestionCount === 0) {
+  // Calculate badge count excluding significant events (only pipelines + features)
+  const badgeCount = status ? status.pipelineCount + status.featuresCount : 0;
+
+  // No suggestions available for this stream (excluding significant events)
+  if (!status || badgeCount === 0) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
         <EuiFlexItem grow={false}>
@@ -57,7 +60,7 @@ export function SuggestionStatusColumn({
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
 
-  // Build suggestion items for the popover
+  // Build suggestion items for the popover (excluding significant events)
   const suggestionItems: Array<{ count: number; label: string; tab: string }> = [];
 
   if (status.featuresCount > 0) {
@@ -65,14 +68,6 @@ export function SuggestionStatusColumn({
       count: status.featuresCount,
       label: getPartitioningSuggestionLabel(status.featuresCount),
       tab: 'partitioning',
-    });
-  }
-
-  if (status.significantEventsCount > 0) {
-    suggestionItems.push({
-      count: status.significantEventsCount,
-      label: getSignificantEventsSuggestionLabel(status.significantEventsCount),
-      tab: 'significantEvents',
     });
   }
 
@@ -85,20 +80,19 @@ export function SuggestionStatusColumn({
   }
 
   const popoverContent = (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiListGroup gutterSize="none" flush>
       {suggestionItems.map((item) => (
-        <EuiFlexItem key={item.tab}>
-          <EuiLink
-            href={router.link('/{key}/management/{tab}', {
-              path: { key: streamName, tab: item.tab },
-            })}
-            data-test-subj={`suggestionLink-${streamName}-${item.tab}`}
-          >
-            <EuiText size="s">{item.label}</EuiText>
-          </EuiLink>
-        </EuiFlexItem>
+        <EuiListGroupItem
+          key={item.tab}
+          label={item.label}
+          href={router.link('/{key}/management/{tab}', {
+            path: { key: streamName, tab: item.tab },
+          })}
+          data-test-subj={`suggestionLink-${streamName}-${item.tab}`}
+          size="s"
+        />
       ))}
-    </EuiFlexGroup>
+    </EuiListGroup>
   );
 
   // Suggestions are available - show count with popover
@@ -110,11 +104,11 @@ export function SuggestionStatusColumn({
             <EuiBadge
               color="success"
               data-test-subj={`suggestionStatusBadge-${streamName}`}
-              aria-label={getSuggestionAriaLabel(status.suggestionCount)}
+              aria-label={getSuggestionAriaLabel(badgeCount)}
               onClick={togglePopover}
               onClickAriaLabel={OPEN_SUGGESTIONS_POPOVER_ARIA_LABEL}
             >
-              {status.suggestionCount}
+              {badgeCount}
             </EuiBadge>
           }
           isOpen={isPopoverOpen}
@@ -155,14 +149,6 @@ function getPartitioningSuggestionLabel(count: number): string {
   return i18n.translate('xpack.streams.suggestionStatusColumn.partitioningSuggestionLabel', {
     defaultMessage:
       '{count, plural, one {# partitioning suggestion} other {# partitioning suggestions}}',
-    values: { count },
-  });
-}
-
-function getSignificantEventsSuggestionLabel(count: number): string {
-  return i18n.translate('xpack.streams.suggestionStatusColumn.significantEventsSuggestionLabel', {
-    defaultMessage:
-      '{count, plural, one {# significant events suggestion} other {# significant events suggestions}}',
     values: { count },
   });
 }
