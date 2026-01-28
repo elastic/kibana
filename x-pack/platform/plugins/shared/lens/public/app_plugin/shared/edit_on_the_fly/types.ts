@@ -70,6 +70,8 @@ export interface EditConfigPanelProps {
   navigateToLensEditor?: () => void;
   /** If set to true it displays a header on the flyout */
   displayFlyoutHeader?: boolean;
+  /** If true, hides the ES|QL editor in the flyout */
+  hideTextBasedEditor?: boolean;
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
@@ -88,8 +90,6 @@ export interface EditConfigPanelProps {
   parentApi?: unknown;
   /** Text for the apply button. Defaults to "Apply and close" */
   applyButtonLabel?: string;
-  /** If true, hides the ES|QL editor in the flyout */
-  hideTextBasedEditor?: boolean;
 }
 
 export interface LayerConfigurationProps {

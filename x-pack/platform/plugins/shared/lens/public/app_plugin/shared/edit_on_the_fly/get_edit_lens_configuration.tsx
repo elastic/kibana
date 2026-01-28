@@ -168,7 +168,7 @@ export async function getEditLensConfiguration(
     navigateToLensEditor,
     displayFlyoutHeader,
     isNewPanel,
-    hidesSuggestions: hidesSuggestionsProp,
+    hidesSuggestions,
     onApply,
     onCancel,
     hideTimeFilterInfo,
@@ -180,8 +180,6 @@ export async function getEditLensConfiguration(
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
-
-    const hidesSuggestions = hideTextBasedEditor ? true : hidesSuggestionsProp;
 
     const [currentAttributes, setCurrentAttributes] =
       useState<TypedLensSerializedState['attributes']>(attributes);

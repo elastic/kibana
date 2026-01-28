@@ -114,8 +114,8 @@ export function ChartConfigPanel({
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
-          hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
           hideTextBasedEditor={true}
+          hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
         />
       );
       setEditLensConfigPanel(panel);

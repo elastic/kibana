@@ -394,7 +394,7 @@ export function LensEditConfigurationFlyout({
   );
 
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
-  if (hideTextBasedEditor || hidesSuggestions) {
+  if (hideTextBasedEditor && hidesSuggestions) {
     return (
       <>
         {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
