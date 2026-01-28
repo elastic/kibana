@@ -32,6 +32,14 @@ export const Query: Validation<unknown, Query> = validation(
   })
 );
 
+export const QueryWithEsql: Validation<unknown, QueryWithEsql> = validation(
+  z.unknown(),
+  z.object({
+    view: z.string(),
+    esql: z.string(),
+  })
+);
+
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace QueryStream {
   export interface Model {
@@ -72,10 +80,7 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
     GetResponse: z.object({
       stream: z
         .object({
-          query: z.object({
-            view: z.string(),
-            esql: z.string(),
-          }),
+          query: QueryWithEsql.right,
         })
         .passthrough(),
       inherited_fields: inheritedFieldDefinitionSchema,
@@ -84,10 +89,7 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
     UpsertRequest: z.object({
       stream: z
         .object({
-          query: z.object({
-            view: z.string(),
-            esql: z.string(),
-          }),
+          query: QueryWithEsql.right,
         })
         .passthrough(),
     }),
