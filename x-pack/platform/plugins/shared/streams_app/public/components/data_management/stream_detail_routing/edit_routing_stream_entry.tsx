@@ -25,11 +25,14 @@ export function EditRoutingStreamEntry({
 
   return (
     <EuiPanel
-      color="subdued"
+      color="plain"
       hasShadow={false}
-      hasBorder
+      hasBorder={false}
       paddingSize="m"
       data-test-subj={`routingRule-${routingRule.destination}`}
+      className={css`
+        border: 1px solid ${euiTheme.colors.primary};
+      `}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         <StreamNameFormRow partitionName={partitionName} prefix={prefix} readOnly />

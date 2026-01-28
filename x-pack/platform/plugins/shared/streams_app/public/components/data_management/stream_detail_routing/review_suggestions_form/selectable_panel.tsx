@@ -19,17 +19,11 @@ export function SelectablePanel(props: EuiPanelProps & { isSelected: boolean }) 
     <EuiPanel
       {...rest}
       color="subdued"
-      hasBorder
+      hasBorder={false}
       hasShadow={false}
-      className={
-        isSelected
-          ? css`
-              ::after {
-                border-color: ${euiTheme.components.forms.controlBorderSelected};
-              }
-            `
-          : undefined
-      }
+      className={css`
+        border: ${isSelected ? `1px solid ${euiTheme.colors.primary}` : euiTheme.border.thin};
+      `}
     />
   );
 }
