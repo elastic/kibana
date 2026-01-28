@@ -26,6 +26,7 @@ export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin)
     missingComments: [],
     isAnyType: [],
     noReferences: [],
+    paramDocMismatches: [],
     deprecatedAPIsReferencedCount: 0,
     unreferencedDeprecatedApisCount: 0,
     adoptionTrackedAPIs: [],
@@ -73,6 +74,8 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
     stats.missingComments.push(doc);
   }
 
+  trackParamDocMismatches(doc, stats);
+
   if (doc.type === TypeKind.AnyKind) {
     stats.isAnyType.push(doc);
   }
@@ -85,6 +88,47 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
     stats.noReferences.push(doc);
   }
 }
+
+/**
+ * Returns true if a declaration represents a function-like construct.
+ *
+ * This checks two conditions:
+ * 1. The declaration has `type: FunctionKind` - covers function declarations, method signatures,
+ *    and function-typed properties in interfaces/classes.
+ * 2. The signature contains `=>` - covers type aliases that define function types. The API doc
+ *    system normalizes all function signatures to arrow syntax, so this check is reliable.
+ */
+const isFunctionLike = (doc: ApiDeclaration): boolean => {
+  if (doc.type === TypeKind.FunctionKind) return true;
+  if (doc.signature) {
+    const sig = doc.signature.map((part) => (typeof part === 'string' ? part : part.text)).join('');
+    return sig.includes('=>');
+  }
+  return false;
+};
+
+/**
+ * Tracks functions where not all parameters have documentation.
+ *
+ * For function-like declarations, `children` represents the function's parameters.
+ * This is distinct from interface/class children which represent properties/methods.
+ * Each function-like member within an interface has its own declaration with its own
+ * children (parameters), so we don't conflate interface properties with function parameters.
+ */
+const trackParamDocMismatches = (doc: ApiDeclaration, stats: ApiStats): void => {
+  if (!isFunctionLike(doc)) {
+    return;
+  }
+  if (!doc.children || doc.children.length === 0) {
+    return;
+  }
+  const describedParams = doc.children.filter(
+    (param) => param.description && param.description.length > 0
+  ).length;
+  if (describedParams !== doc.children.length) {
+    stats.paramDocMismatches.push(doc);
+  }
+};
 
 function countApiForPlugin(doc: PluginApi) {
   return (

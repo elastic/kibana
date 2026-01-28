@@ -109,6 +109,9 @@ export const iShouldBeInternalFn = () => 'hi';
 //     line 83 - a
 //     line 83 - fnWithNonExportedRef
 //     line 85 - NotAnArrowFnType
+//   param doc mismatches (2):
+//     line 83 - fnWithNonExportedRef
+//     line 85 - NotAnArrowFnType
 //   no references (40):
 //     line 13 - notAnArrowFn
 //     line 24 - a

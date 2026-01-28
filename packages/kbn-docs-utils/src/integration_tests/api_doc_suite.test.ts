@@ -152,10 +152,12 @@ beforeAll(async () => {
       apiCount: pluginAStats.apiCount,
       missingExports: pluginAStats.missingExports,
       missingComments: pluginAStats.missingComments.length,
+      paramDocMismatches: pluginAStats.paramDocMismatches.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
+    paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
   };
