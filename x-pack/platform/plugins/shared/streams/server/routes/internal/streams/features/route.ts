@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
-import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -183,7 +182,7 @@ export const bulkFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<StorageClientBulkResponse> => {
+  }): Promise<{ acknowledged: boolean }> => {
     const { featureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -197,7 +196,9 @@ export const bulkFeaturesRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    return featureClient.bulk(name, operations);
+    await featureClient.bulk(name, operations);
+
+    return { acknowledged: true };
   },
 });
 
