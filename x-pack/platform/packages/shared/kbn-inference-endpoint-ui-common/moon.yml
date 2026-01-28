@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-management'
-  - '@kbn/connector-schemas'
 tags:
   - shared-browser
   - package
