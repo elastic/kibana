@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import { ApmServicesTable, getServiceColumns } from './apm_services_table';
-import { SLO_COUNT_CAP } from './slo_status_badge';
+import { SLO_COUNT_CAP } from '../../../shared/slo_status_badge';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { apmRouter } from '../../../routing/apm_route_config';

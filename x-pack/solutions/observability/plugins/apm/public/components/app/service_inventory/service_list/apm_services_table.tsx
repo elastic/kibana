@@ -60,7 +60,7 @@ import type {
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
-import { SloStatusBadge } from './slo_status_badge';
+import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import { useServiceActions } from './service_actions';
 import {
   APM_SLO_INDICATOR_TYPES,

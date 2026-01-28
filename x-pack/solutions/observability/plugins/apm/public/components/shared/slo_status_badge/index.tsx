@@ -9,7 +9,7 @@ import type { MouseEventHandler } from 'react';
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SloStatus } from '../../../../../common/service_inventory';
+import type { SloStatus } from '../../../../common/service_inventory';
 
 interface SloStatusConfig {
   id: string;
