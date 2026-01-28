@@ -85,16 +85,76 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 
 ### Available fixtures
 
-| Fixture                     | Description                                                                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
+| Fixture                     | Description                                                                                                                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
 | `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
-| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                |
-| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
-| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
-| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
+| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
+| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
 
 ## Running the suite
+
+### Evals CLI (recommended)
+
+Use the evals CLI to discover and run suites with consistent, shareable commands:
+
+```bash
+# List eval suites from cached metadata (fast)
+node scripts/evals list
+
+# Refresh suite discovery (slower, scans configs)
+node scripts/evals list --refresh
+
+# Run a suite (EVALUATION_CONNECTOR_ID is required)
+node scripts/evals run --suite obs-ai-assistant --evaluation-connector-id bedrock-claude
+
+# Check local prerequisites and common setup hints
+node scripts/evals doctor
+```
+
+The CLI uses suite metadata from:
+
+```
+x-pack/platform/packages/shared/kbn-evals/evals.suites.json
+```
+
+You can also render a CI label mapping (from suite metadata, useful for PR labels and automation):
+
+```bash
+node scripts/evals ci-map --json
+```
+
+To see all supported environment variables:
+
+```bash
+node scripts/evals env
+```
+
+#### Local flow (trace capture)
+
+If you want local traces available for trace-based evaluators, run EDOT locally and start Scout using the built-in tracing config:
+
+```bash
+node scripts/edot_collector.js
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
+```
+
+If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the HTTP exporter in `kibana.dev.yml`:
+
+```yaml
+telemetry.tracing.exporters:
+  - http:
+      url: 'http://localhost:4318/v1/traces'
+```
+
+If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
+
+```bash
+ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+```
 
 If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
 
@@ -109,8 +169,6 @@ telemetry.tracing.exporters:
 
 This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
 
-
-
 Create a Playwright config that delegates to the helper:
 
 ```ts
@@ -124,6 +182,12 @@ Start scout:
 
 ```bash
 node scripts/scout.js start-server --stateful
+```
+
+If you want OTLP trace export enabled for evals, use the custom Scout config:
+
+```bash
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
 ```
 
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
@@ -141,7 +205,7 @@ Trace-based evaluators automatically collect non-functional metrics from OpenTel
 - **Tool calls** (number of tool invocations)
 - You can build your own using `createTraceBasedEvaluator` factory.
 
-By default, these evaluators query traces from the same Elasticsearch cluster as your test environment using the `esClient` fixture.
+By default, these evaluators query traces from the same Elasticsearch cluster as your test environment (the Scout `esClient` cluster).
 
 #### Prerequisites
 
