@@ -71,7 +71,7 @@ export async function getLogAiInsights({
         Base your analysis strictly on the provided data.
       `)
     : dedent(`
-        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
+        You are an expert SRE assistant analyzing a log with severity ${severity}. Keep it concise:
 
         - Explain what the log message means in context
         - Identify the source (service, host, container)
