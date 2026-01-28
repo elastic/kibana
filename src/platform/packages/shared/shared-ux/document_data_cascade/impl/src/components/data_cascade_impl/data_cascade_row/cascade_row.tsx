@@ -54,10 +54,10 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
-  // helps create a reference to the header to support rendering items into the row header conditionally
+  // Ref for the cell portal target - always available since we always render the portal
   const headerPortalRenderRef = useRef<HTMLDivElement | null>(null);
 
-  const setHeaderPortalRenderRef = useCallback((ref: HTMLDivElement) => {
+  const setHeaderPortalRenderRef = useCallback((ref: HTMLDivElement | null) => {
     headerPortalRenderRef.current = ref;
   }, []);
 
@@ -111,18 +111,19 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       css={styles.rowWrapper}
     >
       <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
-        <React.Fragment>
-          {isActiveSticky && activeStickyRenderSlotRef.current
-            ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>
-                  <>{rowHeader}</>
-                  <div ref={setHeaderPortalRenderRef} />
-                </div>,
-                activeStickyRenderSlotRef.current,
-                `${rowId}-sticky-header`
-              )
-            : null}
-        </React.Fragment>
+        {/* Always render the portal when the slot is available so the cell portal
+            target ref is always set. Toggle visibility with CSS based on isActiveSticky. */}
+        {activeStickyRenderSlotRef.current &&
+          createPortal(
+            <div
+              css={isActiveSticky ? styles.rowStickyHeaderInner : styles.rowStickyHeaderInnerHidden}
+            >
+              <>{rowHeader}</>
+              <div ref={setHeaderPortalRenderRef} />
+            </div>,
+            activeStickyRenderSlotRef.current,
+            `${rowId}-sticky-header`
+          )}
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
         <React.Fragment>
           <StickyHeaderPortalProvider

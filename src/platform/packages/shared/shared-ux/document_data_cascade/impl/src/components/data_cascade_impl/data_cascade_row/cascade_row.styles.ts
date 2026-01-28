@@ -170,6 +170,15 @@ export const styles = (
       borderStyle: 'solid',
       borderColor: border.color,
     }),
+    // Hidden variant - keeps the element in DOM so refs are always available,
+    // but visually hidden and non-interactive
+    rowStickyHeaderInnerHidden: css({
+      position: 'absolute',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      height: 0,
+      overflow: 'hidden',
+    }),
     rowWrapper: css({
       display: 'flex',
       position: 'absolute',
