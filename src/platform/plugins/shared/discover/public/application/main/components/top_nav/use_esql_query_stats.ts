@@ -48,6 +48,8 @@ export function useESQLQueryStats(
       return;
     }
 
+    handleRequestAdapterChange();
+
     requestAdapter.on('change', handleRequestAdapterChange);
 
     return () => {
