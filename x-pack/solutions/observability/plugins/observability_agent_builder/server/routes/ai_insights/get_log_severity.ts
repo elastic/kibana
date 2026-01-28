@@ -16,7 +16,7 @@ const ERROR_PATTERNS = [/\berror\b/i, /\bexception\b/i, /\bfail(?:ed|ure|ing)?\b
  */
 export function isWarningOrAbove(logDocument: LogDocument): boolean {
   const logLevel = logDocument['log.level'];
-  if (typeof logLevel === 'string' && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
+  if (logLevel && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
     return true;
   }
 
