@@ -24,6 +24,10 @@ export interface DashboardMountContextProps {
 }
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
+/**
+ * Properties for redirecting within the dashboard application.
+ * Can redirect to either a specific dashboard or the listing page.
+ */
 export type RedirectToProps =
   | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
   | { destination: 'listing'; filter?: string; useReplace?: boolean };

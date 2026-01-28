@@ -58,6 +58,12 @@ export const getLegendActions = (
       return null;
     }
 
+    // Don't show filter actions for computed columns
+    const column = visData.columns[columnIndex];
+    if (column?.isComputedColumn === true) {
+      return null;
+    }
+
     const title = getFilterPopoverTitle(
       visParams,
       visData,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
@@ -15,6 +15,7 @@ import {
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -23,7 +24,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuSecondaryActionItem,
 } from './types';
-import { APP_MENU_ITEM_LIMIT } from './constants';
+import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
 /**
  * Calculate how many items can be displayed based on the presence of action buttons.
@@ -117,15 +118,14 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent) => {
     if (isDisabled(item?.disableButton)) {
       return;
     }
 
-    const shouldClosePopover =
-      !item?.href && childPanelId === undefined && item.run?.length === 0 && onClose;
+    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
-    item.run?.();
+    item.run?.({ triggerElement: event?.currentTarget as HTMLElement });
 
     if (shouldClosePopover) {
       onClose();
@@ -133,11 +133,17 @@ export const mapAppMenuItemToPanelItem = (
     }
   };
 
+  const hasClickHandler = childPanelId === undefined;
+  const routerLinkProps =
+    item?.href && item?.run && hasClickHandler
+      ? getRouterLinkProps({ href: item.href, onClick: handleClick })
+      : { onClick: hasClickHandler ? handleClick : undefined };
+
   return {
     key: item.id,
     name: upperFirst(item.label),
     icon: item?.iconType,
-    onClick: item?.href || childPanelId !== undefined ? undefined : handleClick,
+    ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton),
@@ -213,6 +219,8 @@ export const getPopoverPanels = ({
   primaryActionItem,
   secondaryActionItem,
   startPanelId = 0,
+  rootPanelWidth = DEFAULT_POPOVER_WIDTH,
+  rootPopoverTestId,
   onClose,
   onCloseOverflowButton,
 }: {
@@ -220,6 +228,8 @@ export const getPopoverPanels = ({
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
+  rootPanelWidth?: number;
+  rootPopoverTestId?: string;
   onClose?: () => void;
   onCloseOverflowButton?: () => void;
 }): EuiContextMenuPanelDescriptor[] => {
@@ -227,14 +237,24 @@ export const getPopoverPanels = ({
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
   let currentPanelId = startPanelId;
 
-  const processItems = (
-    itemsToProcess: AppMenuPopoverItem[],
-    panelId: number,
-    parentTitle?: string
-  ) => {
+  const processItems = ({
+    itemsToProcess,
+    panelId,
+    parentTitle,
+    parentPopoverTestId,
+    parentPopoverWidth,
+  }: {
+    itemsToProcess: AppMenuPopoverItem[];
+    panelId: number;
+    parentTitle?: string;
+    parentPopoverTestId?: string;
+    parentPopoverWidth?: number;
+  }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    itemsToProcess.forEach((item) => {
+    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
+
+    sortedItems.forEach((item) => {
       if (item.separator === 'above') {
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
@@ -243,7 +263,16 @@ export const getPopoverPanels = ({
         currentPanelId++;
         const childPanelId = currentPanelId;
 
-        processItems(item.items, childPanelId, item.label);
+        // popoverWidth may exist on items that are AppMenuItemType (e.g., overflow items)
+        const itemPopoverWidth =
+          'popoverWidth' in item ? (item as { popoverWidth?: number }).popoverWidth : undefined;
+        processItems({
+          itemsToProcess: item.items,
+          panelId: childPanelId,
+          parentTitle: item.label,
+          parentPopoverTestId: item.popoverTestId,
+          parentPopoverWidth: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
+        });
         panelItems.push(
           mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
         );
@@ -259,11 +288,18 @@ export const getPopoverPanels = ({
     panels.push({
       id: panelId,
       ...(parentTitle && { title: upperFirst(parentTitle) }),
+      ...(parentPopoverTestId && { 'data-test-subj': parentPopoverTestId }),
+      ...(parentPopoverWidth && { width: parentPopoverWidth }),
       items: panelItems,
     });
   };
 
-  processItems(items, startPanelId);
+  processItems({
+    itemsToProcess: items,
+    panelId: startPanelId,
+    parentPopoverTestId: rootPopoverTestId,
+    parentPopoverWidth: rootPanelWidth,
+  });
 
   /**
    * Action items are only added to the main panel and only in lower breakpoints (below "m").

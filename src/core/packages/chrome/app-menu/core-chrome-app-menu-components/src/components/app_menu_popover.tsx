@@ -8,7 +8,6 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
-import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
 import type {
@@ -26,7 +25,6 @@ interface AppMenuContextMenuProps {
   popoverWidth?: number;
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
-  anchorPosition?: PopoverAnchorPosition;
   popoverTestId?: string;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
@@ -41,8 +39,7 @@ export const AppMenuPopover = ({
   popoverWidth,
   primaryActionItem,
   secondaryActionItem,
-  anchorPosition,
-  popoverTestId,
+  popoverTestId = 'app-menu-popover',
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
@@ -52,10 +49,20 @@ export const AppMenuPopover = ({
         items,
         primaryActionItem,
         secondaryActionItem,
+        rootPanelWidth: popoverWidth,
+        rootPopoverTestId: popoverTestId,
         onClose,
         onCloseOverflowButton,
       }),
-    [items, primaryActionItem, secondaryActionItem, onClose, onCloseOverflowButton]
+    [
+      items,
+      primaryActionItem,
+      secondaryActionItem,
+      popoverWidth,
+      popoverTestId,
+      onClose,
+      onCloseOverflowButton,
+    ]
   );
 
   if (panels.length === 0) {
@@ -80,13 +87,7 @@ export const AppMenuPopover = ({
       closePopover={onClose}
       panelPaddingSize="none"
       hasArrow={false}
-      anchorPosition={anchorPosition || 'upLeft'}
-      panelStyle={{
-        width: popoverWidth,
-      }}
-      panelProps={{
-        'data-test-subj': popoverTestId || 'app-menu-popover',
-      }}
+      anchorPosition="downLeft"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

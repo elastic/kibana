@@ -48,4 +48,20 @@ export const ConnectorIconsMap: Map<
     '.jina',
     lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
   ],
+  [
+    '.abuseipdb',
+    lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
+  ],
+  [
+    '.greynoise',
+    lazy(() => import(/* webpackChunkName: "connectorIconGreynoise" */ './specs/greynoise/icon')),
+  ],
+  [
+    '.shodan',
+    lazy(() => import(/* webpackChunkName: "connectorIconShodan" */ './specs/shodan/icon')),
+  ],
+  [
+    '.urlvoid',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
+  ],
 ]);

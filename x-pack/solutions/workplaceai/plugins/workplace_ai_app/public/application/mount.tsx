@@ -31,7 +31,7 @@ export const mountApp = async ({
   element: HTMLElement;
   history: ScopedHistory;
 }) => {
-  const kibanaServices = { ...core, plugins };
+  const kibanaServices = { ...core, plugins, workplaceAIServices: services };
   const queryClient = new QueryClient();
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

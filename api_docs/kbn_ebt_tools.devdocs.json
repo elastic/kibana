@@ -32,6 +32,8 @@
           "(type: \"Panel\") => void"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 146,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "\"Panel\""
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 146,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,6 +81,8 @@
           ") => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               "PerformanceTrackerOptions"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 81,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,6 +130,8 @@
           ") => PerformanceMark | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 107,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,6 +146,8 @@
               "PerformanceMark[]"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -157,6 +169,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -180,6 +194,8 @@
           "({ type, startMark, endMark, createPerformanceMeasures, }: GetMeanFromMeasuresOptions) => number"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 169,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,6 +210,8 @@
               "GetMeanFromMeasuresOptions"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 169,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -217,6 +235,8 @@
           "(type: \"Panel\") => PerformanceMark[]"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,6 +253,8 @@
               "\"Panel\""
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 117,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -256,6 +278,8 @@
           "(type: \"Panel\") => _.Dictionary<PerformanceMark[]>"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -272,6 +296,8 @@
               "\"Panel\""
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+            "lineNumber": 133,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +319,8 @@
           "React.ForwardRefExoticComponent<{ children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/index.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -308,6 +336,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -337,6 +367,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,6 +387,8 @@
               ", \"reportEvent\">"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -378,6 +412,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,6 +433,8 @@
           "({ customInitialLoad, isReady, isRefreshing, customMetrics, meta, }: UsePageReadyProps) => void"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -411,6 +449,8 @@
               "UsePageReadyProps"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+            "lineNumber": 23,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,6 +471,8 @@
           "PerformanceApi"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_performance_context.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -447,6 +489,8 @@
         "label": "Meta",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -461,6 +505,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +521,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +537,8 @@
               "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_dataset_quality] ${string}` | `[ttfmp_rule_details] ${string}` | `[ttfmp_rules_list] ${string}` | `[ttfmp_slos] ${string}` | `[ttfmp_streams_list] ${string}` | `[ttfmp_streams_detail_retention] ${string}` | `[ttfmp_streams_detail_partitioning] ${string}` | `[ttfmp_streams_detail_processing] ${string}` | `[ttfmp_streams_detail_schema] ${string}` | `[ttfmp_streams_detail_data_quality] ${string}` | `[ttfmp_streams_detail_advanced] ${string}` | `[ttfmp_streams_detail_attachments] ${string}` | `[ttfmp_streams_detail_references] ${string}` | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -505,6 +555,8 @@
           "\nStructure of the `metric` event"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -518,6 +570,8 @@
               "\nThe name of the event that is tracked in the metrics i.e. kibana_loaded, kibana_started"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -534,6 +588,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -547,6 +603,8 @@
             "label": "duration",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,6 +621,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +639,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -595,6 +657,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,6 +675,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -627,6 +693,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -643,6 +711,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -659,6 +729,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -675,6 +747,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -691,6 +765,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +783,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -723,6 +801,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -739,6 +819,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -755,6 +837,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -771,6 +855,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -787,6 +873,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -803,6 +891,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -819,6 +909,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,6 +927,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -855,6 +949,8 @@
           "\"renderComplete\" | \"preRender\" | \"renderStart\""
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -870,6 +966,8 @@
           "\"preRenderDuration\" | \"renderDuration\""
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -885,6 +983,8 @@
           "\"Panel\""
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -899,6 +999,8 @@
         "label": "perfomanceMarkers",
         "description": [],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -910,6 +1012,8 @@
             "label": "startPageChange",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -921,6 +1025,8 @@
             "label": "endPageReady",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,6 +1038,8 @@
             "label": "startPageRefresh",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -951,6 +1059,8 @@
           "{ readonly PRE_RENDER: \"preRender\"; readonly RENDER_START: \"renderStart\"; readonly RENDER_COMPLETE: \"renderComplete\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -966,6 +1076,8 @@
           "{ readonly PRE_RENDER_DURATION: \"preRenderDuration\"; readonly RENDER_DURATION: \"renderDuration\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -983,6 +1095,8 @@
           "{ readonly PANEL: \"Panel\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_tracker.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

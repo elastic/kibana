@@ -13,19 +13,28 @@ import type { IExampleExternalService } from './types';
  * It's just a dummy example of calling an external service.
  */
 export class ExampleExternalService implements IExampleExternalService {
-  private readonly proxies: Record<string, string> = {};
+  private readonly proxies: Record<string, { name: string; url: string }> = {};
 
-  constructor(proxies: Record<string, string>) {
+  constructor(proxies: Record<string, { name: string; url: string }>) {
     this.proxies = proxies;
   }
 
-  public async getProxies(): Promise<{ id: string; url: string }[]> {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return Object.entries(this.proxies).map(([id, url]) => ({ id, url }));
+  public async getProxies(): Promise<{ id: string; name: string; url: string }[]> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return Object.entries(this.proxies).map(([id, proxy]) => ({
+      id,
+      name: proxy.name,
+      url: proxy.url,
+    }));
   }
 
-  public async getProxy(proxyId: string): Promise<string | null> {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return this.proxies[proxyId] ?? null;
+  public async getProxy(
+    proxyId: string
+  ): Promise<{ id: string; name: string; url: string } | null> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    if (!this.proxies[proxyId]) {
+      return null;
+    }
+    return { id: proxyId, name: this.proxies[proxyId].name, url: this.proxies[proxyId].url };
   }
 }

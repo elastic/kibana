@@ -519,7 +519,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'dataConnectors:enabled': {
+  'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -625,6 +625,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableGroupedNav': {

@@ -25,7 +25,10 @@ interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: AgentBuilderInternalService;
   onClose?: () => void;
-  onPropsUpdate?: (callback: (props: EmbeddableConversationProps) => void) => void;
+  onRegisterCallbacks?: (callbacks: {
+    updateProps: (props: EmbeddableConversationProps) => void;
+    resetBrowserApiTools: () => void;
+  }) => void;
 }
 
 /**
@@ -37,7 +40,7 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services, onClose, onPropsUpdate }: OpenConversationFlyoutParams
+  { coreStart, services, onClose, onRegisterCallbacks }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
@@ -71,7 +74,7 @@ export function openConversationFlyout(
           onClose={handleOnClose}
           ariaLabelledBy={ariaLabelledBy}
           {...restOptions}
-          onPropsUpdate={onPropsUpdate}
+          onRegisterCallbacks={onRegisterCallbacks}
         />
       </Suspense>,
       startServices

@@ -1,0 +1,900 @@
+{
+  "id": "@kbn/ftr-llm-proxy",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.LlmProxy",
+        "type": "Class",
+        "tags": [],
+        "label": "LlmProxy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.server",
+            "type": "Object",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "signature": [
+              "Server",
+              "<typeof ",
+              "IncomingMessage",
+              ", typeof ",
+              "ServerResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.interval",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "NodeJS.Timeout"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.interceptors",
+            "type": "Object",
+            "tags": [],
+            "label": "interceptors",
+            "description": [],
+            "signature": [
+              "{ toolChoice: ({ name, response }: { name: string; response: LLMResponseFnOrString; }) => Promise<",
+              "LlmSimulator",
+              ">; userMessage: ({ name, response, when, }: { name?: string | undefined; response: LLMResponseFnOrString; when?: ((body: ",
+              "ChatCompletionStreamParams",
+              ") => boolean) | undefined; }) => Promise<",
+              "LlmSimulator",
+              ">; toolMessage: ({ name, response, when, }: { name?: string | undefined; response: LLMResponseFnOrString; when?: ((body: ",
+              "ChatCompletionStreamParams",
+              ") => boolean) | undefined; }) => Promise<",
+              "LlmSimulator",
+              ">; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.interceptedRequests",
+            "type": "Array",
+            "tags": [],
+            "label": "interceptedRequests",
+            "description": [],
+            "signature": [
+              "{ requestBody: ",
+              "ChatCompletionStreamParams",
+              "; matchingInterceptorName: string | undefined; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-llm-proxy",
+                "id": "def-common.LlmProxy.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "port",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                "lineNumber": 44,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-llm-proxy",
+                "id": "def-common.LlmProxy.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                "lineNumber": 44,
+                "columnNumber": 46,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.getPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getPort",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.waitForAllInterceptorsToHaveBeenCalled",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForAllInterceptorsToHaveBeenCalled",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LlmProxy.intercept",
+            "type": "Function",
+            "tags": [],
+            "label": "intercept",
+            "description": [],
+            "signature": [
+              "({ name, when, responseMock, }: { name: string; when: (body: ",
+              "ChatCompletionStreamParams",
+              ") => boolean; responseMock?: ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLMMessage",
+                "text": "LLMMessage"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLmError",
+                "text": "LLmError"
+              },
+              " | ((body: ",
+              "ChatCompletionStreamParams",
+              ") => ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLMMessage",
+                "text": "LLMMessage"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLmError",
+                "text": "LLmError"
+              },
+              "); }) => { waitForIntercept: () => Promise<",
+              "LlmSimulator",
+              ">; completeAfterIntercept: () => Promise<",
+              "LlmSimulator",
+              ">; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-llm-proxy",
+                "id": "def-common.LlmProxy.intercept.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    name,\n    when,\n    responseMock,\n  }",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                "lineNumber": 157,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ftr-llm-proxy",
+                    "id": "def-common.LlmProxy.intercept.$1.name",
+                    "type": "string",
+                    "tags": [],
+                    "label": "name",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                    "lineNumber": 158,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/ftr-llm-proxy",
+                    "id": "def-common.LlmProxy.intercept.$1.when",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "when",
+                    "description": [],
+                    "signature": [
+                      "(body: ",
+                      "ChatCompletionStreamParams",
+                      ") => boolean"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                    "lineNumber": 159,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/ftr-llm-proxy",
+                        "id": "def-common.LlmProxy.intercept.$1.when.$1",
+                        "type": "CompoundType",
+                        "tags": [],
+                        "label": "body",
+                        "description": [],
+                        "signature": [
+                          "Omit<",
+                          "ChatCompletionCreateParamsBase",
+                          ", \"stream\"> & { stream?: true | undefined; }"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                        "lineNumber": 30,
+                        "columnNumber": 10,
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/ftr-llm-proxy",
+                    "id": "def-common.LlmProxy.intercept.$1.responseMock",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "responseMock",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/ftr-llm-proxy",
+                        "scope": "common",
+                        "docId": "kibKbnFtrLlmProxyPluginApi",
+                        "section": "def-common.LLMMessage",
+                        "text": "LLMMessage"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "@kbn/ftr-llm-proxy",
+                        "scope": "common",
+                        "docId": "kibKbnFtrLlmProxyPluginApi",
+                        "section": "def-common.LLmError",
+                        "text": "LLmError"
+                      },
+                      " | ((body: ",
+                      "ChatCompletionStreamParams",
+                      ") => ",
+                      {
+                        "pluginId": "@kbn/ftr-llm-proxy",
+                        "scope": "common",
+                        "docId": "kibKbnFtrLlmProxyPluginApi",
+                        "section": "def-common.LLMMessage",
+                        "text": "LLMMessage"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "@kbn/ftr-llm-proxy",
+                        "scope": "common",
+                        "docId": "kibKbnFtrLlmProxyPluginApi",
+                        "section": "def-common.LLmError",
+                        "text": "LLmError"
+                      },
+                      ")"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+                    "lineNumber": 160,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createInterceptors",
+        "type": "Function",
+        "tags": [],
+        "label": "createInterceptors",
+        "description": [],
+        "signature": [
+          "(proxy: ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LlmProxy",
+            "text": "LlmProxy"
+          },
+          ") => { toolChoice: ({ name, response }: { name: string; response: LLMResponseFnOrString; }) => Promise<",
+          "LlmSimulator",
+          ">; userMessage: ({ name, response, when, }: { name?: string | undefined; response: LLMResponseFnOrString; when?: ((body: ",
+          "ChatCompletionStreamParams",
+          ") => boolean) | undefined; }) => Promise<",
+          "LlmSimulator",
+          ">; toolMessage: ({ name, response, when, }: { name?: string | undefined; response: LLMResponseFnOrString; when?: ((body: ",
+          "ChatCompletionStreamParams",
+          ") => boolean) | undefined; }) => Promise<",
+          "LlmSimulator",
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/interceptors.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createInterceptors.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "proxy",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LlmProxy",
+                "text": "LlmProxy"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/interceptors.ts",
+            "lineNumber": 21,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createLlmProxy",
+        "type": "Function",
+        "tags": [],
+        "label": "createLlmProxy",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LlmProxy",
+            "text": "LlmProxy"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+        "lineNumber": 242,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createLlmProxy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/proxy.ts",
+            "lineNumber": 242,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createOpenAiChunk",
+        "type": "Function",
+        "tags": [],
+        "label": "createOpenAiChunk",
+        "description": [],
+        "signature": [
+          "(msg: string | ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          ") => ",
+          "ChatCompletionChunk"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createOpenAiChunk.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "msg",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.ToolMessage",
+                "text": "ToolMessage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
+            "lineNumber": 14,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createOpenAIResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "createOpenAIResponse",
+        "description": [],
+        "signature": [
+          "(msg: ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LLMMessage",
+            "text": "LLMMessage"
+          },
+          ") => ",
+          "ChatCompletion"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createOpenAIResponse.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "msg",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLMMessage",
+                "text": "LLMMessage"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
+            "lineNumber": 41,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createToolCallMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "createToolCallMessage",
+        "description": [],
+        "signature": [
+          "(toolName: string, toolArg: Record<string, any>) => Omit<",
+          "ChatCompletionMessage",
+          ", \"refusal\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createToolCallMessage.$1",
+            "type": "string",
+            "tags": [],
+            "label": "toolName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createToolCallMessage.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "toolArg",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.isLlmError",
+        "type": "Function",
+        "tags": [],
+        "label": "isLlmError",
+        "description": [],
+        "signature": [
+          "(output: ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LLMMessage",
+            "text": "LLMMessage"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LLmError",
+            "text": "LLmError"
+          },
+          ") => output is ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.LLmError",
+            "text": "LLmError"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.isLlmError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLMMessage",
+                "text": "LLMMessage"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/ftr-llm-proxy",
+                "scope": "common",
+                "docId": "kibKbnFtrLlmProxyPluginApi",
+                "section": "def-common.LLmError",
+                "text": "LLmError"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 28,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.LLmError",
+        "type": "Interface",
+        "tags": [],
+        "label": "LLmError",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LLmError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"error\""
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LLmError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.LLmError.errorMsg",
+            "type": "string",
+            "tags": [],
+            "label": "errorMsg",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.LLMMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "LLMMessage",
+        "description": [],
+        "signature": [
+          "string | string[] | ",
+          {
+            "pluginId": "@kbn/ftr-llm-proxy",
+            "scope": "common",
+            "docId": "kibKbnFtrLlmProxyPluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.ToolMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolMessage",
+        "description": [],
+        "signature": [
+          "{ role: \"assistant\"; content: string | null; audio?: ",
+          "ChatCompletionAudio",
+          " | null | undefined; annotations?: ",
+          "ChatCompletionMessage",
+          ".Annotation[] | undefined; tool_calls?: ",
+          "ChatCompletionMessageToolCall",
+          "[] | undefined; function_call?: ",
+          "ChatCompletionMessage",
+          ".FunctionCall | null | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -24,6 +24,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+            "lineNumber": 24,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+            "lineNumber": 24,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -94,6 +100,8 @@
           ">) => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +126,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+            "lineNumber": 35,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -157,6 +167,8 @@
           " | undefined, deps?: React.DependencyList) => string"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,6 +190,8 @@
               "<P> | null | undefined"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -193,6 +207,8 @@
               "P"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -209,6 +225,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -224,6 +242,8 @@
               "React.DependencyList"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,6 +323,8 @@
           "; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; onSave?: (() => Promise<void>) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -317,6 +339,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -332,6 +356,8 @@
               "G | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -378,6 +404,8 @@
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -392,6 +420,8 @@
               "\"export\""
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -438,6 +468,8 @@
           " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 182,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -452,6 +484,8 @@
               "\"exportDerivatives\""
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -472,6 +506,8 @@
           "<S>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -485,6 +521,8 @@
               "\nKibana application ID."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -498,6 +536,8 @@
               "\nA relative URL path within a Kibana application."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -514,6 +554,8 @@
               "S"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -548,6 +590,8 @@
           "<P>>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -561,6 +605,8 @@
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +625,8 @@
               "<object>>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -595,6 +643,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -633,6 +683,8 @@
           "<P>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -644,6 +696,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,6 +716,8 @@
               "<object>>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -678,6 +734,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -700,6 +758,8 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -716,6 +776,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 82,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -734,6 +796,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 82,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -756,6 +820,8 @@
               " | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -772,6 +838,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 91,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -790,6 +858,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 91,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -812,6 +882,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -828,6 +900,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 101,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -846,6 +920,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 101,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -868,6 +944,8 @@
               " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -884,6 +962,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 111,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -902,6 +982,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 111,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -924,6 +1006,8 @@
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -938,6 +1022,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -954,6 +1040,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -969,6 +1057,8 @@
                   "React.DependencyList | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -991,6 +1081,8 @@
           "<P>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1004,6 +1096,8 @@
               "Locator ID."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1017,6 +1111,8 @@
               "Kibana version when locator params were generated."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1033,6 +1129,8 @@
               "P"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1057,6 +1155,8 @@
           "<I> extends Pick<I, \"id\" | \"groupId\" | \"prerequisiteCheck\">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 266,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1071,6 +1171,8 @@
               "I[\"config\"]"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1095,6 +1197,8 @@
                   ", \"anonymousAccessServiceProvider\" | \"urlService\">"
                 ],
                 "path": "src/platform/plugins/shared/share/public/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1111,6 +1215,8 @@
         "label": "ShareContext",
         "description": [],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 303,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1124,6 +1230,8 @@
               "\nThe type of the object to share. for example lens, dashboard, etc."
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 313,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1140,6 +1248,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 317,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1160,6 +1270,8 @@
               "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>; }"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 321,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1176,6 +1288,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 330,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1192,6 +1306,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 334,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1208,6 +1324,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 344,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -1252,6 +1370,8 @@
               "; } | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 348,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1266,6 +1386,8 @@
               "{ [key: string]: unknown; }"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 352,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1277,6 +1399,8 @@
             "label": "isDirty",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 353,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1291,6 +1415,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 354,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1319,6 +1445,8 @@
           ", \"name\">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 357,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1330,6 +1458,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 365,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1344,6 +1474,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 366,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1368,6 +1500,8 @@
           " extends ShareMenuItemBase"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 380,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1383,6 +1517,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 381,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1415,6 +1551,8 @@
           ", \"onClose\">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 398,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1429,6 +1567,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 400,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1443,6 +1583,8 @@
               "HTMLElement | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 401,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1454,6 +1596,8 @@
             "label": "allowShortUrl",
             "description": [],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 402,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1468,6 +1612,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 403,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1484,6 +1630,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 404,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1498,6 +1646,8 @@
               "(() => Promise<void>) | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
+            "lineNumber": 405,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1523,6 +1673,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 294,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1538,6 +1690,8 @@
           "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; readonly url_expiration: Readonly<{} & { enabled: boolean; duration: moment.Duration; check_interval: moment.Duration; url_limit: number; }>; }"
         ],
         "path": "src/platform/plugins/shared/share/server/config.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1553,6 +1707,8 @@
           "\"csv:quoteValues\""
         ],
         "path": "src/platform/plugins/shared/share/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1568,6 +1724,8 @@
           "\"csv:separator\""
         ],
         "path": "src/platform/plugins/shared/share/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1583,6 +1741,8 @@
           "Blob | { content: string; type: string; }"
         ],
         "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1612,6 +1772,8 @@
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 208,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1635,6 +1797,8 @@
           " | undefined; } & Record<string, unknown>"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
+        "lineNumber": 299,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1687,6 +1851,8 @@
         "<I>]) => void; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1706,6 +1872,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1732,6 +1900,8 @@
             ">) => void"
           ],
           "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1755,6 +1925,8 @@
                 ">"
               ],
               "path": "src/platform/plugins/shared/share/public/plugin.ts",
+              "lineNumber": 41,
+              "columnNumber": 12,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1783,6 +1955,8 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/share/public/plugin.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1804,6 +1978,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/share/public/plugin.ts",
+              "lineNumber": 46,
+              "columnNumber": 39,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1872,6 +2048,8 @@
         "[]; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1904,6 +2082,8 @@
           "; }) => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1915,6 +2095,8 @@
             "label": "{\n  savedObjectsRepository,\n  unusedUrls,\n  namespace,\n  logger,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 40,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1929,6 +2111,8 @@
                   "ISavedObjectsRepository"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1944,6 +2128,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1955,6 +2141,8 @@
                 "label": "namespace",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1975,6 +2163,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1995,6 +2185,8 @@
           "(duration: moment.Duration) => string"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2009,6 +2201,8 @@
               "moment.Duration"
             ],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 22,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2030,6 +2224,8 @@
           "; urlExpirationDuration: moment.Duration; urlLimit: number; }) => Promise<{ unusedUrls: { id: string; type: string; }[]; hasMore: boolean; namespace: string; }>"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2041,6 +2237,8 @@
             "label": "{\n  savedObjectsRepository,\n  urlExpirationDuration,\n  urlLimit,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 66,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2055,6 +2253,8 @@
                   "ISavedObjectsRepository"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 67,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2069,6 +2269,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 68,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2080,6 +2282,8 @@
                 "label": "urlLimit",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 69,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2101,6 +2305,8 @@
           "TaskInstanceWithId"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2115,6 +2321,8 @@
               "moment.Duration"
             ],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 24,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2144,6 +2352,8 @@
           "; isEnabled: boolean; }) => Promise<{ deletedCount: number; }>"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 104,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2155,6 +2365,8 @@
             "label": "{\n  core,\n  urlExpirationDuration,\n  urlLimit,\n  logger,\n  isEnabled,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 110,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2170,6 +2382,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 111,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2184,6 +2398,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 112,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2195,6 +2411,8 @@
                 "label": "urlLimit",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 113,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2215,6 +2433,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 114,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2226,6 +2446,8 @@
                 "label": "isEnabled",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 115,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2254,6 +2476,8 @@
           "; checkInterval: moment.Duration; isEnabled: boolean; }) => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+        "lineNumber": 166,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2265,6 +2489,8 @@
             "label": "{\n  taskManager,\n  checkInterval,\n  isEnabled,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+            "lineNumber": 170,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2293,6 +2519,8 @@
                   " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 171,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2307,6 +2535,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 172,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2318,6 +2548,8 @@
                 "label": "isEnabled",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 173,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2342,6 +2574,8 @@
           "\"csv:quoteValues\""
         ],
         "path": "src/platform/plugins/shared/share/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2357,6 +2591,8 @@
           "\"csv:separator\""
         ],
         "path": "src/platform/plugins/shared/share/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2372,6 +2608,8 @@
           "\"7d\""
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2387,6 +2625,8 @@
           "\"1y\""
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2402,6 +2642,8 @@
           "10000"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2417,6 +2659,8 @@
           "\"url\""
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2432,6 +2676,8 @@
           "\"unusedUrlsCleanupTask\""
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2446,6 +2692,8 @@
       "label": "SharePublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/share/server/plugin.ts",
+      "lineNumber": 41,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2465,6 +2713,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/share/server/plugin.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2480,6 +2730,8 @@
       "label": "SharePublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/share/server/plugin.ts",
+      "lineNumber": 46,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2499,6 +2751,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/share/server/plugin.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2539,6 +2793,8 @@
           " | undefined, deps?: React.DependencyList) => string"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2560,6 +2816,8 @@
               "<P> | null | undefined"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2575,6 +2833,8 @@
               "P"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2591,6 +2851,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2606,6 +2868,8 @@
               "React.DependencyList"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2626,6 +2890,8 @@
           "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
         ],
         "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2650,6 +2916,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2670,6 +2938,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2688,6 +2958,8 @@
           "\nThe state of anonymous access."
         ],
         "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2701,6 +2973,8 @@
               "\nWhether anonymous access is enabled or not."
             ],
             "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2717,6 +2991,8 @@
               "Record<string, string> | null"
             ],
             "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2751,6 +3027,8 @@
           "<P>>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2764,6 +3042,8 @@
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2782,6 +3062,8 @@
               "<object>>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2798,6 +3080,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2836,6 +3120,8 @@
           "<P>"
         ],
         "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2847,6 +3133,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2865,6 +3153,8 @@
               "<object>>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2881,6 +3171,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2903,6 +3195,8 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2919,6 +3213,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 82,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2937,6 +3233,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 82,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2959,6 +3257,8 @@
               " | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2975,6 +3275,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 91,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2993,6 +3295,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 91,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3015,6 +3319,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3031,6 +3337,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 101,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3049,6 +3357,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 101,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3071,6 +3381,8 @@
               " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3087,6 +3399,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 111,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3105,6 +3419,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 111,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3127,6 +3443,8 @@
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3141,6 +3459,8 @@
                   "P"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3157,6 +3477,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3172,6 +3494,8 @@
                   "React.DependencyList | undefined"
                 ],
                 "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false

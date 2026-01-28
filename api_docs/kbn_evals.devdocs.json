@@ -26,6 +26,8 @@
         "label": "EvaluationScoreRepository",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "default"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+                "lineNumber": 93,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+                "lineNumber": 93,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -101,6 +109,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -121,6 +131,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+                "lineNumber": 213,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,6 +159,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 315,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -161,6 +175,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+                "lineNumber": 315,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -179,6 +195,8 @@
         "label": "KibanaPhoenixClient",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -193,6 +211,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -204,6 +224,8 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 25,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -218,6 +240,8 @@
                       "PhoenixConfig"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 26,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -238,6 +262,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 27,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -258,6 +284,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -269,6 +297,8 @@
                     "label": "runId",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 29,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -283,10 +313,50 @@
                       "number | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 30,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.KibanaPhoenixClient.getDatasetByName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatasetByName",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<",
+              "DatasetInfo",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.KibanaPhoenixClient.getDatasetByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 86,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -311,13 +381,15 @@
               "TaskOutput",
               ">(options: { dataset: TEvaluationDataset; metadata?: Record<string, unknown> | undefined; task: ",
               "ExperimentTask",
-              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; concurrency?: number | undefined; }, evaluators: ",
+              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; concurrency?: number | undefined; trustUpstreamDataset?: boolean | undefined; }, evaluators: ",
               "Evaluator",
               "<TEvaluationDataset[\"examples\"][number], TTaskOutput>[]) => Promise<",
               "RanExperiment",
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -326,9 +398,11 @@
                 "id": "def-common.KibanaPhoenixClient.runExperiment.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n      concurrency,\n    }",
+                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n      concurrency,\n      trustUpstreamDataset,\n    }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 132,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -349,6 +423,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 133,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -367,6 +443,8 @@
                       ">"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 134,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -382,6 +460,8 @@
                           "TExample"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+                        "lineNumber": 72,
+                        "columnNumber": 3,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -398,6 +478,8 @@
                       "Record<string, unknown> | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 135,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -412,6 +494,24 @@
                       "number | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 136,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.runExperiment.$1.trustUpstreamDataset",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "trustUpstreamDataset",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 137,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -433,6 +533,8 @@
                   ">[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 139,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -453,6 +555,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -473,6 +577,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -487,6 +593,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 201,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -528,6 +636,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -549,6 +659,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 116,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -568,6 +680,8 @@
           "(text: string, terms: string[]) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 134,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -582,6 +696,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 134,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -597,6 +713,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 134,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -631,6 +749,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -642,6 +762,8 @@
             "label": "options",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+            "lineNumber": 29,
+            "columnNumber": 12,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -663,6 +785,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+                "lineNumber": 29,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -697,6 +821,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -718,6 +844,8 @@
               "<TOutput, TReferenceOutput>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -743,6 +871,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -754,6 +884,8 @@
             "label": "{\n  testDir,\n  repetitions,\n  timeout,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+            "lineNumber": 39,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -765,6 +897,8 @@
                 "label": "testDir",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "lineNumber": 40,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -779,6 +913,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -793,6 +929,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -827,6 +965,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -848,6 +988,8 @@
               "<TOutput, TReferenceOutput>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -873,6 +1015,8 @@
           ">[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/index.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -896,6 +1040,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/groundedness/index.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -929,6 +1075,8 @@
           ">[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+        "lineNumber": 208,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -950,6 +1098,8 @@
               "<TOutput, TReferenceOutput>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -983,6 +1133,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1004,6 +1156,8 @@
               "<TOutput, TReferenceOutput>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/index.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1039,6 +1193,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/latency.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1050,6 +1206,8 @@
             "label": "{\n  traceEsClient,\n  log,\n  spanName,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/latency.ts",
+            "lineNumber": 41,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1064,6 +1222,8 @@
                   "default"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/latency.ts",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1084,6 +1244,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/latency.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1095,6 +1257,8 @@
                 "label": "spanName",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/latency.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1125,6 +1289,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+        "lineNumber": 153,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1146,6 +1312,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1161,6 +1329,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1176,6 +1346,8 @@
               "EvaluationTableOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1282,6 +1454,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluate.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1297,6 +1471,8 @@
           "(value: unknown, out: string[], maxStrings?: number, maxLen?: number) => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1311,6 +1487,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1326,6 +1504,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1341,6 +1521,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1356,6 +1538,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1375,6 +1559,8 @@
           "(text: string) => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 85,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1389,6 +1575,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 85,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1408,6 +1596,8 @@
           "(text: string, version: string) => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 100,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1422,6 +1612,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1437,6 +1629,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1471,6 +1665,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/report_model_score.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1492,6 +1688,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/report_model_score.ts",
+            "lineNumber": 101,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1511,6 +1709,8 @@
           "(metadata: Record<string, unknown> | null | undefined, key: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1525,6 +1725,8 @@
               "Record<string, unknown> | null | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1540,6 +1742,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1561,6 +1765,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1575,6 +1781,8 @@
               "TaskOutput"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 67,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1594,6 +1802,8 @@
           "(metadata: Record<string, unknown> | null | undefined, key: string) => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1608,6 +1818,8 @@
               "Record<string, unknown> | null | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1623,6 +1835,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1644,6 +1858,8 @@
           ") => { tool_id?: string | undefined; results?: unknown[] | undefined; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1658,6 +1874,8 @@
               "TaskOutput"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1687,6 +1905,8 @@
           "[]) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1708,6 +1928,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 103,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1727,6 +1949,8 @@
           "(text: string, patterns: string[]) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1741,6 +1965,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 129,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1756,6 +1982,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_helpers.ts",
+            "lineNumber": 129,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1793,6 +2021,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1814,6 +2044,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 56,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1833,6 +2065,8 @@
           "() => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1854,6 +2088,8 @@
           "<TExample, TTaskOutput>[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1869,6 +2105,8 @@
               "<TExample, TTaskOutput>[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1898,6 +2136,8 @@
           ", cb: () => any) => any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/tracing.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1912,6 +2152,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/tracing.ts",
+            "lineNumber": 16,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1933,6 +2175,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/tracing.ts",
+            "lineNumber": 16,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1948,6 +2192,8 @@
               "() => any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/tracing.ts",
+            "lineNumber": 16,
+            "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1966,6 +2212,8 @@
         "label": "DatasetScore",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1977,6 +2225,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1988,6 +2238,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1999,6 +2251,8 @@
             "label": "numExamples",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2013,6 +2267,8 @@
               "Map<string, number[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,6 +2280,8 @@
             "label": "experimentId",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2055,6 +2313,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2077,6 +2337,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2091,6 +2353,8 @@
         "label": "DefaultEvaluators",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2119,6 +2383,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2140,6 +2406,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+                "lineNumber": 59,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2164,6 +2432,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2186,6 +2456,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2232,6 +2504,8 @@
               ">; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2246,6 +2520,8 @@
         "label": "EvaluationDataset",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2257,6 +2533,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,6 +2546,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2283,6 +2563,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2297,6 +2579,8 @@
               "undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2311,6 +2595,8 @@
         "label": "EvaluationReport",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2332,6 +2618,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2352,6 +2640,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2372,6 +2662,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2383,6 +2675,8 @@
             "label": "repetitions",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2394,6 +2688,8 @@
             "label": "runId",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2408,6 +2704,8 @@
         "label": "EvaluationScoreDocument",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2419,6 +2717,8 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2430,6 +2730,8 @@
             "label": "run_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2441,6 +2743,8 @@
             "label": "experiment_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2452,6 +2756,8 @@
             "label": "repetitions",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2466,6 +2772,8 @@
               "{ id: string; family: string; provider: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2480,6 +2788,8 @@
               "{ id: string; family: string; provider: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2494,6 +2804,8 @@
               "{ id: string; name: string; examples_count: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2508,6 +2820,8 @@
               "{ name: string; stats: { mean: number; median: number; std_dev: number; min: number; max: number; count: number; percentage: number; }; scores: number[]; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2522,6 +2836,8 @@
               "{ hostname: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2553,6 +2869,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2573,6 +2891,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2593,6 +2913,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2613,6 +2935,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2627,6 +2951,8 @@
               "HttpHandler"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2647,6 +2973,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2667,6 +2995,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2678,6 +3008,8 @@
             "label": "repetitions",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2692,6 +3024,8 @@
               "EvaluationAnalysisService"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2706,6 +3040,8 @@
         "label": "EvaluatorDisplayGroup",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2720,6 +3056,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2731,6 +3069,8 @@
             "label": "combinedColumnName",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2745,6 +3085,8 @@
         "label": "EvaluatorDisplayOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2759,6 +3101,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2773,6 +3117,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2795,6 +3141,8 @@
               ")[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/report_table.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2809,6 +3157,8 @@
         "label": "EvaluatorStats",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2820,6 +3170,8 @@
             "label": "mean",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2831,6 +3183,8 @@
             "label": "median",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2842,6 +3196,8 @@
             "label": "stdDev",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2853,6 +3209,8 @@
             "label": "min",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2864,6 +3222,8 @@
             "label": "max",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2875,6 +3235,8 @@
             "label": "count",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2886,6 +3248,8 @@
             "label": "percentage",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/evaluation_stats.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2910,6 +3274,8 @@
           "<TOutput, TReferenceOutput>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2923,6 +3289,8 @@
               "Number of top results to evaluate (K in Precision@K, Recall@K)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2939,6 +3307,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2963,6 +3333,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2978,6 +3350,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3003,6 +3377,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3018,6 +3394,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3036,6 +3414,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3050,6 +3430,8 @@
         "label": "ReportDisplayOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3074,6 +3456,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3097,6 +3481,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3113,6 +3499,8 @@
           "\nRepresents a retrieved document with its index and ID."
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3124,6 +3512,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3135,6 +3525,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3156,6 +3548,8 @@
           "EvaluationCriterionStructured"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/criteria/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3187,6 +3581,8 @@
           ") => Promise<void>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3208,6 +3604,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3219,6 +3617,8 @@
             "label": "runId",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3239,6 +3639,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/reporting/evaluation_reporter.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3258,6 +3660,8 @@
           "{ [x: string]: Record<string, number>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3282,6 +3686,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3297,6 +3703,8 @@
               "T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3324,6 +3732,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3339,6 +3749,8 @@
               "T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false
           }
