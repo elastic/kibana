@@ -270,7 +270,7 @@ export const OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT: EventTypeOp
       type: 'keyword',
       _meta: {
         description:
-          'The current step in the onboarding flow. Possible values: "in_progress", "awaiting_data", "data_received"',
+          'The current step in the onboarding flow. Possible values: "in_progress", "awaiting_data", "data_received", "aws_launch_stack"',
       },
     },
     context: flowContextSchema,

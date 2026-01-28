@@ -30,97 +30,12 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { useCloudForwarderFlow } from './use_cloudforwarder_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
+import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
+import { type LogType } from '../../../../common/aws_cloudforwarder';
+import { isValidS3BucketName, buildS3BucketArn, buildCloudFormationUrl } from './utils';
 
 const EDOT_CLOUD_FORWARDER_DOCS_URL =
   'https://www.elastic.co/docs/reference/opentelemetry/edot-cloud-forwarder/aws';
-
-/**
- * CloudFormation template configurations for different AWS log types.
- * All log types use the same template URL but with different parameters
- * (log type and OTLP endpoint) passed via URL hash parameters.
- */
-const CLOUDFORMATION_TEMPLATES = {
-  vpcflow: {
-    templateUrl:
-      'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/s3_logs-cloudformation.yaml',
-    stackName: 'edot-cloud-forwarder-vpcflow',
-    logType: 'vpcflow',
-    label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.vpcflow', {
-      defaultMessage: 'VPC Flow Logs',
-    }),
-  },
-  elbaccess: {
-    templateUrl:
-      'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/s3_logs-cloudformation.yaml',
-    stackName: 'edot-cloud-forwarder-elbaccess',
-    logType: 'elbaccess',
-    label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.elbaccess', {
-      defaultMessage: 'ELB Access Logs',
-    }),
-  },
-  cloudtrail: {
-    templateUrl:
-      'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/s3_logs-cloudformation.yaml',
-    stackName: 'edot-cloud-forwarder-cloudtrail',
-    logType: 'cloudtrail',
-    label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.cloudtrail', {
-      defaultMessage: 'CloudTrail Logs',
-    }),
-  },
-};
-
-type LogType = keyof typeof CLOUDFORMATION_TEMPLATES;
-
-/**
- * Validates S3 bucket names according to AWS naming rules:
- * - 3-63 characters long
- * - Only lowercase letters, numbers, hyphens, and periods
- * - Must start and end with a letter or number
- * - Cannot contain consecutive periods
- */
-const S3_BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
-
-function isValidS3BucketName(bucketName: string): boolean {
-  return S3_BUCKET_NAME_REGEX.test(bucketName) && !bucketName.includes('..');
-}
-
-/**
- * Builds an S3 bucket ARN from a bucket name.
- * Format: arn:aws:s3:::bucket-name
- */
-function buildS3BucketArn(bucketName: string): string {
-  return `arn:aws:s3:::${bucketName}`;
-}
-
-/**
- * Builds a CloudFormation console URL with pre-filled parameters for deploying
- * the EDOT Cloud Forwarder. The URL includes the template URL, stack name, log type,
- * OTLP endpoint, API key, and S3 bucket ARN as hash parameters for the AWS CloudFormation console.
- */
-function buildCloudFormationUrl(
-  logType: LogType,
-  otlpEndpoint: string,
-  apiKey: string,
-  s3BucketArn: string
-): string {
-  const config = CLOUDFORMATION_TEMPLATES[logType];
-  const url = new URL('https://console.aws.amazon.com/cloudformation/home');
-  const params = new URLSearchParams({
-    templateURL: config.templateUrl,
-    stackName: config.stackName,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    param_EdotCloudForwarderS3LogsType: config.logType,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    param_OTLPEndpoint: otlpEndpoint,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    param_ElasticAPIKey: apiKey,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    param_SourceS3BucketARN: s3BucketArn,
-  });
-
-  url.hash = `/stacks/create/review?${params.toString()}`;
-  return url.toString();
-}
 
 export function CloudForwarderPanel() {
   useFlowBreadcrumb({
@@ -134,6 +49,7 @@ export function CloudForwarderPanel() {
 
   const {
     services: {
+      analytics,
       context: { cloudServiceProvider },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -162,17 +78,33 @@ export function CloudForwarderPanel() {
         onboardingFlowType="cloudforwarder"
         error={error}
         telemetryEventContext={{
-          cloudforwarder: { cloudServiceProvider, selectedLogType },
+          cloudforwarder: { cloudServiceProvider },
         }}
         onRetryClick={refetch}
       />
     );
   }
 
-  const logTypeOptions = Object.entries(CLOUDFORMATION_TEMPLATES).map(([id, config]) => ({
-    id,
-    label: config.label,
-  }));
+  const logTypeOptions: Array<{ id: LogType; label: string }> = [
+    {
+      id: 'vpcflow',
+      label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.vpcflow', {
+        defaultMessage: 'VPC Flow Logs',
+      }),
+    },
+    {
+      id: 'elbaccess',
+      label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.elbaccess', {
+        defaultMessage: 'ELB Access Logs',
+      }),
+    },
+    {
+      id: 'cloudtrail',
+      label: i18n.translate('xpack.observability_onboarding.cloudforwarder.logType.cloudtrail', {
+        defaultMessage: 'CloudTrail Logs',
+      }),
+    },
+  ];
 
   const steps = [
     {
@@ -183,51 +115,49 @@ export function CloudForwarderPanel() {
         }
       ),
       children: (
-        <>
-          <EuiText>
-            <p>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.observability_onboarding.cloudforwarderPanel.prerequisitesDescription"
+              defaultMessage="Before deploying the EDOT Cloud Forwarder, ensure you have:"
+            />
+          </p>
+          <ul>
+            <li>
               <FormattedMessage
-                id="xpack.observability_onboarding.cloudforwarderPanel.prerequisitesDescription"
-                defaultMessage="Before deploying the EDOT Cloud Forwarder, ensure you have:"
+                id="xpack.observability_onboarding.cloudforwarderPanel.prerequisiteAWS"
+                defaultMessage="An active AWS account with permissions to create CloudFormation stacks, Lambda functions, and S3 bucket notifications"
               />
-            </p>
-            <ul>
-              <li>
-                <FormattedMessage
-                  id="xpack.observability_onboarding.cloudforwarderPanel.prerequisiteAWS"
-                  defaultMessage="An active AWS account with permissions to create CloudFormation stacks, Lambda functions, and S3 bucket notifications"
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.observability_onboarding.cloudforwarderPanel.prerequisiteS3"
-                  defaultMessage="An S3 bucket containing your AWS logs (VPC Flow Logs, ELB Access Logs, or CloudTrail)"
-                />
-              </li>
-            </ul>
-            <p>
+            </li>
+            <li>
               <FormattedMessage
-                id="xpack.observability_onboarding.cloudforwarderPanel.prerequisitesDocumentation"
-                defaultMessage="{documentationLink} for detailed setup instructions."
-                values={{
-                  documentationLink: (
-                    <EuiLink
-                      data-test-subj="observabilityOnboardingCloudForwarderPanelDocumentationLink"
-                      href={EDOT_CLOUD_FORWARDER_DOCS_URL}
-                      external
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.cloudforwarderPanel.documentationLinkLabel',
-                        { defaultMessage: 'Check the documentation' }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
+                id="xpack.observability_onboarding.cloudforwarderPanel.prerequisiteS3"
+                defaultMessage="An S3 bucket containing your AWS logs (VPC Flow Logs, ELB Access Logs, or CloudTrail)"
               />
-            </p>
-          </EuiText>
-        </>
+            </li>
+          </ul>
+          <p>
+            <FormattedMessage
+              id="xpack.observability_onboarding.cloudforwarderPanel.prerequisitesDocumentation"
+              defaultMessage="{documentationLink} for detailed setup instructions."
+              values={{
+                documentationLink: (
+                  <EuiLink
+                    data-test-subj="observabilityOnboardingCloudForwarderPanelDocumentationLink"
+                    href={EDOT_CLOUD_FORWARDER_DOCS_URL}
+                    external
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.documentationLinkLabel',
+                      { defaultMessage: 'Check the documentation' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
       ),
     },
     {
@@ -359,6 +289,22 @@ export function CloudForwarderPanel() {
                 iconType="popout"
                 fill
                 isDisabled={!isValidS3BucketName(trimmedBucketName)}
+                onClick={() => {
+                  analytics?.reportEvent(
+                    OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType,
+                    {
+                      onboardingFlowType: 'cloudforwarder',
+                      onboardingId: data.onboardingId,
+                      step: 'aws_launch_stack',
+                      context: {
+                        cloudforwarder: {
+                          cloudServiceProvider,
+                          selectedLogType,
+                        },
+                      },
+                    }
+                  );
+                }}
               >
                 {i18n.translate(
                   'xpack.observability_onboarding.cloudforwarderPanel.launchStackButtonLabel',
@@ -378,35 +324,33 @@ export function CloudForwarderPanel() {
         }
       ),
       children: (
-        <>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutTitle',
-              {
-                defaultMessage: 'Data will appear in Discover',
-              }
-            )}
-            color="success"
-            iconType="check"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutDescription"
-                defaultMessage="Once logs are flowing, you can view them in Discover and create visualizations in Dashboard. Look for indices prefixed with {logsPrefix}."
-                values={{
-                  logsPrefix: (
-                    <strong>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.cloudforwarderPanel.strong.logsawsLabel',
-                        { defaultMessage: 'logs-aws.*' }
-                      )}
-                    </strong>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
-        </>
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutTitle',
+            {
+              defaultMessage: 'Data will appear in Discover',
+            }
+          )}
+          color="success"
+          iconType="check"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.observability_onboarding.cloudforwarderPanel.visualizeDataCalloutDescription"
+              defaultMessage="Once logs are flowing, you can view them in Discover and create visualizations in Dashboard. Look for indices prefixed with {logsPrefix}."
+              values={{
+                logsPrefix: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.strong.logsawsLabel',
+                      { defaultMessage: 'logs-aws.*' }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
       ),
     },
   ];
