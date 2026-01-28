@@ -36,10 +36,7 @@ import {
   updateFailureStoreFailedNotifier,
   updateFailureStoreSuccessNotifier,
 } from './notifications';
-import type {
-  DatasetQualityControllerContext,
-  DatasetQualityControllerEvent,
-} from './types';
+import type { DatasetQualityControllerContext, DatasetQualityControllerEvent } from './types';
 
 const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
   Object.entries(datasetTypesPrivileges)
@@ -643,7 +640,8 @@ export const createDatasetQualityControllerStateMachine = ({
         return { integrations: event.output as Integration[] };
       }),
       notifyFetchDatasetTypesPrivilegesFailed: ({ event }) => {
-        if ('error' in event) fetchDatasetTypesPrivilegesFailedNotifier(toasts, event.error as Error);
+        if ('error' in event)
+          fetchDatasetTypesPrivilegesFailedNotifier(toasts, event.error as Error);
       },
       notifyFetchDatasetStatsFailed: ({ event }) => {
         if ('error' in event) fetchDatasetStatsFailedNotifier(toasts, event.error as Error);
@@ -675,12 +673,14 @@ export const createDatasetQualityControllerStateMachine = ({
           types: KNOWN_TYPES,
         });
       }),
-      loadDataStreamStats: fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
-        return dataStreamStatsClient.getDataStreamsStats({
-          types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: input.filters.query,
-        });
-      }),
+      loadDataStreamStats: fromPromise(
+        async ({ input }: { input: DatasetQualityControllerContext }) => {
+          return dataStreamStatsClient.getDataStreamsStats({
+            types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+            datasetQuery: input.filters.query,
+          });
+        }
+      ),
       loadDataStreamDocsStats: fromCallback<
         DatasetQualityControllerEvent,
         { context: DatasetQualityControllerContext; type: DataStreamType }
@@ -699,15 +699,17 @@ export const createDatasetQualityControllerStateMachine = ({
         };
         fetchDocs();
       }),
-      loadDegradedDocs: fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
-        const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
-        return dataStreamStatsClient.getDataStreamsDegradedStats({
-          types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: input.filters.query,
-          start,
-          end,
-        });
-      }),
+      loadDegradedDocs: fromPromise(
+        async ({ input }: { input: DatasetQualityControllerContext }) => {
+          const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
+          return dataStreamStatsClient.getDataStreamsDegradedStats({
+            types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+            datasetQuery: input.filters.query,
+            start,
+            end,
+          });
+        }
+      ),
       loadFailedDocs: fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
         const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
         return dataStreamStatsClient.getDataStreamsFailedStats({
