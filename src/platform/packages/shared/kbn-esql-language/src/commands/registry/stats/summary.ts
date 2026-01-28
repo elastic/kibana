@@ -58,6 +58,9 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
 
 // ======= Visitor Handlers =======
 
+/**
+ * Visites its arguments and options.
+ */
 const collectInStats = (
   ctx:
     | StatsCommandVisitorContext<VisitorMethods, SummaryData>
@@ -67,11 +70,17 @@ const collectInStats = (
   for (const _ of ctx.visitOptions(false)); // Options corresponds to the "grouping" part "BY"
 };
 
+/**
+ * If BY option is found, sets a flag and continues visiting its arguments.
+ */
 const collectInCommandOption = (ctx: CommandOptionVisitorContext<VisitorMethods, SummaryData>) => {
   const isInByClause = ctx.node.name === 'by';
   for (const _ of ctx.visitArguments(isInByClause));
 };
 
+/**
+ * Collects the columns used directly as arguments.
+ */
 const collectInColumns = (
   ctx: ColumnExpressionVisitorContext<VisitorMethods, SummaryData>,
   isInByClause: boolean
@@ -91,7 +100,9 @@ const collectInColumns = (
   }
 };
 
-// Collects param variables
+/**
+ * Collects the param variables.
+ */
 const collectInLiterals = (
   ctx: LiteralExpressionVisitorContext<VisitorMethods, SummaryData>,
   isInByClause: boolean
@@ -112,7 +123,9 @@ const collectInLiterals = (
   }
 };
 
-// Collects columns from assignments, "where" expressions, and other functions calls.
+/**
+ * Collects columns from assignments, "where" expressions, and other functions calls.
+ */
 const collectInFunctions = (
   ctx: FunctionCallExpressionVisitorContext<VisitorMethods, SummaryData>,
   isInByClause: boolean
