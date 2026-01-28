@@ -66,7 +66,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -132,7 +132,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,

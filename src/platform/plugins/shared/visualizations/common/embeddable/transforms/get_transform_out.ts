@@ -48,9 +48,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
       };
     }
 
-    return {
-      ...state,
-    };
+    return state;
   }
   return transformOut;
 }
