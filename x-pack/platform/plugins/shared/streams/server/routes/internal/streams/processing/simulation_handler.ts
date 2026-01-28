@@ -554,7 +554,9 @@ const computePipelineSimulationResult = (
       }
     });
 
-    diff.detected_fields.forEach(({ processor_id, name }) => {
+    // Use per_processor_fields for processor metrics - this tracks what each processor touched,
+    // even if the field was later deleted by another processor (useful for debugging/metrics)
+    diff.per_processor_fields.forEach(({ processor_id, name }) => {
       processorsMap[processor_id].detected_fields.push(name);
     });
 
@@ -702,8 +704,13 @@ const getLastDoc = (
 /**
  * To improve tracking down the errors and the fields detection to the individual processor,
  * this function computes the detected fields and the errors for each processor.
+ *
+ * Returns:
+ * - `per_processor_fields`: All fields touched by each processor (for per-processor metrics/debugging)
+ * - `detected_fields`: Only fields that exist in the final output compared to input (for overall detection)
+ * - `errors`: Processing errors detected during comparison
  */
-const computeSimulationDocDiff = (
+export const computeSimulationDocDiff = (
   base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
@@ -722,12 +729,20 @@ const computeSimulationDocDiff = (
     }),
   ];
 
-  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
+  // Store base and final docs for overall diff computation
+  const baseDoc = comparisonDocs[0];
+  const finalDoc = comparisonDocs[comparisonDocs.length - 1];
+
+  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> & {
+    per_processor_fields: Array<{ processor_id: string; name: string }>;
+  } = {
     detected_fields: [],
+    per_processor_fields: [],
     errors: [],
   };
 
-  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/udpated fields.
+  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/updated fields.
+  // This tracks what each processor touches for debugging/metrics purposes.
   // When updated fields are detected compared to the original document, the processor is not additive to the documents, and an error is added to the diff result.
   while (comparisonDocs.length > 1) {
     const currentDoc = comparisonDocs.shift()!; // Safe to use ! here since we check the length
@@ -747,7 +762,8 @@ const computeSimulationDocDiff = (
       name,
     }));
 
-    diffResult.detected_fields.push(...processorDetectedFields);
+    // Track per-processor fields (includes fields that may be deleted by later processors)
+    diffResult.per_processor_fields.push(...processorDetectedFields);
 
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
@@ -757,6 +773,22 @@ const computeSimulationDocDiff = (
       });
     }
   }
+
+  // Compute overall diff between initial input and final output.
+  // This excludes temporary fields that were created then deleted within processing.
+  const { added: finalAdded, updated: finalUpdated } = calculateObjectDiff(
+    flattenObjectNestedLast(baseDoc.value),
+    flattenObjectNestedLast(finalDoc.value)
+  );
+
+  const overallAddedFields = Object.keys(flattenObjectNestedLast(finalAdded));
+  const overallUpdatedFields = Object.keys(flattenObjectNestedLast(finalUpdated));
+  const overallDetectedFieldNames = new Set([...overallAddedFields, ...overallUpdatedFields]);
+
+  // Filter per-processor fields to only include fields that exist in the final output,
+  // keeping processor attribution for fields that do exist
+  diffResult.detected_fields = diffResult.per_processor_fields
+    .filter(({ name }) => overallDetectedFieldNames.has(name));
 
   return diffResult;
 };
