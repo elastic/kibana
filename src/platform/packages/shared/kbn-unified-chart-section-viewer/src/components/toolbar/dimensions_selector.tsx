@@ -9,7 +9,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -150,12 +150,26 @@ export const DimensionsSelector = ({
     );
   }, [selectedDimensions, isLoading]);
 
+  const popoverContentBelowSearch = useMemo(() => {
+    const count = selectedDimensions.length;
+    return (
+      <EuiText size="xs" color="subdued" css={{ padding: '8px 0' }}>
+        <FormattedMessage
+          id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
+          defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
+          values={{ count }}
+        />
+      </EuiText>
+    );
+  }, [selectedDimensions.length]);
+
   return (
     <ToolbarSelector
       data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={[...selectedNamesSet]}
       searchable
       buttonLabel={buttonLabel}
+      popoverContentBelowSearch={popoverContentBelowSearch}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
       singleSelection={singleSelection}
