@@ -81,6 +81,8 @@ const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
+// we keep writing to localStorage for pinned fields custom here (instead of useRestorableLocalStorage)
+// to keep backward compatibility
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
   if (
@@ -92,7 +94,7 @@ const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   }
   return [];
 };
-const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storage: Storage) => {
+const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, storage: Storage) => {
   let pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
   pinnedFieldsEntry =
     typeof pinnedFieldsEntry === 'object' && pinnedFieldsEntry !== null ? pinnedFieldsEntry : {};
@@ -149,7 +151,8 @@ const InternalDocViewerTable = ({
     selectedFieldTypes: fieldTypeFilters,
   });
 
-  const [pinnedFields, setPinnedFields] = useState<string[]>(
+  const [pinnedFields, setPinnedFields] = useRestorableState(
+    'pinnedFields',
     getPinnedFields(currentDataViewId, storage)
   );
 
@@ -167,10 +170,10 @@ const InternalDocViewerTable = ({
       const newPinned = pinnedFields.includes(field)
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
-      setPinnedFields(newPinned);
-      updatePinnedFieldsState(newPinned, currentDataViewId, storage);
+      setPinnedFields(newPinned); // Updates restorable and URL state
+      savePinnedFieldsToStorage(newPinned, currentDataViewId, storage); // Persists to localStorage
     },
-    [currentDataViewId, pinnedFields, storage]
+    [currentDataViewId, pinnedFields, storage, setPinnedFields]
   );
 
   const onChangeSearchTerm = useCallback(
