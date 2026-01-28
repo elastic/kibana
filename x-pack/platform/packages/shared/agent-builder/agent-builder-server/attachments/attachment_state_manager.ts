@@ -59,7 +59,7 @@ export interface AttachmentStateManager {
   /** Get an attachment by ID. Optionally resolve by-reference data when context is provided. */
   get(
     id: string,
-    options?: { context?: AttachmentResolveContext; version?: number }
+    options: { context: AttachmentResolveContext; version?: number }
   ): Promise<
     | {
         id: string;
@@ -99,7 +99,7 @@ export interface AttachmentStateManager {
   resolveAttachment(
     attachment: VersionedAttachment,
     options: {
-      context?: AttachmentResolveContext;
+      context: AttachmentResolveContext;
       version: number;
     }
   ): Promise<unknown>;
@@ -158,9 +158,9 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   async get(
     id: string,
-    options?: {
+    options: {
       version?: number;
-      context?: AttachmentResolveContext;
+      context: AttachmentResolveContext;
     }
   ) {
     const attachment = this.attachments.get(id);
@@ -175,7 +175,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     const resolved = await this.resolveAttachment(attachment, {
-      context: options?.context,
+      context: options.context,
       version,
     });
 
@@ -419,7 +419,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     attachment: VersionedAttachment,
     options: {
       version: number;
-      context?: AttachmentResolveContext;
+      context: AttachmentResolveContext;
     }
   ): Promise<AttachmentVersion | undefined> {
     const { version, context } = options;
@@ -428,10 +428,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     const definition = this.options.getTypeDefinition(type);
     if (!definition?.resolve) {
       return data;
-    }
-
-    if (!context) {
-      throw new Error('context was not provided so by ref attachment cannot be resolved');
     }
 
     return definition.resolve(

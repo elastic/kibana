@@ -418,17 +418,6 @@ export function registerAttachmentRoutes({
             });
           }
 
-          // Check if attachment has client_id (from flyout config)
-          const latestVersion = await stateManager.get(attachmentId);
-          const versionData = latestVersion?.data as Record<string, unknown> | undefined;
-          if (versionData?.client_id) {
-            return response.conflict({
-              body: {
-                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
-              },
-            });
-          }
-
           const success = stateManager.permanentDelete(attachmentId);
           if (!success) {
             return response.customError({
@@ -609,7 +598,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
