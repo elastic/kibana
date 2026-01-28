@@ -36,8 +36,8 @@ export async function registerObservabilityAgent({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    configuration: ({ spaceId }) => {
-      const basePath = core.http.basePath.serverBasePath;
+    configuration: ({ request }) => {
+      const urlPrefix = core.http.basePath.get(request);
 
       return {
         instructions:
@@ -47,7 +47,7 @@ export async function registerObservabilityAgent({
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
-        ${getEntityLinkingInstructions({ basePath, spaceId })}
+        ${getEntityLinkingInstructions({ urlPrefix })}
       `),
         tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
       };
@@ -107,16 +107,7 @@ function getKqlInstructions() {
  * Entity Linking instructions for the Observability Agent.
  * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
  */
-export function getEntityLinkingInstructions({
-  basePath,
-  spaceId,
-}: {
-  basePath: string;
-  spaceId?: string;
-}): string {
-  const spacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const prefix = `${basePath}${spacePrefix}`;
-
+export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string }): string {
   return dedent(`
   ### Entity Linking Guidelines
   Use markdown for readability. When referencing entities, create clickable links.
@@ -124,17 +115,18 @@ export function getEntityLinkingInstructions({
 
   | Entity | Link Format | Example |
   |--------|-------------|---------|
-  | Service | [<serviceName>](${prefix}/app/apm/services/<serviceName>) | "The [payments](${prefix}/app/apm/services/payments) service is experiencing high latency." |
-  | Transaction | [<transactionName>](${prefix}/app/apm/services/<serviceName>/transactions) | "The transaction [POST /checkout](${prefix}/app/apm/services/payments/transactions) took 500ms." |
-  | Trace | [<traceId>](${prefix}/app/apm/link-to/trace/<traceId>) | "See trace [8bc26008603e16819bd6fcfb80fceff5](${prefix}/app/apm/link-to/trace/8bc26008603e16819bd6fcfb80fceff5)" |
-  | Error | [<errorKey>](${prefix}/app/apm/services/<serviceName>/errors/<errorKey>) | "Error [upstream-5xx](${prefix}/app/apm/services/catalog-api/errors/upstream-5xx) suggests a dependency failure." |
-  | Service Errors | [errors](${prefix}/app/apm/services/<serviceName>/errors) | "Review all [errors](${prefix}/app/apm/services/frontend/errors) for the [frontend](${prefix}/app/apm/services/frontend) service." |
-  | Service Logs | [logs](${prefix}/app/apm/services/<serviceName>/logs) | "Check [logs](${prefix}/app/apm/services/frontend/logs) for the [frontend](${prefix}/app/apm/services/frontend) service." |
-  | Host | [<hostName>](${prefix}/app/metrics/detail/host/<hostName>) | "Host [web-01](${prefix}/app/metrics/detail/host/web-01) is experiencing high CPU usage." |
-  | Service Map | [Service Map](${prefix}/app/apm/services/<serviceName>/service-map) | "Check the [Service Map](${prefix}/app/apm/services/payments/service-map) to see dependencies." |
-  | Dependencies | [Dependencies](${prefix}/app/apm/services/<serviceName>/dependencies) | "View [Dependencies](${prefix}/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
-  | Alert | [<alertId>](${prefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${prefix}/app/observability/alerts/alert-uuid-123) was triggered." |
-  | Logs Explorer | [Logs](${prefix}/app/logs) | "View [Logs](${prefix}/app/logs) to investigate the issue further." |
+  | Service | [<serviceName>](${urlPrefix}/app/apm/services/<serviceName>) | "The [payments](${urlPrefix}/app/apm/services/payments) service is experiencing high latency." |
+  | Transaction | [<transactionName>](${urlPrefix}/app/apm/services/<serviceName>/transactions) | "The transaction [POST /checkout](${urlPrefix}/app/apm/services/payments/transactions) took 500ms." |
+  | Trace | [<traceId>](${urlPrefix}/app/apm/link-to/trace/<traceId>) | "See trace [8bc26008603e16819bd6fcfb80fceff5](${urlPrefix}/app/apm/link-to/trace/8bc26008603e16819bd6fcfb80fceff5)" |
+  | Error | [<errorKey>](${urlPrefix}/app/apm/services/<serviceName>/errors/<errorKey>) | "Error [upstream-5xx](${urlPrefix}/app/apm/services/catalog-api/errors/upstream-5xx) suggests a dependency failure." |
+  | Service Errors | [errors](${urlPrefix}/app/apm/services/<serviceName>/errors) | "Review all [errors](${urlPrefix}/app/apm/services/frontend/errors) for the [frontend](${urlPrefix}/app/apm/services/frontend) service." |
+  | Service Logs | [logs](${urlPrefix}/app/apm/services/<serviceName>/logs) | "Check [logs](${urlPrefix}/app/apm/services/frontend/logs) for the [frontend](${urlPrefix}/app/apm/services/frontend) service." |
+  | Host | [<hostName>](${urlPrefix}/app/metrics/detail/host/<hostName>) | "Host [web-01](${urlPrefix}/app/metrics/detail/host/web-01) is experiencing high CPU usage." |
+  | Service Map | [Service Map](${urlPrefix}/app/apm/services/<serviceName>/service-map) | "Check the [Service Map](${urlPrefix}/app/apm/services/payments/service-map) to see dependencies." |
+  | Dependencies | [Dependencies](${urlPrefix}/app/apm/services/<serviceName>/dependencies) | "View [Dependencies](${urlPrefix}/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
+  | Alert | [<alertId>](${urlPrefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${urlPrefix}/app/observability/alerts/alert-uuid-123) was triggered." |
+  | Alert Rules | [<alertRuleId>](${urlPrefix}/app/observability/alerts/rules/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/observability/alerts/rules/alert-uuid-123)." |
+  | Logs Explorer | [Logs](${urlPrefix}/app/logs) | "View [Logs](${urlPrefix}/app/logs) to investigate the issue further." |
 
 `);
 }

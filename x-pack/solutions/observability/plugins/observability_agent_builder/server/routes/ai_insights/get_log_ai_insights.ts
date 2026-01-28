@@ -39,13 +39,11 @@ export async function getLogAiInsights({
   inferenceClient,
   connectorId,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
-  const basePath = core.http.basePath.serverBasePath;
-
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
 
-    ${getEntityLinkingInstructions({ basePath, spaceId })}
+    ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
   `);
 
   const logEntry = await getLogDocumentById({
