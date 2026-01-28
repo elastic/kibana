@@ -39,11 +39,13 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const initialState = useMemo(
-    () => ({
-      width: DEFAULT_CONTROL_WIDTH,
-      grow: DEFAULT_CONTROL_GROW,
-      ...api.parentApi.getLayout(api.uuid),
-    }),
+    () => {
+      return {
+        width: DEFAULT_CONTROL_WIDTH,
+        grow: DEFAULT_CONTROL_GROW,
+        ...api.parentApi.getLayout(api.uuid),
+      };
+    },
     // We should re-calculate `initialState` when the popover opens/closes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [api, isPopoverOpen]
@@ -54,17 +56,20 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const onClose = useCallback(() => {
     setIsPopoverOpen(false);
-  }, []);
+    if (apiCanLockHoverActions(api)) {
+      api.lockHoverActions(false);
+    }
+  }, [api]);
 
   const onClickButton = useCallback(() => {
     if (isPopoverOpen) {
       onClose();
       return;
     }
+    setIsPopoverOpen(true);
     if (apiCanLockHoverActions(api)) {
       api.lockHoverActions(true);
     }
-    setIsPopoverOpen(true);
   }, [api, isPopoverOpen, onClose]);
 
   return (
