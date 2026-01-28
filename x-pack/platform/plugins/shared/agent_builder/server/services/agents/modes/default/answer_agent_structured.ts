@@ -7,17 +7,13 @@
 
 import { z } from '@kbn/zod';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
-import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
-import type { AttachmentPresentation } from '../utils/attachment_presentation';
-import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { errorAction } from './actions';
-import { getStructuredAnswerPrompt } from './prompts';
+import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import type { StateType } from './state';
@@ -39,21 +35,15 @@ const wrappedSchemaProp = 'response';
  */
 export const createAnswerAgentStructured = ({
   chatModel,
-  configuration,
-  capabilities,
+  promptFactory,
   events,
   outputSchema,
-  attachmentTypes,
-  versionedAttachmentPresentation,
 }: {
   chatModel: InferenceChatModel;
-  configuration: ResolvedConfiguration;
-  capabilities: ResolvedAgentCapabilities;
   events: AgentEventEmitter;
+  promptFactory: PromptFactory;
   outputSchema?: Record<string, unknown>;
   logger: Logger;
-  attachmentTypes: ProcessedAttachmentType[];
-  versionedAttachmentPresentation?: AttachmentPresentation;
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -75,15 +65,11 @@ export const createAnswerAgentStructured = ({
           tags: [tags.agent, tags.answerAgent],
         });
 
-      const prompt = getStructuredAnswerPrompt({
-        customInstructions: configuration.answer.instructions,
-        capabilities,
+      const prompt = await promptFactory.getStructuredAnswerPrompt({
         initialMessages: state.initialMessages,
         conversationTimestamp: state.conversationTimestamp,
         actions: state.mainActions,
         answerActions: state.answerActions,
-        attachmentTypes,
-        versionedAttachmentPresentation,
       });
 
       let response = await structuredModel.invoke(prompt);

@@ -38,6 +38,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
+import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -142,6 +143,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
+  const promptFactory = createPromptFactory({
+    configuration: resolvedConfiguration,
+    capabilities: resolvedCapabilities,
+    filesystem,
+    processedConversation,
+    outputSchema,
+  });
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -152,6 +161,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
+    promptFactory,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
