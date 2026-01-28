@@ -56,6 +56,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'some-refresh-token',
         realm: 'test-realm',
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
 
       await expect(
@@ -105,6 +106,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'some-refresh-token',
         realm: 'test-realm',
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
@@ -204,6 +206,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'user-initiated-login-refresh-token',
         realm: 'test-realm',
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
 
       await expect(
@@ -249,6 +252,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'user-initiated-login-refresh-token',
         realm: 'test-realm',
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
@@ -368,6 +372,7 @@ describe('SAMLAuthenticationProvider', () => {
           refresh_token: 'some-refresh-token',
           realm: 'test-realm',
           authentication: mockUser,
+          in_response_to: mockSamlResponses.set25.requestId,
         });
 
         const requestIdMap: Record<string, { redirectURL: string }> = {};
@@ -1751,6 +1756,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'essu_dev_some-refresh-token',
         realm: ELASTIC_CLOUD_SSO_REALM_NAME,
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
       mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
         type: 'uiamAccessToken',
@@ -1989,6 +1995,7 @@ describe('SAMLAuthenticationProvider', () => {
         refresh_token: 'x_essu_dev_some-refresh-token',
         realm: ELASTIC_CLOUD_SSO_REALM_NAME,
         authentication: mockUser,
+        in_response_to: mockSAMLSet1.requestId,
       });
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
