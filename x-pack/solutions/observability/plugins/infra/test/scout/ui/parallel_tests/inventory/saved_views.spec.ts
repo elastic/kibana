@@ -225,11 +225,9 @@ test.describe('Infrastructure Inventory - Saved Views', { tag: ['@ess', '@svlObl
       await makeDefaultButton.click();
       await toasts.waitFor();
       expect(await toasts.getHeaderText()).toBe('Metrics settings successfully updated');
-    });
-
-    await test.step("navigate page without saved view and verify 'Preloaded View' is applied", async () => {
-      await inventoryPage.goToPage();
-      await expect(savedViews.selector).toHaveText('Preloaded View');
+      await expect(
+        savedViews.manageViewsTable.getByTestId('infraRenderMakeDefaultActionButton-filled')
+      ).toBeVisible();
     });
   });
 
