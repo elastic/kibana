@@ -106,7 +106,7 @@ export class StorageService implements StorageServiceContract {
     docsCount: number;
     response: BulkResponse;
   }): string {
-    const failedItemCount = response.items.filter((item) => item.index?.error).length;
+    const failedItemCount = response.items.filter((item) => item.create?.error).length;
 
     if (!response.errors) {
       return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;

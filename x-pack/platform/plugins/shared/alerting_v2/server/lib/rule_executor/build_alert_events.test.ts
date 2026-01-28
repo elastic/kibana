@@ -36,12 +36,16 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     };
 
     const esqlResponse: ESQLSearchResponse = {
-      columns: [{ name: 'host.name' }, { name: 'region' }, { name: 'count' }],
+      columns: [
+        { name: 'host.name', type: 'keyword' },
+        { name: 'region', type: 'keyword' },
+        { name: 'count', type: 'number' },
+      ],
       values: [
         ['host-a', 'us-east', 10],
         ['host-b', 'eu-west', 5],
       ],
-    } as unknown as ESQLSearchResponse;
+    };
 
     const docs = buildAlertEventsFromEsqlResponse({
       ruleId: 'rule-123',
