@@ -138,7 +138,7 @@ export async function startHistoricalDataUpload({
           })
         );
 
-  await Promise.race(workerServices);
+  await Promise.all(workerServices);
 
   await teardown();
 }
