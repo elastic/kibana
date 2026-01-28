@@ -59,8 +59,9 @@ export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
             data-test-subj="ESQLEditor-queryStats-totalDocumentsQueries"
           >
             <p>
+              {queryStats.durationInMs && '| '}
               {i18n.translate('esqlEditor.queryStats.documentsQueries', {
-                defaultMessage: '| {count} documents queried',
+                defaultMessage: '{count} documents queried',
                 values: {
                   count: formatDocumentCount(queryStats.totalDocumentsQueried ?? 0),
                 },

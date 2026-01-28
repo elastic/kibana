@@ -15,6 +15,7 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -210,39 +211,8 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
-  describe('data errors display', () => {
-    test('errors are displayed as Monaco decorations', async () => {
-      mockValidate.mockResolvedValue({
-        errors: [{ message: 'Data error example', severity: 'error' }],
-        warnings: [],
-      });
-      const { container } = renderWithI18n(renderESQLEditorComponent(props));
-      await waitFor(() => {
-        const errorDecoration = container.querySelector('.esql-error-glyph');
-        expect(errorDecoration).toBeInTheDocument();
-      });
-    });
-
-    test('errors are not displayed with data errors disabled', async () => {
-      const newProps = {
-        ...props,
-        dataErrorsControl: { enabled: false, onChange: jest.fn() },
-      };
-      mockValidate.mockResolvedValue({
-        errors: [
-          { message: 'Data error example', severity: 'error', code: 'unknownColumn' },
-          { message: 'Data error example', severity: 'error', code: 'unknownIndex' },
-        ],
-        warnings: [],
-      });
-      const { container } = renderWithI18n(renderESQLEditorComponent(newProps));
-      await waitFor(() => {
-        const errorDecoration = container.querySelector('.esql-error-glyph');
-        expect(errorDecoration).not.toBeInTheDocument();
-      });
-    });
-
-    test('errors are displayed when data errors enabled', async () => {
+  describe('data errors switch', () => {
+    test('shown with errors enabled', async () => {
       const newProps = {
         ...props,
         dataErrorsControl: { enabled: true, onChange: jest.fn() },
@@ -254,21 +224,67 @@ describe('ESQLEditor', () => {
         ],
         warnings: [],
       });
-      const { container } = renderWithI18n(renderESQLEditorComponent(newProps));
+      const { queryByTestId, queryAllByText } = renderWithI18n(renderESQLEditorComponent(newProps));
       await waitFor(() => {
-        const errorDecoration = container.querySelector('.esql-error-glyph');
-        expect(errorDecoration).toBeInTheDocument();
+        expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
       });
+      act(() => {
+        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
+      });
+      expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).toBeInTheDocument();
+
+      expect(queryAllByText('Data error example')).toHaveLength(2);
+    });
+
+    test('shown with errors disabled', async () => {
+      const newProps = {
+        ...props,
+        dataErrorsControl: { enabled: false, onChange: jest.fn() },
+      };
+      mockValidate.mockResolvedValue({
+        errors: [
+          { message: 'Data error example', severity: 'error', code: 'unknownColumn' },
+          { message: 'Data error example', severity: 'error', code: 'unknownIndex' },
+        ],
+        warnings: [],
+      });
+      const { queryByTestId, queryAllByText } = renderWithI18n(renderESQLEditorComponent(newProps));
+      await waitFor(() => {
+        expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
+      });
+      act(() => {
+        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
+      });
+      expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).toBeInTheDocument();
+
+      expect(queryAllByText('Data error example')).toHaveLength(0);
+    });
+
+    test('not shown when prop not set', async () => {
+      mockValidate.mockResolvedValue({
+        errors: [{ message: 'Data error example', severity: 'error' }],
+        warnings: [],
+      });
+      const { queryByTestId } = renderWithI18n(renderESQLEditorComponent(props));
+      await waitFor(() => {
+        expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
+      });
+      act(() => {
+        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
+      });
+      expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
     });
   });
 
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {
+    const user = userEvent.setup();
+
     mockValidate.mockResolvedValue({
       errors: [],
       warnings: [],
     });
 
-    const { container } = renderWithI18n(
+    renderWithI18n(
       renderESQLEditorComponent({
         ...props,
         warning: 'Client warning example',
@@ -277,8 +293,13 @@ describe('ESQLEditor', () => {
     );
 
     await waitFor(() => {
-      const warningDecoration = container.querySelector('.esql-warning-glyph');
-      expect(warningDecoration).toBeInTheDocument();
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('1 warning'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Client warning example')).toBeInTheDocument();
     });
   });
 

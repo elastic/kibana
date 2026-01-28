@@ -1062,10 +1062,9 @@ const ESQLEditorInternal = function ESQLEditor({
       lightbulb: {
         enabled: false,
       },
-      lineDecorationsWidth: 15,
+      lineDecorationsWidth: 20,
       lineNumbers: 'on',
-      lineNumbersMinChars: 1,
-      glyphMargin: true,
+      lineNumbersMinChars: 3,
       minimap: { enabled: false },
       overviewRulerLanes: 0,
       overviewRulerBorder: false,
