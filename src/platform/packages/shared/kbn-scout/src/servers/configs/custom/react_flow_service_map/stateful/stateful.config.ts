@@ -23,7 +23,7 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.apm.featureFlags.serviceMapUseReactFlow=true',
+      '--feature_flags.overrides.apm.serviceMapUseReactFlow=true',
     ],
   },
 };
