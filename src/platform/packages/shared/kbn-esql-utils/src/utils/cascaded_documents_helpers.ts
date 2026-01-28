@@ -24,12 +24,8 @@ import {
   isBinaryExpression,
   Walker,
 } from '@kbn/esql-language';
-import {
-  getFieldTerminals,
-  getUsedFields,
-  type StatsCommandSummary,
-  type StatsFieldSummary,
-} from '@kbn/esql-language/src/ast/mutate/commands/stats';
+import type { Terminal } from '@kbn/esql-language/src/ast/mutate/commands/stats';
+import { getFieldTerminals, getUsedFields } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
@@ -73,6 +69,12 @@ export type FieldValue<T extends SupportedFieldTypes> =
   | Parameters<(typeof Builder.expression.literal)[T]>[0]
   | unknown;
 
+export interface StatsCommandSummary {
+  command: ESQLCommand;
+  aggregates: Record<string, FieldSummary>;
+  grouping: Record<string, FieldSummary>;
+}
+
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
 
@@ -103,7 +105,9 @@ const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields
   );
 };
 
-export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery) {
+export function getStatsCommandToOperateOn(
+  esqlQuery: EsqlQuery
+): (StatsCommandSummary & { index: number }) | null {
   if (esqlQuery.errors.length) {
     return null;
   }
@@ -117,13 +121,14 @@ export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery) {
   // accounting for the possibility of multiple stats commands in the query,
   // we always want to operate on the last stats command
   const lastStatsCommandIndex = statsCommands.length - 1;
-  const command = statsCommands[lastStatsCommandIndex];
 
   const summarizedStatsCommand = getStatsCommandAtIndexSummary(esqlQuery, lastStatsCommandIndex);
+  if (!summarizedStatsCommand) {
+    return null;
+  }
 
   return {
     ...summarizedStatsCommand,
-    command,
     index: lastStatsCommandIndex,
   };
 }
@@ -148,7 +153,10 @@ function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
 /**
  * Returns the summary of the stats command at the given command index in the esql query
  */
-function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
+function getStatsCommandAtIndexSummary(
+  esqlQuery: EsqlQuery,
+  commandIndex: number
+): StatsCommandSummary | null {
   const declarationCommand = mutate.commands.stats.byIndex(esqlQuery.ast, commandIndex);
 
   if (!declarationCommand) {
@@ -180,7 +188,7 @@ function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: numbe
 
 export function getFieldParamDefinition(
   fieldName: string,
-  fieldTerminals: StatsFieldSummary['terminals'],
+  fieldTerminals: Array<Terminal>,
   esqlVariables: ESQLControlVariable[] | undefined
 ) {
   const fieldParamDef = fieldTerminals.find(
@@ -199,8 +207,8 @@ export function getFieldParamDefinition(
 }
 
 export function getStatsGroupFieldType<
-  T extends StatsFieldSummary | undefined,
-  R = T extends StatsFieldSummary ? string : undefined
+  T extends FieldSummary | undefined,
+  R = T extends FieldSummary ? string : undefined
 >(groupByFields: T): R {
   if (!groupByFields) {
     return undefined as R;
@@ -522,7 +530,7 @@ export const constructCascadeQuery = ({
 function handleStatsByColumnLeafOperation(
   editorQuery: EsqlQuery,
   operatingStatsCommandIndex: number,
-  columnNode: StatsFieldSummary,
+  columnNode: FieldSummary,
   dataViewFields: DataView['fields'],
   esqlVariables: ESQLControlVariable[] | undefined,
   operationValue: unknown
@@ -619,7 +627,7 @@ function handleStatsByColumnLeafOperation(
 function handleStatsByCategorizeLeafOperation(
   editorQuery: EsqlQuery,
   operatingStatsCommandIndex: number,
-  categorizeCommandNode: StatsFieldSummary,
+  categorizeCommandNode: FieldSummary,
   esqlVariables: ESQLControlVariable[] | undefined,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
