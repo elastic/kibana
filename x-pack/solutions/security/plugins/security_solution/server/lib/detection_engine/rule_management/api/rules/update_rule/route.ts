@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../response_actions_validations';
+import { validateRuleResponseActions } from '../../../utils/rule_response_actions_validators';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -52,12 +52,6 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
-          await validateRuleResponseActions({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: ctx.securitySolution.getEndpointService(),
-            spaceId: ctx.securitySolution.getSpaceId(),
-          });
           const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
@@ -89,6 +83,12 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             request.body,
             existingRule
           );
+
+          await validateRuleResponseActions({
+            ruleResponseActions: request.body.response_actions,
+            endpointService: ctx.securitySolution.getEndpointService(),
+            spaceId: ctx.securitySolution.getSpaceId(),
+          });
 
           const updatedRule = await detectionRulesClient.updateRule({
             ruleUpdate: request.body,

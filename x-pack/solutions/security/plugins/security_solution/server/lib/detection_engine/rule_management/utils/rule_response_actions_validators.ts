@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { stringify } from '../../../../../endpoint/utils/stringify';
-import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
-import type { EndpointScript } from '../../../../../../common/endpoint/types';
-import type { BaseOptionalFields } from '../../../../../../common/api/detection_engine';
-import { ResponseActionTypesEnum } from '../../../../../../common/api/detection_engine';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import { EndpointHttpError } from '../../../../../endpoint/errors';
+import type { BaseOptionalFields } from '../../../../../common/api/detection_engine';
+import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { stringify } from '../../../../endpoint/utils/stringify';
+import { EndpointHttpError } from '../../../../endpoint/errors';
+import type { EndpointScript } from '../../../../../common/endpoint/types';
+import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 
 interface ValidateRuleResponseActionsOptions {
   spaceId: string;

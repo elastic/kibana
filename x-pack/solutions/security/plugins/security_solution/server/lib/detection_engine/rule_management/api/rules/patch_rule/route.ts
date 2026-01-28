@@ -13,7 +13,7 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
 } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../response_actions_validations';
+import { validateRuleResponseActions } from '../../../utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -64,12 +64,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           const params = request.body;
           const securitySolutionCtx = await context.securitySolution;
 
-          await validateRuleResponseActions({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: securitySolutionCtx.getEndpointService(),
-            spaceId: securitySolutionCtx.getSpaceId(),
-          });
-
           const rulesClient = await (await context.alerting).getRulesClient();
           const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
@@ -86,6 +80,13 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
               statusCode: error.statusCode,
             });
           }
+
+          await validateRuleResponseActions({
+            ruleResponseActions: request.body.response_actions,
+            endpointService: securitySolutionCtx.getEndpointService(),
+            spaceId: securitySolutionCtx.getSpaceId(),
+          });
+          // FIXME:PT need to add Authz validations for Endpoint response actions
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({
