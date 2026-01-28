@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { esql } from '@kbn/esql-language';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
-import { omit } from 'lodash';
+import { groupBy, omit } from 'lodash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import type {
@@ -65,14 +65,18 @@ export class AlertActionsClient {
       this.fetchLastAlertEventRecordsForActions(actions),
     ]);
 
+    const recordsByGroupHash = groupBy(records, 'group_hash');
     const docs = actions
       .map((action) => {
-        // we might want to optimize this lookup with a Map if we expect large bulk sizes
-        const matchingAlertEventRecord = records.find(
-          (record) =>
-            record.group_hash === action.group_hash &&
-            ('episode_id' in action ? record.episode_id === action.episode_id : true)
-        );
+        const groupRecords = recordsByGroupHash[action.group_hash];
+        if (!groupRecords) {
+          return;
+        }
+
+        const matchingAlertEventRecord =
+          'episode_id' in action
+            ? groupRecords.find((record) => record.episode_id === action.episode_id)
+            : groupRecords[0];
 
         if (matchingAlertEventRecord) {
           return this.buildAlertActionDocument({
