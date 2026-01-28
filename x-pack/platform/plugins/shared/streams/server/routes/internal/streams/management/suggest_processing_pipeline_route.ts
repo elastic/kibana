@@ -6,12 +6,16 @@
  */
 
 import { z } from '@kbn/zod';
-import { suggestProcessingPipeline } from '@kbn/streams-ai';
+import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
+import {
+  type FlattenRecord,
+  flattenRecord,
+  getStreamTypeFromDefinition,
+} from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -97,7 +101,7 @@ export const suggestIngestPipelineSchema = z.object({
 type SuggestProcessingPipelineResponse = Observable<
   ServerSentEventBase<
     'suggested_processing_pipeline',
-    { pipeline: Awaited<ReturnType<typeof suggestProcessingPipeline>> }
+    { pipeline: SuggestProcessingPipelineResult['pipeline'] }
   >
 >;
 
@@ -118,6 +122,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     logger.debug('[suggest_pipeline] Request received');
     logger.debug(
@@ -229,11 +234,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           }
         }
 
-        return await suggestProcessingPipeline({
+        const maxSteps = 6; // Limit reasoning steps for latency and token cost
+        const startTime = Date.now();
+
+        const result = await suggestProcessingPipeline({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 6, // Limit reasoning steps for latency and token cost
+          maxSteps,
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
@@ -249,11 +257,25 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               fieldsMetadataClient,
             }),
         });
+
+        const durationMs = Date.now() - startTime;
+
+        // Report telemetry for pipeline suggestion
+        telemetry.trackProcessingPipelineSuggested({
+          duration_ms: durationMs,
+          steps_used: result.metadata.stepsUsed,
+          max_steps: result.metadata.maxSteps,
+          success: result.pipeline !== null,
+          stream_name: stream.name,
+          stream_type: getStreamTypeFromDefinition(stream),
+        });
+
+        return result;
       })()
     ).pipe(
-      map((pipeline) => ({
+      map((result) => ({
         type: 'suggested_processing_pipeline' as const,
-        pipeline,
+        pipeline: result.pipeline,
       })),
       catchError((error) => {
         if (isNoLLMSuggestionsError(error)) {
