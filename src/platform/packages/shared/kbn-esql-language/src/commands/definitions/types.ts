@@ -380,10 +380,6 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  promqlMissingParensInAlias: {
-    message: string;
-    type: {};
-  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };

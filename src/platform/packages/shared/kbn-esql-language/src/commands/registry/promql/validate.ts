@@ -37,8 +37,6 @@ const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
 const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
 // Strips the leading PROMQL keyword from the raw command text.
 const PROMQL_LEADING_KEYWORD_REGEX = new RegExp(`^\\s*${PROMQL_KEYWORD}\\s*`, 'i');
-// Detects a named query assignment: name = <rhs>.
-const PROMQL_QUERY_ASSIGNMENT_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(.+)$`);
 // Extracts "param = value" from the query field when the last param is mis-parsed.
 const PROMQL_QUERY_PARAM_VALUE_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(\\S*)`);
 
@@ -183,31 +181,6 @@ export const validate = (
     });
   }
 
-  // Check parens requirement: col0=(query) not col0=query
-  const queryToCheckForParens = tailQueryText;
-  const assignmentMatch = queryToCheckForParens
-    ? queryToCheckForParens.match(PROMQL_QUERY_ASSIGNMENT_REGEX)
-    : null;
-
-  if (assignmentMatch) {
-    const [, rawName, rawRhs] = assignmentMatch;
-    const name = rawName.toLowerCase();
-
-    if (!isPromqlParamName(name)) {
-      const rhsText = rawRhs.trim();
-
-      if (!(rhsText.startsWith('(') && rhsText.endsWith(')'))) {
-        messages.push({
-          ...getMessageFromId({
-            messageId: 'promqlMissingParensInAlias',
-            values: {},
-            locations: command.query?.location ?? command.location,
-          }),
-        });
-      }
-    }
-  }
-
   return messages;
 };
 
@@ -316,7 +289,8 @@ function getPromqlParamsMap(command: ESQLAstPromqlCommand) {
 
 /*
  * Text-based extraction of the query portion from command.text.
- * Used for the parens check and when getPromqlQueryText can't extract from AST.
+ * Strips the PROMQL keyword and known params, returning whatever remains.
+ * Needed when getPromqlQueryText can't extract from AST (e.g. assignment case).
  *
  * Example: "PROMQL step=5m col0=(rate(x[5m]))" → "col0=(rate(x[5m]))"
  */

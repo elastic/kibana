@@ -79,12 +79,6 @@ describe('PROMQL Validation', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend', ['[PROMQL] Missing query']);
     });
 
-    test('named query without parens', () => {
-      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend col0=rate(x[5m])', [
-        '[PROMQL] Named query must use parentheses: name=(query)',
-      ]);
-    });
-
     test('named query with parens', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend col0=(rate(x[5m]))', []);
     });

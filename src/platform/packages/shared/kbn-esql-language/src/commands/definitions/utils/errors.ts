@@ -304,13 +304,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlMissingParensInAlias':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParensInAlias', {
-          defaultMessage: '[PROMQL] Named query must use parentheses: name=(query)',
-        }),
-        type: 'error',
-      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(
