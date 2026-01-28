@@ -10,6 +10,8 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import {
+  CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT_PRIVILEGES,
+  INVESTIGATION_GUIDE_UI_EDIT_PRIVILEGES,
   RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
@@ -126,15 +128,23 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   ...(hasCapabilities(capabilities, RULES_UI_EDIT_PRIVILEGE)
     ? [
         {
-          path: '/rules/id/:detailName/edit',
-          main: EditRulePage,
-          exact: true,
-        },
-        {
           path: '/rules/create',
           main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
             omitSpyRoute: true,
           }),
+          exact: true,
+        },
+      ]
+    : []),
+  ...(hasCapabilities(capabilities, [
+    RULES_UI_EDIT_PRIVILEGE,
+    [RULES_UI_READ_PRIVILEGE, INVESTIGATION_GUIDE_UI_EDIT_PRIVILEGES],
+    [RULES_UI_READ_PRIVILEGE, CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT_PRIVILEGES],
+  ])
+    ? [
+        {
+          path: '/rules/id/:detailName/edit',
+          main: EditRulePage,
           exact: true,
         },
       ]

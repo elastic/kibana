@@ -8,6 +8,8 @@
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { RulesSubFeatureId } from '../../product_features_keys';
 import { getExceptionsSubFeature } from '../kibana_sub_features';
+import { RULES_FEATURE_ID_V4 } from '../../constants';
+import { addAllSubFeatureReplacements } from '../../utils';
 
 export const getRulesBaseKibanaSubFeatureIdsV3 = (): RulesSubFeatureId[] => [
   RulesSubFeatureId.exceptions,
@@ -18,7 +20,9 @@ export const getRulesBaseKibanaSubFeatureIdsV3 = (): RulesSubFeatureId[] => [
  * The order of the subFeatures is the order they will be displayed
  */
 export const getRulesSubFeaturesMapV3 = () => {
-  return new Map<RulesSubFeatureId, SubFeatureConfig>([
+  const subfeaturesList = new Map<RulesSubFeatureId, SubFeatureConfig>([
     [RulesSubFeatureId.exceptions, getExceptionsSubFeature()],
   ]);
+
+  return addAllSubFeatureReplacements(subfeaturesList, [{ feature: RULES_FEATURE_ID_V4 }]);
 };

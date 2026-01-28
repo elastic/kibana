@@ -21,6 +21,7 @@ import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -71,7 +72,6 @@ export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<
 type GapSummaryEntry = GetGapsSummaryByRuleIdsResponseBody['data'][number];
 
 interface ColumnsProps {
-  hasCRUDPermissions: boolean;
   isLoadingJobs: boolean;
   mlJobs: SecurityJob[];
   startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
@@ -85,13 +85,11 @@ interface ActionColumnsProps {
 
 const loadingActionsSet = new Set(['disable', 'enable', 'edit', 'delete', 'run', 'fill_gaps']);
 
-export const useEnabledColumn = ({
-  hasCRUDPermissions,
-  startMlJobs,
-}: ColumnsProps): TableColumn => {
+export const useEnabledColumn = ({ startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
+  const canEnableDisableRules = useUserPrivileges().rulesPrivileges.enableDisable.edit;
 
   const loadingIds = useMemo(
     () => (loadingActionsSet.has(loadingRulesAction ?? '') ? loadingRuleIds : []),
@@ -109,7 +107,7 @@ export const useEnabledColumn = ({
             rule,
             hasMlPermissions,
             hasActionsPrivileges,
-            hasCRUDPermissions
+            canEnableDisableRules
           )}
         >
           <RuleSwitch
@@ -118,7 +116,7 @@ export const useEnabledColumn = ({
             startMlJobsIfNeeded={() => startMlJobs(getMachineLearningJobId(rule))}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-              !hasCRUDPermissions ||
+              !canEnableDisableRules ||
               (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
@@ -129,7 +127,7 @@ export const useEnabledColumn = ({
       width: '95px',
       sortable: true,
     }),
-    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
+    [hasMlPermissions, hasActionsPrivileges, canEnableDisableRules, loadingIds, startMlJobs]
   );
 };
 
@@ -324,7 +322,6 @@ const useActionsColumn = ({
 export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
 
 export const useRulesColumns = ({
-  hasCRUDPermissions,
   isLoadingJobs,
   mlJobs,
   startMlJobs,
@@ -338,9 +335,9 @@ export const useRulesColumns = ({
     confirmDeletion,
   });
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -402,14 +399,14 @@ export const useRulesColumns = ({
       },
       snoozeColumn,
       enabledColumn,
-      ...(hasCRUDPermissions ? [actionsColumn] : []),
+      ...(canEditRules ? [actionsColumn] : []),
     ],
     [
       showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
       enabledColumn,
-      hasCRUDPermissions,
+      canEditRules,
       actionsColumn,
     ]
   );
@@ -599,7 +596,6 @@ export const TOTAL_UNFILLED_DURATION_COLUMN = {
 };
 
 export const useMonitoringColumns = ({
-  hasCRUDPermissions,
   isLoadingJobs,
   mlJobs,
   startMlJobs,
@@ -613,9 +609,9 @@ export const useMonitoringColumns = ({
     confirmDeletion,
   });
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -646,14 +642,14 @@ export const useMonitoringColumns = ({
       executionStatusColumn,
       LAST_EXECUTION_COLUMN,
       enabledColumn,
-      ...(hasCRUDPermissions ? [actionsColumn] : []),
+      ...(canEditRules ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
       gapDurationColumn,
-      hasCRUDPermissions,
+      canEditRules,
       showRelatedIntegrations,
       gapStatusColumn,
     ]
