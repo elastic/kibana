@@ -7,11 +7,11 @@
 
 import { useReducer } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 
 const CLOSED = 'closed' as const;
 const OPEN = 'open' as const;
+
 type ToggleReducerState = typeof CLOSED | typeof OPEN;
 
 export interface ToggleReducerAction {
@@ -20,7 +20,11 @@ export interface ToggleReducerAction {
    */
   storage: Storage | undefined;
   /**
-   * Title to save expanded value in local storage
+   * storageKey to save value in specific flyout
+   */
+  localStorageKey: string | undefined;
+  /**
+   * title to save expanded value in local storage section
    */
   title: string | undefined;
 }
@@ -31,10 +35,12 @@ export interface ToggleReducerAction {
  * The object stored is a map of section names to expanded boolean values.
  */
 export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAction) => {
-  const { storage, title } = action;
-  if (storage && title) {
-    const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
-    storage.set(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
+  const { storage, localStorageKey, title } = action;
+
+  if (storage && localStorageKey && title) {
+    const localStorage = (storage.get(localStorageKey) ?? {}) as Record<string, boolean>;
+
+    storage.set(localStorageKey, {
       ...localStorage,
       [title]: state !== OPEN,
     });
@@ -55,7 +61,7 @@ export interface UseAccordionStateValue {
   /**
    * Handler function for cycling between the states
    */
-  toggle: (title: string | undefined) => void;
+  toggle: (args: { localStorageKey?: string; title?: string }) => void;
 }
 
 /**
@@ -69,13 +75,9 @@ export const useAccordionState = (expandedInitially: boolean): UseAccordionState
   const [state, toggleState] = useReducer(toggleReducer, initialState);
   const renderContent = state === OPEN;
 
-  const toggle = (title: string | undefined) => {
-    toggleState({ storage, title });
+  const toggle = ({ localStorageKey, title }: { localStorageKey?: string; title?: string }) => {
+    toggleState({ storage, localStorageKey, title });
   };
 
-  return {
-    renderContent,
-    state,
-    toggle,
-  };
+  return { renderContent, state, toggle };
 };
