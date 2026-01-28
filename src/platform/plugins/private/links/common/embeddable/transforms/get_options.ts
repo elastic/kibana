@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/common';
 import type { DashboardLink, ExternalLink, LinkOptions } from '../../../server';
 import type { LinkType } from '../../content_management';
 import { DASHBOARD_LINK_TYPE } from '../../content_management';
