@@ -39,7 +39,7 @@ import { FloatingActions } from './floating_actions';
 
 export const ControlPanel = ({
   parentApi,
-  control,
+  control: { uid, grow, width, type },
   setControlPanelRef,
 }: {
   parentApi: ControlsRendererParentApi;
@@ -51,7 +51,7 @@ export const ControlPanel = ({
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: control.uid,
+    id: uid,
   });
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
@@ -91,9 +91,9 @@ export const ControlPanel = ({
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {
       setNodeRef(ref);
-      setControlPanelRef(control.uid, ref);
+      setControlPanelRef(uid, ref);
     },
-    [control.uid, setNodeRef, setControlPanelRef]
+    [uid, setNodeRef, setControlPanelRef]
   );
 
   const onApiAvailable = useCallback(
@@ -113,15 +113,15 @@ export const ControlPanel = ({
         transition,
         transform: CSS.Translate.toString(transform),
       }}
-      grow={Boolean(control.grow)}
+      grow={Boolean(grow)}
       data-test-subj="control-frame"
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-      className={`controlFrameWrapper--${control.width}`}
+      className={`controlFrameWrapper--${width}`}
     >
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
-        uuid={control.uid}
+        uuid={uid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
@@ -129,7 +129,7 @@ export const ControlPanel = ({
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          id={`control-title-${control.uid}`}
+          id={`control-title-${uid}`}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
             values: { controlTitle: panelTitle },
@@ -139,7 +139,7 @@ export const ControlPanel = ({
             fullWidth
             className={classNames('controlFrame__formControlLayout', {
               'controlFrame__formControlLayout--edit': isEditable,
-              type: control.type,
+              type,
             })}
             css={styles.formControl}
             prepend={
@@ -170,9 +170,9 @@ export const ControlPanel = ({
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
-              key={control.uid}
-              maybeId={control.uid}
-              type={control.type}
+              key={uid}
+              maybeId={uid}
+              type={type}
               getParentApi={() => parentApi}
               onApiAvailable={onApiAvailable}
               hidePanelChrome

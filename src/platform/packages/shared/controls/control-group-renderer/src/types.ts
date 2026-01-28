@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
+import type { ControlsLayout } from '@kbn/controls-renderer';
 import type {
   DataControlState,
   LegacyIgnoreParentSettings,

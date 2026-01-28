@@ -35,7 +35,7 @@ export interface ControlsLayout {
 
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
-  'children$' | 'addNewPanel' | 'replacePanel'
+  'children$' | 'addNewPanel' | 'replacePanel' | 'removePanel'
 > &
   Partial<PublishesUnifiedSearch> &
   PublishesViewMode &

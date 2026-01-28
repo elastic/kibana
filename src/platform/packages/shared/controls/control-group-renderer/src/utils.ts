@@ -7,12 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import {
+  apiHasSerializedChildState,
+  apiIsPresentationContainer,
+} from '@kbn/presentation-containers';
+import {
+  apiAppliesFilters,
+  apiAppliesTimeslice,
+  apiHasParentApi,
+  apiPublishesViewMode,
+} from '@kbn/presentation-publishing';
 import type { ControlGroupRendererApi, HasEditorConfig } from './types';
 
 export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorConfig => {
   return typeof (parentApi as HasEditorConfig).getEditorConfig === 'function';
 };
 
+const isControlGroupParentApi = (api: unknown): api is ControlsRendererParentApi => {
+  return (
+    typeof (api as ControlsRendererParentApi).registerChildApi === 'function' &&
+    apiIsPresentationContainer(api) &&
+    apiPublishesViewMode(api) &&
+    apiHasSerializedChildState(api)
+  );
+};
+
 export const isControlGroupRendererApi = (api: unknown): api is ControlGroupRendererApi => {
-  return Boolean(typeof (api as ControlGroupRendererApi).getControls === 'function');
+  // check for all non-deprecated pieces of the control group renderer API
+  return (
+    typeof (api as ControlGroupRendererApi).getControls === 'function' &&
+    typeof (api as ControlGroupRendererApi).openAddDataControlFlyout === 'function' &&
+    apiHasEditorConfig(api) &&
+    apiAppliesFilters(api) &&
+    apiAppliesTimeslice(api) &&
+    apiPublishesESQLVariables(api) &&
+    apiHasParentApi(api) &&
+    isControlGroupParentApi(api.parentApi)
+  );
 };

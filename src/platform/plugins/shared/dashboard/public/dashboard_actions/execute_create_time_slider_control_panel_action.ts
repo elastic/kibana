@@ -37,15 +37,14 @@ export async function isTimeSliderControlCreationCompatible(
 ): Promise<boolean> {
   try {
     const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_TIME_SLIDER);
-    const hasTimeSliderControl = () =>
-      Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
-        (control) => control.type === TIME_SLIDER_CONTROL
-      );
     return await createControlPanelAction.isCompatible({
       embeddable: {
         ...dashboardApi,
         ...(dashboardApi.layout$ && {
-          hasTimeSliderControl,
+          hasTimeSliderControl: () =>
+            Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
+              (control) => control.type === TIME_SLIDER_CONTROL
+            ),
           layoutChanged$: dashboardApi.layout$.pipe(map(() => undefined)),
         }),
       },

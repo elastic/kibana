@@ -38,7 +38,10 @@ export type PinnableControlParentApi = PresentationContainer &
 // This check needs to be a separate function in order for typescript to type the parentApi correctly
 const apiIsPinnableControlParentApi = (
   parentApi: unknown | null
-): parentApi is PinnableControlParentApi => Boolean(apiCanPinPanels(parentApi));
+): parentApi is PinnableControlParentApi =>
+  apiCanPinPanels(parentApi) &&
+  typeof (parentApi as PinnableControlParentApi).getLayout === 'function' &&
+  typeof (parentApi as PinnableControlParentApi).setLayout === 'function';
 
 export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
