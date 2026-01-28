@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
@@ -223,14 +223,23 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 
 export const MetricPanels = () => {
   const { services } = useKibana();
-  const isWorkflowsUiEnabled = services.uiSettings.get<boolean>(
-    WORKFLOWS_UI_SETTING_ENABLED_ID,
-    false
-  );
+  const { chrome, uiSettings } = services;
 
-  const panels = isWorkflowsUiEnabled
-    ? METRIC_PANEL_ITEMS
-    : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
+  const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, false);
+
+  const panels = useMemo(() => {
+    const capabilityChecks: Record<MetricPanelType, boolean> = {
+      discover: chrome.navLinks.get('discover') !== undefined,
+      dashboards: chrome.navLinks.get('dashboards') !== undefined,
+      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined,
+      workflows: isWorkflowsUiEnabled && chrome.navLinks.get('workflows') !== undefined,
+      machineLearning:
+        chrome.navLinks.get('ml:overview') !== undefined || chrome.navLinks.get('ml') !== undefined,
+      dataManagement: chrome.navLinks.get('management:index_management') !== undefined,
+    };
+
+    return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
+  }, [chrome.navLinks, isWorkflowsUiEnabled]);
 
   return (
     <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
