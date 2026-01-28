@@ -35,9 +35,9 @@ describe('createHandler', () => {
       const config: EsqlToolConfig = {
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
+          status: { type: 'string', description: 'User status', optional: true },
           name: {
-            type: 'text',
+            type: 'string',
             description: 'User name',
             optional: true,
             defaultValue: 'John Doe',
@@ -61,9 +61,9 @@ describe('createHandler', () => {
       const config: EsqlToolConfig = {
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
+          status: { type: 'string', description: 'User status', optional: true },
           name: {
-            type: 'text',
+            type: 'string',
             description: 'User name',
             optional: true,
             defaultValue: 'John Doe',
@@ -87,8 +87,8 @@ describe('createHandler', () => {
       const config: EsqlToolConfig = {
         query: 'FROM users | WHERE status == ?status',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
-          name: { type: 'text', description: 'User name', optional: true }, // No default
+          status: { type: 'string', description: 'User status', optional: true },
+          name: { type: 'string', description: 'User name', optional: true }, // No default
         },
       };
 
@@ -109,13 +109,13 @@ describe('createHandler', () => {
 describe('resolveToolParameters', () => {
   const mockParamDefinitions: EsqlToolConfig['params'] = {
     status: {
-      type: 'keyword',
+      type: 'string',
       description: 'User status',
       optional: true,
       defaultValue: 'active',
     },
     name: {
-      type: 'text',
+      type: 'string',
       description: 'User name',
       optional: true,
     },
@@ -149,5 +149,27 @@ describe('resolveToolParameters', () => {
       status: 'inactive',
       name: null, // no default, so null
     });
+  });
+
+  it('should preserve falsy provided values (0, false, empty string)', () => {
+    const paramDefinitions: EsqlToolConfig['params'] = {
+      count: { type: 'integer', description: 'Count', optional: true, defaultValue: 5 },
+      enabled: { type: 'boolean', description: 'Enabled', optional: true, defaultValue: true },
+      name: { type: 'string', description: 'Name', optional: true, defaultValue: 'default' },
+    };
+
+    const providedParams = { count: 0, enabled: false, name: '' };
+    const result = resolveToolParameters(paramDefinitions, providedParams);
+
+    expect(result).toEqual({ count: 0, enabled: false, name: '' });
+  });
+
+  it('should use null for missing required parameters', () => {
+    const paramDefinitions: EsqlToolConfig['params'] = {
+      requiredParam: { type: 'string', description: 'Required param' },
+    };
+
+    const result = resolveToolParameters(paramDefinitions, {});
+    expect(result).toEqual({ requiredParam: null });
   });
 });
