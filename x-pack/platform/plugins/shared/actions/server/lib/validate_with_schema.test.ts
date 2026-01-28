@@ -325,7 +325,7 @@ test('should throw an error when custom validators fail', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type secrets: test error"`);
 });
 
-describe('validateSecretes', () => {
+describe('validateSecrets', () => {
   test('should not run validation when secrets are undefined', () => {
     const schemaValidator = z3.object({ foo: z3.string() }).strict();
     const actionType: ActionType = {
