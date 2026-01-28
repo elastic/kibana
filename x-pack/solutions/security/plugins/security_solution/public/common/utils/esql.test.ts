@@ -36,7 +36,6 @@ describe('buildESQLWithKQLQuery', () => {
     expect(result).toContain('WHERE KQL("host.name: \\"test\\"")');
   });
 });
-
 describe('esqlResponseToRecords', () => {
   it('returns an empty array if the response is undefined', () => {
     const result = esqlResponseToRecords(undefined);
