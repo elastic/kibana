@@ -68,7 +68,7 @@ export const visorStyles = (
       marginLeft: euiTheme.size.xs,
     },
     closeButton: {
-      borderRadius: `calc(${euiTheme.size.s} + 1px)`,
+      borderRadius: euiTheme.size.s,
       border: 'none',
     },
     separator: {
