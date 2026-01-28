@@ -126,41 +126,52 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._changes.ownFields =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.wired.fields,
-        startingStateStreamDefinition.ingest.wired.fields
-      );
+    // For existing streams, check if the value changed
+    // For new streams, only mark as changed if the value is non-empty/meaningful
+    const hasFields = Object.keys(this._definition.ingest.wired.fields || {}).length > 0;
+    this._changes.ownFields = startingStateStreamDefinition
+      ? !_.isEqual(
+          this._definition.ingest.wired.fields,
+          startingStateStreamDefinition.ingest.wired.fields
+        )
+      : hasFields;
 
-    this._changes.routing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.wired.routing,
-        startingStateStreamDefinition.ingest.wired.routing
-      );
+    const hasRouting = (this._definition.ingest.wired.routing || []).length > 0;
+    this._changes.routing = startingStateStreamDefinition
+      ? !_.isEqual(
+          this._definition.ingest.wired.routing,
+          startingStateStreamDefinition.ingest.wired.routing
+        )
+      : hasRouting;
 
-    this._changes.failure_store =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.failure_store,
-        startingStateStreamDefinition.ingest.failure_store
-      );
+    const hasNonInheritFailureStore = !isInheritFailureStore(this._definition.ingest.failure_store);
+    this._changes.failure_store = startingStateStreamDefinition
+      ? !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition.ingest.failure_store
+        )
+      : hasNonInheritFailureStore;
 
-    this._changes.processing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        _.omit(this._definition.ingest.processing, ['updated_at']),
-        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
-      );
+    const hasProcessingSteps = (this._definition.ingest.processing.steps || []).length > 0;
+    this._changes.processing = startingStateStreamDefinition
+      ? !_.isEqual(
+          _.omit(this._definition.ingest.processing, ['updated_at']),
+          _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
+        )
+      : hasProcessingSteps;
 
-    this._changes.lifecycle =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+    const hasNonInheritLifecycle = !isInheritLifecycle(this._definition.ingest.lifecycle);
+    this._changes.lifecycle = startingStateStreamDefinition
+      ? !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition.ingest.lifecycle
+        )
+      : hasNonInheritLifecycle;
 
-    this._changes.settings =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
+    const hasSettings = Object.keys(this._definition.ingest.settings || {}).length > 0;
+    this._changes.settings = startingStateStreamDefinition
+      ? !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings)
+      : hasSettings;
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
