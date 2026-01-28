@@ -9,7 +9,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -117,6 +117,7 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
+    const isAtMaxDimensions = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -141,7 +142,21 @@ export const DimensionsSelector = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiNotificationBadge>{count}</EuiNotificationBadge>
+                {
+                  isAtMaxDimensions ? (
+                    <EuiToolTip content={
+                      <FormattedMessage
+                        id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+                        defaultMessage="Maximum of {maxDimensions} dimensions selected"
+                        values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+                      />
+                    }>
+                      <EuiNotificationBadge>{count}</EuiNotificationBadge>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiNotificationBadge>{count}</EuiNotificationBadge>
+                  )
+                }
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
