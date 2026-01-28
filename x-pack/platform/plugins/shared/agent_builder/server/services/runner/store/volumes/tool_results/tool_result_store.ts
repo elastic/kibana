@@ -19,7 +19,7 @@ export const createResultStore = ({ conversation }: { conversation?: Conversatio
   return new ToolResultStoreImpl({ toolResults });
 };
 
-class ToolResultStoreImpl implements WritableToolResultStore {
+export class ToolResultStoreImpl implements WritableToolResultStore {
   private readonly results: Map<string, ToolResultWithMeta> = new Map();
   private readonly volume: MemoryVolume;
 
