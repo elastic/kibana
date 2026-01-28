@@ -29,8 +29,13 @@ const setExpectSuggestions = (
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
   context = mockContext,
-  offset?: number
+  caret = '^'
 ) => {
+  const pos = query.indexOf(caret);
+  if (pos > -1) {
+    query = query.replace(caret, '');
+  }
+
   return expectSuggestions(
     query,
     expectedSuggestions,
@@ -38,7 +43,7 @@ const setExpectSuggestions = (
     'set',
     mockCallbacks,
     autocomplete,
-    offset
+    pos > -1 ? pos : undefined
   );
 };
 
@@ -104,6 +109,11 @@ describe('SET Autocomplete', () => {
       });
     });
 
+    it('suggests the value without semicolon if already present in the query', async () => {
+      await setExpectSuggestions('SET project_routing = ^;', ['"_alias:*"', '"_alias:_origin"']);
+      await setExpectSuggestions('SET project_routing = ^ ;', ['"_alias:*"', '"_alias:_origin"']);
+    });
+
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
         await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"NULLIFY";']);
@@ -167,6 +177,12 @@ describe('SET Autocomplete', () => {
 
     it('suggests semicolon with newline after numeric value', async () => {
       await setExpectSuggestions('SET project_routing = 123', [';\n']);
+    });
+
+    it('does not suggest semicolon if already present in the query', async () => {
+      await setExpectSuggestions('SET project_routing = 123^;', []);
+      await setExpectSuggestions('SET project_routing = 123^ ;', []);
+      await setExpectSuggestions('SET project_routing = 123 ^ ;', []);
     });
   });
 });

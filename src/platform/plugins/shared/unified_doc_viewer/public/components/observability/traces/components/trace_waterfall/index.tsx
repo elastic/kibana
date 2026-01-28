@@ -114,12 +114,13 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
         The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
         This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
+        Issue: https://github.com/elastic/kibana/issues/248307
         */}
         <div
           css={css`
             width: 100%;
             & .embPanel__content {
-              display: block;
+              display: block !important;
             }
           `}
         >
