@@ -20,6 +20,7 @@ export function SelectablePanel(props: EuiPanelProps & { isSelected: boolean }) 
       {...rest}
       color="subdued"
       hasBorder
+      hasShadow={false}
       className={
         isSelected
           ? css`
