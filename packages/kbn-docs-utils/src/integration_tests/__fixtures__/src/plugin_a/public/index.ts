@@ -47,6 +47,8 @@ export function plugin() {
 //     line 30 - new
 //   param doc mismatches (1):
 //     line 30 - new
+//   missing returns (1):
+//     line 30 - new
 //   any usage (1):
 //     line 20 - imAnAny
 //   no references (9):

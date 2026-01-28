@@ -132,6 +132,14 @@ export interface IReturnAReactComponent {
 //     line 52 - Constructor
 //     line 91 - anOptionalFn
 //     line 101 - fnTypeWithGeneric
+//   missing returns (7):
+//     line 52 - Constructor
+//     line 56 - arrowFn
+//     line 62 - getVar
+//     line 78 - getAPromiseThatResolvesToString
+//     line 91 - anOptionalFn
+//     line 101 - fnTypeWithGeneric
+//     line 107 - fnTypeWithGenericThatIsOptional
 //   no references (23):
 //     line 28 - WithGen
 //     line 32 - t

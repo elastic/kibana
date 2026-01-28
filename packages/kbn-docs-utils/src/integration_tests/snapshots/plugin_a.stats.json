@@ -2,12 +2,20 @@
   "counts": {
     "apiCount": 136,
     "missingExports": 2,
-    "missingComments": 64,
-    "paramDocMismatches": 13,
+    "missingComments": 76,
+    "missingReturns": 23,
     "isAnyType": 1,
     "noReferences": 135
   },
   "missingComments": [
+    {
+      "id": "def-public.Setup.getSearchService2.$1",
+      "label": "searchSpec",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "type": "Object",
+      "lineNumber": 110,
+      "columnNumber": 35
+    },
     {
       "id": "def-public.Setup.getSearchService2.$1.username",
       "label": "username",
@@ -25,12 +33,28 @@
       "columnNumber": 55
     },
     {
+      "id": "def-public.Setup.doTheThing.$3",
+      "label": "thingThree",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "type": "Object",
+      "lineNumber": 123,
+      "columnNumber": 64
+    },
+    {
       "id": "def-public.Setup.doTheThing.$3.nestedVar",
       "label": "nestedVar",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
       "type": "number",
       "lineNumber": 123,
       "columnNumber": 66
+    },
+    {
+      "id": "def-public.Setup.fnWithInlineParams.$1",
+      "label": "obj",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "type": "Object",
+      "lineNumber": 134,
+      "columnNumber": 29
     },
     {
       "id": "def-public.Setup.fnWithInlineParams.$1.fn",
@@ -153,11 +177,83 @@
       "columnNumber": 18
     },
     {
+      "id": "def-public.crazyFunction.$1",
+      "label": "obj",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Object",
+      "lineNumber": 66,
+      "columnNumber": 10
+    },
+    {
+      "id": "def-public.crazyFunction.$1.hi",
+      "label": "hi",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "string",
+      "lineNumber": 66,
+      "columnNumber": 12
+    },
+    {
+      "id": "def-public.crazyFunction.$2",
+      "label": "{ fn1, fn2 }",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Object",
+      "lineNumber": 67,
+      "columnNumber": 19
+    },
+    {
+      "id": "def-public.crazyFunction.$2.fn1",
+      "label": "fn1",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Function",
+      "lineNumber": 67,
+      "columnNumber": 21
+    },
+    {
+      "id": "def-public.crazyFunction.$2.fn1.$1",
+      "label": "foo",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Object",
+      "lineNumber": 67,
+      "columnNumber": 32
+    },
+    {
+      "id": "def-public.crazyFunction.$2.fn1.$1.param",
+      "label": "param",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "string",
+      "lineNumber": 67,
+      "columnNumber": 34
+    },
+    {
+      "id": "def-public.crazyFunction.$2.fn2",
+      "label": "fn2",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Function",
+      "lineNumber": 67,
+      "columnNumber": 62
+    },
+    {
+      "id": "def-public.crazyFunction.$3",
+      "label": "{ str }",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Object",
+      "lineNumber": 68,
+      "columnNumber": 14
+    },
+    {
+      "id": "def-public.crazyFunction.$3.str",
+      "label": "str",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "string",
+      "lineNumber": 68,
+      "columnNumber": 16
+    },
+    {
       "id": "def-public.fnWithNonExportedRef",
       "label": "fnWithNonExportedRef",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 83,
+      "lineNumber": 74,
       "columnNumber": 14
     },
     {
@@ -165,7 +261,7 @@
       "label": "a",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 83,
+      "lineNumber": 74,
       "columnNumber": 38
     },
     {
@@ -173,7 +269,7 @@
       "label": "NotAnArrowFnType",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Type",
-      "lineNumber": 85,
+      "lineNumber": 76,
       "columnNumber": 1
     },
     {
@@ -521,7 +617,15 @@
       "columnNumber": 3
     }
   ],
-  "paramDocMismatches": [
+  "missingReturns": [
+    {
+      "id": "def-public.Setup.getSearchService2",
+      "label": "getSearchService2",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
+      "type": "Function",
+      "lineNumber": 104,
+      "columnNumber": 3
+    },
     {
       "id": "def-public.Setup.fnWithInlineParams.$1.fn",
       "label": "fn",
@@ -529,6 +633,14 @@
       "type": "Function",
       "lineNumber": 135,
       "columnNumber": 5
+    },
+    {
+      "id": "def-public.FooType",
+      "label": "FooType",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
+      "type": "Type",
+      "lineNumber": 12,
+      "columnNumber": 1
     },
     {
       "id": "def-public.ClassConstructorWithStaticProperties.new",
@@ -539,19 +651,35 @@
       "columnNumber": 3
     },
     {
+      "id": "def-public.crazyFunction.$2.fn1",
+      "label": "fn1",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Function",
+      "lineNumber": 67,
+      "columnNumber": 21
+    },
+    {
       "id": "def-public.fnWithNonExportedRef",
       "label": "fnWithNonExportedRef",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 83,
+      "lineNumber": 74,
       "columnNumber": 14
+    },
+    {
+      "id": "def-public.fnWithNonExportedRef.$1",
+      "label": "a",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
+      "type": "Function",
+      "lineNumber": 74,
+      "columnNumber": 38
     },
     {
       "id": "def-public.NotAnArrowFnType",
       "label": "NotAnArrowFnType",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Type",
-      "lineNumber": 85,
+      "lineNumber": 76,
       "columnNumber": 1
     },
     {
@@ -560,6 +688,30 @@
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
       "type": "Function",
       "lineNumber": 52,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.ExampleClass.arrowFn",
+      "label": "arrowFn",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+      "type": "Function",
+      "lineNumber": 56,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.ExampleClass.getVar",
+      "label": "getVar",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+      "type": "Function",
+      "lineNumber": 62,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.ExampleInterface.getAPromiseThatResolvesToString",
+      "label": "getAPromiseThatResolvesToString",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+      "type": "Function",
+      "lineNumber": 78,
       "columnNumber": 3
     },
     {
@@ -576,6 +728,14 @@
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
       "type": "Function",
       "lineNumber": 101,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.ExampleInterface.fnTypeWithGenericThatIsOptional",
+      "label": "fnTypeWithGenericThatIsOptional",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
+      "type": "Function",
+      "lineNumber": 107,
       "columnNumber": 3
     },
     {
@@ -603,11 +763,19 @@
       "columnNumber": 3
     },
     {
-      "id": "def-public.FnTypeWithGeneric",
-      "label": "FnTypeWithGeneric",
+      "id": "def-public.aUnionProperty",
+      "label": "aUnionProperty",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+      "type": "CompoundType",
+      "lineNumber": 59,
+      "columnNumber": 14
+    },
+    {
+      "id": "def-public.FnWithGeneric",
+      "label": "FnWithGeneric",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
       "type": "Type",
-      "lineNumber": 30,
+      "lineNumber": 23,
       "columnNumber": 1
     },
     {
@@ -625,6 +793,14 @@
       "type": "Function",
       "lineNumber": 62,
       "columnNumber": 3
+    },
+    {
+      "id": "def-public.AReactElementFn",
+      "label": "AReactElementFn",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Type",
+      "lineNumber": 65,
+      "columnNumber": 1
     }
   ],
   "isAnyType": [
@@ -1011,7 +1187,7 @@
       "label": "hi",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "string",
-      "lineNumber": 75,
+      "lineNumber": 66,
       "columnNumber": 12
     },
     {
@@ -1019,7 +1195,7 @@
       "label": "obj",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Object",
-      "lineNumber": 75,
+      "lineNumber": 66,
       "columnNumber": 10
     },
     {
@@ -1027,63 +1203,63 @@
       "label": "param",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "string",
-      "lineNumber": 76,
-      "columnNumber": 25
+      "lineNumber": 67,
+      "columnNumber": 34
     },
     {
       "id": "def-public.crazyFunction.$2.fn1.$1",
       "label": "foo",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Object",
-      "lineNumber": 76,
-      "columnNumber": 23
+      "lineNumber": 67,
+      "columnNumber": 32
     },
     {
       "id": "def-public.crazyFunction.$2.fn1",
       "label": "fn1",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 76,
-      "columnNumber": 12
+      "lineNumber": 67,
+      "columnNumber": 21
     },
     {
       "id": "def-public.crazyFunction.$2.fn2",
       "label": "fn2",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 76,
-      "columnNumber": 53
+      "lineNumber": 67,
+      "columnNumber": 62
     },
     {
       "id": "def-public.crazyFunction.$2",
-      "label": "fns",
+      "label": "{ fn1, fn2 }",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Object",
-      "lineNumber": 76,
-      "columnNumber": 10
+      "lineNumber": 67,
+      "columnNumber": 19
     },
     {
       "id": "def-public.crazyFunction.$3.str",
       "label": "str",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "string",
-      "lineNumber": 77,
-      "columnNumber": 15
+      "lineNumber": 68,
+      "columnNumber": 16
     },
     {
       "id": "def-public.crazyFunction.$3",
-      "label": "strObj",
+      "label": "{ str }",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Object",
-      "lineNumber": 77,
-      "columnNumber": 13
+      "lineNumber": 68,
+      "columnNumber": 14
     },
     {
       "id": "def-public.crazyFunction",
       "label": "crazyFunction",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 73,
+      "lineNumber": 64,
       "columnNumber": 14
     },
     {
@@ -1091,7 +1267,7 @@
       "label": "a",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 83,
+      "lineNumber": 74,
       "columnNumber": 38
     },
     {
@@ -1099,7 +1275,7 @@
       "label": "fnWithNonExportedRef",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Function",
-      "lineNumber": 83,
+      "lineNumber": 74,
       "columnNumber": 14
     },
     {
@@ -1147,7 +1323,7 @@
       "label": "NotAnArrowFnType",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
       "type": "Type",
-      "lineNumber": 85,
+      "lineNumber": 76,
       "columnNumber": 1
     },
     {
