@@ -44,6 +44,12 @@ export class LlmSimulator {
     await this.end();
   }
 
+  async writeError(code: number, error: Record<string, unknown>): Promise<void> {
+    this.status(code);
+    await this.write(JSON.stringify(error));
+    await this.end();
+  }
+
   status = once((code: number) => {
     this.response.writeHead(code, {
       'Elastic-Interceptor': this.name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces

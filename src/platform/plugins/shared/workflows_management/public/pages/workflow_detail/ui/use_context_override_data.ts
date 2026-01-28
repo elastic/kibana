@@ -43,6 +43,7 @@ export function useContextOverrideData() {
           enabled: workflowDefinition.enabled || true,
           spaceId,
         },
+        inputsDefinition: workflowDefinition.inputs,
       });
     },
     [workflowGraph, workflowDefinition, spaceId]

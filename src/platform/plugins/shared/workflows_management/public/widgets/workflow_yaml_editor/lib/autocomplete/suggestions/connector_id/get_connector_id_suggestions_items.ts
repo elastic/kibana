@@ -40,7 +40,7 @@ export function getConnectorIdSuggestionsItems(
     suggestions.push({
       label: displayLabel, // Show both connector ID and name
       kind: monaco.languages.CompletionItemKind.Value, // Use generic value kind
-      insertText: instance.name,
+      insertText: instance.id, // Insert UUID
       range,
       detail: connectorType, // Show connector type as detail - this is what CSS targets
       documentation: `Connector ID: ${instance.id}\nName: ${

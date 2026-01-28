@@ -28,6 +28,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
   }) => {
     const connector = executor.getConnector();
     const useThoughtSignature = mustUseThoughtSignature(
@@ -49,6 +50,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     }).pipe(
@@ -117,7 +119,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }),
+          // @ts-expect-error - items is optional (empty object means any)
+          items: def.items ? convertSchemaType({ def: def.items }) : {},
         };
       case 'object':
         return {
