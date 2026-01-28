@@ -46,10 +46,14 @@ describe('downloadToDisk', () => {
   });
 
   it('should download a file from a remote URL', async () => {
-    const mockResponseBody = {
-      pipe: jest.fn(),
-      on: jest.fn((event, callback) => {}),
-    };
+    // Create a proper ReadableStream for the mock response body
+    // Readable.fromWeb() requires an actual ReadableStream instance
+    const mockResponseBody = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('test content'));
+        controller.close();
+      },
+    });
 
     fetchMock.mockResolvedValue({
       body: mockResponseBody,
