@@ -6,7 +6,7 @@
  */
 
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
+import { setup, assign, fromObservable, fromEventObservable, fromPromise } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';
@@ -17,9 +17,10 @@ import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/us
 import { i18n } from '@kbn/i18n';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
+import { conditionToQueryDsl, getConditionFields, conditionToESQL } from '@kbn/streamlang';
 import { processCondition } from '../../utils';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import { executeEsqlQuery } from '../../../../../hooks/use_execute_esql_query';
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
@@ -50,6 +51,8 @@ export interface RoutingSamplesContext {
     | { type: 'suggestion'; name: string; index: number }
     | { type: 'createStream' }
     | { type: 'updateStream'; name: string };
+  isFetchingMore: boolean;
+  fetchMoreError?: Error;
 }
 
 export type RoutingSamplesEvent =
@@ -64,7 +67,8 @@ export type RoutingSamplesEvent =
   | {
       type: 'routingSamples.updatePreviewName';
       name: string;
-    };
+    }
+  | { type: 'routingSamples.fetchMore' };
 
 export interface SearchParams extends RoutingSamplesInput {
   start: number;
@@ -91,6 +95,7 @@ export const routingSamplesMachine = setup({
     collectDocuments: getPlaceholderFor(createDocumentsCollectorActor),
     collectDocumentsCount: getPlaceholderFor(createDocumentsCountCollectorActor),
     subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
+    fetchMoreDocuments: getPlaceholderFor(createFetchMoreDocumentsActor),
   },
   actions: {
     updateCondition: assign((_, params: { condition?: Condition }) => ({
@@ -98,6 +103,8 @@ export const routingSamplesMachine = setup({
     })),
     storeDocuments: assign((_, params: { documents: SampleDocument[] }) => ({
       documents: params.documents,
+      isFetchingMore: false,
+      fetchMoreError: undefined,
     })),
     storeDocumentsError: assign((_, params: { error: Error | undefined }) => ({
       documentsError: params.error,
@@ -128,6 +135,28 @@ export const routingSamplesMachine = setup({
         },
       };
     }),
+    appendDocuments: assign(({ context }, params: { documents: SampleDocument[] }) => {
+      // Merge new documents with existing ones, avoiding duplicates
+      const existingIds = new Set(
+        context.documents.map((doc) => JSON.stringify(doc['@timestamp']) + JSON.stringify(doc))
+      );
+      const newDocuments = params.documents.filter(
+        (doc) => !existingIds.has(JSON.stringify(doc['@timestamp']) + JSON.stringify(doc))
+      );
+      return {
+        documents: [...context.documents, ...newDocuments],
+        isFetchingMore: false,
+        fetchMoreError: undefined,
+      };
+    }),
+    setFetchingMore: assign(() => ({
+      isFetchingMore: true,
+      fetchMoreError: undefined,
+    })),
+    storeFetchMoreError: assign((_, params: { error: Error }) => ({
+      isFetchingMore: false,
+      fetchMoreError: params.error,
+    })),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -135,6 +164,14 @@ export const routingSamplesMachine = setup({
   guards: {
     isValidSnapshot: (_, params: { context?: SampleDocument[] | number | null }) =>
       params.context !== undefined,
+    canFetchMore: ({ context }) => {
+      const finalCondition = processCondition(context.condition);
+      return (
+        context.documentMatchFilter === 'matched' &&
+        finalCondition !== undefined &&
+        !context.isFetchingMore
+      );
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRADYAjCwDsAJiUCBSgJwqAHAGYVAViXqlAGhABPRABZLLc9aUmr6rSpMBffzs6HHxicipYWgxQxgjWdDIIIkwwAGEZCClsGUERJBBxSWlZAsUEL3MWIxUVJ2N9ARV9cxVbB2cTExYdXU16vyNzIydA4JiGcOZYFggwACMMXABjBgzcLJLqeVhMFLAWIg5U5AAKZczsmQBVJP2AEQWl5bAAFWwSMABKaPowpkisye6BWa0uJTyciKV1KoHKJnUVTq6hMTicAjM6IEljsjgQnm6mi0NRM+nq5j0+jGIBCkwBrA4YEwyx4DFmqGW6E+uEwMwoqCIWXw1AgMgOeAAbqgANYHC4UKjLTD3DlcsA82CQgrQkpycrmExGFhOKxGAyIymafS4xD6O0sO0Y7HqCwYlTU2n-eIzRnM1n4dmc7m8lj8wUMahgZBoZAsSgpDioZAkFjyxXK1XBzXCKESGF6xAG-QsPzuQxE-RKE02hBGdRG8zmJx2pxGTReTzqD0TL3TFi+lls0VB9WYDIgkNhoVQEViliSmVy1AKsBKlUjjXjnlasR53VlQtoh3qASNJ31EbWjoIPwqdRuUwmPpafp+bt-OJ9gf+qCBtU8rdJwFadI2jJM4woBMkxTNNVwzDdeUAndCj3HJYQUQ8qk8Iw22MLo-HUK88RUTQBE0Y1zErAR1CcDxdHMQIghAXBUDmeACk9T9IlzYo0ILBAsMNUxhhwusTRUGtNCMAQS10AR0TvTRtBcd9YimQE5kWEFVnwdZNj47VUJkfj0WLZsVGomjaKaPQa0sGS2jLEZsUbRtVLpb1+yZQd8B4-MDwE7psOE0SxNUGsT26RtzOaC9K00dze0Bb8h0zUd2N3XjjICizyJRFp9FMQihn0JSIsMFhsWbA1DSJQiqSYzj1IZbyfz-LNQ2Ahg-P3OFEFdDRSUoorCsosrryMfR70aVtRpafCGMansuJav1UoQmZRVwMAeoMvrayaB1SMRA1NAsk0TBrSajXrCxrFPWp9BMBKlo-ZqfVa9b-zHJZeV27L9ostRgpMEScJo8Lr1qDFjS8JSDWk9xnsSlaPrWgNh2+wC+S63zDKy9DyjqYsQbBsKa0emSntUIlaZcFoUferz0d-THg2x9ltv+wnEGk7oyIsO8alIswJKhs7yOpto2wNJGXsCIA */
@@ -148,6 +185,8 @@ export const routingSamplesMachine = setup({
     approximateMatchingPercentageError: undefined,
     selectedPreview: undefined,
     documentMatchFilter: 'matched',
+    isFetchingMore: false,
+    fetchMoreError: undefined,
   }),
   initial: 'fetching',
   invoke: {
@@ -196,6 +235,10 @@ export const routingSamplesMachine = setup({
         },
       ],
     },
+    'routingSamples.fetchMore': {
+      guard: 'canFetchMore',
+      target: '.fetchingMore',
+    },
   },
   states: {
     debouncingCondition: {
@@ -205,6 +248,9 @@ export const routingSamplesMachine = setup({
     },
     fetching: {
       type: 'parallel',
+      onDone: {
+        target: 'idle',
+      },
       states: {
         documents: {
           initial: 'loading',
@@ -299,6 +345,42 @@ export const routingSamplesMachine = setup({
         },
       },
     },
+    fetchingMore: {
+      entry: [{ type: 'setFetchingMore' }],
+      invoke: {
+        id: 'fetchMoreDocuments',
+        src: 'fetchMoreDocuments',
+        input: ({ context }) => ({
+          condition: context.condition,
+          definition: context.definition,
+          existingDocumentIds: context.documents.map((doc) =>
+            JSON.stringify(doc['@timestamp']) + JSON.stringify(doc)
+          ),
+        }),
+        onDone: {
+          target: 'idle',
+          actions: [
+            {
+              type: 'appendDocuments',
+              params: ({ event }) => ({ documents: event.output }),
+            },
+          ],
+        },
+        onError: {
+          target: 'idle',
+          actions: [
+            {
+              type: 'storeFetchMoreError',
+              params: ({ event }) => ({ error: event.error as Error }),
+            },
+          ],
+        },
+      },
+    },
+    idle: {
+      // Stable state after initial fetch or after fetchMore completes
+      // Documents are preserved here, and global event handlers can transition to other states
+    },
   },
 });
 
@@ -311,6 +393,7 @@ export const createRoutingSamplesMachineImplementations = ({
     collectDocuments: createDocumentsCollectorActor({ data, telemetryClient }),
     collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
     subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
+    fetchMoreDocuments: createFetchMoreDocumentsActor({ data }),
   },
 });
 
@@ -334,6 +417,18 @@ export function createDocumentsCountCollectorActor({
     Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
   >(({ input }) => {
     return collectDocumentCounts({ data, input });
+  });
+}
+
+export interface FetchMoreInput {
+  condition?: Condition;
+  definition: Streams.WiredStream.GetResponse;
+  existingDocumentIds: string[];
+}
+
+export function createFetchMoreDocumentsActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
+  return fromPromise<SampleDocument[], FetchMoreInput>(async ({ input, signal }) => {
+    return fetchMoreMatchingDocuments({ data, input, signal });
   });
 }
 
@@ -455,6 +550,132 @@ function collectDocumentCounts({
       abortController.abort();
       subscription.unsubscribe();
     };
+  });
+}
+
+const FETCH_MORE_SIZE = 100;
+
+/**
+ * Builds an ESQL query to find matching documents:
+ * FROM <stream> METADATA _id | WHERE <condition>
+ *
+ * Note: Processing steps are not included because the condition is evaluated
+ * on the already-processed data in the index, not on raw ingest data.
+ */
+export function buildFetchMoreEsqlQuery(
+  streamName: string,
+  condition: Condition
+): string {
+  const conditionEsql = conditionToESQL(condition);
+  return `FROM ${streamName} METADATA _id | WHERE ${conditionEsql} | KEEP _id | LIMIT ${FETCH_MORE_SIZE}`;
+}
+
+/**
+ * Fetches more matching documents by:
+ * 1. Running an ESQL query to find matching document IDs
+ * 2. Fetching full documents by those IDs from Elasticsearch
+ */
+async function fetchMoreMatchingDocuments({
+  data,
+  input,
+  signal,
+}: {
+  data: DataPublicPluginStart;
+  input: FetchMoreInput;
+  signal: AbortSignal;
+}): Promise<SampleDocument[]> {
+  const { condition, definition } = input;
+  const finalCondition = processCondition(condition);
+
+  if (!finalCondition) {
+    return [];
+  }
+
+  const { start, end } = getAbsoluteTimestamps(data);
+  const streamName = definition.stream.name;
+
+  // Step 1: Build and execute ESQL query to get matching document IDs
+  const esqlQuery = buildFetchMoreEsqlQuery(streamName, finalCondition);
+
+  const esqlResponse = await executeEsqlQuery({
+    query: esqlQuery,
+    search: data.search.search.bind(data.search),
+    signal,
+    start,
+    end,
+  });
+
+  // Extract document IDs from the ESQL response
+  const idColumnIndex = esqlResponse.columns?.findIndex((col) => col.name === '_id') ?? -1;
+  if (idColumnIndex === -1 || !esqlResponse.values) {
+    return [];
+  }
+
+  const documentIds = esqlResponse.values
+    .map((row) => row[idColumnIndex] as string)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+  if (documentIds.length === 0) {
+    return [];
+  }
+
+  // Step 2: Fetch full documents by IDs
+  const documents = await fetchDocumentsByIds({
+    data,
+    streamName,
+    documentIds,
+    signal,
+  });
+
+  return documents;
+}
+
+/**
+ * Fetches full documents by their IDs from Elasticsearch
+ */
+async function fetchDocumentsByIds({
+  data,
+  streamName,
+  documentIds,
+  signal,
+}: {
+  data: DataPublicPluginStart;
+  streamName: string;
+  documentIds: string[];
+  signal: AbortSignal;
+}): Promise<SampleDocument[]> {
+  return new Promise((resolve, reject) => {
+    const subscription = data.search
+      .search(
+        {
+          params: {
+            index: streamName,
+            query: {
+              ids: {
+                values: documentIds,
+              },
+            },
+            size: documentIds.length,
+            _source: true,
+          },
+        },
+        { abortSignal: signal }
+      )
+      .pipe(
+        filter((result) => !isRunningResponse(result)),
+        timeout(SEARCH_TIMEOUT_MS),
+        map((result) => result.rawResponse.hits.hits.map((hit) => hit._source as SampleDocument)),
+        catchError(handleTimeoutError)
+      )
+      .subscribe({
+        next: (documents) => resolve(documents),
+        error: (err) => reject(err),
+      });
+
+    signal.addEventListener('abort', () => {
+      subscription.unsubscribe();
+      reject(new Error('Aborted'));
+    });
   });
 }
 

@@ -192,6 +192,11 @@ export const streamRoutingMachine = setup({
             filter: event.filter,
           })),
         },
+        'routingSamples.fetchMore': {
+          actions: sendTo('routingSamplesMachine', {
+            type: 'routingSamples.fetchMore',
+          }),
+        },
         'suggestion.preview': {
           actions: [
             sendTo('routingSamplesMachine', ({ event, context }) => ({

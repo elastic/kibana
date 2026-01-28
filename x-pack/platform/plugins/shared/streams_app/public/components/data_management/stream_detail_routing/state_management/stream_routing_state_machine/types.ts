@@ -55,6 +55,7 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.save' }
   | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
   | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
+  | { type: 'routingSamples.fetchMore' }
   | {
       type: 'suggestion.preview';
       condition: Condition;
