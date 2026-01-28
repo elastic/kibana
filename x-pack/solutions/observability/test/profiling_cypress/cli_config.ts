@@ -19,7 +19,7 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
 
   // This has been changed from the original config.base.ts
   // to avoid the usage of the dockerized package registry
-  // problem is apmSynthtraceKibanaClient initialization happens before the
+  // problem is tests try to install specific packages not available in the image
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
