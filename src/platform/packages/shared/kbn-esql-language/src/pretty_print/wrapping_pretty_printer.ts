@@ -436,6 +436,12 @@ export class WrappingPrettyPrinter {
           adjustedIndentation = adjustedIndentation.slice(0, -2);
         }
 
+        // For bare lists, the first argument should not have indentation since
+        // there's no opening bracket and it continues on the same line
+        if (isBareList && isFirstArg) {
+          adjustedIndentation = '';
+        }
+
         txt += separator + adjustedIndentation + formattedArg;
         lines++;
       }
