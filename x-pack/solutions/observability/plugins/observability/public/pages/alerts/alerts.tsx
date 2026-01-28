@@ -48,6 +48,7 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
+import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { AlertsTableExpandedAlertView } from '../../components/alerts_flyout/alerts_table_expanded_alert_view';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';

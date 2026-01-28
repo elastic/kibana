@@ -352,8 +352,38 @@ export class Plugin
       });
     }
 
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(appUpdater$).pipe(
+    // Register initial navigation sections synchronously to prevent sidebar flicker.
+    // The Overview link doesn't depend on async data, so we can show it immediately.
+    // Other links (Alerts, SLOs, Cases, AI Assistant) will be added once async data loads.
+    const initialOverviewLink = !Boolean(pluginsSetup.serverless)
+      ? [
+          {
+            label: i18n.translate('xpack.observability.overviewLinkTitle', {
+              defaultMessage: 'Overview',
+            }),
+            app: 'observabilityOverview',
+            path: '/',
+            matchPath: (currentPath: string) => currentPath === '/' || currentPath === '',
+          },
+        ]
+      : [];
+
+    // Create a BehaviorSubject so we can update the navigation sections once async data loads
+    const mainNavSections$ = new BehaviorSubject<
+      Array<{ label: string; sortKey: number; entries: NavigationEntry[] }>
+    >([
+      {
+        label: '',
+        sortKey: 100,
+        entries: [...initialOverviewLink],
+      },
+    ]);
+
+    pluginsSetup.observabilityShared.navigation.registerSections(mainNavSections$);
+
+    // Update navigation sections once async data is available
+    from(appUpdater$)
+      .pipe(
         mergeMap((value) =>
           from(coreSetup.getStartServices()).pipe(
             switchMap(([coreStart, pluginsStart]) => {
@@ -456,7 +486,9 @@ export class Plugin
           )
         )
       )
-    );
+      .subscribe((sections) => {
+        mainNavSections$.next(sections);
+      });
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(startServicesPromise).pipe(
