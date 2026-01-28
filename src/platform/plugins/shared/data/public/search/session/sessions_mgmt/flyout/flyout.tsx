@@ -28,7 +28,7 @@ import { getColumns } from './get_columns';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 export const Flyout = ({
-  onClose,
+  flyoutId,
   api,
   coreStart,
   usageCollector,
@@ -39,8 +39,9 @@ export const Flyout = ({
   appId,
   trackingProps,
   onBackgroundSearchOpened,
+  onClose,
 }: {
-  onClose: () => void;
+  flyoutId: string;
   api: SearchSessionsMgmtAPI;
   coreStart: CoreStart;
   usageCollector: SearchUsageCollector;
@@ -51,6 +52,7 @@ export const Flyout = ({
   appId?: string;
   trackingProps: { openedFrom: string };
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  onClose: () => void;
 }) => {
   const technicalPreviewLabel = i18n.translate('data.session_mgmt.technical_preview_label', {
     defaultMessage: 'Technical preview',

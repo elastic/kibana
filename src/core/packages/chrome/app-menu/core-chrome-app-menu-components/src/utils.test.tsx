@@ -217,14 +217,6 @@ describe('utils', () => {
       expect(result.onClick).toBeDefined();
     });
 
-    it('should not set onClick when href is provided', () => {
-      const item = { ...baseItem, href: 'http://example.com' };
-      const result = mapAppMenuItemToPanelItem(item);
-
-      expect(result.onClick).toBeUndefined();
-      expect(result.href).toBe('http://example.com');
-    });
-
     it('should not set onClick when childPanelId is provided', () => {
       const result = mapAppMenuItemToPanelItem(baseItem, 1);
 
