@@ -41,7 +41,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
         label: 'Availability',
-        formula: "1- (count(kql='summary.down > 0') / count())",
+        formula: `ifelse(defaults(count(kql='${FINAL_SUMMARY_KQL}'), 0) > 0, 1 - (defaults(count(kql='${FINAL_SUMMARY_KQL} and summary.down > 0'), 0) / defaults(count(kql='${FINAL_SUMMARY_KQL}'), 1)), 1)`,
         metricStateOptions: {
           colorMode: 'Labels',
           palette: {
@@ -70,10 +70,6 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
             },
           },
           titlePosition: 'bottom',
-        },
-        columnFilter: {
-          language: 'kuery',
-          query: FINAL_SUMMARY_KQL,
         },
       },
       {
@@ -110,6 +106,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary: *' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_successful',
@@ -122,6 +119,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary.down: 0' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_errors',
@@ -151,6 +149,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           language: 'kuery',
           query: 'summary.status: down and summary.final_attempt: true',
         },
+        emptyAsNull: false,
       },
     ],
     labels: FieldLabels,
