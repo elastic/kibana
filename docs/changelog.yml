@@ -199,13 +199,10 @@ bundle:
   resolve: true
 
   # Named bundle profiles for different release scenarios
-  # profiles:
-    # Example: Elasticsearch release profile
-    # elasticsearch-release:
-    #   products: "elasticsearch {version} {lifecycle}"
-    #   output: "elasticsearch-{version}.yaml"
-
-    # Example: Serverless release profile
-    # serverless-release:
-    #   products: "cloud-serverless {version} *"
-    #   output: "serverless-{version}.yaml"
+  profiles:
+    kibana-release:
+      products: "kibana {version} {lifecycle}"
+      output: "kibana-{version}.yaml"
+    serverless-release:
+      products: "cloud-serverless {version} {lifecycle}"
+      output: "serverless-{version}.yaml"
