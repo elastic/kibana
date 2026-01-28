@@ -245,4 +245,45 @@ export class TaskClient<TaskType extends string> {
       last_canceled_at: new Date().toISOString(),
     });
   }
+
+  /**
+   * Lists all tasks from the task index.
+   * Returns up to 10,000 tasks with only id and created_at fields.
+   */
+  public async list(): Promise<Array<{ id: string; created_at: string }>> {
+    this.logger.debug('Listing all tasks');
+
+    const response = await this.storageClient.search({
+      query: { match_all: {} },
+      size: 10000,
+      track_total_hits: true,
+      _source: ['created_at'],
+    });
+
+    return response.hits.hits.map((hit) => ({
+      id: hit._id!,
+      created_at: hit._source.created_at,
+    }));
+  }
+
+  /**
+   * Deletes a single task by ID.
+   * This operation is idempotent - if the task doesn't exist, no error is thrown.
+   */
+  public async deleteTask(id: string): Promise<void> {
+    this.logger.debug(`Deleting task ${id}`);
+
+    try {
+      await this.storageClient.delete({
+        id,
+        refresh: true,
+      });
+      this.logger.debug(`Successfully deleted task ${id}`);
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
+    }
+  }
 }
