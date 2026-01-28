@@ -30,25 +30,24 @@ const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
 const formDeserializer = (data: InferenceEndpoint) => {
-  if (
-    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
-    data.config?.headers
-  ) {
-    const { headers, ...restConfig } = data.config;
-    const maxAllocations =
-      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+  const { providerConfig, headers, taskTypeConfig, ...restConfig } = data.config || {};
+
+  if (providerConfig) {
+    const { adaptive_allocations, max_tokens, ...restProviderConfig } = providerConfig;
+    const maxAllocations = adaptive_allocations?.max_number_of_allocations;
 
     return {
       ...data,
       config: {
         ...restConfig,
         providerConfig: {
-          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+          ...restProviderConfig,
+          ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+        },
+        taskTypeConfig: {
+          ...(taskTypeConfig ?? {}),
           ...(headers ? { headers } : {}),
-          ...(maxAllocations
-            ? // remove the adaptive_allocations from the data config as form does not expect it
-              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
-            : {}),
+          ...(max_tokens ? { max_tokens } : {}),
         },
       },
     };
@@ -58,21 +57,18 @@ const formDeserializer = (data: InferenceEndpoint) => {
 };
 
 // This serializer is used to transform the form data before sending it to the server
+// Form overrides handle correct location for 'max_tokens' and 'headers' so we only handle adaptive_allocations.
 export const formSerializer = (formData: InferenceEndpoint) => {
-  const providerConfig = formData.config?.providerConfig as
-    | InferenceEndpoint['config']['providerConfig']
-    | undefined;
+  const { providerConfig, ...restConfig } = formData.config || {};
+
   if (formData && providerConfig) {
-    const {
-      max_number_of_allocations: maxAllocations,
-      headers,
-      ...restProviderConfig
-    } = providerConfig || {};
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
+      providerConfig || {};
 
     return {
       ...formData,
       config: {
-        ...formData.config,
+        ...restConfig,
         providerConfig: {
           ...restProviderConfig,
           ...(maxAllocations
@@ -87,7 +83,6 @@ export const formSerializer = (formData: InferenceEndpoint) => {
               }
             : {}),
         },
-        ...(headers ? { headers } : {}),
       },
     };
   }
@@ -134,6 +129,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
+        taskTypeConfig: inferenceEndpoint?.config.taskTypeConfig,
         contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
         headers: inferenceEndpoint?.config?.headers,
         temperature: inferenceEndpoint?.config.temperature ?? undefined,

@@ -11,6 +11,7 @@ import { FieldType } from '../types/types';
 import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
+import { TASK_SETTINGS, SERVICE_SETTINGS, TASK_TYPE_CONFIG, PROVIDER_CONFIG } from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -51,9 +52,12 @@ export const getNonEmptyValidator = (
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular
           if (isSecrets ? field.sensitive : !field.sensitive) {
+            const fieldLocation =
+              field.location === TASK_SETTINGS ? TASK_TYPE_CONFIG : PROVIDER_CONFIG;
             if (
-              !configData[field.key] ||
-              (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+              path.includes(fieldLocation) &&
+              (!configData[field.key] ||
+                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key])))
             ) {
               field.validationErrors = [LABELS.getRequiredMessage(field.label)];
               field.isValid = false;
@@ -96,6 +100,19 @@ export const mapProviderFields = (
     });
   }
 
+  // fieldOverrides.supplementalData is a temporary solution until the 'location' field is added for the services api.
+  if (fieldOverrides?.supplementalData) {
+    fieldOverrides?.supplementalData.forEach((supplementalDataField) => {
+      const fieldKey = Object.keys(supplementalDataField)[0];
+      if (newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = {
+          ...newProvider.configurations[fieldKey],
+          ...supplementalDataField[fieldKey],
+        };
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
     .filter(
       (pk) =>
@@ -116,6 +133,7 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
+        location: newProvider.configurations[k].location ?? SERVICE_SETTINGS,
       })
     );
 };

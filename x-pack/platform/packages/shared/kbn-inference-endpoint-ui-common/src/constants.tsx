@@ -74,6 +74,10 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
+export const SERVICE_SETTINGS = 'service_settings';
+export const TASK_SETTINGS = 'task_settings';
+export const TASK_TYPE_CONFIG = 'taskTypeConfig';
+export const PROVIDER_CONFIG = 'providerConfig';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
@@ -95,5 +99,23 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
       },
     ],
     serverlessOnly: true,
+  },
+  [ServiceProviderKeys.anthropic]: {
+    supplementalData: [
+      {
+        max_tokens: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
+  },
+  [ServiceProviderKeys.openai]: {
+    supplementalData: [
+      {
+        headers: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
   },
 };
