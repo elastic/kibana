@@ -171,6 +171,7 @@ export function getTopNavConfig({
             props: OnSaveProps & {
               dashboardId?: string | null;
               addToLibrary: boolean;
+              returnToOrigin?: boolean;
             }
           ): Promise<SaveResult> => {
             try {
@@ -197,6 +198,8 @@ export function getTopNavConfig({
               ...props,
               tags,
               saveByReference: props.addToLibrary,
+              // Only return to origin if explicitly requested via the modal toggle
+              returnToOrigin: props.returnToOrigin,
               history,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save

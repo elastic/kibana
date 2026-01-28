@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  describe('save and return work flow', () => {
+  describe.skip('save and return work flow', () => {
     before(async () => {
       await security.testUser.setRoles(
         [

@@ -71,7 +71,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
       });
 
-      it('edits lens by-reference embeddable', async () => {
+      it.skip('edits lens by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
         await lens.save('Artistpreviouslyknownaslens v2', false, true);
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');

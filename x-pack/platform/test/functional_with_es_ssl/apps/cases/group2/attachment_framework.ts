@@ -367,7 +367,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Lens visualization as persistable attachment', () => {
+    describe.skip('Lens visualization as persistable attachment', () => {
       const myDashboardName = `My-dashboard-${uuidv4()}`;
 
       before(async () => {

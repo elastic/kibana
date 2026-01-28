@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-common';
 // Avoid importing Dashboard public constants here to prevent lens -> dashboard cycles.
 const DASHBOARDS_APP_ID = 'dashboards';
-const DASHBOARDS_PAGE_PATH = '#/list';
+const DASHBOARDS_VISUALIZATIONS_TAB_PATH = '#/list/visualizations';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
@@ -95,9 +95,13 @@ export function setBreadcrumbsTitle(
   }
   if (!isByValueMode && !originatingAppName) {
     breadcrumbs.push({
-      href: application.getUrlForApp(DASHBOARDS_APP_ID, { path: DASHBOARDS_PAGE_PATH }),
+      href: application.getUrlForApp(DASHBOARDS_APP_ID, {
+        path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
+      }),
       onClick: (e) => {
-        application.navigateToApp(DASHBOARDS_APP_ID, { path: DASHBOARDS_PAGE_PATH });
+        application.navigateToApp(DASHBOARDS_APP_ID, {
+          path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
+        });
         e.preventDefault();
       },
       text: i18n.translate('xpack.lens.breadcrumbsDashboardsTitle', {
