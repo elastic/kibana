@@ -361,6 +361,40 @@ describe('validateSecretes', () => {
       validateSecrets(actionType, undefined, { configurationUtilities })
     ).not.toThrowError();
   });
+
+  test('should not run validation when secrets are null', () => {
+    const schemaValidator = {
+      parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+    };
+    const customValidator = (
+      value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
+      services: ValidatorServices
+    ) => {
+      throw new Error('test error');
+    };
+
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: {
+          schema: schemaValidator,
+        },
+        config: {
+          schema: schemaValidator,
+        },
+        secrets: {
+          schema: schemaValidator,
+          customValidator,
+        },
+      },
+    };
+
+    expect(() => validateSecrets(actionType, null, { configurationUtilities })).not.toThrowError();
+  });
 });
 
 describe('validateConnectors', () => {
