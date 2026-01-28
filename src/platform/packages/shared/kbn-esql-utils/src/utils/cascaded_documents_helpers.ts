@@ -24,8 +24,6 @@ import {
   isBinaryExpression,
   Walker,
 } from '@kbn/esql-language';
-import type { Terminal } from '@kbn/esql-language/src/ast/mutate/commands/stats';
-import { getFieldTerminals, getUsedFields } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
@@ -36,6 +34,9 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import type { Terminal } from './esql_fields_utils';
+import { getUsedFields } from './esql_fields_utils';
+import { getFieldTerminals } from './esql_fields_utils';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
 import { getQuerySummaryPerCommandType, getSummaryPerCommand } from './get_query_summary';

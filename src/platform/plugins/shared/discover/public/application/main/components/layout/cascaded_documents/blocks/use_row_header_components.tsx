@@ -29,6 +29,7 @@ import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-d
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { StatsCommandSummary } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
@@ -37,8 +38,8 @@ import {
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { StatsCommandSummary } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
@@ -209,7 +210,7 @@ const ContextMenu = React.memo(
     const rowDataViewField = useMemo(() => {
       const fieldParamDef = getFieldParamDefinition(
         row.groupId,
-        rowStatsFieldSummary?.terminals ?? [],
+        rowStatsFieldSummary?.definition ? getFieldTerminals(rowStatsFieldSummary.definition) : [],
         esqlVariables
       );
 
@@ -218,7 +219,7 @@ const ContextMenu = React.memo(
       }
 
       return dataView.fields.getByName(fieldParamDef ?? row.groupId);
-    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.terminals]);
+    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.definition]);
 
     const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       return [
