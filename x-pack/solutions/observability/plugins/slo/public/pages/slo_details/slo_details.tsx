@@ -10,6 +10,7 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useIsMutating } from '@kbn/react-query';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -38,6 +39,7 @@ import type { SloDetailsPathParams } from './types';
 
 export function SloDetailsPage() {
   const {
+    agentBuilder,
     application: { navigateToUrl },
     http: { basePath },
     observabilityAIAssistant,
@@ -98,6 +100,46 @@ export function SloDetailsPage() {
       ],
     });
   }, [observabilityAIAssistant, slo]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder || !slo) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'slo',
+            url: window.location.href,
+            description: dedent(`
+              The user is looking at the detail page for the following SLO
+
+              Name: ${slo.name}.
+              Id: ${slo.id}
+              Instance Id: ${slo.instanceId}
+              Description: ${slo.description}
+              Observed value: ${slo.summary.sliValue}
+              Error budget remaining: ${slo.summary.errorBudget.remaining}
+              Status: ${slo.summary.status}
+            `),
+            additional_data: {
+              slo: JSON.stringify(slo),
+            },
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, slo]);
 
   useEffect(() => {
     if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {

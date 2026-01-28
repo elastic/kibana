@@ -12,9 +12,10 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import {
   ExternalResourceLinks,
   FETCH_STATUS,
@@ -42,6 +43,7 @@ import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
   const {
+    agentBuilder,
     http,
     observabilityAIAssistant,
     kibanaVersion,
@@ -141,6 +143,36 @@ export function OverviewPage() {
       ],
     });
   }, [appsWithoutData, hasData, setScreenContext]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      sessionTag: 'observability',
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'observability',
+            url: window.location.href,
+            description: `The user is viewing the Overview page which shows a summary of the following apps: ${JSON.stringify(
+              hasData
+            )}`,
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, hasData]);
 
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 

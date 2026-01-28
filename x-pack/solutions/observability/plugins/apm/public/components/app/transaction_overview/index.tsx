@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -54,13 +55,41 @@ export function TransactionOverview() {
     false
   );
 
-  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
+  const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
     return setScreenContext?.({
       screenDescription: `The user is looking at the transactions overview for ${serviceName}, and the transaction type is ${transactionType}`,
     });
   }, [setScreenContext, serviceName, transactionType]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description: `The user is looking at the transactions overview for ${serviceName}, transaction type: ${transactionType}`,
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, serviceName, transactionType]);
 
   const handleOnLoadTable = useCallback(() => {
     onPageReady({

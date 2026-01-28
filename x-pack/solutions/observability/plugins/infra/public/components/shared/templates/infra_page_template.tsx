@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import type { EntityTypes } from '../../../../common/http_api/shared/entity_type';
@@ -30,6 +31,7 @@ export const InfraPageTemplate = ({
 }) => {
   const {
     services: {
+      agentBuilder,
       observabilityAIAssistant,
       observabilityShared: {
         navigation: { PageTemplate },
@@ -99,6 +101,41 @@ export const InfraPageTemplate = ({
       ],
     });
   }, [hasData, setScreenContext, source]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      sessionTag: 'observability',
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'infra',
+            url: window.location.href,
+            description: `The configuration of the Metrics app. ${
+              hasData ? 'Data is available.' : 'No data available.'
+            }`,
+            ...(source && {
+              additional_data: {
+                metrics_configuration: JSON.stringify(source),
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, hasData, source]);
 
   if (sourceError) {
     return <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;

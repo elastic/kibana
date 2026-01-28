@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -24,7 +25,8 @@ export const chartHeight = 288;
 export function ServiceOverview() {
   const { serviceName } = useApmServiceContext();
 
-  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
+  const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
     return setScreenContext?.({
@@ -38,6 +40,33 @@ export function ServiceOverview() {
       ],
     });
   }, [setScreenContext, serviceName]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description: `The user is looking at the service overview page for ${serviceName}`,
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, serviceName]);
 
   const {
     query: { environment, rangeFrom, rangeTo },

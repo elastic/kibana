@@ -202,7 +202,7 @@ export function ErrorGroupDetails() {
     });
   }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
 
-  // Configure agent builder global flyout with the error attachment
+  // Configure agent builder global flyout with the error attachment and screen context
   useEffect(() => {
     if (!agentBuilder || !errorId) {
       return;
@@ -210,8 +210,18 @@ export function ErrorGroupDetails() {
 
     agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
+      sessionTag: 'observability',
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description: `Error details view for error group ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range.`,
+          },
+          hidden: true,
+        },
         {
           type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
           data: {
@@ -228,7 +238,7 @@ export function ErrorGroupDetails() {
     return () => {
       agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [agentBuilder, errorId, serviceName, environment, start, end]);
+  }, [agentBuilder, errorId, serviceName, environment, start, end, groupId, errorSamplesData]);
 
   return (
     <>

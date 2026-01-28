@@ -51,6 +51,7 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
@@ -95,6 +96,7 @@ export interface ClientPluginsSetup {
 }
 
 export interface ClientPluginsStart {
+  agentBuilder?: AgentBuilderPluginStart;
   fleet: FleetStart;
   data: DataPublicPluginStart;
   kql: KqlPluginStart;

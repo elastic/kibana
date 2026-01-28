@@ -10,6 +10,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -248,7 +249,8 @@ export function ServiceInventory() {
   );
 
   // TODO verify this with AI team
-  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
+  const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
     if (!setScreenContext) {
@@ -277,6 +279,48 @@ export function ServiceInventory() {
       ],
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    let description = 'APM Service Inventory page';
+    if (isFailure(mainStatisticsStatus)) {
+      description = 'APM Service Inventory page - services failed to load';
+    } else if (isPending(mainStatisticsStatus)) {
+      description = 'APM Service Inventory page - services loading';
+    } else if (mainStatisticsData.items.length > 0) {
+      description = `APM Service Inventory page showing ${mainStatisticsData.items.length} services`;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      sessionTag: 'observability',
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'apm',
+            url: window.location.href,
+            description,
+            ...(mainStatisticsData.items.length > 0 && {
+              additional_data: {
+                services: JSON.stringify(mainStatisticsData.items),
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, mainStatisticsStatus, mainStatisticsData.items]);
 
   useEffect(() => {
     if (

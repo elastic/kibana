@@ -7,9 +7,9 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiTitle, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import { EuiSpacer } from '@elastic/eui';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -25,7 +25,8 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observabilityShared, observabilityAIAssistant } = useKibanaServices();
+  const { agentBuilder, docLinks, http, observabilityShared, observabilityAIAssistant } =
+    useKibanaServices();
 
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
@@ -83,6 +84,33 @@ export function RumHome() {
       ],
     });
   }, [hasData, observabilityAIAssistant?.service, screenDescription]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'RUM Dashboard',
+            url: window.location.href,
+            description: screenDescription,
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, screenDescription]);
 
   return (
     <PageTemplateComponent

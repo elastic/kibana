@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useIsMutating } from '@kbn/react-query';
 import dedent from 'dedent';
@@ -20,7 +21,7 @@ import { ToggleSLOView } from './toggle_slo_view';
 import { UngroupedView } from './ungrouped_slos/ungrouped_view';
 
 export function SloList() {
-  const { observabilityAIAssistant } = useKibana().services;
+  const { agentBuilder, observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
@@ -78,6 +79,49 @@ export function SloList() {
       `),
     });
   }, [sloList, observabilityAIAssistant]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder || !sloList) {
+      return;
+    }
+
+    const slosByStatus = mapValues(
+      _groupBy(sloList.results, (result) => result.summary.status),
+      (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
+    ) as Record<SLOWithSummaryResponse['summary']['status'], string>;
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'slo',
+            url: window.location.href,
+            description:
+              sloList.total >= 1
+                ? `The user is looking at a list of SLOs. There are ${sloList.total} SLOs. Out of those, ${sloList.results.length} are visible.`
+                : 'The user is looking at a list of SLOs.',
+            ...(sloList.total >= 1 && {
+              additional_data: {
+                violating_slos: slosByStatus.VIOLATED || '',
+                degrading_slos: slosByStatus.DEGRADING || '',
+                healthy_slos: slosByStatus.HEALTHY || '',
+                slos_without_data: slosByStatus.NO_DATA || '',
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, sloList]);
 
   usePageReady({
     isReady: !isLoading && sloList !== undefined,

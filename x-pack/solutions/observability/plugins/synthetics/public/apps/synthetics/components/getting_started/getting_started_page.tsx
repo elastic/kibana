@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
@@ -38,7 +39,7 @@ export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
+  const { agentBuilder, observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEnablement();
@@ -84,6 +85,40 @@ export const GettingStartedPage = () => {
       ],
     });
   }, [setScreenContext, hasNoLocations, locations]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'synthetics',
+            url: window.location.href,
+            description: hasNoLocations
+              ? 'Synthetics Getting Started - The user has no locations configured'
+              : `Synthetics Getting Started - The user has ${locations.length} locations configured`,
+            ...(locations.length > 0 && {
+              additional_data: {
+                locations: JSON.stringify(locations),
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, hasNoLocations, locations]);
 
   return !loading ? (
     <Wrapper>

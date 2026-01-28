@@ -9,6 +9,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -31,6 +32,7 @@ interface RulesPageProps {
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const { services } = useKibana();
   const {
+    agentBuilder,
     http,
     docLinks,
     notifications: { toasts },
@@ -97,6 +99,38 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       ],
     });
   }, [filteredRuleTypes, ruleTypesWithDescriptions, setScreenContext]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'observability',
+            url: window.location.href,
+            description: 'Observability Rules page',
+            ...(ruleTypesWithDescriptions.length > 0 && {
+              additional_data: {
+                available_rule_types: JSON.stringify(ruleTypesWithDescriptions),
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, ruleTypesWithDescriptions]);
 
   const tabs = [
     {

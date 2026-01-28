@@ -12,6 +12,7 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
@@ -69,6 +70,7 @@ const tableColumns = getColumns({ showRuleName: true });
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
   const {
+    agentBuilder,
     data,
     http,
     notifications,
@@ -173,6 +175,38 @@ function InternalAlertsPage() {
       ],
     });
   }, [filteredRuleTypes, ruleTypesWithDescriptions, setScreenContext]);
+
+  // Configure agent builder global flyout with screen context
+  useEffect(() => {
+    if (!agentBuilder) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'observability',
+            url: window.location.href,
+            description: `The user is viewing the Alerts page which shows a table of ${tableCount} alerts.`,
+            ...(ruleTypesWithDescriptions.length > 0 && {
+              additional_data: {
+                available_rule_types: JSON.stringify(ruleTypesWithDescriptions),
+              },
+            }),
+          },
+          hidden: true,
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, tableCount, ruleTypesWithDescriptions]);
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;

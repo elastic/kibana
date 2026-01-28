@@ -6,6 +6,7 @@
  */
 
 import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -84,6 +85,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
   cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;

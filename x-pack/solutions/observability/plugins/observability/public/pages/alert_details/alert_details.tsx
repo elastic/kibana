@@ -179,7 +179,7 @@ export function AlertDetails() {
     }
   }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
-  // Configure agent builder global flyout with the current alert attachment
+  // Configure agent builder global flyout with the current alert attachment and screen context
   useEffect(() => {
     if (!agentBuilder) return;
     const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
@@ -188,10 +188,21 @@ export function AlertDetails() {
       return;
     }
 
+    const screenDescription = alertDetail ? getScreenDescription(alertDetail) : '';
+
     agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
+        {
+          type: 'screen_context',
+          data: {
+            app: 'observability',
+            url: window.location.href,
+            description: screenDescription,
+          },
+          hidden: true,
+        },
         {
           id: alertUuid,
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
