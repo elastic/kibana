@@ -147,7 +147,9 @@
       "build_on_commit": false,
       "build_drafts": false,
       "enable_trigger_checkbox": true,
-      "kibana_versions_check": true
+      "kibana_versions_check": true,
+      "build_on_comment": true,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:storybook))$"
     },
     {
       "repoOwner": "elastic",
