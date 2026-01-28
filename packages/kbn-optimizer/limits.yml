@@ -44,8 +44,8 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 32797
   developerToolbar: 4467
-  devTools: 8109
-  discover: 28617
+  devTools: 8107
+  discover: 28275
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
@@ -119,7 +119,7 @@ pageLoadAssetSize:
   navigation: 12376
   newsfeed: 12371
   noDataPage: 1749
-  observability: 107797
+  observability: 1173152
   observabilityAgentBuilder: 7077
   observabilityAIAssistant: 61180
   observabilityAIAssistantApp: 18012
