@@ -45,7 +45,6 @@ import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
   serviceProviderLinkComponents,
-  DEFAULT_MODELS,
 } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import type { TaskTypeOption } from '../utils/helpers';
@@ -62,26 +61,6 @@ import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidde
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
 import { useKibana } from '../hooks/use_kibana';
-
-/**
- * Returns the default model for a given field key and provider service.
- * If the field is 'model_id' or 'model' and the provider has a default model defined
- * in DEFAULT_MODELS, returns that default model. Otherwise, returns null.
- *
- * @param fieldKey - the configuration field key (e.g., 'model_id', 'model')
- * @param providerService - the service provider identifier
- * @returns the default model string if available, otherwise null
- */
-function getDefaultModelValue(
-  fieldKey: string,
-  providerService: string | undefined
-): string | null {
-  const isModelField = fieldKey === 'model_id' || fieldKey === 'model';
-  if (isModelField && providerService && DEFAULT_MODELS[providerService as ServiceProviderKeys]) {
-    return DEFAULT_MODELS[providerService as ServiceProviderKeys] ?? null;
-  }
-  return null;
-}
 
 // Custom trigger button CSS
 export const buttonCss = css`
@@ -256,13 +235,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
+      const overrides = newProvider ? getOverrides(newProvider) : undefined;
+      const newProviderSchema: ConfigEntryView[] = newProvider
+        ? mapProviderFields(taskType, newProvider, overrides)
+        : [];
       if (newProvider) {
-        const overrides = getOverrides(newProvider);
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
-          taskType,
-          newProvider,
-          overrides
-        );
         setProviderSchema(newProviderSchema);
       }
 
@@ -287,9 +264,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          // Set default value from provider configuration, using DEFAULT_MODELS for model fields
-          const defaultValue = newProvider?.configurations[k]?.default_value;
-          newConfig[k] = defaultValue ?? getDefaultModelValue(k, newProvider?.service);
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          const schemaField = newProviderSchema.find((f) => f.key === k);
+          newConfig[k] = schemaField?.default_value ?? null;
         }
       });
 
@@ -341,15 +318,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       newProviderSchema.forEach((fieldConfig) => {
         if (!fieldConfig.sensitive) {
-          if (fieldConfig && !!fieldConfig.default_value) {
-            defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
-          } else {
-            // Use DEFAULT_MODELS for model fields, otherwise null
-            defaultProviderConfig[fieldConfig.key] = getDefaultModelValue(
-              fieldConfig.key,
-              newProvider?.service
-            );
-          }
+          // default_value now includes overridden defaults from INTERNAL_OVERRIDE_FIELDS
+          defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
         }

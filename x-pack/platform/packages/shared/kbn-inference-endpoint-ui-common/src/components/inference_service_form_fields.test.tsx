@@ -18,7 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
-import { DEFAULT_MODELS } from '../constants';
+import { INTERNAL_OVERRIDE_FIELDS } from '../constants';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
@@ -131,7 +131,9 @@ describe('Inference Services', () => {
 
     expect(screen.getByTestId('provider-select')).toHaveValue('OpenAI');
     const modelIdInput = screen.getByTestId('model_id-input');
-    expect(modelIdInput).toHaveValue(DEFAULT_MODELS.openai);
+    // Default value comes from INTERNAL_OVERRIDE_FIELDS.openai.defaultValues.model_id
+    const expectedDefaultModel = INTERNAL_OVERRIDE_FIELDS.openai?.defaultValues?.model_id as string;
+    expect(modelIdInput).toHaveValue(expectedDefaultModel);
   });
 
   describe('isProviderForSolutions', () => {
