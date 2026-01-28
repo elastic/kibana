@@ -13,6 +13,7 @@ const path = require('node:path');
 const categories = [
   { key: 'missingComments', title: 'missing comments' },
   { key: 'paramDocMismatches', title: 'param doc mismatches' },
+  { key: 'missingReturns', title: 'missing returns' },
   { key: 'isAnyType', title: 'any usage' },
   { key: 'noReferences', title: 'no references' },
 ];
