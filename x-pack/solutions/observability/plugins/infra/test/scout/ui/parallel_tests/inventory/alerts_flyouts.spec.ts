@@ -8,31 +8,35 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsPrivilegedUser();
     await inventoryPage.addDismissK8sTourInitScript();
     await inventoryPage.goToPage();
   });
 
-  test('Should open inventory rule flyout', async ({ pageObjects: { inventoryPage } }) => {
-    await test.step('open alerts menu', async () => {
-      await inventoryPage.alertsHeaderButton.click();
-      await expect(inventoryPage.alertsMenu).toBeVisible();
-    });
+  test(
+    'Should open inventory rule flyout',
+    { tag: ['@svlOblt'] },
+    async ({ pageObjects: { inventoryPage } }) => {
+      await test.step('open alerts menu', async () => {
+        await inventoryPage.alertsHeaderButton.click();
+        await expect(inventoryPage.alertsMenu).toBeVisible();
+      });
 
-    await test.step('open infrastructure rules submenu', async () => {
-      await inventoryPage.inventoryAlertsMenuOption.click();
-      await expect(inventoryPage.alertsMenu).toContainText('Infrastructure rules');
-    });
+      await test.step('open infrastructure rules submenu', async () => {
+        await inventoryPage.inventoryAlertsMenuOption.click();
+        await expect(inventoryPage.alertsMenu).toContainText('Infrastructure rules');
+      });
 
-    await test.step('open inventory rule flyout', async () => {
-      await inventoryPage.createInventoryRuleButton.click();
-      await expect(inventoryPage.alertsFlyout).toBeVisible();
-      await expect(inventoryPage.alertsFlyoutRuleDefinitionSection).toBeVisible();
-      await expect(inventoryPage.alertsFlyoutRuleTypeName).toHaveText('Inventory');
-    });
-  });
+      await test.step('open inventory rule flyout', async () => {
+        await inventoryPage.createInventoryRuleButton.click();
+        await expect(inventoryPage.alertsFlyout).toBeVisible();
+        await expect(inventoryPage.alertsFlyoutRuleDefinitionSection).toBeVisible();
+        await expect(inventoryPage.alertsFlyoutRuleTypeName).toHaveText('Inventory');
+      });
+    }
+  );
 
   test('Should open metrics threshold rule flyout', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('open alerts menu', async () => {
@@ -53,16 +57,18 @@ test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess', '@svlO
     });
   });
 
-  test('Should not have option to create custom threshold rule', async ({
-    pageObjects: { inventoryPage },
-  }) => {
-    await test.step('open alerts menu', async () => {
-      await inventoryPage.alertsHeaderButton.click();
-      await expect(inventoryPage.alertsMenu).toBeVisible();
-    });
+  test(
+    'Should not have option to create custom threshold rule',
+    { tag: ['@svlOblt'] },
+    async ({ pageObjects: { inventoryPage } }) => {
+      await test.step('open alerts menu', async () => {
+        await inventoryPage.alertsHeaderButton.click();
+        await expect(inventoryPage.alertsMenu).toBeVisible();
+      });
 
-    await test.step('verify custom threshold alert menu option is not visible', async () => {
-      await expect(inventoryPage.customThresholdAlertMenuOption).toBeHidden();
-    });
-  });
+      await test.step('verify custom threshold alert menu option is not visible', async () => {
+        await expect(inventoryPage.customThresholdAlertMenuOption).toBeHidden();
+      });
+    }
+  );
 });
