@@ -70,5 +70,25 @@ describe('JiraConnector', () => {
         { jql: 'assignee = currentUser()' }
       );
     });
+
+    it('should include optional maxResults and nextPageToken in the request', async () => {
+      const mockResponse = { data: { issues: [], total: 0 } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await JiraConnector.actions.searchIssuesWithJql.handler(mockContext, {
+        jql: 'status = Done',
+        maxResults: 50,
+        nextPageToken: 'page-token-abc',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/search/jql',
+        {
+          jql: 'status = Done',
+          maxResults: 50,
+          nextPageToken: 'page-token-abc',
+        }
+      );
+    });
   });
 });

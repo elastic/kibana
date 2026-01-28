@@ -41,11 +41,18 @@ export const JiraConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         jql: z.string(),
+        maxResults: z.number().optional(),
+        nextPageToken: z.string().optional(),
       }),
       handler: async (ctx, input) => {
+        const typedInput = input as {
+          jql: string;
+          maxResults?: number;
+          nextPageToken?: string;
+        };
         const subdomain = (ctx.config?.subdomain as string) ?? '';
         const baseUrl = `https://${subdomain.trim()}.atlassian.net`;
-        const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, input);
+        const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, typedInput);
         return response.data;
       },
     },
