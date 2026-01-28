@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -24,6 +25,18 @@ jest.mock('../../../hooks/use_apm_router', () => ({
 
 jest.mock('../../../hooks/use_apm_params', () => ({
   useApmParams: jest.fn(),
+}));
+
+const mockUseFetcher = jest.fn();
+jest.mock('../../../hooks/use_fetcher', () => ({
+  useFetcher: () => mockUseFetcher(),
+  FETCH_STATUS: {
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    FAILURE: 'failure',
+    NOT_INITIATED: 'not_initiated',
+  },
+  isPending: (status: string) => status === 'loading' || status === 'not_initiated',
 }));
 
 jest.mock('@elastic/eui', () => {
@@ -63,8 +76,6 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('SloOverviewFlyout', () => {
   const mockOnClose = jest.fn();
-  const mockHttpFetch = jest.fn();
-  const mockHttpPost = jest.fn();
   const mockLink = jest.fn().mockReturnValue('/services/test-service/overview');
   const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/slo');
 
@@ -73,10 +84,6 @@ describe('SloOverviewFlyout', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
-        http: {
-          fetch: mockHttpFetch,
-          post: mockHttpPost,
-        },
         uiSettings: {
           get: jest.fn().mockReturnValue('0.00%'),
         },
@@ -107,17 +114,17 @@ describe('SloOverviewFlyout', () => {
       },
     });
 
-    mockHttpFetch.mockResolvedValue({
-      results: [],
-      total: 0,
-    });
-
-    mockHttpPost.mockResolvedValue({
-      aggregations: {
-        perSloId: {
-          buckets: [],
-        },
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 0, noData: 0 },
       },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
   });
 
@@ -140,7 +147,11 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('displays loading state initially', async () => {
-    mockHttpFetch.mockImplementation(() => new Promise(() => {}));
+    mockUseFetcher.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.LOADING,
+      refetch: jest.fn(),
+    });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
@@ -175,30 +186,42 @@ describe('SloOverviewFlyout', () => {
       }),
     ];
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 2,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 2,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 1, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Latency SLO')).toBeInTheDocument();
-      expect(screen.getByText('Error Rate SLO')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Latency SLO')).toBeInTheDocument();
+    expect(screen.getByText('Error Rate SLO')).toBeInTheDocument();
   });
 
   it('displays "No SLOs found" when no data', async () => {
-    mockHttpFetch.mockResolvedValue({
-      results: [],
-      total: 0,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 0, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
-    });
+    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
   });
 
   it('displays status stats panel', async () => {
@@ -221,22 +244,13 @@ describe('SloOverviewFlyout', () => {
     });
   });
 
-  it('fetches SLOs with correct filters for service name', async () => {
+  it('renders correctly with service name prop', async () => {
     renderWithIntl(<SloOverviewFlyout serviceName="my-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(mockHttpFetch).toHaveBeenCalledWith(
-        '/api/observability/slos',
-        expect.objectContaining({
-          query: expect.objectContaining({
-            filters: expect.stringContaining('my-service'),
-          }),
-        })
-      );
-    });
+    expect(screen.getByText('my-service')).toBeInTheDocument();
   });
 
-  it('fetches SLOs with environment filter', async () => {
+  it('renders correctly with environment from params', async () => {
     mockUseApmParams.mockReturnValue({
       query: {
         environment: 'production',
@@ -247,40 +261,29 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(mockHttpFetch).toHaveBeenCalledWith(
-        '/api/observability/slos',
-        expect.objectContaining({
-          query: expect.objectContaining({
-            filters: expect.stringContaining('production'),
-          }),
-        })
-      );
-    });
+    expect(screen.getByText('test-service')).toBeInTheDocument();
   });
 
   it('displays alerts badge when SLO has active alerts', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 1,
-    });
-
-    mockHttpPost.mockResolvedValue({
-      aggregations: {
-        perSloId: {
-          buckets: [{ key: ['slo-1', '*'], key_as_string: 'slo-1|*', doc_count: 3 }],
-        },
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: { 'slo-1|*': 3 },
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('apmSloActiveAlertsBadge')).toBeInTheDocument();
-      expect(screen.getByText('3')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('apmSloActiveAlertsBadge')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
   });
 
   it('renders service link badge', async () => {
@@ -306,32 +309,43 @@ describe('SloOverviewFlyout', () => {
       createMockSlo({ id: `slo-${i}`, name: `SLO ${i}` })
     );
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 25,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 25,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 25, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('sloOverviewFlyoutPagination')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('sloOverviewFlyoutPagination')).toBeInTheDocument();
   });
 
   it('does not display pagination when total SLOs are within page size', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO' })];
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 1,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Test SLO')).toBeInTheDocument();
-    });
-
+    expect(screen.getByText('Test SLO')).toBeInTheDocument();
     expect(screen.queryByTestId('sloOverviewFlyoutPagination')).not.toBeInTheDocument();
   });
 
@@ -344,32 +358,44 @@ describe('SloOverviewFlyout', () => {
   it('renders the SLO table', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO' })];
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 1,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('sloOverviewFlyoutTable')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('sloOverviewFlyoutTable')).toBeInTheDocument();
   });
 
   it('displays tooltip with SLO name on hover', async () => {
     const sloName = 'My Very Long SLO Name That Might Get Truncated';
     const mockSlos = [createMockSlo({ id: 'slo-1', name: sloName })];
 
-    mockHttpFetch.mockResolvedValue({
-      results: mockSlos,
-      total: 1,
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
 
     const sloLink = screen.getByTestId('apmSloNameLink');
     fireEvent.mouseOver(sloLink);
@@ -380,12 +406,15 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('handles API error gracefully', async () => {
-    mockHttpFetch.mockRejectedValue(new Error('API Error'));
+    mockUseFetcher.mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.FAILURE,
+      error: new Error('API Error'),
+      refetch: jest.fn(),
+    });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
-    });
+    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
   });
 });

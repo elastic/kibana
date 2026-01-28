@@ -34,24 +34,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AgentIcon } from '@kbn/custom-icons';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import {
-  AlertConsumers,
-  SLO_RULE_TYPE_IDS,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SloTabId, SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID, sloListLocatorID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -106,168 +102,57 @@ const STATUS_PRIORITY: Record<string, number> = {
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { http, uiSettings, slo: sloPlugin, share } = useKibana<ApmPluginStartDeps>().services;
+  const { uiSettings, slo: sloPlugin, share } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const { query } = useApmParams('/services');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [sloData, setSloData] = useState<SLOWithSummaryResponse[]>([]);
-  const [totalSlos, setTotalSlos] = useState(0);
   const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
-  const [activeAlerts, setActiveAlerts] = useState<Map<string, number>>(new Map());
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
   const { environment } = query;
-
-  const filtersQuery = useMemo(() => {
-    const filters: Array<Record<string, unknown>> = [
-      { term: { [SERVICE_NAME]: serviceName } },
-      {
-        terms: {
-          'slo.indicator.type': APM_SLO_INDICATOR_TYPES,
-        },
-      },
-    ];
-
-    if (environment && environment !== 'ENVIRONMENT_ALL') {
-      filters.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
-    }
-
-    if (selectedStatuses.length > 0) {
-      filters.push({ terms: { status: selectedStatuses } });
-    }
-
-    return JSON.stringify({
-      must: [],
-      filter: filters,
-      should: [],
-      must_not: [],
-    });
-  }, [serviceName, environment, selectedStatuses]);
 
   const kqlQuery = useMemo(() => {
     const trimmed = searchQuery.trim();
     return trimmed || undefined;
   }, [searchQuery]);
 
-  useEffect(() => {
-    if (!http) return;
+  const { data, status: fetchStatus } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/services/{serviceName}/slos', {
+        params: {
+          path: { serviceName },
+          query: {
+            environment,
+            page,
+            perPage,
+            ...(selectedStatuses.length > 0 && { statusFilters: JSON.stringify(selectedStatuses) }),
+            ...(kqlQuery && { kqlQuery }),
+          },
+        },
+      });
+    },
+    [serviceName, environment, selectedStatuses, kqlQuery, page, perPage],
+    { showToastOnError: false }
+  );
 
-    let isMounted = true;
-    setIsLoading(true);
+  const isLoading = isPending(fetchStatus);
 
-    const fetchSlosAndAlerts = async () => {
-      try {
-        const sloResponse = await http.fetch<{ results: SLOWithSummaryResponse[]; total: number }>(
-          '/api/observability/slos',
-          {
-            method: 'GET',
-            version: '2023-10-31',
-            query: {
-              filters: filtersQuery,
-              ...(kqlQuery && { kqlQuery }),
-              page: String(page + 1), // API uses 1-based indexing
-              perPage: String(perPage),
-              sortBy: 'status',
-              sortDirection: 'desc',
-            },
-          }
-        );
+  const sloData = useMemo(() => data?.results ?? [], [data?.results]);
+  const totalSlos = data?.total ?? 0;
 
-        if (!isMounted) return;
-
-        const slos = sloResponse.results;
-        const total = sloResponse.total;
-
-        if (slos.length > 0) {
-          const sloIdsAndInstanceIds = slos.map(
-            (sloItem) => [sloItem.id, sloItem.instanceId ?? ALL_VALUE] as [string, string]
-          );
-
-          const alertsResponse = await http
-            .post<{
-              aggregations?: {
-                perSloId: {
-                  buckets: Array<{
-                    key: [string, string];
-                    key_as_string: string;
-                    doc_count: number;
-                  }>;
-                };
-              };
-            }>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-              body: JSON.stringify({
-                rule_type_ids: SLO_RULE_TYPE_IDS,
-                consumers: [
-                  AlertConsumers.SLO,
-                  AlertConsumers.OBSERVABILITY,
-                  AlertConsumers.ALERTS,
-                ],
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [
-                      { range: { '@timestamp': { gte: 'now-24h' } } },
-                      { term: { 'kibana.alert.status': 'active' } },
-                    ],
-                    should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-                      bool: {
-                        filter: [
-                          { term: { 'slo.id': sloId } },
-                          ...(instanceId === ALL_VALUE
-                            ? []
-                            : [{ term: { 'slo.instanceId': instanceId } }]),
-                        ],
-                      },
-                    })),
-                    minimum_should_match: 1,
-                  },
-                },
-                aggs: {
-                  perSloId: {
-                    multi_terms: {
-                      size: 10000,
-                      terms: [{ field: 'slo.id' }, { field: 'slo.instanceId' }],
-                    },
-                  },
-                },
-              }),
-            })
-            .catch(() => null);
-
-          if (isMounted && alertsResponse) {
-            const alertsMap = new Map<string, number>();
-            alertsResponse.aggregations?.perSloId?.buckets?.forEach((bucket) => {
-              alertsMap.set(bucket.key_as_string, bucket.doc_count);
-            });
-            setActiveAlerts(alertsMap);
-          }
-        }
-
-        if (isMounted) {
-          setSloData(slos);
-          setTotalSlos(total);
-          setIsLoading(false);
-        }
-      } catch {
-        if (isMounted) {
-          setSloData([]);
-          setTotalSlos(0);
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchSlosAndAlerts();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [http, filtersQuery, kqlQuery, page, perPage]);
+  const activeAlerts = useMemo(() => {
+    const alertsMap = new Map<string, number>();
+    if (data?.activeAlerts) {
+      Object.entries(data.activeAlerts).forEach(([key, count]) => {
+        alertsMap.set(key, count as number);
+      });
+    }
+    return alertsMap;
+  }, [data?.activeAlerts]);
 
   const getActiveAlertsForSlo = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
@@ -288,20 +173,14 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   }, []);
 
   const statusCounts = useMemo(() => {
-    const counts = {
-      VIOLATED: 0,
-      DEGRADING: 0,
-      HEALTHY: 0,
-      NO_DATA: 0,
+    const backendCounts = data?.statusCounts;
+    return {
+      VIOLATED: backendCounts?.violated ?? 0,
+      DEGRADING: backendCounts?.degrading ?? 0,
+      HEALTHY: backendCounts?.healthy ?? 0,
+      NO_DATA: backendCounts?.noData ?? 0,
     };
-    sloData.forEach((sloItem) => {
-      const status = sloItem.summary?.status;
-      if (status && status in counts) {
-        counts[status as keyof typeof counts]++;
-      }
-    });
-    return counts;
-  }, [sloData]);
+  }, [data?.statusCounts]);
 
   // Sort SLOs by alerts count (alerts data is fetched separately, so we sort client-side)
   const sortedSlos = useMemo(() => {
