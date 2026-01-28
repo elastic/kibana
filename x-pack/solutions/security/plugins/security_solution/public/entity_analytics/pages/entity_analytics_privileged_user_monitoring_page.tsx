@@ -39,6 +39,7 @@ import { useEntityAnalyticsRoutes } from '../api/api';
 import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { UserLimitCallOut } from '../components/user_limit_callout';
+import { WatchlistFilter } from './watchlist_filter';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
@@ -324,6 +325,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                     defaultMessage="Manage data sources"
                   />
                 </EuiButtonEmpty>,
+                <WatchlistFilter />,
               ]}
             />
             <EuiFlexGroup direction="column">
