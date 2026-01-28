@@ -373,7 +373,7 @@ export const SharepointOnline: ConnectorSpec = {
           .optional()
           .describe('Entity types to search'),
         region: z
-          .string()
+          .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
           .optional()
           .describe(
             'Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
@@ -388,7 +388,7 @@ export const SharepointOnline: ConnectorSpec = {
           entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
-          region?: string;
+          region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
 
         const searchRequest = {
