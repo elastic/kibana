@@ -32,5 +32,4 @@ export default createTestConfig({
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
   ],
-  enableFleetDockerRegistry: true,
 });
