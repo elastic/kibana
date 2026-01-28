@@ -147,7 +147,7 @@ const getColumnConfigs = ({
           defaultMessage: 'Health',
         }),
         order: 20,
-        render: (index) => <DataHealth health={index.health} />,
+        render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
         fieldName: 'status',

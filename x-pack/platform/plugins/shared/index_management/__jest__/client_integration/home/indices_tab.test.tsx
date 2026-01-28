@@ -483,7 +483,11 @@ describe('<IndexManagementHome />', () => {
       const actions = createCreateIndexActions();
 
       expect(httpSetup.get).toHaveBeenCalledTimes(1);
-      expect(httpSetup.get).toHaveBeenNthCalledWith(1, '/api/index_management/indices_get');
+      expect(httpSetup.get).toHaveBeenNthCalledWith(
+        1,
+        '/api/index_management/indices_get',
+        expect.anything()
+      );
 
       await actions.clickCreateIndexButton();
 
@@ -503,7 +507,11 @@ describe('<IndexManagementHome />', () => {
       // It refreshes indices after saving; wait so the table's async state update settles (avoids act warnings).
       await waitFor(() => {
         expect(httpSetup.get).toHaveBeenCalledTimes(2);
-        expect(httpSetup.get).toHaveBeenNthCalledWith(2, '/api/index_management/indices_get');
+        expect(httpSetup.get).toHaveBeenNthCalledWith(
+          2,
+          '/api/index_management/indices_get',
+          expect.anything()
+        );
       });
 
       // Creating triggers modal state updates; wait for modal to close so updates don't land after test end.

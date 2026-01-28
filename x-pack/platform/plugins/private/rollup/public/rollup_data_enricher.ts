@@ -13,27 +13,24 @@ const SOURCE = i18n.translate('xpack.rollupJobs.rollupDataEnricher.source', {
   defaultMessage: 'rollup',
 });
 
-export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
-  client
-    .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices_caps')
-    .then((response) => {
-      return {
-        applyToAliases: true,
-        indices: Object.keys(response).reduce((acc, rollupJob) => {
-          response[rollupJob].rollup_jobs.forEach((job) => {
-            acc.push({
-              name: job.rollup_index,
-              isRollupIndex: true,
+export const rollupDataEnricher = {
+  name: SOURCE,
+  fn: async (client: HttpSetup, signal: AbortSignal): Promise<EnricherResponse> =>
+    client
+      .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices_caps', { signal })
+      .then((response) => {
+        return {
+          applyToAliases: true,
+          indices: Object.keys(response).reduce((acc, rollupJob) => {
+            response[rollupJob].rollup_jobs.forEach((job) => {
+              acc.push({
+                name: job.rollup_index,
+                isRollupIndex: true,
+              });
             });
-          });
-          return acc;
-        }, [] as { name: string; isRollupIndex: true }[]),
-        source: SOURCE,
-      };
-    })
-    .catch((error) => {
-      return {
-        error: true,
-        source: SOURCE,
-      };
-    });
+            return acc;
+          }, [] as { name: string; isRollupIndex: true }[]),
+          source: SOURCE,
+        };
+      }),
+};

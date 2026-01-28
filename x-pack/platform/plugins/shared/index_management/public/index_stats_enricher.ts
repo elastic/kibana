@@ -15,30 +15,27 @@ const SOURCE = i18n.translate('xpack.idxMgmt.indexStatsEnricher.source', {
   defaultMessage: 'index stats',
 });
 
-export const indexStatsEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
-  client
-    .get<IndicesStatsResponse>(`${API_BASE_PATH}/indices_stats`)
-    .then((response) => {
-      const indices = response.indices || {};
-      return {
-        indices: Object.keys(indices).map((name) => ({
-          name,
-          health: indices[name]?.health,
-          status: indices[name]?.status,
-          uuid: indices[name]?.uuid,
-          documents_deleted: indices[name]?.primaries?.docs?.deleted ?? 0,
-          primary_size: numeral(indices[name]?.primaries?.store?.size_in_bytes ?? 0).format(
-            '0.00 b'
-          ),
-          documents: indices[name]?.primaries?.docs?.count ?? 0,
-          size: numeral(indices[name]?.total?.store?.size_in_bytes ?? 0).format('0.00 b'),
-        })),
-        source: SOURCE,
-      };
-    })
-    .catch((error) => {
-      return {
-        error: true,
-        source: SOURCE,
-      };
-    });
+export const indexStatsEnricher = {
+  name: SOURCE,
+  fn: async (client: HttpSetup, signal: AbortSignal): Promise<EnricherResponse> =>
+    client
+      .get<IndicesStatsResponse>(`${API_BASE_PATH}/indices_stats`, { signal })
+      .then(async (response) => {
+        const indices = response.indices || {};
+        return {
+          indices: Object.keys(indices).map((name) => ({
+            name,
+            health: indices[name]?.health,
+            status: indices[name]?.status,
+            uuid: indices[name]?.uuid,
+            documents_deleted: indices[name]?.primaries?.docs?.deleted ?? 0,
+            primary_size: numeral(indices[name]?.primaries?.store?.size_in_bytes ?? 0).format(
+              '0.00 b'
+            ),
+            documents: indices[name]?.primaries?.docs?.count ?? 0,
+            size: numeral(indices[name]?.total?.store?.size_in_bytes ?? 0).format('0.00 b'),
+          })),
+          source: SOURCE,
+        };
+      }),
+};

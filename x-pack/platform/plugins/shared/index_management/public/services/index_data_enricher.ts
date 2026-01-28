@@ -15,8 +15,21 @@ export class IndexDataEnricher {
     this._enrichers.push(enricher);
   }
 
-  public enrichIndices = (client: HttpSetup): Promise<EnricherResponse>[] => {
-    return this.enrichers.map((enricher) => enricher(client));
+  public enrichIndices = (client: HttpSetup, signal: AbortSignal): Promise<EnricherResponse>[] => {
+    return this.enrichers.map((enricher) =>
+      enricher.fn(client, signal).catch((error) => {
+        // aborted request, dont show error
+        if (error.name === 'AbortError') {
+          return {
+            source: enricher.name,
+          };
+        }
+        return {
+          error: true,
+          source: enricher.name,
+        };
+      })
+    );
   };
 
   public get enrichers() {

@@ -28,7 +28,10 @@ export interface EnricherResponse {
    */
   applyToAliases?: boolean;
 }
-export type Enricher = (client: HttpSetup) => Promise<EnricherResponse>;
+export interface Enricher {
+  name: string;
+  fn: (client: HttpSetup, signal: AbortSignal) => Promise<EnricherResponse>;
+}
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (

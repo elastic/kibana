@@ -13,21 +13,18 @@ const SOURCE = i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleDataEnrich
   defaultMessage: 'index lifecycle',
 });
 
-export const indexLifecycleDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
-  client
-    .get<IlmExplainLifecycleResponse>('/api/index_lifecycle_management/explain')
-    .then((response) => {
-      return {
-        indices: Object.keys(response.indices).map((index) => ({
-          name: index,
-          ilm: response.indices[index],
-        })),
-        source: SOURCE,
-      };
-    })
-    .catch((error) => {
-      return {
-        error: true,
-        source: SOURCE,
-      };
-    });
+export const indexLifecycleDataEnricher = {
+  name: SOURCE,
+  fn: async (client: HttpSetup, signal: AbortSignal): Promise<EnricherResponse> =>
+    client
+      .get<IlmExplainLifecycleResponse>('/api/index_lifecycle_management/explain', { signal })
+      .then((response) => {
+        return {
+          indices: Object.keys(response.indices).map((index) => ({
+            name: index,
+            ilm: response.indices[index],
+          })),
+          source: SOURCE,
+        };
+      }),
+};
