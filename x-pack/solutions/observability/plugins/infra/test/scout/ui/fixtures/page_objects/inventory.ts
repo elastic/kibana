@@ -6,7 +6,11 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT, KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
+import {
+  EXTENDED_TIMEOUT,
+  KUBERNETES_TOUR_STORAGE_KEY,
+  KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
+} from '../constants';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -158,6 +162,16 @@ export class InventoryPage {
     );
   }
 
+  public async addClearK8sCardDismissedInitScript() {
+    // Clear the K8s dashboard promotion card dismissed state to ensure cards are visible
+    await this.page.addInitScript(
+      ([k8sCardDismissedKey]) => {
+        window.localStorage.removeItem(k8sCardDismissedKey);
+      },
+      [KUBERNETES_CARD_DISMISSED_STORAGE_KEY]
+    );
+  }
+
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Escape');
@@ -199,5 +213,25 @@ export class InventoryPage {
 
   public async clickNoDataPageAddDataButton() {
     await this.noDataPageActionButton.click();
+  }
+
+  public async filterByQueryBar(query: string) {
+    const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.clear();
+    await queryBar.fill(query);
+    await queryBar.press('Enter');
+    await this.waitForNodesToLoad();
+  }
+
+  public async selectPalette(
+    palette: 'status' | 'temperature' | 'cool' | 'warm' | 'positive' | 'negative'
+  ) {
+    await this.page.getByTestId('openLegendControlsButton').click();
+    await this.page.getByTestId('legendControlsPalette').selectOption(palette);
+    await this.page.getByTestId('applyLegendControlsButton').click();
+    await this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Legend Options' })
+      .waitFor({ state: 'hidden' });
   }
 }
