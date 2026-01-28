@@ -8,13 +8,31 @@
  */
 
 import { ReplaySubject, Subject } from 'rxjs';
-import type { ActionFunction, EventObject, Expr, Subscribable } from 'xstate';
+import type { EventObject, Subscribable } from 'xstate';
+
+/**
+ * Expression function type - takes context and event, returns a result.
+ * Updated for XState v5: receives destructured args object.
+ */
+type ExpressionFunction<TContext, TEvent extends EventObject, TResult> = (args: {
+  context: TContext;
+  event: TEvent;
+}) => TResult;
+
+/**
+ * Simple action function type for notification channel.
+ * Updated for XState v5: receives destructured args object.
+ */
+type NotificationAction<TContext, TEvent extends EventObject> = (args: {
+  context: TContext;
+  event: TEvent;
+}) => void;
 
 export interface NotificationChannel<TContext, TEvent extends EventObject, TSentEvent> {
   createService: () => Subscribable<TSentEvent>;
   notify: (
-    eventExpr: Expr<TContext, TEvent, TSentEvent | undefined>
-  ) => ActionFunction<TContext, TEvent>;
+    eventExpr: ExpressionFunction<TContext, TEvent, TSentEvent | undefined>
+  ) => NotificationAction<TContext, TEvent>;
 }
 
 export const createNotificationChannel = <TContext, TEvent extends EventObject, TSentEvent>(
@@ -27,9 +45,11 @@ export const createNotificationChannel = <TContext, TEvent extends EventObject, 
   const createService = () => eventsSubject.asObservable();
 
   const notify =
-    (eventExpr: Expr<TContext, TEvent, TSentEvent | undefined>) =>
-    (context: TContext, event: TEvent) => {
-      const eventToSend = eventExpr(context, event);
+    (
+      eventExpr: ExpressionFunction<TContext, TEvent, TSentEvent | undefined>
+    ): NotificationAction<TContext, TEvent> =>
+    ({ context, event }) => {
+      const eventToSend = eventExpr({ context, event });
 
       if (eventToSend != null) {
         eventsSubject.next(eventToSend);
