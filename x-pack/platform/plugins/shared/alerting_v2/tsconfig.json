@@ -44,7 +44,10 @@
     "@kbn/zod",
     "@kbn/core-di-internal",
     "@kbn/i18n",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/safer-lodash-set",
+    "@kbn/test"
   ],
   "exclude": [
     "target/**/*"
