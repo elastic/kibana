@@ -33,6 +33,8 @@
           "\"service.instance.id\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/resource_attributes/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"service.namespace\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/resource_attributes/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"span.destination.service.resource\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "\"span.subtype\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "\"span.type\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "\"transaction.name\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +135,8 @@
           "\"transaction.type\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/attributes/tracing.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -138,6 +152,8 @@
           "\"span.self_time.count\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/metrics/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +169,8 @@
           "\"span.self_time.sum.us\""
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-attributes/src/metrics/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

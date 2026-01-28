@@ -33,6 +33,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/security_project/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

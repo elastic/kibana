@@ -11,6 +11,7 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
+  type RuntimeAgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
@@ -25,10 +26,15 @@ export {
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,
+  type PromptResponse,
   type PromptRequest,
   type ToolCallPromptRequestSource,
   type PromptRequestSource,
+  type ConfirmationPromptResponseState,
+  type PromptResponseState,
+  ConfirmationStatus,
   AgentPromptType,
   AgentPromptRequestSourceType,
   isConfirmationPrompt,
+  type PromptStorageState,
 } from './prompts';

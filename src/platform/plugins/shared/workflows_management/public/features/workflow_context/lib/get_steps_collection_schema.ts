@@ -9,10 +9,11 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
-import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { isEnterForeach } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { getOutputSchemaForStepType } from '../../../../common/schema';
+import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
@@ -43,7 +44,7 @@ export function getStepsCollectionSchema(
     if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
-          output: getOutputSchemaForStepType(node.stepType).optional(),
+          output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
         }),
       });

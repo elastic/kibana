@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -45,7 +46,20 @@ export const createAttachmentAddTool = ({
       };
     }
 
-    const attachment = attachmentManager.add({ id, type, data, description });
+    let attachment;
+    try {
+      attachment = await attachmentManager.add({ id, type, data, description });
+    } catch (e) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: e.message },
+          },
+        ],
+      };
+    }
 
     return {
       results: [
@@ -55,9 +69,28 @@ export const createAttachmentAddTool = ({
           data: {
             attachment_id: attachment.id,
             type: attachment.type,
+            version: attachment.current_version,
           },
         },
       ],
     };
+  },
+  summarizeToolReturn: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
+    if (!isOtherResult(result)) return undefined;
+    const data = result.data as Record<string, unknown>;
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Added new ${data.type || 'attachment'} "${data.attachment_id}"`,
+          attachment_id: data.attachment_id,
+          type: data.type,
+          version: data.version,
+        },
+      },
+    ];
   },
 });

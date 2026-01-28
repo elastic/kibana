@@ -50,6 +50,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: false,
 
   /**
+   * `runscript` response action for Elastic Defend Endpoint
+   * Release: 9.4
+   */
+  responseActionsEndpointRunScript: false,
+
+  /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
@@ -86,11 +92,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
-   * Enabled new index sync update detection logic
-   */
-  privilegedMonitoringNewIndexSyncUpdateDetectionEnabled: true,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -114,16 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: false,
-
-  /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: true,
-
-  /**
-   * Enables the ability to use does not match condition for indicator match rules
-   */
-  doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
@@ -193,11 +184,11 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
 
   /**
    * Enables the Entity Analytics Watchlist feature.
@@ -205,9 +196,10 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsWatchlistEnabled: false,
 
   /**
-   * Enables the Gap Auto Fill Scheduler feature.
+   * Enables the Trial Companion feature.
    */
-  gapAutoFillSchedulerEnabled: false,
+  trialCompanionEnabled: false,
+
   /**
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.

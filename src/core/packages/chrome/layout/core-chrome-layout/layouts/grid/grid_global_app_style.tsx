@@ -94,19 +94,28 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   .kbnBody {
-    // adjust position of all the right flyouts relative to the application area, except the ones that are "above the header"
-    .euiFlyout[class*='right']:not(.euiOverlayMask[class*='aboveHeader'] .euiFlyout) {
-      ${logicalCSS('top', layoutVar('application.top', '0px'))};
-      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${logicalCSS('right', layoutVar('application.right', '0px'))};
-    }
-
     // overlay mask "belowHeader" should only cover the application area
-    .euiOverlayMask[class*='belowHeader'] {
+    .euiOverlayMask[data-relative-to-header='below'] {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+    }
+
+    // adjust position of all the right flyouts relative to the application area
+    .euiFlyout[class*='right'] {
+      ${logicalCSS('top', layoutVar('application.top', '0px'))};
+      ${logicalCSS('right', layoutVar('application.right', '0px'))};
+      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+    }
+
+    // if the overlay mask exists that is above the header, set the top, right and bottom of the right flyouts to 0
+    .euiOverlayMask[data-relative-to-header='above']
+      + [data-euiportal='true']
+      .euiFlyout[class*='right'] {
+      ${logicalCSS('top', 0)};
+      ${logicalCSS('right', 0)};
+      ${logicalCSS('bottom', 0)};
     }
   }
 

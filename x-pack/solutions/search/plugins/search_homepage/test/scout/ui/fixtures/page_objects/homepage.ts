@@ -15,10 +15,6 @@ export class Homepage {
     await this.page.testSubj.waitForSelector('search-homepage');
   }
 
-  async getManageLink() {
-    return this.page.testSubj.locator('searchHomepageSearchHomepagePageManageSubscriptionLink');
-  }
-
   async getHeaderLeftGroup() {
     return this.page.testSubj.locator('searchHomepageHeaderLeftsideGroup');
   }
@@ -31,6 +27,12 @@ export class Homepage {
     return this.page.testSubj.locator(cardId).click();
   }
 
+  async getGettingStartedButton() {
+    return this.page.testSubj.locator(
+      'searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton'
+    );
+  }
+
   async clickGettingStartedButton() {
     await this.page.testSubj.waitForSelector(
       'searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton'
@@ -38,14 +40,6 @@ export class Homepage {
     return this.page.testSubj
       .locator('searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton')
       .click();
-  }
-
-  async getCloudResourceCards() {
-    return this.page.locator('[data-test-subj^="cloudResourceCard-"]');
-  }
-
-  async getCloudResourceCardLink(cardId: string) {
-    return this.page.testSubj.locator(cardId).getByRole('link');
   }
 
   async getApiKeyButton() {
@@ -84,5 +78,48 @@ export class Homepage {
 
   async getApiKeyValueRow() {
     return this.page.testSubj.locator('connectionDetailsApiKeyValueRow');
+  }
+
+  // Embedded Console methods
+  async expectEmbeddedConsoleControlBarExists() {
+    await this.page.testSubj.waitForSelector('consoleEmbeddedSection');
+  }
+
+  async getEmbeddedConsoleBody() {
+    return this.page.testSubj.locator('consoleEmbeddedBody');
+  }
+
+  async clickEmbeddedConsoleControlBar() {
+    await this.page.testSubj.locator('consoleEmbeddedControlBar').click();
+  }
+
+  async getFullscreenToggleButton() {
+    return this.page.testSubj.locator('consoleToggleFullscreenButton');
+  }
+
+  async getSearchHomepageContainer() {
+    return this.page.testSubj.locator('search-homepage');
+  }
+
+  // Elasticsearch endpoint and copy functionality
+  async getCopyEndpointButton() {
+    return this.page.testSubj.locator('copyEndpointButton');
+  }
+
+  async getCopyEndpointButtonCopied() {
+    return this.page.testSubj.locator('copyEndpointButton-copied');
+  }
+
+  async getEndpointValueField() {
+    return this.page.testSubj.locator('endpointValueField');
+  }
+
+  // Body Links methods
+  async getBodyLinks() {
+    return this.page.testSubj.locator('searchHomepageBodyLinkLink');
+  }
+
+  async getBodyLinkByText(text: string) {
+    return this.page.getByRole('link', { name: text });
   }
 }

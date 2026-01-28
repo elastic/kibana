@@ -22,6 +22,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview.tsx",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -37,6 +39,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,6 +55,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -76,6 +82,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,6 +104,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "lineNumber": 16,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -115,6 +125,8 @@
           "({}: {}) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +141,8 @@
               "{}"
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+            "lineNumber": 12,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -147,6 +161,8 @@
         "label": "DataViewLogsSourceConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -161,6 +177,8 @@
               "\"data_view\""
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +199,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +215,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,6 +231,8 @@
         "label": "IndexNameLogsSourceConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,6 +247,8 @@
               "\"index_name\""
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -234,6 +260,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +273,8 @@
             "label": "timestampField",
             "description": [],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,6 +286,8 @@
             "label": "messageField",
             "description": [],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -270,6 +302,8 @@
         "label": "LogsOverviewErrorContentProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -284,6 +318,8 @@
               "Error | undefined"
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -298,6 +334,8 @@
         "label": "LogsOverviewFeatureFlags",
         "description": [],
         "path": "x-pack/platform/packages/shared/logs-overview/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -309,6 +347,8 @@
             "label": "isPatternsEnabled",
             "description": [],
             "path": "x-pack/platform/packages/shared/logs-overview/src/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -323,6 +363,8 @@
         "label": "SharedSettingLogsSourceConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,6 +379,8 @@
               "\"shared_setting\""
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,6 +395,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -365,6 +411,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,6 +468,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -465,6 +515,8 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/components/logs_overview/logs_overview.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -502,6 +554,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/logs-overview/src/utils/logs_source.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

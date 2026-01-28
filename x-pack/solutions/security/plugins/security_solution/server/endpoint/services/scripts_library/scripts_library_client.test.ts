@@ -148,7 +148,7 @@ describe('scripts library client', () => {
       });
 
       await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
-        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with with a script entry named [my script] (script ID: [1-2-3])'
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with a script entry named [my script] (script ID: [1-2-3])'
       );
     });
 
@@ -160,6 +160,7 @@ describe('scripts library client', () => {
         id: '1-2-3',
         name: 'my script',
         fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
         platform: ['macos', 'linux'],
@@ -278,6 +279,7 @@ describe('scripts library client', () => {
             instructions: undefined,
             name: 'my script',
             fileHash: 'e5441eb2bb',
+            fileId: 'file-1-2-3',
             fileName: 'my_script.sh',
             fileSize: 12098,
             pathToExecutable: undefined,
@@ -436,7 +438,7 @@ describe('scripts library client', () => {
       await expect(
         scriptsClient.update({ id: '1-2-3', file: createHapiReadableStreamMock() })
       ).rejects.toThrow(
-        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with with a script entry named [my script] (script ID: [1-2-3])'
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with a script entry named [my script] (script ID: [1-2-3])'
       );
     });
 
@@ -453,6 +455,7 @@ describe('scripts library client', () => {
         id: '1-2-3',
         name: 'my script',
         fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
         platform: ['macos', 'linux'],
@@ -480,6 +483,7 @@ describe('scripts library client', () => {
         createdBy: 'elastic',
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
         id: '1-2-3',

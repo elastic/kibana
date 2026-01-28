@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureType, StreamType } from '@kbn/streams-schema';
+import type { StreamType } from '@kbn/streams-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -22,19 +22,40 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-type CountByFeatureType = Record<FeatureType, number>;
-
-interface StreamsFeatureIdentificationIdentifiedProps {
+interface StreamsSystemIdentificationIdentifiedProps {
   count: number;
-  count_by_type: CountByFeatureType;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
   stream_type: StreamType;
 }
 
+interface StreamsDescriptionGeneratedProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+interface StreamsSignificantEventsQueriesGeneratedProps {
+  count: number;
+  systems_count: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsInsightsGeneratedProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  cached_tokens_used?: number;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
+  type StreamsSystemIdentificationIdentifiedProps,
+  type StreamsDescriptionGeneratedProps,
+  type StreamsSignificantEventsQueriesGeneratedProps,
+  type StreamsInsightsGeneratedProps,
 };
