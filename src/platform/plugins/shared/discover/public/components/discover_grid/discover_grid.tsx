@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import {
   DEFAULT_PAGINATION_MODE,
@@ -96,28 +97,34 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       cascadeGroupingChangeHandler,
     });
 
-    const externalAdditionalControls = useMemo(() => {
-      const additionalControls = [
-        customExternalAdditionalControls,
-        cascadedDocumentsContext?.availableCascadeGroups.length && props.isPlainRecord
-          ? groupBySelectorRenderer(
-              cascadedDocumentsContext.availableCascadeGroups,
-              cascadedDocumentsContext.selectedCascadeGroups
-            )
-          : null,
-      ].filter(Boolean);
+    const isCascadedDocumentsAvailable =
+      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
-      return additionalControls.length ? (
-        <React.Fragment>{additionalControls}</React.Fragment>
-      ) : null;
+    const externalAdditionalControls = useMemo(() => {
+      const additionalControls: ReactNode[] = [];
+
+      if (customExternalAdditionalControls) {
+        additionalControls.push(customExternalAdditionalControls);
+      }
+
+      if (isCascadedDocumentsAvailable) {
+        additionalControls.push(
+          groupBySelectorRenderer(
+            cascadedDocumentsContext.availableCascadeGroups,
+            cascadedDocumentsContext.selectedCascadeGroups
+          )
+        );
+      }
+
+      return additionalControls.length ? additionalControls : undefined;
     }, [
       cascadedDocumentsContext,
       customExternalAdditionalControls,
       groupBySelectorRenderer,
-      props.isPlainRecord,
+      isCascadedDocumentsAvailable,
     ]);
 
-    return props.isPlainRecord && !!cascadedDocumentsContext?.selectedCascadeGroups.length ? (
+    return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
       <CascadedDocumentsProvider value={cascadedDocumentsContext}>
         <LazyCascadedDocumentsLayout {...props} />
       </CascadedDocumentsProvider>
