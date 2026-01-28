@@ -88,10 +88,12 @@ test.describe(
 
       // Navigate to Discover
       await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilFieldListHasCountOfFields();
       await pageObjects.discover.selectDataView('logs.child');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await expect(pageObjects.discover.getSelectedDataView()).toHaveText('logs.child');
+      await pageObjects.discover.waitUntilFieldListHasCountOfFields();
 
-      // Switch to ES|QL mode by clicking the button
+      // Switch to ES|QL mode by clicking the button and waiting for doc table to load
       await pageObjects.discover.selectTextBaseLang();
 
       await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
