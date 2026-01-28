@@ -217,6 +217,10 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       return isDisabled || !assistantAvailability.hasAgentBuilderManagePrivilege;
     }, [assistantAvailability, isDisabled]);
 
+    const isMenuDisabled = useMemo(() => {
+      return isDisabled && !assistantAvailability.hasAssistantPrivilege;
+    }, [assistantAvailability, isDisabled]);
+
     const onContinueTour = useCallback(() => {
       handleOpenAIAgentModal('security_ab_tour');
     }, [handleOpenAIAgentModal]);
@@ -234,7 +238,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
               button={
                 <EuiButtonIcon
                   aria-label={i18n.AI_ASSISTANT_MENU}
-                  isDisabled={isDisabled}
+                  isDisabled={isMenuDisabled}
                   iconType="controls"
                   onClick={onButtonClick}
                   data-test-subj="chat-context-menu"
