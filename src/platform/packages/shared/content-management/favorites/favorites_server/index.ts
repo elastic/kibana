@@ -13,4 +13,6 @@ export {
   type FavoritesSetup,
   type AddFavoriteResponse,
   type RemoveFavoriteResponse,
+  getFavoritesForTypes,
+  favoritesSavedObjectName,
 } from './src';

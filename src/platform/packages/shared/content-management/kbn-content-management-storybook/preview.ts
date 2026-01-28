@@ -27,7 +27,23 @@ const preview: Preview = {
     controls: { expanded: true },
     options: {
       storySort: {
-        order: ['Playground', '*'],
+        order: [
+          'Content Management',
+          [
+            'Content List',
+            [
+              'Getting Started',
+              'Features',
+              'Customization',
+              'Layout Patterns',
+              'States',
+              'Playground',
+              '*',
+            ],
+            '*',
+          ],
+          '*',
+        ],
       },
     },
   },

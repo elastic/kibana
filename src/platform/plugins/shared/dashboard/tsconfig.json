@@ -99,7 +99,13 @@
     "@kbn/cps",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-provider-client",
+    "@kbn/content-list-provider-server",
+    "@kbn/content-list-table",
+    "@kbn/content-list-toolbar",
+    "@kbn/content-list-grid"
   ],
   "exclude": ["target/**/*"]
 }

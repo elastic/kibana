@@ -12,16 +12,16 @@ import React, { useEffect, useState } from 'react';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
-import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import type { DashboardRedirect } from '../types';
 import { findService } from '../../dashboard_client';
+import DashboardContentList from '../../dashboard_listing/dashboard_content_list';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -101,16 +101,29 @@ export const DashboardListingPage = ({
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <DashboardListing
-          useSessionStorageIntegration={true}
-          initialFilter={initialFilter ?? titleFilter}
-          goToDashboard={(id, viewMode) => {
-            redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
-          }}
-          getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
-          }}
-        />
+        <>
+          <DashboardContentList
+            kbnUrlStateStorage={kbnUrlStateStorage}
+            goToDashboard={(id, viewMode) => {
+              redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
+            }}
+            getDashboardUrl={(id, timeRestore) => {
+              return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
+            }}
+            initialFilter={initialFilter ?? titleFilter}
+            useSessionStorageIntegration={true}
+          />
+          {/* <DashboardListing
+            useSessionStorageIntegration={true}
+            initialFilter={initialFilter ?? titleFilter}
+            goToDashboard={(id, viewMode) => {
+              redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
+            }}
+            getDashboardUrl={(id, timeRestore) => {
+              return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
+            }}
+          /> */}
+        </>
       )}
     </>
   );

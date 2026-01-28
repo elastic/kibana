@@ -14,9 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -110,35 +108,34 @@ export async function renderApp(
   render(
     <KibanaRenderContextProvider {...getCore()}>
       <AppUsageTracker>
-        <TableListViewKibanaProvider
-          {...{
-            core: coreStart,
-            savedObjectsTagging,
-            FormattedRelative,
-          }}
-        >
-          <Router history={history}>
-            <Routes>
-              <Route path={`/map/:savedMapId`} render={renderMapApp} />
-              <Route exact path={`/map`} render={renderMapApp} />
-              // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-              <Route
-                path={``}
-                render={({ location: { pathname, hash } }) => {
-                  if (hash) {
-                    // Remove leading hash
-                    const newPath = hash.substr(1);
-                    return <Redirect to={newPath} />;
-                  } else if (pathname === '/' || pathname === '') {
-                    return <ListPage history={history} stateTransfer={stateTransfer} />;
-                  } else {
-                    return <Redirect to="/" />;
-                  }
-                }}
-              />
-            </Routes>
-          </Router>
-        </TableListViewKibanaProvider>
+        <Router history={history}>
+          <Routes>
+            <Route path={`/map/:savedMapId`} render={renderMapApp} />
+            <Route exact path={`/map`} render={renderMapApp} />
+            // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+            <Route
+              path={``}
+              render={({ location: { pathname, hash } }) => {
+                if (hash) {
+                  // Remove leading hash
+                  const newPath = hash.substr(1);
+                  return <Redirect to={newPath} />;
+                } else if (pathname === '/' || pathname === '') {
+                  return (
+                    <ListPage
+                      history={history}
+                      stateTransfer={stateTransfer}
+                      coreStart={coreStart}
+                      savedObjectsTagging={savedObjectsTagging}
+                    />
+                  );
+                } else {
+                  return <Redirect to="/" />;
+                }
+              }}
+            />
+          </Routes>
+        </Router>
       </AppUsageTracker>
     </KibanaRenderContextProvider>,
     element

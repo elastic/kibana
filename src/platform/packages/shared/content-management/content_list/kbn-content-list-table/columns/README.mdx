@@ -1,0 +1,235 @@
+# Columns
+
+Columns define what data appears in the table and how it's rendered.
+
+## Usage
+
+Columns are declarative components passed as children to `ContentListTable`:
+
+```tsx
+const { Column, Action } = ContentListTable;
+
+<ContentListTable>
+  <Column.Name showDescription={false} showTags={false} />
+  <Column.UpdatedAt />
+  <Column.Actions>
+    <Action.Edit />
+    <Action.Delete />
+  </Column.Actions>
+</ContentListTable>
+```
+
+## Built-in Columns
+
+### Name Column
+
+Displays item title with optional description, tags, and starred button.
+
+```tsx
+<Column.Name
+  showDescription={false}  // Hide description below title (default: true)
+  showTags={false}         // Hide tags below title (default: true)
+  showStarred={false}      // Hide starred button (default: true when starred enabled on provider)
+  sortable={true}          // Enable sorting (default: true)
+  width="40%"              // CSS width
+  columnTitle="Title"      // Custom header text (default: "Name")
+/>
+```
+
+### UpdatedAt Column
+
+Displays last modified timestamp in relative format.
+
+```tsx
+<Column.UpdatedAt
+  width="150px"
+  columnTitle="Last Modified"  // default: "Last updated"
+/>
+```
+
+### CreatedBy Column
+
+Displays creator avatar with tooltip.
+
+```tsx
+<Column.CreatedBy
+  width="100px"
+  columnTitle="Author"  // default: "Creator"
+/>
+```
+
+### Actions Column
+
+Renders action buttons. See [actions/README.mdx](./actions/README.mdx) for details.
+
+```tsx
+<Column.Actions width="100px">
+  <Action.Edit />
+  <Action.Delete />
+</Column.Actions>
+```
+
+### Expander Column
+
+Renders expand/collapse buttons for rows with expandable content. Only shown when `renderDetails` is provided to `ContentListTable`.
+
+```tsx
+<Column.Expander
+  width="40px"
+  iconType={{              // Custom icons (optional)
+    expanded: 'arrowUp',
+    collapsed: 'arrowDown',
+  }}
+/>
+```
+
+## Custom Columns
+
+Add custom columns anywhere using the base `Column` component. **No registration required!**
+
+```tsx
+<Column
+  id="status"                                    // Required: unique identifier
+  name="Status"                                  // Required: header text
+  width="120px"                                  // Optional: CSS width
+  sortable={false}                               // Optional: enable sorting
+  render={(item) => <EuiBadge>{item.status}</EuiBadge>}  // Required: render function
+/>
+```
+
+Custom columns work out of the box - you can define them directly in your component without any registration or configuration. The table will automatically include them in the specified order.
+
+## Column Order
+
+Column order in JSX determines order in the table:
+
+```tsx
+// Renders: Name | Status | Updated | Actions
+<ContentListTable>
+  <Column.Name />
+  <Column id="status" name="Status" render={...} />
+  <Column.UpdatedAt />
+  <Column.Actions />
+</ContentListTable>
+```
+
+## Architecture
+
+Columns use a declarative marker component pattern:
+
+```
+┌─────────────────────────────────────────┐
+│      parse_children.ts (orchestrator)   │
+│  - Iterates over React children         │
+│  - Delegates to column-specific parsers │
+└─────────────────────────────────────────┘
+                    │
+        ┌───────────┼───────────┬──────────┐
+        │           │           │          │
+        ▼           ▼           ▼          ▼
+   ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐
+   │  Name  │  │Updated │  │Created │  │Actions │
+   │ Parser │  │   At   │  │   By   │  │ Parser │
+   │        │  │ Parser │  │ Parser │  │        │
+   └────────┘  └────────┘  └────────┘  └────────┘
+```
+
+1. **Marker components** (`Column.Name`, etc.) don't render anything
+2. **Parser** extracts props from children and builds a config map
+3. **Builder** converts config into EUI table columns
+4. **Cell components** handle actual rendering
+
+## Adding a New Shared Column Type (Package Contributors Only)
+
+**Note:** This section is only for contributors adding new built-in column types to this package (like adding `Column.MyNewSharedColumn`). Regular consumers should use the `<Column />` component shown above.
+
+To add a new shared column type to the package:
+
+### 1. Create the marker component
+
+```tsx
+// my_column.tsx
+export interface MyColumnProps {
+  width?: string;
+  columnTitle?: string;
+  myOption?: boolean;
+}
+
+export function MyColumn(_props: MyColumnProps): null {
+  return null;  // Marker component
+}
+MyColumn.displayName = 'MyColumn';
+```
+
+### 2. Create the parser
+
+```tsx
+// my_column_builder.tsx
+export interface MyColumnConfig {
+  width?: string;
+  columnTitle?: string;
+  myOption?: boolean;
+}
+
+export function parseMyColumnProps(element: ReactElement): MyColumnConfig {
+  const props = element.props || {};
+  return {
+    width: props.width,
+    columnTitle: props.columnTitle,
+    myOption: props.myOption,
+  };
+}
+```
+
+### 3. Create the builder
+
+```tsx
+export const buildMyColumn: ColumnBuilder<MyColumnConfig> = (config, context) => {
+  return {
+    name: config.columnTitle ?? 'My Column',
+    width: config.width,
+    render: (item: ContentListItem) => <MyCell item={item} {...config} />,
+  };
+};
+```
+
+### 4. Register in parse_children.ts
+
+**This step is ONLY required for new shared column types.** Regular custom columns work without registration.
+
+```tsx
+const COLUMN_PARSERS: Record<string, ParseColumnProps> = {
+  name: parseNameColumnProps,
+  updatedAt: parseUpdatedAtColumnProps,
+  createdBy: parseCreatedByColumnProps,
+  actions: parseActionsColumnProps,
+  expander: parseExpanderColumnProps,
+  myColumn: parseMyColumnProps,  // Add your new shared column type here
+};
+```
+
+### 5. Export from the package
+
+```tsx
+// columns/index.ts
+export { MyColumn, type MyColumnProps } from './my_column';
+
+// columns/namespaces.tsx - Add to ColumnNamespace interface
+export interface ColumnNamespace {
+  // ... existing columns
+  MyColumn: (props: MyColumnProps) => ReactElement | null;
+}
+
+// content_list_table.tsx - Add to Column namespace object
+export const Column: ColumnNamespace = Object.assign(BaseColumn, {
+  Name: NameColumn,
+  // ... other columns
+  MyColumn: MyColumn,  // Add your new column here
+});
+```
+
+## Related
+
+- [Parent README](../README.md) - Package overview
+- [actions/README.mdx](./actions/README.mdx) - Action components
+

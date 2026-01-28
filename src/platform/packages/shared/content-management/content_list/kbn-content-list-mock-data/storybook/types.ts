@@ -8,6 +8,47 @@
  */
 
 /**
+ * Status type for content items with workflow states
+ */
+export type ContentStatus = 'active' | 'draft' | 'archived' | 'review';
+
+/**
+ * Status configuration with colors, labels, and sort priority
+ */
+export const STATUS_CONFIG: Record<
+  ContentStatus,
+  { color: string; label: string; priority: number }
+> = {
+  active: { color: 'success', label: 'Active', priority: 1 },
+  review: { color: 'warning', label: 'In Review', priority: 2 },
+  draft: { color: 'default', label: 'Draft', priority: 3 },
+  archived: { color: 'hollow', label: 'Archived', priority: 4 },
+};
+
+/**
+ * Status distribution pattern for mock data
+ */
+export const STATUS_DISTRIBUTION: ContentStatus[] = [
+  'active',
+  'draft',
+  'review',
+  'archived',
+  'active',
+  'active',
+  'draft',
+  'review',
+  'archived',
+  'active',
+];
+
+/**
+ * Get status for an item based on its index
+ */
+export function getStatusByIndex(index: number): ContentStatus {
+  return STATUS_DISTRIBUTION[index % STATUS_DISTRIBUTION.length];
+}
+
+/**
  * Visualization types available in Kibana
  */
 export type VisualizationType =

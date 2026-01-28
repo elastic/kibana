@@ -8,7 +8,11 @@
  */
 
 export { type FavoritesClientPublic, FavoritesClient } from './src/favorites_client';
-export { FavoritesContextProvider } from './src/favorites_context';
+export {
+  FavoritesContextProvider,
+  type FavoritesContextProviderProps,
+  type FavoritesServices,
+} from './src/favorites_context';
 export { useFavorites } from './src/favorites_query';
 
 export {

@@ -19,6 +19,9 @@
   ],
   "kbn_references": [
     "@kbn/content-management-table-list-view-common",
+    "@kbn/content-management-tags",
+    "@kbn/content-management-favorites-public",
+    "@kbn/content-management-user-profiles",
     "@kbn/user-profile-components"
   ],
   "exclude": [
