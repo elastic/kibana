@@ -81,8 +81,10 @@
 #   - security
 #   - other
 
-pr: "233289"
-type: deprecation
+pr: "236756"
+issues:
+- https://github.com/elastic/kibana/issues/231286
+type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
@@ -90,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: Filter endpoint list exceptions  in DE logic
+title: '[Alerts] Fix alerts page controls'
