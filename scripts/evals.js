@@ -9,120 +9,164 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
-const Path = require('path');
+var Fs = require('fs');
+var Path = require('path');
 
-const METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
 
-const hasFlag = (args, flag) =>
-  args.includes(flag) || args.some((arg) => arg.startsWith(`${flag}=`));
+function hasFlag(args, flag) {
+  if (args.includes(flag)) {
+    return true;
+  }
 
-const readMetadata = (repoRoot) => {
-  const filePath = Path.join(repoRoot, METADATA_RELATIVE_PATH);
+  for (var i = 0; i < args.length; i++) {
+    if (String(args[i]).startsWith(flag + '=')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function readMetadata(repoRoot) {
+  var filePath = Path.join(repoRoot, METADATA_RELATIVE_PATH);
   if (!Fs.existsSync(filePath)) {
     return [];
   }
 
   try {
-    const raw = Fs.readFileSync(filePath, 'utf-8');
-    const parsed = JSON.parse(raw);
+    var raw = Fs.readFileSync(filePath, 'utf-8');
+    var parsed = JSON.parse(raw);
     return Array.isArray(parsed.suites) ? parsed.suites : [];
   } catch (error) {
     return [];
   }
-};
+}
 
-const deriveSuiteRoot = (configPath, repoRoot) => {
-  const relPath = configPath.replace(/\\/g, '/');
-  const parts = relPath.split('/');
-  const suiteIndex = parts.findIndex((part) => part.startsWith('kbn-evals-suite-'));
-  if (suiteIndex === -1) {
-    return null;
+function deriveSuiteRoot(configPath) {
+  var relPath = String(configPath).replace(/\\/g, '/');
+  var parts = relPath.split('/');
+
+  for (var i = 0; i < parts.length; i++) {
+    if (String(parts[i]).startsWith('kbn-evals-suite-')) {
+      return parts.slice(0, i + 1).join('/');
+    }
   }
-  return parts.slice(0, suiteIndex + 1).join('/');
-};
 
-const normalizeSuite = (entry, repoRoot) => {
-  const id = entry.id;
-  const name = entry.name ?? id;
-  const tags = entry.tags ?? [];
-  const ciLabels = entry.ciLabels ?? [`evals:${id}`];
-  const absoluteConfigPath = Path.resolve(repoRoot, entry.configPath);
-  const suiteRoot = deriveSuiteRoot(entry.configPath, repoRoot);
+  return null;
+}
+
+function normalizeSuite(entry, repoRoot) {
+  var id = entry.id;
+  var name = entry.name !== undefined && entry.name !== null ? entry.name : id;
+  var tags = entry.tags !== undefined && entry.tags !== null ? entry.tags : [];
+  var ciLabels =
+    entry.ciLabels !== undefined && entry.ciLabels !== null ? entry.ciLabels : ['evals:' + id];
+  var absoluteConfigPath = Path.resolve(repoRoot, entry.configPath);
+  var suiteRoot = deriveSuiteRoot(entry.configPath);
+
   return {
-    id,
-    name,
+    id: id,
+    name: name,
     configPath: entry.configPath,
-    absoluteConfigPath,
-    suiteRoot,
+    absoluteConfigPath: absoluteConfigPath,
+    suiteRoot: suiteRoot,
     relativeSuiteRoot: suiteRoot,
-    tags,
-    ciLabels,
+    tags: tags,
+    ciLabels: ciLabels,
     description: entry.description,
     source: 'metadata',
   };
-};
+}
 
-const logInfo = (message) => console.log(` info ${message}`);
-const logWarning = (message) => console.log(`warning ${message}`);
-const logError = (message) => console.log(`error ${message}`);
+function logInfo(message) {
+  console.log(' info ' + message);
+}
 
-const printSuiteTable = (suites) => {
+function logWarning(message) {
+  console.log('warning ' + message);
+}
+
+function printSuiteTable(suites) {
   if (suites.length === 0) {
     return;
   }
 
-  const idWidth = Math.max('Suite ID'.length, ...suites.map((suite) => suite.id.length));
-  const tagsWidth = Math.max(
-    'Tags'.length,
-    ...suites.map((suite) => (suite.tags.length ? suite.tags.join(', ').length : 1))
-  );
+  var idWidth = 'Suite ID'.length;
+  var tagsWidth = 'Tags'.length;
 
-  logInfo(`${'Suite ID'.padEnd(idWidth)}  ${'Tags'.padEnd(tagsWidth)}  Config`);
-  suites.forEach((suite) => {
-    const tags = suite.tags.length ? suite.tags.join(', ') : '-';
-    logInfo(`${suite.id.padEnd(idWidth)}  ${tags.padEnd(tagsWidth)}  ${suite.configPath}`);
-  });
-};
+  for (var i = 0; i < suites.length; i++) {
+    if (String(suites[i].id).length > idWidth) {
+      idWidth = String(suites[i].id).length;
+    }
 
-const runFastList = (repoRoot, args) => {
-  const metadata = readMetadata(repoRoot);
+    var tagString = suites[i].tags && suites[i].tags.length ? suites[i].tags.join(', ') : '-';
+    if (tagString.length > tagsWidth) {
+      tagsWidth = tagString.length;
+    }
+  }
+
+  logInfo('Suite ID'.padEnd(idWidth) + '  ' + 'Tags'.padEnd(tagsWidth) + '  Config');
+  for (var j = 0; j < suites.length; j++) {
+    var tags = suites[j].tags && suites[j].tags.length ? suites[j].tags.join(', ') : '-';
+    logInfo(
+      String(suites[j].id).padEnd(idWidth) +
+        '  ' +
+        tags.padEnd(tagsWidth) +
+        '  ' +
+        suites[j].configPath
+    );
+  }
+}
+
+function runFastList(repoRoot, args) {
+  var metadata = readMetadata(repoRoot);
   if (metadata.length === 0) {
     return false;
   }
 
-  const suites = metadata.map((entry) => normalizeSuite(entry, repoRoot));
-  const wantsJson = hasFlag(args, '--json');
+  var suites = [];
+  for (var i = 0; i < metadata.length; i++) {
+    suites.push(normalizeSuite(metadata[i], repoRoot));
+  }
+
+  var wantsJson = hasFlag(args, '--json');
   logInfo('Using cached suite metadata (fast). Run with --refresh to rescan configs.');
 
   if (wantsJson) {
-    process.stdout.write(`${JSON.stringify(suites, null, 2)}\n`);
+    process.stdout.write(JSON.stringify(suites, null, 2) + '\n');
     return true;
   }
 
-  logInfo(`Found ${suites.length} eval suite(s):`);
+  logInfo('Found ' + suites.length + ' eval suite(s):');
   printSuiteTable(suites);
   return true;
-};
+}
 
-const runFastCiMap = (repoRoot, args) => {
-  const metadata = readMetadata(repoRoot);
+function runFastCiMap(repoRoot, args) {
+  var metadata = readMetadata(repoRoot);
   if (metadata.length === 0) {
     return false;
   }
 
-  const entries = metadata.flatMap((suite) => {
-    const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-    return labels.map((label) => ({
-      label,
-      suiteId: suite.id,
-      command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
-    }));
-  });
+  var entries = [];
+  for (var i = 0; i < metadata.length; i++) {
+    var suite = metadata[i];
+    var labels = suite.ciLabels && suite.ciLabels.length ? suite.ciLabels : ['evals:' + suite.id];
 
-  const wantsJson = hasFlag(args, '--json');
+    for (var j = 0; j < labels.length; j++) {
+      entries.push({
+        label: labels[j],
+        suiteId: suite.id,
+        command:
+          'EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
+      });
+    }
+  }
+
+  var wantsJson = hasFlag(args, '--json');
   if (wantsJson) {
-    process.stdout.write(`${JSON.stringify(entries, null, 2)}\n`);
+    process.stdout.write(JSON.stringify(entries, null, 2) + '\n');
     return true;
   }
 
@@ -132,13 +176,13 @@ const runFastCiMap = (repoRoot, args) => {
   }
 
   logInfo('CI label mappings:');
-  entries.forEach((entry) => {
-    logInfo(`- ${entry.label}: ${entry.command}`);
-  });
+  for (var k = 0; k < entries.length; k++) {
+    logInfo('- ' + entries[k].label + ': ' + entries[k].command);
+  }
   return true;
-};
+}
 
-const ENV_DOCS = [
+var ENV_DOCS = [
   {
     name: 'EVALUATION_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
@@ -191,24 +235,36 @@ const ENV_DOCS = [
   },
 ];
 
-const runFastEnv = () => {
+function runFastEnv() {
   logInfo('Environment variables:');
-  const nameWidth = Math.max('Name'.length, ...ENV_DOCS.map((entry) => entry.name.length));
-  const descWidth = Math.max(
-    'Description'.length,
-    ...ENV_DOCS.map((entry) => entry.description.length)
-  );
 
-  logInfo(`${'Name'.padEnd(nameWidth)}  ${'Description'.padEnd(descWidth)}  Example`);
-  ENV_DOCS.forEach((entry) => {
+  var nameWidth = 'Name'.length;
+  var descWidth = 'Description'.length;
+
+  for (var i = 0; i < ENV_DOCS.length; i++) {
+    if (String(ENV_DOCS[i].name).length > nameWidth) {
+      nameWidth = String(ENV_DOCS[i].name).length;
+    }
+    if (String(ENV_DOCS[i].description).length > descWidth) {
+      descWidth = String(ENV_DOCS[i].description).length;
+    }
+  }
+
+  logInfo('Name'.padEnd(nameWidth) + '  ' + 'Description'.padEnd(descWidth) + '  Example');
+  for (var j = 0; j < ENV_DOCS.length; j++) {
     logInfo(
-      `${entry.name.padEnd(nameWidth)}  ${entry.description.padEnd(descWidth)}  ${entry.example}`
+      String(ENV_DOCS[j].name).padEnd(nameWidth) +
+        '  ' +
+        String(ENV_DOCS[j].description).padEnd(descWidth) +
+        '  ' +
+        String(ENV_DOCS[j].example)
     );
-  });
-  return true;
-};
+  }
 
-const runFastHelp = () => {
+  return true;
+}
+
+function runFastHelp() {
   logInfo('Evals CLI');
   logInfo('');
   logInfo('For full command help/flags: node scripts/evals --full-help');
@@ -226,14 +282,14 @@ const runFastHelp = () => {
     '  node scripts/evals run --suite obs-ai-assistant --evaluation-connector-id bedrock-claude'
   );
   return true;
-};
+}
 
 function main() {
-  const args = process.argv.slice(2);
-  const command = args[0];
-  const repoRoot = process.cwd();
+  var args = process.argv.slice(2);
+  var command = args[0];
+  var repoRoot = process.cwd();
 
-  const hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
+  var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 
   // For subcommand-level help, prefer the full CLI help output.
   if (hasHelpFlag && (command === 'list' || command === 'env')) {
@@ -250,10 +306,13 @@ function main() {
   }
 
   if (command === 'list' && hasFlag(args, '--refresh') && !hasFlag(args, '--json')) {
-    const metadata = readMetadata(repoRoot);
+    var metadata = readMetadata(repoRoot);
     if (metadata.length > 0) {
-      const suites = metadata.map((entry) => normalizeSuite(entry, repoRoot));
-      logInfo(`Cached suites (${suites.length}):`);
+      var suites = [];
+      for (var i = 0; i < metadata.length; i++) {
+        suites.push(normalizeSuite(metadata[i], repoRoot));
+      }
+      logInfo('Cached suites (' + suites.length + '):');
       printSuiteTable(suites);
       logInfo('Refreshing suite discovery...');
       process.env.KBN_EVALS_LIST_CACHE_PRINTED = 'true';
