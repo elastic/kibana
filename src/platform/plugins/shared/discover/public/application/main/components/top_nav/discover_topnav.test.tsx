@@ -14,10 +14,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
+import type { SearchBarCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -33,10 +32,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
   () => <div data-test-subj="custom-search-bar" />;
-
-const mockTopNavCustomization: TopNavCustomization = {
-  id: 'top_nav',
-};
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -113,7 +108,6 @@ const getTestComponent = (props: DiscoverTopNavProps) =>
 
 describe('Discover topnav component', () => {
   beforeEach(() => {
-    mockTopNavCustomization.defaultMenu = undefined;
     mockUseCustomizations = false;
     capturedTopNavMenu = undefined;
     jest.clearAllMocks();
@@ -124,8 +118,6 @@ describe('Discover topnav component', () => {
       }
 
       switch (id) {
-        case 'top_nav':
-          return mockTopNavCustomization;
         case 'search_bar':
           return mockSearchBarCustomization;
         default:
@@ -158,83 +150,6 @@ describe('Discover topnav component', () => {
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
     expect(itemIds).toEqual(['inspect', 'new', 'open']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
-  });
-
-  describe('top nav customization', () => {
-    it('should allow disabling default menu items', async () => {
-      mockUseCustomizations = true;
-      mockTopNavCustomization.defaultMenu = {
-        newItem: { disabled: true },
-        openItem: { disabled: true },
-        shareItem: { disabled: true },
-        alertsItem: { disabled: true },
-        inspectItem: { disabled: true },
-        saveItem: { disabled: true },
-      };
-      const props = getProps();
-      await act(async () => {
-        getTestComponent(props);
-      });
-
-      const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
-      expect(itemIds).toEqual([]);
-    });
-
-    describe('share service available', () => {
-      let availableIntegrationsSpy: jest.SpyInstance;
-
-      beforeAll(() => {
-        mockDiscoverService.share = sharePluginMock.createStartContract();
-      });
-
-      afterAll(() => {
-        mockDiscoverService.share = undefined;
-      });
-
-      beforeEach(() => {
-        (availableIntegrationsSpy = jest.spyOn(
-          mockDiscoverService.share!,
-          'availableIntegrations'
-        )).mockImplementation(() => []);
-      });
-
-      it('will include share menu item if the share service is available', async () => {
-        const props = getProps();
-        await act(async () => {
-          getTestComponent(props);
-        });
-
-        const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
-        expect(itemIds).toEqual(['inspect', 'new', 'open', 'share']);
-        expect(capturedTopNavMenu?.primaryActionItem?.id).toBe('save');
-      });
-
-      it('will include export menu item if there are export integrations available', async () => {
-        availableIntegrationsSpy.mockImplementation((_objectType, groupId) => {
-          if (groupId === 'export') {
-            return [
-              {
-                id: 'export',
-                shareType: 'integration',
-                groupId: 'export',
-                config: () => Promise.resolve({}),
-              },
-            ];
-          }
-
-          return [];
-        });
-
-        const props = getProps();
-        await act(async () => {
-          getTestComponent(props);
-        });
-
-        const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
-        expect(itemIds).toEqual(['inspect', 'new', 'open', 'export', 'share']);
-        expect(capturedTopNavMenu?.primaryActionItem?.id).toBe('save');
-      });
-    });
   });
 
   describe('search bar customization', () => {
