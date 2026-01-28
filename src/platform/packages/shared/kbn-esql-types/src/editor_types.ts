@@ -30,8 +30,6 @@ export interface ESQLQueryStats {
   durationInMs?: string;
   /** Total number of documents queried in the last query */
   totalDocumentsQueried?: number;
-  /** Timestamp of when the last query was run */
-  lastRunAt?: string;
 }
 
 /** @internal **/

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { round } from 'lodash';
 import type { ESQLQueryStats } from '@kbn/esql-types';
 
@@ -29,8 +29,14 @@ function formatDocumentCount(count: number): string {
 }
 
 export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={{ marginRight: euiTheme.size.s }}
+    >
       {queryStats.durationInMs && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
