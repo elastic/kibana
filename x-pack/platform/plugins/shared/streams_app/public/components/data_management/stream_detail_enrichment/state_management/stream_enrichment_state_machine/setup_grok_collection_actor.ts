@@ -6,7 +6,7 @@
  */
 
 import type { GrokCollection } from '@kbn/grok-ui';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 
 export function setupGrokCollectionActor() {
   return fromPromise<void, { grokCollection: GrokCollection }>(async ({ input }) => {
