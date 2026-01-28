@@ -16,7 +16,7 @@ import { getLogDocumentById } from './get_log_document_by_id';
 import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
-import { isWarningOrAbove } from './get_log_severity';
+import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import type { AiInsightResult, ContextEvent } from './types';
 
 export interface GetLogAiInsightsParams {
