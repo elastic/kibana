@@ -10,6 +10,7 @@ import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
+import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -18,6 +19,33 @@ import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
+
+export function filterToolsByNamespace(
+  tools: InternalToolDefinition[],
+  namespaces?: string
+): InternalToolDefinition[] {
+  if (!namespaces?.trim()) {
+    return tools;
+  }
+
+  const namespaceList = namespaces
+    .split(',')
+    .map((ns) => ns.trim())
+    .filter(Boolean);
+
+  if (namespaceList.length === 0) {
+    return tools;
+  }
+
+  return tools.filter((tool) => {
+    const lastDotIndex = tool.id.lastIndexOf('.');
+    if (lastDotIndex <= 0) {
+      return false;
+    }
+    const toolNamespace = tool.id.substring(0, lastDotIndex);
+    return namespaceList.includes(toolNamespace);
+  });
+}
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -52,6 +80,16 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
                 meta: { description: 'JSON-RPC 2.0 request payload for MCP server communication.' },
               }
             ),
+            query: schema.object({
+              namespace: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.',
+                  },
+                })
+              ),
+            }),
           },
         },
         options: {
@@ -74,7 +112,8 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           const { tools: toolService } = getInternalServices();
 
           const registry = await toolService.getRegistry({ request });
-          const tools = await registry.list({});
+          const allTools = await registry.list({});
+          const tools = filterToolsByNamespace(allTools, request.query.namespace);
 
           const idMapping = createToolIdMappings(tools);
 
