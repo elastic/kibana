@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { SetRequired } from 'type-fest';
@@ -33,6 +33,7 @@ export interface UseAlertsTableQueryParamsOptions
     include_unmapped: boolean;
   }>;
   dispatchBulkAction: Dispatch<BulkActionsReducerAction>;
+  setPageIndex: Dispatch<SetStateAction<number>>;
 }
 
 /**
@@ -51,6 +52,7 @@ export const useAlertsTableQueryParams = ({
   minScore,
   trackScores,
   dispatchBulkAction,
+  setPageIndex,
 }: UseAlertsTableQueryParamsOptions) => {
   const [queryParams, setQueryParams] = useState({
     ruleTypeIds,
@@ -92,6 +94,10 @@ export const useAlertsTableQueryParams = ({
           pageSize,
         }
       );
+
+      if (resetPageIndex) {
+        setPageIndex(0);
+      }
       if (resetPageIndex || pageIndex !== prevQueryParams.pageIndex) {
         // Clear any bulk actions selections when the query changes
         dispatchBulkAction({ action: BulkActionsVerbs.clear });
@@ -122,6 +128,7 @@ export const useAlertsTableQueryParams = ({
     pageSize,
     pageIndex,
     dispatchBulkAction,
+    setPageIndex,
   ]);
 
   return queryParams;

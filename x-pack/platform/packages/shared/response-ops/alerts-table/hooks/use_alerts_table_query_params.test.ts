@@ -11,6 +11,7 @@ import { useAlertsTableQueryParams } from './use_alerts_table_query_params';
 import { BulkActionsVerbs } from '../types';
 
 const mockDispatchBulkAction = jest.fn();
+const mockSetPageIndex = jest.fn();
 const defaultOptions: UseAlertsTableQueryParamsOptions = {
   ruleTypeIds: ['ruleType1'],
   consumers: ['consumer1'],
@@ -23,6 +24,7 @@ const defaultOptions: UseAlertsTableQueryParamsOptions = {
   minScore: undefined,
   trackScores: false,
   dispatchBulkAction: mockDispatchBulkAction,
+  setPageIndex: mockSetPageIndex,
 };
 const changedOptions: Partial<UseAlertsTableQueryParamsOptions> = {
   ruleTypeIds: ['ruleType1', 'ruleType2'],
@@ -58,7 +60,7 @@ describe('useAlertsTableQueryParams', () => {
       useAlertsTableQueryParams(options)
     );
 
-    const { dispatchBulkAction, ...expectedQueryParams } = defaultOptions;
+    const { dispatchBulkAction, setPageIndex, ...expectedQueryParams } = defaultOptions;
 
     expect(result.current).toEqual(expectedQueryParams);
   });
@@ -111,5 +113,39 @@ describe('useAlertsTableQueryParams', () => {
 
     expect(result.current.pageIndex).toBe(2);
     expect(mockDispatchBulkAction).not.toHaveBeenCalled();
+    expect(mockSetPageIndex).not.toHaveBeenCalled();
+  });
+
+  it('should reset pageIndex to 0 after filter change', () => {
+    const { rerender } = renderHook((options: UseAlertsTableQueryParamsOptions = defaultOptions) =>
+      useAlertsTableQueryParams(options)
+    );
+
+    rerender({
+      ...defaultOptions,
+      pageSize: 10,
+    });
+
+    rerender({
+      ...defaultOptions,
+      query: { ids: { values: ['some_id'] } },
+    });
+
+    expect(mockSetPageIndex).toHaveBeenCalledTimes(2);
+    expect(mockSetPageIndex).toHaveBeenCalledWith(0);
+  });
+
+  it('should reset pageIndex when filters are applied', () => {
+    const highPageOptions = { ...defaultOptions, pageIndex: 5 };
+    const { rerender } = renderHook((options: UseAlertsTableQueryParamsOptions = highPageOptions) =>
+      useAlertsTableQueryParams(options)
+    );
+
+    rerender({
+      ...highPageOptions,
+      query: changedOptions.query!,
+    });
+
+    expect(mockSetPageIndex).toHaveBeenCalledWith(0);
   });
 });

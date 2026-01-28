@@ -368,6 +368,7 @@ const AlertsTableContent = typedForwardRef(
       minScore,
       trackScores,
       dispatchBulkAction,
+      setPageIndex,
     });
 
     const {
