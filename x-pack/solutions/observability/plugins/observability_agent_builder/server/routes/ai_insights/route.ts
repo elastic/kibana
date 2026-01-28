@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import { getCurrentSpaceId } from '@kbn/agent-builder-plugin/server/utils/spaces';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
