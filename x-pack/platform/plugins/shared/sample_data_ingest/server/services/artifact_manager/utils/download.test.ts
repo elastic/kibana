@@ -32,6 +32,18 @@ jest.mock('stream/promises', () => ({
   pipeline: jest.fn(),
 }));
 
+// Mock Readable.fromWeb to return the mock body directly since pipeline is already mocked
+jest.mock('stream', () => {
+  const actual = jest.requireActual('stream');
+  return {
+    ...actual,
+    Readable: {
+      ...actual.Readable,
+      fromWeb: jest.fn((webStream) => webStream),
+    },
+  };
+});
+
 const fetchMock = jest.spyOn(global, 'fetch');
 
 describe('download', () => {
