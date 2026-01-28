@@ -33,16 +33,8 @@ export const createAgentHandler = ({
     },
     context
   ) => {
-    const resolvedConfiguration =
-      typeof agent.configuration === 'function'
-        ? await agent.configuration({
-            spaceId: context.spaceId,
-            request: context.request,
-          })
-        : agent.configuration;
-
     const effectiveConfiguration = {
-      ...resolvedConfiguration,
+      ...agent.configuration,
       ...(configurationOverrides || {}),
     };
 
