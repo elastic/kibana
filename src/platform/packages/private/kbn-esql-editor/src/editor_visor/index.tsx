@@ -141,6 +141,7 @@ export function QuickSearchVisor({
           <div ref={kqlInputRef}>
             <KQLComponent
               iconType="search"
+              isDisabled={!isVisible}
               disableLanguageSwitcher={true}
               indexPatterns={selectedSources.map((source) => source.label)}
               bubbleSubmitEvent={false}
@@ -158,6 +159,7 @@ export function QuickSearchVisor({
               }}
               appName="esqlEditorVisor"
               dataTestSubj="esqlVisorKQLQueryInput"
+              size="s"
             />
           </div>
         </EuiFlexItem>

@@ -8,72 +8,76 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { getConnectorIcon } from './get_connector_icon';
-import type { Connector } from '../types/connector';
+import { getConnectorIcon, getConnectorIconType } from './get_connector_icon';
 
 // Mock the connector-specs icons
 jest.mock('@kbn/connector-specs/icons', () => ({
   ConnectorIconsMap: new Map(),
 }));
 
-describe('getConnectorIcon', () => {
-  const mockConnector: Connector = {
-    id: 'test-connector',
-    name: 'Test Connector',
-    type: '.notion',
-    category: 'popular',
-  };
-
+describe('Connector Icon Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (ConnectorIconsMap as Map<string, React.ComponentType<any>>).clear();
   });
 
-  describe('with connector-specs icon', () => {
-    it('should render lazy-loaded icon when connector type starts with dot and icon exists', () => {
-      const MockIcon = () => <div data-test-subj="mock-notion-icon">Notion Icon</div>;
+  describe('getConnectorIconType', () => {
+    it('should return icon component when icon exists in map', () => {
+      const MockIcon = () => <div>Notion Icon</div>;
       (ConnectorIconsMap as Map<string, React.ComponentType<any>>).set('.notion', MockIcon);
 
-      const { container } = render(<>{getConnectorIcon(mockConnector, 'l')}</>);
+      const result = getConnectorIconType('.notion');
 
-      expect(container.querySelector('[data-test-subj="mock-notion-icon"]')).toBeInTheDocument();
+      expect(result).toBe(MockIcon);
     });
 
-    it('should render skeleton fallback while icon is loading', () => {
-      // Create a mock icon that throws to simulate suspended state
-      const MockIcon = () => {
-        throw new Promise(() => {});
-      };
-      (ConnectorIconsMap as Map<string, React.ComponentType<any>>).set('.notion', MockIcon);
+    it('should return default integration string when icon not found in map', () => {
+      const result = getConnectorIconType('.unknown');
 
-      const { container } = render(<>{getConnectorIcon(mockConnector, 'l')}</>);
-
-      // EuiSkeletonCircle renders a span with specific classes
-      const skeleton = container.querySelector('.euiSkeletonCircle');
-      expect(skeleton).toBeInTheDocument();
+      expect(result).toBe('integration');
     });
   });
 
-  describe('fallback to default icon', () => {
-    it('should render fallback icon when connector type does not start with dot', () => {
-      const connectorWithoutDot: Connector = {
-        ...mockConnector,
-        type: 'notion', // No dot prefix
-      };
+  describe('getConnectorIcon', () => {
+    describe('with connector-specs icon', () => {
+      it('should render lazy-loaded icon component when icon exists in map', () => {
+        const MockIcon = () => <div data-test-subj="mock-notion-icon">Notion Icon</div>;
+        (ConnectorIconsMap as Map<string, React.ComponentType<any>>).set('.notion', MockIcon);
 
-      const { container } = render(<>{getConnectorIcon(connectorWithoutDot, 'l')}</>);
+        const { container } = render(<>{getConnectorIcon('.notion', 'l')}</>);
 
-      // EuiIcon renders with specific data-euiicon-type attribute
-      const icon = container.querySelector('[data-euiicon-type="application"]');
-      expect(icon).toBeInTheDocument();
+        expect(container.querySelector('[data-test-subj="mock-notion-icon"]')).toBeInTheDocument();
+      });
+
+      it('should render skeleton fallback while icon is loading', () => {
+        // Create a mock icon that throws to simulate suspended state
+        const MockIcon = () => {
+          throw new Promise(() => {});
+        };
+        (ConnectorIconsMap as Map<string, React.ComponentType<any>>).set('.notion', MockIcon);
+
+        const { container } = render(<>{getConnectorIcon('.notion', 'l')}</>);
+
+        // EuiSkeletonCircle renders a span with specific classes
+        const skeleton = container.querySelector('.euiSkeletonCircle');
+        expect(skeleton).toBeInTheDocument();
+      });
     });
 
-    it('should render fallback icon when connector type starts with dot but icon not found in map', () => {
-      // ConnectorIconsMap is empty, so .notion won't be found
-      const { container } = render(<>{getConnectorIcon(mockConnector, 'l')}</>);
+    describe('fallback to default icon', () => {
+      it('should render default integration icon when icon not found in map', () => {
+        const { container } = render(<>{getConnectorIcon('.notion', 'l')}</>);
 
-      const icon = container.querySelector('[data-euiicon-type="application"]');
-      expect(icon).toBeInTheDocument();
+        const icon = container.querySelector('[data-euiicon-type="integration"]');
+        expect(icon).toBeInTheDocument();
+      });
+
+      it('should render default integration icon for unknown icon type', () => {
+        const { container } = render(<>{getConnectorIcon('.unknown', 'l')}</>);
+
+        const icon = container.querySelector('[data-euiicon-type="integration"]');
+        expect(icon).toBeInTheDocument();
+      });
     });
   });
 });

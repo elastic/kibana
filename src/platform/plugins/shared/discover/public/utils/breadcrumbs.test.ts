@@ -36,7 +36,11 @@ describe('Breadcrumbs', () => {
       rootBreadcrumbPath: '#/custom-path',
     });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/custom-path', deepLinkId: 'discover' },
+      {
+        text: 'Discover',
+        href: '#/custom-path',
+        deepLinkId: 'discover',
+      },
       { text: 'Saved Search' },
     ]);
   });

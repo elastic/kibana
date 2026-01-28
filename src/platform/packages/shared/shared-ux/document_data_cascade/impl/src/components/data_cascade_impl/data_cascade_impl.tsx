@@ -29,6 +29,7 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
+import { ScrollSyncProvider } from '../../lib/core/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
@@ -147,6 +148,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
     scrollOffset: virtualizerScrollOffset,
+    isScrolling,
   } = virtualizerInstance.current;
 
   useRegisterCascadeAccessibilityHelpers<G>({
@@ -155,7 +157,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     scrollToRowIndex: scrollToVirtualizedIndex,
   });
 
-  const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['children']>(
+  const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['listItemRenderer']>(
     ({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
       <CascadeRowPrimitive<G, L>
         {...{
@@ -176,6 +178,19 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
+  const shouldRenderStickyHeader = useMemo(() => {
+    return (
+      enableStickyGroupHeader &&
+      activeStickyIndex !== null &&
+      (virtualizerScrollOffset ?? 0) > (virtualizedRowComputedTranslateValue.get(0) ?? 0)
+    );
+  }, [
+    activeStickyIndex,
+    enableStickyGroupHeader,
+    virtualizerScrollOffset,
+    virtualizedRowComputedTranslateValue,
+  ]);
+
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
       <EuiFlexGroup direction="column" gutterSize="none" css={styles.containerInner}>
@@ -193,27 +208,25 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 }}
               >
                 <>
-                  {activeStickyIndex !== null &&
-                    enableStickyGroupHeader &&
-                    (virtualizerScrollOffset ?? 0) >
-                      (virtualizedRowComputedTranslateValue.get(0) ?? 0) && (
-                      <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
-                        <div ref={activeStickyRenderSlotRef} />
-                      </div>
-                    )}
+                  {shouldRenderStickyHeader && (
+                    <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
+                      <div ref={activeStickyRenderSlotRef} />
+                    </div>
+                  )}
                 </>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
-                    <VirtualizedCascadeRowList<G>
-                      {...{
-                        activeStickyIndex,
-                        getVirtualItems,
-                        virtualizedRowComputedTranslateValue,
-                        rows,
-                      }}
-                    >
-                      {virtualCascadeRowRenderer}
-                    </VirtualizedCascadeRowList>
+                    <ScrollSyncProvider disableScrollSync={isScrolling}>
+                      <VirtualizedCascadeRowList<G>
+                        {...{
+                          activeStickyIndex,
+                          getVirtualItems,
+                          virtualizedRowComputedTranslateValue,
+                          rows,
+                          listItemRenderer: virtualCascadeRowRenderer,
+                        }}
+                      />
+                    </ScrollSyncProvider>
                   </div>
                 </div>
               </div>

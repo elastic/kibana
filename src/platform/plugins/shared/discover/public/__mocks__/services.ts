@@ -268,7 +268,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
-    discoverFeatureFlags: {},
+    discoverFeatureFlags: {
+      getCascadeLayoutEnabled: jest.fn(() => false),
+    },
+    embeddableEditor: {
+      isByValueEditor: jest.fn(() => false),
+      isEmbeddedEditor: jest.fn(() => false),
+      transferBackToEditor: jest.fn(),
+    },
   } as unknown as DiscoverServices;
 }
 
