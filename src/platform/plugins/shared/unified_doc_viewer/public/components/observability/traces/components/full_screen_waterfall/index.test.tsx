@@ -14,25 +14,6 @@ import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 
-let capturedCallbacks: any = null;
-
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
-    const api = getParentApi();
-    capturedCallbacks = api.getSerializedStateForChild();
-
-    return (
-      <div
-        data-test-subj="embeddableRenderer"
-        data-type={type}
-        data-hide-panel-chrome={hidePanelChrome}
-      >
-        Embeddable Renderer Mock
-      </div>
-    );
-  },
-}));
-
 jest.mock('./waterfall_flyout/span_flyout', () => ({
   SpanFlyout: ({ traceId, spanId, _, activeSection }: any) => (
     <div
@@ -76,7 +57,6 @@ describe('FullScreenWaterfall', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    capturedCallbacks = null;
   });
 
   it('should not display nested flyouts initially', () => {
