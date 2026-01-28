@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// import { summary } from '../../../../commands/registry/stats/summary';
+import { getSummaryPerCommand } from '@kbn/esql-utils/src/utils/get_query_summary';
 import { Walker } from '../../../walker';
-import { Visitor } from '../../../visitor';
 import { LeafPrinter } from '../../../../pretty_print';
 import { Builder } from '../../../builder';
 import { singleItems } from '../../../visitor/utils';
@@ -58,12 +59,12 @@ export interface StatsCommandSummary {
   /**
    * Summary of the main arguments of the "STATS" command.
    */
-  aggregates: Record<string, StatsFieldSummary>;
+  aggregates: Set<StatsFieldSummary>; // HD remove all interface
 
   /**
    * Summary of the "BY" arguments of the "STATS" command.
    */
-  grouping: Record<string, StatsFieldSummary>;
+  grouping: Set<StatsFieldSummary>;
 }
 
 /**
@@ -92,12 +93,12 @@ export interface StatsFieldSummary {
    * The definition of the field, which is the right-hand side of the `=`
    * operator, or the argument itself if no `=` operator is present.
    */
-  // definition: ESQLProperNode;
+  definition: ESQLProperNode;
 
   /**
    * A list of terminal nodes that were found in the definition.
    */
-  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList>;
+  // terminals: Array<ESQLColumn | ESQLLiteral | ESQLList>;
 
   /**
    * A formatted list of field names which were used for new field
@@ -140,36 +141,6 @@ const summarizeArgParts = (
   return [LeafPrinter.column(column), column, arg];
 };
 
-const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummary => {
-  const [field, column, definition] = summarizeArgParts(query, arg);
-  const terminals: StatsFieldSummary['terminals'] = [];
-  const usedFields: StatsFieldSummary['usedFields'] = new Set();
-
-  Walker.walk(definition, {
-    visitLiteral(node) {
-      terminals.push(node);
-    },
-    visitColumn(node) {
-      terminals.push(node);
-      usedFields.add(LeafPrinter.column(node));
-    },
-    visitListLiteral(node) {
-      terminals.push(node);
-    },
-  });
-
-  const summary: StatsFieldSummary = {
-    arg,
-    field,
-    column,
-    definition,
-    terminals,
-    usedFields,
-  };
-
-  return summary;
-};
-
 /**
  * Returns a summary of the STATS command.
  *
@@ -178,45 +149,42 @@ const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummar
  * @returns Summary of the STATS command.
  */
 export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsCommandSummary => {
-  const aggregates: StatsCommandSummary['aggregates'] = {};
-  const grouping: StatsCommandSummary['grouping'] = {};
+  const result = getSummaryPerCommand(query.src, command);
 
-  // Process main arguments, the "aggregates" part of the command.
-  new Visitor()
-    .on('visitExpression', (ctx) => {
-      const summary = summarizeField(query, ctx.node);
-      aggregates[summary.field] = summary;
-    })
-    .on('visitCommand', () => {})
-    .on('visitStatsCommand', (ctx) => {
-      for (const _ of ctx.visitArguments());
-    })
-    .visitCommand(command);
-
-  // Process the "BY" arguments, the "grouping" part of the command.
-  new Visitor()
-    .on('visitExpression', (ctx) => {
-      const node = ctx.node;
-      const summary = summarizeField(query, node);
-      grouping[summary.field] = summary;
-    })
-    .on('visitCommandOption', (ctx) => {
-      if (ctx.node.name !== 'by') return;
-      for (const _ of ctx.visitArguments());
-    })
-    .on('visitCommand', () => {})
-    .on('visitStatsCommand', (ctx) => {
-      for (const _ of ctx.visitOptions());
-    })
-    .visitCommand(command);
-
-  const summary: StatsCommandSummary = {
+  return {
+    ...result,
     command,
-    aggregates,
-    grouping,
   };
+};
 
-  return summary;
+export const getFieldTerminals = (definition: ESQLProperNode) => {
+  const terminals: Array<ESQLColumn | ESQLLiteral | ESQLList> = [];
+
+  Walker.walk(definition, {
+    visitLiteral(node) {
+      terminals.push(node);
+    },
+    visitColumn(node) {
+      terminals.push(node);
+    },
+    visitListLiteral(node) {
+      terminals.push(node);
+    },
+  });
+
+  return terminals;
+};
+
+export const getUsedFields = (definition: ESQLProperNode) => {
+  const usedFields: Set<string> = new Set();
+
+  Walker.walk(definition, {
+    visitColumn(node) {
+      usedFields.add(LeafPrinter.column(node));
+    },
+  });
+
+  return usedFields;
 };
 
 /**
