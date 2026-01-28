@@ -53,6 +53,54 @@ describe('Converter Helpers', () => {
 
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
+
+    it('preserves title and tags in classic streams', () => {
+      const request: Streams.ClassicStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: 'Test description',
+          title: 'My Custom Title',
+          tags: ['nginx', 'production'],
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      const definition = convertUpsertRequestIntoDefinition('classic-stream', request);
+
+      expect(Streams.ClassicStream.Definition.is(definition)).toEqual(true);
+      expect(definition.title).toEqual('My Custom Title');
+      expect(definition.tags).toEqual(['nginx', 'production']);
+    });
+
+    it('preserves title and tags in wired streams', () => {
+      const request: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: 'Test description',
+          title: 'Production Logs',
+          tags: ['logs', 'production', 'nginx'],
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      const definition = convertUpsertRequestIntoDefinition('wired-stream', request);
+
+      expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
+      expect(definition.title).toEqual('Production Logs');
+      expect(definition.tags).toEqual(['logs', 'production', 'nginx']);
+    });
   });
 
   describe('convertGetResponseIntoUpsertRequest', () => {
@@ -139,6 +187,99 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+    });
+
+    it('preserves title and tags when converting classic streams', () => {
+      const getResponse: Streams.ClassicStream.GetResponse = {
+        stream: {
+          name: 'classic-stream',
+          description: 'Test description',
+          title: 'My Classic Stream Title',
+          tags: ['classic', 'test'],
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+        effective_lifecycle: {
+          dsl: {},
+        },
+        effective_settings: {},
+        privileges: {
+          lifecycle: true,
+          manage: true,
+          monitor: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+          view_index_metadata: true,
+        },
+        effective_failure_store: {
+          disabled: {},
+        },
+        data_stream_exists: true,
+        ...emptyAssets,
+      };
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
+
+      expect(Streams.ClassicStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect(upsertRequest.stream.title).toEqual('My Classic Stream Title');
+      expect(upsertRequest.stream.tags).toEqual(['classic', 'test']);
+    });
+
+    it('preserves title and tags when converting wired streams', () => {
+      const getResponse: Streams.WiredStream.GetResponse = {
+        stream: {
+          name: 'wired-stream',
+          description: 'Test description',
+          title: 'Production NGINX Logs',
+          tags: ['nginx', 'production', 'access-logs'],
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [],
+            },
+            failure_store: { inherit: {} },
+          },
+        },
+        privileges: {
+          lifecycle: true,
+          manage: true,
+          monitor: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+          view_index_metadata: true,
+        },
+        effective_lifecycle: {
+          dsl: {},
+          from: 'logs',
+        },
+        effective_settings: {},
+        inherited_fields: {},
+        effective_failure_store: {
+          disabled: {},
+          from: 'logs',
+        },
+        ...emptyAssets,
+      };
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
+
+      expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect(upsertRequest.stream.title).toEqual('Production NGINX Logs');
+      expect(upsertRequest.stream.tags).toEqual(['nginx', 'production', 'access-logs']);
     });
   });
 });

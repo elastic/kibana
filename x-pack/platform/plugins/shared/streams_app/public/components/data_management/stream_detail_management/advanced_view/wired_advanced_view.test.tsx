@@ -99,6 +99,11 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
   }),
 }));
 
+// Mock hooks used by StreamTitlePanel and StreamTagsPanel
+jest.mock('../../../../hooks/use_update_streams', () => ({
+  useUpdateStreams: () => jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     isServerless: false,
@@ -354,6 +359,44 @@ describe('WiredAdvancedView', () => {
     });
   });
 
+  describe('Stream Title and Tags Panels', () => {
+    it('should always render Stream title panel', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Stream title')).toBeInTheDocument();
+    });
+
+    it('should always render Stream tags panel', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Stream tags')).toBeInTheDocument();
+    });
+  });
+
   describe('All Features Enabled', () => {
     it('should render all panels when all features are enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
@@ -372,6 +415,9 @@ describe('WiredAdvancedView', () => {
 
       // Import & Export
       expect(screen.getByText('Import & export')).toBeInTheDocument();
+      // Stream title and tags
+      expect(screen.getByText('Stream title')).toBeInTheDocument();
+      expect(screen.getByText('Stream tags')).toBeInTheDocument();
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
       // Stream discovery (contains Features and Systems)

@@ -100,6 +100,11 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
   }),
 }));
 
+// Mock hooks used by StreamTitlePanel and StreamTagsPanel
+jest.mock('../../../../hooks/use_update_streams', () => ({
+  useUpdateStreams: () => jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
   useStreamsAppFetch: () => ({
     value: {
@@ -426,6 +431,42 @@ describe('ClassicAdvancedView', () => {
     });
   });
 
+  describe('Stream Title and Tags Panels', () => {
+    it('should always render Stream title panel', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Stream title')).toBeInTheDocument();
+    });
+
+    it('should always render Stream tags panel', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Stream tags')).toBeInTheDocument();
+    });
+  });
+
   describe('All Features Enabled', () => {
     it('should render all panels when significantEvents is enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
@@ -441,6 +482,9 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
+      // Stream title and tags
+      expect(screen.getByText('Stream title')).toBeInTheDocument();
+      expect(screen.getByText('Stream tags')).toBeInTheDocument();
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
       // Stream discovery (contains Features and Systems)

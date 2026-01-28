@@ -1107,4 +1107,110 @@ export class StreamsApp {
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
   }
+
+  // Stream title utility methods (header)
+  async expectStreamName(name: string) {
+    await expect(this.page.getByTestId('streamName')).toHaveText(name);
+  }
+
+  async expectStreamNameSubtitle(name: string) {
+    await expect(this.page.getByTestId('streamNameSubtitle')).toContainText(name);
+  }
+
+  async expectStreamNameSubtitleHidden() {
+    await expect(this.page.getByTestId('streamNameSubtitle')).toBeHidden();
+  }
+
+  async editStreamTitleInHeader(title: string) {
+    // Click to edit the title inline
+    await this.page.getByTestId('streamTitleEdit').click();
+    // Clear and type new title
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.type(title);
+    // Save by clicking the save button
+    await this.page.locator('[data-test-subj="streamTitleEdit"] button[type="submit"]').click();
+  }
+
+  // Stream tags utility methods (header)
+  async expectStreamTag(tag: string) {
+    await expect(this.page.getByTestId(`streamTag-${tag}`)).toBeVisible();
+  }
+
+  async expectStreamTagsEmpty() {
+    await expect(this.page.getByTestId('streamTagsEmpty')).toBeVisible();
+  }
+
+  async openStreamTagsPopover() {
+    await this.page.getByTestId('streamTagsAddButton').click();
+    await expect(this.page.getByTestId('streamTagsComboBox')).toBeVisible();
+  }
+
+  async addStreamTagInHeader(tag: string) {
+    await this.openStreamTagsPopover();
+    const comboBox = this.page.getByTestId('streamTagsComboBox');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+    // Close the popover by clicking elsewhere
+    await this.page.keyboard.press('Escape');
+  }
+
+  async removeStreamTagInHeader(tag: string) {
+    // Click the remove button on the tag badge
+    await this.page.getByTestId(`streamTag-${tag}`).locator('button').click();
+  }
+
+  // Stream title utility methods (advanced settings panel)
+  async clickStreamTitlePanelEdit() {
+    await this.page.getByTestId('streamTitlePanelEditButton').click();
+  }
+
+  async fillStreamTitlePanelInput(title: string) {
+    await this.page.getByTestId('streamTitlePanelInput').clear();
+    await this.page.getByTestId('streamTitlePanelInput').fill(title);
+  }
+
+  async saveStreamTitlePanel() {
+    await this.page.getByTestId('streamTitlePanelSaveButton').click();
+  }
+
+  async cancelStreamTitlePanel() {
+    await this.page.getByTestId('streamTitlePanelCancelButton').click();
+  }
+
+  async expectStreamTitlePanelDisplay(title: string) {
+    await expect(this.page.getByTestId('streamTitlePanelDisplay')).toHaveText(title);
+  }
+
+  async expectStreamTitlePanelEmpty() {
+    const display = this.page.getByTestId('streamTitlePanelDisplay');
+    // When no title, it shows "No title set"
+    await expect(display).toContainText('No title set');
+  }
+
+  // Stream tags utility methods (advanced settings panel)
+  async clickStreamTagsPanelEdit() {
+    await this.page.getByTestId('streamTagsPanelEditButton').click();
+  }
+
+  async addStreamTagInPanel(tag: string) {
+    const comboBox = this.page.getByTestId('streamTagsPanelComboBox');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+  }
+
+  async saveStreamTagsPanel() {
+    await this.page.getByTestId('streamTagsPanelSaveButton').click();
+  }
+
+  async cancelStreamTagsPanel() {
+    await this.page.getByTestId('streamTagsPanelCancelButton').click();
+  }
+
+  async expectStreamTagsPanelBadge(tag: string) {
+    await expect(this.page.getByTestId(`streamTagsPanelBadge-${tag}`)).toBeVisible();
+  }
+
+  async expectStreamTagsPanelEmpty() {
+    await expect(this.page.getByTestId('streamTagsPanelEmpty')).toBeVisible();
+  }
 }

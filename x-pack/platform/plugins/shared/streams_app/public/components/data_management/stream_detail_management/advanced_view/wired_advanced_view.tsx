@@ -14,6 +14,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { StreamDiscoveryConfiguration } from '../../../stream_detail_systems/stream_discovery_configuration';
 import { StreamDescription } from '../../../stream_detail_systems/stream_description';
+import { StreamTitlePanel } from '../../../stream_detail_systems/stream_title';
+import { StreamTagsPanel } from '../../../stream_detail_systems/stream_tags';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
@@ -54,6 +56,10 @@ export function WiredAdvancedView({
           <EuiSpacer />
         </>
       )}
+      <StreamTitlePanel definition={definition} refreshDefinition={refreshDefinition} />
+      <EuiSpacer />
+      <StreamTagsPanel definition={definition} refreshDefinition={refreshDefinition} />
+      <EuiSpacer />
       {significantEvents?.enabled && (
         <>
           <StreamDescription

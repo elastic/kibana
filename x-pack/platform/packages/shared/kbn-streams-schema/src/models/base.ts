@@ -18,6 +18,8 @@ export namespace BaseStream {
     name: string;
     description: string;
     updated_at: string;
+    title?: string;
+    tags?: string[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -49,6 +51,8 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
     name: z.string(),
     description: z.string(),
     updated_at: z.string().datetime(),
+    title: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
   Source: z.object({}),
   GetResponse: z.object({
