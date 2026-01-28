@@ -27,10 +27,7 @@ interface TableActionsProps {
   hideFilteringOnComputedColumns?: boolean;
 }
 
-type CheckFilterParams = Pick<
-  TableActionsProps,
-  'row' | 'isEsqlMode' | 'hideFilteringOnComputedColumns'
-> & {
+type CheckFilterParams = Pick<TableActionsProps, 'row' | 'hideFilteringOnComputedColumns'> & {
   onFilter: DocViewFilterFn | undefined;
 };
 
@@ -41,19 +38,6 @@ function isFilterDisabledDueToIgnoredReason({ row, onFilter }: CheckFilterParams
 
   const { ignoredReason } = row;
   return Boolean(onFilter && ignoredReason);
-}
-
-function isFilterDisabledDueToEsqlMultiValue({
-  row,
-  onFilter,
-  isEsqlMode,
-  hideFilteringOnComputedColumns,
-}: CheckFilterParams): boolean {
-  if (!row || hideFilteringOnComputedColumns) {
-    return false;
-  }
-
-  return Boolean(onFilter && isEsqlMode && Array.isArray(row.flattenedValue));
 }
 
 function isFilterInOutPairDisabled(params: CheckFilterParams): boolean {
@@ -67,9 +51,7 @@ function isFilterInOutPairDisabled(params: CheckFilterParams): boolean {
       dataViewField: row.dataViewField,
       onFilter,
       hideFilteringOnComputedColumns,
-    }) ||
-    isFilterDisabledDueToIgnoredReason(params) ||
-    isFilterDisabledDueToEsqlMultiValue(params)
+    }) || isFilterDisabledDueToIgnoredReason(params)
   );
 }
 
@@ -88,12 +70,6 @@ export function getFilterInOutPairDisabledWarning(params: CheckFilterParams): st
         defaultMessage: 'Ignored values cannot be searched',
       }
     );
-  }
-
-  if (isFilterDisabledDueToEsqlMultiValue(params)) {
-    return i18n.translate('unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled', {
-      defaultMessage: 'Multivalue filtering is not supported in ES|QL',
-    });
   }
 
   return !dataViewField
@@ -190,7 +166,6 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
     isFilterInOutPairDisabled({
       row,
       onFilter,
-      isEsqlMode,
       hideFilteringOnComputedColumns,
     })
   ) {
@@ -235,7 +210,6 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
     isFilterInOutPairDisabled({
       row,
       onFilter,
-      isEsqlMode,
       hideFilteringOnComputedColumns,
     })
   ) {
@@ -308,7 +282,6 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
     isFilterExistsDisabled({
       row,
       onFilter,
-      isEsqlMode,
       hideFilteringOnComputedColumns,
     })
   ) {

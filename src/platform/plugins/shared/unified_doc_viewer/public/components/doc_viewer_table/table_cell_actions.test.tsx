@@ -229,7 +229,7 @@ describe('TableActions', () => {
       expect(filterOutProps.title).toBe('Filter out value');
     });
 
-    it('should not allow filtering in ES|QL mode for multivalue fields', () => {
+    it('should allow filtering in ES|QL mode for multivalue fields', () => {
       const actions = getFieldValueCellActions({
         rows: getRows('extension', ['foo', 'bar']),
         isEsqlMode: true,
@@ -245,8 +245,14 @@ describe('TableActions', () => {
         />
       ));
       render(<>{actions}</>);
-      expect(screen.queryByTestId('addFilterForValueButton-extension')).toBeNull();
-      expect(screen.queryByTestId('addFilterOutValueButton-extension')).toBeNull();
+      const filterForProps = JSON.parse(
+        screen.getByTestId('addFilterForValueButton-extension').innerHTML
+      );
+      expect(filterForProps.title).toBe('Filter for value');
+      const filterOutProps = JSON.parse(
+        screen.getByTestId('addFilterOutValueButton-extension').innerHTML
+      );
+      expect(filterOutProps.title).toBe('Filter out value');
     });
 
     it('should allow filtering on multifields in ES|QL mode when on Dashboard', () => {
@@ -419,7 +425,6 @@ describe('TableActions', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: undefined,
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -436,32 +441,9 @@ describe('TableActions', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Ignored values cannot be searched');
-    });
-
-    it('should return warning for ES|QL multivalue fields', () => {
-      const rows = getRows('extension', ['foo', 'bar']);
-      const warning = getFilterInOutPairDisabledWarning({
-        row: rows[0],
-        onFilter: jest.fn(),
-        isEsqlMode: true,
-        hideFilteringOnComputedColumns: false,
-      });
-      expect(warning).toBe('Multivalue filtering is not supported in ES|QL');
-    });
-
-    it('should not return warning for ES|QL multivalue fields when hideFilteringOnComputedColumns is true', () => {
-      const rows = getRows('extension', ['foo', 'bar']);
-      const warning = getFilterInOutPairDisabledWarning({
-        row: rows[0],
-        onFilter: jest.fn(),
-        isEsqlMode: true,
-        hideFilteringOnComputedColumns: true,
-      });
-      expect(warning).toBeUndefined();
     });
 
     it('should return warning for unindexed fields', () => {
@@ -475,7 +457,6 @@ describe('TableActions', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Unindexed fields cannot be searched');
@@ -486,7 +467,6 @@ describe('TableActions', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -497,7 +477,6 @@ describe('TableActions', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
         onFilter: undefined,
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -509,7 +488,6 @@ describe('TableActions', () => {
       const warning = getFilterExistsDisabledWarning({
         row: undefined,
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -529,7 +507,6 @@ describe('TableActions', () => {
       const warning = getFilterExistsDisabledWarning({
         row: rows[0],
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Unable to filter for presence of scripted fields');
@@ -540,7 +517,6 @@ describe('TableActions', () => {
       const warning = getFilterExistsDisabledWarning({
         row: rows[0],
         onFilter: jest.fn(),
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -551,7 +527,6 @@ describe('TableActions', () => {
       const warning = getFilterExistsDisabledWarning({
         row: rows[0],
         onFilter: undefined,
-        isEsqlMode: false,
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();

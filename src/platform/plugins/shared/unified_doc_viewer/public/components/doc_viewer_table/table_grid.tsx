@@ -223,7 +223,6 @@ export function TableGrid({
       const params = {
         row,
         onFilter: filter,
-        isEsqlMode,
         hideFilteringOnComputedColumns,
       };
 
@@ -247,7 +246,7 @@ export function TableGrid({
         </>
       );
     },
-    [rows, filter, isEsqlMode, hideFilteringOnComputedColumns]
+    [rows, filter, hideFilteringOnComputedColumns]
   );
 
   const leadingControlColumns = useMemo(() => {
