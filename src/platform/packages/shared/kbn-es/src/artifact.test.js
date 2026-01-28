@@ -8,9 +8,8 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-jest.mock('node-fetch');
-import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
+
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 import { Artifact } from './artifact';
 
@@ -43,7 +42,7 @@ const createArchive = (params = {}) => {
 };
 
 const mockFetch = (mock) =>
-  fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
+  mockedFetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = ['ES_SNAPSHOT_MANIFEST', 'KBN_ES_SNAPSHOT_USE_UNVERIFIED'];
@@ -88,12 +87,12 @@ beforeEach(() => {
 const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) => {
   return async () => {
     const artifact = await Artifact.getSnapshot(requestedLicense, MOCK_VERSION, log);
-    expect(fetch).toHaveBeenCalledTimes(fetchTimesCalled);
-    expect(fetch.mock.calls[0][0]).toEqual(
+    expect(mockedFetch).toHaveBeenCalledTimes(fetchTimesCalled);
+    expect(mockedFetch.mock.calls[0][0]).toEqual(
       `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest-verified.json`
     );
     if (fetchTimesCalled === 2) {
-      expect(fetch.mock.calls[1][0]).toEqual(
+      expect(mockedFetch.mock.calls[1][0]).toEqual(
         `${PERMANENT_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest.json`
       );
     }
@@ -136,7 +135,7 @@ describe('Artifact', () => {
 
     describe('with missing default snapshot', () => {
       beforeEach(() => {
-        fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+        mockedFetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
         mockFetch(MOCKS.valid);
       });
 
@@ -184,7 +183,7 @@ describe('Artifact', () => {
 
       it('should use the custom URL when looking for a snapshot', async () => {
         await Artifact.getSnapshot('default', MOCK_VERSION, log);
-        expect(fetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
+        expect(mockedFetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
       });
 
       afterEach(() => {
@@ -200,7 +199,7 @@ describe('Artifact', () => {
 
       it('should use the daily unverified URL when looking for a snapshot', async () => {
         await Artifact.getSnapshot('default', MOCK_VERSION, log);
-        expect(fetch.mock.calls[0][0]).toEqual(
+        expect(mockedFetch.mock.calls[0][0]).toEqual(
           `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest.json`
         );
       });

@@ -11,11 +11,10 @@ import fs from 'fs';
 import { promisify } from 'util';
 import path from 'path';
 import { createHash } from 'crypto';
-import { pipeline, Transform } from 'stream';
+import { pipeline, Transform, Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { setTimeout } from 'timers/promises';
 
-import type { Headers } from 'node-fetch';
-import fetch from 'node-fetch';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -63,7 +62,7 @@ interface ArtifactDownloaded {
   etag?: string;
   contentLength: number;
   first500Bytes: Buffer;
-  headers: Headers;
+  headers: globalThis.Headers;
 }
 interface ArtifactCached {
   cached: true;
@@ -77,7 +76,7 @@ function getChecksumType(checksumUrl: string): ChecksumType {
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
 }
 
-function headersToString(headers: Headers, indent = '') {
+function headersToString(headers: globalThis.Headers, indent = '') {
   return [...headers.entries()].reduce(
     (acc, [key, value]) => `${acc}\n${indent}${key}: ${value}`,
     ''
@@ -301,8 +300,14 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
+    if (!resp.body) {
+      throw new Error('Response body is null');
+    }
+
+    const bodyStream = Readable.fromWeb(resp.body as WebReadableStream);
+
     await asyncPipeline(
-      resp.body,
+      bodyStream,
       new Transform({
         transform(chunk, encoding, cb) {
           contentLength += Buffer.byteLength(chunk);

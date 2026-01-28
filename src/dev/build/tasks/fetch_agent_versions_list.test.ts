@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -16,13 +15,12 @@ import { FetchAgentVersionsList } from './fetch_agent_versions_list';
 import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
-jest.mock('node-fetch');
 jest.mock('p-retry');
 jest.mock('../lib');
 
 const config = getMockConfig();
 
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedFetch = jest.spyOn(global, 'fetch');
 const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
 const mockedWrite = write as jest.MockedFunction<typeof write>;
 const mockedBuild = new Build(config);
