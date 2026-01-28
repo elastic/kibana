@@ -8,22 +8,20 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataControlState, StoredDataControlState } from '@kbn/controls-schemas';
+import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 
 export function transformDataControlIn(
   state: DataControlState,
   referenceName: string
-): { state: StoredDataControlState; references?: Reference[] } {
-  const { title, description, use_global_filters, ignore_validations, data_view_id, field_name } =
-    state;
+): {
+  state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
+  references?: Reference[];
+} {
+  const { data_view_id, ...rest } = state;
   return {
     state: {
-      title,
-      description,
-      useGlobalFilters: use_global_filters,
-      ignoreValidations: ignore_validations,
-      fieldName: field_name,
+      ...rest,
       dataViewRefName: referenceName,
     },
     references: [
@@ -36,9 +34,11 @@ export function transformDataControlIn(
   };
 }
 
-export function transformDataControlOut(
+export function transformDataControlOut<
+  StoredStateType extends Partial<LegacyStoredDataControlState & DataControlState>
+>(
   id: string | undefined,
-  state: StoredDataControlState,
+  state: StoredStateType,
   refNames: Readonly<string[]>,
   panelReferences: Reference[] = [],
   containerReferences: Reference[] = []
@@ -56,13 +56,32 @@ export function transformDataControlOut(
   } else {
     dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
+
+  const {
+    useGlobalFilters,
+    use_global_filters,
+    ignoreValidations,
+    ignore_validations,
+    fieldName,
+    field_name,
+  } = state;
+
   return {
     title: state.title,
     description: state.description,
-    use_global_filters: state.useGlobalFilters,
-    ignore_validations: state.ignoreValidations,
-    field_name: state.fieldName,
+
+    /** Get the data view ID from the reference */
     data_view_id: dataViewRef?.id ?? '',
+
+    /**
+     * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+     */
+    ...(typeof useGlobalFilters === 'boolean' ? { use_global_filters: useGlobalFilters } : {}),
+    ...(typeof use_global_filters === 'boolean' ? { use_global_filters } : {}),
+    ...(typeof ignoreValidations === 'boolean' ? { ignore_validations: ignoreValidations } : {}),
+    ...(typeof ignore_validations === 'boolean' ? { ignore_validations } : {}),
+    ...(fieldName ? { field_name: fieldName } : {}),
+    ...(field_name ? { field_name } : { field_name: '' }),
   };
 }
 

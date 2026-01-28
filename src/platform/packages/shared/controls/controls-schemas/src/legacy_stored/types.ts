@@ -17,14 +17,17 @@ import type { storedPinnedControlSchema } from './stored_pinned_controls_schema'
 import type { storedRangeSliderControlSchema } from './stored_range_slider_schema';
 import type { storedTimeSliderControlSchema } from './stored_time_slider_schema';
 
-export type StoredDataControlState = TypeOf<typeof storedDataControlSchema>;
+export type LegacyStoredDataControlState = TypeOf<typeof storedDataControlSchema>;
 
-export type StoredPinnedControlState = TypeOf<typeof storedPinnedControlSchema>;
-export interface StoredPinnedControls {
-  [id: string]: StoredPinnedControlState;
+export type LegacyStoredPinnedControlState = TypeOf<typeof storedPinnedControlSchema>;
+
+export interface LegacyStoredPinnedControls {
+  [id: string]: LegacyStoredPinnedControlState;
 }
 
-export type StoredOptionsListExplicitInput = TypeOf<typeof storedOptionsListDSLControlSchema>;
-export type StoredESQLControlExplicitInput = TypeOf<typeof storedOptionsListESQLControlSchema>;
-export type StoredRangeSliderExplicitInput = TypeOf<typeof storedRangeSliderControlSchema>;
-export type StoredTimeSliderExplicitInput = TypeOf<typeof storedTimeSliderControlSchema>;
+export type LegacyStoredOptionsListExplicitInput = TypeOf<typeof storedOptionsListDSLControlSchema>;
+export type LegacyStoredESQLControlExplicitInput = TypeOf<
+  typeof storedOptionsListESQLControlSchema
+>;
+export type LegacyStoredRangeSliderExplicitInput = TypeOf<typeof storedRangeSliderControlSchema>;
+export type LegacyStoredTimeSliderExplicitInput = TypeOf<typeof storedTimeSliderControlSchema>;

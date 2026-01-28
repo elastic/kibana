@@ -13,22 +13,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
-    transformIn: (state: TimeSliderControlState) => {
-      return {
-        state: {
-          isAnchored: state.is_anchored,
-          timesliceEndAsPercentageOfTimeRange: state.timeslice_end_as_percentage_of_time_range,
-          timesliceStartAsPercentageOfTimeRange: state.timeslice_start_as_percentage_of_time_range,
-        } as StoredTimeSliderExplicitInput,
-        references: [],
-      };
-    },
-    transformOut: (
-      state: StoredTimeSliderExplicitInput,
-      panelReferences,
-      containerReferences,
-      id
-    ): TimeSliderControlState => {
+    transformOut: (state: StoredTimeSliderExplicitInput): TimeSliderControlState => {
       return {
         is_anchored: state.isAnchored,
         timeslice_end_as_percentage_of_time_range: state.timesliceEndAsPercentageOfTimeRange,

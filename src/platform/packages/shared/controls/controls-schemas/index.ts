@@ -32,11 +32,11 @@ export type {
 } from './src/types';
 
 export type {
-  StoredDataControlState,
-  StoredESQLControlExplicitInput,
-  StoredOptionsListExplicitInput,
-  StoredPinnedControls,
-  StoredPinnedControlState,
-  StoredRangeSliderExplicitInput,
-  StoredTimeSliderExplicitInput,
-} from './src/stored';
+  LegacyStoredDataControlState,
+  LegacyStoredESQLControlExplicitInput,
+  LegacyStoredOptionsListExplicitInput,
+  LegacyStoredPinnedControls,
+  LegacyStoredPinnedControlState,
+  LegacyStoredRangeSliderExplicitInput,
+  LegacyStoredTimeSliderExplicitInput,
+} from './src/legacy_stored';

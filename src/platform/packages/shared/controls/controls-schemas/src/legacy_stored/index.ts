@@ -8,11 +8,11 @@
  */
 
 export type {
-  StoredDataControlState,
-  StoredESQLControlExplicitInput,
-  StoredOptionsListExplicitInput,
-  StoredPinnedControls,
-  StoredPinnedControlState,
-  StoredRangeSliderExplicitInput,
-  StoredTimeSliderExplicitInput,
+  LegacyStoredDataControlState,
+  LegacyStoredESQLControlExplicitInput,
+  LegacyStoredOptionsListExplicitInput,
+  LegacyStoredPinnedControls,
+  LegacyStoredPinnedControlState,
+  LegacyStoredRangeSliderExplicitInput,
+  LegacyStoredTimeSliderExplicitInput,
 } from './types';

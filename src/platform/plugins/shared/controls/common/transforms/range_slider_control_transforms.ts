@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type {
+  LegacyStoredRangeSliderExplicitInput,
   RangeSliderControlState,
-  StoredRangeSliderExplicitInput,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { transformDataControlOut, transformDataControlIn } from './data_control_transforms';
+import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const RANGE_SLIDER_REF_NAME = 'rangeSliderDataView' as const;
 const RANGE_SLIDER_LEGACY_REF_NAMES = [
@@ -31,17 +32,20 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
       return {
         state: {
           ...dataControlState,
-          value: state.value,
-          step: state.step,
-        } as StoredRangeSliderExplicitInput,
+          ...state,
+        },
         references,
       };
     },
-    transformOut: (
-      state: StoredRangeSliderExplicitInput,
-      panelReferences,
-      containerReferences,
-      id
+    transformOut: <
+      StoredStateType extends Partial<
+        LegacyStoredRangeSliderExplicitInput & RangeSliderControlState
+      >
+    >(
+      state: StoredStateType,
+      panelReferences: Reference[] | undefined,
+      containerReferences: Reference[] | undefined,
+      id: string | undefined
     ): RangeSliderControlState => {
       const dataControlState = transformDataControlOut(
         id,
@@ -52,8 +56,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
       );
       return {
         ...dataControlState,
-        value: state.value,
-        step: state.step,
+        ...state,
       };
     },
   });
