@@ -60,10 +60,11 @@ interface FieldSummaryProps {
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
   enableGeoPointSuggestions?: boolean;
+  onGoToField?: (fieldName: string) => void;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions, onGoToField } = props;
 
   const router = useStreamsAppRouter();
 
@@ -121,6 +122,25 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
+          {field.alias_for && onGoToField && (
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="streamsAppFieldSummaryGoToFieldButton"
+                    size="s"
+                    color="primary"
+                    iconType="arrowRight"
+                    onClick={() => onGoToField(field.alias_for!)}
+                  >
+                    {i18n.translate('xpack.streams.fieldSummary.goToFieldButtonLabel', {
+                      defaultMessage: 'Go to field',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
