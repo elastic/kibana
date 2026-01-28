@@ -6,7 +6,6 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import fetch, { FetchError } from 'node-fetch';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -28,7 +27,8 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 jest.mock('../../services/output');
-jest.mock('node-fetch');
+
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 let mockedLogger: jest.Mocked<Logger>;
 
@@ -42,7 +42,6 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     is_default_monitoring: true,
     name: 'Remote Output',
   };
-  const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
 
   const statusRes = {
     integrations: [
@@ -319,9 +318,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     mockedFetch.mockResolvedValueOnce({
       json: () => {
-        const err = new FetchError(`some error`, 'invalid-json');
-        err.type = 'invalid-json';
-        err.message = `some error`;
+        const err = new Error(`some error`);
         throw err;
       },
       status: 404,

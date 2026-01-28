@@ -6,6 +6,8 @@
  */
 
 import path from 'path';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
@@ -159,8 +161,12 @@ export const getFileHandler: FleetRequestHandler<
     }
     validateContentTypeIsAllowed(proxiedHeaders['content-type']);
 
+    const body = registryResponse.body
+      ? Readable.fromWeb(registryResponse.body as WebReadableStream)
+      : undefined;
+
     return response.custom({
-      body: registryResponse.body,
+      body,
       statusCode: registryResponse.status,
       headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
     });

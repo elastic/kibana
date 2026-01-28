@@ -6,11 +6,12 @@
  */
 
 import { URL } from 'url';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 
 import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
 
-import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
 import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
@@ -653,7 +654,7 @@ export async function getPackageArchiveSignatureOrUndefined({
   try {
     const res = await fetchFile(signaturePath);
 
-    if (res?.body) return streamToString(res.body);
+    if (res?.body) return streamToString(Readable.fromWeb(res.body as WebReadableStream));
     return undefined;
   } catch (e) {
     logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
