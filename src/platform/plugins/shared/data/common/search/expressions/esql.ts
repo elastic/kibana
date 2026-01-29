@@ -336,10 +336,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           label: i18n.translate('data.search.es_search.documentsQueriedLabel', {
                             defaultMessage: 'Documents queried',
                           }),
-                          value: i18n.translate('data.search.es_search.documentsQueriedValue', {
-                            defaultMessage: '{documentsQueried}',
-                            values: { documentsQueried: rawResponse.documents_found },
-                          }),
+                          value: rawResponse.documents_found,
                           description: i18n.translate(
                             'data.search.es_search.documentsQueriedDescription',
                             {
