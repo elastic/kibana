@@ -8,8 +8,11 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { fetch as mockedFetch } from 'undici';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
+jest.mock('undici');
+
+// const mockedFetch = jest.spyOn(undici, 'fetch');
 
 import { Artifact } from './artifact';
 
