@@ -24,6 +24,7 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { SystemClient } from '../lib/streams/system/system_client';
+import type { InsightClient } from '../lib/insights/insight_client';
 
 export type GetScopedClients = ({
   request,
@@ -38,6 +39,7 @@ export interface RouteHandlerScopedClients {
   streamsClient: StreamsClient;
   featureClient: FeatureClient;
   systemClient: SystemClient;
+  insightClient: InsightClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;

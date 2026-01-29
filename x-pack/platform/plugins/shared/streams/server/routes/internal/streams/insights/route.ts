@@ -15,6 +15,8 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import type { PersistedInsight } from '../../../../lib/insights';
+import { insightInputSchema, insightStatusSchema } from '../../../../lib/insights';
 
 export type InsightsTaskResult = TaskResult<InsightsResult>;
 
@@ -119,7 +121,222 @@ const insightsStatusRoute = createServerRoute({
   },
 });
 
+// CRUD Routes for persisted insights
+
+const listInsightsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_insights',
+  options: {
+    access: 'internal',
+    summary: 'List all insights',
+    description: 'Fetches all persisted insights with optional filters',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      status: insightStatusSchema.optional(),
+      impact: z.string().optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ insights: PersistedInsight[]; total: number }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const filters: { status?: 'active' | 'dismissed'; impact?: string[] } = {};
+    if (params.query.status) {
+      filters.status = params.query.status;
+    }
+    if (params.query.impact) {
+      filters.impact = params.query.impact.split(',');
+    }
+
+    const { hits, total } = await insightClient.list(filters);
+    return { insights: hits, total };
+  },
+});
+
+const getInsightRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Get a single insight',
+    description: 'Fetches a single insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ insight: PersistedInsight }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const insight = await insightClient.get(params.path.id);
+    return { insight };
+  },
+});
+
+const createInsightRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_insights',
+  options: {
+    access: 'internal',
+    summary: 'Create a new insight',
+    description: 'Creates a new persisted insight',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: insightInputSchema,
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ insight: PersistedInsight }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const insight = await insightClient.create(params.body);
+    return { insight };
+  },
+});
+
+const updateInsightRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Update an insight',
+    description: 'Updates an existing insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    body: insightInputSchema.partial().extend({
+      status: insightStatusSchema.optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ insight: PersistedInsight }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const insight = await insightClient.update(params.path.id, params.body);
+    return { insight };
+  },
+});
+
+const deleteInsightRoute = createServerRoute({
+  endpoint: 'DELETE /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Delete an insight',
+    description: 'Deletes an existing insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return await insightClient.delete(params.path.id);
+  },
+});
+
+const bulkInsightsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_insights/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk operations on insights',
+    description: 'Perform bulk create, update, or delete operations on insights',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            index: z.object({
+              insight: insightInputSchema,
+              id: z.string().optional(),
+            }),
+          }),
+          z.object({
+            update: z.object({
+              id: z.string(),
+              insight: insightInputSchema.partial(),
+              status: insightStatusSchema.optional(),
+            }),
+          }),
+          z.object({
+            delete: z.object({ id: z.string() }),
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return await insightClient.bulk(params.body.operations);
+  },
+});
+
 export const internalInsightsRoutes = {
   ...insightsTaskRoute,
   ...insightsStatusRoute,
+  ...listInsightsRoute,
+  ...getInsightRoute,
+  ...createInsightRoute,
+  ...updateInsightRoute,
+  ...deleteInsightRoute,
+  ...bulkInsightsRoute,
 };

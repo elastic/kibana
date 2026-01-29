@@ -11,6 +11,40 @@ import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 
+export interface InsightInput {
+  title: string;
+  description: string;
+  impact: 'critical' | 'high' | 'medium' | 'low';
+  evidence: Array<{
+    streamName: string;
+    queryTitle: string;
+    featureName?: string;
+    eventCount: number;
+  }>;
+  recommendations: string[];
+}
+
+export interface PersistedInsight extends InsightInput {
+  id: string;
+  status: 'active' | 'dismissed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InsightBulkIndexOp {
+  index: { insight: InsightInput; id?: string };
+}
+
+export interface InsightBulkUpdateOp {
+  update: { id: string; insight: Partial<InsightInput>; status?: 'active' | 'dismissed' };
+}
+
+export interface InsightBulkDeleteOp {
+  delete: { id: string };
+}
+
+export type InsightBulkOperation = InsightBulkIndexOp | InsightBulkUpdateOp | InsightBulkDeleteOp;
+
 export interface StreamsTestApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
@@ -42,6 +76,20 @@ export interface StreamsTestApiService {
   }>;
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
+  // Insights API
+  listInsights: (filters?: {
+    status?: 'active' | 'dismissed';
+    impact?: string;
+  }) => Promise<{ insights: PersistedInsight[]; total: number }>;
+  getInsight: (id: string) => Promise<{ insight: PersistedInsight }>;
+  createInsight: (input: InsightInput) => Promise<{ insight: PersistedInsight }>;
+  updateInsight: (
+    id: string,
+    input: Partial<InsightInput> & { status?: 'active' | 'dismissed' }
+  ) => Promise<{ insight: PersistedInsight }>;
+  deleteInsight: (id: string) => Promise<{ acknowledged: boolean }>;
+  bulkInsights: (operations: InsightBulkOperation[]) => Promise<{ acknowledged: boolean }>;
+  cleanupTestInsights: () => Promise<void>;
 }
 
 export function getStreamsTestApiService({
@@ -224,6 +272,95 @@ export function getStreamsTestApiService({
           } catch (error) {
             log.debug(`Failed to delete stream ${stream.name}: ${error}`);
           }
+        }
+      });
+    },
+
+    // Insights API methods
+    async listInsights(filters?: { status?: 'active' | 'dismissed'; impact?: string }) {
+      return measurePerformanceAsync(log, 'streamsTestApi.listInsights', async () => {
+        const query = new URLSearchParams();
+        if (filters?.status) query.set('status', filters.status);
+        if (filters?.impact) query.set('impact', filters.impact);
+        const queryString = query.toString();
+        const path = `/internal/streams/_insights${queryString ? `?${queryString}` : ''}`;
+        const response = await kbnClient.request({
+          method: 'GET',
+          path,
+        });
+        return response.data as { insights: PersistedInsight[]; total: number };
+      });
+    },
+
+    async getInsight(id: string) {
+      return measurePerformanceAsync(log, 'streamsTestApi.getInsight', async () => {
+        const response = await kbnClient.request({
+          method: 'GET',
+          path: `/internal/streams/_insights/${id}`,
+        });
+        return response.data as { insight: PersistedInsight };
+      });
+    },
+
+    async createInsight(input: InsightInput) {
+      return measurePerformanceAsync(log, 'streamsTestApi.createInsight', async () => {
+        const response = await kbnClient.request({
+          method: 'POST',
+          path: '/internal/streams/_insights',
+          body: input,
+        });
+        return response.data as { insight: PersistedInsight };
+      });
+    },
+
+    async updateInsight(
+      id: string,
+      input: Partial<InsightInput> & { status?: 'active' | 'dismissed' }
+    ) {
+      return measurePerformanceAsync(log, 'streamsTestApi.updateInsight', async () => {
+        const response = await kbnClient.request({
+          method: 'PUT',
+          path: `/internal/streams/_insights/${id}`,
+          body: input,
+        });
+        return response.data as { insight: PersistedInsight };
+      });
+    },
+
+    async deleteInsight(id: string) {
+      return measurePerformanceAsync(log, 'streamsTestApi.deleteInsight', async () => {
+        const response = await kbnClient.request({
+          method: 'DELETE',
+          path: `/internal/streams/_insights/${id}`,
+        });
+        return response.data as { acknowledged: boolean };
+      });
+    },
+
+    async bulkInsights(operations: InsightBulkOperation[]) {
+      return measurePerformanceAsync(log, 'streamsTestApi.bulkInsights', async () => {
+        const response = await kbnClient.request({
+          method: 'POST',
+          path: '/internal/streams/_insights/_bulk',
+          body: { operations },
+        });
+        return response.data as { acknowledged: boolean };
+      });
+    },
+
+    async cleanupTestInsights() {
+      await measurePerformanceAsync(log, 'streamsTestApi.cleanupTestInsights', async () => {
+        try {
+          const { insights } = await this.listInsights();
+          for (const insight of insights) {
+            try {
+              await this.deleteInsight(insight.id);
+            } catch (error) {
+              log.debug(`Failed to delete insight ${insight.id}: ${error}`);
+            }
+          }
+        } catch (error) {
+          log.debug(`Failed to list insights for cleanup: ${error}`);
         }
       });
     },
