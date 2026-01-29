@@ -309,6 +309,25 @@ describe('listSearchSources', () => {
     expect(results.aliases.map((item) => item.name)).toEqual(['alias-1', 'alias-2', 'alias-3']);
   });
 
+  it('includes non-hidden aliases that point to hidden indices', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [
+        indexItem('.hidden-index-1', { attributes: ['open', 'hidden'] }),
+        indexItem('.hidden-index-2', { attributes: ['open', 'hidden'] }),
+      ],
+      aliases: [aliasItem('my-alias', ['.hidden-index-1', '.hidden-index-2'])],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '*',
+      esClient,
+    });
+
+    expect(results.aliases.length).toBe(1);
+    expect(results.aliases.map((item) => item.name)).toEqual(['my-alias']);
+  });
+
   it('truncates per-type results to max `perTypeLimit`', async () => {
     esClient.indices.resolveIndex.mockResolvedValue({
       indices: [indexItem('index-1'), indexItem('index-2'), indexItem('index-3')],
