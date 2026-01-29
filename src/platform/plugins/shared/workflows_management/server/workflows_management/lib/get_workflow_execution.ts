@@ -99,11 +99,10 @@ function shouldReportAsRunning(
   workflowExecution: EsWorkflowExecution,
   stepExecutions: EsWorkflowStepExecution[]
 ): boolean {
-  if (!isTerminalStatus(workflowExecution.status)) {
-    return false;
-  }
-
-  if (workflowExecution.stepExecutionsCount === undefined) {
+  if (
+    !isTerminalStatus(workflowExecution.status) ||
+    workflowExecution.stepExecutionsCount === undefined
+  ) {
     return false;
   }
 
