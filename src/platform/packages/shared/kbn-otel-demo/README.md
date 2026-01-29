@@ -22,8 +22,6 @@ node scripts/otel_demo.js
 node scripts/otel_demo.js --teardown
 ```
 
-HELLO
-
 ## What This Does
 
 1. **Ensures minikube is running** - Starts it if needed

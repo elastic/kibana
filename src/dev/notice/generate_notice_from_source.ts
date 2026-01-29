@@ -8,13 +8,52 @@
  */
 
 import { readFile } from 'fs/promises';
-import { relative } from 'path';
+import { relative, resolve, isAbsolute } from 'path';
+import { existsSync } from 'fs';
 import globby from 'globby';
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r?\n/g;
+
+/**
+ * Check if any of the provided files contain @notice comments.
+ * This is a quick check to determine if we need to run the full NOTICE.txt generation.
+ */
+export async function checkFilesForNoticeComments(
+  files: string[],
+  log: ToolingLog
+): Promise<boolean> {
+  for (const file of files) {
+    const absolutePath = isAbsolute(file) ? file : resolve(REPO_ROOT, file);
+
+    // Skip non-existent files and non-source files
+    if (!existsSync(absolutePath)) {
+      continue;
+    }
+    if (!/\.(js|mjs|ts|tsx|scss|css)$/.test(file)) {
+      continue;
+    }
+
+    try {
+      const content = await readFile(absolutePath, 'utf-8');
+      if (NOTICE_COMMENT_RE.test(content)) {
+        log.info(`Found @notice comment in ${file}`);
+        // Reset regex lastIndex since we used test()
+        NOTICE_COMMENT_RE.lastIndex = 0;
+        return true;
+      }
+      // Reset regex lastIndex
+      NOTICE_COMMENT_RE.lastIndex = 0;
+    } catch (err) {
+      log.debug(`Could not read file ${file}: ${err}`);
+    }
+  }
+
+  return false;
+}
 
 interface Options {
   /**
