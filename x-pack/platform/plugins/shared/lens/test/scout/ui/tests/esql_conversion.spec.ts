@@ -29,7 +29,9 @@ const KBN_ARCHIVES = {
 const ESQL_CONVERSION_DASHBOARD_TEST_ID = 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
 const METRIC_VISUALIZATION_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
 
-test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
+// Unskip after: https://github.com/elastic/kibana-team/issues/2740
+// eslint-disable-next-line playwright/no-skipped-test
+test.describe.skip('Lens ES|QL', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
     await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
