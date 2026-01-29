@@ -10,7 +10,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/common';
-// import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
 
 // Do not change constan value - part of public REST API
 export const URL_DRILLDOWN_TYPE = 'url_drilldown';
@@ -21,7 +21,7 @@ export const URL_DRILLDOWN_SUPPORTED_TRIGGERS = [
   SELECT_RANGE_TRIGGER,
   'ROW_CLICK_TRIGGER', // TODO make ROW_CLICK_TRIGGER available in common
   CONTEXT_MENU_TRIGGER,
-  'IMAGE_CLICK_TRIGGER',
+  IMAGE_CLICK_TRIGGER,
 ];
 
 export const DEFAULT_ENCODE_URL = true;

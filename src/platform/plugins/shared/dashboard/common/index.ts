@@ -17,6 +17,8 @@ export type {
 
 export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_utils';
 
+export { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from './page_bundle_constants';
+
 export { migrateLegacyQuery } from './migrate_legacy_query';
 export { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 export { isDashboardSection } from './is_dashboard_section';
