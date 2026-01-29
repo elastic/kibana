@@ -158,7 +158,8 @@ export function useStreamFeaturesTable({
         name: FEATURE_COLUMN_HEADER_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          const valueStr = Object.values(feature.value).join(', ');
+          const displayTitle =
+            feature.title ?? Object.values(feature.value).join(', ');
           return (
             <EuiLink
               onClick={() => onSelectFeature(feature)}
@@ -167,7 +168,7 @@ export function useStreamFeaturesTable({
             >
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">{valueStr}</EuiText>
+                  <EuiText size="s">{displayTitle}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
