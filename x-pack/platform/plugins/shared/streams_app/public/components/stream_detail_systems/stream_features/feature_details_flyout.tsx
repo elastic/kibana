@@ -130,9 +130,7 @@ export function FeatureDetailsFlyout({
     },
     {
       title: EXPIRES_AT_LABEL,
-      description: (
-        <EuiText size="s">{feature.expires_at ?? noDataPlaceholder}</EuiText>
-      ),
+      description: <EuiText size="s">{feature.expires_at ?? noDataPlaceholder}</EuiText>,
     },
   ];
 
@@ -356,7 +354,6 @@ const META_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.metaLabel'
   defaultMessage: 'Meta',
 });
 
-const NO_META_AVAILABLE = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.noMetaAvailable',
-  { defaultMessage: 'No meta information' }
-);
+const NO_META_AVAILABLE = i18n.translate('xpack.streams.featureDetailsFlyout.noMetaAvailable', {
+  defaultMessage: 'No meta information',
+});

@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -40,9 +47,7 @@ describe('FeatureDetailsFlyout', () => {
 
   it('shows the feature ID in the flyout', () => {
     const feature = createMinimalFeature({ id: 'feature-123' });
-    renderWithProviders(
-      <FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />
-    );
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
     const idElement = screen.getByTestId('streamsAppFeatureDetailsFlyoutId');
     expect(idElement).toBeInTheDocument();
@@ -53,9 +58,7 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({
       meta: { key1: 'value1', key2: 42 },
     });
-    renderWithProviders(
-      <FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />
-    );
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
     const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
@@ -67,9 +70,7 @@ describe('FeatureDetailsFlyout', () => {
 
   it('shows the Meta section with "No meta information" when meta is empty', () => {
     const feature = createMinimalFeature({ meta: {} });
-    renderWithProviders(
-      <FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />
-    );
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
     const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
@@ -80,9 +81,7 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({
       meta: { endpoints: [{ host: 'a' }] },
     });
-    renderWithProviders(
-      <FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />
-    );
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
     const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
