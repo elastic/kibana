@@ -103,7 +103,7 @@ export function SloList() {
             description:
               sloList.total >= 1
                 ? `The user is looking at a list of SLOs. There are ${sloList.total} SLOs. Out of those, ${sloList.results.length} are visible.`
-                : 'The user is looking at a list of SLOs.',
+                : 'The user is looking at an empty list of SLOs.',
             ...(sloList.total >= 1 && {
               additional_data: {
                 violating_slos: slosByStatus.VIOLATED || '',
