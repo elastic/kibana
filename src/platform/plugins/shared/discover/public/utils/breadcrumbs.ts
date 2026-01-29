@@ -56,7 +56,7 @@ export function setBreadcrumbs({
   const embeddable = services.embeddableEditor;
   const byValueTitle = embeddable.getByValueInput()?.label;
 
-  const breadcrumbTitle = titleBreadcrumbText || byValueTitle;
+  const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
 
   if (breadcrumbTitle) {
     const rootBreadcrumbs = getRootBreadcrumbs({
