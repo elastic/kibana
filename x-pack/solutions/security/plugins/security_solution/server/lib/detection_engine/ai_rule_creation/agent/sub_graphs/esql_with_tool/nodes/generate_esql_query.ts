@@ -43,7 +43,7 @@ export const generateEsqlQueryNode = async ({
 
       // Build security-specific instructions for ES|QL query generation
       const additionalInstructions = `
-You are a helpful agent that helps in creating Elastic Detection (SIEM) rules of ES|QL type, based on provided user request by understanding the intent of the user query and generating a concise and relevant ES|QL query that aligns with the user's intent.
+Your role to is to help in creating Elastic Detection (SIEM) rules of ES|QL type, based on provided user request by understanding the intent of the user query and generating a concise and relevant ES|QL query that aligns with the user's intent.
 
 Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated goal.
 
