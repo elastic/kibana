@@ -15,6 +15,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
     const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
+    const dockerServers = svlSharedConfig.get('dockerServers');
 
     return {
       ...svlSharedConfig.getAll(),
@@ -24,15 +25,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...services,
         ...options.services,
       },
-      dockerServers: enableFleetDockerRegistry
-        ? svlSharedConfig.get('dockerServers')
-        : {
-            ...svlSharedConfig.get('dockerServers'),
-            registry: {
-              ...svlSharedConfig.get('dockerServers.registry'),
-              enabled: false,
-            },
-          },
+      dockerServers:
+        !enableFleetDockerRegistry && dockerServers?.registry
+          ? { ...dockerServers, registry: { ...dockerServers.registry, enabled: false } }
+          : dockerServers,
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [

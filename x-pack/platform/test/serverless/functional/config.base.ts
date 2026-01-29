@@ -20,22 +20,17 @@ export function createTestConfig<
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
     const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
+    const dockerServers = svlSharedConfig.get('dockerServers');
 
     return {
       ...svlSharedConfig.getAll(),
-
+      dockerServers:
+        !enableFleetDockerRegistry && dockerServers?.registry
+          ? { ...dockerServers, registry: { ...dockerServers.registry, enabled: false } }
+          : dockerServers,
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
-      dockerServers: enableFleetDockerRegistry
-        ? svlSharedConfig.get('dockerServers')
-        : {
-            ...svlSharedConfig.get('dockerServers'),
-            registry: {
-              ...svlSharedConfig.get('dockerServers.registry'),
-              enabled: false,
-            },
-          },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
