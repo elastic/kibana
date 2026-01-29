@@ -13,6 +13,7 @@ import type {
   JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
+  NetworkDirectionProcessor,
   ProcessorType,
   RedactProcessor,
   ReplaceProcessor,
@@ -55,6 +56,7 @@ import type {
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
+  NetworkDirectionFormState,
   ProcessorFormState,
   RedactFormState,
   ReplaceFormState,
@@ -81,6 +83,7 @@ export const SPECIALISED_TYPES = [
   'trim',
   'join',
   'concat',
+  'network_direction',
 ];
 
 interface FormStateDependencies {
@@ -291,6 +294,16 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
+  action: 'network_direction' as const,
+  source_ip: '',
+  destination_ip: '',
+  internal_networks: [],
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -317,6 +330,7 @@ const defaultProcessorFormStateByType: Record<
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  network_direction: defaultNetworkDirectionProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -364,7 +378,8 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
-    step.action === 'concat'
+    step.action === 'concat' ||
+    step.action === 'network_direction'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -673,6 +688,26 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConcatProcessor,
+      };
+    }
+
+    if (formState.action === 'network_direction') {
+      const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'network_direction',
+          source_ip,
+          destination_ip,
+          internal_networks:
+            'internal_networks' in formState ? formState.internal_networks : undefined,
+          internal_networks_field:
+            'internal_networks_field' in formState ? formState.internal_networks_field : undefined,
+          target_field,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as NetworkDirectionProcessor,
       };
     }
 

@@ -22,6 +22,7 @@ import type {
   TrimProcessor,
   JoinProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -63,6 +64,7 @@ export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
 export type JoinFormState = JoinProcessor;
 export type ConcatFormState = ConcatProcessor;
+export type NetworkDirectionFormState = NetworkDirectionProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -79,7 +81,8 @@ export type SpecialisedFormState =
   | LowercaseFormState
   | TrimFormState
   | JoinFormState
-  | ConcatFormState;
+  | ConcatFormState
+  | NetworkDirectionFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
