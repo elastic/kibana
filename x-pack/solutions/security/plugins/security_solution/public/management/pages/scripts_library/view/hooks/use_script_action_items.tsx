@@ -16,11 +16,7 @@ import { SCRIPT_LIBRARY_LABELS as tableActionLabels } from '../../translations';
 import type { ScriptsLibraryUrlParams } from '../components/scripts_library_url_params';
 import { useAppUrl } from '../../../../../common/lib/kibana';
 
-export const useScriptActionItems = ({
-  onClickAction,
-  queryParams,
-  script,
-}: {
+export interface UseScriptActionItemsProps {
   onClickAction: ({
     show,
     script,
@@ -30,7 +26,15 @@ export const useScriptActionItems = ({
   }) => void;
   queryParams: ListScriptsRequestQuery;
   script: EndpointScript;
-}): ContextMenuItemNavByRouterProps[] => {
+  showDetailsAction?: boolean;
+}
+
+export const useScriptActionItems = ({
+  onClickAction,
+  queryParams,
+  script,
+  showDetailsAction = true,
+}: UseScriptActionItemsProps): ContextMenuItemNavByRouterProps[] => {
   const { getAppUrl } = useAppUrl();
   const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
@@ -50,7 +54,7 @@ export const useScriptActionItems = ({
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(
     () => [
-      ...(canReadScriptsLibrary
+      ...(canReadScriptsLibrary && showDetailsAction
         ? [
             {
               'data-test-subj': 'actionDetails',
@@ -101,6 +105,14 @@ export const useScriptActionItems = ({
           ]
         : []),
     ],
-    [canReadScriptsLibrary, getAppUrl, toRoutePath, canWriteScriptsLibrary, script, onClickAction]
+    [
+      canReadScriptsLibrary,
+      showDetailsAction,
+      getAppUrl,
+      toRoutePath,
+      canWriteScriptsLibrary,
+      script,
+      onClickAction,
+    ]
   );
 };

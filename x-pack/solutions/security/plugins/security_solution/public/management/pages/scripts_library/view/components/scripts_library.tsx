@@ -22,6 +22,7 @@ import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_li
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
 import type { ScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
+import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 
 export const ScriptsLibrary = memo(() => {
@@ -33,10 +34,19 @@ export const ScriptsLibrary = memo(() => {
     sortDirection: sortDirectionFromUrl,
     sortField: sortFieldFromUrl,
     setPagingAndSortingParams,
+    selectedScriptId,
+    show: showFromUrl,
   } = useScriptsLibraryUrlParams();
+
+  const shouldShowFlyoutForm = useMemo(() => {
+    return showFromUrl === 'create' || showFromUrl === 'edit' || showFromUrl === 'details';
+  }, [showFromUrl]);
 
   const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
+  const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
+    undefined
+  );
   const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
     undefined
   );
@@ -69,12 +79,20 @@ export const ScriptsLibrary = memo(() => {
       page: paginationFromUrlParams.page,
       pageSize: paginationFromUrlParams.pageSize,
     });
+    setSelectedItemForFlyout(
+      selectedScriptId
+        ? scriptsData?.data.find((script) => script.id === selectedScriptId)
+        : undefined
+    );
   }, [
     kueryFromUrl,
     sortDirectionFromUrl,
     sortFieldFromUrl,
     paginationFromUrlParams.page,
     paginationFromUrlParams.pageSize,
+    scriptsData?.data,
+    selectedScriptId,
+    setSelectedItemForFlyout,
   ]);
 
   const totalItemCount = useMemo(() => scriptsData?.total ?? 0, [scriptsData?.total]);
@@ -107,6 +125,7 @@ export const ScriptsLibrary = memo(() => {
       if (show === 'delete') {
         setSelectedItemForDelete(script);
       } else {
+        setSelectedItemForFlyout(script);
         history.push(
           getScriptsLibraryPath({
             query: {
@@ -122,6 +141,7 @@ export const ScriptsLibrary = memo(() => {
   );
 
   const onCloseFlyout = useCallback(() => {
+    setSelectedItemForFlyout(undefined);
     history.push(
       getScriptsLibraryPath({
         query: {
@@ -143,6 +163,12 @@ export const ScriptsLibrary = memo(() => {
     setSelectedItemForDelete(undefined);
   }, []);
 
+  const onSuccessCreateOrEdit = useCallback(() => {
+    onCloseFlyout();
+    setSelectedItemForFlyout(undefined);
+    reFetchEndpointScriptsList();
+  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
       addDanger(scriptsLibraryFetchError?.body?.message || scriptsLibraryFetchError.message);
@@ -156,6 +182,18 @@ export const ScriptsLibrary = memo(() => {
       subtitle={pageLabels.pageAboutInfo}
       hideHeader={false}
     >
+      {shouldShowFlyoutForm && (
+        <EndpointScriptFlyout
+          queryParams={queryParams}
+          onCloseFlyout={onCloseFlyout}
+          onClickAction={onClickAction}
+          onSuccess={onSuccessCreateOrEdit}
+          show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
+          scriptItem={selectedItemForFlyout}
+          data-test-subj={`endpointScriptFlyout-${showFromUrl}`}
+        />
+      )}
+
       {selectedItemForDelete && (
         <EndpointScriptDeleteModal
           scriptName={selectedItemForDelete.name}
