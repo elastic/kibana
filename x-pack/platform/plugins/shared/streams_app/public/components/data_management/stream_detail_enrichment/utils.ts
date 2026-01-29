@@ -235,7 +235,7 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
 const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
   action: 'redact' as const,
   from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-  patterns: [],
+  patterns: [''], // Start with one empty pattern field (required validation will catch if not filled)
   ignore_missing: true,
   ignore_failure: true,
   where: ALWAYS_CONDITION,

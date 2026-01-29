@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -47,6 +47,15 @@ export const RedactProcessorForm = () => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'patterns' as never,
+    rules: {
+      minLength: {
+        value: 1,
+        message: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactPatternsMinLengthError',
+          { defaultMessage: 'At least one pattern is required.' }
+        ),
+      },
+    },
   });
 
   const { field: prefixField } = useController<RedactFormState, 'prefix'>({
@@ -56,6 +65,13 @@ export const RedactProcessorForm = () => {
   const { field: suffixField } = useController<RedactFormState, 'suffix'>({
     name: 'suffix',
   });
+
+  // Ensure there's always at least one pattern field
+  useEffect(() => {
+    if (fields.length === 0) {
+      append('');
+    }
+  }, [fields.length, append]);
 
   return (
     <>
