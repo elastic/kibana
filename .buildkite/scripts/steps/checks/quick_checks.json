@@ -31,7 +31,6 @@
     "script": ".buildkite/scripts/steps/checks/telemetry.sh",
     "nodeCommand": "node scripts/telemetry_check",
     "mayChangeFiles": true,
-    "filesArg": "--files",
     "packagesArg": "--packages"
   },
   {
@@ -122,7 +121,8 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/dependencies_diff.sh",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "skipLocal": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",

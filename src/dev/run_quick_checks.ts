@@ -61,7 +61,7 @@ const scriptOptions: RunOptions = {
   `,
   flags: {
     string: ['dir', 'checks', 'file', 'files'],
-    boolean: ['fix', 'show-commands', 'branch'],
+    boolean: ['fix', 'show-commands', 'branch', 'check-dependents'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
@@ -71,6 +71,8 @@ const scriptOptions: RunOptions = {
                            and scopes checks to those packages.
         --branch           Run checks on files changed in the current branch compared to upstream main.
                            Automatically detects the elastic/kibana remote (upstream, origin, etc.).
+        --check-dependents When used with --files or --branch, also includes files that import the
+                           changed files. Useful for catching cascading issues.
         --fix              Enable auto-fix mode. When enabled, checks that may change files run
                            sequentially to avoid conflicts. Defaults to true in CI, false locally.
         --show-commands    Show the exact command being run for each check. Useful for debugging.
@@ -138,6 +140,21 @@ void run(async ({ log, flagsReader }) => {
       .split(/[,\n]/)
       .map((f) => f.trim())
       .filter(Boolean);
+  }
+
+  // Handle --check-dependents flag: find files that import the changed files
+  const checkDependents = flagsReader.boolean('check-dependents');
+  if (checkDependents && fileListArray && fileListArray.length > 0) {
+    logger.info('Finding files that import the changed files...');
+    const dependentFiles = await findDependentFiles(fileListArray, logger);
+    if (dependentFiles.length > 0) {
+      logger.info(`Found ${dependentFiles.length} dependent file(s) in total`);
+      // Add dependent files to the list (deduplicated)
+      const allFiles = new Set([...fileListArray, ...dependentFiles]);
+      fileListArray = Array.from(allFiles);
+    } else {
+      logger.info('No dependent files found');
+    }
   }
 
   // Process the file list (from either --branch or --files)
@@ -424,7 +441,8 @@ async function runPartitionedChecks(
     {
       concurrent: true, // Run both groups concurrently
       exitOnError: false,
-      renderer: (IS_CI ? 'verbose' : 'default') as any,
+      // Use 'simple' renderer when showing commands to prevent output truncation
+      renderer: (IS_CI ? 'verbose' : showCommands ? 'simple' : 'default') as any,
       rendererOptions: {
         collapseSubtasks: false,
         collapseErrors: false,
@@ -775,4 +793,93 @@ async function getChangedFilesFromBranch(baseRef: string): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+/** Find files that import any of the given files */
+async function findDependentFiles(files: string[], log: ToolingLog): Promise<string[]> {
+  const dependents = new Set<string>();
+
+  // Filter to only JS/TS files
+  const jsFiles = files.filter((f) => /\.(ts|tsx|js|jsx)$/.test(f));
+  const total = jsFiles.length;
+
+  if (total === 0) {
+    return [];
+  }
+
+  log.info(`Scanning imports for ${total} file(s)...`);
+
+  for (let i = 0; i < jsFiles.length; i++) {
+    const file = jsFiles[i];
+    const progress = `[${i + 1}/${total}]`;
+
+    // Show progress every 5 files or for the last file
+    if ((i + 1) % 5 === 0 || i === jsFiles.length - 1) {
+      log.info(`${progress} Searching for dependents... (found ${dependents.size} so far)`);
+    }
+
+    // Generate possible import patterns for this file
+    const importPatterns = getImportPatterns(file);
+
+    for (const pattern of importPatterns) {
+      try {
+        // Use git grep for speed - search for import/require of this file
+        const { stdout } = await execFileAsync(
+          'git',
+          ['grep', '-l', '--extended-regexp', pattern, '--', '*.ts', '*.tsx', '*.js', '*.jsx'],
+          { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 }
+        );
+        const matches = stdout.trim().split('\n').filter(Boolean);
+        for (const match of matches) {
+          // Don't add the file itself as its own dependent
+          if (match !== file) {
+            dependents.add(match);
+          }
+        }
+      } catch {
+        // git grep returns exit code 1 when no matches found, ignore
+      }
+    }
+  }
+
+  return Array.from(dependents);
+}
+
+/** Generate possible import patterns for a file */
+function getImportPatterns(filePath: string): string[] {
+  const patterns: string[] = [];
+
+  // Remove file extension
+  const withoutExt = filePath.replace(/\.(ts|tsx|js|jsx)$/, '');
+
+  // Get the filename without directory
+  const filename = withoutExt.split('/').pop() || withoutExt;
+
+  // Get package-relative paths (for files in packages)
+  const packageMatch = filePath.match(
+    /(?:packages|src\/platform\/packages\/(?:shared|private))\/([^/]+)/
+  );
+
+  if (packageMatch) {
+    // Extract the part after the package directory
+    const afterPackage = withoutExt.split(packageMatch[0])[1] || '';
+    if (afterPackage) {
+      // Pattern for package imports like '@kbn/package-name/path'
+      patterns.push(`from ['"]@kbn/[^'"]*${afterPackage.replace(/^\/src/, '')}['"]`);
+    }
+  }
+
+  // Pattern for relative imports using the filename
+  if (filename !== 'index') {
+    patterns.push(`from ['"][^'"]*/${filename}['"]`);
+  }
+
+  // Pattern for the full relative path (last 2-3 segments)
+  const segments = withoutExt.split('/');
+  if (segments.length >= 2) {
+    const lastTwo = segments.slice(-2).join('/');
+    patterns.push(`from ['"][^'"]*${lastTwo}['"]`);
+  }
+
+  return patterns;
 }
