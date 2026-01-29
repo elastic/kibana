@@ -28,6 +28,7 @@ import {
 import type { CascadeRowHeaderPrimitiveProps } from '../../types';
 import { CascadeRowActions } from './cascade_row_actions';
 import { styles as cascadeRowHeaderStyles, flexHelper } from './cascade_row_header.styles';
+import { CascadeRowHeaderSlotsRenderer } from './cascade_row_header_slots_renderer';
 
 /**
  * @internal
@@ -42,6 +43,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
   enableSecondaryExpansionAction,
   isGroupNode,
   onCascadeGroupNodeExpanded,
+  onCascadeGroupNodeCollapsed,
 }: CascadeRowHeaderPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
@@ -68,6 +70,11 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     [currentGroupByColumns, rowInstance]
   );
 
+  const nodePathMap = useMemo(
+    () => getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance),
+    [currentGroupByColumns, rowInstance]
+  );
+
   const headerMetaSlots = useMemo(
     () => rowHeaderMetaSlots?.({ rowData, rowDepth, nodePath }),
     [rowHeaderMetaSlots, rowData, rowDepth, nodePath]
@@ -82,8 +89,8 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     const dataFetchFn = async () => {
       const groupNodeData = await onCascadeGroupNodeExpanded({
         row: rowInstance.original,
-        nodePath: getCascadeRowNodePath(currentGroupByColumns, rowInstance),
-        nodePathMap: getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance),
+        nodePath,
+        nodePathMap,
       });
 
       if (!groupNodeData) {
@@ -100,7 +107,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
       // eslint-disable-next-line no-console -- added for debugging purposes
       console.error('Error fetching data for row with ID: %s', rowId, error);
     });
-  }, [onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns, actions, rowId]);
+  }, [onCascadeGroupNodeExpanded, nodePath, nodePathMap, actions, rowId, rowInstance.original]);
 
   const onCascadeSecondaryExpansion = useCallback(() => {}, []);
 
@@ -114,6 +121,23 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     }
   }, [rowIsExpanded, rowChildrenCount, isGroupNode, fetchGroupNodeData]);
 
+  useEffect(() => {
+    if (!rowIsExpanded && isGroupNode) {
+      onCascadeGroupNodeCollapsed?.({
+        row: rowInstance.original,
+        nodePath,
+        nodePathMap,
+      });
+    }
+  }, [
+    onCascadeGroupNodeCollapsed,
+    nodePath,
+    nodePathMap,
+    rowInstance.original,
+    rowIsExpanded,
+    isGroupNode,
+  ]);
+
   return (
     <React.Fragment>
       <React.Fragment>
@@ -122,6 +146,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         )}
       </React.Fragment>
       <EuiFlexGroup
+        data-test-subj={`${rowId}-row-header`}
         gutterSize={size}
         direction="row"
         alignItems="center"
@@ -180,28 +205,27 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flexHelper}>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="row" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            direction="row"
+            responsive={false}
+          >
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>
             <EuiFlexItem grow={6} css={styles.rowHeaderSlotContainer}>
               <EuiFlexGroup
                 direction="row"
-                gutterSize={size}
+                gutterSize="s"
                 alignItems="center"
                 justifyContent="flexEnd"
                 css={styles.rowHeaderSlotContainerInner}
               >
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize={size}>
-                        {headerMetaSlots?.map((metaSlot, index) => (
-                          <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
-                            {metaSlot}
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
+                    <EuiFlexItem css={flexHelper} grow>
+                      <CascadeRowHeaderSlotsRenderer headerMetaSlots={headerMetaSlots!} />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>

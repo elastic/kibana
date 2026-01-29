@@ -12,28 +12,26 @@ import { PrebuiltRuleAssetsFilter } from '../common/prebuilt_rule_assets_filter'
 import { PrebuiltRuleAssetsSort } from '../common/prebuilt_rule_assets_sort';
 
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
-export const ReviewRuleInstallationRequestBody = z
-  .object({
-    /**
-     * Page number starting from 1
-     */
-    page: z.coerce.number().int().min(1).optional(),
-    /**
-     * Rules per page
-     */
-    per_page: z.coerce.number().int().min(1).max(10_000).optional(),
+export const ReviewRuleInstallationRequestBody = z.object({
+  /**
+   * Page number starting from 1
+   */
+  page: z.number().int().min(1).default(1),
+  /**
+   * Rules per page
+   */
+  per_page: z.number().int().min(1).max(10_000).default(20),
 
-    /**
-     * Filtering criteria
-     */
-    filter: PrebuiltRuleAssetsFilter.optional(),
+  /**
+   * Filtering criteria
+   */
+  filter: PrebuiltRuleAssetsFilter.optional(),
 
-    /**
-     * Sorting criteria
-     */
-    sort: PrebuiltRuleAssetsSort.optional(),
-  })
-  .partial();
+  /**
+   * Sorting criteria
+   */
+  sort: PrebuiltRuleAssetsSort.optional(),
+});
 
 export interface ReviewRuleInstallationResponseBody {
   /** Current page number */

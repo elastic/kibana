@@ -433,7 +433,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -882,7 +882,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -2079,7 +2079,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -2511,7 +2511,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -2867,7 +2867,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -3251,7 +3251,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -3683,7 +3683,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -4235,7 +4235,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -4667,7 +4667,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -5023,7 +5023,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -5407,7 +5407,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -5839,7 +5839,7 @@
               },
               ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
               "EuiDataGridColumn",
-              "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+              "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -10916,7 +10916,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -11348,7 +11348,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -11704,7 +11704,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -12088,7 +12088,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -12520,7 +12520,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -13056,7 +13056,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -13488,7 +13488,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -13844,7 +13844,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -14228,7 +14228,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -14660,7 +14660,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -15289,7 +15289,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -15721,7 +15721,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -16077,7 +16077,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -16461,7 +16461,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -16893,7 +16893,7 @@
           },
           ">, \"expandedAlertIndex\"> & { expandedAlertIndex: number; }> | null | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; extractObservables?: boolean | undefined; } | undefined; columns: ",
           "EuiDataGridColumn",
-          "[]; pageSize: number; onPageSizeChange: (newPageSize: number) => void; pageIndex: number; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
+          "[]; pageSize: number; pageIndex: number; onPageSizeChange: (newPageSize: number) => void; onPageIndexChange: (newPageIndex: number) => void; isMutedAlertsEnabled: boolean; openLinksInNewTab: boolean; expandedAlertIndex: number | null; onExpandedAlertIndexChange: (expandedAlertIndex: number | null) => void; } & ",
           {
             "pluginId": "observability",
             "scope": "public",
