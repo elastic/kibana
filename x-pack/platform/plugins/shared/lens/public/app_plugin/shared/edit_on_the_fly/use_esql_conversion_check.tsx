@@ -6,16 +6,23 @@
  */
 
 import { useMemo } from 'react';
+import { partition } from 'lodash';
+
 import type {
-  DatasourceStates,
   FormBasedLayer,
+  FormBasedPrivateState,
   FramePublicAPI,
   VisualizationState,
+  SupportedDatasourceId,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
-import { partition } from 'lodash';
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { getESQLForLayer, isEsqlQuerySuccess } from '../../../datasources/form_based/to_esql';
+import type { CoreStart } from '@kbn/core/public';
+
+import {
+  generateEsqlQuery,
+  isEsqlQuerySuccess,
+} from '../../../datasources/form_based/generate_esql_query';
 import {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
@@ -24,26 +31,35 @@ import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
+import { useLensSelector } from '../../../state_management';
+import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
+
+interface EsqlConversionSettings {
+  isConvertToEsqlButtonDisabled: boolean;
+  convertToEsqlButtonTooltip: string;
+  convertibleLayers: ConvertibleLayer[];
+  attributes?: TypedLensSerializedState['attributes'];
+}
 
 const getEsqlConversionDisabledSettings = (
   tooltip: string = esqlConversionFailureReasonMessages.unknown
-) => ({
+): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
   convertibleLayers: [],
 });
 
-export const useEsqlConversion = (
+export const useEsqlConversionCheck = (
   showConvertToEsqlButton: boolean,
   {
+    attributes,
     datasourceId,
-    datasourceStates,
     layerIds,
     visualization,
     activeVisualization,
   }: {
-    datasourceId: 'formBased' | 'textBased';
-    datasourceStates: DatasourceStates;
+    attributes: TypedLensSerializedState['attributes'] | undefined;
+    datasourceId: SupportedDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
     activeVisualization: unknown;
@@ -57,17 +73,14 @@ export const useEsqlConversion = (
     coreStart: CoreStart;
     startDependencies: LensPluginStartDependencies;
   }
-): {
-  isConvertToEsqlButtonDisabled: boolean;
-  convertToEsqlButtonTooltip: string;
-  convertibleLayers: ConvertibleLayer[];
-} => {
-  return useMemo(() => {
-    if (!showConvertToEsqlButton) {
-      return getEsqlConversionDisabledSettings();
-    }
+): EsqlConversionSettings => {
+  // Get datasourceStates from Redux
+  const { datasourceStates } = useLensSelector((state) => state.lens);
 
-    if (!activeVisualization || !visualization?.state) {
+  return useMemo(() => {
+    const datasourceState = datasourceStates[datasourceId]?.state as FormBasedPrivateState;
+
+    if (!showConvertToEsqlButton || !activeVisualization || !visualization?.state || !attributes) {
       return getEsqlConversionDisabledSettings();
     }
 
@@ -88,25 +101,23 @@ export const useEsqlConversion = (
     }
 
     // Guard: datasource state exists and has layers
-    const datasourceState = datasourceStates[datasourceId]?.state;
     if (!isValidDatasourceState(datasourceState)) {
       return getEsqlConversionDisabledSettings();
     }
 
     // Guard: layer access
     const layerId = layerIds[0];
-    const layers = datasourceState.layers;
+    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
     if (!layerId || !layers[layerId]) {
       return getEsqlConversionDisabledSettings();
     }
 
     const singleLayer = layers[layerId];
-    if (!singleLayer?.columnOrder || !singleLayer?.columns) {
+    if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
       return getEsqlConversionDisabledSettings();
     }
 
     // Main logic: compute esqlLayer
-
     const { columnOrder } = singleLayer;
     const columns = { ...singleLayer.columns };
     const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -119,7 +130,7 @@ export const useEsqlConversion = (
 
     let esqlLayer;
     try {
-      esqlLayer = getESQLForLayer(
+      esqlLayer = generateEsqlQuery(
         esAggEntries,
         singleLayer,
         framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
@@ -130,33 +141,57 @@ export const useEsqlConversion = (
     } catch (e) {
       // Layer remains non-convertible
       // This prevents conversion errors from breaking the visualization
+      return getEsqlConversionDisabledSettings(esqlConversionFailureReasonMessages.unknown);
     }
 
-    return isEsqlQuerySuccess(esqlLayer)
-      ? {
-          isConvertToEsqlButtonDisabled: false,
-          convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
-            defaultMessage: 'Convert visualization to ES|QL',
-          }),
-          convertibleLayers: [
-            {
-              id: layerId,
-              icon: 'layers',
-              name: '',
-              type: layerTypes.DATA,
-              query: esqlLayer.esql,
-              isConvertibleToEsql: true,
-            },
-          ],
-        }
-      : getEsqlConversionDisabledSettings(getFailureTooltip(esqlLayer?.reason));
+    if (!isEsqlQuerySuccess(esqlLayer)) {
+      const reason = esqlLayer?.reason;
+      const tooltipMessage = getFailureTooltip(reason);
+      return getEsqlConversionDisabledSettings(tooltipMessage);
+    }
+
+    const convertibleLayers: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: layerTypes.DATA,
+        query: esqlLayer.esql,
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: esqlLayer.esAggsIdMap,
+          partialRows: esqlLayer.partialRows,
+        },
+      },
+    ];
+
+    const newAttributes = convertFormBasedToTextBasedLayer({
+      layersToConvert: convertibleLayers,
+      attributes,
+      visualizationState: visualization.state,
+      datasourceStates,
+      framePublicAPI,
+    });
+
+    if (newAttributes === undefined) {
+      return getEsqlConversionDisabledSettings();
+    }
+
+    return {
+      isConvertToEsqlButtonDisabled: false,
+      convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
+        defaultMessage: 'Convert visualization to ES|QL',
+      }),
+      convertibleLayers,
+      attributes: newAttributes,
+    };
   }, [
     activeVisualization,
+    attributes,
     coreStart.uiSettings,
     datasourceId,
     datasourceStates,
-    framePublicAPI.dataViews.indexPatterns,
-    framePublicAPI.dateRange,
+    framePublicAPI,
     layerIds,
     showConvertToEsqlButton,
     startDependencies.data.nowProvider,
