@@ -16,15 +16,19 @@ import { indices } from './lib/indices';
 import { installDefaultComponentTemplate } from './lib/install_default_component_template';
 
 export async function run(config: Config, client: Client, logger: ToolingLog) {
-  await installDefaultComponentTemplate(config, client, logger);
-  await installIndexTemplate(config, client, logger);
-  if (config.elasticsearch.installKibanaUser) {
-    await setupKibanaSystemUser(config, client, logger);
+  if (config.destination.type === 'elasticsearch') {
+    await installDefaultComponentTemplate(config, client, logger);
+    await installIndexTemplate(config, client, logger);
+    if (config.elasticsearch.installKibanaUser) {
+      await setupKibanaSystemUser(config, client, logger);
+    }
+    await installAssets(config, logger);
   }
-  await installAssets(config, logger);
   await indexSchedule(config, client, logger);
   const indicesCreated = [...indices];
   indices.clear();
-  await client.indices.refresh({ index: indicesCreated, ignore_unavailable: true });
+  if (config.destination.type === 'elasticsearch') {
+    await client.indices.refresh({ index: indicesCreated, ignore_unavailable: true });
+  }
   return indicesCreated;
 }
