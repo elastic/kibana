@@ -462,11 +462,11 @@ export const ExceptionListItemCommentArray = z.array(ExceptionListItemComment);
 export type EndpointListProperties = z.infer<typeof EndpointListProperties>;
 export const EndpointListProperties = z.object({
   list_id: z.literal('endpoint_list'),
-  /** 
+  /**
       * Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
 
 **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
- 
+
       */
   entries: ExceptionListItemEntryArray.optional(),
   os_types: ExceptionListItemOsTypeArray.optional().default([]),
@@ -676,13 +676,13 @@ export const TrustedDevicesWindowsMacProperties = z.object({
 export type EventFiltersProperties = z.infer<typeof EventFiltersProperties>;
 export const EventFiltersProperties = z.object({
   list_id: z.literal('endpoint_event_filters'),
-  /** 
+  /**
       * Exception entries for the event filter.
 
 **Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
 
 **Minimum requirement:** At least 1 entry required
- 
+
       */
   entries: ExceptionListItemEntryArray.optional(),
   os_types: ExceptionListItemOsTypeArray.optional().default([]),
@@ -739,12 +739,12 @@ export const HostIsolationProperties = z.object({
 export type BlocklistWindowsProperties = z.infer<typeof BlocklistWindowsProperties>;
 export const BlocklistWindowsProperties = z.object({
   list_id: z.literal('endpoint_blocklists'),
-  /** 
+  /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
 * Code signature entry: only 1 allowed
- 
+
       */
   entries: z
     .array(z.union([BlocklistHashOrPathEntry, BlocklistWindowsCodeSignatureEntry]))
@@ -763,11 +763,11 @@ export const BlocklistWindowsProperties = z.object({
 export type BlocklistLinuxProperties = z.infer<typeof BlocklistLinuxProperties>;
 export const BlocklistLinuxProperties = z.object({
   list_id: z.literal('endpoint_blocklists'),
-  /** 
+  /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
- 
+
       */
   entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
   /**
@@ -783,11 +783,11 @@ export const BlocklistLinuxProperties = z.object({
 export type BlocklistMacProperties = z.infer<typeof BlocklistMacProperties>;
 export const BlocklistMacProperties = z.object({
   list_id: z.literal('endpoint_blocklists'),
-  /** 
+  /**
       * **Validation rules:**
 * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
 * Path entry: only 1 allowed
- 
+
       */
   entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
   /**

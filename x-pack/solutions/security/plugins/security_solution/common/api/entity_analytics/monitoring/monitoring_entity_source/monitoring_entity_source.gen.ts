@@ -25,9 +25,9 @@ export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
 export type Matcher = z.infer<typeof Matcher>;
 export const Matcher = z.object({
   fields: z.array(z.string()),
-  /** 
+  /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
- 
+
       */
   values: z.union([z.array(z.string()), z.array(z.boolean())]),
 });
