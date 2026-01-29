@@ -38,6 +38,7 @@ export function getDrilldownRegistry() {
     },
     getSchema: (supportedTriggers: string[]) => {
       const drilldownSchemas = Object.entries(registry)
+        // narrow drilldowns to only those that intersect with supported triggers
         .filter(([type, drilldownSetup]) => {
           return supportedTriggers.some((trigger) =>
             drilldownSetup.supportedTriggers.includes(trigger)
@@ -48,9 +49,10 @@ export function getDrilldownRegistry() {
             label: schema.string(),
             triggers: schema.arrayOf(
               schema.oneOf(
-                drilldownSetup.supportedTriggers.map((trigger) => schema.literal(trigger)) as [
-                  Type<string>
-                ]
+                drilldownSetup.supportedTriggers
+                  // narrow drilldown triggers to only those that intersect with supported triggers
+                  .filter((trigger) => supportedTriggers.includes(trigger))
+                  .map((trigger) => schema.literal(trigger)) as [Type<string>]
               )
             ),
             type: schema.literal(type),
