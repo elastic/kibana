@@ -24,6 +24,7 @@ export function UncontrolledStreamsAppSearchBar(props: UncontrolledStreamsAppSea
       displayStyle="inPage"
       disableQueryLanguageSwitcher
       query={undefined}
+      isAutoRefreshDisabled={true}
       {...props}
     />
   );

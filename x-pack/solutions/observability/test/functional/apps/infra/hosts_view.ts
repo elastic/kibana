@@ -11,7 +11,8 @@ import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
+} from '@kbn/synthtrace';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -199,6 +200,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -217,6 +219,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
+  const setCustomDashboardsEnabled = (value: boolean = true) =>
+    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
+
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
@@ -322,6 +327,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('#Single Host Flyout', () => {
         before(async () => {
+          await setCustomDashboardsEnabled(true);
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
         });
@@ -465,6 +471,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             it('should render logs tab', async () => {
               await pageObjects.assetDetails.logsExists();
+            });
+          });
+
+          describe('Dashboards Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickDashboardsTab();
+            });
+
+            it('should render dashboards tab splash screen with option to add dashboard', async () => {
+              await pageObjects.assetDetails.addDashboardExists();
             });
           });
 
@@ -768,7 +784,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 6;
           const RECOVERED_ALERTS = 4;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 11;
+          const COLUMNS = 12;
 
           before(async () => {
             await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -905,7 +921,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const ACTIVE_ALERTS = 6;
             const RECOVERED_ALERTS = 4;
             const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-            const COLUMNS = 11;
+            const COLUMNS = 12;
 
             await pageObjects.infraHostsView.visitAlertTab();
 

@@ -12,7 +12,7 @@ import { pageObjects } from './page_objects';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.
- * This test suite fakes a cloud environement by setting the cloud.id and cloud.base_url
+ * This test suite fakes a cloud environment by setting the cloud.id and cloud.base_url
  */
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -38,15 +38,24 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.searchIndices.enabled=true',
+        `--uiSettings.overrides.eisPromotionalTour:enabled=false`,
       ],
     },
     testFiles: [require.resolve('.')],
-    screenshots: { directory: resolve(__dirname, 'screenshots') },
+    screenshots: { directory: resolve(__dirname, '../screenshots') },
     apps: {
       ...functionalConfig.get('apps'),
       searchInferenceEndpoints: {
         pathname: '/app/elasticsearch/relevance/inference_endpoints',
+      },
+      searchOverview: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      searchHomepage: {
+        pathname: '/app/elasticsearch/home',
+      },
+      searchGettingStarted: {
+        pathname: '/app/elasticsearch/getting_started',
       },
     },
   };

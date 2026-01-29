@@ -20,17 +20,21 @@ export const updateDeletedPolicyResponseActions = async (
 ): Promise<void> => {
   const logger = endpointService.createLogger('updateDeletedPolicyResponseActions');
 
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug(`Space awareness feature flag is disabled. Nothing to do`);
+  if (deletedIntegrationPolicies.length === 0) {
+    logger.debug(`No deleted integration policies provided on input. Nothing to do`);
+    return;
+  }
+
+  if (
+    !(await endpointService.getInternalFleetServices(undefined, true).isEndpointPackageInstalled())
+  ) {
+    logger.debug(`Endpoint package not installed. Nothing to do`);
     return;
   }
 
   logger.debug(
     `Checking if response action requests need to be updated for deleted integration policies`
   );
-
-  // Ensure index has required mappings
-  await ensureActionRequestsIndexIsConfigured(endpointService);
 
   const packageNames = Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat();
   const policyIds: string[] = [];
@@ -50,6 +54,9 @@ export const updateDeletedPolicyResponseActions = async (
 
   if (policyIds.length > 0) {
     const esClient = endpointService.getInternalEsClient();
+
+    // Ensure the index has required mappings
+    await ensureActionRequestsIndexIsConfigured(endpointService);
 
     try {
       const updateResponse = await esClient

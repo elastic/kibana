@@ -13,6 +13,7 @@ import path from 'path';
 import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { getRulesMigrationTools } from '../../server/lib/siem_migrations/rules/task/agent/tools';
 import type { DashboardMigrationsRetriever } from '../../server/lib/siem_migrations/dashboards/task/retrievers';
 import { getDashboardMigrationAgent } from '../../server/lib/siem_migrations/dashboards/task/agent';
 import type { DashboardMigrationTelemetryClient } from '../../server/lib/siem_migrations/dashboards/task/dashboard_migrations_telemetry_client';
@@ -23,6 +24,7 @@ import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/r
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/task/util/esql_knowledge_base';
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
+import type { RuleMigrationsDataClient } from '../../server/lib/siem_migrations/rules/data/rule_migrations_data_client';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -43,12 +45,16 @@ const createLlmInstance = () => {
 async function getSiemRuleMigrationGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance() as ChatModel;
   const telemetryClient = {} as RuleMigrationTelemetryClient;
+  const tools = getRulesMigrationTools('some_migration_id', {
+    rulesClient: {} as unknown as RuleMigrationsDataClient,
+  });
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase,
     ruleMigrationsRetriever,
     logger,
     telemetryClient,
+    tools,
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -64,6 +70,9 @@ async function getSiemDashboardMigrationGraph(logger: Logger): Promise<Drawable>
     dashboardMigrationsRetriever,
     logger,
     telemetryClient,
+    inference: {} as InferenceServerStart,
+    request: {} as KibanaRequest,
+    connectorId: 'test-connector-id',
   });
   return graph.getGraphAsync({ xray: true });
 }

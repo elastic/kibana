@@ -6,7 +6,7 @@
  */
 
 import { render, fireEvent, screen } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import React from 'react';
 import { ConfirmDeleteEndpointModal } from '.';
 import * as i18n from './translations';

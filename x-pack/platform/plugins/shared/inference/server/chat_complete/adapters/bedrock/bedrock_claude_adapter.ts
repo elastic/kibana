@@ -10,6 +10,7 @@ import type { Message } from '@kbn/inference-common';
 import { MessageRole, createInferenceInternalError, ToolChoiceType } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
 import type {
+  ConverseResponse,
   ModelStreamErrorException,
   ToolResultContentBlock,
 } from '@aws-sdk/client-bedrock-runtime';
@@ -17,13 +18,15 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isPlainObject } from 'lodash';
 import type { Readable } from 'stream';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockToolUsePart } from './types';
 import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import type { ConverseCompletionChunk } from './process_completion_chunks';
 import { processConverseCompletionChunks } from './process_completion_chunks';
+import { processConverseResponse } from './process_converse_response';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -36,6 +39,8 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
+    stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
@@ -47,56 +52,71 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
     const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+    const connector = executor.getConnector();
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
-      temperature,
+      ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
+      ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
     };
 
-    return defer(async () => {
-      const res = await executor.invoke({
-        subAction: 'converseStream',
+    const connectorResult$ = defer(async () => {
+      return executor.invoke({
+        subAction: stream ? 'converseStream' : 'converse',
         subActionParams,
       });
-      const result = res.data as { stream: Readable };
-      return { ...res, data: result?.stream };
-    }).pipe(
-      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
-      tap((eventData) => {
-        if (
-          isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
-            'modelStreamErrorException',
-          ])
-        ) {
-          throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
-        }
-      }),
-      filter((value) => {
-        return typeof value === 'object' && !!value;
-      }),
-      map((message) => {
-        const key = Object.keys(message)[0];
-        if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
-          return {
-            type: key,
-            body: JSON.parse(toUtf8(message[key].body)),
-          } as ConverseCompletionChunk;
-        }
-      }),
-      filter((value): value is ConverseCompletionChunk => !!value),
-      processConverseCompletionChunks()
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        map((res) => {
+          const result = res.data as { stream: Readable };
+          return { ...res, data: result?.stream };
+        }),
+        handleConnectorStreamResponse({ processStream: serdeEventstreamIntoObservable }),
+        tap((eventData) => {
+          if (
+            isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
+              'modelStreamErrorException',
+            ])
+          ) {
+            throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
+          }
+        }),
+        filter((value) => {
+          return typeof value === 'object' && !!value;
+        }),
+        map((message) => {
+          const key = Object.keys(message)[0];
+          if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
+            return {
+              type: key,
+              body: JSON.parse(toUtf8(message[key].body)),
+            } as ConverseCompletionChunk;
+          }
+        }),
+        filter((value): value is ConverseCompletionChunk => !!value),
+        processConverseCompletionChunks(modelName)
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as ConverseResponse,
+        }),
+        processConverseResponse(modelName)
+      );
+    }
   },
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  return messages.map((message): BedRockMessage => {
+  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
     switch (message.role) {
       case MessageRole.User: {
         const rawContent: BedRockMessage['rawContent'] = [];
@@ -180,4 +200,25 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       }
     }
   });
+
+  // Combine consecutive user tool result messages into a single message. This format is required by Bedrock.
+  const combinedConverseMessages = converseMessages.reduce<BedRockMessage[]>((acc, curr) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (
+      lastMessage &&
+      lastMessage.role === 'user' &&
+      lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
+      curr.role === 'user' &&
+      curr.rawContent?.some((c) => 'toolResult' in c)
+    ) {
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+    } else {
+      acc.push(curr);
+    }
+
+    return acc;
+  }, []);
+
+  return combinedConverseMessages;
 };

@@ -39,9 +39,24 @@ const defaultProps = {
     event: {
       kind: ['signal'],
     },
+    host: {
+      name: ['test-host'],
+    },
   },
+  nonEcsData: [
+    { field: 'event.kind', value: ['signal'] },
+    { field: 'host.name', value: ['test-host'] },
+  ],
   refetch,
 };
+
+const mockObservable = [
+  {
+    typeKey: 'observable-type-hostname',
+    value: 'test-host',
+    description: 'Auto extracted observable',
+  },
+];
 
 const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
@@ -74,6 +89,7 @@ describe('useAddToCaseActions', () => {
           helpers: {
             getRuleIdFromEvent: () => null,
             canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+            getObservablesFromEcs: jest.fn().mockReturnValue(mockObservable),
           },
         },
       },
@@ -113,6 +129,7 @@ describe('useAddToCaseActions', () => {
     });
     expect(open).toHaveBeenCalledWith({
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      observables: mockObservable,
     });
   });
 

@@ -93,9 +93,7 @@ export const uploadAllEventsFromPath = async (
         } in directory '${eventLogPath}'.`
       );
 
-      for (const filePath of ndjsonFilePaths) {
-        await reportDataStream.addEventsFromFile(filePath);
-      }
+      await reportDataStream.addEventsFromFile(...ndjsonFilePaths);
     }
   } else if (eventLogPath.endsWith('.ndjson')) {
     await reportDataStream.addEventsFromFile(eventLogPath);

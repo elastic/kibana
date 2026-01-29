@@ -19,6 +19,7 @@ export interface UseCasesFeatures {
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
+  isExtractObservablesEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -41,21 +42,26 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        * option to true and get the whole alerts experience without the need
        * to explicitly set the sync to true
        */
-      isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
+      isSyncAlertsEnabled:
+        !features.alerts.enabled || !features.alerts.all ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
-      isObservablesFeatureEnabled: features.observables.enabled,
+      isObservablesFeatureEnabled: !!features.observables.enabled,
+      isExtractObservablesEnabled:
+        !!features.observables.enabled && !!features.observables.autoExtract,
     }),
     [
       features.alerts.enabled,
       features.alerts.sync,
+      features.alerts.all,
       features.metrics,
       hasLicenseGreaterThanPlatinum,
       assign,
       features.observables?.enabled,
+      features.observables?.autoExtract,
       hasLicenseWithAtLeastGold,
     ]
   );

@@ -13,11 +13,13 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
-import type { ValueFormatConfig } from '../../../../../common';
+import type {
+  DataType,
+  LastValueIndexPatternColumn,
+  IndexPatternField,
+  IndexPattern,
+} from '@kbn/lens-common';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
-import type { FieldBasedIndexPatternColumn } from './column_types';
-import type { IndexPatternField, IndexPattern } from '../../../../types';
-import type { DataType } from '../../../../types';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -142,16 +144,6 @@ function setDefaultShowArrayValues(
     (isRuntimeField(field) && field.type !== 'number') ||
     oldParams?.showArrayValues
   );
-}
-
-export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof LAST_VALUE_ID;
-  params: {
-    sortField: string;
-    showArrayValues: boolean;
-    // last value on numeric fields can be formatted
-    format?: ValueFormatConfig;
-  };
 }
 
 function getScale(type: string) {

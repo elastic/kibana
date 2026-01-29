@@ -10,29 +10,30 @@ import React, { useEffect, useRef } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
-import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_state_machine';
 import type { StepConfigurationProps } from '../../steps_list';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
 import { ActionBlockEditor } from './editor';
 import { ActionBlockListItem } from './list_item';
 import { getStepPanelColour } from '../../../utils';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
 };
-export function ActionBlock({
-  stepRef,
-  level,
-  stepUnderEdit,
-  rootLevelMap,
-  stepsProcessingSummaryMap,
-}: StepConfigurationProps) {
+export function ActionBlock(props: StepConfigurationProps) {
+  const { stepRef, level } = props;
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const panelColour = getStepPanelColour(level);
 
@@ -54,7 +55,7 @@ export function ActionBlock({
   return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
-      paddingSize="m"
+      data-stream-type={streamType}
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
       css={
@@ -62,30 +63,19 @@ export function ActionBlock({
           ? css`
               border: 1px solid ${euiTheme.colors.borderStrongPrimary};
               box-sizing: border-box;
+              padding: ${euiTheme.size.m};
             `
           : css`
               border: ${euiTheme.border.thin};
+              border-radius: ${euiTheme.size.s};
+              padding: ${euiTheme.size.m};
             `
       }
     >
       {isUnderEdit ? (
-        <ActionBlockEditor
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          ref={freshBlockRef}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockEditor {...props} ref={freshBlockRef} processorMetrics={processorMetrics} />
       ) : (
-        <ActionBlockListItem
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          stepUnderEdit={stepUnderEdit}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
       )}
     </EuiPanel>
   );

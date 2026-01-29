@@ -12,6 +12,7 @@ import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard'
 import { getCreateDescriptionsNode } from './nodes/create_descriptions';
 import { getTranslatePanelNode } from './nodes/translate_panel/translate_panel';
 import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
+import { RETRY_POLICY } from './constants';
 
 export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
   const parseOriginalDashboardNode = getParseOriginalDashboardNode();
@@ -25,8 +26,12 @@ export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) 
   )
     // Nodes
     .addNode('parseOriginalDashboard', parseOriginalDashboardNode)
-    .addNode('createDescriptions', createDescriptionsNode)
-    .addNode('translatePanel', translatePanel.node, { subgraphs: [translatePanel.subgraph] })
+    .addNode('createDescriptions', createDescriptionsNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('translatePanel', translatePanel.node, {
+      subgraphs: [translatePanel.subgraph],
+    })
     .addNode('aggregateDashboard', aggregateDashboardNode)
     // Edges
     .addEdge(START, 'parseOriginalDashboard')

@@ -6,7 +6,7 @@
  */
 
 import * as i18n from './translations';
-import { ALERTS } from '../../common/translations';
+import { ALERTS, EVENTS } from '../../common/translations';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
@@ -53,6 +53,12 @@ export const useCasesColumnsConfiguration = (
       field: 'totalAlerts',
       name: ALERTS,
       canDisplay: isAlertsEnabled && !isSelectorView,
+      isCheckedDefault: true,
+    },
+    totalEvents: {
+      field: 'totalEvents',
+      name: EVENTS,
+      canDisplay: !isSelectorView,
       isCheckedDefault: true,
     },
     totalComment: {

@@ -9,10 +9,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  DateHistogramParams,
-  DataType,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { DateHistogramParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { DataType } from '@kbn/lens-common';
 import type { DateHistogramColumn, DateHistogramSeries } from './types';
 import type { Panel } from '../../../../common/types';
 

@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { Streams, getDiscoverEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import type { DurationInputArg1, DurationInputArg2 } from 'moment';
 import moment from 'moment';
@@ -24,6 +24,7 @@ import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { executeEsqlQuery } from '../../../hooks/use_execute_esql_query';
 
 interface StreamChartPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -32,14 +33,10 @@ interface StreamChartPanelProps {
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const {
     dependencies: {
-      start: {
-        data,
-        dataViews,
-        streams: { streamsRepositoryClient },
-        share,
-      },
+      start: { data, dataViews, share, streams },
     },
   } = useKibana();
+  const { streamsRepositoryClient } = streams;
 
   const { timeState } = useTimefilter();
 
@@ -58,11 +55,14 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   );
 
   const queries = useMemo(() => {
-    if (!indexPatterns) {
+    const baseQuery = getDiscoverEsqlQuery({
+      definition: definition.stream,
+      indexMode: definition.index_mode,
+    });
+
+    if (!baseQuery) {
       return undefined;
     }
-
-    const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize})`;
 
@@ -70,7 +70,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       baseQuery,
       histogramQuery,
     };
-  }, [bucketSize, indexPatterns]);
+  }, [bucketSize, definition.stream, definition.index_mode]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {
@@ -96,19 +96,15 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
         return undefined;
       }
 
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_histogram_for_stream',
-            query: queries.histogramQuery,
-            start,
-            end,
-          },
-        },
+      return executeEsqlQuery({
+        query: queries.histogramQuery,
+        search: data.search.search,
         signal,
+        start,
+        end,
       });
     },
-    [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery],
+    [indexPatterns, dataViews, data.search.search, queries?.histogramQuery],
     {
       withTimeRange: true,
     }

@@ -151,6 +151,10 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.caseView.userActions.cu
   defaultMessage: 'Custom Fields',
 });
 
+export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.observables', {
+  defaultMessage: 'Observables',
+});
+
 export const USER_ACTION_EDITED = (type: string) =>
   i18n.translate('xpack.cases.caseView.userActions.edited', {
     values: { type },

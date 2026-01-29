@@ -46,6 +46,7 @@ const mockProcessTaskOutput = jest.fn().mockResolvedValue({});
 const mockInitialize = jest.fn().mockResolvedValue(undefined);
 
 class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
+  protected taskConcurrency = 10;
   protected TaskRunnerClass = SiemMigrationTaskRunner;
   protected EvaluatorClass = undefined;
 
@@ -83,6 +84,7 @@ describe('SiemMigrationTaskRunner', () => {
     abortController = new AbortController();
     taskRunner = new TestMigrationTaskRunner(
       'test-migration-id',
+      'splunk',
       mockRequest,
       mockUser,
       abortController,

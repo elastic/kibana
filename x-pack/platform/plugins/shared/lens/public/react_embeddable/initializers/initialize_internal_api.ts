@@ -10,18 +10,19 @@ import type { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
-} from '../types';
+  UserMessage,
+} from '@kbn/lens-common';
+import { createEmptyLensState } from '../helper';
+
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
-import type { UserMessage } from '../../types';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
@@ -73,6 +74,8 @@ export function initializeInternalApi(
     ? parentApi.esqlVariables$
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
+  const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -90,6 +93,8 @@ export function initializeInternalApi(
     blockingError$,
     messages$,
     validationMessages$,
+    isEditingInProgress: () => isEditingInProgress$.getValue(),
+    updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

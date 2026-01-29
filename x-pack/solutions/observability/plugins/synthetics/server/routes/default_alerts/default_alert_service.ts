@@ -22,7 +22,7 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 import type { DefaultRuleType } from '../../../common/types/default_alerts';
-export class DefaultAlertService {
+export class DefaultRuleService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -45,7 +45,7 @@ export class DefaultAlertService {
     return this.settings;
   }
 
-  async setupDefaultAlerts() {
+  async setupDefaultRules() {
     this.settings = await this.getSettings();
 
     const [statusRule, tlsRule] = await Promise.allSettled([
@@ -152,7 +152,7 @@ export class DefaultAlertService {
   async updateStatusRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
         minimumRuleInterval
@@ -168,7 +168,7 @@ export class DefaultAlertService {
   async updateTlsRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
         minimumRuleInterval
@@ -181,7 +181,7 @@ export class DefaultAlertService {
     }
   }
 
-  async upsertDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
+  async upsertDefaultRule(ruleType: DefaultRuleType, name: string, interval: string) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);

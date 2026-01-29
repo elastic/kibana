@@ -12,10 +12,24 @@ import { set } from '@kbn/safer-lodash-set';
 import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
+import { getRemovedTypes } from '../..';
 
 export interface Result {
   mappings: SavedObjectsTypeMappingDefinitions;
 }
+
+const cleanupRemovedTypes = (
+  types: SavedObjectsTypeMappingDefinitions,
+  removedFields: string[]
+): SavedObjectsTypeMappingDefinitions => {
+  for (const field of removedFields) {
+    if (Object.prototype.hasOwnProperty.call(types, field)) {
+      delete types[field];
+    }
+  }
+
+  return types;
+};
 
 (async () => {
   if (!process.send) {
@@ -44,9 +58,10 @@ export interface Result {
 
   await root.preboot();
   const { savedObjects } = await root.setup();
-  const result: Result = {
-    mappings: buildTypesMappings(savedObjects.getTypeRegistry().getAllTypes()),
-  };
+  const mappings = buildTypesMappings(savedObjects.getTypeRegistry().getAllTypes());
+  const removedTypes = await getRemovedTypes();
+  cleanupRemovedTypes(mappings, removedTypes);
+  const result: Result = { mappings };
   process.send(result);
 })().catch((error) => {
   process.stderr.write(`UNHANDLED ERROR: ${error.stack}`);

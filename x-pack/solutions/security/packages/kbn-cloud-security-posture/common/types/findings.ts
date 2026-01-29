@@ -6,6 +6,7 @@
  */
 
 import type { EcsDataStream, EcsEvent, EcsObserver } from '@elastic/ecs';
+import type { estypes } from '@elastic/elasticsearch';
 import type { CspBenchmarkRuleMetadata } from '../schema/rules/latest';
 
 export interface CspFinding {
@@ -30,6 +31,23 @@ interface CspFindingOrchestrator {
   cluster?: {
     id?: string;
     name?: string;
+  };
+}
+
+export interface UseCspOptions extends CspBaseEsQuery {
+  sort?: Array<{
+    [key: string]: string;
+  }>;
+  enabled: boolean;
+  pageSize: number;
+  ignore_unavailable?: boolean;
+}
+
+export interface CspBaseEsQuery {
+  query?: {
+    bool: {
+      filter: Array<estypes.QueryDslQueryContainer | undefined> | undefined;
+    };
   };
 }
 

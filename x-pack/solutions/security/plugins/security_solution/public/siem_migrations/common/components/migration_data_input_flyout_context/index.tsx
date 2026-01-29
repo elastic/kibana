@@ -6,21 +6,22 @@
  */
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { MigrationStats } from '../../types';
 
 interface MigrationDataInputContextValue {
-  openFlyout: (migrationStats?: MigrationTaskStats) => void;
+  openFlyout: (migrationStats?: MigrationStats) => void;
   closeFlyout: () => void;
+  isFlyoutOpen: boolean;
 }
 
 const MigrationDataInputContext = createContext<MigrationDataInputContextValue | null>(null);
 
 export const MigrationDataInputContextProvider: React.FC<
   PropsWithChildren<MigrationDataInputContextValue>
-> = React.memo(({ children, openFlyout, closeFlyout }) => {
+> = React.memo(({ children, openFlyout, closeFlyout, isFlyoutOpen }) => {
   const value = useMemo<MigrationDataInputContextValue>(
-    () => ({ openFlyout, closeFlyout }),
-    [openFlyout, closeFlyout]
+    () => ({ openFlyout, closeFlyout, isFlyoutOpen }),
+    [openFlyout, closeFlyout, isFlyoutOpen]
   );
   return (
     <MigrationDataInputContext.Provider value={value}>

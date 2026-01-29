@@ -25,4 +25,19 @@ export const ReadRiskEngineSettingsResponse = z.object({
    * Include closed alerts in the risk score calculation
    */
   includeClosedAlerts: z.boolean().optional(),
+  /**
+   * Whether to enable resetting risk scores to zero when there are no alerts in the selected date range
+   */
+  enableResetToZero: z.boolean().optional(),
+  filters: z
+    .array(
+      z.object({
+        entity_types: z.array(z.enum(['host', 'user', 'service'])),
+        /**
+         * KQL filter string
+         */
+        filter: z.string(),
+      })
+    )
+    .optional(),
 });

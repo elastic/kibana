@@ -11,7 +11,7 @@ import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { validateDataView } from '@kbn/data-views-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import {
   getDependentVar,
@@ -116,7 +116,7 @@ const isSourceIndexNameValid = (
   // doesn't include a comma if index names are supplied as an array.
   // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
   // If there are no messages, it means the source index name is valid.
-  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
+  let sourceIndexNameValid = Object.keys(validateDataView(sourceIndexName)).length === 0;
   if (sourceIndexNameValid) {
     if (typeof sourceIndex === 'string') {
       sourceIndexNameValid = !sourceIndex.includes(',');
@@ -521,7 +521,7 @@ export function reducer(state: State, action: Action): State {
 
       if (action.payload.sourceIndex !== undefined) {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
-        const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
+        const validationMessages = validateDataView(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
       }
 

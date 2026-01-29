@@ -124,6 +124,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }:
       isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth
+      compressed
       options={comboOptions}
       selectedOptions={selectedOptions}
       onChange={handleChange}

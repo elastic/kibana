@@ -7,60 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord, Writable } from '@kbn/utility-types';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
 
-import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
+export type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel };
 
+/**
+ * Capabilities object for the Dashboard application.
+ * Defines the permissions available for dashboard operations.
+ */
 export interface DashboardCapabilities {
+  /** Whether the user can see write controls (edit, save, etc.). */
   showWriteControls: boolean;
+  /** Whether the user can create new dashboards. */
   createNew: boolean;
+  /** Whether the user can view dashboards. */
   show: boolean;
+  /** Additional capability flags. */
   [key: string]: boolean;
 }
 
-export interface DashboardAttributesAndReferences {
-  attributes: DashboardAttributes;
-  references: Reference[];
-}
-
-export type DashboardSettings = Writable<DashboardOptions> & {
-  description?: DashboardAttributes['description'];
-  tags: string[];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
-};
-
-export interface DashboardState extends DashboardSettings {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  panels: DashboardAttributes['panels'];
-
-  /**
-   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
-   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
-   */
-  references?: Reference[];
-
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: ControlsGroupState;
-}
-
+/**
+ * Parameters for the dashboard locator.
+ * Used to navigate to a specific dashboard with optional state.
+ */
 export type DashboardLocatorParams = Partial<
   DashboardState & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    references?: DashboardState['references'] & SerializableRecord;
-
     viewMode?: ViewMode;
 
     /**

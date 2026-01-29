@@ -27,7 +27,7 @@ export type CellValueProps = Pick<
    */
   | 'columnId'
   /**
-   * List of installed AI for SOC integrations.
+   * List of installed EASE integrations.
    * This comes from the additionalContext property on the table.
    */
   | 'packages'
@@ -39,7 +39,7 @@ export type CellValueProps = Pick<
 >;
 
 /**
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  * It renders some of the value with custom renderers for some specific columns:
  *  - kibana.alert.rule.parameters
  *  - kibana.alert.severity

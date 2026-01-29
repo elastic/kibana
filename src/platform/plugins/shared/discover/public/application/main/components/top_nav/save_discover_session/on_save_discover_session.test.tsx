@@ -83,9 +83,6 @@ const setup = async ({
     additionalPersistedTabs,
     services,
   });
-  if (savedSearch) {
-    stateContainer.actions.setDataView(savedSearch.searchSource.getField('index')!);
-  }
   if (dataViewsList) {
     stateContainer.internalState.dispatch(
       internalStateActions.loadDataViewList.fulfilled(
@@ -312,7 +309,12 @@ describe('onSaveDiscoverSession', () => {
       services,
     }));
     await saveModal?.props.onSave(getOnSaveProps());
-    expect(navigateSpy).toHaveBeenCalledWith({ savedSearchId: 'new-session' });
+    expect(navigateSpy).toHaveBeenCalledWith({
+      savedSearchId: 'new-session',
+      tab: {
+        id: 'stable-test-initial-tab-id',
+      },
+    });
   });
 
   it('should show a success toast on save', async () => {

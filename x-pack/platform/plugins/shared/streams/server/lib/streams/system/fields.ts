@@ -8,6 +8,7 @@
 export const STREAM_NAME = 'stream.name';
 
 export const SYSTEM_UUID = 'system.uuid';
+export const SYSTEM_TYPE = 'system.type';
 export const SYSTEM_DESCRIPTION = 'system.description';
 export const SYSTEM_NAME = 'system.name';
 export const SYSTEM_FILTER = 'system.filter';

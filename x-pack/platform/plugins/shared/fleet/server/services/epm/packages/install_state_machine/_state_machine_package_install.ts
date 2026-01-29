@@ -9,12 +9,11 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
-
-import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
@@ -57,9 +56,12 @@ import {
   cleanupArchiveEntriesStep,
   cleanupKnowledgeBaseStep,
   stepInstallKibanaAssetsWithStreaming,
+  stepInstallPrecheck,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
+import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
+import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -72,7 +74,7 @@ export interface InstallContext extends StateContext<StateNames> {
   spaceId: string;
   force?: boolean;
   verificationResult?: PackageVerificationResult;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
@@ -90,8 +92,19 @@ export interface InstallContext extends StateContext<StateNames> {
  */
 const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
-    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
+    nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_precheck: {
+    onTransition: stepInstallPrecheck,
+    nextState: INSTALL_STATES.INSTALL_ESQL_VIEWS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_esql_views: {
+    onPreTransition: cleanupEsqlViewsStep,
+    onTransition: stepInstallEsqlViews,
+    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
   install_kibana_assets: {
@@ -154,6 +167,11 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_alerting_rules: {
+    onTransition: stepCreateAlertingRules,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

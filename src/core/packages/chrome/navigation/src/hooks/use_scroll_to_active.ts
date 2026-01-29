@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 
 /**
- * Custom hook that provides a ref and scrolls to the element when condition is true.
+ * Hook that returns a callback to smoothly scroll an element into view when it becomes active.
  *
- * @template T - HTML element type (defaults to HTMLElement)
- * @param condition - When true, scrolls the referenced element into view
- * @returns Ref to attach to the target element
+ * @param isActive - whether the element should be scrolled into view.
+ * @returns a callback function that accepts a ref to scroll into view.
  */
-export const useScrollToActive = <T extends HTMLElement = HTMLElement>(condition?: boolean) => {
-  const ref = useRef<T>(null);
-
-  useEffect(() => {
-    if (condition && ref?.current) {
-      ref.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
-  }, [condition]);
-
-  return ref;
+export const useScrollToActive = <T extends HTMLElement = HTMLElement>(isActive?: boolean) => {
+  return useCallback(
+    (ref: T | null) => {
+      if (ref && isActive) {
+        requestAnimationFrame(() => {
+          ref.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+          });
+        });
+      }
+    },
+    [isActive]
+  );
 };

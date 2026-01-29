@@ -35,7 +35,10 @@ import { MultiIntegrationInstallBanner } from './multi_integration_install_banne
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { buildInstallCommand } from './build_install_command';
+import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -53,11 +56,7 @@ export const OtelLogsPanel: React.FC = () => {
   });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: {
-      share,
-      http,
-      context: { isServerless },
-    },
+    services: { share, http },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const {
@@ -82,14 +81,10 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [onPageReady, setupData]);
 
-  const metricsOnboardingEnabled = usePricingFeature(
+  const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
-  const ingestEndpointUrl = isServerless
-    ? setupData?.managedOtlpServiceUrl
-    : setupData?.elasticsearchUrl;
-  const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  const agentVersion = setupData?.elasticAgentVersionInfo.agentVersion ?? '';
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
@@ -105,37 +100,60 @@ export const OtelLogsPanel: React.FC = () => {
     getDeeplinks();
   }, [getDeeplinks]);
 
-  const sampleConfigurationPath = isServerless
-    ? metricsOnboardingEnabled
-      ? './otel_samples/managed_otlp/platformlogs_hostmetrics.yml'
-      : './otel_samples/managed_otlp/platformlogs.yml'
-    : './otel_samples/platformlogs_hostmetrics.yml';
-  const elasticEndpointVarName = isServerless ? 'ELASTIC_OTLP_ENDPOINT' : 'ELASTIC_ENDPOINT';
-
   const installTabContents = [
     {
       id: 'linux',
       name: 'Linux',
       firstStepTitle: HOST_COMMAND,
-      content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
-
-curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch
-
-rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:${elasticEndpointVarName}}#${ingestEndpointUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${setupData?.apiKeyEncoded}/g' ./otel.yml`,
+      content: setupData
+        ? buildInstallCommand({
+            platform: 'linux',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          })
+        : '',
       start: 'sudo ./otelcol --config otel.yml',
-      type: 'copy',
+      codeLanguage: 'sh',
     },
     {
       id: 'mac',
       name: 'Mac',
       firstStepTitle: HOST_COMMAND,
-      content: `arch=$(if [[ $(uname -m) == "arm64" ]]; then echo "aarch64"; else echo $(uname -m); fi)
-
-curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch
-
-rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:${elasticEndpointVarName}}#${ingestEndpointUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${setupData?.apiKeyEncoded}/g' ./otel.yml`,
+      content: setupData
+        ? buildInstallCommand({
+            platform: 'mac',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          })
+        : '',
       start: './otelcol --config otel.yml',
-      type: 'copy',
+      codeLanguage: 'sh',
+    },
+    {
+      id: 'windows',
+      name: 'Windows',
+      firstStepTitle: HOST_COMMAND,
+      content: setupData
+        ? buildInstallCommand({
+            platform: 'windows',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          })
+        : '',
+      start: '.\\otelcol.ps1 --config otel.yml',
+      codeLanguage: 'powershell',
     },
   ];
 
@@ -151,6 +169,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup direction="column" gutterSize="none">
         <MultiIntegrationInstallBanner />
+        <ManagedOtlpCallout />
         <EuiSteps
           steps={[
             {
@@ -163,7 +182,9 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                   <EuiButtonGroup
                     legend={i18n.translate(
                       'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                      { defaultMessage: 'Choose platform' }
+                      {
+                        defaultMessage: 'Choose platform',
+                      }
                     )}
                     options={installTabContents.map(({ id, name }) => ({
                       id,
@@ -184,7 +205,11 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                         <p>{selectedContent.firstStepTitle}</p>
                       </EuiText>
                       <EuiFlexItem>
-                        <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
+                        <EuiCodeBlock
+                          language={selectedContent.codeLanguage}
+                          isCopyable
+                          overflowHeight={300}
+                        >
                           {selectedContent.content}
                         </EuiCodeBlock>
                       </EuiFlexItem>
@@ -220,7 +245,9 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                   <EuiCallOut
                     title={i18n.translate(
                       'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
-                      { defaultMessage: 'Configuration Information' }
+                      {
+                        defaultMessage: 'Configuration Information',
+                      }
                     )}
                     color="warning"
                     iconType="info"
@@ -234,13 +261,21 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                       )}
                     </p>
                     <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                        {
-                          defaultMessage:
-                            'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                        }
-                      )}
+                      {selectedTab === 'windows'
+                        ? i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
+                            {
+                              defaultMessage:
+                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                            {
+                              defaultMessage:
+                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                            }
+                          )}
                     </p>
                   </EuiCallOut>
 
@@ -316,7 +351,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                           </>
                         )}
                         <EuiSpacer size="s" />
-                        {metricsOnboardingEnabled && deeplinks?.metrics && (
+                        {isMetricsOnboardingEnabled && deeplinks?.metrics && (
                           <>
                             <EuiFlexItem grow={false}>
                               <EuiText size="s">
@@ -359,7 +394,9 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                           >
                             {i18n.translate(
                               'xpack.observability_onboarding.otelLogsPanel.documentationLink',
-                              { defaultMessage: 'Open documentation' }
+                              {
+                                defaultMessage: 'Open documentation',
+                              }
                             )}
                           </EuiLink>
                         ),
@@ -391,7 +428,9 @@ function CopyableCodeBlock({ content }: { content: string }) {
           >
             {i18n.translate(
               'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-              { defaultMessage: 'Copy to clipboard' }
+              {
+                defaultMessage: 'Copy to clipboard',
+              }
             )}
           </EuiButton>
         )}

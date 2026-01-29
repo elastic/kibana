@@ -12,6 +12,7 @@ import type { MigrationDocument, Stored } from '../types';
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { isNotFoundError } from '../api/util/is_not_found_error';
 import { MAX_ES_SEARCH_SIZE } from './constants';
+import { MIGRATION_ID_NOT_FOUND } from '../translations';
 
 export class SiemMigrationsDataMigrationClient<
   M extends MigrationDocument = MigrationDocument
@@ -107,15 +108,35 @@ export class SiemMigrationsDataMigrationClient<
   /**
    * Saves a migration as ended, updating the last execution parameters with the current timestamp.
    */
-  async saveAsFinished({ id }: { id: string }): Promise<void> {
-    await this.updateLastExecution(id, { finished_at: new Date().toISOString() });
+  async saveAsFinished({ id, error }: { id: string; error?: string }): Promise<void> {
+    const currentMigrationDoc = await this.get(id);
+    if (!currentMigrationDoc) {
+      throw new Error(MIGRATION_ID_NOT_FOUND(id));
+    }
+
+    const finishedAt = new Date();
+    let latestExecutionTimeMs = 0;
+
+    // ideally started_at should always be defined here, but if it is not, we do not want to throw an error
+    if (currentMigrationDoc.last_execution?.started_at) {
+      latestExecutionTimeMs =
+        finishedAt.getTime() - new Date(currentMigrationDoc.last_execution.started_at).getTime();
+    }
+
+    const currentExecutionTime = currentMigrationDoc?.last_execution?.total_execution_time_ms ?? 0;
+
+    await this.updateLastExecution(id, {
+      finished_at: finishedAt.toISOString(),
+      total_execution_time_ms: currentExecutionTime + latestExecutionTimeMs,
+      error,
+    });
   }
 
   /**
    * Saves a migration as failed, updating the last execution parameters with the provided error message.
    */
   async saveAsFailed({ id, error }: { id: string; error: string }): Promise<void> {
-    await this.updateLastExecution(id, { error, finished_at: new Date().toISOString() });
+    await this.saveAsFinished({ id, error });
   }
 
   /**

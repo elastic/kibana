@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -55,9 +55,6 @@
     "@kbn/search-index-documents",
     "@kbn/search-connectors",
     "@kbn/logs-shared-plugin",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-application-browser",
-    "@kbn/core-capabilities-common",
     "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/core-notifications-browser",
@@ -73,7 +70,6 @@
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
-    "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
     "@kbn/core-security-server-mocks",
     "@kbn/unsaved-changes-prompt",
@@ -86,6 +82,6 @@
     "@kbn/search-indices",
     "@kbn/charts-theme",
     "@kbn/licensing-types",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
   ]
 }

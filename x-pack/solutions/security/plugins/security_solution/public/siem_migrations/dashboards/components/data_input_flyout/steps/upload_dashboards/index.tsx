@@ -6,42 +6,42 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import { DashboardUploadSteps } from '../constants';
-import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
-import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
-
-interface DashboardsUploadStepProps {
-  dataInputStep?: number;
-  migrationStats?: DashboardMigrationTaskStats;
-  onMigrationCreated: OnMigrationCreated;
-  onMissingResourcesFetched: OnMissingResourcesFetched;
-}
+import type { MigrationStepProps } from '../../../../../common/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 export const DashboardsUploadStep = ({
   dataInputStep = 1, // Default value if not provided
   migrationStats,
+  migrationSource,
   onMigrationCreated,
   onMissingResourcesFetched,
-}: DashboardsUploadStepProps) => {
+}: MigrationStepProps) => {
   const dataInputStatus = useMemo(
-    () => getEuiStepStatus(DashboardUploadSteps.DashboardsUpload, dataInputStep),
+    () => getEuiStepStatus(SplunkDataInputStep.Upload, dataInputStep),
     [dataInputStep]
   );
 
   return (
-    <EuiPanel data-test-subj="siemMigrationsDashboardsUploadStep">
+    <EuiPanel data-test-subj="siemMigrationsDashboardsUploadStep" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiStepNumber titleSize="xs" number={1} status={dataInputStatus} />
+              <EuiStepNumber
+                titleSize="xs"
+                number={1}
+                status={dataInputStatus}
+                data-test-subj="dashboardsUploadStepNumber"
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <h3>{i18n.DASHBOARDS_UPLOAD_STEP_TITLE}</h3>
+              <EuiTitle size="xs" data-test-subj="dashboardsUploadTitle">
+                <b>{i18n.DASHBOARDS_UPLOAD_STEP_TITLE}</b>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -49,6 +49,7 @@ export const DashboardsUploadStep = ({
           <EuiFlexItem>
             <DashboardsUploadSubSteps
               migrationStats={migrationStats}
+              migrationSource={migrationSource}
               onMigrationCreated={onMigrationCreated}
               onMissingResourcesFetched={onMissingResourcesFetched}
             />

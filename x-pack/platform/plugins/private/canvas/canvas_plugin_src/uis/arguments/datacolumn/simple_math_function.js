@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import { ArgumentStrings } from '../../../../i18n';
 
@@ -29,7 +30,17 @@ export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
     options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
-  return <EuiSelect compressed options={options} value={value} onChange={onChange} />;
+  return (
+    <EuiSelect
+      compressed
+      options={options}
+      value={value}
+      onChange={onChange}
+      aria-label={i18n.translate('xpack.canvas.simpleMathFunction.functionSelectAriaLabel', {
+        defaultMessage: 'Math function',
+      })}
+    />
+  );
 };
 
 SimpleMathFunction.propTypes = {

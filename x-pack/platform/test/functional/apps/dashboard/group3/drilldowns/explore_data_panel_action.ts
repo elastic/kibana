@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('set back default index pattern and clean-up custom time range on panel', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
+      await dashboard.loadDashboardInEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.disableCustomTimeRange();
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('carries over panel time range', async () => {
       await dashboard.navigateToApp();
 
-      await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
+      await dashboard.loadDashboardInEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.enableCustomTimeRange();

@@ -25,6 +25,7 @@ export interface DocLinksMeta {
  */
 export interface DocLinks {
   readonly settings: string;
+  readonly aiAssistantSettings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
   readonly serverlessReleaseNotes: string;
@@ -52,7 +53,12 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
+    readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
+    readonly cloudConnect: string;
+    readonly connectToAutoops: string;
+    readonly deploymentSignup: string;
+    readonly cloudPricing: string;
   };
   readonly console: {
     readonly guide: string;
@@ -86,6 +92,12 @@ export interface DocLinks {
     readonly notebooksExamples: string;
     readonly customerEngineerRequestForm: string;
     readonly elasticCommunity: string;
+    readonly elasticCloud: string;
+  };
+  readonly searchGettingStarted: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
+    readonly elasticTraining: string;
   };
   readonly metricbeat: {
     readonly base: string;
@@ -114,6 +126,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGithub: string;
+    readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsGoogleDrive: string;
     readonly connectorsGmail: string;
@@ -144,6 +157,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
     readonly elasticInferenceService: string;
+    readonly elasticInferenceServicePricing: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -297,6 +311,7 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
     readonly publicBaseUrl: string;
+    readonly troubleshootServerNotReady: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -304,6 +319,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly aiAssistant: {
       home: string;
+      knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
@@ -362,6 +378,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLMultiValueControls: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -383,6 +400,9 @@ export interface DocLinks {
     createRoleMappingTemplates: string;
     createRollupJobsRequest: string;
     createApiKey: string;
+    createApiKeyMetadata: string;
+    createApiKeyRoleDescriptors: string;
+    createCrossClusterApiKey: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -432,6 +452,7 @@ export interface DocLinks {
     aiAssistant: string;
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
+    elasticServerlessSearchManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -489,6 +510,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
@@ -559,6 +581,7 @@ export interface DocLinks {
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
     fipsIngest: string;
+    edotCollector: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -684,6 +707,7 @@ export interface DocLinks {
   readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;
+    readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
     readonly tools: string;
@@ -692,6 +716,15 @@ export interface DocLinks {
     readonly mcpServer: string;
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
+    readonly learnMore: string;
+  };
+  readonly indexManagement: {
+    readonly componentTemplate: string;
+    readonly indexAlias: string;
+  };
+  readonly subscriptions: string;
+  readonly cases: {
+    readonly casesPermissions: string;
   };
 }
 

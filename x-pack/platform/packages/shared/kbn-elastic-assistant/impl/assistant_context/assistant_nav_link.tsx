@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { useAssistantContext } from '../..';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip } from '@elastic/eui';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
+import { useAssistantContext } from '../..';
 
 const TOOLTIP_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
@@ -27,7 +28,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
+  const {
+    chrome,
+    showAssistantOverlay,
+    assistantAvailability,
+    openChatTrigger$,
+    completeOpenChat,
+  } = useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -41,23 +48,47 @@ export const AssistantNavLink: FC = () => {
     [showAssistantOverlay]
   );
 
+  useEffect(() => {
+    if (!openChatTrigger$) return;
+    const sub = openChatTrigger$.subscribe((selection) => {
+      if (selection === AIAssistantType.Security) {
+        showOverlay();
+        completeOpenChat?.();
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [completeOpenChat, openChatTrigger$, showOverlay]);
+
   if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const AiAssistantButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {chromeStyle === 'project' ? (
+          <EuiButtonEmpty {...props} data-test-subj="assistantNavLink" />
+        ) : (
+          <EuiButton {...props} data-test-subj="assistantNavLink" />
+        )}
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon
+          {...props}
+          data-test-subj="assistantNavLinkButtonIcon"
+          display={chromeStyle === 'project' ? 'empty' : 'base'}
+        />
+      </EuiShowFor>
+    </>
+  );
 
   return (
     <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiButtonBasicOrEmpty
-        onClick={showOverlay}
-        color="primary"
-        size="s"
-        iconType={AssistantIcon}
-        data-test-subj="assistantNavLink"
-      >
+      <AiAssistantButton onClick={showOverlay} color="primary" size="s" iconType={AssistantIcon}>
         {LINK_LABEL}
-      </EuiButtonBasicOrEmpty>
+      </AiAssistantButton>
     </EuiToolTip>
   );
 };

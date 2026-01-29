@@ -85,6 +85,11 @@ export function getFleetServerHostsSecretReferences(
       id: fleetServerHost.secrets.ssl.es_key.id,
     });
   }
+  if (typeof fleetServerHost.secrets?.ssl?.agent_key === 'object') {
+    secretPaths.push({
+      id: fleetServerHost.secrets.ssl.agent_key.id,
+    });
+  }
 
   return secretPaths;
 }
@@ -104,6 +109,12 @@ function getFleetServerHostsSecretPaths(
     secretPaths.push({
       path: 'secrets.ssl.es_key',
       value: fleetServerHost.secrets.ssl.es_key,
+    });
+  }
+  if (fleetServerHost?.secrets?.ssl?.agent_key) {
+    secretPaths.push({
+      path: 'secrets.ssl.agent_key',
+      value: fleetServerHost.secrets.ssl.agent_key,
     });
   }
 

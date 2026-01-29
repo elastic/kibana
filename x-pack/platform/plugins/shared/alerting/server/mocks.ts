@@ -66,6 +66,7 @@ const createStartMock = () => {
     getAlertIndicesAlias: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
+    getRulesClientWithRequestInSpace: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
   });
   return mock;
@@ -172,6 +173,7 @@ const createRuleExecutorServicesMock = <
     alertsClient: publicAlertsClientMock.create(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+    getMaintenanceWindowNames: jest.fn().mockResolvedValue([]),
     getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     savedObjectsClient: savedObjectsClientMock.create(),

@@ -28,6 +28,8 @@ const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fi
     onDelete: () => deleteFileAttachment({ caseId, fileId }),
   });
 
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
+
   const buttonProps = {
     iconType: 'trash',
     'aria-label': i18n.DELETE_FILE,
@@ -35,6 +37,7 @@ const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fi
     isDisabled: isLoading,
     onClick: onModalOpen,
     'data-test-subj': 'cases-files-delete-button',
+    buttonRef,
   };
 
   return permissions.delete ? (
@@ -50,6 +53,7 @@ const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fi
           confirmButtonText={i18n.DELETE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

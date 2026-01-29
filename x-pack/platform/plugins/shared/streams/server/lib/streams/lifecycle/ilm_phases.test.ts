@@ -65,12 +65,36 @@ describe('lifecycle helpers', () => {
           },
         },
         indicesStats: {
-          index_name_001: { total: { store: { size_in_bytes: 10, reserved_in_bytes: 0 } } },
-          index_name_002: { total: { store: { size_in_bytes: 15, reserved_in_bytes: 0 } } },
-          index_name_003: { total: { store: { size_in_bytes: 20, reserved_in_bytes: 0 } } },
-          index_name_004: { total: { store: { size_in_bytes: 30, reserved_in_bytes: 0 } } },
-          index_name_005: { total: { store: { size_in_bytes: 100, reserved_in_bytes: 0 } } },
-          index_name_006: { total: { store: { size_in_bytes: 100, reserved_in_bytes: 0 } } },
+          index_name_001: {
+            total: {
+              store: { total_data_set_size_in_bytes: 10, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_002: {
+            total: {
+              store: { total_data_set_size_in_bytes: 15, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_003: {
+            total: {
+              store: { total_data_set_size_in_bytes: 20, size_in_bytes: 2, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_004: {
+            total: {
+              store: { total_data_set_size_in_bytes: 30, size_in_bytes: 3, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_005: {
+            total: {
+              store: { total_data_set_size_in_bytes: 100, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_006: {
+            total: {
+              store: { total_data_set_size_in_bytes: 100, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
         },
       });
 
@@ -123,9 +147,21 @@ describe('lifecycle helpers', () => {
           },
         },
         indicesStats: {
-          index_name_001: { total: { store: { size_in_bytes: 10, reserved_in_bytes: 0 } } },
-          index_name_002: { total: { store: { size_in_bytes: 10, reserved_in_bytes: 0 } } },
-          index_name_003: { total: { store: { size_in_bytes: 20, reserved_in_bytes: 0 } } },
+          index_name_001: {
+            total: {
+              store: { total_data_set_size_in_bytes: 10, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_002: {
+            total: {
+              store: { total_data_set_size_in_bytes: 10, size_in_bytes: 1, reserved_in_bytes: 0 },
+            },
+          },
+          index_name_003: {
+            total: {
+              store: { total_data_set_size_in_bytes: 20, size_in_bytes: 2, reserved_in_bytes: 0 },
+            },
+          },
         },
       });
 

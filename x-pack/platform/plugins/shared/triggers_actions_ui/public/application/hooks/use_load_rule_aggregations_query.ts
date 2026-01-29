@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import type { RulesListFilters } from '../../types';
 import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';

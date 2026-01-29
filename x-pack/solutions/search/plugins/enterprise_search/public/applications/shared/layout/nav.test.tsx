@@ -23,10 +23,16 @@ import {
 
 const baseNavItems = [
   expect.objectContaining({
-    'data-test-subj': 'searchSideNav-Home',
-    href: '/app/elasticsearch/home',
-    id: 'home',
-    items: undefined,
+    id: 'root',
+    items: [
+      expect.objectContaining({
+        'data-test-subj': 'searchSideNav-Home',
+        href: '/app/elasticsearch/home',
+        id: 'home',
+        items: undefined,
+      }),
+    ],
+    name: undefined,
   }),
   {
     'data-test-subj': 'searchSideNav-Build',

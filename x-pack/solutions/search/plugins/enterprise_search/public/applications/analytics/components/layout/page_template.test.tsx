@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/i18n/strings_should_be_translated_with_i18n, @kbn/i18n/strings_should_be_translated_with_formatted_message */
-
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../__mocks__/kea_logic';
 

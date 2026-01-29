@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -20,27 +16,19 @@ import {
   EuiToolTip,
   useEuiTheme,
   useEuiFontSize,
-  EuiContextMenu,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
 interface GroupStatsProps<T> {
   bucketKey: string;
-  groupFilter: Filter[];
-  groupNumber: number;
   onTakeActionsOpen?: () => void;
   stats?: GroupStatsItem[];
-  takeActionItems?: (
-    groupFilters: Filter[],
-    groupNumber: number
-  ) => {
-    items: EuiContextMenuPanelItemDescriptor[];
-    panels: EuiContextMenuPanelDescriptor[];
-  };
+  actionItems?: JSX.Element;
+  /** Optional array of additional action buttons to display before the Take actions button */
+  additionalActionButtons?: React.ReactElement[];
 }
 
 const Separator = () => {
@@ -60,30 +48,15 @@ const Separator = () => {
 
 const GroupStatsComponent = <T,>({
   bucketKey,
-  groupFilter,
-  groupNumber,
   onTakeActionsOpen,
   stats,
-  takeActionItems: getTakeActionItems,
+  actionItems,
+  additionalActionButtons,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const { items: takeActionItems, panels: takeActionPanels } = useMemo(() => {
-    return getTakeActionItems?.(groupFilter, groupNumber) ?? { items: [], panels: [] };
-  }, [getTakeActionItems, groupFilter, groupNumber]);
-
-  const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: takeActionItems,
-      } as EuiContextMenuPanelDescriptor,
-      ...takeActionPanels,
-    ],
-    [takeActionItems, takeActionPanels]
-  );
 
   const onButtonClick = useCallback(() => {
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
@@ -99,6 +72,7 @@ const GroupStatsComponent = <T,>({
                 component: (
                   <EuiToolTip position="top" content={stat.badge.value}>
                     <EuiBadge
+                      tabIndex={0}
                       style={{ marginLeft: 10, width: stat.badge.width ?? 35 }}
                       color={stat.badge.color ?? 'hollow'}
                     >
@@ -135,9 +109,19 @@ const GroupStatsComponent = <T,>({
     [stats, euiTheme, xsFontSize]
   );
 
+  const additionalActionButtonsComponents = useMemo(
+    () =>
+      additionalActionButtons?.map((button, index) => (
+        <EuiFlexItem grow={false} key={`additional-action-button-${index}`}>
+          {button}
+        </EuiFlexItem>
+      )) ?? [],
+    [additionalActionButtons]
+  );
+
   const takeActionMenu = useMemo(
     () =>
-      takeActionItems.length ? (
+      actionItems ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
@@ -155,11 +139,11 @@ const GroupStatsComponent = <T,>({
             isOpen={isPopoverOpen}
             panelPaddingSize="none"
           >
-            <EuiContextMenu panels={panels} initialPanelId={0} />
+            {actionItems}
           </EuiPopover>
         </EuiFlexItem>
       ) : null,
-    [isPopoverOpen, onButtonClick, takeActionItems, panels]
+    [isPopoverOpen, onButtonClick, actionItems]
   );
 
   return (
@@ -169,12 +153,14 @@ const GroupStatsComponent = <T,>({
       gutterSize="m"
       alignItems="center"
     >
-      {[...statsComponents, takeActionMenu].filter(Boolean).map((component, index, { length }) => (
-        <Fragment key={index}>
-          {component}
-          {index < length - 1 && <Separator />}
-        </Fragment>
-      ))}
+      {[...statsComponents, ...additionalActionButtonsComponents, takeActionMenu]
+        .filter(Boolean)
+        .map((component, index, { length }) => (
+          <Fragment key={index}>
+            {component}
+            {index < length - 1 && <Separator />}
+          </Fragment>
+        ))}
     </EuiFlexGroup>
   );
 };

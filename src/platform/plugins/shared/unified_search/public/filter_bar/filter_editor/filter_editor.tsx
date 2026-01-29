@@ -44,7 +44,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
@@ -52,6 +52,7 @@ import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -70,7 +71,6 @@ import {
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 

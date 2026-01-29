@@ -21,15 +21,17 @@ import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
+import { bulkPostObservableRoute } from './observables/bulk_post_observable';
 import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
-import { getCaseSummaryRoute } from './cases_ai/get_case_summary';
-import { findCasesContainingAllAlertsRoute } from './internal/find_cases_containing_all_alerts';
-import type { ConfigType } from '../../config';
+import {
+  findCasesContainingAllAlertsRoute,
+  findCasesContainingAllDocumentsRoute,
+} from './internal/find_cases_containing_all_alerts';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -45,11 +47,11 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,
+    bulkPostObservableRoute,
     patchObservableRoute,
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
+    findCasesContainingAllDocumentsRoute,
     findCasesContainingAllAlertsRoute,
-  ].concat(
-    config.unsafe?.enableCaseSummary ? [getCaseSummaryRoute as CaseRoute] : []
-  ) as CaseRoute[];
+  ] as CaseRoute[];

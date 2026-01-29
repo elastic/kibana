@@ -130,12 +130,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a visualization to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectMissingEditPanelAction();
       });
 
       it(`does not allow a map to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -180,13 +180,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`allows a visualization to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });
 

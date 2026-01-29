@@ -6,14 +6,11 @@
  */
 
 import type SuperTest from 'supertest';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
-  AttackDiscoveryScheduleCreateProps,
-  AttackDiscoveryScheduleUpdateProps,
+  AttackDiscoveryApiScheduleCreateProps,
+  AttackDiscoveryApiScheduleUpdateProps,
   FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -25,14 +22,13 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_FIND,
 } from '@kbn/elastic-assistant-common';
 
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../../utils/auth/types';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 const configureTest = (test: SuperTest.Test, user: User | undefined) => {
   const configuredTest = test
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1);
   if (user) {
     configuredTest.auth(user.username, user.password);
   }
@@ -57,7 +53,7 @@ export const getAttackDiscoverySchedulesApis = ({
       kibanaSpace = 'default',
       expectedHttpCode = 200,
     }: {
-      schedule: Partial<AttackDiscoveryScheduleCreateProps>;
+      schedule: Partial<AttackDiscoveryApiScheduleCreateProps>;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {
@@ -121,7 +117,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode = 200,
     }: {
       id: string;
-      schedule: Partial<AttackDiscoveryScheduleUpdateProps>;
+      schedule: Partial<AttackDiscoveryApiScheduleUpdateProps>;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {

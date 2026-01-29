@@ -10,6 +10,8 @@
         "label": "AnalyticsService",
         "description": [],
         "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+                "lineNumber": 37,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -59,6 +65,8 @@
               "AnalyticsServiceSetup"
             ],
             "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,6 +81,8 @@
                   "AnalyticsServiceSetupDeps"
                 ],
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+                "lineNumber": 63,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,6 +102,8 @@
               "AnalyticsServiceStart"
             ],
             "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -108,6 +120,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

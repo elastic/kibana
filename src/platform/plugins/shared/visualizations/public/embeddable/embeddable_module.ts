@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getTransforms } from '../../common/embeddable/transforms/get_transforms';
+export { getTransformOut } from '../../common/embeddable/transforms/get_transform_out';
 export { getVisualizeEmbeddableFactory } from './visualize_embeddable';

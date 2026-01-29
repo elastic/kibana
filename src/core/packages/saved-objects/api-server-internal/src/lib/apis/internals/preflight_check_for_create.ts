@@ -22,10 +22,11 @@ import {
   getObjectKey,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { type Either, isLeft, isRight, left, right } from '@kbn/core-saved-objects-api-server';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import { left, right, isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
+import { rawDocExistsInNamespaces } from '../utils';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
@@ -261,7 +262,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId'],
+      _source: ['type', 'namespaces', 'originId', 'accessControl'],
     });
     if (checkAliases) {
       for (const space of spaces) {

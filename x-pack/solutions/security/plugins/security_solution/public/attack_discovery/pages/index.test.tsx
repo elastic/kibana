@@ -24,6 +24,10 @@ import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymizat
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
+import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
+import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
 
 const mockConnectors: unknown[] = [
   {
@@ -49,6 +53,7 @@ jest.mock('react-use/lib/useLocalStorage', () =>
     return [defaultValue || 'test-id', jest.fn()];
   })
 );
+
 jest.mock('react-use/lib/useSessionStorage', () =>
   jest.fn().mockReturnValue([undefined, jest.fn()])
 );
@@ -74,7 +79,7 @@ jest.mock(
   })
 );
 
-const mockSecurityCapabilities = [`${SECURITY_FEATURE_ID}.show`];
+const mockSecurityCapabilities = [SECURITY_UI_SHOW_PRIVILEGE];
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: () =>
@@ -94,6 +99,9 @@ jest.mock('./use_attack_discovery', () => ({
     isLoading: false,
   }),
 }));
+
+jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
+const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -141,6 +149,9 @@ const mockUseKibanaReturnValue = {
           privileges: 'link',
         },
       },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false),
     },
     lens: {
       EmbeddableComponent: () => null,
@@ -211,6 +222,8 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
+
+    useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
   });
 
   describe('page layout', () => {
@@ -299,6 +312,40 @@ describe('AttackDiscovery', () => {
         size: 100,
         start: 'now-24h',
       });
+    });
+  });
+
+  describe('`attacksAlertsAlignmentEnabled` feature', () => {
+    it('renders callout about new Attacks page when feature is enabled', () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
+    });
+
+    it('does not render callout about new Attacks page when feature is disabled', () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
     });
   });
 });

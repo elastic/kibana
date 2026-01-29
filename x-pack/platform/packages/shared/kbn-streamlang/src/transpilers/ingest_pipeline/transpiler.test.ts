@@ -10,6 +10,7 @@ import {
   comprehensiveTestDSL,
   manualIngestPipelineTestDSL,
   notConditionsTestDSL,
+  typeCoercionsTestDSL,
 } from '../shared/mocks/test_dsls';
 
 describe('transpile (Streamlang DSL to ingest pipeline)', () => {
@@ -20,6 +21,11 @@ describe('transpile (Streamlang DSL to ingest pipeline)', () => {
 
   it('should handle not conditions', () => {
     const result = transpile(notConditionsTestDSL);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('should handle type coercions', () => {
+    const result = transpile(typeCoercionsTestDSL);
     expect(result).toMatchSnapshot();
   });
 

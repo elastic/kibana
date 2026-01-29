@@ -5,40 +5,64 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { DashboardMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
-import { useStartMigration } from '../../logic/use_start_migration';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
+import { useStartMigration } from '../../logic/use_start_migration';
+import type { MigrationSettingsBase } from '../../../common/types';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
+
 export interface MigrationReadyPanelProps {
   migrationStats: DashboardMigrationStats;
 }
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { getMissingResources, isLoading } = useGetMissingResources(
+  const migrationId = migrationStats.id;
+  const [flyoutMigrationId, setFlyoutMigrationId] = useState<string | undefined>();
+  const handleMissingResourcesIndexed = useCallback(() => {
+    setFlyoutMigrationId(undefined);
+  }, []);
+  const { missingResourceCount, onMissingResourcesFetched } = useMissingResources({
+    migrationSource: migrationStats.vendor,
+    handleMissingResourcesIndexed,
+  });
+  const { getMissingResources, isLoading: isLoadingMissingResources } = useGetMissingResources(
     'dashboard',
-    setMissingResources
+    onMissingResourcesFetched
   );
-  const { startMigration, isLoading: isStarting } = useStartMigration();
-  const { openFlyout } = useMigrationDataInputContext();
+  const { telemetry } = useKibana().services.siemMigrations.dashboards;
+
+  const { openFlyout, isFlyoutOpen } = useMigrationDataInputContext();
 
   useEffect(() => {
-    getMissingResources(migrationStats.id);
-  }, [getMissingResources, migrationStats.id]);
+    getMissingResources(migrationId);
+  }, [getMissingResources, migrationId]);
+
+  // Check for missing resources when the flyout is closed
+  useEffect(() => {
+    if (!isFlyoutOpen && flyoutMigrationId && migrationStats.id === flyoutMigrationId) {
+      getMissingResources(migrationStats.id);
+    }
+  }, [getMissingResources, flyoutMigrationId, migrationStats.id, isFlyoutOpen]);
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
-  }, [migrationStats, openFlyout]);
+    telemetry.reportSetupMigrationOpenResources({
+      migrationId: migrationStats.id,
+      missingResourcesCount: missingResourceCount,
+      vendor: migrationStats.vendor,
+    });
+  }, [migrationStats, openFlyout, telemetry, missingResourceCount]);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
@@ -56,63 +80,76 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     return i18n.DASHBOARD_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
   }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
+  const { startMigration, isLoading: isStarting } = useStartMigration();
+  const onStartMigrationWithSettings = useCallback(
+    (settings: MigrationSettingsBase) => {
+      startMigration(migrationStats, undefined, settings);
+    },
+    [migrationStats, startMigration]
+  );
+  const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+    useStartDashboardsMigrationModal({
+      type: 'start',
+      migrationStats,
+      onStartMigrationWithSettings,
+    });
+
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} migrationType="dashboard" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <PanelText data-test-subj="dashboardMigrationDescription" size="s" subdued>
-                <span>{migrationPanelDescription}</span>
-                {!isLoading && missingResources.length > 0 && (
-                  <span> {i18n.DASHBOARD_MIGRATION_READY_MISSING_RESOURCES}</span>
-                )}
-              </PanelText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {isLoading ? (
-          <CenteredLoadingSpinner />
-        ) : (
-          <>
-            {missingResources.length > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  aria-label={i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
-                  data-test-subj="dashboardMigrationMissingResourcesButton"
-                  iconType="download"
-                  iconSide="right"
-                  onClick={onOpenFlyout}
-                  size="s"
-                >
-                  {i18n.DASHBOARD_MIGRATION_UPLOAD_BUTTON}
-                </EuiButtonEmpty>
+    <>
+      {startMigrationModal}
+
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <MigrationPanelTitle migrationStats={migrationStats} migrationType="dashboard" />
               </EuiFlexItem>
-            )}
+              <EuiFlexItem>
+                <PanelText data-test-subj="dashboardMigrationDescription" size="s" subdued>
+                  <span>{migrationPanelDescription}</span>
+                  {!isLoadingMissingResources && missingResourceCount > 0 && (
+                    <span> {i18n.DASHBOARD_MIGRATION_READY_MISSING_RESOURCES}</span>
+                  )}
+                </PanelText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {missingResourceCount > 0 && (
             <EuiFlexItem grow={false}>
-              <StartTranslationButton
-                migrationId={migrationStats.id}
-                isStopped={isStopped}
-                startMigration={startMigration}
-                isStarting={isStarting}
-              />
+              <EuiButtonEmpty
+                aria-label={i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                data-test-subj="dashboardMigrationMissingResourcesButton"
+                iconType="download"
+                iconSide="right"
+                onClick={onOpenFlyout}
+                size="s"
+                isLoading={isLoadingMissingResources}
+              >
+                {i18n.DASHBOARD_MIGRATION_UPLOAD_BUTTON}
+              </EuiButtonEmpty>
             </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <StartTranslationButton
+              migrationStats={migrationStats}
+              isStopped={isStopped}
+              startMigration={isStopped ? startMigration : showStartMigrationModal}
+              isStarting={isStarting}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {migrationStats.last_execution?.error && (
+          <>
+            <EuiSpacer size="m" />
+            <MigrationsLastError
+              message={migrationStats.last_execution.error}
+              migrationType="dashboard"
+            />
           </>
         )}
-      </EuiFlexGroup>
-      {migrationStats.last_execution?.error && (
-        <>
-          <EuiSpacer size="m" />
-          <MigrationsLastError
-            message={migrationStats.last_execution.error}
-            migrationType="dashboard"
-          />
-        </>
-      )}
-    </EuiPanel>
+      </EuiPanel>
+    </>
   );
 });
 MigrationReadyPanel.displayName = 'MigrationReadyPanel';

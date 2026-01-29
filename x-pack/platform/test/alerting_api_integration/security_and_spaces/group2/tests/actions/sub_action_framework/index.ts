@@ -101,6 +101,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           config: {
             url: 'https://example.com',
           },
+          is_connector_type_deprecated: false,
         });
       });
     });
@@ -116,7 +117,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: 'error validating action type config: [foo]: definition for this key is missing',
+          message: `error validating connector type config: Unrecognized key(s) in object: 'foo'`,
         });
       });
 
@@ -130,8 +131,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message:
-            'error validating action type secrets: [foo]: definition for this key is missing',
+          message: `error validating connector type secrets: Unrecognized key(s) in object: 'foo'`,
         });
       });
     });
@@ -194,8 +194,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           errorSource: TaskErrorSource.USER,
-          service_message:
-            'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
+          service_message: `Request validation failed (2 errors:\n [1]: Unrecognized key(s) in object: 'foo';\n [2]: Field \"id\": Required)`,
         });
       });
 

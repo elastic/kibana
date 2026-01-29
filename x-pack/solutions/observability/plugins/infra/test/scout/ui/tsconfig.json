@@ -1,0 +1,13 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*"],
+  "kbn_references": [
+    "@kbn/scout-oblt",
+    "@kbn/synthtrace-client",
+    "@kbn/rison",
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -23,11 +23,12 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export { SetupTechnology } from './types';
 export type {
-  CloudConnectorResponse,
+  CloudConnector,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
   CloudConnectorVars,
   CloudProvider,
+  AccountType,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
 } from './types';

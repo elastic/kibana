@@ -15,6 +15,12 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { appContextService, licenseService } from '..';
+import { LICENSE_FOR_AGENT_MIGRATION } from '../../../common/constants';
+
+import type { AgentActionEvent } from '../action_sender';
+import { sendActionTelemetryEvents } from '../action_sender';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
@@ -34,6 +40,13 @@ export async function migrateSingleAgent(
     settings?: Record<string, any>;
   }
 ) {
+  // Check the user has the correct license
+  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
+    throw new FleetUnauthorizedError(
+      `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`
+    );
+  }
+
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
   if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
@@ -42,6 +55,11 @@ export async function migrateSingleAgent(
     throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
   }
   if (!isAgentMigrationSupported(agent)) {
+    // Check if it's specifically a containerized agent
+    if (agent.local_metadata?.elastic?.agent?.upgradeable === false) {
+      throw new FleetError(`Containerized agents cannot be migrated`);
+    }
+    // Otherwise it's a version issue
     throw new FleetError(
       `Agent cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
     );
@@ -59,7 +77,22 @@ export async function migrateSingleAgent(
       secrets: { enrollment_token: options.enrollment_token },
     }),
   });
+
+  sendTelemetryEvent(1);
+
   return { actionId: response.id };
+}
+
+function sendTelemetryEvent(agentCount: number) {
+  const actionTelemetry: AgentActionEvent = {
+    eventType: 'MIGRATE',
+    agentCount,
+  };
+  sendActionTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    actionTelemetry
+  );
 }
 
 export async function bulkMigrateAgents(
@@ -72,16 +105,25 @@ export async function bulkMigrateAgents(
     settings?: Record<string, any>;
   }
 ): Promise<{ actionId: string }> {
+  // Check the user has the correct license
+  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
+    throw new FleetUnauthorizedError(
+      `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`
+    );
+  }
+
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
+    const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
+    sendTelemetryEvent(options.agentIds.length);
+    return response;
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -94,14 +136,16 @@ export async function bulkMigrateAgents(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    return await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
+    const response = await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
+    sendTelemetryEvent(res.total);
+    return response;
   } else {
-    return await new MigrateActionRunner(
+    const response = await new MigrateActionRunner(
       esClient,
       soClient,
       {
@@ -112,5 +156,7 @@ export async function bulkMigrateAgents(
       },
       { pitId: await openPointInTime(esClient) }
     ).runActionAsyncTask();
+    sendTelemetryEvent(res.total);
+    return response;
   }
 }

@@ -235,7 +235,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
           </EuiFlexItem>
         )}
 
-        {availableSubCategories?.length ? <EuiSpacer /> : null}
+        {availableSubCategories?.length ? <EuiSpacer size="m" /> : null}
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
@@ -244,7 +244,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             direction="row"
             gutterSize="s"
             style={{
-              maxWidth: 943,
+              maxWidth: '100%',
+              flexWrap: 'wrap',
             }}
           >
             {visibleSubCategories?.map((subCategory) => {
@@ -257,6 +258,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                     fill={isSelected}
                     aria-label={subCategory?.title}
                     onClick={() => onSubCategoryClick(subCategory.id)}
+                    size="s"
                   >
                     <FormattedMessage
                       id="xpack.fleet.epmList.subcategoriesButton"
@@ -280,7 +282,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                       onClick={onButtonClick}
                       iconType="boxesHorizontal"
                       aria-label="Show more subcategories"
-                      size="m"
+                      size="s"
                     />
                   }
                   isOpen={isPopoverOpen}

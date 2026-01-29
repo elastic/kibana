@@ -37,6 +37,10 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -91,9 +95,13 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
+    agentBuilder,
     uiSettings,
     serverless,
+    observabilityAgentBuilder,
   } = services;
+
+  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -110,6 +118,10 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
+  const alertTitle = alertDetail
+    ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+    : undefined;
+
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
@@ -167,6 +179,43 @@ export function AlertDetails() {
     }
   }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
+  // Configure agent builder global flyout with the current alert attachment
+  useEffect(() => {
+    if (!agentBuilder) return;
+    const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
+
+    if (!alertUuid) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          id: alertUuid,
+          type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+          data: {
+            alertId: alertUuid,
+            ...(alertTitle && {
+              attachmentLabel: i18n.translate(
+                'xpack.observability.alertDetails.alertAttachmentLabel',
+                {
+                  defaultMessage: '{alertTitle} alert',
+                  values: { alertTitle },
+                }
+              ),
+            }),
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, alertDetail, alertTitle]);
+
   useBreadcrumbs(
     [
       {
@@ -177,9 +226,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: alertDetail
-          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
-          : defaultBreadcrumb,
+        text: alertTitle ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -268,6 +315,12 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
+          {AlertAiInsight && (
+            <AlertAiInsight
+              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+              alertTitle={alertTitle}
+            />
+          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -293,6 +346,12 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
+        {AlertAiInsight && (
+          <AlertAiInsight
+            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+            alertTitle={alertTitle}
+          />
+        )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
@@ -402,15 +461,16 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: alertDetail?.formatted ? (
-          <>
-            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
-            <EuiSpacer size="xs" />
-            <AlertSubtitle alert={alertDetail.formatted} />
-          </>
-        ) : (
-          <EuiLoadingSpinner />
-        ),
+        pageTitle:
+          alertDetail?.formatted && alertTitle ? (
+            <>
+              {alertTitle}
+              <EuiSpacer size="xs" />
+              <AlertSubtitle alert={alertDetail.formatted} />
+            </>
+          ) : (
+            <EuiLoadingSpinner />
+          ),
         rightSideItems: [
           <HeaderActions
             alert={alertDetail?.formatted ?? null}
@@ -477,8 +537,8 @@ function getRelevantAlertFields(alertDetail: AlertData) {
     'kibana.alert.rule.uuid',
     'event.action',
     'event.kind',
-    'kibana.alert.rule.tags',
     'kibana.alert.maintenance_window_ids',
+    'kibana.alert.maintenance_window_names',
     'kibana.alert.consecutive_matches',
   ]);
 }

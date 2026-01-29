@@ -40,6 +40,32 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(hasE5).to.be(true);
       },
 
+      async expectModelColumnToBeDisplayed() {
+        // Verify model column cells exist using data-test-subj
+        const modelCells = await testSubjects.findAll('modelCell');
+        expect(modelCells.length).to.greaterThan(0);
+      },
+
+      async expectSearchByModelName() {
+        // Search for a model name that exists in preconfigured endpoints
+        const searchField = await testSubjects.find('search-field-endpoints');
+        await searchField.clearValue();
+        await searchField.type('elser_model');
+
+        // Wait for the table to update
+        const table = await testSubjects.find('inferenceEndpointTable');
+        const rows = await table.findAllByClassName('euiTableRow');
+
+        // Verify results are filtered and contain the searched model
+        expect(rows.length).to.greaterThan(0);
+        const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+        const allContainElser = texts.every((text) => text.toLowerCase().includes('elser'));
+        expect(allContainElser).to.be(true);
+
+        // Clear the search field
+        await searchField.clearValue();
+      },
+
       async expectPreconfiguredEndpointsCannotBeDeleted() {
         const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
         await actionButton.click();
@@ -110,7 +136,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
         await testSubjects.click('provider-select');
         await testSubjects.setValue('provider-super-select-search-box', 'Cohere');
-        await testSubjects.click('provider');
+        await testSubjects.click('Cohere-provider');
 
         await testSubjects.existOrFail('api_key-password');
         await testSubjects.click('inference-endpoint-additional-settings-button');
@@ -118,6 +144,48 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         await testSubjects.existOrFail('inference-endpoint-input-field');
         (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(
           'cohere-completion'
+        );
+
+        expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(true);
+      },
+
+      async expectInferenceEndpointToAllowCustomHeaders() {
+        await testSubjects.click('add-inference-endpoint-header-button');
+        await testSubjects.existOrFail('inference-flyout');
+
+        await testSubjects.click('provider-select');
+        await testSubjects.setValue('provider-super-select-search-box', 'OpenAI');
+        await testSubjects.click('OpenAI-provider');
+
+        await testSubjects.existOrFail('inference-endpoint-more-options');
+        await testSubjects.click('inference-endpoint-more-options-accordion-button');
+        // Toggle switch to show custom headers
+        await testSubjects.existOrFail('headers-switch-unchecked');
+        await testSubjects.click('headers-switch-unchecked');
+        await testSubjects.existOrFail('headers-switch-checked');
+        // Set firstset key/value of custom headers
+        await testSubjects.setValue('headers-key-0', 'First-header-key');
+        await testSubjects.setValue('headers-value-0', 'First-header-value');
+        await testSubjects.existOrFail('headers-delete-button-0');
+        await testSubjects.click('headers-add-button');
+        // Set second set key/value of custom headers
+        await testSubjects.setValue('headers-key-1', 'Second-header-key');
+        await testSubjects.setValue('headers-value-1', 'Second-header-value');
+        await testSubjects.existOrFail('headers-delete-button-1');
+        // Delete first set of custom headers
+        await testSubjects.click('headers-delete-button-0');
+        const headerKeyValue = await testSubjects.getAttribute('headers-key-0', 'value');
+        const headerValueValue = await testSubjects.getAttribute('headers-value-0', 'value');
+        // Confirm second headers are now first/only set of headers
+        expect(headerKeyValue).to.be('Second-header-key');
+        expect(headerValueValue).to.be('Second-header-value');
+
+        await testSubjects.existOrFail('api_key-password');
+        await testSubjects.click('inference-endpoint-additional-settings-button');
+        await testSubjects.click('completion');
+        await testSubjects.existOrFail('inference-endpoint-input-field');
+        (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(
+          'openai-completion'
         );
 
         expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(true);

@@ -101,7 +101,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
-      isServerless,
       hasInvalidRequiredVars,
     } = useLoadCloudSetup({
       newPolicy,
@@ -152,7 +151,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         <ProviderSelector
           selectedProvider={selectedProvider}
           setSelectedProvider={(provider) => {
-            const showCloudConnectors = isCloudConnectorsEnabledForProvider(provider);
+            const showCloudConnectors =
+              isCloudConnectorsEnabledForProvider(provider) &&
+              setupTechnology === SetupTechnology.AGENTLESS;
             setEnabledPolicyInput(provider, showCloudConnectors);
           }}
           disabled={isEditPage}
@@ -241,7 +242,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
           <>
             <EuiSpacer size="m" />
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
@@ -249,19 +249,26 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
-                const showCloudConnectors = isCloudConnectorsEnabledForProvider(selectedProvider);
+                const showCloudConnectors =
+                  isCloudConnectorsEnabledForProvider(selectedProvider) &&
+                  value === SetupTechnology.AGENTLESS;
                 updatePolicy({
-                  updatedPolicy: updatePolicyWithInputs(
-                    newPolicy,
-                    config.providers[selectedProvider].type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      selectedProvider,
-                      packageInfo,
-                      showCloudConnectors,
-                      templateName
-                    )
-                  ),
+                  updatedPolicy: {
+                    ...updatePolicyWithInputs(
+                      newPolicy,
+                      config.providers[selectedProvider].type,
+                      getDefaultCloudCredentialsType(
+                        value === SetupTechnology.AGENTLESS,
+                        selectedProvider,
+                        packageInfo,
+                        showCloudConnectors,
+                        templateName
+                      )
+                    ),
+                    supports_cloud_connector:
+                      showCloudConnectors && value === SetupTechnology.AGENTLESS,
+                    cloud_connector_id: undefined,
+                  },
                 });
               }}
             />
@@ -270,6 +277,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
 
         {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AwsCredentialsFormAgentless
+            cloud={cloud}
             input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -309,6 +317,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            isEditPage={isEditPage}
           />
         )}
 
@@ -318,6 +327,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
+            cloud={cloud}
+            isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             setupTechnology={setupTechnology}
           />

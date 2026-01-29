@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
-import type { System } from '@kbn/streams-schema';
 
-export type IdentifiedSystemsEvent = ServerSentEventBase<
-  'identified_systems',
-  { systems: System[] }
+export type StreamDescriptionEvent = ServerSentEventBase<
+  'stream_description',
+  { description: string; tokensUsed: ChatCompletionTokenCount }
 >;

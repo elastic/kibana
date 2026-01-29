@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useIntegrationLastAlertIngested } from './use_integration_last_alert_ingested';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 
 const integrationName = 'splunk';
 

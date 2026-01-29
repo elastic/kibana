@@ -10,7 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   ActionLogDateRangePicker,
@@ -58,10 +57,6 @@ export const ActionsLogFilters = memo(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
-
     const filters = useMemo(() => {
       return (
         <>
@@ -86,30 +81,20 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {isSentinelOneV1Enabled ? (
-            <ActionsLogFilter
-              filterName={'types'}
-              typesFilters={{
-                agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
-                actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
-              }}
-              isFlyout={isFlyout}
-              data-test-subj={dataTestSubj}
-            />
-          ) : (
-            <ActionsLogFilter
-              filterName={'types'}
-              onChangeFilterOptions={onChangeTypeFilter}
-              isFlyout={isFlyout}
-              data-test-subj={dataTestSubj}
-            />
-          )}
+          <ActionsLogFilter
+            filterName={'types'}
+            typesFilters={{
+              agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
+              actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
+            }}
+            isFlyout={isFlyout}
+            data-test-subj={dataTestSubj}
+          />
         </>
       );
     }, [
       showHostsFilter,
       isFlyout,
-      isSentinelOneV1Enabled,
       onChangeHostsFilter,
       dataTestSubj,
       dataTestHeight,

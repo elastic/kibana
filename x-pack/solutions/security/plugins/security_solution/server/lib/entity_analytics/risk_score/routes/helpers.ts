@@ -27,6 +27,8 @@ export function buildRiskScoreServiceForRequest(
   const riskScoreDataClient = securityContext.getRiskScoreDataClient();
   const experimentalFeatures = securityContext.getConfig().experimentalFeatures;
 
+  const uiSettingsClient = coreContext.uiSettings.client;
+
   return riskScoreServiceFactory({
     assetCriticalityService,
     esClient,
@@ -35,5 +37,6 @@ export function buildRiskScoreServiceForRequest(
     riskScoreDataClient,
     spaceId,
     experimentalFeatures,
+    uiSettingsClient,
   });
 }

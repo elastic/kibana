@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { Global, css } from '@emotion/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   EuiDataGridSorting,
@@ -38,6 +38,8 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   type UseEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -53,6 +55,7 @@ import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
+  prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -308,7 +311,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * Callback to execute on edit runtime field
    */
-  onFieldEdited?: () => void;
+  onFieldEdited?: (options: { editedDataView: DataView }) => void;
   /**
    * Service dependencies
    */
@@ -328,6 +331,7 @@ interface InternalUnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
+    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
     columnsMeta?: DataTableColumnsMeta
   ) => JSX.Element | undefined;
   /**
@@ -465,6 +469,24 @@ interface InternalUnifiedDataTableProps {
    * Custom bulk action
    */
   customBulkActions?: CustomBulkActions;
+
+  /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
+
+  /**
+   * Callback fired when full screen mode is toggled
+   * @param isFullScreen - boolean indicating if the grid is in full screen mode
+   */
+
+  onFullScreenChange?: (isFullScreen: boolean) => void;
+
+  /**
+   * Set to true when the table is used in an embedded context (e.g., dashboards).
+   * When true, filter actions on computed columns will be hidden.
+   */
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -548,6 +570,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       customBulkActions,
+      shouldKeepAdHocDataViewImmutable,
+      onFullScreenChange,
+      hideFilteringOnComputedColumns,
     },
     ref
   ) => {
@@ -848,20 +873,31 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         onFieldEdited
           ? async (fieldName: string) => {
+              const editedDataView = shouldKeepAdHocDataViewImmutable
+                ? await prepareDataViewForEditing(dataView, data.dataViews)
+                : dataView;
               closeFieldEditor.current =
                 onFieldEdited &&
                 (await services?.dataViewFieldEditor?.openEditor({
                   ctx: {
-                    dataView,
+                    dataView: editedDataView,
                   },
                   fieldName,
                   onSave: async () => {
-                    await onFieldEdited();
+                    await onFieldEdited({
+                      editedDataView,
+                    });
                   },
                 }));
             }
           : undefined,
-      [dataView, onFieldEdited, services?.dataViewFieldEditor]
+      [
+        data.dataViews,
+        dataView,
+        onFieldEdited,
+        services?.dataViewFieldEditor,
+        shouldKeepAdHocDataViewImmutable,
+      ]
     );
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -964,6 +1000,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          dataGridRef,
+          hideFilteringOnComputedColumns,
         }),
       [
         cellActionsHandling,
@@ -989,6 +1027,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        hideFilteringOnComputedColumns,
       ]
     );
 
@@ -1055,26 +1094,32 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       const leftControls = (
-        <>
+        <EuiFlexGroup gutterSize="s">
           {Boolean(selectedDocsCount) && (
-            <DataTableDocumentToolbarBtn
-              isPlainRecord={isPlainRecord}
-              isFilterActive={isFilterActive}
-              rows={rows!}
-              setIsFilterActive={setIsFilterActive}
-              selectedDocsState={selectedDocsState}
-              enableComparisonMode={enableComparisonMode}
-              setIsCompareActive={setIsCompareActive}
-              fieldFormats={fieldFormats}
-              pageIndex={unifiedDataTableContextValue.pageIndex}
-              pageSize={unifiedDataTableContextValue.pageSize}
-              toastNotifications={toastNotifications}
-              columns={visibleColumns}
-              customBulkActions={customBulkActions}
-            />
+            <EuiFlexItem grow={false}>
+              <DataTableDocumentToolbarBtn
+                isPlainRecord={isPlainRecord}
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                setIsFilterActive={setIsFilterActive}
+                selectedDocsState={selectedDocsState}
+                enableComparisonMode={enableComparisonMode}
+                setIsCompareActive={setIsCompareActive}
+                fieldFormats={fieldFormats}
+                pageIndex={unifiedDataTableContextValue.pageIndex}
+                pageSize={unifiedDataTableContextValue.pageSize}
+                toastNotifications={toastNotifications}
+                columns={visibleColumns}
+                customBulkActions={customBulkActions}
+              />
+            </EuiFlexItem>
           )}
-          {externalAdditionalControls}
-        </>
+          <>
+            {externalAdditionalControls && (
+              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+            )}
+          </>
+        </EuiFlexGroup>
       );
 
       if (!renderCustomToolbar && inTableSearchControl) {
@@ -1287,14 +1332,14 @@ const InternalUnifiedDataTable = React.forwardRef<
       return (
         <div
           className="euiDataGrid__noResults"
-          css={styles.loadingAndEmpty}
+          css={styles.emptyRow}
           data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={0}
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" textAlign="center">
             <EuiIcon type="discoverApp" size="m" color="subdued" />
             <EuiSpacer size="s" />
             <FormattedMessage
@@ -1309,6 +1354,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     return (
       <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
         <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
+          <Global styles={styles.dataTableGlobal} />
           <div
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1366,6 +1412,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 cellContext={cellContextWithInTableSearchSupport}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
+                onFullScreenChange={onFullScreenChange}
               />
             )}
           </div>
@@ -1408,7 +1455,13 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            renderDocumentView!(
+              expandedDoc,
+              displayedRows,
+              displayedColumns,
+              setExpandedDoc!,
+              columnsMeta
+            )}
         </span>
       </UnifiedDataTableContext.Provider>
     );
@@ -1429,6 +1482,24 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
+  emptyRow: ({ euiTheme }: UseEuiTheme) => {
+    return css([componentStyles.loadingAndEmpty, { padding: euiTheme.size.m }]);
+  },
+  dataTableGlobal: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // Custom styles for data grid header cell.
+      // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+      '.unifiedDataTable__headerCell': {
+        alignItems: 'start !important',
+
+        '.euiDataGridHeaderCell__draggableIcon': {
+          paddingBlock: `calc(${euiTheme.size.xs} / 2) !important`, // to align with a token height
+        },
+        '.euiDataGridHeaderCell__button': {
+          marginTop: `-${euiTheme.size.xs} !important`, // to override Eui value for Density "Expanded"
+        },
+      },
+    }),
   dataTableInner: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
@@ -1439,8 +1510,25 @@ const componentStyles = {
         backgroundColor: euiTheme.colors.backgroundBaseWarning,
       },
       '.unifiedDataTable__cell--expanded': {
-        backgroundColor: euiTheme.colors.highlight,
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+      },
+      '.unifiedDataTable__rowControl': {
+        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
+      },
+      // Compact density - 'auto & custom' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
+        {
+          marginTop: -2.5,
+        },
+      // Compact density - 'single' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
+        {
+          alignSelf: 'flex-start',
+          marginTop: -3,
+        },
       '.euiDataGrid__content': {
         background: 'transparent',
       },
@@ -1477,9 +1565,6 @@ const componentStyles = {
           height: '100%',
           borderBottom: 0,
         },
-      '.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover': {
-        backgroundColor: euiTheme.colors.lightestShade, // we keep using a deprecated shade until a proper token is available
-      },
       '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
         backgroundColor: 'transparent', // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
       },

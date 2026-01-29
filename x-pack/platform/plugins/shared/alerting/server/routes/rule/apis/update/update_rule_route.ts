@@ -28,6 +28,7 @@ import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformUpdateBodyV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -74,7 +75,6 @@ export const updateRuleRoute = (
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
-          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
@@ -83,20 +83,12 @@ export const updateRuleRoute = (
 
           try {
             const rule = await rulesClient.get({ id: updateRuleParams.id });
-            const ruleType = ruleTypes.get(rule.alertTypeId);
 
-            /**
-             * Throws a bad request (400) if the rule type is internallyManaged
-             * ruleType will always exist here because ruleTypes.get will throw a 400
-             * error if the rule type is not registered.
-             */
-            if (ruleType?.internallyManaged) {
-              return res.badRequest({
-                body: {
-                  message: `Cannot update rule of type "${rule.alertTypeId}" because it is internally managed.`,
-                },
-              });
-            }
+            validateInternalRuleType({
+              ruleTypeId: rule.alertTypeId,
+              ruleTypes,
+              operationText: 'update',
+            });
 
             /**
              * Throws an error if the group is not defined in default actions
@@ -112,8 +104,6 @@ export const updateRuleRoute = (
               actionsClient.isSystemAction(action.id)
             );
 
-            const flappingSettings = await rulesSettingsClient.flapping().get();
-
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const updatedRule: Rule<RuleParamsV1> = (await rulesClient.update<RuleParamsV1>({
@@ -123,7 +113,6 @@ export const updateRuleRoute = (
                 actions,
                 systemActions,
               }),
-              isFlappingEnabled: flappingSettings.enabled,
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type

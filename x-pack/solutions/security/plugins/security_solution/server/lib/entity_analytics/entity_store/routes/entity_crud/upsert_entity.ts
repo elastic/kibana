@@ -15,10 +15,20 @@ import {
 } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
-import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from '../../errors';
+import {
+  BadCRUDRequestError,
+  EngineNotRunningError,
+  DocumentVersionConflictError,
+} from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
-export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const upsertEntity = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -53,8 +63,15 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
             .getEntityStoreCrudClient()
             .upsertEntity(request.params.entityType, request.body, request.query.force);
 
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok();
         } catch (error) {
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: (error as Error).message,
+          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError
@@ -67,8 +84,11 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
             return response.badRequest({ body: error as BadCRUDRequestError });
           }
 
-          if (error instanceof DocumentNotFoundError) {
-            return response.notFound({ body: error as DocumentNotFoundError });
+          if (error instanceof DocumentVersionConflictError) {
+            return response.customError({
+              statusCode: 409,
+              body: error as DocumentVersionConflictError,
+            });
           }
 
           logger.error(error);

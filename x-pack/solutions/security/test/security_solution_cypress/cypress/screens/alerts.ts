@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
@@ -56,8 +55,6 @@ export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
-
-export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
@@ -138,8 +135,6 @@ export const SHOW_TOP_N_DROPDOWN =
 export const SHOW_TOP_N_DROPDOWN_ALERT_OPTION = '[data-test-subj="option-alert"]';
 
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
-
-export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
 
 /**
  * Alerts KPIs
@@ -236,22 +231,16 @@ export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
   '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
 
 export const ALERT_USER_AVATAR = (assignee: string) => {
-  let expectedAssignee = assignee;
+  const expectedAssignee = assignee;
 
-  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-    expectedAssignee = `test ${expectedAssignee}`;
-  }
-
-  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+  // Use partial match (^=) for title to handle cases where email is appended in parentheses
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title^='${expectedAssignee}']`;
 };
 
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
 export const ALERT_ASIGNEES_COLUMN =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.workflow_assignee_ids"]';
-
-export const ALERT_ASSIGNEES_COUNT_BADGE =
-  '[data-test-subj="securitySolutionUsersAvatarsCountBadge"]';
 
 export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-button-assignees"]';
 

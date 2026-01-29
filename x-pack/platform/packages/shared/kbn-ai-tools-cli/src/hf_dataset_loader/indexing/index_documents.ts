@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import { inspect } from 'util';
+import type { BulkHelperOptions } from '@elastic/elasticsearch/lib/helpers';
 import type { HuggingFaceDatasetSpec } from '../types';
 import { ensureDatasetIndexExists } from './ensure_dataset_index_exists';
 
@@ -16,11 +17,16 @@ export async function indexDocuments({
   documents,
   dataset,
   logger,
+  bulkHelperOverrides,
 }: {
   esClient: ElasticsearchClient;
   documents: Array<Record<string, unknown>>;
   dataset: HuggingFaceDatasetSpec;
   logger: Logger;
+  bulkHelperOverrides?: Omit<
+    BulkHelperOptions<Record<string, unknown>>,
+    'datasource' | 'onDocument'
+  >;
 }): Promise<void> {
   const indexName = dataset.index;
 
@@ -30,6 +36,8 @@ export async function indexDocuments({
   });
 
   logger.debug(`Indexing ${documents.length} into ${indexName}`);
+
+  const startTime = Date.now();
 
   await esClient.helpers.bulk<Record<string, unknown>>({
     datasource: Readable.from(documents),
@@ -45,5 +53,15 @@ export async function indexDocuments({
       logger.warn(`Dropped document: ${doc.status} (${inspect(doc.error, { depth: 5 })})`);
     },
     refresh: 'wait_for',
+    ...bulkHelperOverrides,
   });
+
+  const endTime = Date.now();
+  const elapsedTimeMs = endTime - startTime;
+  const elapsedTimeSec = elapsedTimeMs / 1000;
+  const docsPerSecond = documents.length / elapsedTimeSec;
+
+  logger.debug(
+    `Indexing completed in ${elapsedTimeSec.toFixed(2)}s (${docsPerSecond.toFixed(2)} docs/sec)`
+  );
 }

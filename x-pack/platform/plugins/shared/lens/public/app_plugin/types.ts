@@ -8,62 +8,30 @@
 import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Observable } from 'rxjs';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type {
-  ApplicationStart,
-  AppMountParameters,
-  ChromeStart,
-  CoreStart,
-  CoreTheme,
-  ExecutionContextStart,
-  HttpStart,
-  IUiSettingsClient,
-  NotificationsStart,
-} from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { AppMountParameters, CoreStart, CoreTheme } from '@kbn/core/public';
 import type {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
-  UiActionsStart,
 } from '@kbn/ui-actions-plugin/public';
 import type { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
-import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type {
-  DatasourceMap,
+  LensAppLocatorParams,
+  LensSerializedState,
+  UserMessagesGetter,
+  LensStartServices as StartServices,
   EditorFrameInstance,
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
-  VisualizationMap,
-  UserMessagesGetter,
-  StartServices,
-} from '../types';
-import type { LensAttributesService } from '../lens_attribute_service';
-import type { LensInspector } from '../lens_inspector_service';
+  LensDocument,
+  LensInspector,
+} from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { LensDocument, LensDocumentService } from '../persistence';
-import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import type { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
-  state?: LensSerializedState;
+  state?: LensSerializedAPIConfig;
   isCopied?: boolean;
 }
 
@@ -80,8 +48,6 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
@@ -114,8 +80,6 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
@@ -135,41 +99,6 @@ export interface HistoryLocationState {
   type: typeof ACTION_VISUALIZE_LENS_FIELD | typeof ACTION_CONVERT_TO_LENS;
   payload: VisualizeFieldContext | VisualizeEditorContext;
   originatingApp?: string;
-}
-
-export interface LensAppServices extends StartServices {
-  http: HttpStart;
-  executionContext: ExecutionContextStart;
-  chrome: ChromeStart;
-  storage: IStorageWrapper;
-  dataViews: DataViewsPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
-  data: DataPublicPluginStart;
-  eventAnnotationService: EventAnnotationServiceType;
-  inspector: LensInspector;
-  uiSettings: IUiSettingsClient;
-  settings: SettingsStart;
-  uiActions: UiActionsStart;
-  application: ApplicationStart;
-  notifications: NotificationsStart;
-  usageCollection?: UsageCollectionStart;
-  stateTransfer: EmbeddableStateTransfer;
-  navigation: NavigationPublicPluginStart;
-  attributeService: LensAttributesService;
-  contentManagement: ContentManagementPublicStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  getOriginatingAppName: () => string | undefined;
-  presentationUtil: PresentationUtilPluginStart;
-  spaces?: SpacesApi;
-  charts: ChartsPluginSetup;
-  share?: SharePluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  docLinks: DocLinksStart;
-  dataViewEditor: DataViewEditorStart;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  locator?: LensAppLocator;
-  lensDocumentService: LensDocumentService;
-  serverless?: ServerlessPluginStart;
 }
 
 interface TopNavAction {

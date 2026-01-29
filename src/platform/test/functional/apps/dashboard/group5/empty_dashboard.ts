@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open add panel when add button is clicked', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
       await testSubjects.click('euiFlyoutCloseButton');
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open editor menu when editor button is clicked', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     });
   });

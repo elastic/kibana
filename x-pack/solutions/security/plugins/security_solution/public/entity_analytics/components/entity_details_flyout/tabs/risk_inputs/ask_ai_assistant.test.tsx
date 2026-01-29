@@ -25,7 +25,7 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => {
   const actual = jest.requireActual('../../../../../common/hooks/use_experimental_features');
   return {
     ...actual,
-    useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+    useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false), // default to false because we use a negative FF riskScoreAssistantToolDisabled
   };
 });
 

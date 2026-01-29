@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';

@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_NETWORK_TLS = i18n.translate(
-  'xpack.securitySolution.networkTls.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on network tls search`,
-  }
-);
-
 export const FAIL_NETWORK_TLS = i18n.translate(
   'xpack.securitySolution.networkTls.failSearchDescription',
   {

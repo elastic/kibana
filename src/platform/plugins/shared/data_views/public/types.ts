@@ -150,6 +150,7 @@ export interface MatchedItem {
     aliases?: string[];
     attributes?: ResolveIndexResponseItemIndexAttrs[];
     data_stream?: string;
+    mode?: string;
   };
 }
 

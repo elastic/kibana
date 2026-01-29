@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TypeOf } from '@kbn/config-schema';
 import type { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
 import type { MlKibanaUrlConfig } from './custom_urls';
+import type { criteriaFieldSchema, influencerSchema } from './schemas';
 
 /**
  * Influencers are the entities that have contributed to, or are to blame for, the anomalies.
@@ -456,3 +457,7 @@ export type MlAnomalyResultType =
   (typeof ML_ANOMALY_RESULT_TYPE)[keyof typeof ML_ANOMALY_RESULT_TYPE];
 
 export type AnomalyDateFunction = 'time_of_day' | 'time_of_week';
+
+export type CriteriaField = TypeOf<typeof criteriaFieldSchema>;
+
+export type Influencer = TypeOf<typeof influencerSchema>;

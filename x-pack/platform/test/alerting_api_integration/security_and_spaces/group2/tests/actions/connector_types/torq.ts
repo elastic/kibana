@@ -98,6 +98,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         config: {
           webhookIntegrationUrl: torqSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -120,7 +121,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring send to Torq action: target url "https://test.torq.io/v1/something" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating connector type config: error configuring send to Torq action: target url "https://test.torq.io/v1/something" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

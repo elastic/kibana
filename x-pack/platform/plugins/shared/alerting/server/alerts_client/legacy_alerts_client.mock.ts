@@ -15,6 +15,7 @@ const createLegacyAlertsClientMock = () => {
       logAlerts: jest.fn(),
       getRawAlertInstancesForState: jest.fn(),
       hasReachedAlertLimit: jest.fn(),
+      getMaxAlertLimit: jest.fn().mockReturnValue(1000),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
       getAlert: jest.fn(),
@@ -22,7 +23,9 @@ const createLegacyAlertsClientMock = () => {
       client: jest.fn(),
       determineDelayedAlerts: jest.fn(),
       determineFlappingAlerts: jest.fn(),
-      updatePersistedAlertsWithMaintenanceWindowIds: jest.fn(),
+      updatePersistedAlerts: jest.fn(),
+      getAlertsToUpdateWithMaintenanceWindows: jest.fn(),
+      getAlertsToUpdateWithLastScheduledActions: jest.fn(),
     };
   });
 };

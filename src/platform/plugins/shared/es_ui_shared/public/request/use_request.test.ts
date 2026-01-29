@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 import sinon from 'sinon';
 
 import type { UseRequestHelpers } from './use_request.test.helpers';
@@ -22,6 +22,10 @@ describe('useRequest hook', () => {
 
   describe('parameters', () => {
     describe('path, method, body', () => {
+      afterEach(async () => {
+        await helpers.teardownFake();
+      });
+
       it('is used to send the request', async () => {
         const { setupSuccessRequest, completeRequest, hookResult, getSuccessResponse } = helpers;
         setupSuccessRequest();
@@ -31,24 +35,32 @@ describe('useRequest hook', () => {
     });
 
     describe('pollIntervalMs', () => {
+      afterEach(async () => {
+        await helpers.teardown();
+      });
+
       it('sends another request after the specified time has elapsed', async () => {
-        const { setupSuccessRequest, advanceTime, getSendRequestSpy } = helpers;
+        jest.useRealTimers(); // Use real timers to avoid fake timer + act() state batching issues
+        const { setupSuccessRequest, getSendRequestSpy } = helpers;
+
         setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
 
-        await advanceTime(REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(1);
+        // Wait for first request to complete
+        await waitFor(() => expect(getSendRequestSpy().callCount).toBe(1));
 
-        // We need to advance (1) the pollIntervalMs and (2) the request time.
-        await advanceTime(REQUEST_TIME * 2);
-        expect(getSendRequestSpy().callCount).toBe(2);
+        // Wait for second request (poll fires + request completes)
+        await waitFor(() => expect(getSendRequestSpy().callCount).toBe(2));
 
-        // We need to advance (1) the pollIntervalMs and (2) the request time.
-        await advanceTime(REQUEST_TIME * 2);
-        expect(getSendRequestSpy().callCount).toBe(3);
+        // Wait for third request (poll fires + request completes)
+        await waitFor(() => expect(getSendRequestSpy().callCount).toBe(3));
       });
     });
 
     describe('initialData', () => {
+      afterEach(async () => {
+        await helpers.teardownFake();
+      });
+
       it('sets the initial data value', async () => {
         const { setupSuccessRequest, completeRequest, hookResult, getSuccessResponse } = helpers;
         setupSuccessRequest({ initialData: 'initialData' });
@@ -61,6 +73,10 @@ describe('useRequest hook', () => {
     });
 
     describe('deserializer', () => {
+      afterEach(async () => {
+        await helpers.teardownFake();
+      });
+
       it('is called with the response once the request resolves', async () => {
         const { setupSuccessRequest, completeRequest, getSuccessResponse } = helpers;
 
@@ -83,6 +99,10 @@ describe('useRequest hook', () => {
   });
 
   describe('state', () => {
+    afterEach(async () => {
+      await helpers.teardownFake();
+    });
+
     describe('isInitialRequest', () => {
       it('is true for the first request and false for subsequent requests', async () => {
         const { setupSuccessRequest, completeRequest, hookResult } = helpers;
@@ -200,6 +220,10 @@ describe('useRequest hook', () => {
 
   describe('callbacks', () => {
     describe('resendRequest', () => {
+      afterEach(async () => {
+        await helpers.teardownFake();
+      });
+
       it('sends the request', async () => {
         const { setupSuccessRequest, completeRequest, hookResult, getSendRequestSpy } = helpers;
         setupSuccessRequest();
@@ -215,33 +239,48 @@ describe('useRequest hook', () => {
       });
 
       it('resets the pollIntervalMs', async () => {
-        const { setupSuccessRequest, advanceTime, hookResult, getSendRequestSpy } = helpers;
+        const { setupSuccessRequest, hookResult, getSendRequestSpy } = helpers;
         const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
         setupSuccessRequest({ pollIntervalMs: DOUBLE_REQUEST_TIME });
 
-        // The initial request resolves, and then we'll immediately send a new one manually...
-        await advanceTime(REQUEST_TIME);
+        await act(async () => {
+          // Advance time enough for the initial request to complete
+          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+        });
+
+        // Wait for initial request to complete, then send a manual one
         expect(getSendRequestSpy().callCount).toBe(1);
         act(() => {
           hookResult.resendRequest();
         });
 
-        // The manual request resolves, and we'll send yet another one...
-        await advanceTime(REQUEST_TIME);
+        await act(async () => {
+          // Advance time enough for the manual request to complete
+          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+        });
+
+        // Wait for manual request to complete, then send another manual one
         expect(getSendRequestSpy().callCount).toBe(2);
         act(() => {
           hookResult.resendRequest();
         });
 
-        // At this point, we've moved forward 3s. The poll is set at 2s. If resendRequest didn't
-        // reset the poll, the request call count would be 4, not 3.
-        await advanceTime(REQUEST_TIME);
+        await act(async () => {
+          // Advance time enough for the second manual request to complete
+          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+        });
+
+        // Wait for the second manual request to complete
+        // If resendRequest didn't reset the poll, we would see 4 requests instead of 3
         expect(getSendRequestSpy().callCount).toBe(3);
       });
     });
   });
 
   describe('request behavior', () => {
+    afterEach(async () => {
+      await helpers.teardownFake();
+    });
     it('outdated responses are ignored by poll requests', async () => {
       const {
         setupSuccessRequest,
@@ -270,22 +309,31 @@ describe('useRequest hook', () => {
     });
 
     it(`outdated responses are ignored if there's a more recently-sent manual request`, async () => {
-      const { setupSuccessRequest, advanceTime, hookResult, getSendRequestSpy } = helpers;
+      const { setupSuccessRequest, hookResult, getSendRequestSpy } = helpers;
 
-      const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
       setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
 
-      // Before the original request resolves, we make a manual resendRequest call.
-      await advanceTime(HALF_REQUEST_TIME);
+      // Wait half the request time - the initial request hasn't completed yet
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
+      });
       expect(getSendRequestSpy().callCount).toBe(0);
+
+      // Make a manual resendRequest call before the original resolves
       act(() => {
         hookResult.resendRequest();
       });
 
-      // The original quest resolves but it's been marked as outdated by the the manual resendRequest
-      // call "interrupts", so data is left undefined.
-      await advanceTime(HALF_REQUEST_TIME);
+      // Wait for the original request to complete - give it enough time + buffer
+      // Original started at T=0, will complete at T=REQUEST_TIME
+      // We're now at T=REQUEST_TIME*0.5, so wait REQUEST_TIME*0.6 more
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
+      });
+
+      // The spy should have been called once (original request completed)
       expect(getSendRequestSpy().callCount).toBe(1);
+      // But the result was ignored, so data should still be undefined
       expect(hookResult.data).toBeUndefined();
     });
 

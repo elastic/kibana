@@ -9,9 +9,10 @@
 
 import type {
   AtomicGraphNode,
+  DataSetGraphNode,
   ElasticsearchGraphNode,
-  KibanaGraphNode,
   HttpGraphNode,
+  KibanaGraphNode,
   WaitGraphNode,
 } from './nodes/base';
 import type {
@@ -22,14 +23,16 @@ import type {
 } from './nodes/branching_nodes';
 import type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
 import type {
-  EnterRetryNode,
-  ExitRetryNode,
   EnterContinueNode,
+  EnterNormalPathNode,
+  EnterRetryNode,
+  EnterTimeoutZoneNode,
+  EnterTryBlockNode,
   ExitContinueNode,
   ExitNormalPathNode,
-  EnterNormalPathNode,
+  ExitRetryNode,
+  ExitTimeoutZoneNode,
   ExitTryBlockNode,
-  EnterTryBlockNode,
 } from './nodes/on_failure_nodes';
 import type { GraphNodeUnion } from './nodes/union';
 
@@ -44,6 +47,9 @@ export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
 export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type === 'http';
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
+
+export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
+  node.type === 'data.set';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 
@@ -84,3 +90,15 @@ export const isEnterNormalPath = (node: GraphNodeUnion): node is EnterNormalPath
 
 export const isExitNormalPath = (node: GraphNodeUnion): node is ExitNormalPathNode =>
   node.type === 'exit-normal-path';
+
+export const isEnterWorkflowTimeoutZone = (node: GraphNodeUnion): node is EnterTimeoutZoneNode =>
+  node.type === 'enter-timeout-zone' && node.stepType === 'workflow_level_timeout';
+
+export const isExitWorkflowTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
+  node.type === 'exit-timeout-zone' && node.stepType === 'workflow_level_timeout';
+
+export const isEnterStepTimeoutZone = (node: GraphNodeUnion): node is EnterTimeoutZoneNode =>
+  node.type === 'enter-timeout-zone' && node.stepType !== 'workflow_level_timeout';
+
+export const isExitStepTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
+  node.type === 'exit-timeout-zone' && node.stepType !== 'workflow_level_timeout';

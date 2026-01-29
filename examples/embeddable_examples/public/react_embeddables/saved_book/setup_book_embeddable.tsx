@@ -10,6 +10,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
 import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../../../common';
 
 export function setupBookEmbeddable(
@@ -23,9 +24,9 @@ export function setupBookEmbeddable(
     return getSavedBookEmbeddableFactory(coreStart);
   });
 
-  embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, async () => {
+  embeddable.registerLegacyURLTransform(BOOK_EMBEDDABLE_TYPE, async () => {
     const { bookTransforms } = await import('../../../common/book/transforms');
-    return bookTransforms;
+    return bookTransforms.transformOut as EmbeddableTransforms<object, object>['transformOut'];
   });
 
   contentManagement.registry.register({

@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Streams, System } from '@kbn/streams-schema';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { type BoundInferenceClient } from '@kbn/inference-common';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import { GenerateStreamDescriptionPrompt } from './prompt';
+import type { Streams, System } from '@kbn/streams-schema';
+import { withSpan } from '@kbn/apm-utils';
+import { createGenerateStreamDescriptionPrompt } from './prompt';
 
 /**
  * Generate a natural-language description
@@ -21,6 +22,9 @@ export async function generateStreamDescription({
   end,
   esClient,
   inferenceClient,
+  signal,
+  logger,
+  systemPrompt,
 }: {
   stream: Streams.all.Definition;
   system?: System;
@@ -28,24 +32,55 @@ export async function generateStreamDescription({
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
-}): Promise<string> {
-  const analysis = await describeDataset({
-    start,
-    end,
-    esClient,
-    index: stream.name,
-    filter: system ? conditionToQueryDsl(system.filter) : undefined,
-  });
+  signal: AbortSignal;
+  logger: Logger;
+  systemPrompt: string;
+}): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
+  logger.debug(
+    `Generating stream description for stream ${stream.name}${
+      system ? ` using system ${system.name}` : ''
+    }`
+  );
 
-  const response = await inferenceClient.prompt({
-    input: {
-      name: system?.name || stream.name,
-      dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true })
-      ),
-    },
-    prompt: GenerateStreamDescriptionPrompt,
-  });
+  logger.trace('Describing dataset for stream description');
+  const analysis = await withSpan('describe_dataset_for_stream_description', () =>
+    describeDataset({
+      start,
+      end,
+      esClient,
+      index: stream.name,
+      filter: system ? conditionToQueryDsl(system.filter) : undefined,
+    })
+  );
 
-  return response.content;
+  logger.trace('Formatting document analysis for stream description');
+  const formattedAnalysis = await withSpan('format_document_analysis_for_stream_description', () =>
+    Promise.resolve(
+      formatDocumentAnalysis(analysis, {
+        dropEmpty: true,
+        dropUnmapped: false,
+      })
+    )
+  );
+
+  const prompt = createGenerateStreamDescriptionPrompt({ systemPrompt });
+
+  logger.trace('Generating stream description via inference client');
+  const response = await withSpan('generate_stream_description', () =>
+    inferenceClient.prompt({
+      input: {
+        name: system?.name || stream.name,
+        dataset_analysis: JSON.stringify(formattedAnalysis),
+      },
+      prompt,
+      abortSignal: signal,
+    })
+  );
+
+  logger.debug('Stream description generated');
+
+  return {
+    description: response.content,
+    tokensUsed: response.tokens,
+  };
 }

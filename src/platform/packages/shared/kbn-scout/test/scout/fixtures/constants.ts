@@ -35,6 +35,7 @@ export const createCasePayload: CaseCreateRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   owner: '',
   customFields: [],

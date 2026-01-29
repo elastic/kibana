@@ -18,7 +18,7 @@ const style = css`
 export const SubSteps = React.memo<{ steps: EuiStepProps[] }>(({ steps }) => {
   return (
     <EuiPanel hasShadow={false} paddingSize="xs" className={style}>
-      <EuiSteps titleSize="xxs" steps={steps} />
+      <EuiSteps titleSize="xxs" steps={steps} data-test-subj="migrationsSubSteps" />
     </EuiPanel>
   );
 });

@@ -16,9 +16,9 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { PostMessageParams, SlackApiConnectorType } from '../../../common/slack_api/types';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
-import { SLACK_CONNECTOR_NAME } from './translations';
+import type { SlackApiConnectorType } from '../../../common/slack_api/types';
+import type { PostMessageParams } from '@kbn/connector-schemas/slack_api';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/slack_api';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -53,8 +53,8 @@ beforeEach(() => {
 
 describe('connector registration', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(SLACK_API_CONNECTOR_ID);
-    expect(connectorType.name).toEqual(SLACK_CONNECTOR_NAME);
+    expect(connectorType.id).toEqual(CONNECTOR_ID);
+    expect(connectorType.name).toEqual(CONNECTOR_NAME);
   });
 });
 
@@ -63,7 +63,7 @@ describe('validate config', () => {
     expect(() => {
       validateConfig(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [message]: definition for this key is missing"`
+      `"error validating connector type config: Unrecognized key(s) in object: 'message'"`
     );
   });
 
@@ -79,19 +79,20 @@ describe('validate params', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: types that failed validation:
-      - [0.subAction]: expected value to equal [validChannelId]
-      - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      "error validating action params: 2 errors:
+       [1]: Field \\"subAction\\": Invalid literal value, expected \\"validChannelId\\", Invalid literal value, expected \\"postMessage\\", Invalid literal value, expected \\"postBlockkit\\";
+       [2]: Field \\"subActionParams\\": Required, Required, Required"
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: types that failed validation:
-      - [0.subAction]: expected value to equal [validChannelId]
-      - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      "error validating action params: 5 errors:
+       [1]: Unrecognized key(s) in object: 'message';
+       [2]: Unrecognized key(s) in object: 'message';
+       [3]: Unrecognized key(s) in object: 'message';
+       [4]: Field \\"subAction\\": Invalid literal value, expected \\"validChannelId\\", Invalid literal value, expected \\"postMessage\\", Invalid literal value, expected \\"postBlockkit\\";
+       [5]: Field \\"subActionParams\\": Required, Required, Required"
     `);
   });
 
@@ -143,7 +144,7 @@ describe('validate secrets', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [undefined]"`
+      `"error validating connector type secrets: Field \\"token\\": Required"`
     );
   });
 
@@ -161,7 +162,7 @@ describe('validate secrets', () => {
     expect(() => {
       validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [number]"`
+      `"error validating connector type secrets: Field \\"token\\": Expected string, received number"`
     );
   });
 
@@ -180,7 +181,7 @@ describe('validate secrets', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      `"error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
     );
   });
 });
@@ -203,7 +204,7 @@ describe('execute', () => {
 
     await expect(
       connectorType.executor({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         config: {},
         services,
         secrets: { token: 'some token' },
@@ -228,7 +229,7 @@ describe('execute', () => {
 
     await expect(
       connectorType.executor({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         services,
         config: {},
         secrets: { token: 'some token' },
@@ -299,7 +300,7 @@ describe('execute', () => {
     }));
 
     const response = await connectorType.executor({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       services,
       config: {},
       secrets: { token: 'some token' },
@@ -324,7 +325,7 @@ describe('execute', () => {
     });
 
     expect(response).toEqual({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       data: {
         channel: 'general',
         message: {
@@ -391,7 +392,7 @@ describe('execute', () => {
     }));
 
     const response = await connectorType.executor({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       services,
       config: { allowedChannels: [{ id: 'LKJHGF345', name: 'test' }] },
       secrets: { token: 'some token' },
@@ -416,7 +417,7 @@ describe('execute', () => {
     });
 
     expect(response).toEqual({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       data: {
         ok: true,
         channel: 'LKJHGF345',
@@ -480,7 +481,7 @@ describe('execute', () => {
     }));
 
     const response = await connectorType.executor({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       services,
       config: { allowedChannels: [{ id: 'LKJHGF345', name: 'test' }] },
       secrets: { token: 'some token' },
@@ -508,7 +509,7 @@ describe('execute', () => {
     });
 
     expect(response).toEqual({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       data: {
         ok: true,
         channel: 'LKJHGF345',
@@ -532,7 +533,7 @@ describe('execute', () => {
       },
     }));
     const response = await connectorType.executor({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       services,
       config: {},
       secrets: { token: 'some token' },
@@ -558,7 +559,7 @@ describe('execute', () => {
     });
 
     expect(response).toEqual({
-      actionId: SLACK_API_CONNECTOR_ID,
+      actionId: CONNECTOR_ID,
       data: {
         channel: {
           id: 'ZXCVBNM567',
