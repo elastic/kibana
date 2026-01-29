@@ -107,6 +107,7 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      skillsService: skills,
       trackingService,
     });
     runner = runnerFactory.getRunner();

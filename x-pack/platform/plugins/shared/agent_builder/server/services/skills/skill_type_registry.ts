@@ -7,6 +7,7 @@
 
 import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 export interface SkillTypeRegistry {
   register(skill: SkillTypeDefinition): void;
   has(skillId: string): boolean;
@@ -22,19 +23,21 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   private skills: Map<string, SkillTypeDefinition> = new Map();
   private skillFullPaths: Set<string> = new Set();
 
-  constructor() {}
+  constructor() { }
 
   register(skill: SkillTypeDefinition) {
     validateSkillTypeDefinition(skill);
-    
+
     if (this.skills.has(skill.id)) {
       throw new Error(`Skill type with id ${skill.id} already registered`);
     }
 
-    const fullPath = `${skill.path}:${skill.name}`;
+    const fullPath = getSkillEntryPath({
+      skill,
+    });
 
     if (this.skillFullPaths.has(fullPath)) {
-      throw new Error(`Skill with path ${skill.path} and name ${skill.name} already registered`);
+      throw new Error(`Skill with path ${skill.basePath} and name ${skill.name} already registered`);
     }
     this.skillFullPaths.add(fullPath);
 
@@ -50,7 +53,12 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   }
 
   list() {
-    return [...this.skills.values()];
+    return [...this.skills.values()].sort((a, b) => getSkillEntryPath({
+      skill: a,
+    }).localeCompare(
+      getSkillEntryPath({
+        skill: b,
+      })));
   }
 }
 

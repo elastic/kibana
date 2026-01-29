@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 export const alertAnalysisSkill = defineSkillType({
   id: 'security.alert-analysis',
   name: 'alert-analysis',
-  path: 'skills/security/alerts',
+  basePath: 'skills/security/alerts',
   description:
     'Comprehensive guide to analyze a security alert, finding related alerts, events and cases and identifying potential threats.',
   body: `# Alert Analysis Guide
@@ -68,11 +68,32 @@ export const alertAnalysisSkill = defineSkillType({
 
 ## Best Practices
 - Always start with the alert details before expanding the investigation
+- Use the reference queries at ./queries/
 - Use entity relationships to find related security data efficiently
 - Maintain chronological context when analyzing events and alerts
 - Cross-reference findings across alerts, events, and cases for validation
 - Prioritize high-severity alerts and critical risk entities
 - Document your analysis process and reasoning clearly`,
+  referencedContent: [
+    {
+      relativePath: './queries',
+      name: 'related_by_entities',
+      body: `FROM .alerts-security.alerts-* METADATA _id, _index
+| WHERE (
+  host.name == "ENTITY_VALUE_PLACEHOLDER" OR
+  user.name == "ENTITY_VALUE_PLACEHOLDER" OR
+  source.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+  destination.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+  entity.name == "ENTITY_VALUE_PLACEHOLDER"
+)
+| WHERE @timestamp >= NOW() - INTERVAL 7 DAYS
+| KEEP _id, _index, @timestamp, kibana.alert.rule.name, kibana.alert.severity, 
+     kibana.alert.workflow_status, host.name, user.name, source.ip, 
+     destination.ip, entity.name, entity.type, message
+| SORT @timestamp DESC
+| LIMIT 100`,
+    },
+  ],
   getAllowedTools: () => [
     `security.alerts`,
     `security.entity_risk_score`,
@@ -81,23 +102,23 @@ export const alertAnalysisSkill = defineSkillType({
   ],
   getInlineTools: () => [
     {
-        id: "security.alert-analysis.get-related-alerts",
-        type: ToolType.builtin,
-        description: "Get related alerts to the alert",
-        schema: z.object({
-            alertId: z.string(),
-        }),
-        handler: async (_args, context) => {
-            // TODO: Implement the handler
-            return {
-                results: [
-                    {
-                        type: ToolResultType.other,
-                        data: { message: "Related alerts fetched successfully" },
-                    },
-                ],
-            };
-        },
+      id: "security.alert-analysis.get-related-alerts",
+      type: ToolType.builtin,
+      description: "Get related alerts to the alert",
+      schema: z.object({
+        alertId: z.string(),
+      }),
+      handler: async (_args, context) => {
+        // TODO: Implement the handler
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { message: "Related alerts fetched successfully" },
+            },
+          ],
+        };
+      },
     }
   ]
 });

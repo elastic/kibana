@@ -83,6 +83,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     events,
     promptManager,
     filestore,
+    skills
   } = context;
 
   ensureValidInput({ input: nextInput, conversation });
@@ -151,6 +152,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     outputSchema,
     conversationTimestamp,
+    skillsService: skills,
   });
 
   const agentGraph = createAgentGraph({

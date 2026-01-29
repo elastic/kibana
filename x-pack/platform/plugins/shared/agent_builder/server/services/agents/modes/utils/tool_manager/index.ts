@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/**
- * Forcefully disable the feature while in development.
- */
-export const FILESTORE_ENABLED = true;
+export { ToolManager } from './tool_manager';
+export { LRUMap } from './lru_map';
+export type { ToolManagerParams } from './tool_manager';

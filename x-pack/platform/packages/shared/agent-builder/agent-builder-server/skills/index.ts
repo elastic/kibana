@@ -7,3 +7,10 @@
 
 export type { SkillTypeDefinition } from './type_definition';
 export { validateSkillTypeDefinition } from './type_definition';
+export type {
+  SkillBoundedTool,
+  BuiltinSkillBoundedTool,
+  IndexSearchSkillBoundedTool,
+  WorkflowSkillBoundedTool,
+  StaticEsqlSkillBoundedTool,
+} from './tools';
