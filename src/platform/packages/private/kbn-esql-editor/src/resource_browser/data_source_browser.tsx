@@ -62,9 +62,10 @@ const getSourceTypeKey = (type?: string): string => {
 interface DataSourceBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (dataSourceName: string, oldLength: number) => void;
+  onSelect: (selectedSources: string[]) => void;
   position?: { top?: number; left?: number };
   isTSCommand?: boolean;
+  initialSources?: string[];
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
@@ -73,6 +74,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   onSelect,
   position,
   isTSCommand = false,
+  initialSources = [],
 }) => {
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -82,21 +84,23 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>(initialSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
+  console.log('initialSources', initialSources);
 
-  // Reset state when popover opens
+  // Reset state when popover opens and pre-select initial sources
   useEffect(() => {
     if (isOpen) {
-      // Clear all selections and filters when popover opens
+      // Clear filters when popover opens
       setSelectedTypes([]);
-      setSelectedItems([]);
       setSelectedIntegrations([]);
       setSearchValue('');
       setIsIntegrationPopoverOpen(false);
+      // Pre-select sources that are already in the query
+      setSelectedItems(initialSources);
     }
-  }, [isOpen]);
+  }, [isOpen, initialSources]);
 
   const fetchData = useCallback(async (): Promise<ESQLSourceResult[]> => {
     if (isTSCommand) {
@@ -282,15 +286,17 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [options, searchValue, selectedTypes, selectedIntegrations, availableIntegrations.length]);
 
   const handleSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const newlySelected = newOptions
-        .filter((o) => o.checked === 'on')
-        .map((o) => o.key as string)
-        .filter(Boolean);
+    (newOptions: EuiSelectableOption[], event: unknown, changedOption: EuiSelectableOption | undefined) => {
+      let newSelected;
 
-      const oldLength = selectedItems.join(',').length;
-      setSelectedItems(newlySelected);
-      onSelect(newlySelected.join(','), oldLength);
+      if (changedOption?.checked === 'on') {
+        newSelected = [...selectedItems, changedOption.key as string];
+      } else {
+        newSelected = selectedItems.filter((o) => o !== changedOption?.key as string);
+      }
+
+      setSelectedItems(newSelected);
+      onSelect(newSelected);
     },
     [onSelect, selectedItems]
   );

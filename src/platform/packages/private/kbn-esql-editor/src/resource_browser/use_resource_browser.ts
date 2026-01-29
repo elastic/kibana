@@ -15,7 +15,15 @@ import { Parser, suggest } from '@kbn/esql-language';
 import { getCursorContext } from '@kbn/esql-language/src/language/shared/get_cursor_context';
 import { getQueryForFields } from '@kbn/esql-language/src/language/shared/get_query_for_fields';
 import { getColumnsByTypeRetriever } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { BROWSER_POPOVER_WIDTH } from './browser_popover_wrapper';
+
+interface SourcesRange {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+}
 
 interface UseResourceBrowserProps {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -45,6 +53,33 @@ export function useResourceBrowser({
   const suggestedFieldNamesRef = useRef<Set<string>>(new Set());
   // Track whether the current command is a TS command to filter timeseries indices
   const isTSCommandRef = useRef<boolean>(false);
+  // Track the sources currently in the query for pre-selection
+  const sourcesInQueryRef = useRef<string[]>([]);
+  // Track the range in the editor where sources are located for replacement
+  const sourcesRangeRef = useRef<SourcesRange | null>(null);
+
+  const handleDataSourceBrowserSelect = useCallback(
+    (newSourceNames: string[]) => {
+      if (editorRef.current && editorModel.current && sourcesRangeRef.current) {
+        const range = sourcesRangeRef.current;
+        const newText = newSourceNames.join(', ');
+
+        editorRef.current.executeEdits('dataSourceBrowser', [
+          {
+            range,
+            text: newText,
+          },
+        ]);
+
+        // Update the sources range end position after the edit
+        sourcesRangeRef.current = {
+          ...range,
+          endColumn: range.startColumn + newText.length,
+        };
+      }
+    },
+    [editorRef, editorModel]
+  );
 
   const handleResourceBrowserSelect = useCallback(
     (newResourceNames: string, oldLength: number) => {
@@ -112,7 +147,6 @@ export function useResourceBrowser({
   }, [editorRef]);
 
   const openIndicesBrowser = useCallback(async () => {
-    // Determine if the current command is a TS command
     if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
       if (position) {
@@ -126,6 +160,35 @@ export function useResourceBrowser({
         // Check if the current command is a timeseries command (TS)
         const isTS = astContext.command?.name === 'ts';
         isTSCommandRef.current = isTS;
+
+        const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(fullText);
+        const sourcesInQuery = sourceFromUpdatedQuery ? sourceFromUpdatedQuery.split(',') : [];
+        sourcesInQueryRef.current = sourcesInQuery;
+        console.log('sourceFromUpdatedQuery', sourcesInQuery);
+
+        // Calculate the range for sources (from first source to end of last source)
+        if (sourcesInQuery.length > 0) {
+          const firstSource = sourcesInQuery[0];
+
+          // Get editor positions from offsets
+          const startPosition = fullText.indexOf(firstSource) + 1;
+          const endPosition = fullText.search(/\s(\||$)/i); // Find position of whitespace before | or end of line
+
+          sourcesRangeRef.current = {
+            startLineNumber: position.lineNumber,
+            startColumn: startPosition,
+            endLineNumber: position.lineNumber,
+            endColumn: endPosition + 1,
+          };
+        } else {
+          sourcesRangeRef.current = {
+            startLineNumber: position.lineNumber,
+            startColumn: position.column,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column,
+          };
+
+        }
       }
     }
     updateResourceBrowserPosition();
@@ -181,7 +244,9 @@ export function useResourceBrowser({
     fieldsBrowserQueryStringRef,
     suggestedFieldNamesRef,
     isTSCommandRef,
+    sourcesInQueryRef,
     handleResourceBrowserSelect,
+    handleDataSourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,
   };

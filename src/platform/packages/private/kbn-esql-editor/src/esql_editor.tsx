@@ -772,7 +772,9 @@ const ESQLEditorInternal = function ESQLEditor({
     fieldsBrowserQueryStringRef,
     suggestedFieldNamesRef,
     isTSCommandRef,
+    sourcesInQueryRef,
     handleResourceBrowserSelect,
+    handleDataSourceBrowserSelect,
     openIndicesBrowser,
     openFieldsBrowser,
   } = useResourceBrowser({
@@ -1476,9 +1478,10 @@ const ESQLEditorInternal = function ESQLEditor({
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}
             onClose={() => setIsDataSourceBrowserOpen(false)}
-            onSelect={handleResourceBrowserSelect}
+            onSelect={handleDataSourceBrowserSelect}
             position={browserPopoverPosition}
             isTSCommand={isTSCommandRef.current}
+            initialSources={sourcesInQueryRef.current}
           />
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
