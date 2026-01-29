@@ -70,17 +70,20 @@ export const getWorkflowExecution = async ({
       spaceId,
     });
 
-    // If workflow is in terminal status but no steps found, refresh and retry
-    // Steps may not be visible yet due to refresh: false on writes
-    if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
-      await esClient.indices.refresh({ index: stepsExecutionIndex });
-      stepExecutions = await searchStepExecutions({
-        esClient,
-        logger,
-        stepsExecutionIndex,
-        workflowExecutionId,
-        spaceId,
-      });
+    // If workflow is in terminal status but steps are missing or not all in terminal status,
+    // refresh and retry. Steps may not be visible yet due to refresh: false on writes.
+    if (isTerminalStatus(doc.status)) {
+      const allStepsTerminal = stepExecutions.every((step) => isTerminalStatus(step.status));
+      if (stepExecutions.length === 0 || !allStepsTerminal) {
+        await esClient.indices.refresh({ index: stepsExecutionIndex });
+        stepExecutions = await searchStepExecutions({
+          esClient,
+          logger,
+          stepsExecutionIndex,
+          workflowExecutionId,
+          spaceId,
+        });
+      }
     }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
