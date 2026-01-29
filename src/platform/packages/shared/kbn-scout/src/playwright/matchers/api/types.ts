@@ -11,6 +11,19 @@ import type { expect as baseExpect } from '@playwright/test';
 import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 
 /**
+ * Options for the expect function.
+ */
+export interface ExpectOptions {
+  /** Custom message to display on assertion failure */
+  message?: string;
+}
+
+/**
+ * Second parameter for expect() - can be a string (shorthand for message) or options object.
+ */
+export type ExpectOptionsOrMessage = string | ExpectOptions;
+
+/**
  * Generic matchers that delegate to Playwright/Jest expect.
  * These work on any value type.
  */

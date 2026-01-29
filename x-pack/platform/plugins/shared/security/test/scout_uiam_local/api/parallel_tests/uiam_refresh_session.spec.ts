@@ -9,7 +9,8 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
 
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -51,7 +52,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
@@ -62,7 +63,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
     }
   );
@@ -75,7 +76,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
@@ -91,7 +92,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         )
       );
       for (const res of responses) {
-        expect(res.statusCode).toBe(200);
+        expect(res).toHaveStatusCode(200);
         expect(res.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
       }
     }
@@ -107,7 +108,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
@@ -118,7 +119,7 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(401);
+      expect(response).toHaveStatusCode(401);
     }
   );
 });

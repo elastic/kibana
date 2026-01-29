@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { GetTransformsStatsResponseSchema } from '../../../../common';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { transformApiTest as apiTest } from '../fixtures';

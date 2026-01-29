@@ -8,15 +8,15 @@
  */
 
 import { expect as baseExpect } from '@playwright/test';
-import type { GenericMatchers } from './types';
+import type { ExpectOptions, GenericMatchers } from './types';
 import { wrapMatcher } from './utils';
 
 /**
  * Create generic matchers delegating to Playwright/Jest expect
  */
-export function createGenericMatchers(actual: unknown): GenericMatchers {
+export function createGenericMatchers(actual: unknown, options?: ExpectOptions): GenericMatchers {
   // eslint-disable-next-line playwright/valid-expect
-  const base = baseExpect(actual);
+  const base = baseExpect(actual, options);
   return {
     toBe: wrapMatcher((expected: unknown) => base.toBe(expected)),
     toBeDefined: wrapMatcher(() => base.toBeDefined()),
