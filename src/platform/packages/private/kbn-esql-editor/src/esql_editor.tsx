@@ -236,13 +236,20 @@ const ESQLEditorInternal = function ESQLEditor({
     if (
       !hasOpenedVisorOnMount.current &&
       !hasUserDismissedVisorAutoOpen &&
+      openVisorOnSourceCommands &&
       code &&
       hasOnlySourceCommand(code)
     ) {
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, hasOpenedVisorOnMount, hasUserDismissedVisorAutoOpen, setIsVisorOpen]);
+  }, [
+    code,
+    hasOpenedVisorOnMount,
+    hasUserDismissedVisorAutoOpen,
+    openVisorOnSourceCommands,
+    setIsVisorOpen,
+  ]);
 
   const onToggleVisor = useCallback(() => {
     setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
@@ -1339,6 +1346,7 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
+          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter
