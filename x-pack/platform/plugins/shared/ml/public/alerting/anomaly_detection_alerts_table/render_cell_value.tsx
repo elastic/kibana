@@ -13,10 +13,10 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
+import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
 import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import {
   alertFieldNameMap,
   ALERT_ANOMALY_SCORE,
