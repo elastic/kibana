@@ -188,6 +188,62 @@ export const createAttachmentRefs = (
 };
 
 /**
+ * Merge attachment refs by attachment id + version + actor to avoid duplicates.
+ */
+export const mergeAttachmentRefs = (
+  previous?: AttachmentVersionRef[],
+  next?: AttachmentVersionRef[]
+): AttachmentVersionRef[] | undefined => {
+  if (!previous?.length && !next?.length) {
+    return undefined;
+  }
+
+  const merged = new Map<string, AttachmentVersionRef>();
+  for (const ref of previous ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  for (const ref of next ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+
+  return Array.from(merged.values());
+};
+
+/**
+ * Apply refs to rounds, merging with any existing refs on the round input.
+ */
+export const applyAttachmentRefsToRounds = (
+  rounds: ConversationRound[],
+  refsByRound: Map<number, AttachmentVersionRef[]>
+): ConversationRound[] => {
+  if (refsByRound.size === 0) {
+    return rounds;
+  }
+
+  return rounds.map((round, index) => {
+    const refs = refsByRound.get(index);
+    if (!refs?.length) {
+      return round;
+    }
+
+    const mergedRefs = mergeAttachmentRefs(round.input.attachment_refs, refs);
+    return {
+      ...round,
+      input: {
+        ...round.input,
+        ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
+      },
+    };
+  });
+};
+
+/**
  * Gets all legacy attachments from all rounds (without deduplication).
  * Useful for checking if any migration is needed.
  */

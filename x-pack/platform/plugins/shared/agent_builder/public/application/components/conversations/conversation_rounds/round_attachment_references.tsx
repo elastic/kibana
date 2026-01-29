@@ -128,10 +128,15 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
         continue;
       }
 
+      const operation = resolveOperation(ref.operation, ref.version);
+      if (operation === ATTACHMENT_REF_OPERATION.read) {
+        continue;
+      }
+
       resolved.push({
         attachment,
         version: ref.version,
-        operation: resolveOperation(ref.operation, ref.version),
+        operation,
         actor,
       });
     }
