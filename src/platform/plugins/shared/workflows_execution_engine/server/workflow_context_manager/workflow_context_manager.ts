@@ -233,24 +233,20 @@ export class WorkflowContextManager {
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    const variables: Record<string, unknown> = {};
-    const stepExecutions = this.workflowExecutionState
+    return this.workflowExecutionState
       .getAllStepExecutions()
-      .filter((x) => x.stepType === 'data.set')
-      .filter((x) => x.output)
-      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
-
-    for (const stepExecution of stepExecutions) {
-      if (
-        stepExecution.output &&
-        typeof stepExecution.output === 'object' &&
-        !Array.isArray(stepExecution.output)
-      ) {
-        Object.assign(variables, stepExecution.output);
-      }
-    }
-
-    return variables;
+      .filter(
+        (stepExecution) =>
+          stepExecution.stepType === 'data.set' &&
+          typeof stepExecution.output === 'object' &&
+          !Array.isArray(stepExecution.output)
+      )
+      .filter((stepExecution) => stepExecution.output)
+      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
+      .reduce((acc, stepExecution) => {
+        Object.assign(acc, stepExecution.output);
+        return acc;
+      }, {});
   }
 
   /**

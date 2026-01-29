@@ -85,6 +85,7 @@ describe('WorkflowContextManager', () => {
     workflowExecutionState.getLatestStepExecution = jest
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
+    workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
 
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
@@ -911,18 +912,18 @@ describe('WorkflowContextManager', () => {
       expect(variables).toEqual({});
     });
 
-    it('should return empty object when no data.set steps are completed', () => {
+    it('should return empty object when no data.set steps with output', () => {
       testContainer.workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([
         {
           stepType: 'data.set',
           status: 'running',
-          output: { var1: 'value1' },
+          output: undefined,
           globalExecutionIndex: 1,
         } as unknown as EsWorkflowStepExecution,
         {
           stepType: 'data.set',
           status: 'pending',
-          output: { var2: 'value2' },
+          output: null,
           globalExecutionIndex: 2,
         } as unknown as EsWorkflowStepExecution,
       ]);
@@ -996,7 +997,7 @@ describe('WorkflowContextManager', () => {
             userId: 'user-123',
             count: 5,
           },
-          globalExecutionIndex: 2,
+          globalExecutionIndex: 1,
         } as unknown as EsWorkflowStepExecution,
         {
           stepType: 'data.set',
@@ -1005,7 +1006,7 @@ describe('WorkflowContextManager', () => {
             count: 10, // Override count
             newVar: 'new value',
           },
-          globalExecutionIndex: 1,
+          globalExecutionIndex: 2,
         } as unknown as EsWorkflowStepExecution,
       ]);
 
