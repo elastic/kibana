@@ -47,6 +47,24 @@ jest.mock('../use_load_action_types', () => ({
 
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
+const OriginalMutationObserver = global.MutationObserver;
+
+beforeAll(() => {
+  class MockMutationObserver {
+    observe() { }
+    disconnect() { }
+    takeRecords() {
+      return [];
+    }
+  }
+
+  global.MutationObserver = MockMutationObserver as unknown as typeof MutationObserver;
+});
+
+afterAll(() => {
+  global.MutationObserver = OriginalMutationObserver;
+});
+
 jest.mock('../add_connector_modal', () => ({
   // @ts-ignore
   AddConnectorModal: ({ onSaveConnector }) => (
