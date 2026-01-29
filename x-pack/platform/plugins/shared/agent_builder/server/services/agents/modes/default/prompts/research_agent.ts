@@ -28,7 +28,7 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions, filestore } = params;
+  const { initialMessages, actions } = params;
   const clearSystemMessage = params.configuration.research.replace_default_instructions;
   return [
     [
@@ -40,7 +40,6 @@ export const getResearchAgentPrompt = async (
     ...getConversationAttachmentsSystemMessages(
       params.processedConversation.versionedAttachmentPresentation
     ),
-    ['system', await getFileSystemInstructions({ filesystem: filestore })],
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
