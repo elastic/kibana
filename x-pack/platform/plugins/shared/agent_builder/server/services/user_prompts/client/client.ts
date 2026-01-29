@@ -86,11 +86,33 @@ class UserPromptClientImpl implements UserPromptClient {
     // Add search query if provided
     let searchQuery: QueryDslQueryContainer | undefined;
     if (query?.trim()) {
+      const trimmedQuery = query.trim();
+      // Use wildcard queries for substring matching on both fields
+      // This matches the exact query phrase as a substring within each field
+      // Note: Wildcards with leading * can be slower but provide flexible substring matching
       searchQuery = {
-        multi_match: {
-          query: query.trim(),
-          fields: ['name', 'content'],
-          type: 'phrase_prefix',
+        bool: {
+          should: [
+            // Wildcard on name (keyword field) for substring matching
+            {
+              wildcard: {
+                name: {
+                  value: `*${trimmedQuery}*`,
+                  case_insensitive: true,
+                },
+              },
+            },
+            // Wildcard on content (text field) - this works for substring matching on the analyzed text content
+            {
+              wildcard: {
+                content: {
+                  value: `*${trimmedQuery}*`,
+                  case_insensitive: true,
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       };
     }
