@@ -47,12 +47,12 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
   cloud?: CloudSetup;
-  cps: CPSServerSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
-  cps: CPSServerStart;
+  cps?: CPSServerStart;
 }
 
 /**
@@ -208,7 +208,7 @@ export class SpacesPlugin
 
     setupCapabilities(core, getSpacesService, this.log);
 
-    if (plugins.cps.getCpsEnabled()) {
+    if (plugins.cps?.getCpsEnabled()) {
       plugins.features.registerElasticsearchFeature({
         id: 'project_routing',
         privileges: [

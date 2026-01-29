@@ -135,8 +135,8 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     setShowConfirmDeleteModal(true);
   }, []);
 
-  const canReadProjectRouting = () => {
-    return application?.capabilities?.project_routing?.read_space_default ?? false;
+  const canReadProjectRouting = (): boolean => {
+    return application?.capabilities?.project_routing?.read_space_default === true;
   };
 
   const performSave = useCallback(

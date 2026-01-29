@@ -50,7 +50,7 @@ describe('GET /spaces/space', () => {
 
     const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
-      .setup({ config$: Rx.of(spacesConfig) })
+      .setup({ config$: Rx.of(spacesConfig) }, undefined)
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
@@ -60,7 +60,11 @@ describe('GET /spaces/space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

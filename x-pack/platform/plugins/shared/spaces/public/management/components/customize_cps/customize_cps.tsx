@@ -44,8 +44,8 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
     });
   };
 
-  const canEdit = () => {
-    return application?.capabilities?.project_routing?.manage_space_default ?? false;
+  const canEdit = (): boolean => {
+    return application?.capabilities?.project_routing?.manage_space_default === true;
   };
 
   return (

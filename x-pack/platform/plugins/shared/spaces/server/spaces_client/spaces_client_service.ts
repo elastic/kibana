@@ -82,7 +82,10 @@ export class SpacesClientService {
     private readonly buildFlavour: BuildFlavor
   ) {}
 
-  public setup({ config$ }: SetupDeps, cpsSetup: CPSServerSetup): SpacesClientServiceSetup {
+  public setup(
+    { config$ }: SetupDeps,
+    cpsSetup: CPSServerSetup | undefined
+  ): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
       this.config = nextConfig;
     });
@@ -108,7 +111,7 @@ export class SpacesClientService {
   public start(
     coreStart: CoreStart,
     features: FeaturesPluginStart,
-    cps: CPSServerStart
+    cps: CPSServerStart | undefined
   ): SpacesClientServiceStart {
     const nonGlobalTypes = coreStart.savedObjects
       .getTypeRegistry()
@@ -135,7 +138,7 @@ export class SpacesClientService {
           this.buildFlavour,
           features,
           this.cpsSetup,
-          cps.createNpreClient(request)
+          cps?.createNpreClient(request)
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);
