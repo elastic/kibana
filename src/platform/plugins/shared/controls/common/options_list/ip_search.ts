@@ -13,9 +13,11 @@ export interface IpRangeQuery {
   validSearch: boolean;
   rangeQuery?: Array<{ key: string; from: string; to: string } | { key: string; mask: string }>;
 }
+
+export type IpType = 'ipv4' | 'ipv6';
 interface IpSegments {
   segments: string[];
-  type: 'ipv4' | 'ipv6' | 'unknown';
+  type: IpType | 'unknown';
 }
 
 export const getIsValidFullIp = (searchString: string) => {
@@ -26,9 +28,7 @@ export const getIsCidrNotation = (searchString: string): boolean => {
   return /^[A-Fa-f0-9.:]+\/\d+$/.test(searchString);
 };
 
-export const getValidCidrRange = (
-  searchString: string
-): { isValid: boolean; ipType?: 'ipv4' | 'ipv6' } => {
+export const getValidCidrRange = (searchString: string): { isValid: boolean; ipType?: IpType } => {
   try {
     const slashIndex = searchString.lastIndexOf('/');
     if (slashIndex === -1) {
@@ -73,7 +73,7 @@ export const getIpSegments = (searchString: string): IpSegments => {
 };
 
 export const getMinMaxIp = (
-  type: 'ipv4' | 'ipv6',
+  type: IpType,
   segments: IpSegments['segments']
 ): { min: string; max: string } => {
   const isIpv4 = type === 'ipv4';
