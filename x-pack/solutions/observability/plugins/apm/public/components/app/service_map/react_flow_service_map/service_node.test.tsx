@@ -24,7 +24,10 @@ jest.mock('@elastic/eui', () => {
           mediumShade: '#98A2B3',
           primary: '#0077CC',
           primaryText: '#0077CC',
+          textPrimary: '#0077CC',
+          textParagraph: '#343741',
           text: '#343741',
+          backgroundBasePlain: '#fff',
           success: '#00BFB3',
           warning: '#FEC514',
           danger: '#BD271E',
@@ -33,11 +36,20 @@ jest.mock('@elastic/eui', () => {
           xs: '4px',
           s: '8px',
           m: '12px',
+          l: '24px',
         },
         border: {
           radius: {
             small: '4px',
+            medium: '6px',
           },
+          width: {
+            thin: '1px',
+            thick: '2px',
+          },
+        },
+        font: {
+          family: '"Inter", sans-serif',
         },
         animation: {
           fast: '150ms',
@@ -124,7 +136,7 @@ describe('ServiceNode', () => {
 
   it('renders with data-test-subj attribute', () => {
     renderServiceNode();
-    expect(screen.getByTestId('serviceMapNode-test-service')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceMapNode-service-test-service')).toBeInTheDocument();
   });
 
   it('applies primary color when selected', () => {

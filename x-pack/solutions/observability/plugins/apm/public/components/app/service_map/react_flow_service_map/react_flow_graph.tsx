@@ -135,6 +135,34 @@ function ReactFlowGraphInner({
     [height, euiTheme]
   );
 
+  const controlsStyles = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      border-radius: ${euiTheme.border.radius.medium};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+      box-shadow: none;
+
+      button {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+        fill: ${euiTheme.colors.text};
+
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        svg {
+          fill: currentColor;
+        }
+      }
+    `,
+    [euiTheme]
+  );
+
   const onInit = useCallback(() => {
     if (layoutedNodes.length > 0) {
       fitView(fitViewOptions);
@@ -168,34 +196,7 @@ function ReactFlowGraphInner({
         })}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
-        <Controls
-          showInteractive={false}
-          position="top-left"
-          css={css`
-            background-color: ${euiTheme.colors.backgroundBasePlain};
-            border-radius: ${euiTheme.border.radius.medium};
-            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-            box-shadow: none;
-
-            button {
-              background-color: ${euiTheme.colors.backgroundBasePlain};
-              border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-              fill: ${euiTheme.colors.text};
-
-              &:hover {
-                background-color: ${euiTheme.colors.backgroundBaseSubdued};
-              }
-
-              &:last-child {
-                border-bottom: none;
-              }
-
-              svg {
-                fill: currentColor;
-              }
-            }
-          `}
-        />
+        <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
     </div>
   );

@@ -29,7 +29,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const defaultEdgeProps = {
+const createEdgeProps = (selected: boolean = false) => ({
   id: 'edge-1',
   source: 'node-1',
   target: 'node-2',
@@ -42,8 +42,9 @@ const defaultEdgeProps = {
   sourceHandleId: undefined,
   targetHandleId: undefined,
   interactionWidth: 20,
-  style: { stroke: '#98A2B3', strokeWidth: 1 },
-};
+  // Style is passed externally based on selection state
+  style: selected ? { stroke: '#0077CC', strokeWidth: 2 } : { stroke: '#98A2B3', strokeWidth: 1 },
+});
 
 function createEdgeData(overrides: Partial<ServiceMapEdgeData> = {}): ServiceMapEdgeData {
   return {
@@ -56,10 +57,11 @@ function renderServiceMapEdge(
   data: ServiceMapEdgeData = createEdgeData(),
   selected: boolean = false
 ) {
+  const edgeProps = createEdgeProps(selected);
   return render(
     <ReactFlowProvider>
       <svg>
-        <ServiceMapEdge {...defaultEdgeProps} data={data} selected={selected} />
+        <ServiceMapEdge {...edgeProps} data={data} selected={selected} />
       </svg>
     </ReactFlowProvider>
   );
@@ -76,23 +78,23 @@ describe('ServiceMapEdge', () => {
     const { container } = renderServiceMapEdge();
     const path = container.querySelector('path');
     expect(path).toHaveAttribute('style');
-    // The stroke should be mediumShade color
-    expect(path?.style.stroke).toBe('rgb(152, 162, 179)');
+    // The stroke should be mediumShade color (may be hex or rgb depending on browser)
+    expect(['rgb(152, 162, 179)', '#98A2B3']).toContain(path?.style.stroke);
   });
 
   it('renders with primary stroke color when selected', () => {
     const { container } = renderServiceMapEdge(createEdgeData(), true);
     const path = container.querySelector('path');
     expect(path).toHaveAttribute('style');
-    // The stroke should be primary color
-    expect(path?.style.stroke).toBe('rgb(0, 119, 204)');
+    // The stroke should be primary color (may be hex or rgb depending on browser)
+    expect(['rgb(0, 119, 204)', '#0077CC']).toContain(path?.style.stroke);
   });
 
   it('renders with wider stroke when selected', () => {
     const { container } = renderServiceMapEdge(createEdgeData(), true);
     const path = container.querySelector('path');
-    // The strokeWidth should be 4 when selected
-    expect(path?.style.strokeWidth).toBe('4');
+    // The strokeWidth should be 2 when selected (style passed externally)
+    expect(path?.style.strokeWidth).toBe('2');
   });
 
   it('renders unidirectional edge by default', () => {

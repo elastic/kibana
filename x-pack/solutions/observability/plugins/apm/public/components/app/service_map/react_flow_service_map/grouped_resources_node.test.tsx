@@ -23,7 +23,10 @@ jest.mock('@elastic/eui', () => {
           mediumShade: '#98A2B3',
           primary: '#0077CC',
           primaryText: '#0077CC',
+          textPrimary: '#0077CC',
+          textParagraph: '#343741',
           text: '#343741',
+          backgroundBasePlain: '#fff',
         },
         size: {
           xs: '4px',
@@ -34,6 +37,16 @@ jest.mock('@elastic/eui', () => {
           radius: {
             small: '4px',
           },
+          width: {
+            thin: '1px',
+            thick: '2px',
+          },
+        },
+        font: {
+          family: '"Inter", sans-serif',
+        },
+        levels: {
+          header: 1000,
         },
         animation: {
           fast: '150ms',
@@ -143,7 +156,9 @@ describe('GroupedResourcesNode', () => {
 
   it('renders with data-test-subj attribute', () => {
     renderGroupedResourcesNode();
-    expect(screen.getByTestId('serviceMapNode-grouped-resources')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('serviceMapNode-groupedResources-grouped-resources')
+    ).toBeInTheDocument();
   });
 
   it('applies primary color when selected', () => {
