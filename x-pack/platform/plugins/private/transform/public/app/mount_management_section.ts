@@ -59,6 +59,7 @@ export async function mountManagementSection(
     savedSearch,
     contentManagement,
     fieldsMetadata,
+    cps,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -97,6 +98,7 @@ export async function mountManagementSection(
     savedSearch,
     contentManagement,
     fieldsMetadata,
+    cps,
   };
 
   const enabledFeatures: TransformEnabledFeatures = {

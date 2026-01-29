@@ -39,6 +39,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps-plugin/public';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
@@ -70,6 +71,7 @@ export interface AppDependencies {
   settings: SettingsStart;
   contentManagement: ContentManagementPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export const useAppDependencies = () => {
