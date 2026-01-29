@@ -240,8 +240,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEvent('keydown', onKeyDown);
 
-  // Show missing connector callout if no connectors are configured
-
+  // Show missing connector callout if the current conversation's connector doesn't exist in the connectors list
   const showMissingConnectorCallout = useMemo(() => {
     if (
       !isLoadingCurrentUserConversations &&
