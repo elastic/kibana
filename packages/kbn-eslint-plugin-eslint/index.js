@@ -28,6 +28,7 @@ module.exports = {
     scout_test_file_naming: require('./rules/scout_test_file_naming'),
     scout_require_api_client_in_api_test: require('./rules/scout_require_api_client_in_api_test'),
     scout_no_es_archiver_in_parallel_tests: require('./rules/scout_no_es_archiver_in_parallel_tests'),
+    scout_expect_import: require('./rules/scout_expect_import'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
   },
