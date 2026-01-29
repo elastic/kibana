@@ -62,14 +62,11 @@ export const getOutputUnitsByPackage = (
 ): FleetServerAgentComponentUnit[] => {
   const reId = new RegExp(packagePolicy.id);
 
-  return (
-    agentComponents
-      // .map((c) => c?.units || [])
-      .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId)))
-      .map((c) => c.units || [])
-      .flat()
-      .filter((u) => !!u && u.type === 'output')
-  );
+  return agentComponents
+    .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId)))
+    .map((c) => c.units || [])
+    .flat()
+    .filter((u) => !!u && u.type === 'output');
 };
 
 export const getOutputUnitsByPackageAndInputType = (
@@ -80,14 +77,9 @@ export const getOutputUnitsByPackageAndInputType = (
   const reId = new RegExp(packagePolicy.id);
   const reUnitType = new RegExp(unitType);
 
-  return (
-    agentComponents
-      // .map((c) => c?.units || [])
-      .filter((c) =>
-        (c.units ?? []).some((unit) => unit.id.match(reId) && unit.id.match(reUnitType))
-      )
-      .map((c) => c.units || [])
-      .flat()
-      .find((u) => !!u && u.type === 'output')
-  );
+  return agentComponents
+    .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId) && unit.id.match(reUnitType)))
+    .map((c) => c.units || [])
+    .flat()
+    .find((u) => !!u && u.type === 'output');
 };
