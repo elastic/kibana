@@ -8,6 +8,7 @@
 import * as Rx from 'rxjs';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ISpacesClient } from './spaces_client';
@@ -17,6 +18,20 @@ import type { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';
 
 const debugLogger = jest.fn();
+
+const createMockCpsSetup = (): CPSServerSetup => ({
+  getCpsEnabled: jest.fn().mockReturnValue(true),
+});
+
+const createMockCpsStart = (): CPSServerStart => ({
+  createNpreClient: jest.fn().mockReturnValue({
+    getNpre: jest.fn().mockResolvedValue(undefined),
+    putNpre: jest.fn().mockResolvedValue(undefined),
+    deleteNpre: jest.fn().mockResolvedValue(undefined),
+    canPutNpre: jest.fn().mockResolvedValue(true),
+    canDeleteNpre: jest.fn().mockResolvedValue(true),
+  }),
+});
 
 describe('SpacesClientService', () => {
   describe('#setup', () => {
@@ -42,6 +57,15 @@ describe('SpacesClientService', () => {
       expect(() => setup.registerClientWrapper(clientWrapper)).toThrowErrorMatchingInlineSnapshot(
         `"Client wrapper has already been set"`
       );
+    });
+
+    it('accepts cpsSetup parameter', () => {
+      const service = new SpacesClientService(debugLogger, 'traditional');
+      const mockCpsSetup = createMockCpsSetup();
+      const setup = service.setup({ config$: Rx.of(spacesConfig) }, mockCpsSetup);
+
+      expect(setup).toBeDefined();
+      expect((service as any).cpsSetup).toBe(mockCpsSetup);
     });
   });
 
@@ -149,6 +173,35 @@ describe('SpacesClientService', () => {
       expect(coreStart.savedObjects.createInternalRepository).not.toHaveBeenCalled();
 
       expect(customRepositoryFactory).toHaveBeenCalledWith(request, coreStart.savedObjects);
+    });
+
+    it('creates spaces client with valid cps parameter', () => {
+      const service = new SpacesClientService(debugLogger, 'traditional');
+      const mockCpsSetup = createMockCpsSetup();
+      service.setup({ config$: Rx.of(spacesConfig) }, mockCpsSetup);
+
+      const coreStart = coreMock.createStart();
+      const mockCpsStart = createMockCpsStart();
+      const start = service.start(coreStart, featuresPluginMock.createStart(), mockCpsStart);
+
+      const request = httpServerMock.createKibanaRequest();
+      const client = start.createSpacesClient(request);
+
+      expect(client).toBeInstanceOf(SpacesClient);
+      expect(mockCpsStart.createNpreClient).toHaveBeenCalledWith(request);
+    });
+
+    it('creates spaces client when cps parameters are undefined', () => {
+      const service = new SpacesClientService(debugLogger, 'traditional');
+      service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+
+      const coreStart = coreMock.createStart();
+      const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
+
+      const request = httpServerMock.createKibanaRequest();
+      const client = start.createSpacesClient(request);
+
+      expect(client).toBeInstanceOf(SpacesClient);
     });
   });
 });

@@ -50,6 +50,10 @@ const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 describe('ManageSpacePage', () => {
+  const spacesManager = spacesManagerMock.create();
+  const history = scopedHistoryMock.create();
+  const notifications = notificationServiceMock.createStartContract();
+
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: { reload: jest.fn() },
@@ -57,18 +61,17 @@ describe('ManageSpacePage', () => {
     });
   });
 
-  const history = scopedHistoryMock.create();
-
-  it('allows a space to be created', async () => {
-    const spacesManager = spacesManagerMock.create();
+  beforeEach(() => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+  });
 
+  it('allows a space to be created', async () => {
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -82,9 +85,7 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     await updateSpace(false, 'oblt');
 
@@ -105,15 +106,11 @@ describe('ManageSpacePage', () => {
   });
 
   it('validates the form (name, initials, solution view...)', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -127,19 +124,16 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     const createButton = screen.getByTestId('save-space-button');
     await userEvent.click(createButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('Enter a name.')).toBeInTheDocument();
-      expect(screen.getByText('Enter a URL identifier.')).toBeInTheDocument();
-      expect(screen.getByText('Select a solution.')).toBeInTheDocument();
-      expect(screen.getByText('Enter initials.')).toBeInTheDocument();
-    });
+    // Wait for all validation errors to appear
+    expect(await screen.findByText('Enter a name.')).toBeInTheDocument();
+    expect(screen.getByText('Enter a URL identifier.')).toBeInTheDocument();
+    expect(screen.getByText('Select a solution.')).toBeInTheDocument();
+    expect(screen.getByText('Enter initials.')).toBeInTheDocument();
 
     expect(spacesManager.createSpace).not.toHaveBeenCalled();
 
@@ -149,33 +143,29 @@ describe('ManageSpacePage', () => {
 
     await userEvent.click(createButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('Select a solution.')).toBeInTheDocument();
-      expect(screen.queryByText('Enter a name.')).not.toBeInTheDocument();
-      expect(screen.queryByText('Enter a URL identifier.')).not.toBeInTheDocument();
-      expect(screen.queryByText('Enter initials.')).not.toBeInTheDocument();
-    });
+    // Wait for positive assertion, then check negatives synchronously
+    expect(await screen.findByText('Select a solution.')).toBeInTheDocument();
+    expect(screen.queryByText('Enter a name.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Enter a URL identifier.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Enter initials.')).not.toBeInTheDocument();
 
     await updateSpace(false, 'oblt');
 
     await userEvent.click(createButton);
 
+    // Wait for validation error to disappear and create to be called
     await waitFor(() => {
       expect(screen.queryByText('Select a solution.')).not.toBeInTheDocument();
-      expect(spacesManager.createSpace).toHaveBeenCalled();
     });
+    expect(spacesManager.createSpace).toHaveBeenCalled();
   });
 
   it('shows solution view select when visible', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -189,23 +179,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.getByTestId('navigationPanel')).toBeInTheDocument();
   });
 
   it('hides solution view select when not visible', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -219,23 +203,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.queryByTestId('navigationPanel')).not.toBeInTheDocument();
   });
 
   it('shows feature visibility controls when allowed', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -249,28 +227,20 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     // Switch to classic to show feature visibility controls
     await updateSpace(false, 'classic');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('enabled-features-panel')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('enabled-features-panel')).toBeInTheDocument();
   });
 
   it('hides feature visibility controls when not allowed', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -284,21 +254,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.queryByTestId('enabled-features-panel')).not.toBeInTheDocument();
   });
 
   it('hides feature visibility controls when solution view is not "classic"', async () => {
-    const spacesManager = spacesManagerMock.create();
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -312,35 +278,23 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     // Switch to observability view
     await updateSpace(false, 'oblt');
 
-    await waitFor(() => {
-      // Expect visible features table to not exist
-      expect(screen.queryByTestId('enabled-features-panel')).not.toBeInTheDocument();
-    });
+    // Expect visible features table to not exist
+    expect(screen.queryByTestId('enabled-features-panel')).not.toBeInTheDocument();
 
     // Switch to classic
     await updateSpace(false, 'classic');
 
-    await waitFor(() => {
-      // Expect visible features table to exist again
-      expect(screen.getByTestId('enabled-features-panel')).toBeInTheDocument();
-    });
+    // Expect visible features table to exist again
+    expect(await screen.findByTestId('enabled-features-panel')).toBeInTheDocument();
   });
 
   it('notifies when there is an error retrieving features', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     const error = new Error('something awful happened');
-
-    const notifications = notificationServiceMock.createStartContract();
 
     renderWithI18n(
       <CreateSpacePage
@@ -368,15 +322,11 @@ describe('ManageSpacePage', () => {
   });
 
   it('hides CustomizeCps component when project_routing capability is not present', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -390,23 +340,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
   it('shows CustomizeCps component when project_routing.manage_space_default capability is true', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -421,23 +365,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
   });
 
   it('hides CustomizeCps component when project_routing.manage_space_default capability is false', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -452,23 +390,17 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
 
     expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
   it('includes projectRouting in createSpace call when provided', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
-
     renderWithI18n(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
-        notifications={notificationServiceMock.createStartContract()}
+        notifications={notifications}
         history={history}
         capabilities={{
           navLinks: {},
@@ -483,10 +415,8 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
+    expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
 
     const nameInput = screen.getByRole('textbox', { name: /name/i });
     const descriptionInput = screen.getByRole('textbox', { name: /description/i });
@@ -508,14 +438,15 @@ describe('ManageSpacePage', () => {
 
     await waitFor(() => {
       expect(spacesManager.createSpace).toHaveBeenCalled();
-      // Verify the call includes the expected fields
-      const callArgs = spacesManager.createSpace.mock.calls[0][0];
-      expect(callArgs).toMatchObject({
-        id: 'new-space-name',
-        name: 'New Space Name',
-        description: 'some description',
-        solution: 'oblt',
-      });
+    });
+
+    // Verify the call includes the expected fields
+    const callArgs = spacesManager.createSpace.mock.calls[0][0];
+    expect(callArgs).toMatchObject({
+      id: 'new-space-name',
+      name: 'New Space Name',
+      description: 'some description',
+      solution: 'oblt',
     });
   });
 });

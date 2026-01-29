@@ -17,6 +17,8 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type { INpreClient } from '@kbn/cps/server/npre';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initDeleteSpacesApi } from './delete';
@@ -35,7 +37,7 @@ import {
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
 
-  const setup = async () => {
+  const setup = async (options?: { cpsSetup?: CPSServerSetup; cpsStart?: CPSServerStart }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
@@ -47,7 +49,7 @@ describe('Spaces Public API', () => {
 
     const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
-      .setup({ config$: Rx.of(spacesConfig) }, undefined)
+      .setup({ config$: Rx.of(spacesConfig) }, options?.cpsSetup)
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
@@ -60,7 +62,7 @@ describe('Spaces Public API', () => {
     const clientServiceStart = clientService.start(
       coreStart,
       featuresPluginMock.createStart(),
-      undefined
+      options?.cpsStart
     );
 
     const spacesServiceStart = service.start({
@@ -86,6 +88,38 @@ describe('Spaces Public API', () => {
       routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
+      mockCpsSetup: options?.cpsSetup,
+      mockCpsStart: options?.cpsStart,
+    };
+  };
+
+  const setupWithCps = async (options: {
+    cpsEnabled: boolean;
+    canDelete?: boolean;
+    expression?: string;
+  }) => {
+    const mockCpsSetup = {
+      getCpsEnabled: jest.fn().mockReturnValue(options.cpsEnabled),
+    };
+
+    const npreClient: INpreClient = {
+      getNpre: jest.fn().mockResolvedValue(options.expression),
+      putNpre: jest.fn().mockResolvedValue(undefined),
+      deleteNpre: jest.fn().mockResolvedValue(undefined),
+      canPutNpre: jest.fn().mockResolvedValue(true),
+      canDeleteNpre: jest.fn().mockResolvedValue(options.canDelete),
+    };
+
+    const mockCpsStart = {
+      createNpreClient: jest.fn().mockReturnValue(npreClient),
+    };
+
+    return {
+      ...(await setup({
+        cpsSetup: mockCpsSetup,
+        cpsStart: mockCpsStart,
+      })),
+      npreClient,
     };
   };
 
@@ -191,5 +225,97 @@ describe('Spaces Public API', () => {
 
     expect(status).toEqual(400);
     expect(payload.message).toEqual('The default space cannot be deleted because it is reserved.');
+  });
+
+  describe('Cross-project search', () => {
+    it('deletes the NPRE when CPS is enabled and user has permission', async () => {
+      const { routeHandler, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canDelete: true,
+        expression: 'some-expression',
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          id: 'a-space',
+        },
+        method: 'delete',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(204);
+      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
+      expect(npreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
+    });
+
+    it('returns 403 if the user does not have permission to delete the NPRE', async () => {
+      const { routeHandler, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canDelete: false,
+        expression: 'some-expression',
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          id: 'a-space',
+        },
+        method: 'delete',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(403);
+      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
+      expect(npreClient.deleteNpre).not.toHaveBeenCalled();
+    });
+
+    it('returns 204 when user does not have permission to delete the NPRE but it does not exist', async () => {
+      const { routeHandler, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canDelete: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          id: 'a-space',
+        },
+        method: 'delete',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(204);
+      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
+      expect(npreClient.getNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
+      expect(npreClient.deleteNpre).not.toHaveBeenCalled();
+    });
+
+    it('does not call delete NPRE when CPS is disabled', async () => {
+      const { routeHandler, npreClient } = await setupWithCps({
+        cpsEnabled: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          id: 'a-space',
+        },
+        method: 'delete',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(204);
+      expect(npreClient.canDeleteNpre).not.toHaveBeenCalled();
+      expect(npreClient.deleteNpre).not.toHaveBeenCalled();
+    });
   });
 });

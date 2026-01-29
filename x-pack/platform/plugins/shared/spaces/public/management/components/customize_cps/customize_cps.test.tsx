@@ -101,7 +101,7 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('Cross-project search default scope')).toBeInTheDocument();
     });
 
-    it('renders project picker component', async () => {
+    it('renders project picker section', async () => {
       renderComponent(defaultSpace);
 
       expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
@@ -141,6 +141,20 @@ describe('CustomizeCps', () => {
       await waitFor(() => {
         expect(mockFetchProjects).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Settings Button', () => {
+    it('is visible', async () => {
+      renderComponent(defaultSpace);
+
+      expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(mockCpsManager.fetchProjects).toHaveBeenCalled();
+      });
+
+      expect(await screen.findByTestId('projectPickerSettingsPopover')).toBeInTheDocument();
     });
   });
 
