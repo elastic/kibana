@@ -269,6 +269,7 @@ export async function saveQueries(
         severity_score: query.severity_score,
         evidence: query.evidence,
       },
-    }))
+    })),
+    { createRules: false }
   );
 }
