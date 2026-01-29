@@ -48,7 +48,6 @@
       "presentationUtil",
       "presentationPanel",
       "savedObjects"
-    ],
-    "extraPublicDirs": ["common"]
+    ]
   }
 }

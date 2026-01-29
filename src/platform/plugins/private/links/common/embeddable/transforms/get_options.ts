@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/common';
 import type { DashboardLink, ExternalLink, LinkOptions } from '../../../server';
 import type { LinkType } from '../../content_management';
 import { DASHBOARD_LINK_TYPE } from '../../content_management';
@@ -18,7 +17,6 @@ export function getOptions(type: LinkType, options: LinkOptions) {
   if (type === DASHBOARD_LINK_TYPE) {
     const dashboardOptions = options as DashboardLink['options'];
     return {
-      ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
         open_in_new_tab: dashboardOptions.open_in_new_tab,
       }),
@@ -42,7 +40,7 @@ export function getOptions(type: LinkType, options: LinkOptions) {
         'boolean' && {
         use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
-    };
+    } as DashboardLink['options'];
   }
 
   const urlOptions = options as Required<ExternalLink>['options'];
