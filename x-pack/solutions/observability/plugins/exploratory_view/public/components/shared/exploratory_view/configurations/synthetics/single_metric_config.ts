@@ -41,7 +41,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
         label: 'Availability',
-        formula: `ifelse(defaults(count(kql='${FINAL_SUMMARY_KQL}'), 0) > 0, 1 - (defaults(count(kql='${FINAL_SUMMARY_KQL} and summary.down > 0'), 0) / defaults(count(kql='${FINAL_SUMMARY_KQL}'), 1)), 1)`,
+        formula: "defaults(1 - (count(kql='summary.down > 0') / count()), 1)",
         metricStateOptions: {
           colorMode: 'Labels',
           palette: {
@@ -70,6 +70,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
             },
           },
           titlePosition: 'bottom',
+        },
+        columnFilter: {
+          language: 'kuery',
+          query: FINAL_SUMMARY_KQL,
         },
       },
       {
