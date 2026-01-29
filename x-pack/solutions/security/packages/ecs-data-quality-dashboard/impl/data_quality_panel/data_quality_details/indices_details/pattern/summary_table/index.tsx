@@ -14,6 +14,7 @@ import { defaultSort } from '../../../../constants';
 import type { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { MIN_PAGE_SIZE } from '../constants';
+import { SUMMARY_TABLE_CAPTION } from './translations';
 import { getShowPagination } from './utils/get_show_pagination';
 
 export interface Props {
@@ -124,12 +125,7 @@ const SummaryTableComponent: React.FC<Props> = ({
           : undefined
       }
       sorting={sorting}
-      tableCaption={i18n.translate(
-        'xpack.security.solution.dataQualityPanel.summaryTable.caption',
-        {
-          defaultMessage: 'Index summary',
-        }
-      )}
+      tableCaption={SUMMARY_TABLE_CAPTION}
     />
   );
 };
