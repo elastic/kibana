@@ -81,7 +81,11 @@ tool("run_live_query", {
 };
 
 /**
- * Creates a LangChain tool for running live osquery queries
+ * Creates a LangChain tool for running live osquery queries.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for live query execution
+ * @internal
  */
 const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
@@ -196,6 +200,38 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates the Live Query skill for running osquery queries against agents in real-time.
+ *
+ * This skill provides the ability to execute ad-hoc osquery SQL queries or run
+ * pre-configured saved queries/packs against one or more agents. Results are
+ * returned asynchronously and can be fetched using the Results skill.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing the `run_live_query` tool.
+ *
+ * @example
+ * ```typescript
+ * const liveQuerySkill = getLiveQuerySkill(() => osqueryAppContext);
+ *
+ * // The skill exposes 'run_live_query' tool with parameters:
+ * // - query: SQL query string
+ * // - agent_ids: Target agent IDs
+ * // - timeout: Query timeout in seconds
+ * // - saved_query_id: Run a saved query by ID
+ * // - pack_id: Run a pack by ID
+ * ```
+ *
+ * @remarks
+ * Running live queries requires appropriate permissions (`writeLiveQueries` or
+ * `runSavedQueries` capability). The tool returns an action ID that can be used
+ * to fetch results via the Results skill.
+ *
+ * @see {@link getResultsSkill} for fetching query results
+ * @see {@link getSavedQueriesSkill} for listing available saved queries
+ * @see {@link getPacksSkill} for listing available packs
+ */
 export const getLiveQuerySkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...LIVE_QUERY_SKILL,

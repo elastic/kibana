@@ -70,6 +70,13 @@ tool("get_pack", {
 `,
 };
 
+/**
+ * Creates a LangChain tool for listing osquery packs with pagination.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for listing packs
+ * @internal
+ */
 const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ page, pageSize, sort, sortOrder }, config) => {
@@ -136,6 +143,13 @@ const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates a LangChain tool for retrieving a specific osquery pack by ID.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for getting pack details
+ * @internal
+ */
 const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ pack_id }, config) => {
@@ -194,6 +208,34 @@ const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates the Packs skill for listing and retrieving osquery packs.
+ *
+ * Packs are collections of osquery queries that can be scheduled to run on agents.
+ * This skill provides read-only access to browse and inspect pack configurations.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing `list_packs` and `get_pack` tools.
+ *
+ * @example
+ * ```typescript
+ * const packsSkill = getPacksSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes two tools:
+ * // - list_packs: List all packs with pagination (page, pageSize, sort, sortOrder)
+ * // - get_pack: Get detailed information about a specific pack (pack_id)
+ * ```
+ *
+ * @remarks
+ * Pack data includes:
+ * - Basic metadata (name, description, enabled status)
+ * - Query configurations with scheduling information
+ * - Assigned agent policy IDs
+ * - Version and read-only status for prebuilt packs
+ *
+ * @see {@link getLiveQuerySkill} for running pack queries
+ */
 export const getPacksSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...PACKS_SKILL,

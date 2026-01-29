@@ -79,6 +79,13 @@ tool("get_action_results", {
 `,
 };
 
+/**
+ * Creates a LangChain tool for fetching live query results by action ID.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for fetching live query results
+ * @internal
+ */
 const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ actionId, page, pageSize, sort, sortOrder, kuery, startDate }, config) => {
@@ -183,6 +190,13 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
   );
 };
 
+/**
+ * Creates a LangChain tool for fetching aggregated action results across agents.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for fetching action results
+ * @internal
+ */
 const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ actionId, agentIds, page, pageSize, sort, sortOrder, kuery, startDate }, config) => {
@@ -279,6 +293,35 @@ const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =
   );
 };
 
+/**
+ * Creates the Results skill for fetching osquery query execution results.
+ *
+ * After running a live query, use this skill to retrieve the results using
+ * the action ID returned from the query execution. Supports both detailed
+ * results and aggregated status across agents.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing `get_live_query_results` and `get_action_results` tools.
+ *
+ * @example
+ * ```typescript
+ * const resultsSkill = getResultsSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes two tools:
+ * // - get_live_query_results: Get detailed results (actionId, page, pageSize, kuery)
+ * // - get_action_results: Get aggregated status (actionId, agentIds, page, pageSize)
+ * ```
+ *
+ * @remarks
+ * Result types differ based on the tool used:
+ * - `get_live_query_results`: Returns actual query data with column definitions and rows
+ * - `get_action_results`: Returns execution status aggregations (successful, failed, pending)
+ *
+ * Both tools support pagination and KQL filtering for large result sets.
+ *
+ * @see {@link getLiveQuerySkill} for running queries that produce results
+ */
 export const getResultsSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...RESULTS_SKILL,

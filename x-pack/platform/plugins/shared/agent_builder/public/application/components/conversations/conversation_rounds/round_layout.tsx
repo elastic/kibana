@@ -7,22 +7,30 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
+import type {
+  VersionedAttachment,
+  Attachment,
+  AttachmentVersion,
+} from '@kbn/agent-builder-common/attachments';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
   rawRound: ConversationRound;
+  /** Conversation-level attachments (created by tools) - only passed for current round */
+  conversationAttachments?: VersionedAttachment[];
 }
 
 const labels = {
@@ -35,6 +43,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
+  conversationAttachments,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
@@ -147,8 +156,62 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
+      {/* Conversation-level attachments (created by tools) */}
+      {conversationAttachments && conversationAttachments.length > 0 && !isLoadingCurrentRound && (
+        <EuiFlexItem grow={false}>
+          <ConversationAttachmentsList attachments={conversationAttachments} />
+        </EuiFlexItem>
+      )}
+
       {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
       {isCurrentRound && <EuiSpacer size="l" />}
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Renderer for conversation-level attachments.
+ * Uses the registered renderContent function for each attachment type.
+ */
+const ConversationAttachmentsList: React.FC<{ attachments: VersionedAttachment[] }> = ({
+  attachments,
+}) => {
+  const { attachmentsService } = useAgentBuilderServices();
+
+  // Filter to only show active (non-deleted) attachments
+  const activeAttachments = useMemo(() => {
+    return attachments.filter((att) => !att.deleted_at);
+  }, [attachments]);
+
+  if (activeAttachments.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {activeAttachments.map((versionedAttachment) => {
+        const latestVersion =
+          versionedAttachment.versions?.[versionedAttachment.versions.length - 1];
+        if (!latestVersion) {
+          return null;
+        }
+
+        // Convert to Attachment format for the renderer
+        const attachment: Attachment = {
+          id: versionedAttachment.id,
+          type: versionedAttachment.type,
+          data: latestVersion.data ?? {},
+        };
+
+        // eslint-disable-next-line no-console
+        console.log('[ConversationAttachmentsList] Rendering attachment:', versionedAttachment.type, versionedAttachment);
+        const RenderContent = attachmentsService.getRenderContent(versionedAttachment.type);
+        return (
+          <EuiFlexItem key={versionedAttachment.id} grow={false}>
+            <RenderContent attachment={attachment} version={latestVersion} />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
@@ -12,7 +13,23 @@ import {
   type TextAttachment,
   type ScreenContextAttachment,
   type EsqlAttachment,
+  type Attachment,
 } from '@kbn/agent-builder-common/attachments';
+import type { WorkflowDraftAttachmentData } from '../../server/attachment_types/workflow_draft';
+import { WorkflowDraftViewer } from './workflow_draft_viewer';
+
+/**
+ * Attachment type ID for workflow drafts (must match server-side).
+ */
+const WORKFLOW_DRAFT_ATTACHMENT_TYPE = 'workflow_draft';
+
+/**
+ * Workflow draft attachment type.
+ */
+type WorkflowDraftAttachment = Attachment<
+  typeof WORKFLOW_DRAFT_ATTACHMENT_TYPE,
+  WorkflowDraftAttachmentData
+>;
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -41,5 +58,18 @@ export const registerAttachmentUiDefinitions = ({
         defaultMessage: 'ES|QL query',
       }),
     getIcon: () => 'editorCodeBlock',
+  });
+
+  // Register workflow_draft with visual preview
+  attachments.addAttachmentType<WorkflowDraftAttachment>(WORKFLOW_DRAFT_ATTACHMENT_TYPE, {
+    getLabel: (attachment) =>
+      attachment.data?.name ??
+      i18n.translate('xpack.agentBuilderPlatform.attachments.workflowDraft.label', {
+        defaultMessage: 'Workflow Draft',
+      }),
+    getIcon: () => 'pipelineApp',
+    renderContent: ({ attachment }) => {
+      return <WorkflowDraftViewer attachment={attachment} />;
+    },
   });
 };

@@ -64,6 +64,13 @@ tool("get_saved_query", {
 `,
 };
 
+/**
+ * Creates a LangChain tool for listing saved osquery queries with pagination.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for listing saved queries
+ * @internal
+ */
 const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ page, pageSize, sort, sortOrder }, config) => {
@@ -145,6 +152,13 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
   );
 };
 
+/**
+ * Creates a LangChain tool for retrieving a specific saved query by ID.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for getting saved query details
+ * @internal
+ */
 const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ saved_query_id }, config) => {
@@ -213,6 +227,36 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates the Saved Queries skill for listing and retrieving saved osquery queries.
+ *
+ * Saved queries are reusable osquery SQL queries that can be referenced by ID
+ * when running live queries. They help standardize common queries and reduce errors.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing `list_saved_queries` and `get_saved_query` tools.
+ *
+ * @example
+ * ```typescript
+ * const savedQueriesSkill = getSavedQueriesSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes two tools:
+ * // - list_saved_queries: List queries with pagination (page, pageSize, sort, sortOrder)
+ * // - get_saved_query: Get detailed query information (saved_query_id)
+ * ```
+ *
+ * @remarks
+ * Saved query data includes:
+ * - Query SQL and metadata (id, description)
+ * - Scheduling configuration (interval, timeout)
+ * - Platform targeting (windows, darwin, linux)
+ * - ECS field mappings for result normalization
+ * - Prebuilt status for system-provided queries
+ *
+ * @see {@link getLiveQuerySkill} for running saved queries
+ * @see {@link getSchemaSkill} for understanding query table schemas
+ */
 export const getSavedQueriesSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...SAVED_QUERIES_SKILL,

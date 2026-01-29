@@ -70,9 +70,11 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
+    const targetPattern = state.targetPattern ?? '*';
+
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
-      indexPattern: state.targetPattern ?? '*',
+      indexPattern: targetPattern,
       esClient,
       model,
       logger,
@@ -86,9 +88,21 @@ export const createSearchToolGraph = ({
         searchTarget: { type: selectedResource.type, name: selectedResource.name },
       };
     } else {
+      // Provide actionable error with suggestions
+      const suggestions = [
+        'Specify an explicit index pattern in the query (e.g., index: "logs-*")',
+        'Common index patterns: logs-*, filebeat-*, packetbeat-*, auditbeat-*, metrics-*, .alerts-*',
+        'Use ES|QL with FROM clause to target a specific index: FROM logs-* | ...',
+      ];
+
+      const errorMessage =
+        targetPattern === '*'
+          ? `Could not automatically determine which index to use for query: "${state.nlQuery.slice(0, 100)}...". ${suggestions.join('. ')}`
+          : `No indices found matching pattern "${targetPattern}". Verify the index exists and you have read permissions.`;
+
       return {
         indexIsValid: false,
-        error: `Could not figure out which index to use`,
+        error: errorMessage,
       };
     }
   };

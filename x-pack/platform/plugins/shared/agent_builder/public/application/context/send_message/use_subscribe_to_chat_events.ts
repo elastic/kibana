@@ -113,6 +113,8 @@ export const useSubscribeToChatEvents = ({
     } else if (isRoundCompleteEvent(event)) {
       // Now we have the full response and can stop the loading indicators
       setIsResponseLoading(false);
+      // Invalidate conversation to refetch with updated attachments
+      conversationActions.invalidateConversation();
     } else if (isConversationCreatedEvent(event)) {
       const { conversation_id: id, title } = event.data;
       conversationActions.onConversationCreated({ conversationId: id, title });

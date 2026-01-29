@@ -169,6 +169,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     logger,
     promptManager,
     stateManager,
+    attachmentStateManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
@@ -191,5 +192,16 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    // Expose attachment management to tools/skills
+    attachments: {
+      add: async (params) => {
+        const attachment = await attachmentStateManager.add(params);
+        return {
+          id: attachment.id,
+          type: attachment.type,
+          current_version: attachment.current_version,
+        };
+      },
+    },
   };
 };

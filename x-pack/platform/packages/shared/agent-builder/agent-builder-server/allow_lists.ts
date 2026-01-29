@@ -31,6 +31,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_metric_change_points`,
   `${internalNamespaces.observability}.get_index_info`,
   `${internalNamespaces.observability}.get_trace_change_points`,
+  `${internalNamespaces.observability}.analyze_latency_bottlenecks`,
 
   // Dashboards
   'platform.dashboard.create_dashboard',
@@ -72,6 +73,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'platform.connectors_actions',
   'platform.workflows',
   'platform.workflows_logs',
+  'platform.workflow_generation',
   'platform.cases',
   'platform.spaces',
   'platform.tags',

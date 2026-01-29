@@ -119,4 +119,15 @@ export interface ToolHandlerContext {
    * Manager to store/load tool state during interrupted executions.
    */
   stateManager: ToolStateManager;
+  /**
+   * Optional attachment manager for creating/managing conversation attachments.
+   * Only available when running within an agent context.
+   */
+  attachments?: {
+    add: (params: { type: string; data: unknown; description?: string }) => Promise<{
+      id: string;
+      type: string;
+      current_version: number;
+    }>;
+  };
 }

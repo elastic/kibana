@@ -702,6 +702,9 @@ export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
   rule = 'security.rule',
+  attackDiscovery = 'security.attack_discovery',
+  case = 'security.case',
+  timeline = 'security.timeline',
 }
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;

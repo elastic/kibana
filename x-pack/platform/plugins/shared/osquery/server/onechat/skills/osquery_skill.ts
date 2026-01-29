@@ -47,6 +47,10 @@ Running a live query can be disruptive. Always restate:
 Then require explicit “yes” and pass \`confirm: true\`.`,
 };
 
+/**
+ * Collects all tools from individual osquery skills for delegation.
+ * @internal
+ */
 const getDelegatedTools = (getOsqueryContext: GetOsqueryAppContextFn) => {
     return [
         ...getStatusSkill(getOsqueryContext).tools,
@@ -58,6 +62,40 @@ const getDelegatedTools = (getOsqueryContext: GetOsqueryAppContextFn) => {
     ];
 };
 
+/**
+ * Creates the unified Osquery skill that serves as a single entrypoint for all osquery operations.
+ *
+ * This skill consolidates all osquery functionality into one tool with operation-based routing,
+ * following the OneChat guideline of "one tool per skill" for better LLM tool selection.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing the unified osquery tool with all operations.
+ *
+ * @example
+ * ```typescript
+ * const osquerySkill = getOsquerySkill(() => osqueryAppContext);
+ *
+ * // The skill exposes a single 'osquery' tool that routes via 'operation':
+ * // - operation: "get_status" - Check osquery installation status
+ * // - operation: "get_schema" - Browse osquery table schemas
+ * // - operation: "list_packs" / "get_pack" - Manage packs
+ * // - operation: "list_saved_queries" / "get_saved_query" - Manage saved queries
+ * // - operation: "run_live_query" - Execute live queries (requires confirm: true)
+ * // - operation: "get_live_query_results" / "get_action_results" - Fetch results
+ * ```
+ *
+ * @remarks
+ * The `run_live_query` operation requires explicit confirmation (`confirm: true`) as it
+ * is a potentially disruptive operation that executes queries on agents.
+ *
+ * @see {@link getLiveQuerySkill} for standalone live query functionality
+ * @see {@link getPacksSkill} for standalone packs functionality
+ * @see {@link getSavedQueriesSkill} for standalone saved queries functionality
+ * @see {@link getResultsSkill} for standalone results functionality
+ * @see {@link getSchemaSkill} for standalone schema functionality
+ * @see {@link getStatusSkill} for standalone status functionality
+ */
 export const getOsquerySkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
     const delegatedTools = getDelegatedTools(getOsqueryContext);
 

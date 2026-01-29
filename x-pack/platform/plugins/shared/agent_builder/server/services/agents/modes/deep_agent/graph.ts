@@ -12,25 +12,26 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
+import { createDeepAgent } from '@kbn/langchain-deep-agent';
+import type { BaseMessage } from '@langchain/core/messages';
+import { RemoveMessage } from '@langchain/core/messages';
+import type { FileData } from '@kbn/langchain-deep-agent';
+import type { DynamicStructuredTool } from 'langchain';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { ResolvedConfiguration } from '../types';
 import { getSystemPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
-import { createDeepAgent } from '@kbn/langchain-deep-agent';
-import { BaseMessage, RemoveMessage } from '@langchain/core/messages';
 import { createResearchMiddleware } from './middlewares/researchAgentMiddleware';
-import type { FileData } from '@kbn/langchain-deep-agent';
-import type { DynamicStructuredTool } from 'langchain';
-import { createSkillSystemPromptMiddleware, createSkillToolExecutor } from './middlewares/skillMiddleware';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { createSkillSystemPromptMiddleware, createSkillTools } from './middlewares/skillMiddleware';
 
 export const createAgentGraph = ({
   chatModel,
   tools,
   skillFiles,
-  skillTools,
+  skills,
   configuration,
   capabilities,
   logger,
@@ -40,28 +41,37 @@ export const createAgentGraph = ({
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   skillFiles: Record<string, FileData>;
-  skillTools: DynamicStructuredTool[];
+  skills: Array<{
+    namespace: string;
+    name: string;
+    description: string;
+    content: string;
+    tools: DynamicStructuredTool[];
+  }>;
   capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
   skillToolContext: Omit<ToolHandlerContext, 'resultStore'>;
 }) => {
-
   const systemPrompt = getSystemPrompt({
     customInstructions: configuration.research.instructions,
     capabilities,
   });
 
-  const skillExecutorTool = createSkillToolExecutor(skillTools, events, skillToolContext)
+  const { invokeSkillTool, readSkillToolsTool, discoverSkillsTool } = createSkillTools(
+    skills,
+    events,
+    skillToolContext
+  );
 
   const deepAgent = createDeepAgent({
     model: chatModel,
-    tools: [...tools, skillExecutorTool],
-    systemPrompt: systemPrompt,
+    tools: [...tools, invokeSkillTool, readSkillToolsTool, discoverSkillsTool],
+    systemPrompt,
     middleware: [
       createResearchMiddleware(events),
-      createSkillSystemPromptMiddleware(events, skillFiles),
+      createSkillSystemPromptMiddleware(events, skillFiles, skills),
     ],
   });
 
@@ -71,7 +81,7 @@ export const createAgentGraph = ({
     const response = await deepAgent.invoke({
       messages: state.messages,
       files: {
-        ...skillFiles
+        ...skillFiles,
       },
     });
 

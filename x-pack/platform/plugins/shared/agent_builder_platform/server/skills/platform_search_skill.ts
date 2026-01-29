@@ -11,6 +11,55 @@ import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 
+/**
+ * Schema for the platform.search tool.
+ * Exported for use by proxy tools that route to this skill.
+ *
+ * The tool uses a discriminated union on `operation`:
+ * - `operation: 'search'` - Routes to platform.core.search for natural language / KQL queries
+ * - `operation: 'execute_esql'` - Routes to platform.core.execute_esql for ES|QL queries
+ *
+ * Parameters can be passed either as:
+ * - `{ operation, params: { ... } }` (preferred)
+ * - `{ operation, ...flattenedParams }` (flattened compat)
+ */
+export const platformSearchSchema = z.discriminatedUnion('operation', [
+    z
+        .object({
+            operation: z.literal('search').describe('Run a Kibana-mediated read-only search.'),
+            params: z
+                .object({
+                    query: z.string().describe('A natural language query expressing the search request'),
+                    index: z
+                        .string()
+                        .optional()
+                        .describe(
+                            '(optional) Index to search against (e.g., "logs-*", "packetbeat-*"). If not provided, will automatically select the best index based on the query.'
+                        ),
+                    fields: z
+                        .array(z.string())
+                        .optional()
+                        .describe('(optional) Preferred output fields to keep in the result'),
+                })
+                .passthrough()
+                .optional()
+                .describe('Parameters for the search operation'),
+        })
+        .passthrough(),
+    z
+        .object({
+            operation: z.literal('execute_esql').describe('Run a Kibana-mediated ES|QL query (read-only).'),
+            params: z
+                .object({
+                    query: z.string().describe('The ES|QL query to execute'),
+                })
+                .passthrough()
+                .optional()
+                .describe('Parameters for the ES|QL operation'),
+        })
+        .passthrough(),
+]);
+
 const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultStore'> | null => {
     if (!config || typeof config !== 'object') {
         return null;
@@ -56,23 +105,7 @@ const PLATFORM_SEARCH_TOOL = tool(
         name: 'platform.search',
         description:
             'Single entrypoint for platform search. Routes to `platform.core.search` (KQL/DSL style) or `platform.core.execute_esql` (ES|QL) based on `operation`.',
-        schema: z.discriminatedUnion('operation', [
-            // Accept both:
-            // - { operation, params: { ... } } (preferred)
-            // - { operation, ...params }       (flattened compat)
-            z
-                .object({
-                    operation: z.literal('search').describe('Run a Kibana-mediated read-only search.'),
-                    params: z.object({}).passthrough().optional(),
-                })
-                .passthrough(),
-            z
-                .object({
-                    operation: z.literal('execute_esql').describe('Run a Kibana-mediated ES|QL query (read-only).'),
-                    params: z.object({}).passthrough().optional(),
-                })
-                .passthrough(),
-        ]),
+        schema: platformSearchSchema,
     }
 );
 

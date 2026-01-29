@@ -6,3 +6,27 @@
  */
 
 export { runDeepAgentMode } from './run_chat_agent';
+export { createAgentGraph } from './graph';
+export {
+  createSkillTools,
+  createSkillSystemPromptMiddleware,
+  getSkillToolsArray,
+} from './middlewares/skillMiddleware';
+export {
+  type SkillContext,
+  type SkillInvocation,
+  type DiscoveredSkill,
+  type DiscoveredTool,
+  createSkillContext,
+  serializeSkillContext,
+  deserializeSkillContext,
+  recordSkillInvocation,
+  discoverSkills,
+  extractToolsFromSkill,
+  generateSkillPrompt,
+  generateSkillSummary,
+  getToolSchema,
+  findSkillForTool,
+  groupSkillsByDomain,
+} from './utils';
+export type { StateType } from './state';

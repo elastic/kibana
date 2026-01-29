@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, type ZodSchema } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
@@ -23,12 +23,26 @@ const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultSto
     return maybeConfig.configurable?.onechat ?? null;
 };
 
-export const createToolProxy = ({
+/**
+ * Creates a proxy tool that routes calls to an underlying OneChat tool.
+ *
+ * @param toolId - The ID of the underlying tool to proxy to
+ * @param description - Optional description override
+ * @param schema - Optional Zod schema for the tool parameters. When provided, this schema
+ *                 is exposed to the LLM for better parameter guidance. Without it, the tool
+ *                 accepts any parameters (passthrough) which can lead to schema errors.
+ *
+ * IMPORTANT: Always provide a schema when the underlying tool has a specific structure,
+ * especially for discriminated unions (e.g., `platform.search` with operation: 'search' | 'execute_esql').
+ */
+export const createToolProxy = <T extends ZodSchema = z.ZodObject<{}, 'passthrough'>>({
     toolId,
     description,
+    schema,
 }: {
     toolId: string;
     description?: string;
+    schema?: T;
 }): DynamicStructuredTool => {
     return tool(
         async (params, config) => {
@@ -89,7 +103,7 @@ export const createToolProxy = ({
         {
             name: toolId,
             description: description ?? `Proxy to OneChat tool "${toolId}". Parameters must match the underlying tool schema.`,
-            schema: z.object({}).passthrough(),
+            schema: schema ?? z.object({}).passthrough(),
         }
     );
 };

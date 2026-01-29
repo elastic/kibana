@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, type ZodSchema } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
@@ -32,13 +32,24 @@ const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultSto
  *
  * Why: skills are often enabled without all referenced tool ids being attached to the agent.
  * Exposing proxies under `skill.tools` allows execution via `invoke_skill` using the same tool id.
+ *
+ * @param toolId - The ID of the underlying tool to proxy to
+ * @param description - Optional description override
+ * @param schema - Optional Zod schema for the tool parameters. When provided, this schema
+ *                 is exposed to the LLM for better parameter guidance. Without it, the tool
+ *                 accepts any parameters (passthrough) which can lead to schema errors.
+ *
+ * IMPORTANT: Always provide a schema when the underlying tool has a specific structure,
+ * especially for discriminated unions (e.g., tools with operation: 'a' | 'b').
  */
-export const createToolProxy = ({
+export const createToolProxy = <T extends ZodSchema = z.ZodObject<{}, 'passthrough'>>({
     toolId,
     description,
+    schema,
 }: {
     toolId: string;
     description?: string;
+    schema?: T;
 }): DynamicStructuredTool => {
     return tool(
         async (params, config) => {
@@ -102,9 +113,9 @@ export const createToolProxy = ({
         {
             name: toolId,
             description: description ?? `Proxy to OneChat tool "${toolId}". Parameters must match the underlying tool schema.`,
-            // We intentionally allow passthrough parameters so this proxy can match the underlying tool's schema
-            // without duplicating it. The tool id + description guides the LLM.
-            schema: z.object({}).passthrough(),
+            // When schema is provided, use it for better LLM guidance.
+            // Otherwise, use passthrough to accept any parameters.
+            schema: schema ?? z.object({}).passthrough(),
         }
     );
 };

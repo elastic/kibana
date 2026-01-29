@@ -174,3 +174,12 @@ export const useIsAwaitingPrompt = () => {
   const lastRound = conversationRounds.at(-1);
   return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
 };
+
+/**
+ * Returns conversation-level attachments.
+ * These are attachments created by tools during the conversation.
+ */
+export const useConversationAttachments = () => {
+  const { conversation } = useConversation();
+  return conversation?.attachments ?? [];
+};

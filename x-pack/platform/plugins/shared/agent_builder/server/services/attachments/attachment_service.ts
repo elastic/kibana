@@ -31,6 +31,8 @@ export class AttachmentServiceImpl implements AttachmentService {
   setup(): AttachmentServiceSetup {
     return {
       registerType: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
+      extendType: (attachmentTypeId, extension) =>
+        this.attachmentTypeRegistry.extend(attachmentTypeId, extension),
     };
   }
 
@@ -39,8 +41,11 @@ export class AttachmentServiceImpl implements AttachmentService {
       validate: (attachment) => {
         return validateAttachment({ attachment, registry: this.attachmentTypeRegistry });
       },
-      getTypeDefinition: (attachment) => {
-        return this.attachmentTypeRegistry.get(attachment);
+      getTypeDefinition: (type) => {
+        return this.attachmentTypeRegistry.get(type);
+      },
+      getMergedTypeDefinition: (type) => {
+        return this.attachmentTypeRegistry.getMerged(type);
       },
     };
   }

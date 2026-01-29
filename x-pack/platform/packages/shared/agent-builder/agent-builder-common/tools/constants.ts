@@ -46,6 +46,8 @@ export const platformCoreTools = {
   attachmentAdd: platformCoreTool('attachment_add'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
+  // Skill tools
+  readSkillTools: platformCoreTool('read_skill_tools'),
 } as const;
 
 /**

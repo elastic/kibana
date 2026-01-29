@@ -11,8 +11,10 @@ import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contract';
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginSetupDependencies,
+} from '../../plugin_contract';
 import { detectionRulesTool } from './detection_rules_tool';
 import { casesTool } from './cases_tool';
 import { exceptionListsTool } from './exception_lists_tool';
@@ -31,7 +33,7 @@ export const registerTools = async (
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core, logger));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(detectionRulesTool(core));
+  agentBuilder.tools.register(detectionRulesTool(core, { ml: setupPlugins.ml }));
   agentBuilder.tools.register(casesTool(core));
   agentBuilder.tools.register(exceptionListsTool({ core, lists: setupPlugins.lists }));
   agentBuilder.tools.register(timelinesTool(core));

@@ -16,5 +16,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./indices.spec.ts'));
     loadTestFile(require.resolve('./privileges.spec.ts'));
     loadTestFile(require.resolve('./service_map.spec.ts'));
+    loadTestFile(require.resolve('./trace_correlation.spec.ts'));
   });
 }

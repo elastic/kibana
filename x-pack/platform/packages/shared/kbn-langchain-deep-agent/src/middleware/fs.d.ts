@@ -5,6 +5,9 @@
  * - Pluggable backends (StateBackend, StoreBackend, FilesystemBackend, CompositeBackend)
  * - Tool result eviction for large outputs
  */
+import { ToolMessage } from "langchain";
+import { Command } from "@langchain/langgraph";
+import { z as z3 } from "zod/v3";
 import type { BackendProtocol, BackendFactory, FileData } from "../backends/protocol";
 export type { FileData };
 export declare const LS_TOOL_DESCRIPTION = "List files and directories in a directory";
@@ -39,4 +42,115 @@ export interface FilesystemMiddlewareOptions {
 /**
  * Create filesystem middleware with all tools and features.
  */
-export declare function createFilesystemMiddleware(options?: FilesystemMiddlewareOptions): import("langchain").AgentMiddleware<any, undefined, any>;
+export declare function createFilesystemMiddleware(options?: FilesystemMiddlewareOptions): import("langchain").AgentMiddleware<any, undefined, any, (import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    path: z3.ZodDefault<z3.ZodOptional<z3.ZodString>>;
+}, "strip", z3.ZodTypeAny, {
+    path: string;
+}, {
+    path?: string | undefined;
+}>, {
+    path: string;
+}, {
+    path?: string | undefined;
+}, string, "ls"> | import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    file_path: z3.ZodString;
+    offset: z3.ZodDefault<z3.ZodOptional<z3.ZodNumber>>;
+    limit: z3.ZodDefault<z3.ZodOptional<z3.ZodNumber>>;
+}, "strip", z3.ZodTypeAny, {
+    offset: number;
+    limit: number;
+    file_path: string;
+}, {
+    file_path: string;
+    offset?: number | undefined;
+    limit?: number | undefined;
+}>, {
+    offset: number;
+    limit: number;
+    file_path: string;
+}, {
+    file_path: string;
+    offset?: number | undefined;
+    limit?: number | undefined;
+}, ToolMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>>, "read_file"> | import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    file_path: z3.ZodString;
+    content: z3.ZodString;
+}, "strip", z3.ZodTypeAny, {
+    content: string;
+    file_path: string;
+}, {
+    content: string;
+    file_path: string;
+}>, {
+    content: string;
+    file_path: string;
+}, {
+    content: string;
+    file_path: string;
+}, string | Command<unknown, {
+    files: Record<string, FileData>;
+    messages: ToolMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>>[];
+}, string>, "write_file"> | import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    file_path: z3.ZodString;
+    old_string: z3.ZodString;
+    new_string: z3.ZodString;
+    replace_all: z3.ZodDefault<z3.ZodOptional<z3.ZodBoolean>>;
+}, "strip", z3.ZodTypeAny, {
+    file_path: string;
+    old_string: string;
+    new_string: string;
+    replace_all: boolean;
+}, {
+    file_path: string;
+    old_string: string;
+    new_string: string;
+    replace_all?: boolean | undefined;
+}>, {
+    file_path: string;
+    old_string: string;
+    new_string: string;
+    replace_all: boolean;
+}, {
+    file_path: string;
+    old_string: string;
+    new_string: string;
+    replace_all?: boolean | undefined;
+}, string | Command<unknown, {
+    files: Record<string, FileData>;
+    messages: ToolMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>>[];
+}, string>, "edit_file"> | import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    pattern: z3.ZodString;
+    path: z3.ZodDefault<z3.ZodOptional<z3.ZodString>>;
+}, "strip", z3.ZodTypeAny, {
+    pattern: string;
+    path: string;
+}, {
+    pattern: string;
+    path?: string | undefined;
+}>, {
+    pattern: string;
+    path: string;
+}, {
+    pattern: string;
+    path?: string | undefined;
+}, string, "glob"> | import("langchain").DynamicStructuredTool<z3.ZodObject<{
+    pattern: z3.ZodString;
+    path: z3.ZodDefault<z3.ZodOptional<z3.ZodString>>;
+    glob: z3.ZodNullable<z3.ZodOptional<z3.ZodString>>;
+}, "strip", z3.ZodTypeAny, {
+    pattern: string;
+    path: string;
+    glob?: string | null | undefined;
+}, {
+    pattern: string;
+    path?: string | undefined;
+    glob?: string | null | undefined;
+}>, {
+    pattern: string;
+    path: string;
+    glob?: string | null | undefined;
+}, {
+    pattern: string;
+    path?: string | undefined;
+    glob?: string | null | undefined;
+}, string, "grep">)[]>;

@@ -50,6 +50,13 @@ tool("get_status", {})
 `,
 };
 
+/**
+ * Creates a LangChain tool for checking osquery integration status.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for status checking
+ * @internal
+ */
 const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({}, config) => {
@@ -110,6 +117,36 @@ const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates the Status skill for checking osquery integration availability.
+ *
+ * Use this skill to verify that osquery is properly installed and configured
+ * before attempting to run queries. This is useful for troubleshooting and
+ * providing user feedback about osquery availability.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing the `get_status` tool.
+ *
+ * @example
+ * ```typescript
+ * const statusSkill = getStatusSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes one tool:
+ * // - get_status: Check osquery installation status (no parameters required)
+ * ```
+ *
+ * @remarks
+ * Status information includes:
+ * - `install_status`: 'installed' or 'not_installed'
+ * - `package_info`: Package name, version, and install version (if installed)
+ * - `package_policies_count`: Number of osquery package policies in current space
+ *
+ * A status of 'not_installed' or zero package policies indicates that osquery
+ * may not be available for running queries in the current space.
+ *
+ * @see {@link getLiveQuerySkill} for running queries when status is available
+ */
 export const getStatusSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...STATUS_SKILL,

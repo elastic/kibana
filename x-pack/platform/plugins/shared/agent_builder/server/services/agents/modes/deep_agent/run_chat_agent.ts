@@ -11,22 +11,21 @@ import { isStreamEvent, toolsToLangchain } from '@kbn/agent-builder-genai-utils/
 import type { ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/agent-builder-server';
+import { getSkillFilePath } from '@kbn/agent-builder-common/skills';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import {
   addRoundCompleteEvent,
   extractRound,
   selectTools,
   conversationToLangchainMessages,
-  prepareConversation
+  prepareConversation,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
-import { getSkillFilePath } from '@kbn/agent-builder-common/skills';
-import { DynamicStructuredTool } from 'langchain';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 
 const chatAgentGraphName = 'deep-onechat-agent';
 
@@ -59,7 +58,18 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   },
   context
 ) => {
-  const { logger, request, modelProvider, toolProvider, attachments, skillProvider, events } = context;
+  const {
+    logger,
+    request,
+    modelProvider,
+    toolProvider,
+    attachments,
+    skillProvider,
+    events,
+    stateManager,
+    promptManager,
+    attachmentStateManager,
+  } = context;
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
@@ -84,6 +94,8 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     attachmentsService: attachments,
     request,
+    spaceId: context.spaceId,
+    runner: context.runner,
   });
 
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
@@ -118,8 +130,10 @@ export const runDeepAgentMode: RunChatAgentFn = async (
 
   // Convert skills to FileData format for the agent's filesystem
   const now = new Date().toISOString();
-  const skillsFiles: Record<string, { content: string[]; created_at: string; modified_at: string; description?: string }> = {};
-  const skillTools: DynamicStructuredTool[] = [];
+  const skillsFiles: Record<
+    string,
+    { content: string[]; created_at: string; modified_at: string; description?: string }
+  > = {};
   for (const skill of skills) {
     const filePath = getSkillFilePath(skill);
     skillsFiles[filePath] = {
@@ -128,7 +142,6 @@ export const runDeepAgentMode: RunChatAgentFn = async (
       modified_at: now,
       description: skill.description,
     };
-    skillTools.push(...skill.tools);
   }
 
   // Build skill tool context from agent handler context (same shape as ToolHandlerContext)
@@ -141,6 +154,17 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     toolProvider: context.toolProvider,
     runner: context.runner,
     events: context.events,
+    // Expose attachment management to skills
+    attachments: {
+      add: async (params) => {
+        const attachment = await context.attachmentStateManager.add(params);
+        return {
+          id: attachment.id,
+          type: attachment.type,
+          current_version: attachment.current_version,
+        };
+      },
+    },
   };
 
   const agentGraph = createAgentGraph({
@@ -149,7 +173,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     tools: allTools,
     skillFiles: skillsFiles,
-    skillTools: skillTools,
+    skills,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     skillToolContext,
@@ -189,8 +213,20 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
+  const getConversationState = () => ({
+    prompt: promptManager.dump(),
+  });
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput, startTime, modelProvider }),
+    addRoundCompleteEvent({
+      userInput: processedInput,
+      startTime,
+      modelProvider,
+      getConversationState,
+      pendingRound: undefined,
+      stateManager,
+      attachmentStateManager,
+    }),
     shareReplay()
   );
 

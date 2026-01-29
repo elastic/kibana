@@ -10,6 +10,9 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
+import { createWorkflowDraftAttachmentType } from './workflow_draft';
+import { createWorkflowAttachmentType } from './workflow';
+import { createSavedObjectAttachmentType } from './saved_object';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -29,6 +32,9 @@ export const registerAttachmentTypes = ({
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
+    createWorkflowDraftAttachmentType(),
+    createWorkflowAttachmentType(),
+    createSavedObjectAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

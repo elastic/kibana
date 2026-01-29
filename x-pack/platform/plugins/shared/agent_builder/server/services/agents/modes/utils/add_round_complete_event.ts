@@ -338,12 +338,14 @@ const buildRoundState = ({
   events: SourceEvents[];
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {
-  const finalGraphState = events.find(isFinalStateEvent)!.data.state;
+  const finalStateEvent = events.find(isFinalStateEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);
 
-  if (promptRequestEvents.length === 0) {
+  if (!finalStateEvent || promptRequestEvents.length === 0) {
     return undefined;
   }
+
+  const finalGraphState = finalStateEvent.data.state;
 
   const promptRequest = promptRequestEvents[0];
   const toolCallId = promptRequest.source.tool_call_id;

@@ -18,6 +18,7 @@ import { PLATFORM_TAGS_SKILL } from './platform_tags_skill';
 import { PLATFORM_UI_SETTINGS_SKILL } from './platform_ui_settings_skill';
 import { PLATFORM_VISUALIZATION_SKILL } from './platform_visualization_skill';
 import { PLATFORM_WORKFLOWS_LOGS_SKILL } from './platform_workflows_logs_skill';
+import { PLATFORM_WORKFLOW_GENERATION_SKILL } from './platform_workflow_generation_skill';
 import { PLATFORM_WORKFLOWS_SKILL } from './platform_workflows_skill';
 
 export const registerSkills = (setupDeps: PluginSetupDependencies) => {
@@ -28,6 +29,7 @@ export const registerSkills = (setupDeps: PluginSetupDependencies) => {
   setupDeps.agentBuilder.skills.register(PLATFORM_ALERTING_RULES_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_CONNECTORS_ACTIONS_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOWS_SKILL);
+  setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOW_GENERATION_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOWS_LOGS_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_CASES_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_SPACES_SKILL);
@@ -35,6 +37,3 @@ export const registerSkills = (setupDeps: PluginSetupDependencies) => {
   setupDeps.agentBuilder.skills.register(PLATFORM_UI_SETTINGS_SKILL);
   setupDeps.agentBuilder.skills.register(PLATFORM_PRIVILEGES_SKILL);
 };
-
-
-

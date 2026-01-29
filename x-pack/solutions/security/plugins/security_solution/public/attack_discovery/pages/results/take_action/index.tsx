@@ -299,21 +299,7 @@ const TakeActionComponent: React.FC<Props> = ({
         attackDiscoveries.length === 1
           ? isAgentChatExperienceEnabled
             ? hasAgentBuilderPrivilege
-<<<<<<< HEAD
-              ? [
-=======
               ? [viewInAgentBuilderItem]
-              : []
-            : [
->>>>>>> c6dda133743206dc0701562c4c2e6f4d5172a9c7
-                <EuiContextMenuItem
-                  data-test-subj="viewInAgentBuilder"
-                  key="viewInAgentBuilder"
-                  onClick={onViewInAgentBuilder}
-                >
-                  {i18n.ADD_TO_CHAT}
-                </EuiContextMenuItem>,
-              ]
               : []
             : [
               <EuiContextMenuItem

@@ -63,6 +63,13 @@ tool("get_schema", {
 `,
 };
 
+/**
+ * Creates a LangChain tool for browsing osquery table schemas.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for schema discovery
+ * @internal
+ */
 const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
     async ({ table }, config) => {
@@ -108,6 +115,37 @@ const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   );
 };
 
+/**
+ * Creates the Schema skill for discovering osquery table and column definitions.
+ *
+ * Use this skill to explore available osquery tables and their schemas before
+ * writing queries. This helps ensure queries use correct table and column names.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing the `get_schema` tool.
+ *
+ * @example
+ * ```typescript
+ * const schemaSkill = getSchemaSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes one tool:
+ * // - get_schema: Get table schema (table: string | null)
+ * //   - Pass null/undefined to list all available tables
+ * //   - Pass table name to get column definitions
+ * ```
+ *
+ * @remarks
+ * Schema data is loaded from the bundled osquery schema JSON file (currently v5.20.0).
+ * Each table includes:
+ * - Table name and description
+ * - Column definitions with name, type, and description
+ *
+ * Common tables include: processes, file, users, groups, network_interfaces, listening_ports.
+ *
+ * @see {@link getLiveQuerySkill} for running queries against discovered tables
+ * @see {@link getSavedQueriesSkill} for pre-built queries using these schemas
+ */
 export const getSchemaSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {
     ...SCHEMA_SKILL,

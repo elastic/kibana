@@ -15,3 +15,4 @@ export { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from './get_correlated_logs
 export { OBSERVABILITY_GET_HOSTS_TOOL_ID } from './get_hosts/tool';
 export { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from './get_trace_metrics/tool';
 export { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from './get_index_info';
+export { OBSERVABILITY_ANALYZE_LATENCY_BOTTLENECKS_TOOL_ID } from './analyze_latency_bottlenecks/tool';

@@ -87,6 +87,55 @@ Complete in order:
 5. Use the available tools to gather context about the alert and provide a response.`;
       return description;
     },
+
+    // Skills to reference when this attachment is present
+    skills: [
+      'security.alert_triage',
+      'security.detection_rules',
+      'security.cases',
+      'security.get_alerts',
+    ],
+
+    // LLM guidance for security alert investigation
+    skillContent: `# Security Alert Investigation
+
+A security alert is attached to this conversation. Follow this investigation workflow:
+
+## Investigation Steps
+1. **Triage**: Determine alert severity and potential impact
+2. **Context Gathering**: 
+   - Check entity risk scores for involved hosts/users
+   - Look for related alerts in the same timeframe
+   - Review the detection rule that triggered this alert
+3. **Threat Intel**: Search Elastic Security Labs for related threat information
+4. **Analysis**: Correlate findings and determine if this is a true positive
+5. **Response**: Recommend appropriate actions based on findings
+
+## Available Security Skills
+- **alert_triage**: Analyze alerts and determine severity
+- **detection_rules**: Review and understand the triggering rule
+- **cases**: Add to a case for tracking if confirmed
+- **get_alerts**: Query for related alerts
+
+## MITRE ATT&CK
+If the alert includes MITRE ATT&CK information:
+- Review the tactics and techniques
+- Understand the attack chain
+- Check for indicators of related activity`,
+
+    // Entity recognition patterns for auto-attachment
+    entityRecognition: {
+      patterns: [
+        /alert\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+        /investigate\s+alert\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+        /security\s+alert\s+["']?([a-zA-Z0-9_-]+)["']?/i,
+      ],
+      extractId: (match) => match[1],
+      resolve: async (entityId, context) => {
+        // TODO: Implement resolution from alerts index
+        return null;
+      },
+    },
   };
 };
 

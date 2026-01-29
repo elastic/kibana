@@ -21,7 +21,11 @@ jest.mock('./middlewares/researchAgentMiddleware', () => ({
 
 jest.mock('./middlewares/skillMiddleware', () => ({
   createSkillSystemPromptMiddleware: jest.fn(() => ({ name: 'mockSkillSystemPromptMiddleware' })),
-  createSkillToolExecutor: jest.fn(() => ({ name: 'mockInvokeSkillTool' })),
+  createSkillTools: jest.fn(() => ({
+    invokeSkillTool: { name: 'mockInvokeSkillTool' },
+    readSkillToolsTool: { name: 'mockReadSkillToolsTool' },
+    discoverSkillsTool: { name: 'mockDiscoverSkillsTool' },
+  })),
 }));
 
 import { createAgentGraph } from './graph';
@@ -48,7 +52,7 @@ describe('deep agent graph', () => {
       chatModel,
       tools: [],
       skillFiles: {},
-      skillTools: [],
+      skills: [],
       configuration: {
         research: { instructions: '', replace_default_instructions: false },
         answer: { instructions: '', replace_default_instructions: false },
@@ -72,5 +76,3 @@ describe('deep agent graph', () => {
     );
   });
 });
-
-
