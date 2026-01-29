@@ -9,30 +9,27 @@ import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import type { PatchUpdateRequestBody } from '../../../../common/api/endpoint';
+import type { CreateScriptRequestBody } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
-import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
+import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { isEditableScriptField } from './common';
 import type { ErrorType } from './types';
 
-type PatchRequest = Partial<Omit<PatchUpdateRequestBody, 'file'>> & { file?: File } & {
-  id: string;
-};
-export const usePatchEndpointScript = (
-  scriptData: PatchRequest,
+type CreateRequestBody = Omit<CreateScriptRequestBody, 'file'> & { file?: File };
+export const usePostEndpointScript = (
+  scriptData: CreateRequestBody,
   options: UseMutationOptions<
     EndpointScriptApiResponse,
     IHttpFetchError<ErrorType>,
-    PatchRequest
+    CreateRequestBody
   > = {}
-): UseMutationResult<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, PatchRequest> => {
+): UseMutationResult<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, CreateRequestBody> => {
   const http = useHttp();
-  return useMutation<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, PatchRequest>({
+  return useMutation<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, CreateRequestBody>({
     ...options,
-    mutationKey: ['patch-script-by-id', scriptData],
+    mutationKey: ['post-script-upload', scriptData],
     mutationFn: () => {
-      const { id, file, ...rest } = scriptData;
+      const { file, ...rest } = scriptData;
       const formData = new FormData();
       if (file) {
         formData.append('file', file, file.name);
@@ -43,17 +40,15 @@ export const usePatchEndpointScript = (
           formData.append(key, typeof value !== 'string' ? JSON.stringify(value) : value);
         }
       }
-      return http.patch<EndpointScriptApiResponse>(
-        resolvePathVariables(SCRIPTS_LIBRARY_ROUTE_ITEM, { script_id: id }),
-        {
-          version: '2023-10-31',
-          body: formData,
-          headers: {
-            // Allow the browser to set the content type
-            'Content-Type': undefined,
-          },
-        }
-      );
+
+      return http.post<EndpointScriptApiResponse>(SCRIPTS_LIBRARY_ROUTE, {
+        version: '2023-10-31',
+        body: formData,
+        headers: {
+          // Allow the browser to set the content type
+          'Content-Type': undefined,
+        },
+      });
     },
   });
 };
