@@ -94,7 +94,7 @@ export const getBuildAgent = async ({
     .addEdge(ADD_SCHEDULE, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
-  graph.name = 'Detection Engine AI Assisted Rule Creation Graph';
+  graph.name = 'Detection Engine AI Rule Creation Graph';
   return graph;
 };
 

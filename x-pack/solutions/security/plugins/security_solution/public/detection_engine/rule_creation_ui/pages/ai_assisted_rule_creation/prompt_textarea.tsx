@@ -58,7 +58,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         autoFocus
         resize="none"
         disabled={isDisabled}
-        placeholder={i18n.AI_ASSISTED_RULE_CREATION_PROMPT_PLACEHOLDER}
+        placeholder={i18n.AI_RULE_CREATION_PROMPT_PLACEHOLDER}
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}

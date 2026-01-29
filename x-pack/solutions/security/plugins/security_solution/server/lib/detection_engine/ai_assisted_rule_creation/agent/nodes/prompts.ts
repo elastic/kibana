@@ -9,7 +9,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 export const CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful assistant that helps in creating Elastic Detection rule's name and description based on user request and ES|QL query that fulfils the detection logic.
+    `You are a helpful agent that helps in creating Elastic Detection rule's name and description based on user request and ES|QL query that fulfils the detection logic.
     You should create short name of the rule based on what ES|QL query and user request. 
     You should create a brief description of the rule based on what it does.
 `,
@@ -55,7 +55,7 @@ A: Please find matched rule JSON object below:
 export const TAGS_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful assistant that analyzes user query and ES|QL query for creating Elastic Detection (SIEM) rules and selects relevant tags from available options.
+    `You are a helpful agent that analyzes user query and ES|QL query for creating Elastic Detection (SIEM) rules and selects relevant tags from available options.
 
 Your task is to:
 1. Understand the intent and context of the user's security detection rule request
@@ -86,7 +86,7 @@ Respond with a JSON object containing only the "relevant_tags" array.`,
 export const SCHEDULE_RETRIEVAL_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful assistant and security expert that analyzes user query and determining the schedule for a detection rule.
+    `You are a helpful agent and security expert that analyzes user query and determining the schedule for a detection rule.
 Analyze the user's request and determine the appropriate schedule for this detection rule, if user mentions frequency, use that.
 Based on user query determine whether user ask  lookback period for data analysis to minimize missed detections.
 
@@ -130,7 +130,7 @@ Based on the above, provide the schedule in the following JSON format:
 export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful assistant that analyzes user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+    `You are a helpful agent that analyzes user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
 
 Your task is to:
 1. Understand the intent and context of the user's security detection rule request

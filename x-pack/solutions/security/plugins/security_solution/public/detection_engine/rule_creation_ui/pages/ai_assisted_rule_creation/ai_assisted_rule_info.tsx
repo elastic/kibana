@@ -7,20 +7,17 @@
 
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import React from 'react';
-import {
-  AI_ASSISTED_RULE_CREATION_INFO_TITLE,
-  AI_ASSISTED_RULE_CREATION_INFO_MESSAGE,
-} from './translations';
+import { AI_RULE_CREATION_INFO_TITLE, AI_RULE_CREATION_INFO_MESSAGE } from './translations';
 
-export const AiAssistedRuleInfo: React.FC = () => {
+export const AiRuleInfo: React.FC = () => {
   return (
     <EuiCallOut
-      title={AI_ASSISTED_RULE_CREATION_INFO_TITLE}
+      title={AI_RULE_CREATION_INFO_TITLE}
       color="primary"
       size="s"
-      data-test-subj="ai-assisted-rule-creation-info-callout"
+      data-test-subj="ai-rule-creation-info-callout"
     >
-      <EuiText size="s">{AI_ASSISTED_RULE_CREATION_INFO_MESSAGE}</EuiText>
+      <EuiText size="s">{AI_RULE_CREATION_INFO_MESSAGE}</EuiText>
     </EuiCallOut>
   );
 };

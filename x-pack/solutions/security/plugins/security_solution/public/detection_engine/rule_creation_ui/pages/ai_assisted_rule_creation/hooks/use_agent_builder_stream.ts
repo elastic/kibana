@@ -33,7 +33,7 @@ const parseRuleResponse = (ruleData: unknown) => {
 
   const now = new Date().toISOString();
   // Values required by rule response schema
-  // AI assisted rule creation returns only fields that required for rule create API schema
+  // AI rule creation returns only fields that required for rule create API schema
   // but we need to return a complete rule response schema to satisfy UI form type requirements
   // these fields are technical fields that generated on server side and not be used in rule creation form on UI
   const placeholderFields = {
@@ -46,9 +46,9 @@ const parseRuleResponse = (ruleData: unknown) => {
       type: 'internal',
     },
     updated_at: now,
-    updated_by: 'AI Assisted Rule Creation',
+    updated_by: 'AI Rule Creation',
     created_at: now,
-    created_by: 'AI Assisted Rule Creation',
+    created_by: 'AI Rule Creation',
     revision: 0,
   };
 
@@ -66,7 +66,7 @@ export const useAgentBuilderStream = () => {
 
   const showErrorToast = useCallback(
     (error: Error) => {
-      addError(error, { title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE });
+      addError(error, { title: i18n.AI_RULE_CREATION_ERROR_TITLE });
     },
     [addError]
   );
@@ -115,7 +115,7 @@ export const useAgentBuilderStream = () => {
               type: SecurityAgentBuilderAttachments.rule,
               data: {
                 text: '',
-                attachmentLabel: 'AI Assisted Rule Creation',
+                attachmentLabel: 'AI Rule Creation',
               },
             },
           ],

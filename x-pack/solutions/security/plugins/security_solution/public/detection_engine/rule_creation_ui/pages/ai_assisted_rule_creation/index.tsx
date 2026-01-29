@@ -34,10 +34,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { PromptComponent } from './prompt';
 import { LinkIcon } from '../../../../common/components/link_icon';
 import { useHeaderLinkBackStyles } from '../../../../common/components/header_page';
-import { AiAssistedRuleUpdates } from './agent_builder_updates';
+import { AiRuleCreationUpdates } from './agent_builder_updates';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { AiAssistedRuleInfo } from './ai_assisted_rule_info';
+import { AiRuleInfo } from './ai_assisted_rule_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   getDetectionEngineUrl,
@@ -49,7 +49,7 @@ import * as i18n from './translations';
 
 const manageConnectorsPath = '/insightsAndAlerting/triggersActionsConnectors/connectors';
 
-const AiAssistedCreateRulePageComponent: React.FC = () => {
+const AiRuleCreationPageComponent: React.FC = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
@@ -110,7 +110,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
           setShowForm(true);
         })
         .catch((err) => {
-          addError(err, { title: i18n.AI_ASSISTED_RULE_CREATION_FAILURE_TITLE });
+          addError(err, { title: i18n.AI_RULE_CREATION_FAILURE_TITLE });
         });
     }
   }, [promptValue, isValid, streamRuleCreation, selectedConnectorId, addError]);
@@ -145,7 +145,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
           }}
           iconType="arrowLeft"
         >
-          {i18n.AI_ASSISTED_RULE_CREATION_BACK_TO_PROMPT}
+          {i18n.AI_RULE_CREATION_BACK_TO_PROMPT}
         </LinkIcon>
       </div>
     ),
@@ -163,7 +163,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     );
   }, [isSignalIndexExists, isAuthenticated, hasEncryptionKey, needsListsConfiguration]);
 
-  const canUserAccessAiAssistedRuleCreation = useMemo(() => {
+  const canUserAccessAiRuleCreation = useMemo(() => {
     return canEditRules && isAiRuleCreationAvailable;
   }, [canEditRules, isAiRuleCreationAvailable]);
 
@@ -173,13 +173,13 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
         deepLinkId: SecurityPageName.alerts,
         path: getDetectionEngineUrl(),
       });
-    } else if (!canUserAccessAiAssistedRuleCreation) {
+    } else if (!canUserAccessAiRuleCreation) {
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRulesUrl(),
       });
     }
-  }, [needsRedirectToDetections, navigateToApp, canUserAccessAiAssistedRuleCreation]);
+  }, [needsRedirectToDetections, navigateToApp, canUserAccessAiRuleCreation]);
 
   return showForm && rule ? (
     <CreateRulePage rule={rule} backComponent={backComponent} sendToAgentChat />
@@ -195,10 +195,10 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <EuiText>
-                        <h3>{i18n.AI_ASSISTED_RULE_CREATION_DESCRIBE_RULE_HEADING}</h3>
+                        <h3>{i18n.AI_RULE_CREATION_DESCRIBE_RULE_HEADING}</h3>
                       </EuiText>
                       <EuiSpacer size="m" />
-                      <AiAssistedRuleInfo />
+                      <AiRuleInfo />
                       <EuiSpacer size="m" />
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -214,15 +214,15 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiToolTip
-                              content={i18n.AI_ASSISTED_RULE_CREATION_MANAGE_CONNECTORS}
+                              content={i18n.AI_RULE_CREATION_MANAGE_CONNECTORS}
                               disableScreenReaderOutput
                             >
                               <EuiButtonIcon
                                 iconType="gear"
                                 href={manageConnectorsUrl}
                                 target="_blank"
-                                aria-label={i18n.AI_ASSISTED_RULE_CREATION_MANAGE_CONNECTORS}
-                                data-test-subj="ai-assisted-rule-creation-manage-connectors-button"
+                                aria-label={i18n.AI_RULE_CREATION_MANAGE_CONNECTORS}
+                                data-test-subj="ai-rule-creation-manage-connectors-button"
                               />
                             </EuiToolTip>
                           </EuiFlexItem>
@@ -248,9 +248,9 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                                 onClick={handleRegenerate}
                                 isLoading={isAiRuleCreationInProgress}
                                 isDisabled={!isValid}
-                                data-test-subj="ai-assisted-rule-creation-regenerate-button"
+                                data-test-subj="ai-rule-creation-regenerate-button"
                               >
-                                {i18n.AI_ASSISTED_RULE_CREATION_REGENERATE_BUTTON}
+                                {i18n.AI_RULE_CREATION_REGENERATE_BUTTON}
                               </EuiButton>
                             </EuiFlexItem>
                           </EuiFlexGroup>
@@ -264,9 +264,9 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                               <EuiButton
                                 color="danger"
                                 onClick={cancelRuleCreation}
-                                data-test-subj="ai-assisted-rule-creation-cancel-button"
+                                data-test-subj="ai-rule-creation-cancel-button"
                               >
-                                {i18n.AI_ASSISTED_RULE_CREATION_CANCEL_BUTTON}
+                                {i18n.AI_RULE_CREATION_CANCEL_BUTTON}
                               </EuiButton>
                             </EuiFlexItem>
                           </EuiFlexGroup>
@@ -282,7 +282,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           <EuiProgress
                             size="s"
                             color="primary"
-                            data-test-subj="ai-assisted-rule-creation-progress"
+                            data-test-subj="ai-rule-creation-progress"
                           />
                         </EuiFlexItem>
                       )}
@@ -292,16 +292,14 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           announceOnMount
                           color="warning"
                           iconType="warning"
-                          data-test-subj="ai-assisted-rule-creation-cancelled-callout"
+                          data-test-subj="ai-rule-creation-cancelled-callout"
                         >
-                          <EuiText size="s">
-                            {i18n.AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE}
-                          </EuiText>
+                          <EuiText size="s">{i18n.AI_RULE_CREATION_CANCELLED_MESSAGE}</EuiText>
                         </EuiCallOut>
                       ) : null}
 
                       <EuiSpacer size="m" />
-                      <AiAssistedRuleUpdates updates={updates} />
+                      <AiRuleCreationUpdates updates={updates} />
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
                 </EuiResizablePanel>
@@ -325,4 +323,4 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   );
 };
 
-export const AiAssistedCreateRulePage = React.memo(AiAssistedCreateRulePageComponent);
+export const AiRuleCreationPage = React.memo(AiRuleCreationPageComponent);

@@ -16,7 +16,7 @@ import { getPrebuiltRulesAssets } from '../../utils/get_prebuilt_rules_assets';
 import { getCustomRulesTags } from '../../utils/get_custom_rules_tags';
 import { TAGS_SELECTION_PROMPT } from './prompts';
 
-const AI_ASSISTED_RULE_CREATION_TAG = 'AI assisted rule creation';
+const AI_RULE_CREATION_TAG = 'AI Rule Creation';
 
 interface GetTagsNodeParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -78,7 +78,7 @@ export const getTagsNode = ({
       return {
         ...state,
         rule: {
-          tags: [...suggestedTags, AI_ASSISTED_RULE_CREATION_TAG],
+          tags: [...suggestedTags, AI_RULE_CREATION_TAG],
         },
       };
     } catch (error) {

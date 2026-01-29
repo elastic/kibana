@@ -24,7 +24,7 @@ import {
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
-import { AiAssistedCreateRulePage } from '../detection_engine/rule_creation_ui/pages/ai_assisted_rule_creation';
+import { AiRuleCreationPage } from '../detection_engine/rule_creation_ui/pages/ai_assisted_rule_creation';
 import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -79,7 +79,7 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
         {
           path: AI_ASSISTED_RULE_CREATE_PATH,
           main: withSecurityRoutePageWrapper(
-            AiAssistedCreateRulePage,
+            AiRuleCreationPage,
             SecurityPageName.aiAssistedRuleCreate,
             {
               omitSpyRoute: true,

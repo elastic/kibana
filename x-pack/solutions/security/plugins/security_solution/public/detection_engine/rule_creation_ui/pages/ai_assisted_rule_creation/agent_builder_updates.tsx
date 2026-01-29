@@ -15,22 +15,22 @@ export interface ToolProgressUpdate {
   timestamp: Date;
 }
 
-interface AiAssistedRuleUpdatesProps {
+interface AiRuleCreationUpdatesProps {
   /** Array of tool progress updates with message and timestamp */
   updates: ToolProgressUpdate[];
 }
 
 /**
- * Component that displays AI-assisted rule creation progress updates
+ * Component that displays AI rule creation progress updates
  * from the agent builder API. Shows tool progress messages in a timeline format.
  */
-export const AiAssistedRuleUpdates: React.FC<AiAssistedRuleUpdatesProps> = ({ updates }) => {
+export const AiRuleCreationUpdates: React.FC<AiRuleCreationUpdatesProps> = ({ updates }) => {
   const comments: EuiCommentProps[] = updates.map((update) => ({
-    username: 'AI assistant',
+    username: 'AI agent',
     timelineAvatarAriaLabel: 'Tool progress',
     event: (
       <FormattedMessage
-        id="xpack.securitySolution.detectionEngine.aiAssistedRuleCreation.agentBuilderUpdates.progress"
+        id="xpack.securitySolution.detectionEngine.aiRuleCreation.agentBuilderUpdates.progress"
         defaultMessage="progress update"
       />
     ),
@@ -53,8 +53,8 @@ export const AiAssistedRuleUpdates: React.FC<AiAssistedRuleUpdatesProps> = ({ up
       <EuiSpacer size="m" />
       <EuiCommentList
         comments={comments.toReversed()}
-        aria-label="AI-assisted rule creation progress"
-        data-test-subj="ai-assisted-rule-updates"
+        aria-label="AI rule creation progress"
+        data-test-subj="ai-rule-updates"
       />
     </>
   );

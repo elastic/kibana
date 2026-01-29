@@ -39,12 +39,12 @@ export const useInferenceConnectors = () => {
   const { addError } = useAppToasts();
 
   const { data: inferenceConnectors, isLoading } = useQuery({
-    queryKey: ['security-detection-engine-ai-assisted-rule-creation-inference-connectors'],
+    queryKey: ['security-detection-engine-ai-rule-creation-inference-connectors'],
     queryFn: () => inference.getConnectors(),
     retry: 1,
     onError: (error) => {
       addError(error, {
-        title: i18n.AI_ASSISTED_RULE_CREATION_CONNECTORS_LOAD_ERROR,
+        title: i18n.AI_RULE_CREATION_CONNECTORS_LOAD_ERROR,
       });
     },
   });
