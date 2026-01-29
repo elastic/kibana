@@ -72,7 +72,8 @@ describe('FullScreenWaterfall', () => {
     expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
   });
 
-  it('should not display the full trace waterfall', () => {
+  describe('when service name is undefined', () => {
+    it('does not display the full trace waterfall', () => {
     render(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
     expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
