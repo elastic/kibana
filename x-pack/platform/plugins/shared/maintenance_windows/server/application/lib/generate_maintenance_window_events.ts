@@ -72,10 +72,10 @@ export const shouldRegenerateEvents = ({
   }
 
   const duration = schedule && getDurationInMilliseconds(schedule.duration);
-  const transformedDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
+  const mwDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
 
   // If the duration changes, we should regenerate events
-  if (typeof duration === 'number' && duration !== transformedDuration) {
+  if (typeof duration === 'number' && duration !== mwDuration) {
     return true;
   }
   return false;

@@ -20,23 +20,36 @@ const scheduleAndScopeBackfill: SavedObjectModelDataBackfillFn<
   MaintenanceWindowV1,
   MaintenanceWindowV2
 > = (doc) => {
-  // Add schedule and scope objects to existing maintenance windows
-  let schedule;
-  let scope;
-  if (doc.attributes?.duration && doc.attributes?.rRule) {
-    const scheduleWithoutCustom = transformRRuleToCustomSchedule({
-      duration: doc.attributes.duration,
-      rRule: doc.attributes.rRule,
-    });
+  try {
+    // Add schedule and scope objects to existing maintenance windows
+    let schedule;
+    let scope;
+    if (doc.attributes?.duration && doc.attributes?.rRule) {
+      const customScheduled = transformRRuleToCustomSchedule({
+        duration: doc.attributes.duration,
+        rRule: doc.attributes.rRule,
+      });
 
-    schedule = { custom: scheduleWithoutCustom };
-  }
-  if (doc.attributes?.scopedQuery) {
-    scope = {
-      alerting: doc.attributes.scopedQuery,
+      schedule = { custom: customScheduled };
+    }
+    if (doc.attributes?.scopedQuery) {
+      scope = {
+        alerting: doc.attributes.scopedQuery,
+      };
+    }
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        ...(schedule ? { schedule } : {}),
+        ...(scope ? { scope } : {}),
+      },
     };
+  } catch (e) {
+    // In case of an error, return the document as-is to avoid blocking the migration
+    return doc;
   }
-  return { attributes: { ...doc.attributes, schedule, scope } };
 };
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {

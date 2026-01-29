@@ -7,11 +7,14 @@
 
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
-import { transformRRuleToCustomSchedule } from '../lib/transforms/rrule_to_custom/latest';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
+import * as transformsModule from '../lib/transforms/rrule_to_custom/latest';
 
 jest.mock('./schema');
-jest.mock('../lib/transforms/rrule_to_custom/latest');
+jest.mock('../lib/transforms/rrule_to_custom/latest', () => ({
+  __esModule: true,
+  ...jest.requireActual('../lib/transforms/rrule_to_custom/latest'),
+}));
 
 describe('maintenanceWindowModelVersions', () => {
   describe('version 1', () => {
@@ -73,8 +76,6 @@ describe('maintenanceWindowModelVersions', () => {
   });
 
   describe('version 4', () => {
-    const mockTransformRRuleToCustomSchedule =
-      transformRRuleToCustomSchedule as jest.MockedFunction<typeof transformRRuleToCustomSchedule>;
     const modelVersion4 = maintenanceWindowModelVersions[4] as SavedObjectsFullModelVersion;
 
     beforeEach(() => {
@@ -99,18 +100,6 @@ describe('maintenanceWindowModelVersions', () => {
     describe('backfillFn', () => {
       const version4 = maintenanceWindowModelVersions['4'] as SavedObjectsFullModelVersion;
       it('should transform duration and rRule to schedule when schedule does not exist', () => {
-        const mockSchedule = {
-          duration: '30m',
-          start: '2026-01-08T12:01:17.327Z',
-          timezone: 'Europe/London',
-          recurring: {
-            end: '2026-01-08T23:59:59.999Z',
-            every: '1h',
-            onWeekDay: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
-          },
-        };
-        mockTransformRRuleToCustomSchedule.mockReturnValue(mockSchedule);
-
         const mockDocument = {
           id: 'test-id',
           type: 'maintenance-window',
@@ -141,35 +130,27 @@ describe('maintenanceWindowModelVersions', () => {
             ? version4.changes[0].backfillFn(mockDocument, {} as any)
             : null;
 
-        expect(mockTransformRRuleToCustomSchedule).toHaveBeenCalledWith({
-          duration: 3600000,
-          rRule: {
-            dtstart: '2026-01-08T12:01:17.327Z',
-            tzid: 'Europe/London',
-            freq: 4,
-            interval: 1,
-            until: '2026-01-08T23:59:59.999Z',
-            byweekday: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
-          },
-        });
         expect(result).toEqual({
+          ...mockDocument,
           attributes: {
             ...mockDocument.attributes,
-            schedule: { custom: mockSchedule },
+            schedule: {
+              custom: {
+                duration: '60m',
+                start: '2026-01-08T12:01:17.327Z',
+                timezone: 'Europe/London',
+                recurring: {
+                  end: '2026-01-08T23:59:59.999Z',
+                  every: '1h',
+                  onWeekDay: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
+                },
+              },
+            },
           },
         });
       });
 
       it('should transform scopedQuery to scope when scope does not exist', () => {
-        mockTransformRRuleToCustomSchedule.mockReturnValue({
-          start: '2026-01-08T12:01:17.327Z',
-          timezone: 'Europe/London',
-          duration: '30m',
-          recurring: {
-            every: '1h',
-            end: '2026-01-08T23:59:59.999Z',
-          },
-        });
         const mockDocument = {
           id: 'test-id',
           type: 'maintenance-window',
@@ -225,11 +206,12 @@ describe('maintenanceWindowModelVersions', () => {
             : null;
 
         expect(result).toEqual({
+          ...mockDocument,
           attributes: {
             ...mockDocument.attributes,
             schedule: {
               custom: {
-                duration: '30m',
+                duration: '60m',
                 recurring: {
                   end: '2026-01-08T23:59:59.999Z',
                   every: '1h',
@@ -270,16 +252,6 @@ describe('maintenanceWindowModelVersions', () => {
       });
 
       it('should handle document without scopedQuery', () => {
-        mockTransformRRuleToCustomSchedule.mockReturnValue({
-          start: '2026-01-08T12:01:17.327Z',
-          timezone: 'Europe/London',
-          duration: '30m',
-          recurring: {
-            every: '1h',
-            end: '2026-01-08T23:59:59.999Z',
-          },
-        });
-
         const mockDocument = {
           id: 'test-id',
           type: 'maintenance-window',
@@ -311,11 +283,12 @@ describe('maintenanceWindowModelVersions', () => {
             : null;
 
         expect(result).toEqual({
+          ...mockDocument,
           attributes: {
             ...mockDocument.attributes,
             schedule: {
               custom: {
-                duration: '30m',
+                duration: '60m',
                 recurring: {
                   end: '2026-01-08T23:59:59.999Z',
                   every: '1h',
@@ -326,6 +299,72 @@ describe('maintenanceWindowModelVersions', () => {
             },
             scope: undefined,
           },
+        });
+      });
+
+      it('should return doc unchanged in case of error during backfill', () => {
+        const mockDocument = {
+          id: 'test-id',
+          type: 'maintenance-window',
+          attributes: {
+            duration: 3600000,
+            rRule: {
+              dtstart: '2026-01-08T12:01:17.327Z',
+              tzid: 'Europe/London',
+              freq: 4,
+              interval: 1,
+              until: '2026-01-08T23:59:59.999Z',
+            },
+            scopedQuery: {
+              filters: [
+                {
+                  $state: {
+                    store: 'appState',
+                  },
+                  meta: {
+                    disabled: false,
+                    negate: false,
+                    alias: null,
+                    key: '_id',
+                    field: '_id',
+                    value: 'exists',
+                    type: 'exists',
+                  },
+                  query: {
+                    exists: {
+                      field: '_id',
+                    },
+                  },
+                },
+              ],
+              kql: 'test: query',
+              dsl: `{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"query"}}],"minimum_should_match":1}},{"exists":{"field":"_id"}}],"should":[],"must_not":[]}}`,
+            },
+            enabled: true,
+          },
+          references: [],
+          migrationVersion: {},
+          coreMigrationVersion: '8.0.0',
+          typeMigrationVersion: '8.0.0',
+          updated_at: '2023-01-01T00:00:00.000Z',
+          version: '1',
+          namespaces: ['default'],
+          originId: 'test-origin',
+        };
+
+        jest
+          .spyOn(transformsModule, 'transformRRuleToCustomSchedule')
+          .mockImplementationOnce(() => {
+            throw new Error('Transform failed');
+          });
+
+        const result =
+          version4?.changes[0]?.type === 'data_backfill'
+            ? version4.changes[0].backfillFn(mockDocument, {} as any)
+            : null;
+
+        expect(result).toEqual({
+          ...mockDocument,
         });
       });
     });

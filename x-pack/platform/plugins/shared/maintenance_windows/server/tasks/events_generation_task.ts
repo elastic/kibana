@@ -28,7 +28,7 @@ import {
 } from '../application/transforms';
 import type { MaintenanceWindowsServerStartDependencies } from '../types';
 import { getMaintenanceWindowStatus } from '../application/lib/get_maintenance_window_status';
-import { generateMaintenanceWindowEvents as generateMaintenanceWindowEventsViaRRule } from '../application/lib/generate_maintenance_window_events';
+import { generateMaintenanceWindowEvents } from '../application/lib/generate_maintenance_window_events';
 
 export const MAINTENANCE_WINDOW_EVENTS_TASK_TYPE = 'maintenance-window:generate-events';
 
@@ -287,7 +287,7 @@ export async function generateEvents({
       .map((filteredMaintenanceWindow) => {
         const { schedule, expirationDate: oldExpirationDate } = filteredMaintenanceWindow;
 
-        const newEvents = generateMaintenanceWindowEventsViaRRule({
+        const newEvents = generateMaintenanceWindowEvents({
           schedule: schedule.custom,
           expirationDate: newExpirationDate,
           startDate: startRangeDate, // here start range date is 1 week before current expiration date
