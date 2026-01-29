@@ -23,12 +23,21 @@ export class DiscoverApp {
   private async getVisibleDataViewSwitch() {
     const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
     const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
-    const anySwitch = discoverSwitch.or(fallbackSwitch);
-    await expect(anySwitch).toBeVisible({ timeout: 30_000 });
-    if (await discoverSwitch.isVisible()) {
-      return discoverSwitch;
+
+    // There should be exactly one visible data view switch.
+    // If both are visible (bug), fail explicitly instead of picking one
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible({ timeout: 30_000 });
+
+    const discoverVisible = await discoverSwitch.isVisible();
+    const fallbackVisible = await fallbackSwitch.isVisible();
+
+    if (discoverVisible === fallbackVisible) {
+      throw new Error(
+        `Expected exactly one data view switch link to be visible, but discover=${discoverVisible} fallback=${fallbackVisible}`
+      );
     }
-    return fallbackSwitch;
+
+    return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
   private async waitForDataViewSwitch() {
@@ -74,7 +83,6 @@ export class DiscoverApp {
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async waitUntilFieldListHasCountOfFields() {
