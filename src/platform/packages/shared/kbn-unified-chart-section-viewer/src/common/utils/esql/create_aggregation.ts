@@ -18,6 +18,12 @@ import { replaceParameters } from '@kbn/esql-composer';
 import type { MetricField } from '../../../types';
 
 type Params = Record<string, string | number | boolean | null>;
+interface AggegationTemplateParams {
+  type: MetricField['type'];
+  instrument: MetricField['instrument'];
+  placeholderName: string;
+  customFunction?: string;
+}
 
 // Helper function to safely extract the target AST node
 function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
@@ -76,17 +82,12 @@ export function replaceFunctionParams(functionString: string, params: Params): s
  * @param customFunction - Optional custom aggregation function to use.
  * @returns The ES|QL aggregation function template string.
  */
-function getAggregationTemplate({
+export function getAggregationTemplate({
   type,
   instrument,
   placeholderName,
   customFunction,
-}: {
-  type: MetricField['type'];
-  instrument: MetricField['instrument'];
-  placeholderName: string;
-  customFunction?: string;
-}): string {
+}: AggegationTemplateParams): string {
   if (type === 'exponential_histogram' || type === 'tdigest') {
     return `PERCENTILE(??${placeholderName}, 95)`;
   }
