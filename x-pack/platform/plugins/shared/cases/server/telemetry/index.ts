@@ -15,14 +15,13 @@ import {
   CASE_TELEMETRY_SAVED_OBJECT,
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
-  SAVED_OBJECT_TYPES,
   CASE_RULES_SAVED_OBJECT,
-  CASE_TEMPLATE_SAVED_OBJECT,
 } from '../../common/constants';
 import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../saved_object_types';
 
 export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
 
@@ -45,9 +44,7 @@ export const createCasesTelemetry = ({
   const getInternalSavedObjectClient = async (): Promise<TelemetrySavedObjectsClient> => {
     const [coreStart] = await core.getStartServices();
     const soClient = coreStart.savedObjects.createInternalRepository([
-      ...SAVED_OBJECT_TYPES.filter((savedObjectType) =>
-        templatesConfig?.enabled ? true : savedObjectType !== CASE_TEMPLATE_SAVED_OBJECT
-      ),
+      ...getSavedObjectsTypes({ templates: templatesConfig }),
       FILE_SO_TYPE,
       CASE_RULES_SAVED_OBJECT,
     ]);

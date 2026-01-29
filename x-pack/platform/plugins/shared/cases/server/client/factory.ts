@@ -36,11 +36,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import {
-  CASE_TEMPLATE_SAVED_OBJECT,
-  KIBANA_SYSTEM_USERNAME,
-  SAVED_OBJECT_TYPES,
-} from '../../common/constants';
+import { CASE_TEMPLATE_SAVED_OBJECT, KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -60,6 +56,7 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../saved_object_types';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -134,11 +131,7 @@ export class CasesClientFactory {
     });
 
     const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES.filter((savedObjectType) =>
-        this.options.config.templates.enabled
-          ? true
-          : savedObjectType !== CASE_TEMPLATE_SAVED_OBJECT
-      ),
+      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
