@@ -14,7 +14,7 @@ import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
-import { getFileSystemInstructions } from '../../../../runner/store';
+import { getFileSystemInstructions, FILESTORE_ENABLED } from '../../../../runner/store';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 const tools = {
@@ -65,7 +65,7 @@ That answering agent will have access to the conversation history and to all inf
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
 3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
 
-${await getFileSystemInstructions({ filesystem: filestore })}
+${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
 ## INSTRUCTIONS
 
@@ -178,7 +178,7 @@ Constraints:
       - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
       - Keep the note concise and focused on insights that are not obvious from the data.
 
-${await getFileSystemInstructions({ filesystem: filestore })}
+${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
 ${customInstructionsBlock(customInstructions)}
 

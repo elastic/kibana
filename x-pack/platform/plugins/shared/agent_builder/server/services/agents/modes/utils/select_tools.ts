@@ -22,7 +22,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { getStoreTools } from '../../../runner/store';
+import { getStoreTools, FILESTORE_ENABLED } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
@@ -79,7 +79,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...registryTools,
-    ...convertedFsTools,
+    ...(FILESTORE_ENABLED ? convertedFsTools : []),
   ];
 
   const deduped = new Map<string, ExecutableTool>();
