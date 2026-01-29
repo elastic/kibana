@@ -588,16 +588,31 @@ export class HttpServer {
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
       // TODO: is it ok to pull the values like this or should we
       // look for an alternative?
-      const credentials = request?.auth?.credentials as {
+      interface AuthCredentials {
         username?: string;
         email?: string;
-        roles: string[];
-        profile_uid: string;
+        roles?: string[];
+        profile_uid?: string;
+      }
+      const isAuthCredentials = (value: unknown): value is AuthCredentials => {
+        if (typeof value !== 'object' || value === null) return false;
+        const v = value as Record<string, unknown>;
+        return (
+          (v.username === undefined || typeof v.username === 'string') &&
+          (v.email === undefined || typeof v.email === 'string') &&
+          (v.roles === undefined ||
+            (Array.isArray(v.roles) && v.roles.every((r) => typeof r === 'string'))) &&
+          (v.profile_uid === undefined || typeof v.profile_uid === 'string')
+        );
       };
+
+      const credentials = isAuthCredentials(request?.auth?.credentials)
+        ? request.auth.credentials
+        : undefined;
 
       userActivity?.setInjectedContext({
         user: {
-          ip: request.raw.req.socket?.remoteAddress,
+          ip: request.info.remoteAddress,
           id: credentials?.profile_uid,
           username: credentials?.username,
           email: credentials?.email,
