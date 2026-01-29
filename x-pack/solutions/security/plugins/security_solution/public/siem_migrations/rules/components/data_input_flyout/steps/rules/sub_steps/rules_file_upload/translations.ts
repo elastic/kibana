@@ -21,3 +21,10 @@ export const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptQradar',
   { defaultMessage: 'Select or drag and drop the exported XML file' }
 );
+
+export const RULES_FILE_UPLOAD_XML_WARNING = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.xmlWarning',
+  {
+    defaultMessage: 'Building block rules will be skipped during migration.',
+  }
+);

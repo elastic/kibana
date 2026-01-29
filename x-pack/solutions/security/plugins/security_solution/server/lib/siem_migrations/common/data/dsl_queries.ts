@@ -40,41 +40,17 @@ export const dsl = {
   isEligibleForTranslation(): QueryDslQueryContainer {
     return {
       bool: {
-        should: [
+        filter: [{ term: { status: 'pending' } }],
+        must_not: [
           {
             bool: {
               filter: [
-                {
-                  term: {
-                    'original_rule.vendor': 'qradar',
-                  },
-                },
-                {
-                  term: {
-                    status: 'pending',
-                  },
-                },
-                {
-                  match_phrase: {
-                    'original_rule.query': '*buildingBlock="false"*',
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    status: 'pending',
-                  },
-                },
+                { term: { 'original_rule.vendor': 'qradar' } },
+                { match_phrase: { 'original_rule.query': 'buildingBlock="true"' } },
               ],
             },
           },
         ],
-        minimum_should_match: 1,
       },
     };
   },

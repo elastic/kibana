@@ -59,6 +59,15 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
             // Parse QRadar XML
             const parser = new QradarRulesXmlParser(xml);
             const qradarRules = await parser.getRules();
+            const isEligibleForTranslation = qradarRules.filter(
+              (rule) => rule.rule_type !== 'building_block'
+            );
+
+            if (isEligibleForTranslation.length === 0) {
+              return res.badRequest({
+                body: { message: 'No valid rules could be extracted from the XML' },
+              });
+            }
 
             const qRadarResources = await parser.getResources();
 

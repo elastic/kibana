@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
@@ -73,6 +81,8 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiCallOut size="s" color="warning" title={i18n.RULES_FILE_UPLOAD_XML_WARNING} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={validationError != null} fullWidth error={validationError}>

@@ -243,8 +243,10 @@ export abstract class SiemMigrationsDataItemClient<
         },
       },
     };
+
+    const query = this.getFilterQuery(undefined, { isEligibleForTranslation: true });
     const result = await this.esClient
-      .search({ index, aggregations, _source: false })
+      .search({ index, query, aggregations, _source: false })
       .catch((error) => {
         this.logger.error(`Error getting all migration ${this.type} stats: ${error.message}`);
         throw error;
@@ -382,10 +384,14 @@ export abstract class SiemMigrationsDataItemClient<
   }
 
   protected getFilterQuery(
-    migrationId: string,
+    migrationId?: string,
     filters: SiemMigrationFilters = {}
   ): { bool: { filter: QueryDslQueryContainer[] } } {
-    const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+    const filter: QueryDslQueryContainer[] = [];
+
+    if (migrationId) {
+      filter.push({ term: { migration_id: migrationId } });
+    }
 
     if (filters.status) {
       if (Array.isArray(filters.status)) {
@@ -411,6 +417,7 @@ export abstract class SiemMigrationsDataItemClient<
     if (filters.untranslatable != null) {
       filter.push(filters.untranslatable ? dsl.isUntranslatable() : dsl.isNotUntranslatable());
     }
+
     if (filters.isEligibleForTranslation) {
       filter.push(dsl.isEligibleForTranslation());
     }
