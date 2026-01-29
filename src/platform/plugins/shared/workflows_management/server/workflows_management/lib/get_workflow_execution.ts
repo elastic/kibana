@@ -101,7 +101,7 @@ function shouldReportAsRunning(
 ): boolean {
   if (
     !isTerminalStatus(workflowExecution.status) ||
-    workflowExecution.stepExecutionsCount === undefined
+    workflowExecution.stepExecutionsCount === undefined // backward compatibility for those not having the field
   ) {
     return false;
   }
