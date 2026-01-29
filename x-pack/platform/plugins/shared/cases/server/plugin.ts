@@ -146,6 +146,7 @@ export class CasePlugin
           usageCollection: plugins.usageCollection,
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
+          templatesConfig: this.caseConfig.templates,
         });
       }
 
@@ -278,6 +279,7 @@ export class CasePlugin
       // usageCounter will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
+      config: this.caseConfig,
     });
 
     return {
