@@ -26,7 +26,10 @@ This is useful for understanding what fields are available for querying and what
       end,
     });
 
-    const formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
+    const formattedAnalysis = formatDocumentAnalysis(analysis, {
+      dropEmpty: true,
+      dropUnmapped: false,
+    });
 
     return {
       analysis: formattedAnalysis,
