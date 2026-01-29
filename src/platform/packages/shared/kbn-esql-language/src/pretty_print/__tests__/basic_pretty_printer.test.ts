@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../../parser';
-import type { ESQLFunction, ESQLMap } from '../../types';
+import { Parser } from '../../parser';
 import { Walker } from '../../ast/walker';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import type {
   BasicPrettyPrinterMultilineOptions,
   BasicPrettyPrinterOptions,
@@ -17,7 +17,7 @@ import type {
 import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
 const reprint = (src: string, opts?: BasicPrettyPrinterOptions) => {
-  const { root } = parse(src);
+  const { root } = Parser.parse(src);
   const text = BasicPrettyPrinter.print(root, opts);
 
   // console.log(JSON.stringify(root, null, 2));
@@ -745,7 +745,7 @@ describe('single line query', () => {
     describe('map expressions', () => {
       test('empty map', () => {
         const src = 'ROW fn(1, {"foo": "bar"})';
-        const { root } = parse(src);
+        const { root } = Parser.parse(src);
         const node = Walker.match(root, { type: 'map' })! as ESQLMap;
 
         node.entries = [];
@@ -769,6 +769,16 @@ describe('single line query', () => {
 
       test('supports nested maps', () => {
         assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
+      });
+
+      describe('representation: assignment', () => {
+        test('a single entry', () => {
+          assertReprint('PROMQL index = my_index bytes[5m]');
+        });
+
+        test('two entries', () => {
+          assertReprint('PROMQL index = my_index time = ?param bytes[5m]');
+        });
       });
     });
 
@@ -926,7 +936,7 @@ describe('single line query', () => {
 
 describe('multiline query', () => {
   const multiline = (src: string, opts?: BasicPrettyPrinterMultilineOptions) => {
-    const { root } = parse(src);
+    const { root } = Parser.parse(src);
     const text = BasicPrettyPrinter.multiline(root, opts);
 
     // console.log(JSON.stringify(ast, null, 2));
@@ -1013,7 +1023,7 @@ describe('single line command', () => {
   | LIMIT 100`;
     const {
       root: { commands },
-    } = parse(query);
+    } = Parser.parse(query);
     const line1 = BasicPrettyPrinter.command(commands[0]);
     const line2 = BasicPrettyPrinter.command(commands[1]);
     const line3 = BasicPrettyPrinter.command(commands[2]);
@@ -1031,7 +1041,7 @@ describe('single line command', () => {
 describe('single line expression', () => {
   test('can print a single expression', () => {
     const query = `FROM a | STATS a != 1, avg(1, 2, 3)`;
-    const { root } = parse(query);
+    const { root } = Parser.parse(query);
     const comparison = Walker.match(root, { type: 'function', name: '!=' })! as ESQLFunction;
     const func = Walker.match(root, { type: 'function', name: 'avg' })! as ESQLFunction;
 

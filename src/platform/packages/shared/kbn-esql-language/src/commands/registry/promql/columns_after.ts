@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
+import { isBinaryExpression, isIdentifier } from '../../../ast/is';
+import { getIndexFromPromQLParams } from '../../definitions/utils/promql';
 import { synth } from '../../../..';
 
 export const columnsAfter = async (
@@ -29,7 +30,7 @@ async function getSourceColumns(
   command: ESQLAstPromqlCommand,
   fromFrom: IAdditionalFields['fromFrom']
 ): Promise<ESQLColumnData[]> {
-  const indexName = getIndexFromParams(command);
+  const indexName = getIndexFromPromQLParams(command);
 
   if (!indexName) {
     return [];
@@ -43,21 +44,6 @@ async function getSourceColumns(
    * We create a synthetic FROM command to reuse the existing field fetching infrastructure.
    */
   return fromFrom(synth.cmd`FROM ${indexName}`);
-}
-
-function getIndexFromParams({ params }: ESQLAstPromqlCommand): string | undefined {
-  if (!params?.entries) {
-    return undefined;
-  }
-
-  const indexEntry = params.entries.find(
-    (entry): entry is ESQLMapEntry =>
-      isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
-  );
-
-  const { value } = indexEntry ?? {};
-
-  return isIdentifier(value) || isSource(value) ? value.name : undefined;
 }
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
