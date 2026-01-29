@@ -725,10 +725,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <div css={sectionWrapperCss}>
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={() => navigateToCasesTemplates()}>
-                    <FormattedMessage
-                      defaultMessage="Show all templates"
-                      id="show-all-templates-button"
-                    />
+                    {i18n.SHOW_ALL_TEMPLATES}
                   </EuiButton>
                 </EuiFlexItem>
               </div>
