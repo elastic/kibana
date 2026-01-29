@@ -126,7 +126,6 @@ dependsOn:
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
-  - '@kbn/controls-schemas'
   - '@kbn/zod'
   - '@kbn/cps'
   - '@kbn/controls-renderer'
