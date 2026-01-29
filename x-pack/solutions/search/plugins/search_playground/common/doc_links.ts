@@ -15,7 +15,6 @@ class PlaygroundDocLinks {
   public hiddenFields: string = '';
   public elasticLLMCosts: string = '';
   public elasticLLM: string = '';
-  public agentBuilderLink: string = '';
 
   constructor() {}
 
@@ -27,7 +26,6 @@ class PlaygroundDocLinks {
     this.hiddenFields = newDocLinks.playground.hiddenFields;
     this.elasticLLMCosts = newDocLinks.observability.elasticManagedLlmUsageCost;
     this.elasticLLM = newDocLinks.observability.elasticManagedLlm;
-    this.agentBuilderLink = newDocLinks.agentBuilder.agentBuilder;
   }
 }
 
