@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { createPrecisionAtKEvaluator, createRecallAtKEvaluator, createF1AtKEvaluator } from '.';
+import {
+  createPrecisionAtKEvaluator,
+  createRecallAtKEvaluator,
+  createF1AtKEvaluator,
+  createRagEvaluators,
+} from '.';
 import type { RagEvaluatorConfig, GroundTruth, RetrievedDoc } from './types';
 
 interface TestOutput {
@@ -438,6 +443,199 @@ describe('RAG Evaluators', () => {
       expect(result.score).toBeNull();
       expect(result.label).toBe('unavailable');
       expect(result.explanation).toContain('Retrieved docs extraction failed');
+    });
+  });
+
+  describe('evaluator naming', () => {
+    it('should include K value in evaluator names', () => {
+      const evaluator = createPrecisionAtKEvaluator({ ...config, k: 10 });
+      expect(evaluator.name).toBe('Precision@10');
+    });
+
+    it('should use first K value for individual evaluator when array is passed', () => {
+      const evaluator = createRecallAtKEvaluator({ ...config, k: [5, 10, 20] });
+      expect(evaluator.name).toBe('Recall@5');
+    });
+  });
+
+  describe('multi-K evaluation with createRagEvaluators', () => {
+    it('should create evaluators for each K value when k is an array', () => {
+      const multiKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: [5, 10],
+      };
+
+      const evaluators = createRagEvaluators(multiKConfig);
+
+      expect(evaluators).toHaveLength(6);
+      expect(evaluators.map((e) => e.name)).toEqual([
+        'Precision@5',
+        'Recall@5',
+        'F1@5',
+        'Precision@10',
+        'Recall@10',
+        'F1@10',
+      ]);
+    });
+
+    it('should create 3 evaluators when k is a single number (backward compatibility)', () => {
+      const singleKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: 5,
+      };
+
+      const evaluators = createRagEvaluators(singleKConfig);
+
+      expect(evaluators).toHaveLength(3);
+      expect(evaluators.map((e) => e.name)).toEqual(['Precision@5', 'Recall@5', 'F1@5']);
+    });
+
+    it('should deduplicate and sort K values', () => {
+      const duplicateKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: [10, 5, 10, 20, 5],
+      };
+
+      const evaluators = createRagEvaluators(duplicateKConfig);
+
+      expect(evaluators).toHaveLength(9);
+      expect(evaluators.map((e) => e.name)).toEqual([
+        'Precision@5',
+        'Recall@5',
+        'F1@5',
+        'Precision@10',
+        'Recall@10',
+        'F1@10',
+        'Precision@20',
+        'Recall@20',
+        'F1@20',
+      ]);
+    });
+
+    it('should calculate metrics correctly for different K values', async () => {
+      const multiKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: [2, 5],
+      };
+
+      const evaluators = createRagEvaluators(multiKConfig);
+      const precision2 = evaluators.find((e) => e.name === 'Precision@2')!;
+      const precision5 = evaluators.find((e) => e.name === 'Precision@5')!;
+
+      const output = {
+        retrievedDocs: [
+          createDoc('doc_1'),
+          createDoc('doc_X'),
+          createDoc('doc_2'),
+          createDoc('doc_Y'),
+          createDoc('doc_3'),
+        ],
+      };
+
+      const result2 = await precision2.evaluate({
+        input: {},
+        output,
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      const result5 = await precision5.evaluate({
+        input: {},
+        output,
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      // Precision@2: 1 relevant doc (doc_1) in top 2 = 0.5
+      expect(result2.score).toBe(0.5);
+      // Precision@5: 3 relevant docs (doc_1, doc_2, doc_3) in top 5 = 0.6
+      expect(result5.score).toBe(0.6);
+    });
+  });
+
+  describe('RAG_EVAL_K environment variable', () => {
+    const originalEnv = process.env.RAG_EVAL_K;
+
+    afterEach(() => {
+      if (originalEnv !== undefined) {
+        process.env.RAG_EVAL_K = originalEnv;
+      } else {
+        delete process.env.RAG_EVAL_K;
+      }
+    });
+
+    it('should parse comma-separated K values from env var', () => {
+      process.env.RAG_EVAL_K = '5,10,20';
+
+      const evaluators = createRagEvaluators(config);
+
+      expect(evaluators).toHaveLength(9);
+      expect(evaluators.map((e) => e.name)).toEqual([
+        'Precision@5',
+        'Recall@5',
+        'F1@5',
+        'Precision@10',
+        'Recall@10',
+        'F1@10',
+        'Precision@20',
+        'Recall@20',
+        'F1@20',
+      ]);
+    });
+
+    it('should handle env var with spaces around values', () => {
+      process.env.RAG_EVAL_K = '5, 10, 20';
+
+      const evaluators = createRagEvaluators(config);
+
+      expect(evaluators).toHaveLength(9);
+      expect(evaluators.map((e) => e.name).slice(0, 3)).toEqual([
+        'Precision@5',
+        'Recall@5',
+        'F1@5',
+      ]);
+    });
+
+    it('should override config k when env var is set', () => {
+      process.env.RAG_EVAL_K = '3';
+
+      const multiKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: [5, 10, 20],
+      };
+
+      const evaluators = createRagEvaluators(multiKConfig);
+
+      expect(evaluators).toHaveLength(3);
+      expect(evaluators.map((e) => e.name)).toEqual(['Precision@3', 'Recall@3', 'F1@3']);
+    });
+
+    it('should use config k when env var is invalid', () => {
+      process.env.RAG_EVAL_K = 'invalid';
+
+      const evaluators = createRagEvaluators({ ...config, k: 7 });
+
+      expect(evaluators).toHaveLength(3);
+      expect(evaluators.map((e) => e.name)).toEqual(['Precision@7', 'Recall@7', 'F1@7']);
+    });
+
+    it('should filter out invalid values from comma-separated env var', () => {
+      process.env.RAG_EVAL_K = '5,invalid,10,-1,0,20';
+
+      const evaluators = createRagEvaluators(config);
+
+      expect(evaluators).toHaveLength(9);
+      expect(evaluators.map((e) => e.name)).toEqual([
+        'Precision@5',
+        'Recall@5',
+        'F1@5',
+        'Precision@10',
+        'Recall@10',
+        'F1@10',
+        'Precision@20',
+        'Recall@20',
+        'F1@20',
+      ]);
     });
   });
 });

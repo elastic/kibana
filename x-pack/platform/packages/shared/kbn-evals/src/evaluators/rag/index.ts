@@ -17,9 +17,9 @@ import {
   filterDocsByGroundTruthIndices,
 } from './metrics';
 
-const PRECISION_EVALUATOR_NAME = 'Precision@K';
-const RECALL_EVALUATOR_NAME = 'Recall@K';
-const F1_EVALUATOR_NAME = 'F1@K';
+const getPrecisionName = (k: number) => `Precision@${k}`;
+const getRecallName = (k: number) => `Recall@${k}`;
+const getF1Name = (k: number) => `F1@${k}`;
 
 function shouldFilterByGroundTruthIndices(config: {
   filterByGroundTruthIndices?: boolean;
@@ -30,15 +30,40 @@ function shouldFilterByGroundTruthIndices(config: {
   return process.env.INDEX_FOCUSED_RAG_EVAL === 'true';
 }
 
-function getEffectiveK(configK: number): number {
+/**
+ * Returns K values from RAG_EVAL_K env var (comma-separated) or config.
+ */
+function getEffectiveK(configK: number | number[]): number[] {
   const envK = process.env.RAG_EVAL_K;
   if (envK !== undefined) {
-    const parsed = parseInt(envK, 10);
-    if (!isNaN(parsed) && parsed > 0) {
+    const parsed = envK
+      .split(',')
+      .map((v) => parseInt(v.trim(), 10))
+      .filter((n) => !isNaN(n) && n > 0);
+    if (parsed.length > 0) {
       return parsed;
     }
   }
-  return configK;
+  return Array.isArray(configK) ? configK : [configK];
+}
+
+/**
+ * Normalizes K values by removing duplicates and sorting in ascending order.
+ */
+function normalizeKValues(configK: number | number[]): number[] {
+  const kValues = getEffectiveK(configK);
+  return [...new Set(kValues)].sort((a, b) => a - b);
+}
+
+/**
+ * Returns a single K value. Uses the number directly or first value from array.
+ */
+function getSingleK(configK: number | number[]): number {
+  if (typeof configK === 'number') {
+    return configK;
+  }
+  const kValues = getEffectiveK(configK);
+  return kValues[0];
 }
 
 interface RagMetrics {
@@ -56,7 +81,7 @@ function computeRagMetrics<TOutput, TReferenceOutput>(
   referenceOutput: TReferenceOutput
 ): RagMetrics | null {
   const { extractRetrievedDocs, extractGroundTruth } = config;
-  const k = getEffectiveK(config.k);
+  const k = getSingleK(config.k);
   const threshold = config.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
 
   const groundTruth: GroundTruth = extractGroundTruth(referenceOutput);
@@ -85,8 +110,9 @@ function computeRagMetrics<TOutput, TReferenceOutput>(
 export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
   config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
+  const k = getSingleK(config.k);
   return {
-    name: PRECISION_EVALUATOR_NAME,
+    name: getPrecisionName(k),
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
@@ -96,7 +122,7 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
         return {
           score: null,
           label: 'unavailable',
-          explanation: `Precision@K evaluation failed: ${
+          explanation: `Precision@${k} evaluation failed: ${
             error instanceof Error ? error.message : String(error)
           }`,
         };
@@ -106,7 +132,7 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
         return {
           score: null,
           label: 'unavailable',
-          explanation: 'No ground truth available for Precision@K evaluation',
+          explanation: `No ground truth available for Precision@${k} evaluation`,
         };
       }
 
@@ -124,8 +150,9 @@ export function createPrecisionAtKEvaluator<TOutput = unknown, TReferenceOutput 
 export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
   config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
+  const k = getSingleK(config.k);
   return {
-    name: RECALL_EVALUATOR_NAME,
+    name: getRecallName(k),
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
@@ -135,7 +162,7 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
         return {
           score: null,
           label: 'unavailable',
-          explanation: `Recall@K evaluation failed: ${
+          explanation: `Recall@${k} evaluation failed: ${
             error instanceof Error ? error.message : String(error)
           }`,
         };
@@ -145,7 +172,7 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
         return {
           score: null,
           label: 'unavailable',
-          explanation: 'No ground truth available for Recall@K evaluation',
+          explanation: `No ground truth available for Recall@${k} evaluation`,
         };
       }
 
@@ -163,8 +190,9 @@ export function createRecallAtKEvaluator<TOutput = unknown, TReferenceOutput = u
 export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unknown>(
   config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator {
+  const k = getSingleK(config.k);
   return {
-    name: F1_EVALUATOR_NAME,
+    name: getF1Name(k),
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
       let metrics: RagMetrics | null;
@@ -174,7 +202,7 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
         return {
           score: null,
           label: 'unavailable',
-          explanation: `F1@K evaluation failed: ${
+          explanation: `F1@${k} evaluation failed: ${
             error instanceof Error ? error.message : String(error)
           }`,
         };
@@ -184,7 +212,7 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
         return {
           score: null,
           label: 'unavailable',
-          explanation: 'No ground truth available for F1@K evaluation',
+          explanation: `No ground truth available for F1@${k} evaluation`,
         };
       }
 
@@ -207,13 +235,17 @@ export function createF1AtKEvaluator<TOutput = unknown, TReferenceOutput = unkno
 
 /**
  * Creates all RAG evaluators (Precision@K, Recall@K, F1@K) with shared configuration.
+ * When k is an array or RAG_EVAL_K contains comma-separated values, evaluators are created for each K value.
+ * For example, k: [5, 10] will create: Precision@5, Recall@5, F1@5, Precision@10, Recall@10, F1@10
  */
 export function createRagEvaluators<TOutput = unknown, TReferenceOutput = unknown>(
   config: RagEvaluatorConfig<TOutput, TReferenceOutput>
 ): Evaluator[] {
-  return [
-    createPrecisionAtKEvaluator(config),
-    createRecallAtKEvaluator(config),
-    createF1AtKEvaluator(config),
-  ];
+  const kValues = normalizeKValues(config.k);
+
+  return kValues.flatMap((kValue) => [
+    createPrecisionAtKEvaluator({ ...config, k: kValue }),
+    createRecallAtKEvaluator({ ...config, k: kValue }),
+    createF1AtKEvaluator({ ...config, k: kValue }),
+  ]);
 }
