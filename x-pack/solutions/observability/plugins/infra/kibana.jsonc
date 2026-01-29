@@ -54,7 +54,6 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "licenseManagement",
-      "presentationPanel",
       "unifiedChartSectionViewer",
       "serverless"
     ],
@@ -63,6 +62,7 @@
       "licenseManagement",
       "kibanaUtils",
       "kibanaReact",
+      "presentationPanel",
       "ml",
       "fleet"
     ]
