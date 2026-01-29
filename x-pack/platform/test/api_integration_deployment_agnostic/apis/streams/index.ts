@@ -34,6 +34,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./systems'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./doc_counts'));
+    loadTestFile(require.resolve('./field_statistics'));
     loadTestFile(require.resolve('./snapshot_restore'));
   });
 }

@@ -21,12 +21,14 @@ import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
 import { StreamDetailAttachments } from '../../stream_detail_attachments';
+import { StreamDetailFieldStatistics } from '../stream_detail_field_statistics';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'schema',
   'retention',
+  'fieldStatistics',
   'advanced',
   'significantEvents',
   'dataQuality',
@@ -116,6 +118,24 @@ export function WiredStreamDetailManagement({
           <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    },
+    fieldStatistics: {
+      content: <StreamDetailFieldStatistics definition={definition} />,
+      label: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.streams.managementTab.fieldStatistics.tooltip', {
+            defaultMessage:
+              'View field usage statistics to understand how fields in this stream are being queried.',
+          })}
+        >
+          <span tabIndex={0}>
+            {i18n.translate('xpack.streams.streamDetailView.fieldStatisticsTab', {
+              defaultMessage: 'Field statistics',
             })}
           </span>
         </EuiToolTip>
