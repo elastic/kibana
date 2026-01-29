@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('loads with correct page title', async () => {
       await pageObjects.header.waitUntilLoadingHasFinished();
-      const pageTitle = await testSubjects.getVisibleText('rulesPageTitle');
+      const pageTitle = await testSubjects.getVisibleText('appTitle');
       expect(pageTitle).to.be('Rules');
     });
 

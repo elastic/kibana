@@ -170,7 +170,7 @@ const RulesPage = () => {
         paddingSize: 'xl',
         bottomBorder: true,
         pageTitle: (
-          <span data-test-subj="rulesPageTitle">
+          <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesPage.pageTitle"
               defaultMessage="Rules"
