@@ -210,3 +210,80 @@ paths:
           description: The integration is deleted.
         404:
           description: The integration is not found.
+  /internal/automatic_import/integrations/{integration_id}/approve:
+    post:
+      summary: Approves an existing integration.
+      operationId: ApproveAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Approves an integration by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        additionalProperties: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveIntegrationRequest"
+      responses:
+        200:
+          description: Indicates integration has been approved correctly.
+        400:
+          description: >-
+            The request is invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error:
+                    description: The error message
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        404:
+          description: Indicates the integration id was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error:
+                    description: The error message
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    ApproveIntegrationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - integrationId
+        - dataStreams
+        - version
+        - isApproved
+      properties:
+        integrationId:
+          description: The ID of the integration
+          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        dataStreams:
+          description: The data streams of the integration
+          type: array
+          items:
+            $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/DataStream"
+        version:
+          description: The version of the integration
+          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        isApproved:
+          description: Whether the integration is approved
+          type: boolean

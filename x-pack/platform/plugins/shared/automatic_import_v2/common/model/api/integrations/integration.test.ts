@@ -8,6 +8,8 @@
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
@@ -44,6 +46,173 @@ describe('integration schemas', () => {
       },
     ],
     ...overrides,
+  });
+
+  describe('ApproveAutoImportIntegrationRequestParams', () => {
+    it('requires integration_id', () => {
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse({});
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+    });
+
+    it('rejects empty integration_id', () => {
+      const payload = { integration_id: '   ' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
+    });
+
+    it('accepts valid params', () => {
+      const payload = { integration_id: 'integration-123' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = { integration_id: 'integration-123', unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({ integration_id: 'integration-123' });
+    });
+  });
+
+  describe('ApproveAutoImportIntegrationRequestBody', () => {
+    const validPayload = {
+      integrationId: 'integration-123',
+      version: '1.0.0',
+      dataStreams: [createValidDataStream()],
+      isApproved: true,
+    };
+
+    it('accepts a valid payload', () => {
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(validPayload);
+      expectParseSuccess(result);
+    });
+
+    it('accepts multiple data streams', () => {
+      const payload = {
+        ...validPayload,
+        dataStreams: [
+          createValidDataStream({ dataStreamId: 'ds-1', title: 'logs' }),
+          createValidDataStream({
+            dataStreamId: 'ds-2',
+            title: 'metrics',
+            inputTypes: [{ name: 'http_endpoint' as const }],
+          }),
+        ],
+      };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('accepts an empty dataStreams array', () => {
+      const payload = { ...validPayload, dataStreams: [] };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('requires integrationId', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).integrationId;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
+    });
+
+    it('rejects empty integrationId', () => {
+      const payload = { ...validPayload, integrationId: '   ' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('integrationId: No empty strings allowed');
+    });
+
+    it('requires dataStreams', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).dataStreams;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('dataStreams: Required');
+    });
+
+    it('rejects invalid dataStreams entries', () => {
+      const payload = {
+        ...validPayload,
+        dataStreams: [
+          {
+            // missing dataStreamId/title/description/inputTypes
+          },
+        ],
+      };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('strips unknown properties inside a data stream entry', () => {
+      const payload = {
+        ...validPayload,
+        dataStreams: [createValidDataStream({ unknown: 'property' })],
+      };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data.dataStreams[0]).not.toHaveProperty('unknown');
+    });
+
+    it('rejects invalid input type in a data stream entry', () => {
+      const payload = {
+        ...validPayload,
+        dataStreams: [createValidDataStream({ inputTypes: [{ name: 'invalid-type' }] })],
+      };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('requires version', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).version;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: Required');
+    });
+
+    it('requires isApproved', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).isApproved;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('isApproved: Required');
+    });
+
+    it('accepts isApproved=false', () => {
+      const payload = { ...validPayload, isApproved: false };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects empty version', () => {
+      const payload = { ...validPayload, version: '   ' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
+    });
+
+    it('accepts non-semver version strings', () => {
+      const payload = { ...validPayload, version: 'build-2026-01-29' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects unknown properties', () => {
+      const payload = { ...validPayload, unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
   });
 
   describe('CreateAutoImportIntegrationRequestBody', () => {
