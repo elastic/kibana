@@ -10,22 +10,20 @@ export const AI_RULE_CREATION_PROMPT_TEXTAREA = '[data-test-subj="prompt-textare
 export const AI_RULE_CREATION_SEND_BUTTON = '[data-test-subj="submit-chat"]';
 
 export const AI_RULE_CREATION_REGENERATE_BUTTON =
-  '[data-test-subj="ai-assisted-rule-creation-regenerate-button"]';
+  '[data-test-subj="ai-rule-creation-regenerate-button"]';
 
-export const AI_RULE_CREATION_CANCEL_BUTTON =
-  '[data-test-subj="ai-assisted-rule-creation-cancel-button"]';
+export const AI_RULE_CREATION_CANCEL_BUTTON = '[data-test-subj="ai-rule-creation-cancel-button"]';
 
 export const AI_RULE_CREATION_CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
 
-export const AI_RULE_CREATION_INFO_CALLOUT =
-  '[data-test-subj="ai-assisted-rule-creation-info-callout"]';
+export const AI_RULE_CREATION_INFO_CALLOUT = '[data-test-subj="ai-rule-creation-info-callout"]';
 
-export const AI_RULE_CREATION_PROGRESS = '[data-test-subj="ai-assisted-rule-creation-progress"]';
+export const AI_RULE_CREATION_PROGRESS = '[data-test-subj="ai-rule-creation-progress"]';
 
-export const AI_RULE_CREATION_UPDATES = '[data-test-subj="ai-assisted-rule-updates"]';
+export const AI_RULE_CREATION_UPDATES = '[data-test-subj="ai-rule-updates"]';
 
 export const AI_RULE_CREATION_CANCELLED_CALLOUT =
-  '[data-test-subj="ai-assisted-rule-creation-cancelled-callout"]';
+  '[data-test-subj="ai-rule-creation-cancelled-callout"]';
 
 export const CREATE_RULE_MENU_BUTTON = '[data-test-subj="create-rule-button"]';
 

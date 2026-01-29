@@ -106,7 +106,7 @@ export const assertEsqlQueryBarContains = (expectedQuery: string) => {
 export const assertCancelledCalloutVisible = () => {
   cy.get(AI_RULE_CREATION_CANCELLED_CALLOUT)
     .should('be.visible')
-    .should('contain', 'The AI-assisted rule creation process was cancelled.');
+    .should('contain', 'The AI rule creation process was cancelled.');
 };
 
 export const clickNewAgentBuilderAttachmentButton = () => {
