@@ -769,7 +769,7 @@ yargs(process.argv.slice(2))
             log.info(`Found ${mdFiles.length} markdown files in commands directory`);
 
             // Initialize cache
-            const cachePath = Path.join(outDir, '.file-cache.json');
+            const cachePath = Path.join(__dirname, '.file-cache.json');
             const cache = await loadCache(cachePath);
             let cacheUpdated = false;
 
