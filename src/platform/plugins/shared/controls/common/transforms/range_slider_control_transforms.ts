@@ -34,10 +34,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
         RANGE_SLIDER_REF_NAME
       );
       return {
-        state: {
-          ...dataControlState,
-          ...state,
-        },
+        state: dataControlState,
         references,
       };
     },
@@ -60,7 +57,8 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
       );
       return {
         ...dataControlState,
-        ...state,
+        value: state.value,
+        step: state.step,
       };
     },
   });

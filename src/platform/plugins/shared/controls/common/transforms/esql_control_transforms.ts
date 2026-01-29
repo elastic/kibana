@@ -22,63 +22,87 @@ interface LegacyStoredESQLControlExplicitInput {
     hideSort?: boolean;
   };
   esqlQuery: string;
-  exclude?: boolean;
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  searchTechnique?: string;
-  selectedOptions: string[];
+  selectedOptions?: string[];
   singleSelect?: boolean;
-  sort?: { by: string; direction: string };
   variableName: string;
   variableType: string;
 }
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
-    transformIn: (state: OptionsListESQLControlState) => {
-      return {
-        state: {
-          availableOptions: state.available_options,
-          controlType: state.control_type,
-          description: state.description,
-          displaySettings: {
-            hideActionBar: state.display_settings?.hide_action_bar,
-            hideExclude: state.display_settings?.hide_exclude,
-            hideExists: state.display_settings?.hide_exists,
-            hideSort: state.display_settings?.hide_sort,
-            placeholder: state.display_settings?.placeholder,
-          },
-          esqlQuery: state.esql_query,
-          selectedOptions: state.selected_options,
-          singleSelect: state.single_select,
-          title: state.title,
-          variableName: state.variable_name,
-          variableType: state.variable_type,
-        } as StoredESQLControlExplicitInput,
-        references: [],
-      };
-    },
-    transformOut: (
-      state: StoredESQLControlExplicitInput,
-      panelReferences,
-      containerReferences,
-      id
+    transformOut: <
+      StoredStateType extends Partial<
+        LegacyStoredESQLControlExplicitInput & OptionsListESQLControlState
+      >
+    >(
+      state: StoredStateType
     ): OptionsListESQLControlState => {
+      const {
+        availableOptions,
+        available_options,
+        controlType,
+        control_type,
+        displaySettings,
+        display_settings,
+        esqlQuery,
+        esql_query,
+        selectedOptions,
+        selected_options,
+        singleSelect,
+        single_select,
+        variableName,
+        variable_name,
+        variableType,
+        variable_type,
+      } = state;
+
       return {
-        available_options: state.availableOptions,
-        control_type: state.controlType as OptionsListESQLControlState['control_type'],
-        esql_query: state.esqlQuery,
-        display_settings: {
-          hide_action_bar: state.displaySettings?.hideActionBar,
-          hide_exclude: state.displaySettings?.hideExclude,
-          hide_exists: state.displaySettings?.hideExists,
-          hide_sort: state.displaySettings?.hideSort,
-          placeholder: state.displaySettings?.placeholder,
-        },
-        selected_options: state.selectedOptions,
-        single_select: state.singleSelect,
-        variable_name: state.variableName,
-        variable_type: state.variableType as OptionsListESQLControlState['variable_type'],
+        /**
+         * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+         */
+        ...(Array.isArray(availableOptions) && availableOptions.length
+          ? { available_options: availableOptions }
+          : {}),
+        ...(available_options && { available_options }),
+        ...(controlType && { control_type: controlType }),
+        ...(control_type ? { control_type } : { control_type: '' }),
+        ...(displaySettings
+          ? {
+              display_settings: {
+                ...(typeof displaySettings.hideActionBar === 'boolean' && {
+                  hide_action_bar: displaySettings.hideActionBar,
+                }),
+                ...(typeof displaySettings.hideExclude === 'boolean' && {
+                  hide_exclude: displaySettings.hideExclude,
+                }),
+                ...(typeof displaySettings.hideExists === 'boolean' && {
+                  hide_exists: displaySettings.hideExists,
+                }),
+                ...(typeof displaySettings.hideSort === 'boolean' && {
+                  hide_sort: displaySettings.hideSort,
+                }),
+                ...(displaySettings.placeholder && {
+                  placeholder: displaySettings.placeholder,
+                }),
+              },
+            }
+          : {}),
+        ...(display_settings ? { display_settings } : {}),
+        ...(esqlQuery && { esql_query: esqlQuery }),
+        ...(esql_query && { esql_query }),
+
+        ...(Array.isArray(selectedOptions) && selectedOptions.length
+          ? { selected_options: selectedOptions }
+          : {}),
+        ...(selected_options && { selected_options }),
+
+        ...(typeof singleSelect === 'boolean' && { single_select: singleSelect }),
+        ...(typeof single_select === 'boolean' && { single_select }),
+
+        ...(variableName && { variable_name: variableName }),
+        ...(variable_name && { variable_name }),
+        ...(variableType && { variable_type: variableType }),
+        ...(variable_type && { variable_type }),
       };
     },
   });

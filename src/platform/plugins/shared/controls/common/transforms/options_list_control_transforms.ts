@@ -48,10 +48,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         OPTIONS_LIST_REF_NAME
       );
       return {
-        state: {
-          ...dataControlState,
-          ...state,
-        },
+        state: dataControlState,
         references,
       };
     },

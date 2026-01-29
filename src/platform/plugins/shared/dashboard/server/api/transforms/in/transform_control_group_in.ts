@@ -59,6 +59,8 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
         );
       }
 
+      console.log({ transformedControlState: JSON.stringify(transformedControlState) });
+
       const { width, grow, explicitInput } = transformedControlState;
       return [
         uid,

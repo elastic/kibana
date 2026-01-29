@@ -22,7 +22,7 @@ export function transformControlGroupOut(
   const controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, containerReferences)
     : [];
-
+  console.log({ controls: JSON.stringify(controls) });
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
   const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined = ignoreParentSettingsJSON
     ? JSON.parse(ignoreParentSettingsJSON)

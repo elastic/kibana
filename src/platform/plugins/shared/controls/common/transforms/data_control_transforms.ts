@@ -8,9 +8,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 export interface LegacyStoredDataControlState extends SerializedTitles {
   fieldName: string;
@@ -26,6 +26,7 @@ export function transformDataControlIn(
   state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
   references?: Reference[];
 } {
+  console.log({ state });
   const { data_view_id, ...rest } = state;
   return {
     state: {
@@ -88,8 +89,9 @@ export function transformDataControlOut<
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignoreValidations === 'boolean' && { ignore_validations: ignoreValidations }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
+    field_name: '',
     ...(fieldName && { field_name: fieldName }),
-    ...(field_name ? { field_name } : { field_name: '' }),
+    ...(field_name && { field_name }),
   };
 }
 
