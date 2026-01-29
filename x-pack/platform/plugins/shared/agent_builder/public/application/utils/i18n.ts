@@ -529,5 +529,30 @@ export const labels = {
     deletePromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.deletePromptButtonLabel', {
       defaultMessage: 'Delete prompt',
     }),
+    // Toast messages
+    createPromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.createPromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" created successfully',
+        values: { promptId },
+      }),
+    createPromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.createPromptErrorToast', {
+      defaultMessage: 'Failed to create prompt',
+    }),
+    updatePromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.updatePromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" updated successfully',
+        values: { promptId },
+      }),
+    updatePromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.updatePromptErrorToast', {
+      defaultMessage: 'Failed to update prompt',
+    }),
+    deletePromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.deletePromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" deleted successfully',
+        values: { promptId },
+      }),
+    deletePromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.deletePromptErrorToast', {
+      defaultMessage: 'Failed to delete prompt',
+    }),
   },
 };
