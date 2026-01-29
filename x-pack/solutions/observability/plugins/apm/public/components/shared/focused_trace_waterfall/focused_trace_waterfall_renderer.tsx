@@ -8,16 +8,21 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
 import { EuiCallOut } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { FocusedTraceWaterfall } from '.';
 import { Loading } from '../trace_waterfall/loading';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-export function FocusedTraceWaterfallRenderer({
-  traceId,
-  rangeFrom,
-  rangeTo,
-  docId,
-}: FocusedTraceWaterfallProps) {
+interface Props extends FocusedTraceWaterfallProps {
+  core: CoreStart;
+}
+
+export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, docId, core }: Props) {
+  useEffectOnce(() => {
+    createCallApmApi(core);
+  });
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}/summary', {

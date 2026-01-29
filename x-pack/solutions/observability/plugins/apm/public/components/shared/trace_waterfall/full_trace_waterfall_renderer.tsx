@@ -9,9 +9,16 @@ import { EuiCallOut } from '@elastic/eui';
 import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { TraceWaterfall } from '.';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { Loading } from './loading';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+
+interface Props extends FullTraceWaterfallProps {
+  core: CoreStart;
+}
 
 export function FullTraceWaterfallRenderer({
   traceId,
@@ -21,7 +28,11 @@ export function FullTraceWaterfallRenderer({
   scrollElement,
   onNodeClick,
   onErrorClick,
-}: FullTraceWaterfallProps) {
+  core,
+}: Props) {
+  useEffectOnce(() => {
+    createCallApmApi(core);
+  });
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {

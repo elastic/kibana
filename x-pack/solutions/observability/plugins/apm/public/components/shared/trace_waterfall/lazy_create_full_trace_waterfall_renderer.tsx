@@ -5,11 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { FullTraceWaterfallProps } from '@kbn/apm-types/src/full_trace_waterfall';
 import type { CoreStart } from '@kbn/core/public';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 
 const LazyFullTraceWaterfallRendererComponent = dynamic(() =>
   import('./full_trace_waterfall_renderer').then((mod) => ({
@@ -18,8 +16,7 @@ const LazyFullTraceWaterfallRendererComponent = dynamic(() =>
 );
 
 export function createLazyFullTraceWaterfallRenderer({ core }: { core: CoreStart }) {
-  createCallApmApi(core);
   return (props: FullTraceWaterfallProps) => {
-    return <LazyFullTraceWaterfallRendererComponent {...props} />;
+    return <LazyFullTraceWaterfallRendererComponent {...props} core={core} />;
   };
 }
