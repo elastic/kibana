@@ -126,7 +126,7 @@ export class DashboardApp {
     }
   }
 
-  async openInLineEditor(id: string) {
+  async openInlineEditor(id: string) {
     // Hover over the panel to show action buttons
     const embeddableSelector = `[data-test-embeddable-id="${id}"]`;
     await this.page.locator(embeddableSelector).hover();
