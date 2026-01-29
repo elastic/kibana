@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,9 +35,6 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
-
-// Threshold below which we show the "Load more" button (e.g., less than 10% matching)
-const SPARSE_RESULTS_THRESHOLD = 0.1;
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -139,42 +134,23 @@ const EditingPanel = () => (
 
 const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
-  const { setDocumentMatchFilter, changeRule, createNewRule, fetchMoreSamples } =
-    useStreamRoutingEvents();
+  const { setDocumentMatchFilter, changeRule, createNewRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const isFetchingMore = samplesSnapshot.context.isFetchingMore;
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
-    samplesSnapshot.matches({ fetching: { documents: 'loading' } }) ||
-    isFetchingMore;
+    samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const streamName = samplesSnapshot.context.definition.stream.name;
   const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
 
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
 
-  const { documentsError, approximateMatchingPercentage, documentMatchFilter, fetchMoreError } =
-    samplesSnapshot.context;
+  const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = selectPreviewDocuments(samplesSnapshot.context);
 
   const condition = processCondition(samplesSnapshot.context.condition);
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
-
-  // Determine if we should show the "Load more" button
-  // Show when matching samples are sparse (below threshold) and we're in matched filter mode
-  const isSparseResults =
-    approximateMatchingPercentage !== undefined &&
-    approximateMatchingPercentage !== null &&
-    approximateMatchingPercentage < SPARSE_RESULTS_THRESHOLD &&
-    approximateMatchingPercentage > 0;
-
-  const canFetchMore =
-    documentMatchFilter === 'matched' &&
-    condition &&
-    isProcessedCondition &&
-    !documentsError &&
-    !isLoadingDocuments;
 
   const cellActions = useMemo(() => {
     if (!enableActions) {
@@ -290,42 +266,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     );
   }
 
-  // Fetch more button and error display
-  const fetchMoreSection =
-    canFetchMore && (isSparseResults || !hasDocuments) ? (
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {fetchMoreError && (
-            <EuiFlexItem>
-              <EuiCallOut
-                title={i18n.translate('xpack.streams.streamDetail.preview.fetchMoreError', {
-                  defaultMessage: 'Failed to load more samples',
-                })}
-                color="danger"
-                iconType="error"
-                size="s"
-              >
-                <p>{fetchMoreError.message}</p>
-              </EuiCallOut>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiButton
-              data-test-subj="streamsAppRoutingPreviewFetchMoreButton"
-              onClick={fetchMoreSamples}
-              isLoading={isFetchingMore}
-              iconType="refresh"
-              size="s"
-            >
-              {i18n.translate('xpack.streams.streamDetail.preview.fetchMoreButton', {
-                defaultMessage: 'Load more matching samples',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ) : null;
-
   return (
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -340,7 +280,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
           <EuiFlexItem grow={false} />
         )}
         {content}
-        {fetchMoreSection}
       </EuiFlexGroup>
     </>
   );

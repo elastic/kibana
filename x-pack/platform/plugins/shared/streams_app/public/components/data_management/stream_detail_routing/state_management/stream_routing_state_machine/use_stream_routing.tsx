@@ -122,9 +122,6 @@ export const useStreamRoutingEvents = () => {
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
       },
-      fetchMoreSamples: () => {
-        service.send({ type: 'routingSamples.fetchMore' });
-      },
     };
   }, [service]);
 };
