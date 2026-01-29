@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 4662
+  automaticImportVTwo: 10605
   banners: 4087
   canvas: 15142
   cases: 153204
@@ -26,14 +26,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 559233
+  core: 558848
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12500
+  dashboardEnhanced: 12159
   dashboardMarkdown: 4994
-  data: 454000
+  data: 500179
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   expressionMetricVis: 17559
   expressionPartitionVis: 29826
   expressions: 105076
-  expressionTagcloud: 12643
+  expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
   fieldFormats: 64634
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 7077
-  observabilityAIAssistant: 54556
+  observabilityAIAssistant: 61180
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9285
+  presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
@@ -166,7 +166,7 @@ pageLoadAssetSize:
   serverless: 7451
   serverlessObservability: 19472
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 6608
+  serverlessWorkplaceAI: 7718
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -175,7 +175,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 25991
+  streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -183,7 +183,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 111000
   uiActions: 24670
-  uiActionsEnhanced: 20189
+  uiActionsEnhanced: 19272
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 6898
@@ -207,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 76704
+  workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 6112
+  workplaceAIApp: 65731

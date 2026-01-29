@@ -6,7 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AgentCapabilities, ChatEvent, ConverseInput } from '@kbn/agent-builder-common';
+import type {
+  AgentCapabilities,
+  ChatEvent,
+  ConverseInput,
+  AgentConfigurationOverrides,
+} from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 
@@ -39,6 +44,20 @@ export interface ChatConverseParams {
    */
   capabilities?: AgentCapabilities;
   /**
+   * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
+   */
+  structuredOutput?: boolean;
+  /**
+   * Optional JSON schema for structured output. Only used when structuredOutput is true.
+   * If not provided, uses a default schema.
+   */
+  outputSchema?: Record<string, unknown>;
+  /**
+   * When false, the conversation will not be persisted (no conversation_created/updated events).
+   * Defaults to true.
+   */
+  storeConversation?: boolean;
+  /**
    * Create conversation with specified ID if not found.
    * Defaults to false. Has no effect when conversationId is not provided.
    */
@@ -61,4 +80,9 @@ export interface ChatConverseParams {
    * These tools will be registered as LLM tools with browser.* namespace.
    */
   browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Runtime configuration overrides for the agent.
+   * These override the stored agent configuration for this execution only.
+   */
+  configurationOverrides?: AgentConfigurationOverrides;
 }

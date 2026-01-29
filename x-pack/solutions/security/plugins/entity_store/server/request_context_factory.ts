@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
@@ -15,37 +15,54 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
+import { EngineDescriptorClient } from './domain/definitions/saved_objects';
+import { LogsExtractionClient } from './domain/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
-}
-
-export async function getTaskManagerStart(
-  core: CoreSetup<EntityStoreStartPlugins, void>
-): Promise<TaskManagerStartContract> {
-  const [, startPlugins] = await core.getStartServices();
-
-  return startPlugins.taskManager;
+  request: KibanaRequest;
 }
 
 export async function createRequestHandlerContext({
   logger,
   context,
   coreSetup,
+  request,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const taskManagerStart = await getTaskManagerStart(coreSetup);
+  const [, startPlugins] = await coreSetup.getStartServices();
+  const taskManagerStart = startPlugins.taskManager;
+
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+
+  const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+    core.savedObjects.client,
+    core.elasticsearch.client.asInternalUser,
+    request
+  );
 
   return {
     core,
     logger,
-    assetManager: new AssetManager(
+    assetManager: new AssetManager({
       logger,
-      core.elasticsearch.client.asCurrentUser,
-      taskManagerStart
-    ),
+      esClient: core.elasticsearch.client.asCurrentUser,
+      taskManager: taskManagerStart,
+      engineDescriptorClient: new EngineDescriptorClient(
+        core.savedObjects.client,
+        namespace,
+        logger
+      ),
+      namespace,
+    }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    logsExtractionClient: new LogsExtractionClient(
+      logger,
+      namespace,
+      core.elasticsearch.client.asCurrentUser,
+      dataViewsService
+    ),
   };
 }
