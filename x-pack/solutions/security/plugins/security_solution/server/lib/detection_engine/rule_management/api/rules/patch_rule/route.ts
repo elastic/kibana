@@ -16,7 +16,7 @@ import {
 import {
   validateResponseActionsPermissions,
   validateRuleResponseActionsPayload,
-} from '../../../utils/rule_response_actions_validators';
+} from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,

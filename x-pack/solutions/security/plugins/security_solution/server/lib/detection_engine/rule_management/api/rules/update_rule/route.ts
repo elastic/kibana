@@ -12,7 +12,7 @@ import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   validateResponseActionsPermissions,
   validateRuleResponseActionsPayload,
-} from '../../../utils/rule_response_actions_validators';
+} from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
