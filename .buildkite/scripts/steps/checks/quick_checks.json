@@ -45,7 +45,8 @@
   {
     "script": ".buildkite/scripts/steps/checks/i18n.sh",
     "nodeCommand": "node scripts/i18n_check --quiet",
-    "pathArg": "--path"
+    "pathArg": "--path",
+    "skipLocalIfNoPackages": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/file_casing.sh",

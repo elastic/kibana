@@ -30,6 +30,8 @@ interface QuickCheck {
   nodeCommand?: string;
   mayChangeFiles?: boolean;
   skipLocal?: boolean;
+  /** Skip this check in local runs when no target packages are identified */
+  skipLocalIfNoPackages?: boolean;
   /** Argument name for passing target files as comma-separated list (e.g., "--files") */
   filesArg?: string;
   /** Argument name for passing target packages as multiple arguments (e.g., "--path" becomes "--path ./pkg1 --path ./pkg2") */
@@ -129,6 +131,20 @@ void run(async ({ log, flagsReader }) => {
       logger.info(`Skipping ${skippedChecks.length} check(s) for local run: ${skippedNames}`);
     }
     checksToRun = checksToRun.filter((check) => !check.skipLocal);
+
+    // Skip checks that require package scoping when no packages are identified
+    if (!targetPackages) {
+      const noPackageScopeSkipped = checksToRun.filter((check) => check.skipLocalIfNoPackages);
+      if (noPackageScopeSkipped.length > 0) {
+        const skippedNames = noPackageScopeSkipped
+          .map((c) => getScriptShortName(c.script))
+          .join(', ');
+        logger.info(
+          `Skipping ${noPackageScopeSkipped.length} check(s) (no package scope): ${skippedNames}`
+        );
+      }
+      checksToRun = checksToRun.filter((check) => !check.skipLocalIfNoPackages);
+    }
   }
 
   // Determine fix mode: defaults to true in CI, false locally
@@ -462,7 +478,7 @@ async function runNodeCommand(
 ): Promise<CheckResult> {
   return new Promise((resolveFn) => {
     if (showCommands) {
-      logger.debug(`[${getScriptShortName(script)}] Running: ${nodeCommand}`);
+      logger.info(`[${getScriptShortName(script)}] Running: ${nodeCommand}`);
     }
 
     const parts = nodeCommand.split(' ');
@@ -506,7 +522,7 @@ async function runShellScript(script: string, startTime: number): Promise<CheckR
     validateScriptPath(script);
 
     if (showCommands) {
-      logger.debug(`[${getScriptShortName(script)}] Running: bash ${script}`);
+      logger.info(`[${getScriptShortName(script)}] Running: bash ${script}`);
     }
 
     const scriptProcess = spawn('bash', [script], {
