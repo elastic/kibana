@@ -346,6 +346,15 @@ describe('aggregation functions (by clause)', () => {
     });
   });
 
+  test('suggests functions and metrics after opening paren in assignment', async () => {
+    const metricNames = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+
+    await expectPromqlSuggestions('PROMQL col0 = (', {
+      labelsContain: ['abs', 'avg', ...metricNames],
+      labelsNotContain: [promqlByCompleteItem.label],
+    });
+  });
+
   test('cursor inside complete empty function - sum(|) after accepting suggestion', async () => {
     const fullQuery = 'PROMQL sum()';
     const cursorBeforeClosingParen = 11; // index of )

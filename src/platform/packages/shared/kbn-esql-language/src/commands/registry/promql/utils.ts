@@ -39,10 +39,8 @@ type PromqlPositionType =
   | 'after_complete_expression' // rate(bytes)  | → operators
   | 'inside_function_args' // sum( | → functions
   | 'after_open_paren' // (|, col0 = | → functions
-  // Future positions (not yet implemented):
   | 'inside_label_selector' // metric{|} → labels
   | 'after_metric' // http_requests| → labels, operators
-  | 'inside_time_range' // metric[|] → duration
   | 'after_binary_operator'; // a + | → functions
 
 interface PromqlPosition {
@@ -135,6 +133,14 @@ function getQueryZonePosition(
     if (ctx) {
       if (checkInsideGrouping(ctx)) {
         return { type: 'inside_grouping' };
+      }
+
+      if (checkInsideLabelSelector(ctx)) {
+        return { type: 'inside_label_selector' };
+      }
+
+      if (checkAfterMetric(ctx)) {
+        return { type: 'after_metric' };
       }
 
       if (checkCanAddGrouping(ctx)) {
@@ -256,6 +262,33 @@ function checkInsideGrouping(ctx: PromQLQueryContext): boolean {
   return funcsToCheck.some(
     ({ grouping }) => grouping && isCursorInsideGrouping(ctx.relativeCursor, grouping)
   );
+}
+
+/** Checks if cursor is inside a label selector: `{label="value"}`. */
+function checkInsideLabelSelector(ctx: PromQLQueryContext): boolean {
+  const { node, parent } = ctx.position;
+
+  if (node?.type === 'label-map' || node?.type === 'label') {
+    return true;
+  }
+
+  return parent?.type === 'label-map' || parent?.type === 'label';
+}
+
+/** Checks if cursor is right after a selector metric name. */
+function checkAfterMetric(ctx: PromQLQueryContext): boolean {
+  const { node, parent } = ctx.position;
+
+  if (node?.type !== 'identifier' || parent?.type !== 'selector') {
+    return false;
+  }
+
+  const selector = parent;
+  if (selector.metric !== node) {
+    return false;
+  }
+
+  return ctx.relativeCursor > node.location.max;
 }
 
 /** Checks if cursor is logically inside a grouping (including right after open paren). */

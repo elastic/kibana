@@ -199,6 +199,7 @@ export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'by ($0) ',
   asSnippet: true,
   kind: 'Reference',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
     defaultMessage: 'Group by labels',
   }),

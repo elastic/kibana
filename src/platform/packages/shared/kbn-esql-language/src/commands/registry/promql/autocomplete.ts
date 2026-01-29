@@ -109,6 +109,10 @@ export async function autocomplete(
     case 'inside_grouping':
       return suggestLabels(context);
 
+    case 'inside_label_selector':
+    case 'after_metric':
+      return [];
+
     case 'inside_query':
       return [];
 
