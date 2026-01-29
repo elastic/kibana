@@ -587,6 +587,7 @@ export const createModifyStepTool = (
 /**
  * Tool to modify a single property within a step.
  * This is more surgical than modifying the entire step - only changes one line.
+ * Supports nested property paths like "with.message" or "output.result".
  */
 export const createModifyStepPropertyTool = (
   ctx: EditorContext
@@ -597,18 +598,18 @@ export const createModifyStepPropertyTool = (
 }> => ({
   id: 'workflow_modify_step_property',
   description:
-    'Modify a single property within a step. Use this for small changes like updating a value, changing an iteration count, or modifying a condition. This is preferred over workflow_modify_step when only one property needs to change. Shows the proposed change for user to accept (Tab/Enter) or reject (Escape).',
+    'Modify a single property within a step. Use this for small changes like updating a value, changing an iteration count, or modifying a condition. Supports nested properties like "with.message" or "output.result". This is preferred over workflow_modify_step when only one property needs to change. Shows the proposed change for user to accept (Tab/Enter) or reject (Escape).',
   schema: z.object({
     stepName: z.string().describe('Name of the step containing the property'),
     propertyName: z
       .string()
       .describe(
-        'Name of the property to modify (e.g., "foreach", "condition", "type", "connector-id")'
+        'Name of the property to modify. Can be a simple property (e.g., "foreach", "condition") or a nested path (e.g., "with.message", "with.prompt", "output.result")'
       ),
     newValue: z
       .string()
       .describe(
-        'The new value for the property. Include quotes if needed for YAML strings (e.g., "\'[1,2,3,4,5]\'" or "\'not variables.done\'")'
+        'The new value for the property. Include quotes if needed for YAML strings (e.g., "\'[1,2,3,4,5]\'" or "\'hello world\'")'
       ),
   }),
   handler: async ({ stepName, propertyName, newValue }) => {
@@ -631,18 +632,72 @@ export const createModifyStepPropertyTool = (
       return;
     }
 
+    // Handle nested property paths like "with.message"
+    const propertyPath = propertyName.split('.');
+    const targetProperty = propertyPath[propertyPath.length - 1]; // The actual property to modify
+
     // Search for the property within the step's line range
     let propertyLineNumber: number | null = null;
     let propertyIndent = 0;
 
-    for (let lineNum = stepRange.startLine; lineNum <= stepRange.endLine; lineNum++) {
-      const lineContent = model.getLineContent(lineNum);
-      // Match property: value pattern, accounting for indentation
-      const propertyMatch = lineContent.match(new RegExp(`^(\\s*)${propertyName}\\s*:`));
-      if (propertyMatch) {
-        propertyLineNumber = lineNum;
-        propertyIndent = propertyMatch[1].length;
-        break;
+    if (propertyPath.length > 1) {
+      // Nested property - first find the parent(s), then find the target
+      let currentSearchStart = stepRange.startLine;
+      let parentIndent = -1;
+
+      // Find each parent in the path (except the last one which is the target)
+      for (let pathIdx = 0; pathIdx < propertyPath.length - 1; pathIdx++) {
+        const parentProp = propertyPath[pathIdx];
+        let foundParent = false;
+
+        for (let lineNum = currentSearchStart; lineNum <= stepRange.endLine; lineNum++) {
+          const lineContent = model.getLineContent(lineNum);
+          const parentMatch = lineContent.match(new RegExp(`^(\\s*)${parentProp}\\s*:`));
+          if (parentMatch) {
+            parentIndent = parentMatch[1].length;
+            currentSearchStart = lineNum + 1;
+            foundParent = true;
+            break;
+          }
+        }
+
+        if (!foundParent) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[workflow_modify_step_property] Parent property "${parentProp}" not found in step "${stepName}"`
+          );
+          return;
+        }
+      }
+
+      // Now find the target property under the parent
+      // It should be indented more than the parent
+      for (let lineNum = currentSearchStart; lineNum <= stepRange.endLine; lineNum++) {
+        const lineContent = model.getLineContent(lineNum);
+        const currentIndent = lineContent.match(/^(\s*)/)?.[1]?.length ?? 0;
+
+        // If we hit something at the same or less indent as the parent, we've left the parent block
+        if (currentIndent <= parentIndent && lineContent.trim().length > 0) {
+          break;
+        }
+
+        const targetMatch = lineContent.match(new RegExp(`^(\\s*)${targetProperty}\\s*:`));
+        if (targetMatch && targetMatch[1].length > parentIndent) {
+          propertyLineNumber = lineNum;
+          propertyIndent = targetMatch[1].length;
+          break;
+        }
+      }
+    } else {
+      // Simple property - search directly
+      for (let lineNum = stepRange.startLine; lineNum <= stepRange.endLine; lineNum++) {
+        const lineContent = model.getLineContent(lineNum);
+        const propertyMatch = lineContent.match(new RegExp(`^(\\s*)${targetProperty}\\s*:`));
+        if (propertyMatch) {
+          propertyLineNumber = lineNum;
+          propertyIndent = propertyMatch[1].length;
+          break;
+        }
       }
     }
 
@@ -654,8 +709,8 @@ export const createModifyStepPropertyTool = (
       return;
     }
 
-    // Construct the new line with proper indentation
-    const newLine = `${' '.repeat(propertyIndent) + propertyName}: ${newValue}`;
+    // Construct the new line with proper indentation (use target property name, not full path)
+    const newLine = `${' '.repeat(propertyIndent) + targetProperty}: ${newValue}`;
 
     // Log for debugging
     // eslint-disable-next-line no-console
@@ -677,6 +732,108 @@ export const createModifyStepPropertyTool = (
       // Fallback: direct edit
       // eslint-disable-next-line no-console
       console.warn('[workflow_modify_step_property] No ProposedChangesManager, applying directly');
+      const endColumn = model.getLineMaxColumn(propertyLineNumber);
+      editor.pushUndoStop();
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range: new monaco.Range(propertyLineNumber, 1, propertyLineNumber, endColumn),
+            text: newLine,
+          },
+        ],
+        () => null
+      );
+      editor.pushUndoStop();
+      editor.revealLineInCenter(propertyLineNumber);
+    }
+  },
+});
+
+/**
+ * Tool to modify a root-level workflow property (not inside a step).
+ * For example: name, description, version, enabled, tags, etc.
+ */
+export const createModifyWorkflowPropertyTool = (
+  ctx: EditorContext
+): BrowserApiToolDefinition<{
+  propertyName: string;
+  newValue: string;
+}> => ({
+  id: 'workflow_modify_property',
+  description:
+    'Modify a root-level workflow property like name, description, version, enabled, or tags. Use this for changing workflow metadata, NOT for step properties. Shows the proposed change for user to accept (Tab/Enter) or reject (Escape).',
+  schema: z.object({
+    propertyName: z
+      .string()
+      .describe(
+        'Name of the root-level property to modify (e.g., "name", "description", "version", "enabled", "tags")'
+      ),
+    newValue: z
+      .string()
+      .describe(
+        'The new value for the property. Include quotes if needed for YAML strings (e.g., "\'My Workflow\'" for strings)'
+      ),
+  }),
+  handler: async ({ propertyName, newValue }) => {
+    const editor = ctx.getEditor();
+    const proposedChangesManager = ctx.getProposedChangesManager();
+    const model = editor?.getModel();
+
+    if (!editor || !model) {
+      // eslint-disable-next-line no-console
+      console.warn('[workflow_modify_property] Editor or model not available');
+      return;
+    }
+
+    // Search for the property at root level (no indentation or minimal indentation)
+    let propertyLineNumber: number | null = null;
+    let propertyIndent = 0;
+    const lineCount = model.getLineCount();
+
+    for (let lineNum = 1; lineNum <= lineCount; lineNum++) {
+      const lineContent = model.getLineContent(lineNum);
+      // Match property at root level (no leading spaces or just comment lines before)
+      // Root-level properties have 0 indentation
+      const propertyMatch = lineContent.match(new RegExp(`^(${propertyName})\\s*:`));
+      if (propertyMatch) {
+        propertyLineNumber = lineNum;
+        propertyIndent = 0;
+        break;
+      }
+    }
+
+    if (propertyLineNumber === null) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[workflow_modify_property] Root-level property "${propertyName}" not found in workflow`
+      );
+      return;
+    }
+
+    // Construct the new line with proper indentation
+    const newLine = `${' '.repeat(propertyIndent) + propertyName}: ${newValue}`;
+
+    // Log for debugging
+    // eslint-disable-next-line no-console
+    console.debug(
+      `[workflow_modify_property] Changing line ${propertyLineNumber}: "${model.getLineContent(
+        propertyLineNumber
+      )}" -> "${newLine}"`
+    );
+
+    if (proposedChangesManager) {
+      proposedChangesManager.proposeChange({
+        type: 'replace',
+        startLine: propertyLineNumber,
+        endLine: propertyLineNumber,
+        newText: newLine,
+        description: `Change workflow ${propertyName}`,
+      });
+    } else {
+      // Fallback: direct edit
+      // eslint-disable-next-line no-console
+      console.warn('[workflow_modify_property] No ProposedChangesManager, applying directly');
       const endColumn = model.getLineMaxColumn(propertyLineNumber);
       editor.pushUndoStop();
       model.pushEditOperations(

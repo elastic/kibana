@@ -224,7 +224,7 @@ export const WorkflowYAMLEditor = ({
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { openAgentChat, openInlineEdit, isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
     yamlDocumentRef,
     isEditorMounted,
@@ -317,6 +317,7 @@ export const WorkflowYAMLEditor = ({
       registerKeyboardCommands({
         editor,
         openActionsPopover,
+        openEditSelectedCode,
         ...keyboardHandlers,
       });
 
@@ -467,6 +468,18 @@ export const WorkflowYAMLEditor = ({
   const closeActionsPopover = useCallback(() => {
     setActionsPopoverOpen(false);
   }, []);
+
+  // Edit selected code (Cursor-like inline edit via Cmd+K)
+  const openEditSelectedCode = useCallback(
+    (selection: monaco.Selection, selectedText: string) => {
+      if (isAgentBuilderAvailable) {
+        // Open the inline edit input (Cursor-like experience)
+        openInlineEdit(selection, selectedText);
+      }
+      // If agent builder is not available, do nothing (could show a tooltip in the future)
+    },
+    [isAgentBuilderAvailable, openInlineEdit]
+  );
   const onActionSelected = useCallback(
     (action: ActionOptionData) => {
       const model = editorRef.current?.getModel();
@@ -576,7 +589,7 @@ export const WorkflowYAMLEditor = ({
                     iconType="sparkles"
                     size="xs"
                     aria-label="Open AI Agent"
-                    onClick={openAgentChat}
+                    onClick={() => openAgentChat()}
                     data-test-subj="workflowYamlEditorAiAgentButton"
                     tabIndex={0}
                     onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -641,6 +654,20 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
+          onFixInChat={
+            isAgentBuilderAvailable && !isExecutionYaml
+              ? (error) => {
+                  openAgentChat({
+                    errorContext: {
+                      message: error.message ?? 'Unknown error',
+                      lineNumber: error.startLineNumber,
+                      columnNumber: error.startColumn,
+                    },
+                  });
+                }
+              : undefined
+          }
+          isFixInChatAvailable={isAgentBuilderAvailable && !isExecutionYaml}
           extraAction={
             // Only show the shortcuts in edit mode
             !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null

@@ -67,6 +67,9 @@ export class ProposedChangesManager {
    * Propose a change to be shown as ghost text
    */
   proposeChange(change: ProposedChange): void {
+    // eslint-disable-next-line no-console
+    console.log('[ProposedChangesManager] proposeChange called:', change);
+
     if (!this.editor) {
       // eslint-disable-next-line no-console
       console.warn('[ProposedChangesManager] Editor not initialized');
@@ -77,7 +80,14 @@ export class ProposedChangesManager {
     this.clearProposedChange();
 
     const model = this.editor.getModel();
-    if (!model) return;
+    if (!model) {
+      // eslint-disable-next-line no-console
+      console.warn('[ProposedChangesManager] No model available');
+      return;
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[ProposedChangesManager] Storing pending change and showing UI');
 
     // Store the pending change
     this.pendingChange = {
@@ -90,6 +100,9 @@ export class ProposedChangesManager {
 
     // Scroll to the change location
     this.editor.revealLineInCenter(change.startLine);
+
+    // eslint-disable-next-line no-console
+    console.log('[ProposedChangesManager] UI shown, viewZoneId:', this.viewZoneId);
   }
 
   /**

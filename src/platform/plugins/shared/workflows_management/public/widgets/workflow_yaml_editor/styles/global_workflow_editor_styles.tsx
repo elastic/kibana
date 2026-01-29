@@ -279,6 +279,237 @@ const getProposedChangesStyles = () => css`
   }
 `;
 
+/**
+ * Styles for the inline edit input (Cursor-like Cmd+K edit selection)
+ */
+const getInlineEditStyles = () => css`
+  /* ========== Inline Edit Container ========== */
+  .inline-edit-container {
+    background: linear-gradient(135deg, #1a1d23 0%, #13151a 100%);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: calc(100% - 32px);
+    max-width: 800px;
+    min-width: 500px;
+    margin: 8px 16px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    /* Ensure the container can always receive pointer events */
+    pointer-events: auto;
+    position: relative;
+    z-index: 100;
+  }
+
+  .inline-edit-container * {
+    pointer-events: auto;
+  }
+
+  .inline-edit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .inline-edit-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .inline-edit-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a78bfa;
+  }
+
+  .inline-edit-close-btn {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+
+  .inline-edit-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+  }
+
+  .inline-edit-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+    cursor: text;
+  }
+
+  .inline-edit-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
+
+  .inline-edit-input {
+    flex: 1;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    color: #e5e7eb;
+    padding: 8px 0;
+    min-width: 300px;
+    line-height: 1.5;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .inline-edit-input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .inline-edit-input::placeholder {
+    color: #6b7280;
+  }
+
+  .inline-edit-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  .inline-edit-hint {
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .inline-edit-hint kbd {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-family: inherit;
+    color: #9ca3af;
+  }
+
+  .inline-edit-selection-highlight {
+    background-color: rgba(99, 102, 241, 0.2);
+    border-left: 2px solid #6366f1;
+  }
+
+  .inline-edit-status {
+    font-size: 11px;
+    color: #a78bfa;
+    font-weight: 500;
+  }
+
+  .inline-edit-loading .inline-edit-input-wrapper {
+    opacity: 0.7;
+  }
+
+  .inline-edit-loading .inline-edit-status::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #a78bfa;
+    border-top-color: transparent;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: inline-edit-spin 0.8s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes inline-edit-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ========== Light mode overrides ========== */
+  .monaco-editor:not(.vs-dark) .inline-edit-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(99, 102, 241, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-header {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-title {
+    color: #7c3aed;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-input-wrapper {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-input-wrapper:focus-within {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.03);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-input {
+    color: #1f2937;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-input::placeholder {
+    color: #9ca3af;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-hint {
+    color: #6b7280;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-hint kbd {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #6b7280;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-selection-highlight {
+    background-color: rgba(99, 102, 241, 0.12);
+    border-left-color: #7c3aed;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-close-btn {
+    color: #9ca3af;
+  }
+
+  .monaco-editor:not(.vs-dark) .inline-edit-close-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+  }
+`;
+
 export const GlobalWorkflowEditorStyles = () => {
   const euiThemeContext = useEuiTheme();
   return (
@@ -287,6 +518,7 @@ export const GlobalWorkflowEditorStyles = () => {
         getBaseTypeIconsStyles(euiThemeContext),
         getMonacoWorkflowOverridesStyles(euiThemeContext),
         getProposedChangesStyles(),
+        getInlineEditStyles(),
       ]}
     />
   );

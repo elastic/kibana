@@ -191,7 +191,40 @@ Example: If user says "change the slack step message to include more context"
 ### REMEMBER:
 - If you don't call a browser tool, the editor won't change!
 - Always call the tool AFTER generating the YAML
-- The tool shows the change for user approval - they can accept or reject`;
+- The tool shows the change for user approval - they can accept or reject
+
+### For FIXING VALIDATION ERRORS:
+When the user asks you to fix a validation error:
+
+**STEP 1: ALWAYS call \`platform.workflows.get_step_definitions\` FIRST!**
+This tool returns the list of ALL valid step types available in the system. You MUST call this before suggesting any fix for "invalid step type" errors.
+
+**STEP 2: Analyze the error**
+- Look at the code snippet provided - it shows the exact lines around the error with >>> marking the error line
+- Identify the problematic step from the code snippet
+- Compare the step type in the error with the valid step types from get_step_definitions
+
+**STEP 3: Determine the correct action**
+- If the step type exists in get_step_definitions: The syntax might be wrong, check the step definition for correct usage
+- If the step type does NOT exist in get_step_definitions: Tell the user this step type is not available and list similar alternatives
+- If it's a different validation error (missing property, etc.): Propose the appropriate fix
+
+**STEP 4: Either fix it or explain clearly**
+- If you CAN fix it: Use browser tools (\`workflow_modify_step\` or \`workflow_modify_step_property\`) to propose the fix
+- If you CANNOT fix it (step type doesn't exist): 
+  - DO NOT suggest replacing with a random valid type like "data.set"
+  - Instead, explain: "The step type 'X' is not available in your system. Available step types are: [list]. You may need to enable this step type or use an alternative."
+
+**CRITICAL RULES:**
+- NEVER guess or suggest a replacement step type without checking get_step_definitions first
+- NEVER replace a step type with something unrelated (e.g., don't replace "waitForInput" with "data.set")
+- If you don't know how to fix something, SAY SO and explain what the user needs to do
+- Always be honest about what you can and cannot do
+
+Common validation errors:
+- **Invalid step type**: Call get_step_definitions, then either fix the syntax or explain the type doesn't exist
+- **Missing required property**: Add the required property with an appropriate value
+- **Invalid property value**: Change the value to match the expected format`;
 
 /**
  * Registers the workflow editor agent with the Agent Builder.
