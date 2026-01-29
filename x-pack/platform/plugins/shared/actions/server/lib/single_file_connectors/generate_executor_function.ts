@@ -18,9 +18,11 @@ type RecordUnknown = Record<string, unknown>;
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  configureAxiosInstance,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  configureAxiosInstance?: ConnectorSpec['configureAxiosInstance'];
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -36,12 +38,31 @@ export const generateExecutorFunction = ({
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({
+    // Copy authType from config to secrets if it's missing in secrets
+    // This is needed because authType is stored in config (since secrets are stripped),
+    // but getAxiosInstanceWithAuth expects it in secrets
+    const secretsWithAuthType = {
+      ...secrets,
+      ...(config?.authType && !secrets?.authType
+        ? { authType: config.authType }
+        : {}),
+    } as Record<string, unknown>;
+
+    let axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
-      secrets,
+      secrets: secretsWithAuthType,
     });
+
+    // Allow connector spec to customize the axios instance after auth is configured
+    if (configureAxiosInstance) {
+      axiosInstance = await configureAxiosInstance(axiosInstance, {
+        config,
+        secrets,
+        logger,
+      });
+    }
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

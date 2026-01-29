@@ -13,6 +13,7 @@ export * from './specs/brave_search/brave_search';
 export * from './specs/github/github';
 export * from './specs/greynoise/greynoise';
 export * from './specs/notion/notion';
+export * from './specs/pagerduty/pagerduty';
 export * from './specs/shodan/shodan';
 export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';

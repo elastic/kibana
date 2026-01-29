@@ -7,8 +7,10 @@
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
+import { pagerdutyDataSource } from './pagerduty';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
+  dataCatalog.register(pagerdutyDataSource);
 }

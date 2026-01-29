@@ -262,6 +262,20 @@ export interface ConnectorSpec {
   test?: ConnectorTest;
 
   transformations?: Transformations;
+
+  /**
+   * Optional callback to configure the axios instance after authentication is set up.
+   * This allows connectors to customize headers, interceptors, or other axios configuration
+   * that needs to happen after the auth type has configured the instance.
+   */
+  configureAxiosInstance?: (
+    axiosInstance: AxiosInstance,
+    context: {
+      config?: Record<string, unknown>;
+      secrets?: Record<string, unknown>;
+      logger: Logger;
+    }
+  ) => AxiosInstance | Promise<AxiosInstance>;
 }
 
 // ============================================================================
