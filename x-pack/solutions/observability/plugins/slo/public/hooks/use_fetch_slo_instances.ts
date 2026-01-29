@@ -39,23 +39,26 @@ export function useFetchSloInstances({
   const { isLoading, isInitialLoading, isError, data } = useQuery({
     queryKey: sloKeys.instances({ sloId, search, searchAfter, size, remoteName }),
     queryFn: async ({ signal }) => {
-      return sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
-        params: {
-          path: { id: sloId },
-          query: {
-            search,
-            size,
-            searchAfter,
-            remoteName,
+      try {
+        return sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
+          params: {
+            path: { id: sloId },
+            query: {
+              search,
+              size,
+              searchAfter,
+              remoteName,
+            },
           },
-        },
-        signal,
-      });
+          signal,
+        });
+      } catch (error) {
+        // ignore error
+      }
     },
     enabled: Boolean(!!sloId && enabled),
     retry: false,
     refetchOnWindowFocus: false,
   });
-
   return { isLoading, isInitialLoading, isError, data };
 }
