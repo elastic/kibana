@@ -3,7 +3,7 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{transformSchemaName referenceName}}
   {{~#if (isCircularRef $ref)}}Input{{/if~}}
   {{~#if nullable}} | null {{/if~}}
 {{~/if~}}
@@ -11,21 +11,21 @@
 {{~#if allOf~}}
   {{~#each allOf~}}
     {{~> ts_input_type ~}}
-    {{~#unless @last~}}&{{~/unless~}} 
+    {{~#unless @last~}}&{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
 {{~#if anyOf~}}
   {{~#each anyOf~}}
     {{~> ts_input_type ~}}
-    {{~#unless @last~}}|{{~/unless~}} 
+    {{~#unless @last~}}|{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
 {{~#if oneOf~}}
   {{~#each oneOf~}}
     {{~> ts_input_type ~}}
-    {{~#unless @last~}}|{{~/unless~}} 
+    {{~#unless @last~}}|{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
@@ -55,8 +55,8 @@ unknown
   {
     {{#each properties}}
       {{#if description}}
-      /** 
-      * {{{description}}} 
+      /**
+      * {{{description}}}
       */
       {{/if}}
       '{{@key}}'{{~#unless (includes ../required @key)}}?{{/unless~}}: {{> ts_input_type }};
@@ -77,7 +77,7 @@ unknown
   {{~#if enum~}}
     {{~#each enum~}}
       '{{.}}'
-      {{~#unless @last~}}|{{~/unless~}} 
+      {{~#unless @last~}}|{{~/unless~}}
     {{~/each~}}
   {{~else~}}
   string
