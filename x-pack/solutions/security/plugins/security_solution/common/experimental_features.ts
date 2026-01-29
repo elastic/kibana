@@ -208,7 +208,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Troubleshooting Agent Builder agent and tools
    */
-  automaticTroubleshootingAgent: false,
+  automaticTroubleshootingAgent: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
