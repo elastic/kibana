@@ -21,6 +21,7 @@ import type {
   LowercaseProcessor,
   TrimProcessor,
   JoinProcessor,
+  SplitProcessor,
   ConcatProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
@@ -46,6 +47,7 @@ export type UppercaseFormState = UppercaseProcessor;
 export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
 export type JoinFormState = JoinProcessor;
+export type SplitFormState = SplitProcessor;
 export type ConcatFormState = ConcatProcessor;
 
 export type SpecialisedFormState =
@@ -62,6 +64,7 @@ export type SpecialisedFormState =
   | LowercaseFormState
   | TrimFormState
   | JoinFormState
+  | SplitFormState
   | ConcatFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;

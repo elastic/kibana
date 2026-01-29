@@ -55,6 +55,7 @@ import { ProcessorTypeSelector } from './processor_type_selector';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ReplaceProcessorForm } from './replace';
 import { SetProcessorForm } from './set';
+import { SplitProcessorForm } from './split';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
 import { JoinProcessorForm } from './join';
@@ -201,6 +202,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                     )}
                   />
                 )}
+                {type === 'split' && <SplitProcessorForm />}
                 {type === 'concat' && <ConcatProcessorForm />}
                 {type === 'join' && <JoinProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (

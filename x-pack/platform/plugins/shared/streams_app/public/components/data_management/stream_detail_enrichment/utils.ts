@@ -16,6 +16,7 @@ import type {
   MathProcessor,
   ProcessorType,
   ReplaceProcessor,
+  SplitProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -59,6 +60,7 @@ import type {
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
+  SplitFormState,
   TrimFormState,
   UppercaseFormState,
 } from './types';
@@ -79,6 +81,7 @@ export const SPECIALISED_TYPES = [
   'lowercase',
   'trim',
   'join',
+  'split',
   'concat',
 ];
 
@@ -263,6 +266,15 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultSplitProcessorFormState = (): SplitFormState => ({
+  action: 'split' as const,
+  from: '',
+  separator: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -305,6 +317,7 @@ const defaultProcessorFormStateByType: Record<
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
+  split: defaultSplitProcessorFormState,
   concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -350,6 +363,7 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
+    step.action === 'split' ||
     step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
@@ -617,6 +631,23 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as JoinProcessor,
+      };
+    }
+
+    if (formState.action === 'split') {
+      const { from, separator, to, ignore_failure, ignore_missing, preserve_trailing } = formState;
+      return {
+        processorDefinition: {
+          action: 'split',
+          from,
+          separator,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          preserve_trailing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SplitProcessor,
       };
     }
 

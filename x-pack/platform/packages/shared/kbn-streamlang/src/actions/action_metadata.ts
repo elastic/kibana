@@ -606,6 +606,48 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  split: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.split.name', {
+      defaultMessage: 'Split',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.split.description', {
+      defaultMessage: 'Split a string field into an array using a separator',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.split.usage', {
+      defaultMessage:
+        'Provide `from` for the source field, `separator` for the delimiter pattern, and optionally `to` for a target field. The separator supports regex patterns in Ingest Pipelines.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.split.examples.simple', {
+          defaultMessage: 'Split a comma-separated string into an array',
+        }),
+        yaml: `- action: split
+  from: tags
+  separator: ","`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.split.examples.target', {
+          defaultMessage: 'Split into a new field while preserving the original',
+        }),
+        yaml: `- action: split
+  from: tags
+  separator: ","
+  to: tags_array`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.split.tips.regex', {
+        defaultMessage:
+          'In Ingest Pipelines, the separator supports regex patterns. In ES|QL, only single byte delimiters are supported.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.split.tips.preserveTrailing', {
+        defaultMessage:
+          'Use preserve_trailing: true to keep empty trailing elements in the result array (Ingest Pipeline only)',
+      }),
+    ],
+  },
+
   concat: {
     name: i18n.translate('xpack.streamlang.actionMetadata.concat.name', {
       defaultMessage: 'Concat',
