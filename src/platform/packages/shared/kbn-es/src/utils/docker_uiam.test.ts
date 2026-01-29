@@ -8,8 +8,13 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import undici, { fetch, Response } from 'undici';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
-import undici from 'undici';
+
+jest.mock('undici', () => ({
+  ...jest.requireActual('undici'),
+  fetch: jest.fn(),
+}));
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -334,27 +339,26 @@ describe('#initializeUiamContainers', () => {
   const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 
   let agentSpy: jest.SpyInstance;
-  let fetchSpy: jest.SpyInstance;
+  const fetchMock = fetch as jest.MockedFunction<typeof fetch>;
   beforeEach(() => {
     agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
-    fetchSpy = jest.spyOn(global, 'fetch');
   });
 
   afterEach(() => {
     agentSpy.mockRestore();
-    fetchSpy.mockRestore();
+    fetchMock.mockRestore();
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database does not exist', async () => {
-    fetchSpy.mockResolvedValue({ ok: true, status: 201 });
+    fetchMock.mockResolvedValue(new Response(null, { status: 201 }));
 
     await initializeUiamContainers(new ToolingLog());
 
     expect(agentSpy).toHaveBeenCalledTimes(1);
     expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(4);
-    expect(fetchSpy.mock.calls).toMatchInlineSnapshot(`
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "https://localhost:8081/dbs",
@@ -425,21 +429,21 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database and collections exist', async () => {
-    fetchSpy.mockResolvedValue({ ok: false, status: 409 });
+    fetchMock.mockResolvedValue(new Response(null, { status: 409 }));
 
     await initializeUiamContainers(new ToolingLog());
 
     expect(agentSpy).toHaveBeenCalledTimes(1);
     expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   test('fails if cannot create database', async () => {
-    fetchSpy.mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: () => Promise.resolve('Some server error'),
+    fetchMock.mockImplementationOnce(async () => {
+      const response = new Response(null, { status: 500 });
+      jest.spyOn(response, 'text').mockResolvedValueOnce('Some server error');
+      return response;
     });
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
@@ -449,15 +453,17 @@ describe('#initializeUiamContainers', () => {
     expect(agentSpy).toHaveBeenCalledTimes(1);
     expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   test('fails if cannot create collection', async () => {
-    fetchSpy.mockResolvedValueOnce({ ok: true, status: 201 }).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      text: () => Promise.resolve('Some server error'),
-    });
+    fetchMock
+      .mockResolvedValueOnce(new Response(null, { status: 201 }))
+      .mockImplementationOnce(async () => {
+        const response = new Response(null, { status: 500 });
+        jest.spyOn(response, 'text').mockResolvedValueOnce('Some server error');
+        return response;
+      });
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
       `[Error: Failed to create collection (users): 500 Some server error]`
@@ -466,6 +472,6 @@ describe('#initializeUiamContainers', () => {
     expect(agentSpy).toHaveBeenCalledTimes(1);
     expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
