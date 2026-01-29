@@ -8,7 +8,12 @@
  */
 import type { ISuggestionItem } from '../../registry/types';
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
-import { PromQLFunctionDefinitionTypes, type PromQLFunctionDefinition } from '../types';
+import { EDITOR_MARKER } from '../constants';
+import {
+  PromQLFunctionDefinitionTypes,
+  type PromQLFunctionDefinition,
+  type PromQLFunctionParamType,
+} from '../types';
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
@@ -62,6 +67,55 @@ export const getPromqlFunctionSuggestions = (): ISuggestionItem[] => {
     .map((fn) => withAutoSuggest(getPromqlFunctionSuggestion(fn)));
 };
 
+export const getPromqlFunctionSuggestionsForReturnTypes = (
+  returnTypes: PromQLFunctionParamType[]
+): ISuggestionItem[] => {
+  if (!returnTypes.length) {
+    return getPromqlFunctionSuggestions();
+  }
+
+  const allowed = new Set(returnTypes);
+
+  return getPromqlFunctionSuggestions().filter((suggestion) => {
+    const definition = getPromqlFunctionDefinition(suggestion.label);
+    if (!definition?.signatures.length) {
+      return false;
+    }
+
+    return definition.signatures.some((signature) => {
+      const normalized = normalizePromqlReturnType(signature.returnType);
+      return normalized ? allowed.has(normalized) : false;
+    });
+  });
+};
+
+/* Returns the PromQL function definition matching the provided name. */
+export const getPromqlFunctionDefinition = (
+  name: string | undefined
+): PromQLFunctionDefinition | undefined => {
+  if (!name) {
+    return undefined;
+  }
+
+  const normalized = name.toLowerCase();
+  return promqlFunctionDefinitions.find((fn) => fn.name.toLowerCase() === normalized);
+};
+
+/* Extracts param types for a specific PromQL function parameter index. */
+export function getPromqlParamTypesForFunction(
+  name: string | undefined,
+  paramIndex: number
+): PromQLFunctionParamType[] {
+  const definition = getPromqlFunctionDefinition(name);
+  if (!definition?.signatures.length) {
+    return [];
+  }
+
+  return definition.signatures
+    .map((signature) => signature.params[paramIndex]?.type)
+    .filter((paramType) => !!paramType);
+}
+
 /* Reports whether a PromQL function is an across-series aggregation. */
 export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
   const normalized = name.toLowerCase();
@@ -72,6 +126,20 @@ export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
       type === PromQLFunctionDefinitionTypes.PROMQL_ACROSS_SERIES
   );
 };
+
+// TODO: Remove when ES solve the discrepancy with signatures.
+const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
+  'instant vector': 'instant_vector',
+  'range vector': 'range_vector',
+  scalar: 'scalar',
+  string: 'string',
+};
+
+function normalizePromqlReturnType(
+  returnType: string | undefined
+): PromQLFunctionParamType | undefined {
+  return returnType ? PROMQL_RETURN_TYPE_MAP[returnType] : undefined;
+}
 
 export function getIndexFromPromQLParams({
   params,
@@ -92,7 +160,7 @@ export function getIndexFromPromQLParams({
       }
     }
 
-    if (isIdentifier(value) || isSource(value)) {
+    if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
       return value.name;
     }
   }
@@ -101,5 +169,6 @@ export function getIndexFromPromQLParams({
   // Needed by autocomplete and external consumers (e.g. getIndexPatternFromESQLQuery).
   const indexMatch = query?.text?.match(INDEX_PARAM_REGEX);
 
-  return indexMatch?.[1];
+  // same stuffs of getSourcesFromCommands for the other sources
+  return indexMatch?.[1]?.includes(EDITOR_MARKER) ? undefined : indexMatch?.[1];
 }
