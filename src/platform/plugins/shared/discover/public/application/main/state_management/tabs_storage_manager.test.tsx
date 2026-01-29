@@ -8,6 +8,7 @@
  */
 
 import { omit } from 'lodash';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
@@ -39,6 +40,9 @@ const mockTab1 = getTabStateMock({
   },
   appState: {
     columns: ['a', 'b'],
+  },
+  attributes: {
+    visContext: { someKey: 'test' } as unknown as UnifiedHistogramVisContext,
   },
 });
 
@@ -105,6 +109,7 @@ describe('TabsStorageManager', () => {
     internalState: tab.id.startsWith('closedTab')
       ? tab.initialInternalState
       : mockGetInternalState(),
+    attributes: tab.attributes,
     appState: tab.appState,
     globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
@@ -114,6 +119,7 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
+    attributes: storedTab.attributes,
     appState: storedTab.appState,
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
@@ -485,6 +491,9 @@ describe('TabsStorageManager', () => {
 
     const updatedTabState = {
       internalState: {},
+      attributes: {
+        visContext: { someKey: 'updatedValue' } as unknown as UnifiedHistogramVisContext,
+      },
       appState: {
         columns: ['a', 'b', 'c'],
       },

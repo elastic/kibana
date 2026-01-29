@@ -496,6 +496,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
           });

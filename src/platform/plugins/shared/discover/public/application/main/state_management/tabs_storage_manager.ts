@@ -75,7 +75,10 @@ export interface TabsStorageManager {
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
+    tabState: Pick<
+      TabStateInLocalStorage,
+      'internalState' | 'attributes' | 'appState' | 'globalState'
+    >
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -352,6 +355,7 @@ export const createTabsStorageManager = ({
           return {
             ...tab,
             internalState: tabStatePartial.internalState,
+            attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
           };
