@@ -21,7 +21,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function refreshAlertsList() {
     await retry.try(async () => {
       await pageObjects.common.navigateToApp('rules');
-      await testSubjects.click('triggersActions');
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults).to.have.length(1);
     });

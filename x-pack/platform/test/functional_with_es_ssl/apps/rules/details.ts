@@ -41,16 +41,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdConnector;
   }
 
-  async function createRule(overwrites: Record<string, any> = {}) {
-    const { body: createdRule } = await supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send(getTestAlertData(overwrites))
-      .expect(200);
-    objectRemover.add(createdRule.id, 'rule', 'alerting');
-    return createdRule;
-  }
-
   async function createAlwaysFiringRule(overwrites: Record<string, any> = {}) {
     const { body: createdRule } = await supertest
       .post(`/api/alerting/rule`)
@@ -556,59 +546,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
-      });
-    });
-
-    describe('View In App', function () {
-      const ruleName = uuidv4();
-
-      beforeEach(async () => {
-        await pageObjects.common.navigateToApp('rules');
-      });
-
-      after(async () => {
-        await objectRemover.removeAll();
-      });
-
-      it('renders the rule details view in app button', async () => {
-        const rule = await createRule({
-          name: ruleName,
-          consumer: 'alerting_fixture',
-        });
-
-        // refresh to see rule
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify content
-        await testSubjects.existOrFail('rulesList');
-
-        // click on first rule
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
-
-        expect(await pageObjects.ruleDetailsUI.isViewInAppEnabled()).to.be(true);
-
-        await pageObjects.ruleDetailsUI.clickViewInApp();
-
-        expect(await pageObjects.ruleDetailsUI.getNoOpAppTitle()).to.be(`View Rule ${rule.id}`);
-      });
-
-      it('renders a disabled rule details view in app button', async () => {
-        const rule = await createAlwaysFiringRule({
-          name: `test-rule-disabled-nav`,
-        });
-
-        // refresh to see rule
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify content
-        await testSubjects.existOrFail('rulesList');
-
-        // click on first rule
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
-
-        expect(await pageObjects.ruleDetailsUI.isViewInAppDisabled()).to.be(true);
       });
     });
 

@@ -51,9 +51,6 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
-  # Not ready yet
-  - x-pack/platform/test/functional_with_es_ssl/apps/rules/config.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
@@ -208,6 +205,7 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/rules/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/platform/test/functional/apps/advanced_settings/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
