@@ -31,6 +31,7 @@ describe('When using calculateRouteAuthz()', () => {
       allSettings: false,
       addAgents: false,
       addFleetServers: false,
+      generateAgentReports: false,
     },
     integrations: {
       all: false,
