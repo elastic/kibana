@@ -115,7 +115,7 @@ describe('useTemplatesState', () => {
 
     // Simulate selecting a template via the selection callback
     act(() => {
-      result.current.selection.onSelectionChange([mockTemplate]);
+      result.current.selection.onSelectionChange?.([mockTemplate]);
     });
 
     expect(result.current.selectedTemplates).toEqual([mockTemplate]);
@@ -145,7 +145,7 @@ describe('useTemplatesState', () => {
     };
 
     act(() => {
-      result.current.selection.onSelectionChange([mockTemplate]);
+      result.current.selection.onSelectionChange?.([mockTemplate]);
     });
 
     expect(result.current.selectedTemplates).toEqual([mockTemplate]);
