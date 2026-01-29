@@ -40,6 +40,7 @@ import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
 import { ScriptRowActions } from './script_row_actions';
+import type { useScriptActionItems } from '../hooks/use_script_action_items';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
@@ -54,14 +55,14 @@ const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
 interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
   getTestId: (suffix?: string | undefined) => string | undefined;
-  onDelete: ScriptsLibraryTableProps['onDelete'];
+  onClickAction: ScriptsLibraryTableProps['onClickAction'];
   queryParams: ScriptsLibraryTableProps['queryParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
   getTestId,
-  onDelete,
+  onClickAction,
   queryParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
@@ -76,8 +77,7 @@ const getScriptsLibraryTableColumns = ({
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <ScriptNameNavLink
               name={name}
-              queryParams={queryParams}
-              scriptId={item.id}
+              onClick={() => onClickAction({ show: 'details', script: item })}
               data-test-subj={`${getTestId(`column-name-${item.id}`)}`}
             />
           </EuiToolTip>
@@ -183,7 +183,11 @@ const getScriptsLibraryTableColumns = ({
       actions: [
         {
           render: (item: EndpointScript) => (
-            <ScriptRowActions scriptItem={item} queryParams={queryParams} onDelete={onDelete} />
+            <ScriptRowActions
+              scriptItem={item}
+              queryParams={queryParams}
+              onClickAction={onClickAction}
+            />
           ),
         },
       ],
@@ -202,7 +206,7 @@ export interface ScriptsLibraryTableProps {
   isLoading?: boolean;
   items: ScriptItems;
   onChange: OnChangeTable;
-  onDelete: (script: EndpointScript) => void;
+  onClickAction: Parameters<typeof useScriptActionItems>[number]['onClickAction'];
   queryParams: ListScriptsRequestQuery;
   sort: {
     field?: SortableScriptLibraryFields;
@@ -217,7 +221,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     isLoading,
     items,
     onChange,
-    onDelete,
+    onClickAction,
     queryParams,
     sort,
     totalItemCount,
@@ -283,10 +287,10 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
         getScriptsLibraryTableColumns({
           formatBytes,
           getTestId,
-          onDelete,
+          onClickAction,
           queryParams,
         }),
-      [formatBytes, getTestId, onDelete, queryParams]
+      [formatBytes, getTestId, onClickAction, queryParams]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

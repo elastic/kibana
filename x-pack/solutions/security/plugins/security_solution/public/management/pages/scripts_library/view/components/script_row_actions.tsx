@@ -23,17 +23,17 @@ import type { ScriptsLibraryTableProps } from './scripts_library_table';
 export interface ScriptRowActionsProps {
   queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
-  onDelete: ScriptsLibraryTableProps['onDelete'];
+  onClickAction: ScriptsLibraryTableProps['onClickAction'];
   'data-test-subj'?: string;
 }
 
 export const ScriptRowActions = memo<ScriptRowActionsProps>(
-  ({ queryParams, onDelete, scriptItem, 'data-test-subj': dataTestSubj }) => {
+  ({ queryParams, onClickAction, scriptItem, 'data-test-subj': dataTestSubj }) => {
     const [isOpen, setIsOpen] = useState(false);
     const scriptItemActions = useScriptActionItems({
       script: scriptItem,
       queryParams,
-      onDelete,
+      onClickAction,
     });
 
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);

@@ -20,7 +20,7 @@ export interface ScriptsLibraryUrlParams {
   sortField?: SortableScriptLibraryFields;
   sortDirection?: SortDirection;
   selectedScriptId?: string;
-  show?: 'details' | 'edit';
+  show?: 'create' | 'delete' | 'details' | 'edit';
 }
 
 interface ScriptLibraryUrlParamSetters {
