@@ -8,7 +8,7 @@
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import type { FormBasedLayer, GenericIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 
-import { getESQLForLayer } from './to_esql';
+import { generateEsqlQuery } from './generate_esql_query';
 
 const defaultUiSettingsGet = (key: string) => {
   switch (key) {
@@ -96,8 +96,8 @@ describe('to_esql top N', () => {
 
   // Note: operationDefinitionMap for "terms" does not support toESQL
   // should generate a valid ESQL query for top N terms and average aggregation
-  it('should return undefined for top N terms and average aggregation', () => {
-    const result = getESQLForLayer(
+  it('should return failure with function_not_supported reason for top N terms and average aggregation', () => {
+    const result = generateEsqlQuery(
       mockAggEntries,
       mockLayer,
       mockIndexPattern,
