@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { FeedbackPlugin } from './plugin';
 
-export const plugin = () => {
-  return new FeedbackPlugin();
-};
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new FeedbackPlugin(initializerContext);
+}

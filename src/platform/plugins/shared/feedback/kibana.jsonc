@@ -12,8 +12,5 @@
     "requiredPlugins": [
       "licensing"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
   }
 }

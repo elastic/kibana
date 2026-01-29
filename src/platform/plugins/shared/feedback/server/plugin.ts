@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin } from '@kbn/core/server';
+import type { Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FeedbackPluginSetup {}
@@ -15,6 +15,8 @@ interface FeedbackPluginSetup {}
 interface FeedbackPluginStart {}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
   public setup(): FeedbackPluginSetup {
     return {};
   }

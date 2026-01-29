@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { filter, firstValueFrom } from 'rxjs';
@@ -25,6 +25,8 @@ export interface FeedbackPluginStartDependencies {
 interface FeedbackPluginStart {}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
   public setup(): FeedbackPluginSetup {
     return {};
   }
