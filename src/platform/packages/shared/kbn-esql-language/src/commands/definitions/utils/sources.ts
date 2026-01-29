@@ -9,7 +9,7 @@
 import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLSource } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '../../../types';
 import type { ISuggestionItem } from '../../registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
@@ -17,6 +17,7 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
+import { isAsExpression, Walker } from '../../../ast';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -254,4 +255,18 @@ export const specialIndicesToSuggestions = (
   }
 
   return [...mainSuggestions, ...aliasSuggestions];
+};
+
+/**
+ * Returns the source node from the target index of a JOIN command.
+ * For example, in the following JOIN command, it returns the source node representing "lookup_index":
+ * | LOOKUP JOIN lookup_index AS l ON source_index.id = l.id
+ */
+export const getSourceOfJoinTarget = (command: ESQLAstJoinCommand): ESQLSource => {
+  const firstArg = command.args[0];
+  const argumentToWalk = isAsExpression(firstArg) ? firstArg.args[0] : firstArg;
+
+  return Walker.match(argumentToWalk, {
+    type: 'source',
+  }) as ESQLSource;
 };
