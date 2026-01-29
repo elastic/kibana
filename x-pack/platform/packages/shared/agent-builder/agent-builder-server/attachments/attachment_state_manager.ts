@@ -183,7 +183,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       id,
       version,
       type: attachment.type as AttachmentType,
-      data: resolved ? { ...attachment, resolved } : attachmentVersion,
+      data: resolved ? { ...attachmentVersion, resolved } : attachmentVersion,
     };
   }
 
