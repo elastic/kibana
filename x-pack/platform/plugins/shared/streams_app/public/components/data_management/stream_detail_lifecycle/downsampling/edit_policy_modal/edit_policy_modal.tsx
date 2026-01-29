@@ -23,7 +23,6 @@ import {
   useGeneratedHtmlId,
   EuiPanel,
 } from '@elastic/eui';
-import { capitalize } from 'lodash';
 
 export type AffectedResourceType = 'stream' | 'index';
 
@@ -71,7 +70,17 @@ export function EditPolicyModal({
           values: { indicesCount },
         })
       : null;
-  const affectedResourcesLabel = [streamsLabel, indicesLabel].filter(Boolean).join(' and ');
+  const affectedResourcesLabel =
+    streamsLabel && indicesLabel
+      ? i18n.translate('xpack.streams.editPolicyModal.affectedResourcesLabel', {
+          defaultMessage: '{streamsLabel} and {indicesLabel}',
+          values: {
+            streamsLabel,
+            indicesLabel,
+          },
+        })
+      : streamsLabel || indicesLabel || '';
+
   const modalTitle = isInUse
     ? i18n.translate('xpack.streams.editPolicyModal.title', {
         defaultMessage: '{affectedResourcesLabel} will be affected',
@@ -86,6 +95,15 @@ export function EditPolicyModal({
     : i18n.translate('xpack.streams.editPolicyModal.notInUseTitle', {
         defaultMessage: 'Confirm policy changes',
       });
+
+  const affectedResourceTypeLabelMap: Record<AffectedResourceType, string> = {
+    stream: i18n.translate('xpack.streams.editPolicyModal.affectedResourceType.streamLabel', {
+      defaultMessage: 'Stream',
+    }),
+    index: i18n.translate('xpack.streams.editPolicyModal.affectedResourceType.indexLabel', {
+      defaultMessage: 'Index',
+    }),
+  };
 
   return (
     <EuiModal onClose={onCancel} aria-labelledby={modalTitleId} css={{ width: '576px' }}>
@@ -148,7 +166,7 @@ export function EditPolicyModal({
                       data-test-subj={`editPolicyModal-affectedResourcesList-${resource.name}`}
                     >
                       <EuiText size="s">{resource.name}</EuiText>
-                      <EuiText size="s">{capitalize(resource.type)}</EuiText>
+                      <EuiText size="s">{affectedResourceTypeLabelMap[resource.type]}</EuiText>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ))}
@@ -180,6 +198,7 @@ export function EditPolicyModal({
                   color="danger"
                   onClick={onOverwrite}
                   disabled={isProcessing}
+                  isLoading={isProcessing}
                 >
                   {i18n.translate('xpack.streams.editPolicyModal.overwriteButton', {
                     defaultMessage: 'Overwrite',
