@@ -18,7 +18,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
-  EuiBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -170,10 +169,7 @@ export function StreamsTreeTable({
   const filteredStreams = React.useMemo(() => {
     const dataQualityPattern = /dataQuality:\((.*)\)/;
     const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
-    return filterStreamsByQuery(
-      streams.filter((stream) => Streams.all.Definition.is(stream.stream)),
-      freeText
-    );
+    return filterStreamsByQuery(streams, freeText);
   }, [streams, searchQuery]);
 
   const enrichedStreams = React.useMemo(() => {
@@ -194,8 +190,8 @@ export function StreamsTreeTable({
       ) ?? [];
     return qualityFiters.length > 0
       ? rows.filter((row) =>
-        qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
-      )
+          qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
+        )
       : rows;
   }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast?.clauses]);
 
@@ -290,11 +286,11 @@ export function StreamsTreeTable({
       aria-label={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
-            defaultMessage: 'Collapse all',
-          })
+              defaultMessage: 'Collapse all',
+            })
           : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
-            defaultMessage: 'Expand all',
-          })
+              defaultMessage: 'Expand all',
+            })
       }
     />
   );
@@ -360,21 +356,22 @@ export function StreamsTreeTable({
                       type={isCollapsed ? 'arrowRight' : 'arrowDown'}
                       color="text"
                       size="m"
-                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${item.stream.name
-                        }`}
+                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                        item.stream.name
+                      }`}
                       aria-label={
                         isCollapsed
                           ? i18n.translate(
-                            'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
-                            {
-                              defaultMessage: 'Collapsed node with {childCount} children',
-                              values: { childCount: item.children.length },
-                            }
-                          )
+                              'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
+                              {
+                                defaultMessage: 'Collapsed node with {childCount} children',
+                                values: { childCount: item.children.length },
+                              }
+                            )
                           : i18n.translate('xpack.streams.streamsTreeTable.expandedNodeAriaLabel', {
-                            defaultMessage: 'Expanded node with {childCount} children',
-                            values: { childCount: item.children.length },
-                          })
+                              defaultMessage: 'Expanded node with {childCount} children',
+                              values: { childCount: item.children.length },
+                            })
                       }
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
@@ -503,7 +500,11 @@ export function StreamsTreeTable({
           sortable: false,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton stream={item.stream} hasDataStream={!!item.data_stream} isWiredStream={item.type === 'wired'} />
+            <DiscoverBadgeButton
+              stream={item.stream}
+              hasDataStream={!!item.data_stream}
+              isWiredStream={item.type === 'wired'}
+            />
           ),
         },
       ]}
@@ -534,38 +535,38 @@ export function StreamsTreeTable({
         filters:
           qualityLoaded && canReadFailureStore
             ? [
-              {
-                type: 'field_value_selection',
-                name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
-                  defaultMessage: 'Data quality',
-                }),
-                field: 'dataQuality',
-                multiSelect: 'or',
-                options: [
-                  {
-                    value: 'good',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
-                      { defaultMessage: 'Good' }
-                    ),
-                  },
-                  {
-                    value: 'degraded',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
-                      { defaultMessage: 'Degraded' }
-                    ),
-                  },
-                  {
-                    value: 'poor',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
-                      { defaultMessage: 'Poor' }
-                    ),
-                  },
-                ],
-              },
-            ]
+                {
+                  type: 'field_value_selection',
+                  name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
+                    defaultMessage: 'Data quality',
+                  }),
+                  field: 'dataQuality',
+                  multiSelect: 'or',
+                  options: [
+                    {
+                      value: 'good',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+                        { defaultMessage: 'Good' }
+                      ),
+                    },
+                    {
+                      value: 'degraded',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+                        { defaultMessage: 'Degraded' }
+                      ),
+                    },
+                    {
+                      value: 'poor',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+                        { defaultMessage: 'Poor' }
+                      ),
+                    },
+                  ],
+                },
+              ]
             : [],
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
