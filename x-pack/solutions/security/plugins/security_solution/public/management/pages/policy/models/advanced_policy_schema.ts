@@ -1223,7 +1223,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is supported by Elastic Defend versions 9.3 and newer. Default: auto.",
+          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto uses quark if possible (and supported), then tries legacy ebpf, and otherwise it uses kprobe. Quark is supported by Elastic Defend versions 9.3 and newer. Default: auto.",
       }
     ),
   },
@@ -2638,7 +2638,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
@@ -2649,7 +2649,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
@@ -2660,7 +2660,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
