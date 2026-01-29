@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ByteSizeValue } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import type { MeteringStatsResponse } from '../../../lib/types';
@@ -91,9 +90,7 @@ export function registerIndicesGet({ router, lib: { handleEsError }, config }: R
 
           if (indexStatsMap[indexName]) {
             prev[indexName].documents = indexStatsMap[indexName].num_docs ?? 0;
-            prev[indexName].size = new ByteSizeValue(
-              indexStatsMap[indexName].size_in_bytes ?? 0
-            ).toString();
+            prev[indexName].size = indexStatsMap[indexName].size_in_bytes ?? 0;
           }
           return prev;
         }, {});

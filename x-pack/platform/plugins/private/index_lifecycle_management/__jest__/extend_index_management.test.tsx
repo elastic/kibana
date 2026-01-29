@@ -12,6 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import type { Index as IndexManagementIndex } from '@kbn/index-management-shared-types';
 import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
@@ -401,7 +402,7 @@ describe('extend index management', () => {
     const policyErrorPanel = 'policyErrorPanel';
     const phaseDefinitionPanel = 'phaseDefinitionPanel';
 
-    const IlmContentComponent = ({ index }: { index: Index }) => {
+    const IlmContentComponent = ({ index }: { index: IndexManagementIndex }) => {
       const { euiTheme } = useEuiTheme();
       return <IlmComponent index={index} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />;
     };
@@ -410,7 +411,7 @@ describe('extend index management', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
         indexLifecycleTab.shouldRenderTab({
-          index: indexWithoutLifecyclePolicy,
+          index: indexWithoutLifecyclePolicy as IndexManagementIndex,
         });
       expect(shouldRenderTab).toBeFalsy();
     });
@@ -419,11 +420,11 @@ describe('extend index management', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
         indexLifecycleTab.shouldRenderTab({
-          index: indexWithLifecyclePolicy,
+          index: indexWithLifecyclePolicy as IndexManagementIndex,
         });
       expect(shouldRenderTab).toBeTruthy();
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecyclePolicy} />
+        <IlmContentComponent index={indexWithLifecyclePolicy as IndexManagementIndex} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
@@ -433,7 +434,9 @@ describe('extend index management', () => {
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const { container } = renderWithI18n(<IlmContentComponent index={indexWithLifecycleError} />);
+      const { container } = renderWithI18n(
+        <IlmContentComponent index={indexWithLifecycleError as IndexManagementIndex} />
+      );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
       expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
@@ -443,7 +446,7 @@ describe('extend index management', () => {
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
+        <IlmContentComponent index={indexWithLifecyclePhaseDefinition as IndexManagementIndex} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
@@ -454,7 +457,7 @@ describe('extend index management', () => {
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecycleWaitingStep} />
+        <IlmContentComponent index={indexWithLifecycleWaitingStep as IndexManagementIndex} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
