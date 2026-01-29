@@ -133,7 +133,6 @@ export class DashboardApp {
 
     // Wait for the edit button to appear and click it
     const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
-    await this.page.locator(editVisualizationConfigurationSelector).waitFor({ state: 'visible' });
     await this.page.locator(editVisualizationConfigurationSelector).click();
   }
 }
