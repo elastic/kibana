@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useAssistantContext } from '../..';
 
@@ -62,19 +63,32 @@ export const AssistantNavLink: FC = () => {
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const AiAssistantButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {chromeStyle === 'project' ? (
+          <EuiButtonEmpty {...props} data-test-subj="assistantNavLink" />
+        ) : (
+          <EuiButton {...props} data-test-subj="assistantNavLink" />
+        )}
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon
+          {...props}
+          data-test-subj="assistantNavLinkButtonIcon"
+          display={chromeStyle === 'project' ? 'empty' : 'base'}
+        />
+      </EuiShowFor>
+    </>
+  );
 
   return (
     <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiButtonBasicOrEmpty
-        onClick={showOverlay}
-        color="primary"
-        size="s"
-        iconType={AssistantIcon}
-        data-test-subj="assistantNavLink"
-      >
+      <AiAssistantButton onClick={showOverlay} color="primary" size="s" iconType={AssistantIcon}>
         {LINK_LABEL}
-      </EuiButtonBasicOrEmpty>
+      </AiAssistantButton>
     </EuiToolTip>
   );
 };

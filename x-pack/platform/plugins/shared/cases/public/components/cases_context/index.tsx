@@ -133,6 +133,10 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      // Interim bug fix until we refactor this code to avoid passing objects in deps
+      // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
+      features.alerts?.all,
+      features.alerts?.read,
     ]
   );
 

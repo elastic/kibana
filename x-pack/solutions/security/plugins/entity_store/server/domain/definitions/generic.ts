@@ -14,7 +14,12 @@ export const GENERIC_IDENTITY_FIELD = 'entity.id';
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
-  identityFields: [{ field: GENERIC_IDENTITY_FIELD, mapping: { type: 'keyword' } }],
+  // Generic doesn't have type prefix on the id
+  identityField: {
+    calculated: false,
+    field: GENERIC_IDENTITY_FIELD,
+    mapping: { type: 'keyword' },
+  },
   indexPatterns: [],
   fields: [
     ...getEntityFieldsDescriptions(),
@@ -33,21 +38,24 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
 
     newestValue({ source: 'host.architecture' }),
     newestValue({ source: 'host.boot.id' }),
-    newestValue({ source: 'host.cpu.usage' }),
-    newestValue({ source: 'host.disk.read.bytes' }),
-    newestValue({ source: 'host.disk.write.bytes' }),
+    newestValue({
+      source: 'host.cpu.usage',
+      mapping: { type: 'scaled_float', scaling_factor: 1000 },
+    }),
+    newestValue({ source: 'host.disk.read.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.disk.write.bytes', mapping: { type: 'long' } }),
     newestValue({ source: 'host.domain' }),
     newestValue({ source: 'host.hostname' }),
     newestValue({ source: 'host.id' }),
     newestValue({ source: 'host.mac' }),
     newestValue({ source: 'host.name' }),
-    newestValue({ source: 'host.network.egress.bytes' }),
-    newestValue({ source: 'host.network.egress.packets' }),
-    newestValue({ source: 'host.network.ingress.bytes' }),
-    newestValue({ source: 'host.network.ingress.packets' }),
+    newestValue({ source: 'host.network.egress.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.egress.packets', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.ingress.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
     newestValue({ source: 'host.pid_ns_ino' }),
     newestValue({ source: 'host.type' }),
-    newestValue({ source: 'host.uptime' }),
+    newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
     newestValue({
       source: 'host.ip',
       mapping: {
