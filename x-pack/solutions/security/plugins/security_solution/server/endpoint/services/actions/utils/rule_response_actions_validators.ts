@@ -6,7 +6,7 @@
  */
 
 import { isEqual, xorWith } from 'lodash';
-import type { RuleAlertType } from '../../rule_schema';
+import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
   BaseOptionalFields,
   PatchRuleRequestBody,
@@ -16,9 +16,9 @@ import type {
   RuleUpdateProps,
 } from '../../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { stringify } from '../../../../endpoint/utils/stringify';
-import { EndpointHttpError } from '../../../../endpoint/errors';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import { stringify } from '../../../utils/stringify';
+import { EndpointHttpError } from '../../../errors';
 import type { EndpointScript } from '../../../../../common/endpoint/types';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
@@ -122,22 +122,12 @@ export const validateResponseActionsPermissions = async (
   const endpointService = securitySolution.getEndpointService();
   const logger = endpointService.createLogger('validateResponseActionsPermissions');
 
-  logger.debug(() => `Validating response actions permissions for rule: ${stringify(ruleUpdate)}`);
+  logger.debug(
+    () => `Validating response actions permissions for rule payload: ${stringify(ruleUpdate)}`
+  );
 
-  if (
-    !rulePayloadContainsResponseActions(ruleUpdate) ||
-    // FIXME:PT fix this condition below - it seems unnecessary
-    (existingRule && !ruleObjectContainsResponseActions(existingRule))
-  ) {
+  if (!rulePayloadContainsResponseActions(ruleUpdate)) {
     logger.debug(() => `Nothing to do - no response action in payload`);
-    return;
-  }
-
-  if (
-    ruleUpdate.response_actions?.length === 0 &&
-    existingRule?.params?.responseActions?.length === 0
-  ) {
-    logger.debug(() => `No response actions in payload to validate`);
     return;
   }
 
@@ -151,7 +141,7 @@ export const validateResponseActionsPermissions = async (
   );
 
   logger.debug(
-    () => `Validating the following response actions from rule: ${stringify(symmetricDifference)}`
+    () => `Validating authz the following rule response actions: ${stringify(symmetricDifference)}`
   );
 
   symmetricDifference.forEach((action) => {
@@ -176,10 +166,6 @@ export const validateResponseActionsPermissions = async (
 
 function rulePayloadContainsResponseActions<T extends Pick<BaseOptionalFields, 'response_actions'>>(
   rule: T
-) {
-  return 'response_actions' in rule;
-}
-
-function ruleObjectContainsResponseActions(rule?: RuleAlertType) {
-  return rule != null && 'params' in rule && 'responseActions' in rule?.params;
+): boolean {
+  return Boolean(rule && rule?.response_actions && rule.response_actions.length > 0);
 }
