@@ -112,6 +112,7 @@ export interface EsWorkflowExecution {
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
+  stepExecutionIds?: string[]; // IDs of all step executions, enables O(1) mget instead of search
 }
 
 export interface ProviderInput {

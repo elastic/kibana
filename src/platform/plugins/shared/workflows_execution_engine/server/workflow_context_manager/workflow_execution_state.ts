@@ -136,6 +136,8 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
+      // Include all step execution IDs for O(1) mget lookup on read side
+      stepExecutionIds: Array.from(this.stepExecutions.keys()),
     });
   }
 

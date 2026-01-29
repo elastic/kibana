@@ -17,6 +17,33 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
+/**
+ * Fetches step executions by their IDs using mget (O(1) operation).
+ * This is more efficient than search and doesn't require index refresh.
+ */
+async function getStepExecutionsByIds(
+  esClient: ElasticsearchClient,
+  stepsExecutionIndex: string,
+  stepExecutionIds: string[]
+): Promise<EsWorkflowStepExecution[]> {
+  if (stepExecutionIds.length === 0) {
+    return [];
+  }
+
+  const mgetResponse = await esClient.mget<EsWorkflowStepExecution>({
+    index: stepsExecutionIndex,
+    ids: stepExecutionIds,
+  });
+
+  const steps: EsWorkflowStepExecution[] = [];
+  for (const doc of mgetResponse.docs) {
+    if ('found' in doc && doc.found && doc._source) {
+      steps.push(doc._source);
+    }
+  }
+  return steps;
+}
+
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -62,19 +89,43 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    let stepExecutions = await searchStepExecutions({
-      esClient,
-      logger,
-      stepsExecutionIndex,
-      workflowExecutionId,
-      spaceId,
-    });
+    let stepExecutions: EsWorkflowStepExecution[];
 
-    // If workflow is in terminal status but steps are missing or not all in terminal status,
-    // refresh and retry. Steps may not be visible yet due to refresh: false on writes.
-    if (isTerminalStatus(doc.status)) {
-      const allStepsTerminal = stepExecutions.every((step) => isTerminalStatus(step.status));
-      if (stepExecutions.length === 0 || !allStepsTerminal) {
+    // Use mget if we have step execution IDs (O(1) lookup, doesn't require index refresh)
+    if (doc.stepExecutionIds && doc.stepExecutionIds.length > 0) {
+      stepExecutions = await getStepExecutionsByIds(
+        esClient,
+        stepsExecutionIndex,
+        doc.stepExecutionIds
+      );
+
+      // If some steps are missing or not in terminal status when workflow is terminal,
+      // refresh and retry - this handles the race condition
+      if (isTerminalStatus(doc.status)) {
+        const allFound = stepExecutions.length === doc.stepExecutionIds.length;
+        const allTerminal = stepExecutions.every((step) => isTerminalStatus(step.status));
+
+        if (!allFound || !allTerminal) {
+          await esClient.indices.refresh({ index: stepsExecutionIndex });
+          stepExecutions = await getStepExecutionsByIds(
+            esClient,
+            stepsExecutionIndex,
+            doc.stepExecutionIds
+          );
+        }
+      }
+    } else {
+      // Fallback to search for backward compatibility (old workflows without stepExecutionIds)
+      stepExecutions = await searchStepExecutions({
+        esClient,
+        logger,
+        stepsExecutionIndex,
+        workflowExecutionId,
+        spaceId,
+      });
+
+      // For old workflows, use the previous refresh logic
+      if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
         await esClient.indices.refresh({ index: stepsExecutionIndex });
         stepExecutions = await searchStepExecutions({
           esClient,
@@ -85,7 +136,6 @@ export const getWorkflowExecution = async ({
         });
       }
     }
-
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
