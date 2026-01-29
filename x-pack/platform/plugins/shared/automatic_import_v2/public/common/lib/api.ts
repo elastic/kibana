@@ -10,7 +10,8 @@ import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
 } from '../../../common/model/api/integrations/integration.gen';
-import type { DataStream } from '../../../common/model/common_attributes.gen';
+import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
+import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
 
 export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
 export const AUTOMATIC_IMPORT_INTEGRATIONS_PATH = `/api/automatic_import_v2/integrations`;
@@ -71,6 +72,32 @@ export const getIntegrationById = async ({
     `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(integrationId)}`,
     {
       version: '1',
+      signal: abortSignal,
+    }
+  );
+
+export interface UploadSamplesRequest {
+  integrationId: string;
+  dataStreamId: string;
+  samples: string[];
+  originalSource: OriginalSource;
+}
+
+export const uploadSamplesToDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  samples,
+  originalSource,
+}: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
+  http.post<UploadSamplesToDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
+    {
+      version: '1',
+      body: JSON.stringify({ samples, originalSource }),
       signal: abortSignal,
     }
   );
