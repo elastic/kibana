@@ -6,6 +6,8 @@
  */
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
   EndpointScript,
   SortableScriptLibraryFields,
@@ -18,10 +20,12 @@ import { AdministrationListPage } from '../../../../components/administration_li
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
+import type { ScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 
 export const ScriptsLibrary = memo(() => {
+  const history = useHistory();
   const { addDanger } = useToasts();
   const { pagination: paginationFromUrlParams } = useUrlPagination();
   const {
@@ -45,6 +49,17 @@ export const ScriptsLibrary = memo(() => {
     pageSize: paginationFromUrlParams.pageSize,
   });
 
+  const {
+    data: scriptsData,
+    isFetching,
+    isFetched,
+    error: scriptsLibraryFetchError,
+    refetch: reFetchEndpointScriptsList,
+  } = useGetEndpointScriptsList(queryParams, {
+    enabled: canReadScriptsLibrary,
+    retry: false,
+  });
+
   // update query state from URL params on page re-load or URL changes
   useEffect(() => {
     setQueryParams({
@@ -61,17 +76,6 @@ export const ScriptsLibrary = memo(() => {
     paginationFromUrlParams.page,
     paginationFromUrlParams.pageSize,
   ]);
-
-  const {
-    data: scriptsData,
-    isFetching,
-    isFetched,
-    error: scriptsLibraryFetchError,
-    refetch: reFetchEndpointScriptsList,
-  } = useGetEndpointScriptsList(queryParams, {
-    enabled: canReadScriptsLibrary,
-    retry: false,
-  });
 
   const totalItemCount = useMemo(() => scriptsData?.total ?? 0, [scriptsData?.total]);
   const tableItems = useMemo(() => scriptsData?.data ?? [], [scriptsData?.data]);
@@ -92,17 +96,48 @@ export const ScriptsLibrary = memo(() => {
     [setPagingAndSortingParams]
   );
 
-  const onClickDelete = useCallback(
-    (script: EndpointScript) => {
-      setSelectedItemForDelete(script);
+  const onClickAction = useCallback(
+    ({
+      show,
+      script,
+    }: {
+      show: Required<ScriptsLibraryUrlParams>['show'];
+      script?: EndpointScript;
+    }) => {
+      if (show === 'delete') {
+        setSelectedItemForDelete(script);
+      } else {
+        history.push(
+          getScriptsLibraryPath({
+            query: {
+              ...queryParams,
+              selectedScriptId: script?.id,
+              show,
+            },
+          })
+        );
+      }
     },
-    [setSelectedItemForDelete]
+    [history, queryParams]
   );
 
+  const onCloseFlyout = useCallback(() => {
+    history.push(
+      getScriptsLibraryPath({
+        query: {
+          ...queryParams,
+          selectedScriptId: undefined,
+          show: undefined,
+        },
+      })
+    );
+  }, [history, queryParams]);
+
   const onDeleteModalSuccess = useCallback(() => {
+    onCloseFlyout();
     setSelectedItemForDelete(undefined);
     reFetchEndpointScriptsList();
-  }, [reFetchEndpointScriptsList]);
+  }, [onCloseFlyout, reFetchEndpointScriptsList]);
 
   const onDeleteModalCancel = useCallback(() => {
     setSelectedItemForDelete(undefined);
@@ -136,7 +171,7 @@ export const ScriptsLibrary = memo(() => {
           items={tableItems}
           isLoading={isFetching}
           onChange={onChangeScriptsTable}
-          onDelete={onClickDelete}
+          onClickAction={onClickAction}
           queryParams={queryParams}
           totalItemCount={totalItemCount}
           sort={{

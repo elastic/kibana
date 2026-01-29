@@ -35,7 +35,7 @@ describe('ScriptsLibraryTable', () => {
   const defaultProps: ScriptsLibraryTableProps = {
     items: [],
     onChange: jest.fn(),
-    onDelete: jest.fn(),
+    onClickAction: jest.fn(),
     queryParams: {
       page: 1,
       pageSize: 10,

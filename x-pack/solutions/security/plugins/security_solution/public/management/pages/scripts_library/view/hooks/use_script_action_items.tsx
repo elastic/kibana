@@ -17,11 +17,17 @@ import type { ScriptsLibraryUrlParams } from '../components/scripts_library_url_
 import { useAppUrl } from '../../../../../common/lib/kibana';
 
 export const useScriptActionItems = ({
-  onDelete,
+  onClickAction,
   queryParams,
   script,
 }: {
-  onDelete: (script: EndpointScript) => void;
+  onClickAction: ({
+    show,
+    script,
+  }: {
+    show: Required<ScriptsLibraryUrlParams>['show'];
+    script: EndpointScript;
+  }) => void;
   queryParams: ListScriptsRequestQuery;
   script: EndpointScript;
 }): ContextMenuItemNavByRouterProps[] => {
@@ -29,7 +35,7 @@ export const useScriptActionItems = ({
   const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
   const toRoutePath = useCallback(
-    (show: ScriptsLibraryUrlParams['show']) =>
+    (show: Required<ScriptsLibraryUrlParams>['show']) =>
       getScriptsDetailPath({
         query: {
           ...queryParams,
@@ -52,6 +58,7 @@ export const useScriptActionItems = ({
               key: 'details',
               name: tableActionLabels.table.actions.details,
               href: getAppUrl({ path: toRoutePath('details') }),
+              onClick: () => onClickAction({ show: 'details', script }),
               children: renderActionItem(tableActionLabels.table.actions.details),
             },
           ]
@@ -64,6 +71,7 @@ export const useScriptActionItems = ({
               key: 'edit',
               name: tableActionLabels.table.actions.edit,
               href: getAppUrl({ path: toRoutePath('edit') }),
+              onClick: () => onClickAction({ show: 'edit', script }),
               children: renderActionItem(tableActionLabels.table.actions.edit),
             },
           ]
@@ -87,12 +95,12 @@ export const useScriptActionItems = ({
               icon: 'trash',
               key: 'delete',
               name: tableActionLabels.table.actions.delete,
-              onClick: () => onDelete(script),
+              onClick: () => onClickAction({ show: 'delete', script }),
               children: renderActionItem(tableActionLabels.table.actions.delete),
             },
           ]
         : []),
     ],
-    [canReadScriptsLibrary, getAppUrl, toRoutePath, canWriteScriptsLibrary, script, onDelete]
+    [canReadScriptsLibrary, getAppUrl, toRoutePath, canWriteScriptsLibrary, script, onClickAction]
   );
 };

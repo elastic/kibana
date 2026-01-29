@@ -14,52 +14,33 @@ import {
 
 describe('ScriptNameNavLink component', () => {
   let mockedContext: AppContextTestRender;
-  let render: (props: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
+  let render: (props?: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
+  let defaultProps: ScriptNameNavLinkProps;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    render = (props: ScriptNameNavLinkProps) => {
-      renderResult = mockedContext.render(<ScriptNameNavLink {...props} data-test-subj="test" />);
+
+    defaultProps = {
+      name: 'Test Script',
+      onClick: jest.fn(),
+      'data-test-subj': 'test',
+    };
+    render = (props?: ScriptNameNavLinkProps) => {
+      renderResult = mockedContext.render(
+        <ScriptNameNavLink {...(props ?? defaultProps)} data-test-subj="test" />
+      );
       return renderResult;
     };
   });
 
   it('should render correctly', () => {
-    const { getByTestId } = render({
-      name: 'Test Script',
-      scriptId: 'test-script-id-123',
-      queryParams: {},
-    });
-    const badgesContainer = getByTestId('test');
-    expect(badgesContainer).toHaveTextContent('Test Script');
-  });
-
-  it('should set correct href', () => {
-    const { getByTestId } = render({
-      name: 'Test Script',
-      scriptId: 'test-script-id-123',
-      queryParams: {},
-    });
-    const linkElement = getByTestId('test') as HTMLAnchorElement;
-    expect(linkElement.href).toContain('?selectedScriptId=test-script-id-123&show=details');
-  });
-
-  it('should set href based on queryParams', () => {
-    const { getByTestId } = render({
-      name: 'Test Script',
-      scriptId: 'test-script-id-123',
-      queryParams: {
-        kuery: 'name: test-name*',
-        page: 2,
-        pageSize: 20,
-        sortField: 'updatedBy',
-        sortDirection: 'desc',
-      },
-    });
-    const linkElement = getByTestId('test') as HTMLAnchorElement;
-    expect(linkElement.href).toContain(
-      '?kuery=name%3A%20test-name*&page=2&pageSize=20&sortField=updatedBy&sortDirection=desc&selectedScriptId=test-script-id-123&show=details'
-    );
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-nav-link');
+    expect(nameElement).toHaveTextContent('Test Script');
   });
 });
