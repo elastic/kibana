@@ -14,7 +14,10 @@ import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/e
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  convertCamelCasedKeysToSnakeCase,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
@@ -62,6 +65,29 @@ export function DashboardRenderer({
   getCreationOptions,
   onApiAvailable,
 }: DashboardRendererProps) {
+  useEffect(() => {
+    console.log(convertCamelCasedKeysToSnakeCase({ testKey: 'something', anotherTestKey: 'idk' }));
+    console.log(
+      convertCamelCasedKeysToSnakeCase({
+        testKey: 'something',
+        anotherTestKey: 'idk',
+        nestedKey: {
+          testThisNestedKey: 'i bet this is flat',
+        },
+        deeplyNestedKey: {
+          oneKey: '1',
+          twoKey: '2',
+          threeKey: {
+            aKey: 'apple',
+            bKey: 'banana',
+            cKey: 'cucumber',
+          },
+        },
+        arrayKey: [1, 2, 3, 4],
+      })
+    );
+  }, []);
+
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();

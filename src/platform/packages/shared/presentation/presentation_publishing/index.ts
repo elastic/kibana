@@ -186,3 +186,5 @@ export {
   type PublishingSubject,
 } from './publishing_subject';
 export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';
+
+export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
