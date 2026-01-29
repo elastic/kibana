@@ -26,5 +26,7 @@
     "@kbn/core-overlays-browser",
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-chrome-browser",
   ]
 }
