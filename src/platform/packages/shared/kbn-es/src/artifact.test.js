@@ -12,8 +12,6 @@ import { fetch as mockedFetch } from 'undici';
 
 jest.mock('undici');
 
-// const mockedFetch = jest.spyOn(undici, 'fetch');
-
 import { Artifact } from './artifact';
 
 const log = new ToolingLog();
