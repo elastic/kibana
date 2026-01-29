@@ -13,8 +13,8 @@ import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
 
-export type KibanaClientFetchOptions = RequestInit & { ignore?: number[] };
-type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[] };
+export type KibanaClientFetchOptions = RequestInit & { ignore?: number[]; timeout?: number };
+type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[]; timeout?: number };
 
 export class KibanaClientHttpError extends Error {
   constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
@@ -58,15 +58,17 @@ export class KibanaClient {
       url.password = '';
     }
 
+    const { timeout, ...fetchOptions } = options;
     const normalizedUrl = normalizeUrl(url.toString());
     return fetch(normalizedUrl, {
-      ...options,
+      ...fetchOptions,
       headers: {
         ...authHeaders,
         ...this.headers,
-        ...options.headers,
+        ...fetchOptions.headers,
       },
       dispatcher: getFetchAgent(normalizedUrl),
+      signal: timeout ? AbortSignal.timeout(timeout) : undefined,
     } as RequestInit).then(async (response) => {
       if (options.ignore && options.ignore.includes(response.status)) {
         return undefined;
