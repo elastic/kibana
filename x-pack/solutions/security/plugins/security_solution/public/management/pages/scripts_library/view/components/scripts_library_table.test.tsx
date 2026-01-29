@@ -69,6 +69,9 @@ describe('ScriptsLibraryTable', () => {
       'data-test-subj': 'test',
     };
 
+    // navigate to scripts lib. page before each test
+    history.push(SCRIPTS_LIBRARY_PATH);
+
     render = (props?: ScriptsLibraryTableProps) => {
       renderResult = mockedContext.render(<ScriptsLibraryTable {...(props ?? defaultProps)} />);
       return renderResult;
@@ -82,21 +85,17 @@ describe('ScriptsLibraryTable', () => {
 
   describe('Table rendering and interactions', () => {
     it('renders record range label', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
-      const { getByTestId } = renderResult;
 
-      expect(getByTestId('test-record-range-label')).toBeInTheDocument();
+      expect(renderResult.getByTestId('test-record-range-label')).toBeInTheDocument();
     });
 
     it('renders scripts table', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
       expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
     it('shows correct set of columns', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const columns = renderResult.getAllByRole('columnheader');
@@ -106,14 +105,12 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows error when error prop is set', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, error: 'An error occurred' });
 
       expect(renderResult.getByText('An error occurred')).toBeInTheDocument();
     });
 
     it('shows `no records` are available', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, items: [], totalItemCount: 0 });
 
       expect(renderResult.getByText('No scripts found')).toBeInTheDocument();
@@ -122,23 +119,18 @@ describe('ScriptsLibraryTable', () => {
 
   describe('With records', () => {
     it('shows correct number of rows', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render({
         ...defaultProps,
         items: scriptsGenerator.generateListOfScripts(Array.from({ length: 11 })),
         totalItemCount: 11,
       });
 
-      const { getByTestId } = renderResult;
-
-      expect(getByTestId('test-record-range-label')).toHaveTextContent(
+      expect(renderResult.getByTestId('test-record-range-label')).toHaveTextContent(
         `Showing 1-10 of 11 scripts`
       );
     });
 
     it('shows script name as a link for opening details flyout', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -148,7 +140,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows platform badges for each script', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -169,7 +160,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows Types for each script', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -190,7 +180,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows last updated info', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -199,7 +188,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows file size in human readable format', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -216,7 +204,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Name` when header clicked', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -235,7 +222,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Last updated` when header clicked', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -253,7 +239,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Updated by` when header clicked', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -271,7 +256,6 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Size` when header clicked', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -291,7 +275,6 @@ describe('ScriptsLibraryTable', () => {
 
   describe('With records and row actions', () => {
     it('should trigger details flyout when script name is clicked', async () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -307,7 +290,7 @@ describe('ScriptsLibraryTable', () => {
       );
     });
 
-    it('should show `delete` action with `canWriteScriptsLibrary` privilege', async () => {
+    it('should should show `edit` and `delete` actions with `canWriteScriptsLibrary` privilege', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
@@ -315,7 +298,6 @@ describe('ScriptsLibraryTable', () => {
         },
       });
 
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -327,12 +309,17 @@ describe('ScriptsLibraryTable', () => {
       expect(actionPanel).toBeInTheDocument();
 
       const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
-      expect(actionItems).toHaveLength(3);
+      expect(actionItems).toHaveLength(4);
       const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
-      expect(actionItemLabels).toEqual(['View details', 'Download script', 'Delete script']);
+      expect(actionItemLabels).toEqual([
+        'View details',
+        'Edit script',
+        'Download script',
+        'Delete script',
+      ]);
     });
 
-    it('should not `delete` action without `canWriteScriptsLibrary` privilege', async () => {
+    it('should not show `edit` and  `delete` actions without `canWriteScriptsLibrary` privilege', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
@@ -340,7 +327,6 @@ describe('ScriptsLibraryTable', () => {
         },
       });
 
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;

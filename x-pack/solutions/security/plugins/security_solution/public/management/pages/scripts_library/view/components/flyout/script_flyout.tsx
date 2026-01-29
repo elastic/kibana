@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -21,6 +21,7 @@ import { useGetEndpointScript } from '../../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import type { UseScriptActionItemsProps } from '../../hooks/use_script_action_items';
 import { EndpointScriptDetailsFlyout } from '../details';
+import { EndpointScriptEditFlyout, type EndpointScriptEditFlyoutProps } from '../edit';
 import { SCRIPT_LIBRARY_LABELS as flyoutLabels } from '../../../translations';
 
 const createFormState = (
@@ -57,7 +58,8 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       createFormState(scriptItem)
     );
 
-    const isViewingOrEditing = useMemo(() => show === 'details', [show]);
+    const isViewingOrEditing = useMemo(() => show === 'edit' || show === 'details', [show]);
+    const isEditForm = useMemo(() => show === 'edit', [show]);
 
     const hasItemForViewOrEdit = useMemo(
       () => !!scriptItem && !!(formState.scriptItem as EndpointScript),
@@ -75,6 +77,51 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     } = useGetEndpointScript(selectedScriptId ?? '', {
       enabled: false,
     });
+
+    const onChange = useCallback(
+      ({ script, isValid }: Parameters<EndpointScriptEditFlyoutProps['onChange']>[number]) => {
+        if (isMounted()) {
+          setFormState((prevState) => ({
+            ...prevState,
+            isValid,
+            scriptItem: {
+              ...prevState.scriptItem,
+              ...script,
+            },
+          }));
+        }
+      },
+      [setFormState, isMounted]
+    );
+
+    const {
+      isLoading: isSubmittingData,
+      mutateAsync: submitScriptData,
+      error: submitScriptError,
+    } = usePatchEndpointScript(formState.scriptItem);
+
+    const onSuccessSubmit = useCallback(() => {
+      toasts.addSuccess(
+        isEditForm
+          ? flyoutLabels.flyout.flyoutEditSubmitSuccess
+          : flyoutLabels.flyout.flyoutCreateSubmitSuccess
+      );
+
+      if (isMounted()) {
+        setUrlParams({
+          ...queryParams,
+          selectedScriptId: undefined,
+          show: undefined,
+        });
+        onSuccess();
+      }
+    }, [toasts, isEditForm, isMounted, queryParams, onSuccess, setUrlParams]);
+
+    const onSubmit = useCallback(() => {
+      submitScriptData({ script_id: (formState.scriptItem as EndpointScript).id }).then(
+        onSuccessSubmit
+      );
+    }, [formState.scriptItem, onSuccessSubmit, submitScriptData]);
 
     // fetch script data if needed for edit or view
     useEffect(() => {
@@ -136,6 +183,20 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
             onClickAction={onClickAction}
             scriptItem={formState.scriptItem as EndpointScript}
             data-test-subj={getTestId()}
+          />
+        )}
+
+        {!shouldFetchScriptToViewOrEdit && (show === 'edit' || show === 'create') && (
+          <EndpointScriptEditFlyout
+            error={submitScriptError}
+            isDisabled={!formState.isValid || isSubmittingData}
+            isSubmittingData={isSubmittingData}
+            onChange={onChange}
+            onClose={onCloseFlyout}
+            onSubmit={onSubmit}
+            scriptItem={formState.scriptItem as EndpointScript}
+            show={show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>}
+            data-test-subj={dataTestSubj}
           />
         )}
       </EuiFlyout>
