@@ -34,7 +34,4 @@ export { InlineEditInputManager, INLINE_EDIT_STYLES } from './inline_edit_input'
 export type { InlineEditSubmitCallback } from './inline_edit_input';
 
 export { executeHeadlessAgent } from './headless_agent_service';
-export type {
-  HeadlessAgentOptions,
-  HeadlessAgentResult,
-} from './headless_agent_service';
+export type { HeadlessAgentOptions, HeadlessAgentResult } from './headless_agent_service';

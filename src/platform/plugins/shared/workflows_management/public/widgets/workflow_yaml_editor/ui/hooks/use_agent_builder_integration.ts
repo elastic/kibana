@@ -17,9 +17,9 @@ import {
   createModifyStepTool,
   createModifyWorkflowPropertyTool,
   createReplaceYamlTool,
-  ProposedChangesManager,
-  InlineEditInputManager,
   executeHeadlessAgent,
+  InlineEditInputManager,
+  ProposedChangesManager,
 } from '../../../../features/ai_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { registerFixInChatCodeActionProvider } from '../../lib/monaco_providers';

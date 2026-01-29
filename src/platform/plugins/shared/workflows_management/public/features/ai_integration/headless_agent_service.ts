@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { catchError, filter, from, lastValueFrom, map, tap, toArray } from 'rxjs';
+import zodToJsonSchema from 'zod-to-json-schema';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { from, lastValueFrom, toArray } from 'rxjs';
-import { map, filter, tap, catchError } from 'rxjs';
-import zodToJsonSchema from 'zod-to-json-schema';
 import type { BrowserApiToolDefinition, EditorContext } from './browser_api_tools';
 
 /**
@@ -189,7 +188,12 @@ export async function executeHeadlessAgent(
     const toolCallEvents = await lastValueFrom(events$.pipe(toArray()), { defaultValue: [] });
 
     // eslint-disable-next-line no-console
-    console.log('[HeadlessAgent] All events received:', allEvents.length, 'Tool calls:', toolCallEvents.length);
+    console.log(
+      '[HeadlessAgent] All events received:',
+      allEvents.length,
+      'Tool calls:',
+      toolCallEvents.length
+    );
 
     for (const toolEvent of toolCallEvents) {
       const toolId = toolEvent.data.tool_id;
@@ -202,7 +206,7 @@ export async function executeHeadlessAgent(
       const tool = browserApiTools.find((t) => t.id === toolId);
       if (tool) {
         onStatus?.(`Applying change: ${toolId}...`);
-        
+
         // Log editor context state
         // eslint-disable-next-line no-console
         console.log('[HeadlessAgent] EditorContext state:', {
@@ -210,7 +214,7 @@ export async function executeHeadlessAgent(
           hasYamlDoc: !!editorContext.getYamlDocument(),
           hasProposedChangesManager: !!editorContext.getProposedChangesManager(),
         });
-        
+
         try {
           // Execute the tool handler - it uses context from closure, not the passed param
           await tool.handler(params);

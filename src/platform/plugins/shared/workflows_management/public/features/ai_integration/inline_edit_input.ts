@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 /**
  * Callback type for when the user submits an edit instruction
@@ -64,15 +64,18 @@ export class InlineEditInputManager {
     this.onSubmit = onSubmit;
 
     // Add decoration to highlight the selection
-    this.decorationIds = this.editor.deltaDecorations([], [
-      {
-        range: selection,
-        options: {
-          className: 'inline-edit-selection-highlight',
-          isWholeLine: false,
+    this.decorationIds = this.editor.deltaDecorations(
+      [],
+      [
+        {
+          range: selection,
+          options: {
+            className: 'inline-edit-selection-highlight',
+            isWholeLine: false,
+          },
         },
-      },
-    ]);
+      ]
+    );
 
     // Create the view zone with the input
     this.editor.changeViewZones((accessor) => {
@@ -158,14 +161,18 @@ export class InlineEditInputManager {
 
     container.addEventListener('mousedown', handleMouseEvent, true);
     container.addEventListener('mouseup', handleMouseEvent, true);
-    container.addEventListener('click', (e) => {
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      // Focus the input when clicking anywhere in the container (except close button)
-      if (this.inputElement && !(e.target as HTMLElement).closest('.inline-edit-close-btn')) {
-        this.inputElement.focus();
-      }
-    }, true);
+    container.addEventListener(
+      'click',
+      (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        // Focus the input when clicking anywhere in the container (except close button)
+        if (this.inputElement && !(e.target as HTMLElement).closest('.inline-edit-close-btn')) {
+          this.inputElement.focus();
+        }
+      },
+      true
+    );
 
     // Also handle pointer events which Monaco might use
     container.addEventListener('pointerdown', handleMouseEvent, true);
