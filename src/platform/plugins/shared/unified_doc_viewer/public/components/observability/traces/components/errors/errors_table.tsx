@@ -25,12 +25,20 @@ import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
 import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {
   ScrollableSectionWrapper,
   type ScrollableSectionWrapperApi,
 } from '../../../../doc_viewer_logs_overview/scrollable_section_wrapper';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+
+const sectionTitle = i18n.translate(
+  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
+  {
+    defaultMessage: 'Errors',
+  }
+);
 
 export interface Props {
   traceId: string;
@@ -53,14 +61,22 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       docId,
     });
 
-    const { columns, openInDiscoverLink } = useMemo(() => {
+    const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+      indexPattern: indexes.apm.errors,
+      whereClause: createTraceContextWhereClauseForErrors({ traceId, spanId: docId }),
+    });
+
+    const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+      href: discoverUrl,
+      esql: esqlQueryString,
+      tabLabel: sectionTitle,
+      dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
+    });
+
+    const { columns } = useMemo(() => {
       const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
 
-      const link = generateDiscoverLink(
-        createTraceContextWhereClauseForErrors({ traceId, spanId: docId })
-      );
-
-      return { columns: cols, openInDiscoverLink: link };
+      return { columns: cols };
     }, [traceId, docId, generateDiscoverLink, response.source]);
 
     if (loading || (!error && response.traceErrors.length === 0)) {
@@ -73,29 +89,12 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
           <ContentFrameworkSection
             data-test-subj="unifiedDocViewerErrorsAccordion"
             id="errorsSection"
-            title={i18n.translate(
-              'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
-              {
-                defaultMessage: 'Errors',
-              }
-            )}
+            title={sectionTitle}
             description={i18n.translate(
               'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
               { defaultMessage: 'Errors that occurred during this span and their causes' }
             )}
-            actions={
-              openInDiscoverLink
-                ? [
-                    {
-                      icon: 'discoverApp',
-                      label: OPEN_IN_DISCOVER_LABEL,
-                      ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
-                      href: openInDiscoverLink,
-                      dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
-                    },
-                  ]
-                : undefined
-            }
+            actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
           >
             <EuiSpacer size="s" />
             {error ? (
