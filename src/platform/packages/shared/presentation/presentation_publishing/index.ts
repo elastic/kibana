@@ -185,6 +185,5 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
-export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';
-
+export { SAVED_OBJECT_REF_NAME } from './constants';
 export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
