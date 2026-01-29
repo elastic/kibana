@@ -39,7 +39,8 @@ export function registerStatus(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, assetManager } = entityStoreCtx;
         logger.debug('Status API invoked');
-        const {status, engines} = await assetManager.getStatus();
+        const withComponents = req.query.include_components;
+        const { status, engines } = await assetManager.getStatus(withComponents);
 
         return res.ok({
           body: {

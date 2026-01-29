@@ -23,7 +23,7 @@ function getTaskType(entityType: EntityType): string {
   return `${config.type}:${entityType}`;
 }
 
-function getTaskId(entityType: EntityType, namespace: string): string {
+export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskType(entityType)}:${namespace}`;
 }
 
@@ -152,7 +152,7 @@ export async function scheduleExtractEntityTask({
 }): Promise<void> {
   try {
     const taskType = getTaskType(type);
-    const taskId = getTaskId(type, namespace);
+    const taskId = getExtractEntityTaskId(type, namespace);
     const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
@@ -181,7 +181,7 @@ export async function stopExtractEntityTask({
   type: EntityType;
   namespace: string;
 }): Promise<void> {
-  const taskId = getTaskId(type, namespace);
+  const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
   logger.debug(`removed task: ${taskId}`);
 }
