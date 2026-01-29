@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
-export function anAlertEventESQLResponse(overrides?: {
+export function getAlertEventESQLResponse(overrides?: {
   '@timestamp'?: string;
   group_hash?: string;
   episode_id?: string;
@@ -31,14 +31,14 @@ export function anAlertEventESQLResponse(overrides?: {
   };
 }
 
-export function anEmptyESQLResponse(): ESQLSearchResponse {
+export function getEmptyESQLResponse(): ESQLSearchResponse {
   return {
     columns: [],
     values: [],
   };
 }
 
-export function aBulkAlertEventsESQLResponse(
+export function getBulkAlertEventsESQLResponse(
   records: Array<{
     '@timestamp'?: string;
     group_hash?: string;

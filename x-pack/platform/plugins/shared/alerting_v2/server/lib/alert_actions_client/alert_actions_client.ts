@@ -153,7 +153,7 @@ export class AlertActionsClient {
     const { groupHash, episodeId } = params;
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE group_hash == ${groupHash} AND ${
+      | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
       episodeId ? esql.exp`episode_id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
