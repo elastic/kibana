@@ -67,21 +67,6 @@ export function hasMatchPhraseQuery(
 }
 
 /**
- * Type guard to check if a filter condition is an AsCodeConditionFilter['condition']
- * with field and operator properties
- */
-export function isAsCodeConditionFilter(
-  condition: unknown
-): condition is AsCodeConditionFilter['condition'] {
-  return (
-    typeof condition === 'object' &&
-    condition !== null &&
-    'field' in condition &&
-    'operator' in condition
-  );
-}
-
-/**
  * Type guard for phrases filter format
  */
 export function isPhrasesFilter(storedFilter: StoredFilter): boolean {

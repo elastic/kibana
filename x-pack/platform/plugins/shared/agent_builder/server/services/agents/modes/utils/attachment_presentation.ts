@@ -39,6 +39,11 @@ export interface AttachmentPresentationConfig {
   maxContentLength?: number;
 }
 
+export type AttachmentContentFormatter = (
+  attachment: VersionedAttachment,
+  data: unknown
+) => Promise<string | undefined>;
+
 const DEFAULT_THRESHOLD = 5;
 const DEFAULT_MAX_CONTENT_LENGTH = 10000;
 
@@ -47,10 +52,11 @@ const DEFAULT_MAX_CONTENT_LENGTH = 10000;
  * Chooses between inline (full content) and summary (metadata only) modes
  * based on the number of active attachments.
  */
-export const prepareAttachmentPresentation = (
+export const prepareAttachmentPresentation = async (
   attachments: VersionedAttachment[],
-  config?: AttachmentPresentationConfig
-): AttachmentPresentation => {
+  config?: AttachmentPresentationConfig,
+  formatContent?: AttachmentContentFormatter
+): Promise<AttachmentPresentation> => {
   const threshold = config?.threshold ?? DEFAULT_THRESHOLD;
   const maxContentLength = config?.maxContentLength ?? DEFAULT_MAX_CONTENT_LENGTH;
 
@@ -68,7 +74,7 @@ export const prepareAttachmentPresentation = (
   if (activeCount <= threshold) {
     return {
       mode: 'inline',
-      content: formatInlineAttachments(activeAttachments, maxContentLength),
+      content: await formatInlineAttachments(activeAttachments, maxContentLength, formatContent),
       activeCount,
     };
   }
@@ -83,17 +89,21 @@ export const prepareAttachmentPresentation = (
 /**
  * Formats attachments for inline mode with full content.
  */
-const formatInlineAttachments = (
+const formatInlineAttachments = async (
   attachments: VersionedAttachment[],
-  maxContentLength: number
-): string => {
-  const attachmentElements: XmlNode[] = attachments.flatMap((attachment) => {
+  maxContentLength: number,
+  formatContent?: AttachmentContentFormatter
+): Promise<string> => {
+  const attachmentElements: XmlNode[] = [];
+  for (const attachment of attachments) {
     const latest = getLatestVersion(attachment);
     if (!latest) {
-      return [];
+      continue;
     }
 
-    let contentStr = formatAttachmentContent(attachment, latest.data);
+    let contentStr =
+      (formatContent ? await formatContent(attachment, latest.data) : undefined) ??
+      formatAttachmentContent(attachment, latest.data);
 
     // Truncate if too long
     if (contentStr.length > maxContentLength) {
@@ -104,19 +114,17 @@ const formatInlineAttachments = (
 
     const contentLines = contentStr.split('\n');
 
-    return [
-      {
-        tagName: 'attachment',
-        attributes: {
-          id: attachment.id,
-          type: attachment.type,
-          version: latest.version,
-          description: attachment.description,
-        },
-        children: contentLines,
-      } satisfies XmlNode,
-    ];
-  });
+    attachmentElements.push({
+      tagName: 'attachment',
+      attributes: {
+        id: attachment.id,
+        type: attachment.type,
+        version: latest.version,
+        description: attachment.description,
+      },
+      children: contentLines,
+    } satisfies XmlNode);
+  }
 
   return generateXmlTree(
     {
@@ -192,13 +200,14 @@ export const getAttachmentSystemPrompt = (presentation: AttachmentPresentation):
   if (presentation.mode === 'inline') {
     return `## Conversation Attachments
 
-The user has ${presentation.activeCount} attachment(s) in this conversation. The full content is shown above in XML format.
+The user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown above in XML format.
 
 You can:
+- Read attachments using attachment_read(id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-Since the content is shown inline, you don't need to read it - just reference it directly.`;
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
   }
 
   return `## Conversation Attachments

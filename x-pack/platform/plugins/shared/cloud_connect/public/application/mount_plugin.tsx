@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { CloudConnectedAppContextProvider } from './app_context';
@@ -26,6 +26,10 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   apiService,
   licensing,
 }) => {
+  const [justConnected, setJustConnected] = useState(false);
+  const [autoEnablingEis, setAutoEnablingEis] = useState(false);
+  const hasConfigurePermission = application.capabilities.cloudConnect?.configure === true;
+
   return (
     <CloudConnectedAppContextProvider
       value={{
@@ -39,6 +43,11 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
         telemetryService,
         apiService,
         licensing,
+        justConnected,
+        setJustConnected,
+        autoEnablingEis,
+        setAutoEnablingEis,
+        hasConfigurePermission,
       }}
     >
       <CloudConnectedAppMain />

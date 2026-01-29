@@ -35,22 +35,22 @@ const createMockAttachment = (
 
 describe('attachment_presentation', () => {
   describe('prepareAttachmentPresentation', () => {
-    it('should return empty content for no attachments', () => {
-      const result = prepareAttachmentPresentation([]);
+    it('should return empty content for no attachments', async () => {
+      const result = await prepareAttachmentPresentation([]);
 
       expect(result.mode).toBe('inline');
       expect(result.content).toBe('');
       expect(result.activeCount).toBe(0);
     });
 
-    it('should choose inline mode for few attachments (<=5)', () => {
+    it('should choose inline mode for few attachments (<=5)', async () => {
       const attachments = [
         createMockAttachment('1', 'text', 'Hello world', { description: 'Test' }),
         createMockAttachment('2', 'json', { key: 'value' }),
         createMockAttachment('3', 'text', 'Another text'),
       ];
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.mode).toBe('inline');
       expect(result.activeCount).toBe(3);
@@ -59,12 +59,12 @@ describe('attachment_presentation', () => {
       expect(result.content).toContain('Hello world');
     });
 
-    it('should choose summary mode for many attachments (>5)', () => {
+    it('should choose summary mode for many attachments (>5)', async () => {
       const attachments = Array.from({ length: 6 }, (_, i) =>
         createMockAttachment(`${i}`, 'text', `Content ${i}`)
       );
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.mode).toBe('summary');
       expect(result.activeCount).toBe(6);
@@ -73,42 +73,42 @@ describe('attachment_presentation', () => {
       expect(result.content).not.toContain('Content 0'); // Data not shown in summary
     });
 
-    it('should allow configurable threshold', () => {
+    it('should allow configurable threshold', async () => {
       const attachments = [
         createMockAttachment('1', 'text', 'Content 1'),
         createMockAttachment('2', 'text', 'Content 2'),
         createMockAttachment('3', 'text', 'Content 3'),
       ];
 
-      const result = prepareAttachmentPresentation(attachments, { threshold: 2 });
+      const result = await prepareAttachmentPresentation(attachments, { threshold: 2 });
 
       expect(result.mode).toBe('summary'); // 3 > 2 threshold
     });
 
-    it('should exclude deleted attachments from count', () => {
+    it('should exclude deleted attachments from count', async () => {
       const attachments = [
         createMockAttachment('1', 'text', 'Active', { active: true }),
         createMockAttachment('2', 'text', 'Deleted', { active: false }),
         createMockAttachment('3', 'text', 'Active 2', { active: true }),
       ];
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.activeCount).toBe(2);
       expect(result.content).toContain('count="2"');
     });
 
-    it('should truncate large content in inline mode', () => {
+    it('should truncate large content in inline mode', async () => {
       const largeContent = 'x'.repeat(15000);
       const attachments = [createMockAttachment('1', 'text', largeContent)];
 
-      const result = prepareAttachmentPresentation(attachments, { maxContentLength: 10000 });
+      const result = await prepareAttachmentPresentation(attachments, { maxContentLength: 10000 });
 
       expect(result.content).toContain('[content truncated');
       expect(result.content.length).toBeLessThan(largeContent.length);
     });
 
-    it('should handle visualization_ref type as JSON', () => {
+    it('should handle visualization_ref type as JSON', async () => {
       const attachments = [
         createMockAttachment('1', 'visualization_ref', {
           saved_object_id: 'viz-123',
@@ -118,59 +118,70 @@ describe('attachment_presentation', () => {
         }),
       ];
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.content).toContain('saved_object_id');
       expect(result.content).toContain('viz-123');
       expect(result.content).toContain('"huge"'); // Full JSON stringified content shown
     });
 
-    it('should include description in XML attributes', () => {
+    it('should include description in XML attributes', async () => {
       const attachments = [
         createMockAttachment('1', 'text', 'Content', { description: 'My notes' }),
       ];
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.content).toContain('description="My notes"');
     });
 
-    it('should escape XML special characters in description', () => {
+    it('should escape XML special characters in description', async () => {
       const attachments = [
         createMockAttachment('1', 'text', 'Content', { description: 'Test <>&"\'' }),
       ];
 
-      const result = prepareAttachmentPresentation(attachments);
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.content).toContain('&lt;');
       expect(result.content).toContain('&gt;');
       expect(result.content).toContain('&amp;');
     });
+
+    it('should prefer formatted content when formatter is provided', async () => {
+      const attachments = [createMockAttachment('1', 'text', 'raw')];
+      const formatter = jest.fn(async () => 'formatted content');
+
+      const result = await prepareAttachmentPresentation(attachments, undefined, formatter);
+
+      expect(formatter).toHaveBeenCalledTimes(1);
+      expect(result.content).toContain('formatted content');
+    });
   });
 
   describe('getAttachmentSystemPrompt', () => {
-    it('should return empty string for no attachments', () => {
-      const presentation = prepareAttachmentPresentation([]);
+    it('should return empty string for no attachments', async () => {
+      const presentation = await prepareAttachmentPresentation([]);
       const prompt = getAttachmentSystemPrompt(presentation);
 
       expect(prompt).toBe('');
     });
 
-    it('should return inline mode instructions', () => {
+    it('should return inline mode instructions with attachment_read guidance', async () => {
       const attachments = [createMockAttachment('1', 'text', 'Content')];
-      const presentation = prepareAttachmentPresentation(attachments);
+      const presentation = await prepareAttachmentPresentation(attachments);
       const prompt = getAttachmentSystemPrompt(presentation);
 
       expect(prompt).toContain('1 attachment');
-      expect(prompt).toContain('shown inline');
+      expect(prompt).toContain('attachment_read');
+      expect(prompt).toContain('content truncated');
       expect(prompt).not.toContain('MUST use attachment tools');
     });
 
-    it('should return summary mode instructions', () => {
+    it('should return summary mode instructions', async () => {
       const attachments = Array.from({ length: 6 }, (_, i) =>
         createMockAttachment(`${i}`, 'text', `Content ${i}`)
       );
-      const presentation = prepareAttachmentPresentation(attachments);
+      const presentation = await prepareAttachmentPresentation(attachments);
       const prompt = getAttachmentSystemPrompt(presentation);
 
       expect(prompt).toContain('6 attachment');

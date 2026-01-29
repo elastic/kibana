@@ -321,7 +321,7 @@ describe('toStoredFilter', () => {
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedPhraseFilter.query);
-      expect(roundTrip.meta.type).toBe('phrase');
+      expect(roundTrip.meta.type).toBe('custom');
       // Verify meta.field and meta.params are preserved through round-trip
       expect(roundTrip.meta.field).toBe('calculated_field');
       expect(roundTrip.meta.params).toEqual({ value: 100 });
@@ -365,7 +365,7 @@ describe('toStoredFilter', () => {
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedRangeFilter.query);
-      expect(roundTrip.meta.type).toBe('range');
+      expect(roundTrip.meta.type).toBe('custom');
       // Verify meta.field and meta.params are preserved through round-trip
       expect(roundTrip.meta.field).toBe('calculated_field');
       expect(roundTrip.meta.params).toEqual({ gte: 0, lt: 100 });
@@ -408,7 +408,7 @@ describe('toStoredFilter', () => {
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
       expect(roundTrip.query?.script).toBeDefined();
-      expect(roundTrip.meta.type).toBe('phrase');
+      expect(roundTrip.meta.type).toBe('custom');
     });
   });
 

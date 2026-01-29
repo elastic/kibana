@@ -20,18 +20,7 @@ import type {
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
-import {
-  FILTERS,
-  isScriptedRangeFilter,
-  isScriptedPhraseFilter,
-  isPhraseFilter,
-  isRangeFilter,
-  isExistsFilter,
-  isMatchAllFilter,
-  isQueryStringFilter,
-  getFilterField,
-  getPhraseFilterValue,
-} from '@kbn/es-query';
+import { FILTERS, getFilterField } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
 import {
@@ -300,7 +289,7 @@ function convertFromSpatialFilter(
 }
 
 /**
- * Convert DSL filter to stored filter with smart type detection
+ * Convert DSL filter to stored filter with FILTERS.CUSTOM type
  */
 function convertFromDSLFilter(
   asCodeFilter: AsCodeDSLFilter,
@@ -319,118 +308,6 @@ function convertFromDSLFilter(
   // Use detected field or fall back to asCodeFilter.field
   const field = detectedField ?? asCodeFilter.field;
 
-  // Detect type from query structure using existing type guards
-  if (isPhraseFilter(dslFilter)) {
-    const queryValue = getPhraseFilterValue(dslFilter);
-
-    return {
-      ...baseStored,
-      query: dslFilter.query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.PHRASE,
-        params: { query: queryValue },
-        ...(field ? { field } : {}),
-      },
-    };
-  }
-
-  // Check if this is a range query
-  if (isRangeFilter(dslFilter)) {
-    const rangeParams = dslFilter.query.range![field!];
-
-    // Detect RANGE_FROM_VALUE (single-bound range) vs regular RANGE (multi-bound)
-    let type = FILTERS.RANGE;
-    if (rangeParams && typeof rangeParams === 'object') {
-      const boundCount = ['gte', 'lte', 'gt', 'lt'].filter((k) => k in rangeParams).length;
-      if (boundCount === 1) {
-        type = FILTERS.RANGE_FROM_VALUE;
-      }
-    }
-
-    return {
-      ...baseStored,
-      query: dslFilter.query,
-      meta: {
-        ...baseStored.meta,
-        type,
-        params: rangeParams,
-        ...(field ? { field } : {}),
-      },
-    };
-  }
-
-  // Check if this is an exists query
-  if (isExistsFilter(dslFilter)) {
-    return {
-      ...baseStored,
-      query: dslFilter.query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.EXISTS,
-        ...(field ? { field } : {}),
-        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
-      },
-    };
-  }
-
-  // Check if this is a match_all query
-  if (isMatchAllFilter(dslFilter)) {
-    return {
-      ...baseStored,
-      query: dslFilter.query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.MATCH_ALL,
-        params: dslFilter.query.match_all,
-        ...(field ? { field } : {}),
-      },
-    };
-  }
-
-  // Check if this is a query_string query
-  if (isQueryStringFilter(dslFilter)) {
-    return {
-      ...baseStored,
-      query: dslFilter.query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.QUERY_STRING,
-        params: dslFilter.query?.query_string,
-        ...(field ? { field } : {}),
-      },
-    };
-  }
-
-  // Detect if this is a scripted range filter (has range params in script)
-  if (isScriptedRangeFilter(dslFilter)) {
-    return {
-      ...baseStored,
-      query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.RANGE,
-        ...(field ? { field } : {}),
-        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
-      },
-    };
-  }
-
-  // Check if this is a scripted phrase filter (has 'value' param in script and no range keys)
-  if (isScriptedPhraseFilter(dslFilter)) {
-    return {
-      ...baseStored,
-      query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.PHRASE,
-        ...(field ? { field } : {}),
-        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
-      },
-    };
-  }
-
-  // Default: custom filter
   return {
     ...baseStored,
     query,
