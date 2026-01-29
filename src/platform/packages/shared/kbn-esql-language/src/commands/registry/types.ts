@@ -141,7 +141,18 @@ export interface ESQLCommandSummary {
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
+  /**
+   * A set of fields used for grouping results in the query.
+   * Note that you don't only get the last grouping applied but all the groupings used in the query.
+   * The client must decide how to use this information.
+   * Example of grouping fields is foo in "STATS AVG(bar) BY foo".
+   */
   grouping?: Set<FieldSummary>;
+
+  /**
+   * A set of fields used for aggregating results in the query.
+   * Example of aggregate fields is foo in "STATS foo = AVG(bar)".
+   */
   aggregates?: Set<FieldSummary>;
 }
 
