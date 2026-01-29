@@ -6,12 +6,12 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { patchTemplate } from './api';
-import { templatesQueryKeys } from './use_get_templates';
-import * as i18n from '../templates/translations';
-import type { ServerError } from '../../types';
-import { useCasesToast } from '../../common/use_cases_toast';
-import type { TemplateUpdateRequest, Template } from './types';
+import { patchTemplate } from '../api/api';
+import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/constants';
+import * as i18n from '../../templates/translations';
+import type { ServerError } from '../../../types';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { TemplateUpdateRequest, Template } from '../types';
 
 interface MutationArgs {
   templateId: string;
@@ -25,9 +25,9 @@ export const useUpdateTemplate = () => {
   return useMutation<Template, ServerError, MutationArgs>(
     ({ templateId, template }) => patchTemplate({ templateId, template }),
     {
-      mutationKey: ['update-template'],
+      mutationKey: casesMutationsKeys.updateTemplate,
       onSuccess: () => {
-        queryClient.invalidateQueries(templatesQueryKeys.all);
+        queryClient.invalidateQueries(casesQueriesKeys.templates);
         showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
       },
       onError: (error: ServerError) => {
@@ -36,5 +36,3 @@ export const useUpdateTemplate = () => {
     }
   );
 };
-
-export type UseUpdateTemplate = ReturnType<typeof useUpdateTemplate>;

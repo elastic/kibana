@@ -18,9 +18,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useKibana } from '../../common/lib/kibana';
-import illustrationRelevance from '../../assets/illustration-relevance-hand-touch-128.svg';
-import * as i18n from '../templates/translations';
+import { useKibana } from '../../../common/lib/kibana';
+import illustrationRelevance from '../../../assets/illustration-relevance-hand-touch-128.svg';
+import * as i18n from '../../templates/translations';
 
 const TemplatesInfoPanelComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();

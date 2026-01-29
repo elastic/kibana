@@ -6,11 +6,12 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { exportTemplate } from './api';
-import * as i18n from '../templates/translations';
-import type { ServerError } from '../../types';
-import { useCasesToast } from '../../common/use_cases_toast';
-import type { ExportTemplateResponse } from './types';
+import { exportTemplate } from '../api/api';
+import { casesMutationsKeys } from '../../../containers/constants';
+import * as i18n from '../../templates/translations';
+import type { ServerError } from '../../../types';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ExportTemplateResponse } from '../types';
 
 interface MutationArgs {
   templateId: string;
@@ -22,7 +23,7 @@ export const useExportTemplate = () => {
   return useMutation<ExportTemplateResponse, ServerError, MutationArgs>(
     ({ templateId }) => exportTemplate({ templateId }),
     {
-      mutationKey: ['export-template'],
+      mutationKey: casesMutationsKeys.exportTemplate,
       onSuccess: () => {
         showSuccessToast(i18n.SUCCESS_EXPORTING_TEMPLATE);
       },
@@ -32,5 +33,3 @@ export const useExportTemplate = () => {
     }
   );
 };
-
-export type UseExportTemplate = ReturnType<typeof useExportTemplate>;

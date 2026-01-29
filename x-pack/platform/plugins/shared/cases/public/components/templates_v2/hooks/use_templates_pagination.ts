@@ -7,9 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 import type { CriteriaWithPagination, Pagination } from '@elastic/eui';
-import type { QueryParams, SortField, Template } from './types';
-
-export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+import type { QueryParams, SortField, Template } from '../types';
+import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export interface UseTemplatesPagination {
   queryParams: QueryParams;
@@ -20,16 +19,11 @@ export interface UseTemplatesPagination {
 export type TemplatesPagination = Required<Pick<Pagination, 'pageIndex' | 'pageSize'>> &
   Pick<Pagination, 'totalItemCount' | 'pageSizeOptions'>;
 
-export interface UseTemplatesPaginationReturnValue {
-  pagination: TemplatesPagination;
-  onTableChange: (criteria: CriteriaWithPagination<Template>) => void;
-}
-
 export const useTemplatesPagination = ({
   queryParams,
   setQueryParams,
   totalItemCount,
-}: UseTemplatesPagination): UseTemplatesPaginationReturnValue => {
+}: UseTemplatesPagination) => {
   const pagination: TemplatesPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,

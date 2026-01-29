@@ -7,30 +7,30 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import { useToasts } from '../../common/lib/kibana';
-import * as i18n from '../templates/translations';
-import type { ServerError } from '../../types';
-import type { TemplatesFindResponse } from './types';
-import { getTemplates } from './api';
-
-export const templatesQueryKeys = {
-  all: ['templates'] as const,
-  list: () => [...templatesQueryKeys.all, 'list'] as const,
-  templates: (params: unknown) => [...templatesQueryKeys.list(), params] as const,
-};
+import { useToasts } from '../../../common/lib/kibana';
+import * as i18n from '../../templates/translations';
+import type { ServerError } from '../../../types';
+import type { QueryParams, TemplatesFindResponse } from '../types';
+import { getTemplates } from '../api/api';
+import { DEFAULT_QUERY_PARAMS } from '../constants';
+import { casesQueriesKeys } from '../../../containers/constants';
 
 export const useGetTemplates = (
-  params: { page?: number; perPage?: number } = {}
+  params: {
+    queryParams?: Partial<QueryParams>;
+  } = {}
 ): UseQueryResult<TemplatesFindResponse> => {
   const toasts = useToasts();
 
   return useQuery(
-    templatesQueryKeys.templates(params),
+    casesQueriesKeys.templatesAll(params),
     ({ signal }) => {
       return getTemplates({
         signal,
-        page: params.page,
-        perPage: params.perPage,
+        queryParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          ...(params.queryParams ?? {}),
+        },
       });
     },
     {

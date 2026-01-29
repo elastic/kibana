@@ -18,6 +18,9 @@ export const casesQueriesKeys = {
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
   userActions: ['user-actions'] as const,
+  templates: ['templates'] as const,
+  templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
+  templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -71,6 +74,10 @@ export const casesMutationsKeys = {
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
   bulkPostObservables: ['bulk-post-observables'] as const,
+  createTemplate: ['create-template'] as const,
+  updateTemplate: ['update-template'] as const,
+  deleteTemplate: ['delete-template'] as const,
+  exportTemplate: ['export-template'] as const,
 };
 
 export const inferenceKeys = {

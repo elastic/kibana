@@ -26,17 +26,17 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { getEmptyCellValue } from '../empty_value';
-import * as i18n from '../templates/translations';
-import type { Template } from './types';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
+import { getEmptyCellValue } from '../../empty_value';
+import * as i18n from '../../templates/translations';
+import type { Template } from '../types';
+import { LINE_CLAMP, SOLUTION_LABELS, SOLUTION_ICONS } from '../constants';
 
 type TemplatesColumns =
   | EuiTableActionsColumnType<Template>
   | EuiTableComputedColumnType<Template>
   | EuiTableFieldDataColumnType<Template>;
 
-const LINE_CLAMP = 3;
 const getLineClampedCss = css`
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -45,18 +45,6 @@ const getLineClampedCss = css`
   overflow: hidden;
   word-break: normal;
 `;
-
-const SOLUTION_LABELS: Record<Template['solution'], string> = {
-  security: 'Security',
-  observability: 'Observability',
-  other: 'Other',
-};
-
-const SOLUTION_ICONS: Record<Template['solution'], string> = {
-  security: 'logoSecurity',
-  observability: 'logoObservability',
-  other: 'logoKibana',
-};
 
 interface ActionColumnProps {
   template: Template;
@@ -212,10 +200,6 @@ export interface UseTemplatesColumnsProps {
   disableActions?: boolean;
 }
 
-export interface UseTemplatesColumnsReturnValue {
-  columns: TemplatesColumns[];
-}
-
 export const useTemplatesColumns = ({
   onEdit,
   onClone,
@@ -224,7 +208,7 @@ export const useTemplatesColumns = ({
   onPreview,
   onDelete,
   disableActions = false,
-}: UseTemplatesColumnsProps): UseTemplatesColumnsReturnValue => {
+}: UseTemplatesColumnsProps) => {
   const { euiTheme } = useEuiTheme();
   const columns: TemplatesColumns[] = useMemo(
     () => [
@@ -258,7 +242,11 @@ export const useTemplatesColumns = ({
         render: (description: string) =>
           description ? (
             <EuiToolTip content={description}>
-              <span css={getLineClampedCss} data-test-subj="template-column-description">
+              <span
+                tabIndex={0}
+                css={getLineClampedCss}
+                data-test-subj="template-column-description"
+              >
                 {description}
               </span>
             </EuiToolTip>

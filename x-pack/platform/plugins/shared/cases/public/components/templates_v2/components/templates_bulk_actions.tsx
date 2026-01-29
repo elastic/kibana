@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem, EuiText, EuiButtonEmpty, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import * as i18n from '../templates/translations';
-import type { Template } from './types';
+import * as i18n from '../../templates/translations';
+import type { Template } from '../types';
 
 export interface TemplatesBulkActionsProps {
   selectedTemplates: Template[];

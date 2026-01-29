@@ -6,12 +6,12 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { deleteTemplate } from './api';
-import { templatesQueryKeys } from './use_get_templates';
-import * as i18n from '../templates/translations';
-import type { ServerError } from '../../types';
-import { useCasesToast } from '../../common/use_cases_toast';
-import type { DeleteTemplateResponse } from './types';
+import { deleteTemplate } from '../api/api';
+import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/constants';
+import * as i18n from '../../templates/translations';
+import type { ServerError } from '../../../types';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { DeleteTemplateResponse } from '../types';
 
 interface MutationArgs {
   templateId: string;
@@ -24,9 +24,9 @@ export const useDeleteTemplate = () => {
   return useMutation<DeleteTemplateResponse, ServerError, MutationArgs>(
     ({ templateId }) => deleteTemplate({ templateId }),
     {
-      mutationKey: ['delete-template'],
+      mutationKey: casesMutationsKeys.deleteTemplate,
       onSuccess: () => {
-        queryClient.invalidateQueries(templatesQueryKeys.all);
+        queryClient.invalidateQueries(casesQueriesKeys.templates);
         showSuccessToast(i18n.SUCCESS_DELETING_TEMPLATE);
       },
       onError: (error: ServerError) => {
@@ -35,5 +35,3 @@ export const useDeleteTemplate = () => {
     }
   );
 };
-
-export type UseDeleteTemplate = ReturnType<typeof useDeleteTemplate>;

@@ -6,18 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import type { Template } from './types';
+import type { Template } from '../types';
 
-export interface UseTemplatesActionsReturnValue {
-  handleEdit: (template: Template) => void;
-  handleClone: (template: Template) => void;
-  handleSetAsDefault: (template: Template) => void;
-  handleExport: (template: Template) => void;
-  handlePreview: (template: Template) => void;
-  handleDelete: (template: Template) => void;
-}
-
-export const useTemplatesActions = (): UseTemplatesActionsReturnValue => {
+export const useTemplatesActions = () => {
   const handleEdit = useCallback((template: Template) => {
     // TODO: Implement edit functionality
     // eslint-disable-next-line no-console

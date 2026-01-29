@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HeaderPage } from '../header_page';
+import { HeaderPage } from '../../header_page';
 interface Props {
   label?: string;
 }

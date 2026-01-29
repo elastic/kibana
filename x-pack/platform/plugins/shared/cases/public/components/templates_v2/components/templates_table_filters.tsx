@@ -9,8 +9,8 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
-import type { QueryParams } from './types';
-import * as i18n from '../templates/translations';
+import type { QueryParams } from '../types';
+import * as i18n from '../../templates/translations';
 
 export interface TemplatesTableFiltersProps {
   queryParams: QueryParams;

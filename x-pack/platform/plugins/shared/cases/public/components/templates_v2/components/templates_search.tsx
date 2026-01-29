@@ -7,7 +7,7 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import * as i18n from '../templates/translations';
+import * as i18n from '../../templates/translations';
 
 interface TemplatesSearchProps {
   search: string;

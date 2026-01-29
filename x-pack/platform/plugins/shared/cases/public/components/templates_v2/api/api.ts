@@ -13,7 +13,7 @@ import type {
   TemplateUpdateRequest,
   DeleteTemplateResponse,
   ExportTemplateResponse,
-} from './types';
+} from '../types';
 
 // TODO: Uncomment when API is available
 // import { KibanaServices } from '../../common/lib/kibana';
@@ -21,31 +21,67 @@ import type {
 // const TEMPLATES_URL = `${CASES_URL}/templates` as const;
 
 export const getTemplates = async ({
-  page = 1,
-  perPage = 10,
+  //   signal,
+  queryParams,
 }: {
   signal?: AbortSignal;
-  page?: number;
-  perPage?: number;
+  queryParams: {
+    page: number;
+    perPage: number;
+    search: string;
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+  };
 }): Promise<TemplatesFindResponse> => {
+  const { page, perPage, search, sortField, sortOrder } = queryParams;
+
   // TODO: Replace with actual API call when available
   // const response = await KibanaServices.get().http.fetch<TemplatesFindResponse>(TEMPLATES_URL, {
   //   method: 'GET',
-  //   query: { page, perPage },
+  //   query: { page, perPage, search, sortField, sortOrder },
   //   signal,
   // });
   // return response;
 
   // Return mock data
+  const filteredTemplates = search
+    ? MOCK_TEMPLATES.filter(
+        (template) =>
+          template.name.toLowerCase().includes(search.toLowerCase()) ||
+          template.description.toLowerCase().includes(search.toLowerCase())
+      )
+    : MOCK_TEMPLATES;
+
+  // Sort templates
+  const sortedTemplates = [...filteredTemplates].sort((a, b) => {
+    const aValue = a[sortField as keyof Template];
+    const bValue = b[sortField as keyof Template];
+
+    if (aValue == null || bValue == null) {
+      return 0;
+    }
+
+    let comparison = 0;
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      comparison = aValue.localeCompare(bValue);
+    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+      comparison = aValue - bValue;
+    } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+      comparison = Number(aValue) - Number(bValue);
+    }
+
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
   const start = (page - 1) * perPage;
   const end = start + perPage;
-  const paginatedTemplates = MOCK_TEMPLATES.slice(start, end);
+  const paginatedTemplates = sortedTemplates.slice(start, end);
 
   return {
     templates: paginatedTemplates,
     page,
     perPage,
-    total: MOCK_TEMPLATES.length,
+    total: filteredTemplates.length,
   };
 };
 

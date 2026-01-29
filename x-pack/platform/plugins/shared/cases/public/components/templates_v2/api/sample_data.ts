@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Template } from './types';
+import type { Template } from '../types';
 
 // Mock data - remove when API is available
 export const MOCK_TEMPLATES: Template[] = [

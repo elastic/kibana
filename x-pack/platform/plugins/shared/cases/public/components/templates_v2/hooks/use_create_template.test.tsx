@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { renderHook, waitFor, act } from '@testing-library/react';
+
+import { TestProviders, createTestQueryClient } from '../../../common/mock';
+import { useCreateTemplate } from './use_create_template';
+import * as api from '../api/api';
+import type { TemplateRequest, Template } from '../types';
+
+jest.mock('../api/api');
+
+const apiMock = api as jest.Mocked<typeof api>;
+
+describe('useCreateTemplate', () => {
+  const mockTemplateRequest: TemplateRequest = {
+    name: 'New Template',
+    description: 'New Description',
+    solution: 'security',
+    fields: 5,
+    tags: ['tag1'],
+    isDefault: false,
+  };
+
+  const mockTemplateResponse: Template = {
+    ...mockTemplateRequest,
+    key: 'template-new',
+    lastUpdate: '2024-01-01T00:00:00.000Z',
+    lastTimeUsed: '2024-01-01T00:00:00.000Z',
+    usage: 0,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    apiMock.postTemplate.mockResolvedValue(mockTemplateResponse);
+  });
+
+  it('calls postTemplate when mutate is called', async () => {
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(() => useCreateTemplate(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders queryClient={queryClient}>{children}</TestProviders>
+      ),
+    });
+
+    await act(async () => {
+      result.current.mutate({ template: mockTemplateRequest });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(apiMock.postTemplate).toHaveBeenCalledWith({ template: mockTemplateRequest });
+  });
+
+  it('returns the created template on success', async () => {
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(() => useCreateTemplate(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders queryClient={queryClient}>{children}</TestProviders>
+      ),
+    });
+
+    await act(async () => {
+      result.current.mutate({ template: mockTemplateRequest });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data).toEqual(mockTemplateResponse);
+  });
+
+  it('handles error correctly', async () => {
+    const error = new Error('Failed to create template');
+    apiMock.postTemplate.mockRejectedValue(error);
+
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(() => useCreateTemplate(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders queryClient={queryClient}>{children}</TestProviders>
+      ),
+    });
+
+    await act(async () => {
+      result.current.mutate({ template: mockTemplateRequest });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+
+    expect(result.current.error).toEqual(error);
+  });
+});

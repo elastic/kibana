@@ -12,29 +12,25 @@ import {
   useEuiTheme,
   EuiBasicTable,
   EuiSkeletonText,
-  EuiEmptyPrompt,
   EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../templates/translations';
-import { LinkButton } from '../links';
-import { useCasesCreateTemplateNavigation } from '../../common/navigation';
-import type { Template } from './types';
-import { useTemplatesColumns } from './use_templates_columns';
-import { useTemplatesState } from './use_templates_state';
-import { useTemplatesPagination } from './use_templates_pagination';
-import { useGetTemplates } from './use_get_templates';
-import { useTemplatesActions } from './use_templates_actions';
-import { TemplatesListHeader } from './templates_list_header';
-import { TemplatesTableFilters } from './templates_table_filters';
-import { TemplatesInfoPanel } from './templates_info_panel';
-import { TemplatesBulkActions } from './templates_bulk_actions';
+import * as i18n from '../../templates/translations';
+import { useCasesCreateTemplateNavigation } from '../../../common/navigation';
+import type { Template } from '../types';
+import { useTemplatesColumns } from '../hooks/use_templates_columns';
+import { useTemplatesState } from '../hooks/use_templates_state';
+import { useTemplatesPagination } from '../hooks/use_templates_pagination';
+import { useGetTemplates } from '../hooks/use_get_templates';
+import { useTemplatesActions } from '../hooks/use_templates_actions';
+import { TemplatesListHeader } from '../components/templates_list_header';
+import { TemplatesTableFilters } from '../components/templates_table_filters';
+import { TemplatesInfoPanel } from '../components/templates_info_panel';
+import { TemplatesBulkActions } from '../components/templates_bulk_actions';
+import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
 
-interface Props {
-  props: { test: string };
-}
-export const AllTemplatesPage: React.FC<Props> = () => {
+export const AllTemplatesPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -42,10 +38,7 @@ export const AllTemplatesPage: React.FC<Props> = () => {
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection } =
     useTemplatesState();
 
-  const { data, isLoading, refetch } = useGetTemplates({
-    page: queryParams.page,
-    perPage: queryParams.perPage,
-  });
+  const { data, isLoading, refetch } = useGetTemplates({ queryParams });
 
   const { pagination, onTableChange } = useTemplatesPagination({
     queryParams,
@@ -76,14 +69,14 @@ export const AllTemplatesPage: React.FC<Props> = () => {
   const isDataEmpty = data?.templates.length === 0;
   const isInitialLoading = isLoading && isDataEmpty;
 
-  const showClearFiltersButton = queryParams.search.length > 0;
+  const hasFilters = queryParams.search.length > 0;
 
   const handleClearFilters = useCallback(() => {
     setQueryParams({ search: '', page: 1 });
   }, [setQueryParams]);
 
   const totalTemplates = pagination.totalItemCount;
-  const rangeStart = pagination.pageIndex * pagination.pageSize + 1;
+  const rangeStart = totalTemplates > 0 ? pagination.pageIndex * pagination.pageSize + 1 : 0;
   const rangeEnd = Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalTemplates);
 
   return (
@@ -96,7 +89,7 @@ export const AllTemplatesPage: React.FC<Props> = () => {
         onRefresh={refetch}
         isLoading={isLoading}
       />
-      {isInitialLoading ? (
+      {!isInitialLoading ? (
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
       ) : (
         <>
@@ -129,7 +122,7 @@ export const AllTemplatesPage: React.FC<Props> = () => {
               </EuiText>
             </EuiFlexItem>
             <TemplatesBulkActions selectedTemplates={selectedTemplates} />
-            {showClearFiltersButton && (
+            {hasFilters && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   onClick={handleClearFilters}
@@ -152,22 +145,11 @@ export const AllTemplatesPage: React.FC<Props> = () => {
             loading={isLoading}
             tableCaption={i18n.TEMPLATE_TITLE}
             noItemsMessage={
-              <EuiEmptyPrompt
-                title={<h3>{i18n.NO_TEMPLATES}</h3>}
-                titleSize="xs"
-                body={i18n.TEMPLATE_DESCRIPTION}
-                actions={
-                  <LinkButton
-                    fill
-                    size="s"
-                    onClick={navigateToCasesCreateTemplate}
-                    href={getCasesCreateTemplateUrl()}
-                    iconType="plusInCircle"
-                    data-test-subj="templates-table-add-template"
-                  >
-                    {i18n.CREATE_TEMPLATE}
-                  </LinkButton>
-                }
+              <TemplatesTableEmptyPrompt
+                hasFilters={hasFilters}
+                onClearFilters={handleClearFilters}
+                onCreateTemplate={navigateToCasesCreateTemplate}
+                createTemplateUrl={getCasesCreateTemplateUrl()}
               />
             }
             onChange={onTableChange}

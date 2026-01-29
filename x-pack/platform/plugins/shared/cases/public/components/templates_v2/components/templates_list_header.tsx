@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HeaderPage } from '../header_page';
-import * as i18n from '../templates/translations';
-import { LinkButton } from '../links';
-import { useCasesCreateTemplateNavigation } from '../../common/navigation';
+import { HeaderPage } from '../../header_page';
+import * as i18n from '../../templates/translations';
+import { LinkButton } from '../../links';
+import { useCasesCreateTemplateNavigation } from '../../../common/navigation';
 
 export const TemplatesListHeader: React.FC = () => {
   const { euiTheme } = useEuiTheme();

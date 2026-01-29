@@ -6,12 +6,12 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { postTemplate } from './api';
-import { templatesQueryKeys } from './use_get_templates';
-import * as i18n from '../templates/translations';
-import type { ServerError } from '../../types';
-import { useCasesToast } from '../../common/use_cases_toast';
-import type { TemplateRequest, Template } from './types';
+import { postTemplate } from '../api/api';
+import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/constants';
+import * as i18n from '../../templates/translations';
+import type { ServerError } from '../../../types';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { TemplateRequest, Template } from '../types';
 
 interface MutationArgs {
   template: TemplateRequest;
@@ -24,9 +24,9 @@ export const useCreateTemplate = () => {
   return useMutation<Template, ServerError, MutationArgs>(
     ({ template }) => postTemplate({ template }),
     {
-      mutationKey: ['create-template'],
+      mutationKey: casesMutationsKeys.createTemplate,
       onSuccess: () => {
-        queryClient.invalidateQueries(templatesQueryKeys.all);
+        queryClient.invalidateQueries(casesQueriesKeys.templates);
         showSuccessToast(i18n.SUCCESS_CREATING_TEMPLATE);
       },
       onError: (error: ServerError) => {
@@ -35,5 +35,3 @@ export const useCreateTemplate = () => {
     }
   );
 };
-
-export type UseCreateTemplate = ReturnType<typeof useCreateTemplate>;

@@ -90,7 +90,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesTemplatesPath(basePath)}>
-            <AllTemplatesPage props={{ test: 'test' }} />
+            <AllTemplatesPage />
           </Route>
         )}
         {isTemplatesEnabled && (

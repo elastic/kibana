@@ -21,6 +21,24 @@ export const NO_TEMPLATES = i18n.translate('xpack.cases.templates.noTemplates', 
   defaultMessage: 'You do not have any templates yet',
 });
 
+export const NO_TEMPLATES_BODY = i18n.translate('xpack.cases.templates.noTemplatesBody', {
+  defaultMessage: 'Create templates that automatically populate values in new cases.',
+});
+
+export const NO_TEMPLATES_MATCH_FILTERS = i18n.translate(
+  'xpack.cases.templates.noTemplatesMatchFilters',
+  {
+    defaultMessage: 'No templates match your search criteria',
+  }
+);
+
+export const NO_TEMPLATES_MATCH_FILTERS_BODY = i18n.translate(
+  'xpack.cases.templates.noTemplatesMatchFiltersBody',
+  {
+    defaultMessage: 'Try modifying your search or filters.',
+  }
+);
+
 export const SEARCH_TEMPLATES = i18n.translate('xpack.cases.templates.searchTemplates', {
   defaultMessage: 'Search templates',
 });
