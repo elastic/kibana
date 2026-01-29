@@ -120,7 +120,8 @@ export class DatePicker {
     await expect(commonlyUsedOption).toBeVisible();
     await commonlyUsedOption.click();
   }
-    async setAbsoluteRange({ from, to }: { from: string; to: string }) {
+
+  async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     await this.typeAbsoluteRange({ from, to, validateDates: true });
   }
