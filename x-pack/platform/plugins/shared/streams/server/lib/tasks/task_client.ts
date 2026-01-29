@@ -13,6 +13,7 @@ import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams, TaskResult } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
 import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
+import { TaskNotFoundError } from '../streams/errors/task_not_found_error';
 import { isStale } from './is_stale';
 
 interface TaskRequest<TaskType, TParams extends {}> {
@@ -268,14 +269,17 @@ export class TaskClient<TaskType extends string> {
 
   /**
    * Deletes a single task by ID.
-   * This operation is idempotent - if the task doesn't exist, no error is thrown.
+   * @throws TaskNotFoundError if the task does not exist
    */
   public async deleteTask(id: string): Promise<void> {
     this.logger.debug(`Deleting task ${id}`);
-    await this.storageClient.delete({
+    const { result } = await this.storageClient.delete({
       id,
       refresh: true,
     });
+    if (result === 'not_found') {
+      throw new TaskNotFoundError(`Task ${id} not found`);
+    }
     this.logger.debug(`Successfully deleted task ${id}`);
   }
 }

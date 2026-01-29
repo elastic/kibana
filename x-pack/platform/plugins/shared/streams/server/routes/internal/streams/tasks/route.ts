@@ -42,7 +42,7 @@ const deleteTaskRoute = createServerRoute({
     access: 'internal',
     summary: 'Delete a single task by ID',
     description:
-      'Deletes a specific task document from the task index by its ID. This operation is idempotent - if the task does not exist, it returns success. This allows administrators to clean up specific stuck or corrupted task states.',
+      'Deletes a specific task document from the task index by its ID. Returns 404 if the task does not exist.',
   },
   security: {
     authz: {
