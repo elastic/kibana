@@ -54,7 +54,6 @@ describe('LogFlyoutContent', () => {
   const defaultProps: LogFlyoutContentProps = {
     hit: mockHit,
     logDataView: dataViewMock,
-    error: null,
   };
 
   beforeEach(() => {
@@ -68,29 +67,6 @@ describe('LogFlyoutContent', () => {
     expect(logsOverview).toBeInTheDocument();
     expect(logsOverview).toHaveAttribute('data-hit-id', mockHit.id);
     expect(logsOverview).toHaveAttribute('data-show-trace-waterfall', 'false');
-  });
-
-  it('should not render error callout when error is null', () => {
-    render(<LogFlyoutContent {...defaultProps} />);
-
-    expect(screen.queryByText('Failed to load data view')).not.toBeInTheDocument();
-  });
-
-  it('should render error callout when error is present', () => {
-    const errorMessage = 'Failed to load data view';
-
-    render(<LogFlyoutContent {...defaultProps} error={errorMessage} />);
-
-    expect(screen.getByText(errorMessage)).toBeInTheDocument();
-  });
-
-  it('should render both error callout and LogsOverview when error is present', () => {
-    const errorMessage = 'Failed to load data view';
-
-    render(<LogFlyoutContent {...defaultProps} error={errorMessage} />);
-
-    expect(screen.getByText(errorMessage)).toBeInTheDocument();
-    expect(screen.getByTestId('logsOverviewComponent')).toBeInTheDocument();
   });
 
   it('should render with different hit data', () => {
