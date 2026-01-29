@@ -22,6 +22,42 @@ export const getIsValidFullIp = (searchString: string) => {
   return ipaddr.IPv4.isValidFourPartDecimal(searchString) || ipaddr.IPv6.isValid(searchString);
 };
 
+export const getIsCidrNotation = (searchString: string): boolean => {
+  return /^[A-Fa-f0-9.:]+\/\d+$/.test(searchString);
+};
+
+export const getValidCidrRange = (
+  searchString: string
+): { isValid: boolean; ipType?: 'ipv4' | 'ipv6' } => {
+  try {
+    const slashIndex = searchString.lastIndexOf('/');
+    if (slashIndex === -1) {
+      return { isValid: false };
+    }
+    const ipPart = searchString.substring(0, slashIndex);
+    if (!getIsValidFullIp(ipPart)) {
+      return { isValid: false };
+    }
+    const [ip, prefixLength] = ipaddr.parseCIDR(searchString);
+    const isIpv4 = ip.kind() === 'ipv4';
+    const maxPrefixLength = isIpv4 ? 32 : 128;
+    if (prefixLength < 0 || prefixLength > maxPrefixLength) {
+      return { isValid: false };
+    }
+    return { isValid: true, ipType: isIpv4 ? 'ipv4' : 'ipv6' };
+  } catch {
+    return { isValid: false };
+  }
+};
+
+const buildCidrRangeQuery = (searchString: string): IpRangeQuery['rangeQuery'] => {
+  const cidrValidation = getValidCidrRange(searchString);
+  if (!cidrValidation.isValid || !cidrValidation.ipType) {
+    return undefined;
+  }
+  return [{ key: cidrValidation.ipType, mask: searchString }];
+};
+
 export const getIpSegments = (searchString: string): IpSegments => {
   if (searchString.indexOf('.') !== -1) {
     // ipv4 takes priority - so if search string contains both `.` and `:` then it will just be an invalid ipv4 search
@@ -101,8 +137,13 @@ const buildPartialIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['ran
 };
 
 export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
-  if (searchString.match(/^[A-Fa-f0-9.:]*$/) === null) {
+  if (searchString.match(/^[A-Fa-f0-9.:\/]*$/) === null) {
     return { validSearch: false };
+  }
+
+  if (getIsCidrNotation(searchString)) {
+    const cidrRangeQuery = buildCidrRangeQuery(searchString);
+    return { validSearch: Boolean(cidrRangeQuery), rangeQuery: cidrRangeQuery };
   }
 
   const ipSegments = getIpSegments(searchString);
