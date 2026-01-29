@@ -102,7 +102,7 @@ export class BasicPrettyPrinter {
     node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    return node.type === 'query'
+    return node.type === 'query' && 'commands' in node
       ? BasicPrettyPrinter.query(node, opts)
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
@@ -530,7 +530,12 @@ export class BasicPrettyPrinter {
               return undefined;
             }
 
-            if (branch.type === 'parens' && branch.child.type === 'query') {
+            // Check for ESQLAstQueryExpression specifically (has 'commands' property)
+            if (
+              branch.type === 'parens' &&
+              branch.child.type === 'query' &&
+              'commands' in branch.child
+            ) {
               return ctx.visitSubQuery(branch.child);
             }
 
