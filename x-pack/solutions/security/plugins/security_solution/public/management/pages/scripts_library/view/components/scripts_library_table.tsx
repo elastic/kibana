@@ -40,7 +40,7 @@ import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
 import { ScriptRowActions } from './script_row_actions';
-import type { useScriptActionItems } from '../hooks/use_script_action_items';
+import type { UseScriptActionItemsProps } from '../hooks/use_script_action_items';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
@@ -206,7 +206,7 @@ export interface ScriptsLibraryTableProps {
   isLoading?: boolean;
   items: ScriptItems;
   onChange: OnChangeTable;
-  onClickAction: Parameters<typeof useScriptActionItems>[number]['onClickAction'];
+  onClickAction: UseScriptActionItemsProps['onClickAction'];
   queryParams: ListScriptsRequestQuery;
   sort: {
     field?: SortableScriptLibraryFields;

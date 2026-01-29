@@ -108,4 +108,101 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       }
     ),
   },
+  flyout: {
+    flyoutViewItemFetchError: (errorMessage: string) =>
+      i18n.translate('xpack.securitySolution.scriptsLibrary.table.flyout.view.loadFailureMessage', {
+        defaultMessage: 'Could not load script details. {errorMessage}',
+        values: { errorMessage },
+      }),
+    body: {
+      details: {
+        requiresInput: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.requiresInputLabel',
+            {
+              defaultMessage: 'Requires user input',
+            }
+          ),
+          tooltip: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.requiresInputTooltip',
+            {
+              defaultMessage: 'Indicates if the script requires input parameters to run.',
+            }
+          ),
+        },
+        tags: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.tagsLabel',
+            {
+              defaultMessage: 'Types',
+            }
+          ),
+        },
+        description: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.descriptionLabel',
+            {
+              defaultMessage: 'Description',
+            }
+          ),
+        },
+        instructions: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.instructionsLabel',
+            {
+              defaultMessage: 'Instructions',
+            }
+          ),
+        },
+        example: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.examplesLabel',
+            {
+              defaultMessage: 'Examples',
+            }
+          ),
+        },
+        fileName: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileNameLabel',
+            {
+              defaultMessage: 'File name',
+            }
+          ),
+        },
+        pathToExecutable: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableLabel',
+            {
+              defaultMessage: 'Path to executable file',
+            }
+          ),
+        },
+        fileSize: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileSizeLabel',
+            {
+              defaultMessage: 'File size',
+            }
+          ),
+        },
+        fileHash: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileHashLabel',
+            {
+              defaultMessage: 'SHA256',
+            }
+          ),
+        },
+        updatedBy: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.updatedByLabel',
+            {
+              defaultMessage: 'Updated by',
+            }
+          ),
+        },
+      },
+    },
+  },
 });

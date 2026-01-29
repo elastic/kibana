@@ -18,7 +18,7 @@ export const ScriptTablePlatformBadges = memo<ScriptTablePlatformBadgesProps>(
   ({ platforms, 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj={dataTestSubj}>
-        {platforms?.map((platform) => (
+        {platforms?.sort().map((platform) => (
           <EuiFlexItem grow={false} key={platform}>
             <EuiBadge color="hollow">{OS_TITLES[platform]}</EuiBadge>
           </EuiFlexItem>
