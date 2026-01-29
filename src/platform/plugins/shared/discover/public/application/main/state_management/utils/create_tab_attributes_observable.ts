@@ -26,10 +26,7 @@ export const createTabAttributesObservable = ({
 
   const tabAttributes$ = internalState$.pipe(
     map(getAttributes),
-    distinctUntilChanged((a, b) => {
-      console.log('Comparing tab attributes:', a, b);
-      return isEqual(a, b);
-    }),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
     skip(1)
   );
 
