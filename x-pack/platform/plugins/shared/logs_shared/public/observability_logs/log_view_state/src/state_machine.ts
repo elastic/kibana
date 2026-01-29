@@ -7,7 +7,9 @@
 
 import { of } from 'rxjs';
 import { assign, fromCallback, fromObservable, fromPromise, setup } from 'xstate';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { NotificationChannel } from '@kbn/xstate-utils';
+import type { LogView, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
 import type { ILogViewsClient } from '../../../services/log_views';
 import type { LogViewNotificationEvent } from './notifications';
 import { logViewNotificationEventSelectors } from './notifications';
@@ -100,13 +102,23 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         sendBack({ type: 'INITIALIZED_FROM_URL', logViewReference: null });
       }),
       listenForUrlChanges: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      loadLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
-      updateLogView: fromPromise<unknown, { context: LogViewContext; event: LogViewEvent }>(
-        async () => undefined
+      loadLogView: fromPromise<LogView, LogViewContext>(async () => {
+        throw new Error('loadLogView not implemented');
+      }),
+      updateLogView: fromPromise<LogView, { context: LogViewContext; event: LogViewEvent }>(
+        async () => {
+          throw new Error('updateLogView not implemented');
+        }
       ),
-      persistInlineLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
-      resolveLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
-      loadLogViewStatus: fromPromise<unknown, LogViewContext>(async () => undefined),
+      persistInlineLogView: fromPromise<LogView, LogViewContext>(async () => {
+        throw new Error('persistInlineLogView not implemented');
+      }),
+      resolveLogView: fromPromise<ResolvedLogView<DataView>, LogViewContext>(async () => {
+        throw new Error('resolveLogView not implemented');
+      }),
+      loadLogViewStatus: fromPromise<LogViewStatus, LogViewContext>(async () => {
+        throw new Error('loadLogViewStatus not implemented');
+      }),
     },
     guards: {
       isPersistedLogView: ({ context }) => context.logViewReference.type === 'log-view-reference',
@@ -372,6 +384,5 @@ export const createLogViewStateMachine = ({
         }
         return await logViews.getResolvedLogViewStatus(input.resolvedLogView);
       }),
-      // Type assertion needed because placeholder actors in setup() have `unknown` output type
-    } as any,
+    },
   });
