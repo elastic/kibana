@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-
-export const configMock = {
-  get: (key: string) => {
-    if (key === 'defaultIndex') {
-      return 'the-data-view-id';
-    } else if (key === SORT_DEFAULT_ORDER_SETTING) {
-      return 'desc';
-    }
-
-    return '';
-  },
-} as unknown as IUiSettingsClient;
+require('@kbn/setup-node-env');
+require('@kbn/yarn-install-scripts/cli').cli();
