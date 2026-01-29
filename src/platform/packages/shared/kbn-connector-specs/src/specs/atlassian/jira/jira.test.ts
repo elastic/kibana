@@ -12,6 +12,7 @@ import { JiraConnector } from './jira';
 
 describe('JiraConnector', () => {
   const mockClient = {
+    get: jest.fn(),
     post: jest.fn(),
   };
 
@@ -87,6 +88,76 @@ describe('JiraConnector', () => {
           jql: 'status = Done',
           maxResults: 50,
           nextPageToken: 'page-token-abc',
+        }
+      );
+    });
+  });
+
+  describe('getIssue action', () => {
+    it('should retrieve issue by ID and return response data', async () => {
+      const mockResponse = {
+        data: {
+          id: '10002',
+          key: 'MYPROJ-2',
+          fields: {
+            summary: 'Add login page',
+            status: { name: 'To Do' },
+            assignee: { displayName: 'Alice' },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getIssue.handler(mockContext, {
+        issueId: '10002',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/10002'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getProjects action', () => {
+    it('should fetch projects and return response data', async () => {
+      const mockResponse = {
+        data: {
+          values: [
+            { id: '10000', key: 'MYPROJ', name: 'My Project' },
+            { id: '10001', key: 'OTHER', name: 'Other Project' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getProjects.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/project/search',
+        { params: {} }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include optional maxResults, startAt, and query as params', async () => {
+      const mockResponse = { data: { values: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraConnector.actions.getProjects.handler(mockContext, {
+        maxResults: 20,
+        startAt: 10,
+        query: 'MYPROJ',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/project/search',
+        {
+          params: {
+            maxResults: 20,
+            startAt: 10,
+            query: 'MYPROJ',
+          },
         }
       );
     });

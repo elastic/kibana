@@ -1,6 +1,8 @@
-import { ConnectorSpec } from '@kbn/connector-specs';
+import { ActionContext, ConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { z } from 'zod/v4';
+
+const buildBaseUrl = (ctx: ActionContext) => `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
 
 export const JiraConnector: ConnectorSpec = {
   metadata: {
@@ -53,6 +55,40 @@ export const JiraConnector: ConnectorSpec = {
         const subdomain = (ctx.config?.subdomain as string) ?? '';
         const baseUrl = `https://${subdomain.trim()}.atlassian.net`;
         const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, typedInput);
+        return response.data;
+      },
+    },
+    getIssue: {
+      isTool: false,
+      input: z.object({
+        issueId: z.string(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          issueId: string;
+        };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/rest/api/3/issue/${typedInput.issueId}`);
+        return response.data;
+      },
+    },
+    getProjects: {
+      isTool: false,
+      input: z.object({
+        maxResults: z.number().optional(),
+        startAt: z.number().optional(),
+        query: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          maxResults?: number;
+          startAt?: number;
+          query?: string;
+        };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/rest/api/3/project/search`, {
+          params: typedInput,
+        });
         return response.data;
       },
     },
