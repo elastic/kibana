@@ -80,6 +80,7 @@ export const sourceSchema = schema.object({
   runtime_mappings: runtimeMappingsSchema,
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  project_routing: schema.maybe(schema.string()),
 });
 
 export const syncSchema = schema.object({

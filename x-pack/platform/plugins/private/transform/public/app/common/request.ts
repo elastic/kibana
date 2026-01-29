@@ -126,7 +126,8 @@ export function getPreviewTransformRequestBody(
   transformConfigQuery: TransformConfigQuery,
   partialRequest?: StepDefineExposedState['previewRequest'],
   runtimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  timeRangeMs?: StepDefineExposedState['timeRangeMs'],
+  projectRouting?: StepDefineExposedState['projectRouting']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
@@ -156,6 +157,7 @@ export function getPreviewTransformRequestBody(
       index,
       ...(isDefaultQuery(query) ? {} : { query }),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}), // this causes 400 issue because it's not supported by elasticsearchClient yet
     },
     ...(partialRequest ?? {}),
   };
@@ -196,7 +198,8 @@ export const getCreateTransformRequestBody = (
     transformConfigState.runtimeMappings,
     transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
       ? transformConfigState.timeRangeMs
-      : undefined
+      : undefined,
+    transformConfigState.projectRouting
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
