@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
@@ -18,7 +18,6 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import { getEsqlQuery } from './get_esql_query';
-import type { ContentFrameworkSectionProps } from '../../../../content_framework/section/section';
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
   defaultMessage: 'Similar spans',
@@ -68,17 +67,12 @@ export function SimilarSpans({
     dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
   });
 
-  const sectionActions: ContentFrameworkSectionProps['actions'] = useMemo(
-    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
-    [openInDiscoverSectionAction]
-  );
-
   return (
     <ContentFrameworkSection
       id="similarSpans"
       data-test-subj="docViewerSimilarSpansSection"
       title={sectionTitle}
-      actions={sectionActions}
+      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
     >
       <ContentFrameworkChart
         data-test-subj="docViewerSimilarSpansLatencyChart"
