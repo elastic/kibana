@@ -194,7 +194,6 @@ export default function ({ getService }: FtrProviderContext) {
               bool: { must: [{ match: { invalidated: { query: false, operator: 'and' } } }] },
             },
             sort: { field: 'creation', direction: 'desc' },
-            from: 0,
             size: 1,
           };
 
