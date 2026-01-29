@@ -52,19 +52,9 @@ export const useFilterDisplay = (): FilterDisplayState => {
   const { features, supports } = useContentListConfig();
   const { sorting, filtering } = features;
 
-  // If sorting is explicitly disabled, return all false.
-  if (sorting === false) {
-    return {
-      hasFilters: false,
-      hasSorting: false,
-      hasTags: false,
-      hasUsers: false,
-      hasCustomFilters: false,
-      hasStarred: false,
-    };
-  }
+  // Sorting is enabled unless explicitly disabled.
+  const hasSorting = sorting !== false;
 
-  const hasSorting = true;
   let hasTags = false;
   let hasUsers = false;
   let hasCustomFilters = false;

@@ -63,7 +63,7 @@ export interface CustomFilterDefinition {
   /** Display name for the filter. */
   name: string;
   /** Available options for the filter. */
-  options: Array<{ value: unknown; label: string }>;
+  options: Array<{ value: string; label: string }>;
   /**
    * Whether this filter supports multiple selections.
    *

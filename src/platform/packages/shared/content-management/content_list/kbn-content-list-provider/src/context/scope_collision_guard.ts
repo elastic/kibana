@@ -10,6 +10,12 @@
 /**
  * Track active provider instances to detect potential cache key collisions.
  * Maps `entityName` → Set of explicitly provided `queryKeyScope` values.
+ *
+ * **Limitation:** This tracking only works within a single plugin's bundle.
+ * When multiple Kibana plugins use this package, each gets its own module instance,
+ * so cross-plugin collisions are not detected. This is acceptable since cross-plugin
+ * cache sharing via explicit `queryKeyScope` is an intentional advanced use case.
+ *
  * @internal
  */
 const activeProviders = new Map<string, Set<string>>();
@@ -23,13 +29,21 @@ const activeProviders = new Map<string, Set<string>>();
  *
  * When `queryKeyScope` is `undefined`, no tracking or warning occurs because the provider
  * will use an auto-generated unique scope internally.
+ *
+ * **Limitation:** Only detects collisions within the same plugin bundle.
+ * Cross-plugin collisions are not detected due to separate module instances.
  */
 export const warnOnQueryKeyScopeCollision = (
   entityName: string,
   queryKeyScope: string | undefined
 ): (() => void) => {
+  // Skip in production/test modes. This check is at runtime to support test mocking of NODE_ENV.
+  if (process.env.NODE_ENV !== 'development') {
+    return () => {};
+  }
+
   // Skip tracking for undefined scopes - providers auto-generate unique scopes internally.
-  if (process.env.NODE_ENV !== 'development' || queryKeyScope === undefined) {
+  if (queryKeyScope === undefined) {
     return () => {};
   }
 

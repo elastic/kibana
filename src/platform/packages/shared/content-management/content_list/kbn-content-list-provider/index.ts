@@ -134,7 +134,6 @@ export type {
   ContentListConfig,
   ContentListServices,
   ContentListKibanaServices,
-  ContentListKibanaProviderBaseProps,
 } from './src/context';
 
 // Feature configuration

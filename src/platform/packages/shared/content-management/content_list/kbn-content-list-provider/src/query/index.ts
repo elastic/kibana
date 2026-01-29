@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Query hook and keys.
+// Query hook.
 export {
   useContentListItemsQuery,
-  contentListKeys,
   type UseContentListItemsQueryParams,
   type UseContentListItemsQueryResult,
 } from './queries';
+
+// Query keys.
+export { contentListKeys } from './keys';
 
 // Query client.
 export { contentListQueryClient, QueryClientProvider } from './query_client';

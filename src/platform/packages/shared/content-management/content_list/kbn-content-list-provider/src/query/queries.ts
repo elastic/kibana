@@ -17,8 +17,6 @@ import type { FindItemsResult } from '../datasource';
 import { contentListKeys } from './keys';
 import { parseQueryText, type TagItem } from './parsing';
 
-export { contentListKeys } from './keys';
-
 export interface UseContentListItemsQueryParams<T>
   extends Pick<FindItemsParams, 'filters' | 'sort' | 'page'> {
   /** Data source configuration with `findItems` function. */

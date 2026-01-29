@@ -33,54 +33,8 @@ describe('state_reducer', () => {
     isReadOnly: false,
   };
 
-  describe('Data mutations', () => {
-    it('should handle SET_ITEMS', () => {
-      const mockItems = createMockItems(3);
-      const newState = reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: mockItems, totalItems: 3 },
-      });
-
-      expect(newState.items).toEqual(mockItems);
-      expect(newState.totalItems).toBe(3);
-      expect(newState.isLoading).toBe(false);
-      expect(newState.error).toBeUndefined();
-    });
-
-    it('should handle SET_LOADING', () => {
-      const newState = reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_LOADING,
-        payload: true,
-      });
-
-      expect(newState.isLoading).toBe(true);
-    });
-
-    it('should handle SET_ERROR', () => {
-      const error = new Error('Test error');
-      const newState = reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: error,
-      });
-
-      expect(newState.error).toEqual(error);
-      expect(newState.isLoading).toBe(false);
-    });
-
-    it('should clear error when SET_ERROR receives undefined', () => {
-      const stateWithError = {
-        ...initialState,
-        error: new Error('Previous error'),
-      };
-
-      const newState = reducer(stateWithError, {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: undefined,
-      });
-
-      expect(newState.error).toBeUndefined();
-    });
-  });
+  // Note: Data mutations (SET_ITEMS, SET_LOADING, SET_ERROR) are not tested here
+  // because React Query manages items, loading, and error state directly.
 
   describe('Search mutations', () => {
     it('should handle SET_SEARCH_QUERY and reset page', () => {
@@ -97,16 +51,6 @@ describe('state_reducer', () => {
       expect(newState.search.queryText).toBe('test query');
       expect(newState.page.index).toBe(0); // Reset to first page
       expect(newState.page.size).toBe(20); // Preserve page size
-    });
-
-    it('should handle SET_SEARCH_ERROR', () => {
-      const error = new Error('Search error');
-      const newState = reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_ERROR,
-        payload: error,
-      });
-
-      expect(newState.search.error).toEqual(error);
     });
 
     it('should handle CLEAR_SEARCH_QUERY and reset page', () => {
@@ -363,11 +307,10 @@ describe('state_reducer', () => {
   describe('Immutability', () => {
     it('should not mutate original state', () => {
       const original = { ...initialState };
-      const mockItems = createMockItems(2);
 
       reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: mockItems, totalItems: 2 },
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
+        payload: 'test query',
       });
 
       expect(initialState).toEqual(original);

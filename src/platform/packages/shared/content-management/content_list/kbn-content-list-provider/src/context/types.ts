@@ -15,17 +15,33 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataSourceConfig } from '../datasource';
 import type { ItemConfig } from '../item';
-import type { TransformFunction } from '../item';
-import type { ContentListFeatures } from '../features';
 
 /**
  * Core configuration - entity metadata and base settings.
  * No generic needed - these settings are datasource-agnostic.
  */
 export interface ContentListCoreConfig {
-  /** Singular name for the entity type (e.g., "dashboard", "visualization"). */
+  /**
+   * Singular name for the entity type (e.g., "dashboard", "visualization").
+   * **IMPORTANT: This is user-facing text and must be wrapped in i18n translation.**
+   * @example
+   * ```tsx
+   * const entityName = i18n.translate('myPlugin.listing.entityName', {
+   *   defaultMessage: 'dashboard',
+   * });
+   * ```
+   */
   entityName: string;
-  /** Plural name for the entity type (e.g., "dashboards", "visualizations"). */
+  /**
+   * Plural name for the entity type (e.g., "dashboards", "visualizations").
+   * **IMPORTANT: This is user-facing text and must be wrapped in i18n translation.**
+   * @example
+   * ```tsx
+   * const entityNamePlural = i18n.translate('myPlugin.listing.entityNamePlural', {
+   *   defaultMessage: 'dashboards',
+   * });
+   * ```
+   */
   entityNamePlural: string;
   /** Per-item configuration for links and actions. */
   item?: ItemConfig;
@@ -113,41 +129,3 @@ export type ContentListKibanaServices = ContentListServices & {
     >;
   };
 };
-
-/**
- * Base props shared by all Kibana providers.
- * @template T The item type from the datasource.
- */
-export interface ContentListKibanaProviderBaseProps<T = UserContentCommonSchema>
-  extends ContentListCoreConfig {
-  /** The saved object type to fetch. */
-  savedObjectType: string;
-  /**
-   * Optional transform function to convert raw items to the expected format.
-   * Default transform is applied for `UserContentCommonSchema`-compatible types.
-   */
-  transform?: TransformFunction<T>;
-  /**
-   * Services for the provider.
-   * `core` and `savedObjectsTagging` are required. `tags` and `userProfile` are derived
-   * from `savedObjectsTagging` and `core.userProfile` respectively.
-   */
-  services: ContentListKibanaServices;
-  /**
-   * Feature configuration for enabling/customizing capabilities.
-   *
-   * Service-dependent features (starred, tags, userProfiles) are automatically enabled
-   * when their corresponding services are provided. Set a feature to `false` to explicitly
-   * disable it even when the service is available.
-   *
-   * @example
-   * ```tsx
-   * // Tags service is provided via savedObjectsTagging, but tags feature is disabled.
-   * <ContentListServerKibanaProvider
-   *   services={{ core: coreStart, savedObjectsTagging }}
-   *   features={{ tags: false }}
-   * >
-   * ```
-   */
-  features?: ContentListFeatures;
-}

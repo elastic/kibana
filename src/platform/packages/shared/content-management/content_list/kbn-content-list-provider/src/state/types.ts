@@ -19,21 +19,15 @@ import type { IdentityResolver } from '../features/search';
  * Most consumers should use the feature hooks (`useContentListSearch`, etc.)
  * rather than dispatching actions directly.
  *
+ * Note: Data actions (SET_ITEMS, SET_LOADING, SET_ERROR) are not needed
+ * because React Query manages items, loading, and error state directly.
+ *
  * @internal
  */
 export const CONTENT_LIST_ACTIONS = {
-  // Data actions.
-  /** Set the loaded items and total count. */
-  SET_ITEMS: 'SET_ITEMS',
-  /** Set the loading state. */
-  SET_LOADING: 'SET_LOADING',
-  /** Set the error state. */
-  SET_ERROR: 'SET_ERROR',
   // Search actions.
   /** Update the search query text. */
   SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
-  /** Set the search error. */
-  SET_SEARCH_ERROR: 'SET_SEARCH_ERROR',
   /** Clear the search query. */
   CLEAR_SEARCH_QUERY: 'CLEAR_SEARCH_QUERY',
   // Filter actions.
@@ -124,19 +118,14 @@ export interface ContentListState {
  * Each action corresponds to a state update operation. Items in payloads
  * are always `ContentListItem` (standardized format) after transformation.
  *
+ * Note: Data actions (SET_ITEMS, SET_LOADING, SET_ERROR) are not included
+ * because React Query manages items, loading, and error state directly.
+ *
  * @internal Used by the state reducer and dispatch function.
  */
 export type ContentListAction =
-  // Data actions
-  | {
-      type: typeof CONTENT_LIST_ACTIONS.SET_ITEMS;
-      payload: { items: ContentListItem[]; totalItems: number };
-    }
-  | { type: typeof CONTENT_LIST_ACTIONS.SET_LOADING; payload: boolean }
-  | { type: typeof CONTENT_LIST_ACTIONS.SET_ERROR; payload: Error | undefined }
   // Search actions
   | { type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY; payload: string }
-  | { type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH_ERROR; payload: Error | undefined }
   | { type: typeof CONTENT_LIST_ACTIONS.CLEAR_SEARCH_QUERY }
   // Filter actions
   | { type: typeof CONTENT_LIST_ACTIONS.SET_FILTERS; payload: ActiveFilters }

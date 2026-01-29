@@ -21,40 +21,21 @@ const FIRST_PAGE_INDEX = 0;
  * Handles all state mutations with immutable updates.
  * Automatically resets page to 0 on search/filter/sort changes.
  *
+ * Note: Data mutations (SET_ITEMS, SET_LOADING, SET_ERROR) are not needed
+ * because React Query manages items, loading, and error state directly.
+ *
  * @param state - Current state.
  * @param action - Action to apply.
  * @returns New state.
  */
 export const reducer = (state: ContentListState, action: ContentListAction): ContentListState => {
   switch (action.type) {
-    // Data mutations.
-    case CONTENT_LIST_ACTIONS.SET_ITEMS:
-      return {
-        ...state,
-        items: action.payload.items,
-        totalItems: action.payload.totalItems,
-        isLoading: false,
-        error: undefined,
-      };
-
-    case CONTENT_LIST_ACTIONS.SET_LOADING:
-      return { ...state, isLoading: action.payload };
-
-    case CONTENT_LIST_ACTIONS.SET_ERROR:
-      return { ...state, error: action.payload, isLoading: false };
-
     // Search mutations.
     case CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY:
       return {
         ...state,
         search: { ...state.search, queryText: action.payload },
-        page: { ...state.page, index: FIRST_PAGE_INDEX }, // Reset to first page on search
-      };
-
-    case CONTENT_LIST_ACTIONS.SET_SEARCH_ERROR:
-      return {
-        ...state,
-        search: { ...state.search, error: action.payload },
+        page: { ...state.page, index: FIRST_PAGE_INDEX }, // Reset to first page on search.
       };
 
     // Filter mutations.

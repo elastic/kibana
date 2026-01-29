@@ -10,7 +10,8 @@
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useContentListItemsQuery, contentListKeys } from './queries';
+import { useContentListItemsQuery } from './queries';
+import { contentListKeys } from './keys';
 import type { DataSourceConfig, FindItemsParams } from '../datasource';
 import {
   createMockItems,

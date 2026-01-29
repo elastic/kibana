@@ -36,7 +36,6 @@ The package exports:
 - **`ContentListProvider`** — Base provider that accepts explicit service implementations. Works in any environment (Kibana apps, Jest tests, Storybook, etc.). Requires a `dataSource.findItems` function.
 
 For Kibana saved objects, use Kibana-specific providers from separate packages:
-- **`ContentListServerKibanaProvider`** from `@kbn/content-list-provider-server` — For server-side data fetching
 - **`ContentListClientKibanaProvider`** from `@kbn/content-list-provider-client` — For client-side data fetching
 
 These Kibana providers wrap `ContentListProvider` and provide built-in data fetching strategies for Saved Objects.
@@ -55,40 +54,37 @@ import {
 
 // 1. Define your findItems function
 const findItems: FindItemsFn = async ({ searchQuery, filters, sort, page, signal }) => {
-  // Route through favorites endpoint when starredOnly is enabled.
-  if (filters.starredOnly) {
-    return favoritesClient.search({
-      savedObjectType: 'dashboard',
-      search: searchQuery,
-      sortField: sort.field,
-      sortOrder: sort.direction,
-      page: page.index + 1,
-      perPage: page.size,
-    });
-  }
-
-  // Direct Saved Objects call otherwise.
-  const response = await savedObjectsClient.find({
-    type: 'dashboard',
-    search: searchQuery ? `${searchQuery}*` : undefined,
-    searchFields: ['title'],
+  // Call your API with the search parameters.
+  const response = await myApi.search({
+    query: searchQuery,
+    tags: filters.tags,
+    starredOnly: filters.starredOnly,
     sortField: sort.field,
     sortOrder: sort.direction,
     page: page.index + 1,
     perPage: page.size,
+    signal,
   });
 
   return {
-    items: response.savedObjects.map(so => so.attributes),
+    items: response.items,
     total: response.total,
   };
 };
 
 // 2. Wrap your app with the provider
+// Note: entityName and entityNamePlural are user-facing and should use i18n.
+const entityName = i18n.translate('myPlugin.listing.entityName', {
+  defaultMessage: 'dashboard',
+});
+const entityNamePlural = i18n.translate('myPlugin.listing.entityNamePlural', {
+  defaultMessage: 'dashboards',
+});
+
 const DashboardListPage = () => (
   <ContentListProvider
-    entityName="dashboard"
-    entityNamePlural="dashboards"
+    entityName={entityName}
+    entityNamePlural={entityNamePlural}
     dataSource={{ findItems }}
     services={{
       core: coreStart,
@@ -130,7 +126,7 @@ dataSource={{
 }}
 ```
 
-> **Note:** For Kibana saved objects, consider using `ContentListServerKibanaProvider` from `@kbn/content-list-provider-server` or `ContentListClientKibanaProvider` from `@kbn/content-list-provider-client` which provide built-in data fetching strategies. See [Jest and Storybook](#jest-and-storybook) for testing patterns.
+> **Note:** For Kibana saved objects, consider using `ContentListClientKibanaProvider` from `@kbn/content-list-provider-client` which provides a built-in data fetching strategy. See [Jest and Storybook](#jest-and-storybook) for testing patterns.
 
 
 ## Usage
@@ -143,36 +139,24 @@ For typical Kibana usage, wrap your content list components with `ContentListPro
 import { ContentListProvider, type FindItemsFn } from '@kbn/content-list-provider';
 
 const DashboardListPage = () => {
-  const { savedObjectsTagging, core, favorites, savedObjectsClient, favoritesClient } = useServices();
+  const { savedObjectsTagging, core, favorites, dashboardApi } = useServices();
   const savedObjectsTaggingApi = savedObjectsTagging?.getTaggingApi();
 
-  // Define findItems with server-side operations.
+  // Define findItems with your API.
   const findItems: FindItemsFn = async ({ searchQuery, filters, sort, page, signal }) => {
-    // Handle favorites filtering via the favorites search endpoint.
-    if (filters.starredOnly) {
-      return favoritesClient.search({
-        savedObjectType: 'dashboard',
-        search: searchQuery,
-        sortField: sort.field,
-        sortOrder: sort.direction,
-        page: page.index + 1,
-        perPage: page.size,
-      });
-    }
-
-    // Standard saved objects query.
-    const response = await savedObjectsClient.find({
-      type: 'dashboard',
-      search: searchQuery ? `${searchQuery}*` : undefined,
-      searchFields: ['title'],
+    const response = await dashboardApi.search({
+      query: searchQuery,
+      tags: filters.tags,
+      starredOnly: filters.starredOnly,
       sortField: sort.field,
       sortOrder: sort.direction,
       page: page.index + 1,
       perPage: page.size,
+      signal,
     });
 
     return {
-      items: response.savedObjects.map(so => so.attributes),
+      items: response.items,
       total: response.total,
     };
   };
@@ -264,7 +248,7 @@ The package uses a two-layer provider pattern:
 **Kibana vs Non-Kibana Context:**
 
 - `ContentListProvider` accepts a `services` prop with explicit implementations. For Kibana apps, pass `core`, `savedObjectsTagging`, and `favorites` services.
-- For Kibana saved objects, consider using `ContentListServerKibanaProvider` from `@kbn/content-list-provider-server` or `ContentListClientKibanaProvider` from `@kbn/content-list-provider-client` which provide built-in data fetching strategies.
+- For Kibana saved objects, consider using `ContentListClientKibanaProvider` from `@kbn/content-list-provider-client` which provides a built-in data fetching strategy.
 
 ### Configuration Context
 
@@ -274,8 +258,8 @@ The configuration context holds static values that define the content list behav
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `entityName` | `string` | Singular name (e.g., `"dashboard"`). |
-| `entityNamePlural` | `string` | Plural name (e.g., `"dashboards"`). |
+| `entityName` | `string` | Singular name (e.g., `"dashboard"`). **Must be i18n-translated.** |
+| `entityNamePlural` | `string` | Plural name (e.g., `"dashboards"`). **Must be i18n-translated.** |
 | `dataSource` | `DataSourceConfig` | Data fetching configuration (see below). |
 
 #### Data Source Configuration
@@ -285,35 +269,21 @@ The `dataSource` prop requires a `findItems` function that handles data fetching
 ```tsx
 dataSource={{
   findItems: async ({ searchQuery, filters, sort, page, signal }) => {
-    // Handle starredOnly filter via favorites search endpoint.
-    if (filters.starredOnly) {
-      return favoritesClient.search({
-        savedObjectType: 'dashboard',
-        search: searchQuery,
-        sortField: sort.field,
-        sortOrder: sort.direction,
-        page: page.index + 1,
-        perPage: page.size,
-      });
-    }
-
-    // Standard saved objects query for non-favorites.
-    const response = await savedObjectsClient.find({
-      type: 'dashboard',
-      search: searchQuery ? `${searchQuery}*` : undefined,
-      searchFields: ['title'],
+    // Call your API with all filter parameters.
+    const response = await myApi.search({
+      query: searchQuery,
+      tags: filters.tags,
+      users: filters.users,
+      starredOnly: filters.starredOnly,
       sortField: sort.field,
       sortOrder: sort.direction,
       page: page.index + 1,
       perPage: page.size,
-      // Map tag filters to hasReference.
-      hasReference: filters.tags?.include?.map(id => ({ type: 'tag', id })),
-      // Map createdBy filter.
-      filter: filters.users?.length ? `dashboard.attributes.createdBy:(${filters.users.join(' OR ')})` : undefined,
+      signal,
     });
 
     return {
-      items: response.savedObjects.map(so => so.attributes),
+      items: response.items,
       total: response.total,
     };
   },

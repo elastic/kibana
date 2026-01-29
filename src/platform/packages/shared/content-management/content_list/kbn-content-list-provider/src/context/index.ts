@@ -20,5 +20,4 @@ export type {
   ContentListConfig,
   ContentListServices,
   ContentListKibanaServices,
-  ContentListKibanaProviderBaseProps,
 } from './types';
