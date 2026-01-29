@@ -10,7 +10,13 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { SerializedError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  type SerializedError,
+  type StackFrame,
+  type StepContext,
+  type WorkflowContext,
+} from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
@@ -221,20 +227,22 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Get variables from all data.set steps that are predecessors of the current step.
+   * Get variables from all completed data.set steps in the workflow execution.
    * Variables are retrieved from step outputs, which are persisted in execution state.
    * This ensures variables survive across wait steps and task resumptions.
+   * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    const predecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
-    const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
-
     const variables: Record<string, unknown> = {};
+    const stepExecutions = this.workflowExecutionState
+      .getAllStepExecutions()
+      .filter((x) => x.stepType === 'data.set')
+      .filter((x) => x.output)
+      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
 
-    for (const dataSetStep of dataSetSteps) {
-      const stepExecution = this.workflowExecutionState.getLatestStepExecution(dataSetStep.id);
+    for (const stepExecution of stepExecutions) {
       if (
-        stepExecution?.output &&
+        stepExecution.output &&
         typeof stepExecution.output === 'object' &&
         !Array.isArray(stepExecution.output)
       ) {
