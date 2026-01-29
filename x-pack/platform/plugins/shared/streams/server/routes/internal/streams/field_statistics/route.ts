@@ -9,9 +9,10 @@ import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import {
-  aggregateFieldUsageStats,
+  aggregateDiskUsage,
+  type DiskUsageResponse,
   type FieldStatisticsResponse,
-} from './aggregate_field_usage_stats';
+} from './aggregate_disk_usage';
 
 const fieldStatisticsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/field_statistics',
@@ -35,7 +36,7 @@ const fieldStatisticsRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
 
-    // Field usage stats API is not available in serverless
+    // Disk usage API is not available in serverless
     if (server.isServerless) {
       return {
         isSupported: false,
@@ -50,12 +51,13 @@ const fieldStatisticsRoute = createServerRoute({
     // Get the data stream to find backing indices
     const dataStream = await streamsClient.getDataStream(name);
 
-    // Query field usage stats using the data stream name (covers all backing indices)
-    const response = await scopedClusterClient.asCurrentUser.indices.fieldUsageStats({
+    // Query disk usage stats using the data stream name (covers all backing indices)
+    const response = (await scopedClusterClient.asCurrentUser.indices.diskUsage({
       index: dataStream.name,
-    });
+      run_expensive_tasks: true,
+    })) as DiskUsageResponse;
 
-    const fields = aggregateFieldUsageStats([response]);
+    const fields = aggregateDiskUsage(response);
 
     return {
       isSupported: true,

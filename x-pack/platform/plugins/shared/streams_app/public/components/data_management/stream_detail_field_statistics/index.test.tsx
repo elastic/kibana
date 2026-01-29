@@ -31,9 +31,7 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 
-const mockUseFieldStatistics = useFieldStatistics as jest.MockedFunction<
-  typeof useFieldStatistics
->;
+const mockUseFieldStatistics = useFieldStatistics as jest.MockedFunction<typeof useFieldStatistics>;
 
 const mockDefinition = {
   stream: {
@@ -50,60 +48,36 @@ const mockFieldData = {
   fields: [
     {
       name: '@timestamp',
-      any: 1500,
-      inverted_index: {
-        terms: 0,
-        postings: 0,
-        proximity: 0,
-        positions: 0,
-        term_frequencies: 0,
-        offsets: 0,
-        payloads: 0,
-      },
-      stored_fields: 500,
-      doc_values: 1000,
-      points: 0,
-      norms: 0,
-      term_vectors: 0,
-      knn_vectors: 0,
+      total_in_bytes: 15000000,
+      inverted_index_in_bytes: 0,
+      stored_fields_in_bytes: 5000000,
+      doc_values_in_bytes: 10000000,
+      points_in_bytes: 0,
+      norms_in_bytes: 0,
+      term_vectors_in_bytes: 0,
+      knn_vectors_in_bytes: 0,
     },
     {
       name: 'message',
-      any: 800,
-      inverted_index: {
-        terms: 500,
-        postings: 200,
-        proximity: 0,
-        positions: 100,
-        term_frequencies: 0,
-        offsets: 0,
-        payloads: 0,
-      },
-      stored_fields: 300,
-      doc_values: 0,
-      points: 0,
-      norms: 0,
-      term_vectors: 0,
-      knn_vectors: 0,
+      total_in_bytes: 8000000,
+      inverted_index_in_bytes: 5000000,
+      stored_fields_in_bytes: 3000000,
+      doc_values_in_bytes: 0,
+      points_in_bytes: 0,
+      norms_in_bytes: 0,
+      term_vectors_in_bytes: 0,
+      knn_vectors_in_bytes: 0,
     },
     {
       name: 'host.name',
-      any: 300,
-      inverted_index: {
-        terms: 100,
-        postings: 0,
-        proximity: 0,
-        positions: 0,
-        term_frequencies: 0,
-        offsets: 0,
-        payloads: 0,
-      },
-      stored_fields: 100,
-      doc_values: 100,
-      points: 0,
-      norms: 0,
-      term_vectors: 0,
-      knn_vectors: 0,
+      total_in_bytes: 3000000,
+      inverted_index_in_bytes: 1000000,
+      stored_fields_in_bytes: 1000000,
+      doc_values_in_bytes: 1000000,
+      points_in_bytes: 0,
+      norms_in_bytes: 0,
+      term_vectors_in_bytes: 0,
+      knn_vectors_in_bytes: 0,
     },
   ],
   totalFields: 3,
@@ -161,10 +135,10 @@ describe('StreamDetailFieldStatistics', () => {
 
       render(<StreamDetailFieldStatistics definition={mockDefinition} />);
 
-      expect(screen.getByText('Field statistics not available')).toBeInTheDocument();
+      expect(screen.getByText('Field disk usage not available')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Field usage statistics are not available in this environment. This feature requires a self-managed Elasticsearch deployment.'
+          'Field disk usage statistics are not available in this environment. This feature requires a self-managed Elasticsearch deployment.'
         )
       ).toBeInTheDocument();
     });
@@ -185,7 +159,7 @@ describe('StreamDetailFieldStatistics', () => {
 
       render(<StreamDetailFieldStatistics definition={mockDefinition} />);
 
-      expect(screen.getByText('No field statistics available')).toBeInTheDocument();
+      expect(screen.getByText('No field disk usage available')).toBeInTheDocument();
     });
   });
 
@@ -202,7 +176,7 @@ describe('StreamDetailFieldStatistics', () => {
     it('should render chart and table when data is available', () => {
       render(<StreamDetailFieldStatistics definition={mockDefinition} />);
 
-      expect(screen.getByText('Field usage overview')).toBeInTheDocument();
+      expect(screen.getByText('Field disk usage overview')).toBeInTheDocument();
       expect(screen.getByText('Field statistics')).toBeInTheDocument();
       expect(screen.getByText('3 fields total')).toBeInTheDocument();
     });
@@ -259,7 +233,7 @@ describe('StreamDetailFieldStatistics', () => {
 
       // Check that column headers are present
       expect(screen.getByText('Field name')).toBeInTheDocument();
-      expect(screen.getByText('Total usage')).toBeInTheDocument();
+      expect(screen.getByText('Total disk usage')).toBeInTheDocument();
       expect(screen.getByText('Doc values')).toBeInTheDocument();
       expect(screen.getByText('Stored fields')).toBeInTheDocument();
     });

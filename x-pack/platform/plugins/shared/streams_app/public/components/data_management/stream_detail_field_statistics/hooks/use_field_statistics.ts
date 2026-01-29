@@ -9,23 +9,24 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 export interface AggregatedFieldStats {
+  /** Field name */
   name: string;
-  any: number;
-  inverted_index: {
-    terms: number;
-    postings: number;
-    proximity: number;
-    positions: number;
-    term_frequencies: number;
-    offsets: number;
-    payloads: number;
-  };
-  stored_fields: number;
-  doc_values: number;
-  points: number;
-  norms: number;
-  term_vectors: number;
-  knn_vectors: number;
+  /** Total disk usage in bytes across all storage types */
+  total_in_bytes: number;
+  /** Inverted index disk usage in bytes */
+  inverted_index_in_bytes: number;
+  /** Stored fields disk usage in bytes */
+  stored_fields_in_bytes: number;
+  /** Doc values disk usage in bytes */
+  doc_values_in_bytes: number;
+  /** Points (numeric range queries) disk usage in bytes */
+  points_in_bytes: number;
+  /** Norms disk usage in bytes */
+  norms_in_bytes: number;
+  /** Term vectors disk usage in bytes */
+  term_vectors_in_bytes: number;
+  /** KNN vectors disk usage in bytes */
+  knn_vectors_in_bytes: number;
 }
 
 export interface FieldStatisticsResponse {

@@ -26,6 +26,20 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { useFieldStatistics, type AggregatedFieldStats } from './hooks/use_field_statistics';
 
+/**
+ * Formats bytes into a human-readable string (B, KB, MB, GB, TB).
+ */
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const base = 1024;
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(base)), units.length - 1);
+  const value = bytes / Math.pow(base, exponent);
+  // Use 2 decimal places for larger units, 0 for bytes
+  const decimals = exponent === 0 ? 0 : 2;
+  return `${value.toFixed(decimals)} ${units[exponent]}`;
+}
+
 interface StreamDetailFieldStatisticsProps {
   definition: Streams.WiredStream.GetResponse;
 }
@@ -35,7 +49,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
 
   const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-  const [sortField, setSortField] = useState<keyof AggregatedFieldStats>('any');
+  const [sortField, setSortField] = useState<keyof AggregatedFieldStats>('total_in_bytes');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const chartBaseTheme = useElasticChartsTheme();
@@ -68,10 +82,10 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
   }, [filteredFields, sortField, sortDirection]);
 
   const chartData = useMemo(() => {
-    // Show top 20 fields by usage for the chart
-    return sortedFields.slice(0, 20).map((field) => ({
+    // Show all fields by disk usage for the chart
+    return sortedFields.map((field) => ({
       field: field.name,
-      usage: field.any,
+      diskUsage: field.total_in_bytes,
     }));
   }, [sortedFields]);
 
@@ -102,57 +116,57 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
         width: '30%',
       },
       {
-        field: 'any',
-        name: i18n.translate('xpack.streams.fieldStatistics.columns.totalUsage', {
-          defaultMessage: 'Total usage',
+        field: 'total_in_bytes',
+        name: i18n.translate('xpack.streams.fieldStatistics.columns.totalDiskUsage', {
+          defaultMessage: 'Total disk usage',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '15%',
       },
       {
-        field: 'doc_values',
+        field: 'doc_values_in_bytes',
         name: i18n.translate('xpack.streams.fieldStatistics.columns.docValues', {
           defaultMessage: 'Doc values',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '12%',
       },
       {
-        field: 'stored_fields',
+        field: 'stored_fields_in_bytes',
         name: i18n.translate('xpack.streams.fieldStatistics.columns.storedFields', {
           defaultMessage: 'Stored fields',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '12%',
       },
       {
-        field: 'points',
+        field: 'points_in_bytes',
         name: i18n.translate('xpack.streams.fieldStatistics.columns.points', {
           defaultMessage: 'Points',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '10%',
       },
       {
-        field: 'norms',
+        field: 'norms_in_bytes',
         name: i18n.translate('xpack.streams.fieldStatistics.columns.norms', {
           defaultMessage: 'Norms',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '10%',
       },
       {
-        field: 'knn_vectors',
+        field: 'knn_vectors_in_bytes',
         name: i18n.translate('xpack.streams.fieldStatistics.columns.knnVectors', {
           defaultMessage: 'KNN vectors',
         }),
         sortable: true,
-        render: (value: number) => value.toLocaleString(),
+        render: (value: number) => formatBytes(value),
         width: '11%',
       },
     ],
@@ -192,7 +206,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
     return (
       <EuiCallOut
         title={i18n.translate('xpack.streams.fieldStatistics.unsupportedTitle', {
-          defaultMessage: 'Field statistics not available',
+          defaultMessage: 'Field disk usage not available',
         })}
         color="warning"
         iconType="iInCircle"
@@ -200,7 +214,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
         <p>
           {i18n.translate('xpack.streams.fieldStatistics.unsupportedDescription', {
             defaultMessage:
-              'Field usage statistics are not available in this environment. This feature requires a self-managed Elasticsearch deployment.',
+              'Field disk usage statistics are not available in this environment. This feature requires a self-managed Elasticsearch deployment.',
           })}
         </p>
       </EuiCallOut>
@@ -211,7 +225,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
     return (
       <EuiCallOut
         title={i18n.translate('xpack.streams.fieldStatistics.noDataTitle', {
-          defaultMessage: 'No field statistics available',
+          defaultMessage: 'No field disk usage available',
         })}
         color="primary"
         iconType="iInCircle"
@@ -219,7 +233,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
         <p>
           {i18n.translate('xpack.streams.fieldStatistics.noDataDescription', {
             defaultMessage:
-              'No field usage data is available for this stream. Field statistics are collected over time as the data is queried.',
+              'No field disk usage data is available for this stream. This may happen if the stream has no data yet.',
           })}
         </p>
       </EuiCallOut>
@@ -233,14 +247,14 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.streams.fieldStatistics.chartTitle', {
-                defaultMessage: 'Field usage overview',
+                defaultMessage: 'Field disk usage overview',
               })}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.streams.fieldStatistics.chartDescription', {
-              defaultMessage: 'Top 20 fields by total usage count',
+              defaultMessage: 'Disk usage by field (sorted by total size)',
             })}
           </EuiText>
           <EuiSpacer size="m" />
@@ -251,7 +265,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
                 locale={i18n.getLocale()}
                 theme={{ background: { color: 'transparent' } }}
               />
-              <Tooltip />
+              <Tooltip headerFormatter={({ value }) => String(value)} />
               <Axis
                 id="bottom"
                 position="bottom"
@@ -261,15 +275,19 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
                 id="left"
                 position="left"
                 title={i18n.translate('xpack.streams.fieldStatistics.chartYAxisTitle', {
-                  defaultMessage: 'Usage count',
+                  defaultMessage: 'Disk usage',
                 })}
+                tickFormat={(d) => formatBytes(d)}
               />
               <BarSeries
-                id="fieldUsage"
+                id="fieldDiskUsage"
+                name={i18n.translate('xpack.streams.fieldStatistics.chartSeriesName', {
+                  defaultMessage: 'Disk usage',
+                })}
                 xScaleType={ScaleType.Ordinal}
                 yScaleType={ScaleType.Linear}
                 xAccessor="field"
-                yAccessors={['usage']}
+                yAccessors={['diskUsage']}
                 data={chartData}
               />
             </Chart>
@@ -337,7 +355,7 @@ export function StreamDetailFieldStatistics({ definition }: StreamDetailFieldSta
             }}
             onTableChange={handleTableChange}
             tableCaption={i18n.translate('xpack.streams.fieldStatistics.tableCaption', {
-              defaultMessage: 'Field usage statistics table',
+              defaultMessage: 'Field disk usage statistics table',
             })}
             data-test-subj="fieldStatisticsTable"
           />

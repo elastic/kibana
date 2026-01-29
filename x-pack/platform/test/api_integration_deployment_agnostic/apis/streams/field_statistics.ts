@@ -93,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          // Index some documents to generate field usage
+          // Index some documents to generate disk usage data
           const now = Date.now();
           const timestamp = new Date(now).toISOString();
 
@@ -115,16 +115,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             refresh: 'wait_for',
           });
 
-          // Execute a search to generate field usage stats
-          await esClient.search({
-            index: streamName,
-            query: {
-              bool: {
-                filter: [{ term: { 'attributes.test_field': 'test-value-1' } }],
-              },
-            },
-          });
-
           const response = await getFieldStatistics(viewerApiClient, streamName);
 
           expect(response.isSupported).to.be(true);
@@ -132,26 +122,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.totalFields).to.be.a('number');
           expect(response.totalFields).to.be.greaterThan(0);
 
-          // Each field should have the expected structure
+          // Each field should have the expected disk usage structure (bytes)
           if (response.fields.length > 0) {
             const field = response.fields[0];
             expect(field).to.have.property('name');
-            expect(field).to.have.property('any');
-            expect(field).to.have.property('inverted_index');
-            expect(field).to.have.property('stored_fields');
-            expect(field).to.have.property('doc_values');
-            expect(field).to.have.property('points');
-            expect(field).to.have.property('norms');
-            expect(field).to.have.property('term_vectors');
-            expect(field).to.have.property('knn_vectors');
+            expect(field).to.have.property('total_in_bytes');
+            expect(field).to.have.property('inverted_index_in_bytes');
+            expect(field).to.have.property('stored_fields_in_bytes');
+            expect(field).to.have.property('doc_values_in_bytes');
+            expect(field).to.have.property('points_in_bytes');
+            expect(field).to.have.property('norms_in_bytes');
+            expect(field).to.have.property('term_vectors_in_bytes');
+            expect(field).to.have.property('knn_vectors_in_bytes');
 
-            expect(field.inverted_index).to.have.property('terms');
-            expect(field.inverted_index).to.have.property('postings');
-            expect(field.inverted_index).to.have.property('proximity');
-            expect(field.inverted_index).to.have.property('positions');
-            expect(field.inverted_index).to.have.property('term_frequencies');
-            expect(field.inverted_index).to.have.property('offsets');
-            expect(field.inverted_index).to.have.property('payloads');
+            // Values should be numbers (bytes)
+            expect(field.total_in_bytes).to.be.a('number');
+            expect(field.inverted_index_in_bytes).to.be.a('number');
+            expect(field.stored_fields_in_bytes).to.be.a('number');
+            expect(field.doc_values_in_bytes).to.be.a('number');
           }
 
           // Clean up
@@ -164,15 +152,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           }
         });
 
-        it('returns fields sorted by usage (any) descending', async () => {
+        it('returns fields sorted by disk usage (total_in_bytes) descending', async () => {
           const response = await getFieldStatistics(viewerApiClient, 'logs');
 
           expect(response.isSupported).to.be(true);
           expect(response.fields).to.be.an('array');
 
-          // Verify fields are sorted by 'any' descending
+          // Verify fields are sorted by 'total_in_bytes' descending
           for (let i = 1; i < response.fields.length; i++) {
-            expect(response.fields[i - 1].any).to.be.greaterThan(response.fields[i].any - 1);
+            expect(response.fields[i - 1].total_in_bytes).to.be.greaterThan(
+              response.fields[i].total_in_bytes - 1
+            );
           }
         });
       }
