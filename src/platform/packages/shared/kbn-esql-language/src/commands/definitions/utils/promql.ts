@@ -154,9 +154,17 @@ export function getIndexFromPromQLParams({
     const { value } = indexEntry ?? {};
 
     if (isList(value) && value.values.length > 0) {
-      const firstElement = value.values[0];
-      if (isIdentifier(firstElement) || isSource(firstElement)) {
-        return firstElement.name;
+      const listText = value.text?.trim();
+      if (listText) {
+        return listText;
+      }
+
+      const names = value.values
+        .map((item) => (isIdentifier(item) || isSource(item) ? item.name : ''))
+        .filter(Boolean);
+
+      if (names.length > 0) {
+        return names.join(',');
       }
     }
 
