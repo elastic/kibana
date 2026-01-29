@@ -23,12 +23,29 @@ import type { UseScriptActionItemsProps } from '../../hooks/use_script_action_it
 import { EndpointScriptDetailsFlyout } from '../details';
 import { EndpointScriptEditFlyout, type EndpointScriptEditFlyoutProps } from '../edit';
 import { SCRIPT_LIBRARY_LABELS as flyoutLabels } from '../../../translations';
+import { useWithScriptSubmit } from '../../hooks/use_with_script_submit';
+
+type ScriptFormStateItem =
+  | (EndpointScript & { file?: File })
+  | {
+      id: string;
+      // required by submit hook types
+      name: string;
+      platform: EndpointScript['platform'];
+      file?: File;
+    };
 
 const createFormState = (
   scriptItem?: EndpointScript
-): { isValid: boolean; scriptItem: (EndpointScript & { file?: File }) | {} } => ({
+): { isValid: boolean; scriptItem: ScriptFormStateItem } => ({
   isValid: false,
-  scriptItem: scriptItem ?? {},
+  scriptItem:
+    scriptItem ??
+    ({
+      id: '',
+      name: '',
+      platform: [],
+    } as const),
 });
 export interface EndpointScriptFlyoutProps {
   onCloseFlyout: () => void;
@@ -62,8 +79,8 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     const isEditForm = useMemo(() => show === 'edit', [show]);
 
     const hasItemForViewOrEdit = useMemo(
-      () => !!scriptItem && !!(formState.scriptItem as EndpointScript),
-      [formState, scriptItem]
+      () => !!scriptItem && formState.scriptItem.id !== '',
+      [formState.scriptItem.id, scriptItem]
     );
     const shouldFetchScriptToViewOrEdit = useMemo(() => {
       return isViewingOrEditing && !hasItemForViewOrEdit;
@@ -94,11 +111,15 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       [setFormState, isMounted]
     );
 
+    const useSubmitScript = useWithScriptSubmit(
+      show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>
+    );
+
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitScriptData,
       error: submitScriptError,
-    } = usePatchEndpointScript(formState.scriptItem);
+    } = useSubmitScript(formState.scriptItem);
 
     const onSuccessSubmit = useCallback(() => {
       toasts.addSuccess(
@@ -118,9 +139,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     }, [toasts, isEditForm, isMounted, queryParams, onSuccess, setUrlParams]);
 
     const onSubmit = useCallback(() => {
-      submitScriptData({ script_id: (formState.scriptItem as EndpointScript).id }).then(
-        onSuccessSubmit
-      );
+      submitScriptData(formState.scriptItem).then(onSuccessSubmit);
     }, [formState.scriptItem, onSuccessSubmit, submitScriptData]);
 
     // fetch script data if needed for edit or view

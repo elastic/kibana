@@ -86,6 +86,12 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
 
     const [hasFormChanged, setHasFormChanged] = useState<boolean>(false);
 
+    // create input state trackers for validation
+    const [hasFileBeenChanged, setHasFileBeenChanged] = useState<boolean>(false);
+    const [hasNameBeenChanged, setHasNameBeenChanged] = useState<boolean>(false);
+    const [hasPlatformBeenChanged, setHasPlatformBeenChanged] = useState<boolean>(false);
+
+    // validation error states
     const [hasFileError, toggleHasFileError] = useState<boolean>(
       !scriptItem?.fileName || !scriptItem?.fileSize
     );
@@ -329,36 +335,38 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           fakeFilePicker
         ) : (
           <EuiFormRow
-            isInvalid={hasFileError}
+            isInvalid={hasFileError && hasFileBeenChanged}
             error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.validationErrorMessage}
           >
             <EuiFilePicker
-              isInvalid={hasFileError}
+              isInvalid={hasFileError && hasFileBeenChanged}
               id={filePickerUUID}
               initialPromptText={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
               onChange={onChangeFile}
+              onBlur={() => !hasFileBeenChanged && setHasFileBeenChanged(true)}
             />
           </EuiFormRow>
         )}
 
         {/* name */}
         <EuiFormRow
-          isInvalid={hasNameError}
+          isInvalid={hasNameError && hasNameBeenChanged}
           error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.name.validationErrorMessage}
           label={
             <EndpointScriptEditItem label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.name.label} />
           }
         >
           <EuiFieldText
-            isInvalid={hasNameError}
+            isInvalid={hasNameError && hasNameBeenChanged}
             defaultValue={scriptItem?.name}
             onChange={onChangeName}
+            onBlur={() => !hasNameBeenChanged && setHasNameBeenChanged(true)}
           />
         </EuiFormRow>
 
         {/* platforms */}
         <EuiFormRow
-          isInvalid={hasPlatformError}
+          isInvalid={hasPlatformError && hasPlatformBeenChanged}
           error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.platforms.validationErrorMessage}
           label={
             <EndpointScriptEditItem
@@ -367,13 +375,14 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           }
         >
           <EuiComboBox
-            isInvalid={hasPlatformError}
+            isInvalid={hasPlatformError && hasPlatformBeenChanged}
             fullWidth
             options={SUPPORTED_HOST_OS_TYPE.map((platform) => ({
               label: OS_TITLES[platform],
             }))}
             selectedOptions={selectedPlatforms}
             onChange={onChangePlatforms}
+            onBlur={() => !hasPlatformBeenChanged && setHasPlatformBeenChanged(true)}
             isClearable={true}
           />
         </EuiFormRow>
