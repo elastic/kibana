@@ -36,7 +36,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { alertId } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
-      const { inference, ruleRegistry, spaces } = startDeps;
+      const { inference, ruleRegistry } = startDeps;
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request });
@@ -135,7 +135,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { index, id } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
-      const { inference, spaces } = startDeps;
+      const { inference } = startDeps;
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request });
