@@ -74,7 +74,6 @@ export const FullScreenWaterfall = ({
    * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
    *
    * This pattern is necessary because:
-   * - Embeddables are constructed once with immutable initial state
    * - EUI components don't expose refs, requiring a wrapper div with closest()
    * - scrollElement must be available before the embeddable initializes (conditional render below)
    *
@@ -82,7 +81,7 @@ export const FullScreenWaterfall = ({
    * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
    * we can replace this workaround with a direct ref usage.
    */
-  const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
+  const waterfallContainerRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
     }
@@ -149,7 +148,7 @@ export const FullScreenWaterfall = ({
           This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
           Issue: https://github.com/elastic/kibana/issues/248307
           */}
-        <div ref={embeddableContainerRef}>
+        <div ref={waterfallContainerRef}>
           {scrollElement && serviceName ? (
             <FullTraceWaterfall
               traceId={traceId}

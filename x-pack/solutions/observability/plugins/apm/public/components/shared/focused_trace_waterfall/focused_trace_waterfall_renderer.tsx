@@ -14,12 +14,12 @@ import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { FocusedTraceWaterfall } from '.';
 import { Loading } from '../trace_waterfall/loading';
 
-export function createFocusedTraceWaterfallFetcher({ core }: { core: CoreStart }) {
+export function createFocusedTraceWaterfallRenderer({ core }: { core: CoreStart }) {
   createCallApmApi(core);
-  return (props: FocusedTraceWaterfallProps) => <FocusedTraceWaterfallFetcher {...props} />;
+  return (props: FocusedTraceWaterfallProps) => <FocusedTraceWaterfallRenderer {...props} />;
 }
 
-function FocusedTraceWaterfallFetcher({
+function FocusedTraceWaterfallRenderer({
   traceId,
   rangeFrom,
   rangeTo,

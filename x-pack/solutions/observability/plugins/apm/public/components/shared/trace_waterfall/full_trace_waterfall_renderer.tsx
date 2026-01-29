@@ -15,12 +15,12 @@ import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { Loading } from './loading';
 import { TraceWaterfall } from '.';
 
-export function createFullTraceWaterfallFetcher({ core }: { core: CoreStart }) {
+export function createFullTraceWaterfallRenderer({ core }: { core: CoreStart }) {
   createCallApmApi(core);
-  return (props: FullTraceWaterfallProps) => <FullTraceWaterfallFetcher {...props} />;
+  return (props: FullTraceWaterfallProps) => <FullTraceWaterfallRenderer {...props} />;
 }
 
-export function FullTraceWaterfallFetcher({
+export function FullTraceWaterfallRenderer({
   traceId,
   rangeFrom,
   rangeTo,
