@@ -8,30 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { AxiosHeaders } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import type {
-  PagerDutyIncident,
-  PagerDutyAssignment,
-  PagerDutyAcknowledger,
-  PagerDutyIncidentsResponse,
-  PagerDutyEscalationPolicy,
-  PagerDutyTeam,
-  PagerDutyServiceReference,
-  PagerDutyAlert,
-  PagerDutyNote,
-  PagerDutySchedule,
-  TransformedIncident,
-  TransformedIncidentsResponse,
-  TransformedEscalationPolicy,
-  TransformedAlert,
-  TransformedNote,
-  TransformedSchedule,
-  PagerDutyOnCall,
-  PagerDutyOnCallsResponse,
-  TransformedOnCall,
-} from './types';
+import type * as PD from './types';
 
+/**
+ * Pagerduty v2 Kibana Stack Connector
+ */
 export const PagerDutyConnector: ConnectorSpec = {
   metadata: {
     id: '.pagerduty-v2',
@@ -49,52 +31,7 @@ export const PagerDutyConnector: ConnectorSpec = {
     headers: {
       Accept: 'application/vnd.pagerduty+json;version=2',
     },
-  },
-
-  configureAxiosInstance: (axiosInstance) => {
-    // PagerDuty uses "Token token=<token>" instead of "Bearer <token>"
-    // Transform the Authorization header after bearer auth is configured
-    const authHeader = axiosInstance.defaults.headers.common.Authorization as string | undefined;
-
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7).trim();
-      axiosInstance.defaults.headers.common.Authorization = `Token token=${token}`;
-    }
-
-    // Also add an interceptor to ensure the header is transformed for each request
-    axiosInstance.interceptors.request.use((requestConfig) => {
-      // Transform Bearer token to PagerDuty's "Token token=<token>" format
-      const requestAuthHeader =
-        requestConfig.headers?.Authorization ||
-        requestConfig.headers?.authorization ||
-        axiosInstance.defaults.headers.common.Authorization;
-
-      if (
-        requestAuthHeader &&
-        typeof requestAuthHeader === 'string' &&
-        requestAuthHeader.startsWith('Bearer ')
-      ) {
-        const token = requestAuthHeader.substring(7).trim();
-        const pagerDutyHeader = `Token token=${token}`;
-
-        // Set the header in the request config
-        if (!requestConfig.headers) {
-          requestConfig.headers = new AxiosHeaders();
-        }
-        if (requestConfig.headers instanceof AxiosHeaders) {
-          requestConfig.headers.set('Authorization', pagerDutyHeader);
-        } else {
-          (requestConfig.headers as Record<string, string>).Authorization = pagerDutyHeader;
-        }
-
-        // Also update defaults for consistency
-        axiosInstance.defaults.headers.common.Authorization = pagerDutyHeader;
-      }
-
-      return requestConfig;
-    });
-
-    return axiosInstance;
+    authorizationHeaderFormat: (token) => `Token token=${token}`,
   },
 
   actions: {
@@ -421,7 +358,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         });
 
         const data = response.data;
-        const transformSchedule = (schedule: PagerDutySchedule): TransformedSchedule => ({
+        const transformSchedule = (schedule: PD.PagerDutySchedule): PD.TransformedSchedule => ({
           id: schedule.id,
           name: schedule.name,
           description: schedule.description,
@@ -501,7 +438,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         );
 
         const data = response.data;
-        const transformSchedule = (schedule: PagerDutySchedule): TransformedSchedule => ({
+        const transformSchedule = (schedule: PD.PagerDutySchedule): PD.TransformedSchedule => ({
           id: schedule.id,
           name: schedule.name,
           description: schedule.description,
@@ -602,8 +539,8 @@ export const PagerDutyConnector: ConnectorSpec = {
           params: queryParams,
         });
 
-        const data = response.data as PagerDutyOnCallsResponse;
-        const transformOnCall = (oncall: PagerDutyOnCall): TransformedOnCall => ({
+        const data = response.data as PD.PagerDutyOnCallsResponse;
+        const transformOnCall = (oncall: PD.PagerDutyOnCall): PD.TransformedOnCall => ({
           user: oncall.user
             ? {
                 id: oncall.user.id,
@@ -702,14 +639,14 @@ async function listAlertsForIncidentHandler(ctx: ActionContext, input: unknown) 
   );
 
   const data = response.data as {
-    alert?: PagerDutyAlert;
-    alerts?: PagerDutyAlert[];
+    alert?: PD.PagerDutyAlert;
+    alerts?: PD.PagerDutyAlert[];
     limit?: number;
     offset?: number;
     total?: number;
     more?: boolean;
   };
-  const transformAlert = (alert: PagerDutyAlert): TransformedAlert => ({
+  const transformAlert = (alert: PD.PagerDutyAlert): PD.TransformedAlert => ({
     id: alert.id,
     summary: alert.summary,
     type: alert.type,
@@ -769,14 +706,14 @@ async function listNotesForIncidentHandler(ctx: ActionContext, input: unknown) {
   );
 
   const data = response.data as {
-    note?: PagerDutyNote;
-    notes?: PagerDutyNote[];
+    note?: PD.PagerDutyNote;
+    notes?: PD.PagerDutyNote[];
     limit?: number;
     offset?: number;
     total?: number;
     more?: boolean;
   };
-  const transformNote = (note: PagerDutyNote): TransformedNote => ({
+  const transformNote = (note: PD.PagerDutyNote): PD.TransformedNote => ({
     id: note.id,
     content: note.content,
     created_at: note.created_at,
@@ -889,7 +826,7 @@ function buildPaginationParams(params: PaginationParams): Record<string, string>
 /**
  * Transform incident response to include only essential fields
  */
-function transformIncident(incident: PagerDutyIncident): TransformedIncident {
+function transformIncident(incident: PD.PagerDutyIncident): PD.TransformedIncident {
   return {
     id: incident.id,
     incident_number: incident.incident_number,
@@ -908,7 +845,7 @@ function transformIncident(incident: PagerDutyIncident): TransformedIncident {
           summary: incident.service.summary,
         }
       : undefined,
-    assignments: incident.assignments?.map((assignment: PagerDutyAssignment) => ({
+    assignments: incident.assignments?.map((assignment: PD.PagerDutyAssignment) => ({
       assignee: assignment.assignee
         ? {
             id: assignment.assignee.id,
@@ -916,7 +853,7 @@ function transformIncident(incident: PagerDutyIncident): TransformedIncident {
           }
         : undefined,
     })),
-    acknowledgers: incident.acknowledgers?.map((ack: PagerDutyAcknowledger) => ({
+    acknowledgers: incident.acknowledgers?.map((ack: PD.PagerDutyAcknowledger) => ({
       acknowledger: ack.acknowledger
         ? {
             id: ack.acknowledger.id,
@@ -930,19 +867,19 @@ function transformIncident(incident: PagerDutyIncident): TransformedIncident {
 /**
  * Transform escalation policy response to include only essential fields
  */
-function transformEscalationPolicy(ep: PagerDutyEscalationPolicy): TransformedEscalationPolicy {
+function transformEscalationPolicy(ep: PD.PagerDutyEscalationPolicy): PD.TransformedEscalationPolicy {
   return {
     id: ep.id,
     name: ep.name,
     description: ep.description,
     num_loops: ep.num_loops,
     on_call_handoff_notifications: ep.on_call_handoff_notifications,
-    teams: ep.teams?.map((team: PagerDutyTeam) => ({
+    teams: ep.teams?.map((team: PD.PagerDutyTeam) => ({
       id: team.id,
       name: team.name,
       summary: team.summary,
     })),
-    services: ep.services?.map((service: PagerDutyServiceReference) => ({
+    services: ep.services?.map((service: PD.PagerDutyServiceReference) => ({
       id: service.id,
       name: service.name,
       summary: service.summary,
@@ -954,8 +891,8 @@ function transformEscalationPolicy(ep: PagerDutyEscalationPolicy): TransformedEs
  * Transform incidents list response
  */
 function transformIncidentsResponse(
-  data: PagerDutyIncidentsResponse
-): TransformedIncidentsResponse {
+  data: PD.PagerDutyIncidentsResponse
+): PD.TransformedIncidentsResponse {
   if (data.incident) {
     return {
       incident: transformIncident(data.incident),
@@ -970,5 +907,5 @@ function transformIncidentsResponse(
       incidents: data.incidents.map(transformIncident),
     };
   }
-  return data as TransformedIncidentsResponse;
+  return data as PD.TransformedIncidentsResponse;
 }

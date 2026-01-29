@@ -18,11 +18,11 @@ type RecordUnknown = Record<string, unknown>;
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
-  configureAxiosInstance,
+  authorizationHeaderFormat,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
-  configureAxiosInstance?: ConnectorSpec['configureAxiosInstance'];
+  authorizationHeaderFormat?: (token: string) => string;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -43,26 +43,16 @@ export const generateExecutorFunction = ({
     // but getAxiosInstanceWithAuth expects it in secrets
     const secretsWithAuthType = {
       ...secrets,
-      ...(config?.authType && !secrets?.authType
-        ? { authType: config.authType }
-        : {}),
+      ...(config?.authType && !secrets?.authType ? { authType: config.authType } : {}),
     } as Record<string, unknown>;
 
-    let axiosInstance = await getAxiosInstanceWithAuth({
+    const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
+      authorizationHeaderFormat,
       secrets: secretsWithAuthType,
     });
-
-    // Allow connector spec to customize the axios instance after auth is configured
-    if (configureAxiosInstance) {
-      axiosInstance = await configureAxiosInstance(axiosInstance, {
-        config,
-        secrets,
-        logger,
-      });
-    }
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

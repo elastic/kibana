@@ -35,7 +35,6 @@ steps:
       offset: \${{inputs.offset}}
       query: "\${{inputs.query}}"
       include: "\${{inputs.include}}"
-
 `;
 }
 
@@ -69,7 +68,7 @@ inputs:
     - item_type
   additionalProperties: false
 steps:
-  - name: download
+  - name: if-schedule
     type: if
     condition: "\${{inputs.item_type == 'schedule'}}"
     steps:
@@ -81,7 +80,7 @@ steps:
           include: \${{inputs.include}}
           timeZone: \${{inputs.time_zone}}
     else:
-      - name: get_incident_check
+      - name: if-incident-check
         type: if
         condition: "\${{inputs.item_type == 'incident'}}"
         steps:
@@ -157,7 +156,6 @@ steps:
       until: "\${{inputs.until}}"
       urgencies: "\${{inputs.urgencies}}"
       include: "\${{inputs.include}}"
-
 `;
 }
 
@@ -257,6 +255,5 @@ steps:
       until: "\${{inputs.until}}"
       include: "\${{inputs.include}}"
       timeZone: "\${{inputs.time_zone}}"
-
 `;
 }

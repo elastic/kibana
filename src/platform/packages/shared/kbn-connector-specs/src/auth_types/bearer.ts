@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
-import * as i18n from './translations';
+import { z } from "@kbn/zod/v4";
+import type { AxiosInstance } from "axios";
+import type { AuthContext, AuthTypeSpec } from "../connector_spec";
+import * as i18n from "./translations";
 
 const authSchema = z
   .object({
@@ -31,12 +31,14 @@ export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'bearer',
   schema: authSchema,
   configure: async (
-    _: AuthContext,
+    ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
+    axiosInstance.defaults.headers.common.Authorization = ctx.authorizationHeaderFormat
+      ? ctx.authorizationHeaderFormat(secret.token)
+      : `Bearer ${secret.token}`;
 
     return axiosInstance;
   },

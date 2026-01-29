@@ -90,6 +90,8 @@ export interface AuthContext {
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
+  /** When set, bearer auth uses this to format the Authorization header instead of "Bearer <token>". */
+  authorizationHeaderFormat?: (token: string) => string;
 }
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
@@ -245,6 +247,7 @@ export interface ConnectorSpec {
   auth?: {
     types: Array<string | AuthTypeDef>;
     headers?: Record<string, AxiosHeaderValue>;
+    authorizationHeaderFormat?: (token: string) => string;
   };
 
   // Single unified schema for all connector fields (config + secrets)
@@ -262,20 +265,6 @@ export interface ConnectorSpec {
   test?: ConnectorTest;
 
   transformations?: Transformations;
-
-  /**
-   * Optional callback to configure the axios instance after authentication is set up.
-   * This allows connectors to customize headers, interceptors, or other axios configuration
-   * that needs to happen after the auth type has configured the instance.
-   */
-  configureAxiosInstance?: (
-    axiosInstance: AxiosInstance,
-    context: {
-      config?: Record<string, unknown>;
-      secrets?: Record<string, unknown>;
-      logger: Logger;
-    }
-  ) => AxiosInstance | Promise<AxiosInstance>;
 }
 
 // ============================================================================
