@@ -27,7 +27,10 @@ import {
 
 export function runTelemetryCheck() {
   run(
-    async ({ flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
+    async ({
+      flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path, root },
+      log,
+    }) => {
       if (typeof baselineSha !== 'undefined' && typeof baselineSha !== 'string') {
         throw createFailError(
           `${chalk.white.bgRed(
@@ -41,6 +44,10 @@ export function runTelemetryCheck() {
 
       if (typeof path === 'boolean') {
         throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --path require a value`);
+      }
+
+      if (typeof root === 'boolean') {
+        throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --root requires a value`);
       }
 
       if (fix && typeof path !== 'undefined') {
@@ -57,11 +64,19 @@ export function runTelemetryCheck() {
         );
       }
 
+      // Parse root filter - can be a single string or array of strings
+      const rootFilter: string[] | undefined = root
+        ? Array.isArray(root)
+          ? root
+          : [root]
+        : undefined;
+
       const list = new Listr<TaskContext>(
         [
           {
             title: 'Checking .telemetryrc.json files',
-            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
+            task: (context, task) =>
+              task.newListr(parseConfigsTask(rootFilter), { exitOnError: true }),
           },
           {
             title: 'Extracting Collectors',
@@ -72,8 +87,8 @@ export function runTelemetryCheck() {
             enabled: () => typeof path !== 'undefined',
             title: 'Checking collectors in --path are not excluded',
             task: (context) => {
-              const totalCollections = context.roots.reduce((acc, root) => {
-                return acc + (root.parsedCollections?.length || 0);
+              const totalCollections = context.roots.reduce((acc, curr) => {
+                return acc + (curr.parsedCollections?.length || 0);
               }, 0);
               const collectorsInPath = Array.isArray(path) ? path.length : 1;
 
@@ -151,12 +166,16 @@ export function runTelemetryCheck() {
           baseline: 'baselineSha',
         },
         boolean: ['fix'],
-        string: ['baselineSha'],
+        string: ['baselineSha', 'root'],
         default: {
           fix: false,
         },
         allowUnexpected: true,
         guessTypesForUnexpectedFlags: true,
+        help: `
+          --root             Filter to only scan specific roots (can be specified multiple times).
+                             Example: --root src/platform --root x-pack/solutions/observability
+        `,
       },
     }
   );

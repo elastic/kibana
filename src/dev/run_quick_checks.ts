@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import { availableParallelism } from 'os';
-import { isAbsolute, join } from 'path';
+import { isAbsolute, join, resolve } from 'path';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
 
 import type { RunOptions } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { findPackageForPath, type Package } from '@kbn/repo-packages';
+import { Listr, type ListrTask } from 'listr2';
 
 const MAX_PARALLELISM = availableParallelism();
+const IS_CI = process.env.CI === 'true';
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 
 interface QuickCheck {
   script: string;
+  nodeCommand?: string;
   mayChangeFiles?: boolean;
-  // Additional properties can be added here in the future
+  skipLocal?: boolean;
 }
 
 interface CheckResult {
@@ -42,11 +45,19 @@ const scriptOptions: RunOptions = {
       - arguments (--file, --dir, --checks) are exclusive - only one can be used at a time.
   `,
   flags: {
-    string: ['dir', 'checks', 'file'],
+    string: ['dir', 'checks', 'file', 'files'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
         --checks           Runs all scripts given in this parameter. (comma or newline delimited)
+        --files            Optional list of target files (comma or newline delimited). When provided,
+                           the script identifies which Kibana plugins/packages contain these files
+                           and scopes checks to those packages.
+                           
+                           Environment variables set for check scripts:
+                             - QUICK_CHECK_TARGET_FILES: comma-separated list of target files
+                             - QUICK_CHECK_TARGET_PACKAGES: comma-separated list of affected package directories
+                             - QUICK_CHECK_TARGET_PACKAGE_IDS: comma-separated list of affected package IDs
       `,
   },
   log: {
@@ -58,6 +69,7 @@ const scriptOptions: RunOptions = {
 let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
   logger = log;
+  const scriptStartTime = Date.now();
 
   // Clean up any existing marker file from previous runs
   if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
@@ -67,24 +79,68 @@ void run(async ({ log, flagsReader }) => {
   // Set environment variable so check scripts know where to write the marker file
   process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
 
-  const checksToRun = collectScriptsToRun({
+  // Handle optional --files parameter
+  const targetFiles = flagsReader.string('files');
+  if (targetFiles) {
+    const fileListArray = targetFiles
+      .trim()
+      .split(/[,\n]/)
+      .map((f) => f.trim())
+      .filter(Boolean);
+
+    // Find affected packages for the given files
+    const affectedPackages = findAffectedPackages(fileListArray);
+
+    // Set environment variables for check scripts
+    process.env.QUICK_CHECK_TARGET_FILES = fileListArray.join(',');
+    process.env.QUICK_CHECK_TARGET_PACKAGES = affectedPackages
+      .map((pkg) => pkg.normalizedRepoRelativeDir)
+      .join(',');
+    process.env.QUICK_CHECK_TARGET_PACKAGE_IDS = affectedPackages.map((pkg) => pkg.id).join(',');
+
+    logger.info(`Target files specified: ${fileListArray.length} file(s)`);
+    logger.info(
+      `Affected packages: ${
+        affectedPackages.length > 0 ? affectedPackages.map((p) => p.id).join(', ') : '(none found)'
+      }`
+    );
+  }
+
+  let checksToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),
     targetDir: flagsReader.string('dir'),
     checks: flagsReader.string('checks'),
   });
 
+  // Filter out checks marked as skipLocal when running locally (not in CI)
+  if (!IS_CI) {
+    const skippedChecks = checksToRun.filter((check) => check.skipLocal);
+    if (skippedChecks.length > 0) {
+      const skippedNames = skippedChecks.map((c) => getScriptShortName(c.script)).join(', ');
+      logger.info(`Skipping ${skippedChecks.length} check(s) for local run: ${skippedNames}`);
+    }
+    checksToRun = checksToRun.filter((check) => !check.skipLocal);
+  }
+
   // Partition checks based on mayChangeFiles flag
   const fileChangingChecks = checksToRun
     .filter((check) => check.mayChangeFiles)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+    .map((check) => ({
+      script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
+      nodeCommand: check.nodeCommand,
+    }));
 
   const regularChecks = checksToRun
     .filter((check) => !check.mayChangeFiles)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+    .map((check) => ({
+      script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
+      nodeCommand: check.nodeCommand,
+    }));
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} sequential, ${regularChecks.length} parallel) using ${MAX_PARALLELISM} cores...`
   );
+  logger.write('');
   const startTime = Date.now();
   const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
 
@@ -122,8 +178,13 @@ void run(async ({ log, flagsReader }) => {
     process.exitCode = 1;
   } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
-    return results;
   }
+
+  // Display total elapsed time at the end
+  const totalElapsedTime = humanizeTime(Date.now() - scriptStartTime);
+  logger.write(`\n--- Total elapsed time: ${totalElapsedTime}`);
+
+  return results;
 }, scriptOptions);
 
 function collectScriptsToRun(inputOptions: {
@@ -165,87 +226,208 @@ function collectScriptsToRun(inputOptions: {
   }
 }
 
-async function runPartitionedChecks(
-  fileChangingChecks: string[],
-  regularChecks: string[]
-): Promise<CheckResult[]> {
-  // Run both partitions concurrently, but with different parallelism
-  const [fileChangingResults, regularResults] = await Promise.all([
-    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
-    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
-  ]);
-
-  return [...fileChangingResults, ...regularResults];
+interface CheckToRun {
+  script: string;
+  nodeCommand?: string;
 }
 
-async function runAllChecks(
-  scriptsToRun: string[],
-  parallelism = MAX_PARALLELISM
-): Promise<CheckResult[]> {
-  const checksRunning: Array<Promise<any>> = [];
-  const checksFinished: CheckResult[] = [];
+interface ListrContext {
+  results: CheckResult[];
+}
 
-  while (scriptsToRun.length > 0 || checksRunning.length > 0) {
-    while (scriptsToRun.length > 0 && checksRunning.length < parallelism) {
-      const script = scriptsToRun.shift();
-      if (!script) {
-        continue;
+function createListrTask(check: CheckToRun, label: string): ListrTask<ListrContext> {
+  const scriptName = getScriptShortName(check.script);
+  return {
+    title: `${label} ${scriptName}`,
+    task: async (ctx, task) => {
+      const result = await runCheckAsync(check);
+      ctx.results.push(result);
+      const time = humanizeTime(result.durationMs);
+      if (result.success) {
+        task.title = `${label} ${scriptName} (${time})`;
+      } else {
+        throw new Error(`${scriptName} failed (${time})`);
       }
+    },
+  };
+}
 
-      const check = runCheckAsync(script);
-      checksRunning.push(check);
-      check
-        .then((result) => {
-          checksRunning.splice(checksRunning.indexOf(check), 1);
-          checksFinished.push(result);
-        })
-        .catch((error) => {
-          checksRunning.splice(checksRunning.indexOf(check), 1);
-          checksFinished.push({
-            success: false,
-            script,
-            output: error.message,
-            durationMs: 0,
-          });
-        });
+async function runPartitionedChecks(
+  fileChangingChecks: CheckToRun[],
+  regularChecks: CheckToRun[]
+): Promise<CheckResult[]> {
+  const context: ListrContext = { results: [] };
+
+  // Create tasks for sequential checks (file-changing)
+  const seqTasks: ListrTask<ListrContext>[] = fileChangingChecks.map((check, idx) =>
+    createListrTask(check, `seq [${idx + 1}/${fileChangingChecks.length}]`)
+  );
+
+  // Create tasks for parallel checks
+  const parallelTasks: ListrTask<ListrContext>[] = regularChecks.map((check, idx) =>
+    createListrTask(check, `    [${idx + 1}/${regularChecks.length}]`)
+  );
+
+  const list = new Listr<ListrContext>(
+    [
+      {
+        title: 'Sequential checks (may change files)',
+        task: (_, task) =>
+          task.newListr(seqTasks, {
+            concurrent: false, // Run sequentially
+            exitOnError: false, // Continue even if one fails
+            rendererOptions: { collapseSubtasks: false },
+          }),
+        skip: () => seqTasks.length === 0,
+      },
+      {
+        title: 'Parallel checks',
+        task: (_, task) =>
+          task.newListr(parallelTasks, {
+            concurrent: MAX_PARALLELISM, // Run in parallel
+            exitOnError: false, // Continue even if one fails
+            rendererOptions: { collapseSubtasks: false },
+          }),
+        skip: () => parallelTasks.length === 0,
+      },
+    ],
+    {
+      concurrent: true, // Run both groups concurrently
+      exitOnError: false,
+      renderer: (IS_CI ? 'verbose' : 'default') as any,
+      rendererOptions: {
+        collapseSubtasks: false,
+        collapseErrors: false,
+      },
     }
+  );
 
-    await sleep(1000);
+  try {
+    await list.run(context);
+  } catch {
+    // Errors are tracked in results, we don't need to throw
   }
 
-  return checksFinished;
+  return context.results;
 }
 
-async function runCheckAsync(script: string): Promise<CheckResult> {
-  logger.info(`Starting check: ${script}`);
+function getScriptShortName(script: string): string {
+  // Extract just the check name from the full path
+  // e.g., ".buildkite/scripts/steps/checks/ts_projects.sh" -> "ts_projects"
+  const basename = script.split('/').pop() || script;
+  return basename.replace('.sh', '');
+}
+
+async function runCheckAsync(checkToRun: CheckToRun): Promise<CheckResult> {
+  const { script, nodeCommand } = checkToRun;
   const startTime = Date.now();
 
-  return new Promise((resolve) => {
-    validateScriptPath(script);
-    // Pass environment variables to child process, including COLLECT_COMMITS_MARKER_FILE
-    const scriptProcess = execFile('bash', [script], {
+  // When target packages are specified, use shell scripts instead of nodeCommand
+  // because shell scripts have logic to filter based on QUICK_CHECK_TARGET_PACKAGES
+  const hasTargetPackages = Boolean(process.env.QUICK_CHECK_TARGET_PACKAGES);
+
+  // When running locally (not CI) and a nodeCommand is available, run it directly
+  // This is faster than running through the shell script
+  // But if we have target packages, prefer shell script for filtering support
+  if (!IS_CI && nodeCommand && !hasTargetPackages) {
+    return runNodeCommand(nodeCommand, script, startTime);
+  }
+
+  // In CI, when no nodeCommand, or when target packages need filtering, use shell script
+  return runShellScript(script, startTime);
+}
+
+// Maximum output to capture per check (to avoid memory issues)
+const MAX_OUTPUT_SIZE = 100 * 1024; // 100KB per check
+
+function createLimitedOutputCapture() {
+  let output = '';
+  return {
+    append: (data: string | Buffer) => {
+      const str = data.toString();
+      output += str;
+      // Keep only the last MAX_OUTPUT_SIZE characters
+      if (output.length > MAX_OUTPUT_SIZE) {
+        output = '...(truncated)...\n' + output.slice(-MAX_OUTPUT_SIZE);
+      }
+    },
+    get: () => output,
+  };
+}
+
+async function runNodeCommand(
+  nodeCommand: string,
+  script: string,
+  startTime: number
+): Promise<CheckResult> {
+  return new Promise((resolveFn) => {
+    const parts = nodeCommand.split(' ');
+    const cmd = parts[0];
+    const args = parts.slice(1);
+
+    const childProcess = spawn(cmd, args, {
+      cwd: REPO_ROOT,
       env: { ...process.env },
+      shell: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
-    let output = '';
-    const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
-    scriptProcess.stdout?.on('data', appendToOutput);
-    scriptProcess.stderr?.on('data', appendToOutput);
+    const outputCapture = createLimitedOutputCapture();
 
-    scriptProcess.on('exit', (code) => {
-      const result: CheckResult = {
+    childProcess.stdout?.on('data', outputCapture.append);
+    childProcess.stderr?.on('data', outputCapture.append);
+
+    childProcess.on('close', (code) => {
+      resolveFn({
         success: code === 0,
         script,
-        output,
+        output: outputCapture.get(),
         durationMs: Date.now() - startTime,
-      };
-      if (code === 0) {
-        logger.info(`Passed check: ${script} in ${humanizeTime(result.durationMs)}`);
-      } else {
-        logger.warning(`Failed check: ${script} in ${humanizeTime(result.durationMs)}`);
-      }
+      });
+    });
 
-      resolve(result);
+    childProcess.on('error', (error) => {
+      resolveFn({
+        success: false,
+        script,
+        output: error.message,
+        durationMs: Date.now() - startTime,
+      });
+    });
+  });
+}
+
+async function runShellScript(script: string, startTime: number): Promise<CheckResult> {
+  return new Promise((resolveFn) => {
+    validateScriptPath(script);
+
+    const scriptProcess = spawn('bash', [script], {
+      cwd: REPO_ROOT,
+      env: { ...process.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    const outputCapture = createLimitedOutputCapture();
+
+    scriptProcess.stdout?.on('data', outputCapture.append);
+    scriptProcess.stderr?.on('data', outputCapture.append);
+
+    scriptProcess.on('close', (code) => {
+      resolveFn({
+        success: code === 0,
+        script,
+        output: outputCapture.get(),
+        durationMs: Date.now() - startTime,
+      });
+    });
+
+    scriptProcess.on('error', (error) => {
+      resolveFn({
+        success: false,
+        script,
+        output: error.message,
+        durationMs: Date.now() - startTime,
+      });
     });
   });
 }
@@ -302,8 +484,28 @@ function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
 }
 
+/**
+ * Find all unique packages that contain the given files
+ */
+function findAffectedPackages(files: string[]): Package[] {
+  const packagesMap = new Map<string, Package>();
+
+  for (const file of files) {
+    // Convert to absolute path if relative
+    const absolutePath = isAbsolute(file) ? file : resolve(REPO_ROOT, file);
+
+    // Find the package that contains this file
+    const pkg = findPackageForPath(REPO_ROOT, absolutePath);
+    if (pkg && !packagesMap.has(pkg.id)) {
+      packagesMap.set(pkg.id, pkg);
+    }
+  }
+
+  return Array.from(packagesMap.values());
+}
+
 async function pushCommits(): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolveFn, reject) => {
     const pushProcess = execFile('git', ['push'], {
       cwd: REPO_ROOT,
       env: { ...process.env },
@@ -317,7 +519,7 @@ async function pushCommits(): Promise<void> {
 
     pushProcess.on('exit', (code) => {
       if (code === 0) {
-        resolve();
+        resolveFn();
       } else {
         reject(new Error(`git push failed with code ${code}: ${output}`));
       }

@@ -16,6 +16,7 @@ import type { I18nCheckTaskContext, MessageDescriptor } from '../types';
 import {
   checkConfigs,
   mergeConfigs,
+  filterConfigByPaths,
   checkUntrackedNamespacesTask,
   validateTranslationsTask,
   validateTranslationFiles,
@@ -27,6 +28,11 @@ const runStartTime = Date.now();
 
 const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
   !config?.translations.length && 'No translations found.';
+
+const skipOnNoNamespaces = ({ config }: I18nCheckTaskContext) =>
+  !config || !Object.keys(config.paths).length
+    ? 'No i18n namespaces found for the specified paths.'
+    : false;
 
 run(
   async ({
@@ -86,6 +92,7 @@ run(
 
     const kibanaRootPaths = ['./src', './packages', './x-pack'];
     const rootPaths = Array().concat(path || kibanaRootPaths);
+    const filterPaths = path ? (Array.isArray(path) ? path : [path]) : undefined;
 
     const list = new Listr<I18nCheckTaskContext>(
       [
@@ -100,8 +107,21 @@ run(
             task.newListr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
         {
+          title: 'Filtering namespaces by path',
+          enabled: () => !!filterPaths,
+          task: (context, task) => {
+            if (!context.config || !filterPaths) return;
+            const originalCount = Object.keys(context.config.paths).length;
+            context.config = filterConfigByPaths(filterPaths, context.config);
+            const filteredCount = Object.keys(context.config.paths).length;
+            task.title = `Filtered namespaces: ${filteredCount} of ${originalCount} (paths: ${filterPaths.join(
+              ', '
+            )})`;
+          },
+        },
+        {
           title: 'Validating i18n Messages',
-          skip: skipOnNoTranslations,
+          skip: (context) => skipOnNoNamespaces(context) || skipOnNoTranslations(context),
           task: (context, task) =>
             validateTranslationsTask(context, task, {
               filterNamespaces,
@@ -115,7 +135,7 @@ run(
         },
         {
           title: 'Validating translation files',
-          skip: skipOnNoTranslations,
+          skip: (context) => skipOnNoNamespaces(context) || skipOnNoTranslations(context),
           task: (context, task) =>
             validateTranslationFiles(context, task, {
               filterNamespaces,

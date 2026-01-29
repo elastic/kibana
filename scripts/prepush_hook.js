@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { mergeConfigs } from './merge_configs';
-export { checkConfigs } from './check_configs';
-export { filterConfigByPaths } from './i18n_config';
+require('@kbn/setup-node-env');
+require('../src/dev/run_prepush_hook');

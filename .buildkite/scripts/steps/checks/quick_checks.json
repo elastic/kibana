@@ -1,88 +1,115 @@
 [
   {
     "script": ".buildkite/scripts/steps/checks/ts_projects.sh",
+    "nodeCommand": "node scripts/lint_ts_projects",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/packages.sh",
+    "nodeCommand": "node scripts/lint_packages",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_notice.sh",
+    "nodeCommand": "node scripts/notice --validate",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/plugin_list_docs.sh",
+    "nodeCommand": "node scripts/build_plugin_list_docs",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/event_log.sh",
+    "nodeCommand": "node x-pack/platform/plugins/shared/event_log/scripts/create_schemas.js",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/telemetry.sh",
+    "nodeCommand": "node scripts/telemetry_check",
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/jest_configs.sh"
+    "script": ".buildkite/scripts/steps/checks/jest_configs.sh",
+    "nodeCommand": "node scripts/check_jest_configs"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/bundle_limits.sh"
+    "script": ".buildkite/scripts/steps/checks/bundle_limits.sh",
+    "nodeCommand": "node scripts/build_kibana_platform_plugins --validate-limits"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/i18n.sh"
+    "script": ".buildkite/scripts/steps/checks/i18n.sh",
+    "nodeCommand": "node scripts/i18n_check --quiet"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/file_casing.sh"
+    "script": ".buildkite/scripts/steps/checks/file_casing.sh",
+    "nodeCommand": "node scripts/check_file_casing --quiet"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/licenses.sh"
+    "script": ".buildkite/scripts/steps/checks/licenses.sh",
+    "nodeCommand": "node scripts/check_licenses --dev",
+    "skipLocal": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/test_projects.sh"
+    "script": ".buildkite/scripts/steps/checks/test_projects.sh",
+    "nodeCommand": "yarn kbn run-in-packages test"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/test_hardening.sh"
+    "script": ".buildkite/scripts/steps/checks/test_hardening.sh",
+    "nodeCommand": "node scripts/test_hardening"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/ftr_configs.sh"
+    "script": ".buildkite/scripts/steps/checks/ftr_configs.sh",
+    "nodeCommand": "node scripts/check_ftr_configs"
   },
   {
     "script": ".buildkite/scripts/steps/checks/yarn_deduplicate.sh",
-    "mayChangeFiles": true
+    "nodeCommand": "node scripts/yarn_deduplicate",
+    "mayChangeFiles": true,
+    "skipLocal": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/pkg_json_semver_ranges.sh",
-    "mayChangeFiles": true
+    "nodeCommand": "node scripts/check_pkg_json_semver_ranges",
+    "mayChangeFiles": true,
+    "skipLocal": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/prettier_topology.sh"
+    "script": ".buildkite/scripts/steps/checks/prettier_topology.sh",
+    "nodeCommand": "node scripts/prettier_topology_check"
   },
   {
     "script": ".buildkite/scripts/steps/checks/renovate.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/native_modules.sh"
+    "script": ".buildkite/scripts/steps/checks/native_modules.sh",
+    "nodeCommand": "node scripts/check_prod_native_modules"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh"
+    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh",
+    "nodeCommand": "node scripts/yarn_install_scripts scan --validate"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
+    "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh",
+    "nodeCommand": "node scripts/check_ftr_code_owners"
   },
   {
     "script": ".buildkite/scripts/steps/checks/styled_components_mapping.sh",
+    "nodeCommand": "node scripts/styled_components_mapping",
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/dependencies_missing_owner.sh"
+    "script": ".buildkite/scripts/steps/checks/dependencies_missing_owner.sh",
+    "nodeCommand": "node scripts/dependency_ownership.js --missingOwner --failIfUnowned"
   },
   {
     "script": ".buildkite/scripts/steps/checks/validate_pipelines.sh",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "skipLocal": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
+    "script": ".buildkite/scripts/steps/checks/check_scout_config.sh",
+    "nodeCommand": "node scripts/scout discover-playwright-configs --validate"
   },
   {
     "script": ".buildkite/scripts/steps/checks/dependencies_diff.sh",
@@ -90,10 +117,12 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
+    "nodeCommand": "node scripts/generate codeowners",
     "mayChangeFiles": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
+    "nodeCommand": "node scripts/regenerate_moon_projects.js --update",
     "mayChangeFiles": true
   }
 ]
