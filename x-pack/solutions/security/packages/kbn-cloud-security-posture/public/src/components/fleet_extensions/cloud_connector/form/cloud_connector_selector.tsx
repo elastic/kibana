@@ -24,17 +24,20 @@ import {
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '@kbn/cloud-security-posture-common';
+import type { AccountType } from '@kbn/fleet-plugin/public';
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
 import { AccountBadge } from '../components/account_badge';
+import { IntegrationCountBadge } from '../components/integration_count_badge';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
   cloudConnectorId: string | undefined;
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  accountType?: AccountType;
 }
 
 export const CloudConnectorSelector = ({
@@ -42,8 +45,12 @@ export const CloudConnectorSelector = ({
   cloudConnectorId,
   credentials,
   setCredentials,
+  accountType,
 }: CloudConnectorSelectorProps) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors(provider);
+  const { data: cloudConnectors = [] } = useGetCloudConnectors({
+    cloudProvider: provider,
+    accountType,
+  });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);
 
@@ -141,6 +148,12 @@ export const CloudConnectorSelector = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AccountBadge accountType={connector.accountType} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <IntegrationCountBadge
+                cloudConnectorId={connector.id}
+                count={connector.packagePolicyCount ?? 0}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

@@ -307,7 +307,19 @@ export function StreamsTreeTable({
       )}
       <EuiFlexItem>
         {streamsListStepProps ? (
-          <EuiTourStep {...streamsListStepProps}>
+          <EuiTourStep
+            step={streamsListStepProps.step}
+            stepsTotal={streamsListStepProps.stepsTotal}
+            title={streamsListStepProps.title}
+            subtitle={streamsListStepProps.subtitle}
+            content={streamsListStepProps.content}
+            anchorPosition={streamsListStepProps.anchorPosition}
+            offset={streamsListStepProps.offset}
+            maxWidth={streamsListStepProps.maxWidth}
+            isStepOpen={streamsListStepProps.isStepOpen}
+            footerAction={streamsListStepProps.footerAction}
+            onFinish={streamsListStepProps.onFinish}
+          >
             <span>{NAME_COLUMN_HEADER}</span>
           </EuiTourStep>
         ) : (
@@ -486,8 +498,10 @@ export function StreamsTreeTable({
                 {
                   stream: item.stream,
                   data_stream_exists: !!item.data_stream,
+                  index_mode: item.data_stream?.index_mode,
                 } as Streams.ingest.all.GetResponse
               }
+              isWiredStream={item.type === 'wired'}
             />
           ),
         },

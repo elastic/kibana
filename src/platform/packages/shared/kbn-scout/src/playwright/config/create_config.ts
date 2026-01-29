@@ -51,6 +51,8 @@ export function createPlaywrightConfig(
     },
     {
       name: 'ech',
+      // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
+      testIgnore: '**/ai_suggestions_*.spec.ts',
       use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
     },
     {
@@ -104,6 +106,7 @@ export function createPlaywrightConfig(
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
       deleteSpaceAfterTests: parseDeleteSpaceAfterTests(),
+      runGlobalSetup: options.runGlobalSetup,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
@@ -112,6 +115,7 @@ export function createPlaywrightConfig(
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      timezoneId: 'GMT',
     },
 
     // Timeout for each test, includes test, hooks and fixtures

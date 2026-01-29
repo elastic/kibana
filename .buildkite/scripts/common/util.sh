@@ -132,33 +132,6 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
-# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
-# a package directory is left behind in a bad state that can cause all subsequent installs to fail
-# So this function contains some cleanup/retry logic to try to recover from this kind of situation
-npm_install_global() {
-  package="$1"
-  version="${2:-latest}"
-  toInstall="$package@$version"
-
-  npmRoot=$(npm root -g)
-  packageRoot="${npmRoot:?}/$package"
-
-  # The success flag file exists just to try to make sure we know that the full install was done
-  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
-  successFlag="${packageRoot:?}/.install-success"
-
-  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
-    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
-    rm -rf "$packageRoot"
-  fi
-
-  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
-    rm -rf "$packageRoot"
-    echo "Trying again to install $toInstall..."
-    npm install -g "$toInstall" && touch "$successFlag"
-  fi
-}
-
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
@@ -198,4 +171,43 @@ docker_with_retry () {
       sleep $sleep_time
     fi
   done
+}
+
+force_clean_ports() {
+  set +e
+
+  echo "LSOF: $(which lsof)"
+  for port in "$@"; do
+    echo "Force cleaning port: '$port'"
+
+    PORT_PID=$(lsof -i ":$port" -t)
+    if [[ "$PORT_PID" != "" ]]; then
+      echo "Found process using port '$port': $PORT_PID - sending SIGTERM..."
+      kill -15 "$PORT_PID" || true
+      sleep 5
+
+      PORT_PID=$(lsof -i ":$port" -t)
+      if [[ "$PORT_PID" != "" ]]; then
+        echo "Process $PORT_PID is still using port '$port', force killing..."
+        kill -9 "$PORT_PID" || true
+      fi
+    else
+      echo "No process found using port '$port', checking docker..."
+
+      ENTRY_WITH_PORT=$(docker ps -a | grep -E ":$port->")
+      if [[ -z "$ENTRY_WITH_PORT" ]]; then
+        echo "No docker container found using port $port"
+        continue
+      else
+        CONTAINER_ID=$(echo "$ENTRY_WITH_PORT" | awk '{print $1}')
+        echo "Found docker container using port $port: $CONTAINER_ID"
+        echo "Stopping and removing container $CONTAINER_ID"
+        docker stop "$CONTAINER_ID" || true
+        docker rm "$CONTAINER_ID" || true
+        continue
+      fi
+    fi
+  done
+
+  set -e
 }

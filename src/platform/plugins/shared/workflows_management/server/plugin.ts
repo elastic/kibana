@@ -27,6 +27,7 @@ import {
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
+  WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
   WorkflowsServerPluginStart,
@@ -64,7 +65,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    registerUISettings({ uiSettings: core.uiSettings });
+    registerUISettings(core, plugins);
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
@@ -160,9 +161,6 @@ export class WorkflowsPlugin
     // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
-    this.logger.debug('Workflows Management: Creating router');
-    const router = core.http.createRouter();
-
     this.logger.debug('Workflows Management: Creating workflows service');
 
     const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
@@ -178,6 +176,9 @@ export class WorkflowsPlugin
     if (!this.spaces) {
       throw new Error('Spaces service not initialized');
     }
+
+    this.logger.debug('Workflows Management: Creating router');
+    const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
     defineRoutes(router, this.api, this.logger, this.spaces);

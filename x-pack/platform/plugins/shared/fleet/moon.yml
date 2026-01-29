@@ -103,7 +103,6 @@ dependsOn:
   - '@kbn/reporting-public'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
-  - '@kbn/core-http-server-utils'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
   - '@kbn/lock-manager'
@@ -118,6 +117,8 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
+  - '@kbn/kql'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -133,9 +134,6 @@ fileGroups:
     - server/**/*.json
     - scripts/**/*
     - package.json
-    - cypress.config.ts
-    - cypress.config.space_awareness.ts
-    - '!cypress.config.ts'
-    - '!cypress.config.space_awareness.ts'
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

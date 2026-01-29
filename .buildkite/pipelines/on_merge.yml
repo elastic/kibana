@@ -38,6 +38,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: us-central1-c,us-central1-b,us-central1-a
     key: build
     timeout_in_minutes: 60
     retry:
@@ -54,6 +55,7 @@ steps:
       machineType: n2-highcpu-8
       preemptible: true
       diskSizeGb: 105
+      spotZones: us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -68,6 +70,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+      spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -83,6 +86,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -98,6 +102,7 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
+      spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -112,9 +117,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c4-standard-4
-      diskType: 'hyperdisk-balanced'
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      spotZones: us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -130,6 +135,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -147,6 +153,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 80
     retry:
@@ -210,6 +217,22 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
+    label: 'Scout UIAM Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      diskSizeGb: 105
+    timeout_in_minutes: 15
+    depends_on:
+      - build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
@@ -218,6 +241,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -233,6 +257,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -248,6 +273,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 10
     retry:
@@ -263,6 +289,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -278,6 +305,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -293,6 +321,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -308,6 +337,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -323,6 +353,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -338,6 +369,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -353,6 +385,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -368,6 +401,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -383,6 +417,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -398,6 +433,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -413,6 +449,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -428,6 +465,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -443,6 +481,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -458,6 +497,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -473,6 +513,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -488,6 +529,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -503,6 +545,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -518,6 +561,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -533,6 +577,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -548,6 +593,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -563,6 +609,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -578,6 +625,9 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 75
     parallelism: 20
     retry:
@@ -593,6 +643,9 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 75
     parallelism: 14
     retry:
@@ -608,6 +661,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 120
     parallelism: 3
     retry:
@@ -632,6 +686,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     key: storybooks
     timeout_in_minutes: 80
     retry:
@@ -647,6 +702,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     timeout_in_minutes: 60
     soft_fail: true
     retry:
@@ -662,6 +718,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
     artifact_paths: 'target/plugin_so_types_snapshot.json'
     timeout_in_minutes: 30
     retry:

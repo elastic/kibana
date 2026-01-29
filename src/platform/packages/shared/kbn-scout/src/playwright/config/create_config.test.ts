@@ -59,6 +59,7 @@ describe('createPlaywrightConfig', () => {
       testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',
       deleteSpaceAfterTests: true,
+      timezoneId: 'GMT',
     });
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();

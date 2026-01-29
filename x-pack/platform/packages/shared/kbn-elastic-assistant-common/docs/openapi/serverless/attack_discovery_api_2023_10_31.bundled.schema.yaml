@@ -6,8 +6,7 @@ info:
     your environment and identify threats. Each "discovery" represents a
     potential attack and describes relationships among multiple alerts to tell
     you which users and hosts are involved, how alerts correspond to the MITRE
-    ATT&CK matrix, and which threat actor might be responsible. `Technical
-    preview`
+    ATT&CK matrix, and which threat actor might be responsible.
   title: Security Attack discovery API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -24,7 +23,7 @@ paths:
         Performs bulk updates on multiple Attack discoveries, including workflow
         status changes and visibility settings. This endpoint allows efficient
         batch processing of alert modifications without requiring individual API
-        calls for each alert. `Technical preview`
+        calls for each alert.
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -157,12 +156,11 @@ paths:
                  "kibana_alert_workflow_status": "acknowledged"
                }
              }'
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/_find:
     get:
       description: >-
         Find Attack discoveries that match the search criteria. Supports free
-        text search, filtering, pagination, and sorting. `Technical preview`
+        text search, filtering, pagination, and sorting.
       operationId: AttackDiscoveryFind
       parameters:
         - description: >-
@@ -263,6 +261,16 @@ paths:
             to the current user.
           in: query
           name: shared
+          required: false
+          schema:
+            type: boolean
+        - description: >-
+            Whether to filter by scheduled or ad-hoc attack discoveries. If
+            omitted, both types of attack discoveries are returned. Use `true`
+            to return only scheduled discoveries or `false` to return only
+            ad-hoc discoveries.
+          in: query
+          name: scheduled
           required: false
           schema:
             type: boolean
@@ -408,14 +416,13 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/_generate:
     post:
       description: >-
         Initiates the generation of attack discoveries by analyzing security
         alerts using AI. Returns an execution UUID that can be used to track the
         generation progress and retrieve results. Results may also be retrieved
-        via the find endpoint. `Technical preview`
+        via the find endpoint.
       operationId: PostAttackDiscoveryGenerate
       requestBody:
         content:
@@ -1407,14 +1414,13 @@ paths:
                 "end": "now",
                 "start": "now-24h"
               }'
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/generations:
     get:
       description: >-
         Get the latest attack discovery generations metadata (that are not
         dismissed) for the current user. This endpoint retrieves generation
         metadata including execution status and statistics for Attack discovery
-        generations. `Technical preview`
+        generations.
       operationId: GetAttackDiscoveryGenerations
       parameters:
         - description: >-
@@ -1491,13 +1497,12 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/generations/{execution_uuid}:
     get:
       description: >-
         Returns a specific Attack discovery generation, including all generated
         Attack discoveries and associated metadata, including execution status
-        and statistics. `Technical preview`
+        and statistics.
       operationId: GetAttackDiscoveryGeneration
       parameters:
         - description: >-
@@ -1595,14 +1600,13 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/generations/{execution_uuid}/_dismiss:
     post:
       description: >-
         Dismisses an attack discovery generation for the current user,
         indicating that it's status should not be reported in the UI. This sets
         the generation's status to "dismissed" and affects how the generation
-        appears in subsequent queries. `Technical preview`
+        appears in subsequent queries.
       operationId: PostAttackDiscoveryGenerationsDismiss
       parameters:
         - description: >-
@@ -1753,7 +1757,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/generations/46b218d5-535d-4329-be56-d0f6af6986b7/_dismiss' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules:
     post:
       description: >-
@@ -1761,7 +1764,6 @@ paths:
         specified intervals. The schedule defines when and how Attack discovery
         analysis should run, including which alerts to analyze, which AI
         connector to use, and what actions to take when discoveries are found.
-        `Technical preview`
       operationId: CreateAttackDiscoverySchedules
       requestBody:
         content:
@@ -1869,12 +1871,11 @@ paths:
                    }
                ]
              }'
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/_find:
     get:
       description: >-
         Finds Attack discovery schedules that match the search criteria.
-        Supports pagination and sorting by various fields. `Technical preview`
+        Supports pagination and sorting by various fields.
       operationId: FindAttackDiscoverySchedules
       parameters:
         - description: Page number to return (used for pagination). Defaults to 1.
@@ -1973,12 +1974,11 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/{id}:
     delete:
       description: >-
         Permanently deletes an Attack discovery schedule and all associated
-        configuration. `Technical preview`
+        configuration.
       operationId: DeleteAttackDiscoverySchedules
       parameters:
         - description: >-
@@ -2031,12 +2031,11 @@ paths:
              --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
     get:
       description: >-
         Retrieves a specific Attack discovery schedule by its unique identifier.
         Returns complete schedule configuration including parameters, interval
-        settings, associated actions, and execution history. `Technical preview`
+        settings, associated actions, and execution history.
       operationId: GetAttackDiscoverySchedules
       parameters:
         - description: >-
@@ -2103,13 +2102,12 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
     put:
       description: >-
         Updates an existing Attack discovery schedule with new configuration.
         All schedule properties can be modified including name, parameters,
         interval, and actions. The update operation replaces the entire schedule
-        configuration with the provided values. `Technical preview`
+        configuration with the provided values.
       operationId: UpdateAttackDiscoverySchedules
       parameters:
         - description: >-
@@ -2213,15 +2211,13 @@ paths:
                },
                "actions": []
              }'
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/{id}/_disable:
     post:
       description: >-
         Disables an Attack discovery schedule, preventing it from running
         according to its configured interval. The schedule configuration is
         preserved and can be re-enabled later. Any currently running executions
-        will complete, but no new executions will be started. `Technical
-        preview`
+        will complete, but no new executions will be started.
       operationId: DisableAttackDiscoverySchedules
       parameters:
         - description: >-
@@ -2274,14 +2270,13 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/{id}/_enable:
     post:
       description: >-
         Enables a previously disabled Attack discovery schedule, allowing it to
         run according to its configured interval. Once enabled, the schedule
         will begin executing at the next scheduled time based on its interval
-        configuration. `Technical preview`
+        configuration.
       operationId: EnableAttackDiscoverySchedules
       parameters:
         - description: >-
@@ -2334,7 +2329,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
-      x-state: Technical Preview; added in 9.2.0
 components:
   schemas:
     AnonymizationFieldResponse:
@@ -2445,6 +2439,11 @@ components:
             The optional time the attack discovery alert workflow status was
             last updated
           type: string
+        assignees:
+          description: The optional array of user-IDs who have been assigned the attack
+          items:
+            type: string
+          type: array
         connector_id:
           description: The ID of the connector that generated the attack discovery
           type: string
@@ -2488,6 +2487,11 @@ components:
         summary_markdown:
           description: A markdown summary of attack discovery, using the same syntax
           type: string
+        tags:
+          description: The optional array of tags assigned the attack
+          items:
+            type: string
+          type: array
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The time the attack discovery was generated
@@ -3030,7 +3034,6 @@ tags:
       in your environment and identify threats. Each "discovery" represents a
       potential attack and describes relationships among multiple alerts to tell
       you which users and hosts are involved, how alerts correspond to the MITRE
-      ATT&CK matrix, and which threat actor might be responsible. `Technical
-      preview`
+      ATT&CK matrix, and which threat actor might be responsible.
     name: Security Attack discovery API
     x-displayName: Security Attack discovery

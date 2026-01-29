@@ -11,7 +11,6 @@ import React, { Suspense, lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { TopNavMenuConfigBeta } from '../top_nav_menu_beta';
 import type { TopNavMenuProps } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
@@ -20,35 +19,16 @@ const LazyTopNavMenu = lazy(async () => {
   return { default: TopNavMenu };
 });
 
-const LazyTopNavMenuBeta = lazy(async () => {
-  const { TopNavMenuBeta } = await import('../top_nav_menu_beta/top_nav_menu_beta');
-  return { default: TopNavMenuBeta };
-});
-
-export function createTopNavBeta() {
-  return ({ config, visible }: { config: TopNavMenuConfigBeta; visible?: boolean }) => {
-    return (
-      <I18nProvider>
-        <Suspense>
-          <LazyTopNavMenuBeta visible={visible} config={config} />
-        </Suspense>
-      </I18nProvider>
-    );
-  };
-}
-
 /**
- * @deprecated
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
  */
 export function createTopNav(
   /**
-   * @deprecated TopNavMenuBeta will decouple from UnifiedSearch, so this parameter
-   * will be removed once TopNavMenuBeta becomes the default.
+   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
    */
   unifiedSearch: UnifiedSearchPublicPluginStart,
   /**
-   * @deprecated TopNavMenuBeta will not allow for reigstering global menu items, so this parameter
-   * will be removed once TopNavMenuBeta becomes the default.
+   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
    */
   extraConfig: RegisteredTopNavMenuData[]
 ) {

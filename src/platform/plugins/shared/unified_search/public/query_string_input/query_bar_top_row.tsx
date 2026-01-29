@@ -46,24 +46,22 @@ import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
-import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '../typeahead/suggestions_component';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 
-import { QueryStringInput } from './query_string_input';
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
+
+const BUTTON_MIN_WIDTH = 108;
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -232,6 +230,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     controlsWrapper: React.ReactNode;
   };
   /**
+   * Optional ES|QL prop - Request statistics to be displayed in the ES|QL editor UI
+   */
+  esqlQueryStats?: ESQLQueryStats;
+  /**
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
@@ -284,6 +286,7 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
     const { euiTheme } = useEuiTheme();
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
@@ -303,6 +306,12 @@ export const QueryBarTopRow = React.memo(
       return () => window.removeEventListener('resize', handleResize);
     }, [euiTheme.breakpoint.m, submitButtonStyle]);
 
+    useEffect(() => {
+      if (!props.isLoading) {
+        setIsCancelling(false);
+      }
+    }, [props.isLoading]);
+
     const {
       showQueryInput = true,
       showDatePicker = true,
@@ -321,7 +330,7 @@ export const QueryBarTopRow = React.memo(
       appName,
       data,
       usageCollection,
-      unifiedSearch,
+      kql,
       notifications,
       docLinks,
       http,
@@ -446,6 +455,7 @@ export const QueryBarTopRow = React.memo(
         event.preventDefault();
 
         if (propsOnCancel) {
+          setIsCancelling(true);
           propsOnCancel();
         }
       },
@@ -557,6 +567,12 @@ export const QueryBarTopRow = React.memo(
     useEffect(() => {
       onDraftChangeDebounced?.(draft);
     }, [onDraftChangeDebounced, draft]);
+
+    useEffect(() => {
+      return () => {
+        onDraftChangeDebounced?.flush(); // immediately invoke pending debounced calls on unmount
+      };
+    }, [onDraftChangeDebounced]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
@@ -671,6 +687,8 @@ export const QueryBarTopRow = React.memo(
             color="text"
             data-test-subj="queryCancelButton"
             iconType="cross"
+            isMainButtonLoading={isCancelling}
+            isDisabled={isCancelling}
             isSecondaryButtonDisabled={!canSendToBackground}
             isSecondaryButtonLoading={isSendingToBackground}
             onClick={onClickCancelButton}
@@ -679,6 +697,7 @@ export const QueryBarTopRow = React.memo(
             secondaryButtonIcon="backgroundTask"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
+            minWidth={BUTTON_MIN_WIDTH}
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -695,6 +714,8 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
+            isLoading={isCancelling}
+            isDisabled={isCancelling}
           >
             {buttonLabelCancel}
           </EuiButtonIcon>
@@ -709,6 +730,8 @@ export const QueryBarTopRow = React.memo(
           size="s"
           data-test-subj="queryCancelButton"
           color="text"
+          isLoading={isCancelling}
+          isDisabled={isCancelling}
         >
           {buttonLabelCancel}
         </EuiButton>
@@ -743,6 +766,7 @@ export const QueryBarTopRow = React.memo(
           secondaryButtonIcon="backgroundTask"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
+          minWidth={BUTTON_MIN_WIDTH}
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
         </SplitButton>
@@ -885,7 +909,7 @@ export const QueryBarTopRow = React.memo(
             submitOnBlur={props.submitOnBlur}
             bubbleSubmitEvent={props.bubbleSubmitEvent}
             deps={{
-              unifiedSearch,
+              autocomplete: kql.autocomplete,
               data,
               storage,
               usageCollection,
@@ -915,11 +939,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderTextLangEditor() {
-      const adHocDataview = props.indexPatterns?.[0];
-      let detectedTimestamp;
-      if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectedTimestamp = adHocDataview?.timeFieldName;
-      }
       return (
         isQueryLangSelected &&
         props.query &&
@@ -929,7 +948,6 @@ export const QueryBarTopRow = React.memo(
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectedTimestamp={detectedTimestamp}
             expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({
@@ -954,6 +972,8 @@ export const QueryBarTopRow = React.memo(
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
+            queryStats={props.esqlQueryStats}
+            openVisorOnSourceCommands
           />
         )
       );

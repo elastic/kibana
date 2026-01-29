@@ -1,0 +1,31 @@
+{
+  "attributes": {
+    "name": "Nginx Availability",
+    "description": "Nginx availability SLO over the past 7 days",
+    "indicator": {
+      "type": "sli.kql.custom",
+      "params": {
+        "index": "logs-nginx-*",
+        "filter": "",
+        "good": "http.response.status_code < 500",
+        "total": "http.response.status_code : *",
+        "timestampField": "@timestamp"
+      }
+    },
+    "budgetingMethod": "occurrences",
+    "timeWindow": {
+      "duration": "7d",
+      "type": "rolling"
+    },
+    "objective": {
+      "target": 0.95
+    },
+    "tags": ["nginx"],
+    "groupBy": ["url.domain"],
+    "artifacts": {
+      "dashboards": [{ "id": "nginx-overview-dashboard" }]
+    }
+  },
+  "id": "sample_slo_template",
+  "type": "slo_template"
+}

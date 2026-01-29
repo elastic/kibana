@@ -71,6 +71,7 @@ import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigatio
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -177,6 +178,7 @@ export interface LensAppServices extends StartServices {
   lensDocumentService: ILensDocumentService;
   serverless?: ServerlessPluginStart;
   cps?: CPSPluginStart;
+  kql: KqlPluginStart;
 }
 
 export type StartServices = Pick<
@@ -1393,6 +1395,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export interface LensState {

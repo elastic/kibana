@@ -22,6 +22,7 @@ import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
+  discardFlyoutsOnTabChange,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
@@ -41,6 +42,8 @@ import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import { fetchData } from './tab_state';
+import { initializeAndSync, stopSyncing } from './tab_sync';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -123,17 +126,15 @@ export const updateTabs: InternalStateThunkActionCreator<
     void
   ],
   Promise<void>
-> =
-  ({ items, selectedItem, updatedDiscoverSession }) =>
-  async (
+> = ({ items, selectedItem, updatedDiscoverSession }) =>
+  async function updateTabsThunkFn(
     dispatch,
     getState,
     { services, runtimeStateManager, tabsStorageManager, urlStateStorage, searchSessionManager }
-  ) => {
+  ) {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
-    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
@@ -213,15 +214,19 @@ export const updateTabs: InternalStateThunkActionCreator<
     });
 
     const selectedTab = selectedItem ?? currentTab;
+    const selectedTabHasChanged = selectedTab.id !== currentTab.id;
+
+    // If changing tabs, stop syncing the current tab before updating any URL state
+    if (selectedTabHasChanged) {
+      dispatch(stopSyncing({ tabId: currentTab.id }));
+    }
 
     // Push the selected tab ID to the URL, which creates a new browser history entry.
     // This must be done before setting other URL state, which replace the history entry
     // in order to avoid creating multiple browser history entries when switching tabs.
     await tabsStorageManager.pushSelectedTabIdToUrl(selectedTab.id);
 
-    if (selectedTab.id !== currentTab.id) {
-      currentTabStateContainer?.actions.stopSyncing();
-
+    if (selectedTabHasChanged) {
       const nextTab = updatedTabs.find((tab) => tab.id === selectedTab.id);
       const nextTabRuntimeState = selectTabRuntimeState(runtimeStateManager, selectedTab.id);
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
@@ -270,11 +275,11 @@ export const updateTabs: InternalStateThunkActionCreator<
           searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         }
 
-        nextTabStateContainer.actions.initializeAndSync();
+        dispatch(initializeAndSync({ tabId: nextTab.id }));
 
         if (nextTab.forceFetchOnSelect) {
           nextTabStateContainer.dataState.reset();
-          nextTabStateContainer.actions.fetchData();
+          dispatch(fetchData({ tabId: nextTab.id }));
         }
       } else {
         await Promise.all([
@@ -285,7 +290,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         services.data.search.session.reset();
       }
 
-      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
+      dispatch(discardFlyoutsOnTabChange());
     }
 
     dispatch(
@@ -540,11 +545,11 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
   };
 
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
-  function disconnectTabThunkFn(_, __, { runtimeStateManager }) {
+  function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const stateContainer = tabRuntimeState.stateContainer$.getValue();
     stateContainer?.dataState.cancel();
-    stateContainer?.actions.stopSyncing();
+    dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };
 

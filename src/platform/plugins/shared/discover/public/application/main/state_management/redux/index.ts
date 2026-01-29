@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import { actions } from './actions';
+import * as actions from './actions';
 
 export {
   type DiscoverInternalState,
@@ -46,12 +46,14 @@ export {
   selectAllTabs,
   selectRecentlyClosedTabs,
   selectTab,
+  selectTabAppState,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
 } from './selectors';
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
@@ -70,6 +72,7 @@ export {
   type TabActionInjector,
   createTabActionInjector,
   createTabItem,
+  getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
   extractEsqlVariables,
 } from './utils';

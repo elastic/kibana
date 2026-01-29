@@ -23,6 +23,8 @@
           "MockedVersionedRouter"
         ],
         "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -39,6 +41,8 @@
         "label": "RegisteredVersionedRoute",
         "description": [],
         "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +65,8 @@
               " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +87,8 @@
               ">; }; }"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -131,6 +139,8 @@
           ">"
         ],
         "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,6 +182,8 @@
           "; }"
         ],
         "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,6 +253,8 @@
           "; }"
         ],
         "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -255,6 +269,8 @@
         "label": "mockRouter",
         "description": [],
         "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+        "lineNumber": 156,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,6 +286,8 @@
               "RouterMock"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -285,6 +303,8 @@
                   "{ routerPath?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+                "lineNumber": 30,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -305,6 +325,8 @@
               "<P, Q, B, any>"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -321,6 +343,8 @@
                   "<P, Q, B>"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+                "lineNumber": 67,
+                "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -339,6 +363,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -354,6 +380,8 @@
                   "{ headers?: Record<string, string> | undefined; }"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+                "lineNumber": 123,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -372,6 +400,8 @@
               ">"
             ],
             "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

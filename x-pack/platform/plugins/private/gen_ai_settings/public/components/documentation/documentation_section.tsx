@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
@@ -22,15 +23,17 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  useProductDocStatus,
   useInstallProductDoc,
   useUninstallProductDoc,
+  REACT_QUERY_KEYS,
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
+import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
-import { ELASTIC_DOCS_ID } from './types';
+import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -39,88 +42,61 @@ interface DocumentationSectionProps {
 
 export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ productDocBase }) => {
   const { services } = useKibana();
-  const { notifications, application } = services;
+  const { application, docLinks } = services;
 
   // Check if user has Agent Builder 'All' privileges (manageAgents capability)
   const hasManagePrivilege = application.capabilities.agentBuilder?.manageAgents === true;
 
-  const { status, isLoading, refetch } = useProductDocStatus(productDocBase);
+  const queryClient = useQueryClient();
 
-  const { mutate: installDoc, isLoading: isInstalling } = useInstallProductDoc(productDocBase, {
-    onSuccess: () => {
-      notifications.toasts.addSuccess({ title: i18n.INSTALL_SUCCESS });
-    },
-    onError: (error) => {
-      notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
-        title: i18n.INSTALL_ERROR,
-      });
-    },
+  const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
+
+  const statusQueries = useQueries({
+    queries: docsConfig.map((doc) => {
+      const inferenceId = defaultInferenceEndpoints.ELSER;
+      const resourceType = doc.resourceType;
+      return {
+        // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
+        // invalidate these queries automatically (otherwise status only updates on full refresh).
+        queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
+        queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
+        keepPreviousData: false,
+        refetchOnWindowFocus: false,
+        refetchInterval: (queryData?: NormalizedDocStatus) => {
+          // Match useProductDocStatus behavior: poll when install/uninstall is in progress.
+          const status = queryData?.status;
+
+          return status === 'installing' || status === 'uninstalling' ? 2000 : false;
+        },
+      };
+    }),
   });
 
-  const { mutate: uninstallDoc, isLoading: isUninstalling } = useUninstallProductDoc(
-    productDocBase,
-    {
-      onSuccess: () => {
-        notifications.toasts.addSuccess({ title: i18n.UNINSTALL_SUCCESS });
-      },
-      onError: (error) => {
-        notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.UNINSTALL_ERROR,
-        });
-      },
-    }
-  );
+  const isLoading = statusQueries.some((q) => q.isLoading);
 
-  const handleInstall = useCallback(
-    (itemId: string) => {
-      if (itemId === ELASTIC_DOCS_ID) {
-        installDoc(defaultInferenceEndpoints.ELSER);
-      }
-      // Security labs is stubbed - no action
-    },
-    [installDoc]
-  );
-
-  const handleUninstall = useCallback(
-    (itemId: string) => {
-      if (itemId === ELASTIC_DOCS_ID) {
-        uninstallDoc(defaultInferenceEndpoints.ELSER);
-      }
-      // Security labs is stubbed - no action
-    },
-    [uninstallDoc]
-  );
-
-  const handleRetry = useCallback(
-    (itemId: string) => {
-      handleInstall(itemId);
-    },
-    [handleInstall]
-  );
+  const refetch = useCallback(() => {
+    // Invalidate all doc status queries (for all rows) so they refresh together.
+    queryClient.invalidateQueries({ queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS] });
+  }, [queryClient]);
 
   const documentationItems: DocumentationItem[] = useMemo(() => {
-    const elasticDocsStatus: DocumentationStatus = status?.overall ?? 'uninstalled';
+    return docsConfig.map((doc, idx) => {
+      const data = statusQueries[idx]?.data;
+      const status: DocumentationStatus = data?.status ?? 'uninstalled';
+      const updateAvailable = doc.supportsUpdates ? Boolean(data?.updateAvailable) : false;
 
-    return [
-      {
-        id: ELASTIC_DOCS_ID,
-        name: i18n.ELASTIC_DOCS_NAME,
-        status: elasticDocsStatus,
-        isTechPreview: false,
-        isStubbed: false,
-        icon: 'logoElastic',
-      },
-      // TODO: Enable Security Labs after https://github.com/elastic/kibana/issues/244946 is worked
-      // {
-      //   id: SECURITY_LABS_ID,
-      //   name: i18n.SECURITY_LABS_NAME,
-      //   status: 'uninstalled',
-      //   isTechPreview: false,
-      //   isStubbed: true,
-      //   icon: 'logoSecurity',
-      // },
-    ];
-  }, [status]);
+      return {
+        id: doc.id,
+        name: doc.name,
+        status,
+        resourceType: doc.resourceType,
+        ...(updateAvailable ? { updateAvailable } : {}),
+        isTechPreview: doc.isTechPreview,
+        isStubbed: doc.isStubbed,
+        icon: doc.icon,
+      };
+    });
+  }, [docsConfig, statusQueries]);
 
   const getStatusBadge = useCallback((itemStatus: DocumentationStatus) => {
     // Status badge only shows binary state: Installed or Not installed
@@ -143,133 +119,16 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
-      // Use server status OR local mutation state to determine if action is in progress
-      const isItemInstalling =
-        item.status === 'installing' || (isInstalling && item.id === ELASTIC_DOCS_ID);
-      const isItemUninstalling =
-        item.status === 'uninstalling' || (isUninstalling && item.id === ELASTIC_DOCS_ID);
-
-      // Helper to wrap button with tooltip when user lacks privileges
-      const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
-        if (!hasManagePrivilege) {
-          return (
-            <EuiToolTip content={i18n.INSUFFICIENT_PRIVILEGES} position="top">
-              {button}
-            </EuiToolTip>
-          );
-        }
-        return button;
-      };
-
-      // Stubbed items show disabled install button
-      if (item.isStubbed && item.status !== 'not_available') {
-        return wrapWithPrivilegeTooltip(
-          <EuiButtonEmpty
-            size="xs"
-            iconType="download"
-            isDisabled={true}
-            data-test-subj={`documentation-install-${item.id}`}
-          >
-            {i18n.ACTION_INSTALL}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Not available - show retry
-      if (item.status === 'not_available') {
-        return wrapWithPrivilegeTooltip(
-          <EuiButtonEmpty
-            size="xs"
-            iconType="refresh"
-            onClick={hasManagePrivilege ? () => refetch() : undefined}
-            isDisabled={!hasManagePrivilege}
-            data-test-subj={`documentation-retry-${item.id}`}
-          >
-            {i18n.ACTION_RETRY}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Error state - show retry
-      if (item.status === 'error') {
-        return wrapWithPrivilegeTooltip(
-          <EuiButtonEmpty
-            size="xs"
-            iconType="refresh"
-            onClick={hasManagePrivilege ? () => handleRetry(item.id) : undefined}
-            isDisabled={!hasManagePrivilege}
-            data-test-subj={`documentation-retry-${item.id}`}
-          >
-            {i18n.ACTION_RETRY}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Uninstalling - show loading state
-      if (isItemUninstalling) {
-        return (
-          <EuiButtonEmpty
-            size="xs"
-            isLoading={true}
-            isDisabled={true}
-            data-test-subj={`documentation-uninstalling-${item.id}`}
-          >
-            {i18n.STATUS_UNINSTALLING}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Installed - show uninstall button
-      if (item.status === 'installed') {
-        return wrapWithPrivilegeTooltip(
-          <EuiButtonEmpty
-            size="xs"
-            iconType="returnKey"
-            onClick={hasManagePrivilege ? () => handleUninstall(item.id) : undefined}
-            isDisabled={!hasManagePrivilege}
-            data-test-subj={`documentation-uninstall-${item.id}`}
-          >
-            {i18n.ACTION_UNINSTALL}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Installing - show loading state
-      if (isItemInstalling) {
-        return (
-          <EuiButtonEmpty
-            size="xs"
-            isLoading={true}
-            isDisabled={true}
-            data-test-subj={`documentation-installing-${item.id}`}
-          >
-            {i18n.STATUS_INSTALLING}
-          </EuiButtonEmpty>
-        );
-      }
-
-      // Default - show install button
-      return wrapWithPrivilegeTooltip(
-        <EuiButtonEmpty
-          size="xs"
-          iconType="download"
-          onClick={hasManagePrivilege ? () => handleInstall(item.id) : undefined}
-          isDisabled={!hasManagePrivilege}
-          data-test-subj={`documentation-install-${item.id}`}
-        >
-          {i18n.ACTION_INSTALL}
-        </EuiButtonEmpty>
+      return (
+        <DocumentationRowActions
+          item={item}
+          productDocBase={productDocBase}
+          hasManagePrivilege={hasManagePrivilege}
+          onRefetch={refetch}
+        />
       );
     },
-    [
-      handleInstall,
-      handleUninstall,
-      handleRetry,
-      isInstalling,
-      isUninstalling,
-      refetch,
-      hasManagePrivilege,
-    ]
+    [hasManagePrivilege, productDocBase, refetch]
   );
 
   const columns: Array<EuiBasicTableColumn<DocumentationItem>> = useMemo(
@@ -289,6 +148,11 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
             {item.isTechPreview && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
+              </EuiFlexItem>
+            )}
+            {item.updateAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{i18n.UPDATE_AVAILABLE}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -322,7 +186,10 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiText size="s" color="subdued">
-          {i18n.DOCUMENTATION_DESCRIPTION}
+          {i18n.DOCUMENTATION_DESCRIPTION}{' '}
+          <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+            {i18n.LEARN_MORE}
+          </EuiLink>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiText size="xs" color="subdued">
@@ -335,8 +202,210 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
           columns={columns}
           loading={isLoading}
           data-test-subj="documentationTable"
+          tableCaption={i18n.DOCUMENTATION_TABLE_CAPTION}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
+  );
+};
+
+const DocumentationRowActions: React.FC<{
+  item: DocumentationItem;
+  productDocBase: ProductDocBasePluginStart;
+  hasManagePrivilege: boolean;
+  onRefetch: () => void;
+}> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
+  const { services } = useKibana();
+  const { notifications, rendering, docLinks } = services;
+
+  const installMutation = useInstallProductDoc(productDocBase, {
+    onSuccess: () => {
+      notifications.toasts.addSuccess({ title: i18n.getInstallSuccessTitle(item.name) });
+    },
+    onError: (error) => {
+      const message = error.body?.message ?? error.message;
+      notifications.toasts.addDanger({
+        title: i18n.getInstallErrorTitle(item.name),
+        text: toMountPoint(
+          <EuiText size="s">
+            <p>{message}</p>
+            <p>{i18n.AIR_GAPPED_HINT}</p>
+            <p>
+              <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+                {i18n.LEARN_MORE}
+              </EuiLink>
+            </p>
+          </EuiText>,
+          rendering
+        ),
+      });
+    },
+  });
+
+  const uninstallMutation = useUninstallProductDoc(productDocBase, {
+    onSuccess: () => {
+      notifications.toasts.addSuccess({ title: i18n.getUninstallSuccessTitle(item.name) });
+    },
+    onError: (error) => {
+      notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
+        title: i18n.getUninstallErrorTitle(item.name),
+      });
+    },
+  });
+
+  const installVars = useMemo(
+    () => ({
+      inferenceId: defaultInferenceEndpoints.ELSER,
+      resourceType: item.resourceType,
+    }),
+    [item.resourceType]
+  );
+
+  const isItemInstalling = item.status === 'installing' || installMutation.isLoading;
+  const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
+
+  const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
+    if (!hasManagePrivilege) {
+      return (
+        <EuiToolTip content={i18n.INSUFFICIENT_PRIVILEGES} position="top">
+          {button}
+        </EuiToolTip>
+      );
+    }
+    return button;
+  };
+
+  // Stubbed items show disabled install button
+  if (item.isStubbed && item.status !== 'not_available') {
+    return wrapWithPrivilegeTooltip(
+      <EuiButtonEmpty
+        size="xs"
+        iconType="download"
+        isDisabled={true}
+        data-test-subj={`documentation-install-${item.id}`}
+      >
+        {i18n.ACTION_INSTALL}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Not available - show retry
+  if (item.status === 'not_available') {
+    return wrapWithPrivilegeTooltip(
+      <EuiButtonEmpty
+        size="xs"
+        iconType="refresh"
+        onClick={hasManagePrivilege ? () => onRefetch() : undefined}
+        isDisabled={!hasManagePrivilege}
+        data-test-subj={`documentation-retry-${item.id}`}
+      >
+        {i18n.ACTION_RETRY}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Error state - show retry
+  if (item.status === 'error') {
+    return wrapWithPrivilegeTooltip(
+      <EuiButtonEmpty
+        size="xs"
+        iconType="refresh"
+        onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
+        isDisabled={!hasManagePrivilege}
+        data-test-subj={`documentation-retry-${item.id}`}
+      >
+        {i18n.ACTION_RETRY}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Uninstalling - show loading state
+  if (isItemUninstalling) {
+    return (
+      <EuiButtonEmpty
+        size="xs"
+        isLoading={true}
+        isDisabled={true}
+        data-test-subj={`documentation-uninstalling-${item.id}`}
+      >
+        {i18n.STATUS_UNINSTALLING}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Installed - show uninstall button
+  if (item.status === 'installed') {
+    if (item.updateAvailable) {
+      return wrapWithPrivilegeTooltip(
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="refresh"
+              onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
+              isDisabled={!hasManagePrivilege}
+              data-test-subj={`documentation-update-${item.id}`}
+            >
+              {i18n.ACTION_UPDATE}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="returnKey"
+              onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
+              isDisabled={!hasManagePrivilege}
+              data-test-subj={`documentation-uninstall-${item.id}`}
+            >
+              {i18n.ACTION_UNINSTALL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return wrapWithPrivilegeTooltip(
+      <EuiButtonEmpty
+        size="xs"
+        iconType="returnKey"
+        onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
+        isDisabled={!hasManagePrivilege}
+        data-test-subj={`documentation-uninstall-${item.id}`}
+      >
+        {i18n.ACTION_UNINSTALL}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Installing - show loading state
+  if (isItemInstalling) {
+    return (
+      <EuiButtonEmpty
+        size="xs"
+        isLoading={true}
+        isDisabled={true}
+        data-test-subj={`documentation-installing-${item.id}`}
+      >
+        {i18n.STATUS_INSTALLING}
+      </EuiButtonEmpty>
+    );
+  }
+
+  // Default - show install button
+  return wrapWithPrivilegeTooltip(
+    <EuiButtonEmpty
+      size="xs"
+      iconType="download"
+      onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
+      isDisabled={!hasManagePrivilege}
+      data-test-subj={`documentation-install-${item.id}`}
+    >
+      {i18n.ACTION_INSTALL}
+    </EuiButtonEmpty>
   );
 };

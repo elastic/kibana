@@ -1366,4 +1366,199 @@ describe('Azure credentials with mixed secret and text vars', () => {
       azure_credentials_cloud_connector_id: undefined,
     });
   });
+
+  describe('getAccountTypeFromInputs', () => {
+    const mockInput = {
+      type: 'cloudbeat/cis_aws',
+      policy_template: 'cis_aws',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
+            external_id: { value: 'test-external-id' },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const mockPolicy = {
+      id: 'test-policy-id',
+      enabled: true,
+      policy_id: 'test-policy',
+      policy_ids: ['test-policy'],
+      name: 'test-policy',
+      namespace: 'default',
+      package: {
+        name: 'cloud_security_posture',
+        title: 'Cloud Security Posture',
+        version: '1.0.0',
+      },
+      supports_cloud_connector: true,
+      inputs: [
+        {
+          type: 'cloudbeat/cis_aws',
+          policy_template: 'cis_aws',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+              vars: {
+                role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
+                external_id: { value: 'test-external-id' },
+              },
+            },
+          ],
+        },
+      ],
+    } as NewPackagePolicy;
+
+    it('should extract account type from AWS policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  ...mockInput.streams[0].vars,
+                  'aws.account_type': { value: 'single-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      ...mockPolicy.inputs[0].streams[0].vars,
+                      'aws.account_type': { value: 'single-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'aws'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('single-account');
+    });
+
+    it('should extract organization account type from AWS policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  ...mockInput.streams[0].vars,
+                  'aws.account_type': { value: 'organization-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      ...mockPolicy.inputs[0].streams[0].vars,
+                      'aws.account_type': { value: 'organization-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'aws'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('organization-account');
+    });
+
+    it('should extract account type from Azure policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            type: 'cloudbeat/cis_azure',
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  'azure.account_type': { value: 'single-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                type: 'cloudbeat/cis_azure',
+                enabled: true,
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      'azure.account_type': { value: 'single-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'azure'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('single-account');
+    });
+
+    it('should return undefined when no account type is present', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'aws')
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+
+    it('should return undefined when cloudProvider is not provided', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, undefined)
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+
+    it('should return undefined for unsupported cloud provider', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'gcp')
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+  });
 });

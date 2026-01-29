@@ -11,7 +11,7 @@
         "label": "AIAgentConfirmationModal",
         "description": [],
         "signature": [
-          "({ onConfirm, onCancel, }: ",
+          "({ onConfirm, onCancel, docLinks, }: ",
           {
             "pluginId": "@kbn/ai-agent-confirmation-modal",
             "scope": "public",
@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,7 @@
             "id": "def-public.AIAgentConfirmationModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onConfirm,\n  onCancel,\n}",
+            "label": "{\n  onConfirm,\n  onCancel,\n  docLinks,\n}",
             "description": [],
             "signature": [
               {
@@ -42,6 +44,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 28,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,6 +64,8 @@
         "label": "AIAgentConfirmationModalProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,6 +80,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -90,10 +98,34 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-agent-confirmation-modal",
+            "id": "def-public.AIAgentConfirmationModalProps.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

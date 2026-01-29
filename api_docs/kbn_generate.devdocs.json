@@ -32,6 +32,8 @@
           "() => void"
         ],
         "path": "packages/kbn-generate/src/cli.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { type ComponentProps, useState, useCallback } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiShowFor,
   EuiSpacer,
   EuiButton,
+  EuiButtonIcon,
   EuiCard,
   EuiIcon,
   EuiModalHeader,
@@ -31,7 +33,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
@@ -58,9 +59,9 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
+  const { links: docLinks } = coreStart.docLinks;
 
   const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.manageAgents === true;
-  const isAiAgentsEnabled = getIsAiAgentsEnabled(coreStart.featureFlags);
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
 
@@ -108,12 +109,24 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     }
   }, [selectedType, applySelection]);
 
+  const AiAssistantHeaderButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <EuiButton {...props} data-test-subj="aiAssistantHeaderButton" />
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon {...props} display="base" data-test-subj="aiAssistantHeaderButtonIcon" />
+      </EuiShowFor>
+    </>
+  );
+
   return (
     <>
-      <EuiButton
+      <AiAssistantHeaderButton
         iconType={AssistantIcon}
         onClick={() => setModalOpen(true)}
-        data-test-subj="aiAssistantHeaderButton"
         aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
           defaultMessage: 'Open the AI Assistant selector',
         })}
@@ -123,7 +136,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
           defaultMessage: 'AI Assistant',
         })}
-      </EuiButton>
+      </AiAssistantHeaderButton>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
@@ -132,7 +145,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                 {i18n.translate(
                   'aiAssistantManagementSelection.headerButton.selectAIChatExperienceTitle',
                   {
-                    defaultMessage: 'Select an AI chat experience',
+                    defaultMessage: 'Select a chat experience',
                   }
                 )}
               </EuiModalHeaderTitle>
@@ -160,9 +173,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       </EuiLink>
                     ),
                     learnMoreLink: (
-                      // TODO: Update link when documentation is ready
                       <EuiLink
-                        href="#"
+                        href={docLinks.agentBuilder.learnMore}
                         target="_blank"
                         data-test-subj="aiAgentBuilderLearnMoreLink"
                       >
@@ -232,36 +244,34 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />
                 </EuiFlexItem>
-                {isAiAgentsEnabled && (
-                  <EuiFlexItem grow={1}>
-                    <EuiCard
-                      display="plain"
-                      hasBorder
-                      betaBadgeProps={{
-                        label: i18n.translate(
-                          'aiAssistantManagementSelection.headerButton.betaLabel',
-                          {
-                            defaultMessage: 'BETA',
-                          }
-                        ),
-                      }}
-                      selectable={{
-                        isSelected: selectedType === AIChatExperience.Agent,
-                        onClick: () => setSelectedType(AIChatExperience.Agent),
-                      }}
-                      title={i18n.translate(
-                        'aiAssistantManagementSelection.headerButton.aiAgentLabel',
+                <EuiFlexItem grow={1}>
+                  <EuiCard
+                    display="plain"
+                    hasBorder
+                    betaBadgeProps={{
+                      label: i18n.translate(
+                        'aiAssistantManagementSelection.headerButton.betaLabel',
                         {
-                          defaultMessage: 'AI Agent',
+                          defaultMessage: 'BETA',
                         }
-                      )}
-                      titleSize="xs"
-                      icon={<RobotIcon size="xxl" />}
-                      data-test-subj="aiAssistantAgentCard"
-                      isDisabled={!hasAgentBuilder}
-                    />
-                  </EuiFlexItem>
-                )}
+                      ),
+                    }}
+                    selectable={{
+                      isSelected: selectedType === AIChatExperience.Agent,
+                      onClick: () => setSelectedType(AIChatExperience.Agent),
+                    }}
+                    title={i18n.translate(
+                      'aiAssistantManagementSelection.headerButton.aiAgentLabel',
+                      {
+                        defaultMessage: 'AI Agent',
+                      }
+                    )}
+                    titleSize="xs"
+                    icon={<RobotIcon size="xxl" />}
+                    data-test-subj="aiAssistantAgentCard"
+                    isDisabled={!hasAgentBuilder}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiModalBody>
             <EuiModalFooter>
@@ -299,6 +309,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         <AIAgentConfirmationModal
           onConfirm={handleConfirmAgent}
           onCancel={() => setConfirmModalOpen(false)}
+          docLinks={docLinks}
         />
       )}
     </>

@@ -15,7 +15,7 @@ import {
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
-  getIndexPatternsForStream,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -166,8 +166,10 @@ export function LifecycleBadge({
 
 export function DiscoverBadgeButton({
   definition,
+  isWiredStream,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  isWiredStream: boolean;
 }) {
   const {
     dependencies: {
@@ -176,8 +178,11 @@ export function DiscoverBadgeButton({
   } = useKibana();
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  const esqlQuery = getDiscoverEsqlQuery({
+    definition: definition.stream,
+    indexMode: definition.index_mode,
+    includeMetadata: isWiredStream,
+  });
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(

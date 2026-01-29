@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
+            "lineNumber": 101,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): React.JSX.Element; displayName: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,6 +85,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "lineNumber": 37,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -110,6 +118,8 @@
           "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
