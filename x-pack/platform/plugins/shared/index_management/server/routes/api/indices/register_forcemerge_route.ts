@@ -12,7 +12,7 @@ import { addBasePath } from '..';
 import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
+  indices: schema.arrayOf(schema.string(), { maxSize: 1000 }),
   maxNumSegments: schema.maybe(schema.number()),
 });
 

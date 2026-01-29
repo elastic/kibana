@@ -12,7 +12,7 @@ import { Fields } from '../../models/fields';
 import type { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
-  indexes: schema.arrayOf(schema.string()),
+  indexes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
 });
 
 function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {

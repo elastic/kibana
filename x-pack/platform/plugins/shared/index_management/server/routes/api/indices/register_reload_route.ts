@@ -15,7 +15,7 @@ import { addBasePath } from '..';
 
 const bodySchema = schema.maybe(
   schema.object({
-    indexNames: schema.maybe(schema.arrayOf(schema.string())),
+    indexNames: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   })
 );
 

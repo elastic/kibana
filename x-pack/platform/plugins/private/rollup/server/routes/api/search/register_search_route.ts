@@ -28,7 +28,8 @@ export const registerSearchRoute = ({
           schema.object({
             index: schema.string(),
             query: schema.any(),
-          })
+          }),
+          { maxSize: 1000 }
         ),
       },
     },

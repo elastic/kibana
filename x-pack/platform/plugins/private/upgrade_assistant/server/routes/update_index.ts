@@ -40,7 +40,8 @@ export function registerUpdateIndexRoute({
         }),
         body: schema.object({
           operations: schema.arrayOf(
-            schema.oneOf([schema.literal('blockWrite'), schema.literal('unfreeze')])
+            schema.oneOf([schema.literal('blockWrite'), schema.literal('unfreeze')]),
+            { maxSize: 1000 }
           ),
         }),
       },

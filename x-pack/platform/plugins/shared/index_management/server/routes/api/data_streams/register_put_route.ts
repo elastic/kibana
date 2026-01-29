@@ -22,7 +22,7 @@ export const getEsWarningText = (warning: string): string | null => {
 
 export function registerPutDataRetention({ router, lib: { handleEsError } }: RouteDependencies) {
   const bodySchema = schema.object({
-    dataStreams: schema.arrayOf(schema.string()),
+    dataStreams: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     dataRetention: schema.maybe(schema.string()),
     enabled: schema.maybe(schema.boolean()),
   });
@@ -86,7 +86,7 @@ export function registerPutDataStreamFailureStore({
 }: RouteDependencies) {
   const bodySchema = schema.object(
     {
-      dataStreams: schema.arrayOf(schema.string()),
+      dataStreams: schema.arrayOf(schema.string(), { maxSize: 1000 }),
       dsFailureStore: schema.boolean(),
       customRetentionPeriod: schema.maybe(schema.string()),
       retentionDisabled: schema.maybe(schema.boolean()),

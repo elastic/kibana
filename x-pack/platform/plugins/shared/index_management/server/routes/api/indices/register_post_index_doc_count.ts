@@ -29,7 +29,7 @@ export function registerPostIndexDocCountRoute({
       },
       validate: {
         body: schema.object({
-          indexNames: schema.arrayOf(schema.string(), { minSize: 1 }),
+          indexNames: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
         }),
       },
     },
