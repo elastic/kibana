@@ -6,9 +6,10 @@
  */
 
 import { createHash } from 'crypto';
-import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLRow } from '@kbn/es-types';
 import stringify from 'json-stable-stringify';
 
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { AlertEvent } from '../../resources/alert_events';
 
@@ -48,7 +49,7 @@ export interface BuildAlertEventsOpts {
   ruleVersion: number;
   spaceId: string;
   ruleAttributes: RuleSavedObjectAttributes;
-  esqlResponse: ESQLSearchResponse;
+  esqlResponse: EsqlQueryResponse;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */

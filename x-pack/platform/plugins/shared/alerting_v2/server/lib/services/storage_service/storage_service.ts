@@ -89,7 +89,7 @@ export class StorageService implements StorageServiceContract {
       return;
     }
 
-    const error = firstErrorItem.index?.error;
+    const error = firstErrorItem.create?.error;
     this.logger.error({
       error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
       code: 'BULK_INDEX_ERROR',
