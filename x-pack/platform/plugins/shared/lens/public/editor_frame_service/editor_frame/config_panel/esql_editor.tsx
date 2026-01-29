@@ -283,7 +283,6 @@ function InnerESQLEditor({
     closeFlyout,
   });
 
-  const hideTimeFilterInfo = false;
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
       <div
@@ -295,8 +294,6 @@ function InnerESQLEditor({
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={setQuery}
-          detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-          hideTimeFilterInfo={hideTimeFilterInfo}
           errors={errors}
           warning={
             suggestsLimitedColumns
