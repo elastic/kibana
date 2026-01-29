@@ -12,8 +12,8 @@
  * 2.0.
  */
 
-import type { ESQLSearchParams } from '@kbn/es-types';
 import { hasStartEndParams } from '@kbn/esql-utils';
+import type { EsqlESQLParam, EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { parseDurationToMs } from '../duration';
 
 export interface GetQueryPayloadParams {
@@ -29,18 +29,9 @@ export interface GetQueryPayloadParams {
 export interface QueryPayload {
   dateStart: string;
   dateEnd: string;
-  filter: ESQLSearchParams['filter'];
-  params?: ESQLSearchParams['params'];
+  filter: EsqlQueryRequest['filter'];
+  params?: EsqlQueryRequest['params'];
 }
-
-type NamedParamValue =
-  | string
-  | number
-  | Array<string | number>
-  | Record<string, string | number>
-  | undefined;
-
-type NamedParams = Array<Record<string, NamedParamValue>>;
 
 export function getQueryPayload({
   query,
@@ -63,22 +54,25 @@ export function getQueryPayload({
     },
   ];
 
-  const filter: ESQLSearchParams['filter'] = {
+  const filter: EsqlQueryRequest['filter'] = {
     bool: {
       filter: rangeFilter,
     },
-  } as ESQLSearchParams['filter'];
+  } as EsqlQueryRequest['filter'];
 
   if (!hasStartEndParams(query)) {
     return { dateStart, dateEnd, filter };
   }
 
-  const params: NamedParams = [];
+  const params: EsqlQueryRequest['params'] = [];
+
   if (/\?_tstart/i.test(query)) {
-    params.push({ _tstart: dateStart });
+    // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
+    params.push({ _tstart: dateStart } as unknown as EsqlESQLParam);
   }
   if (/\?_tend/i.test(query)) {
-    params.push({ _tend: dateEnd });
+    // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
+    params.push({ _tend: dateEnd } as unknown as EsqlESQLParam);
   }
 
   return { dateStart, dateEnd, filter, ...(params.length ? { params } : {}) };

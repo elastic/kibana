@@ -12,10 +12,8 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import {
-  QueryService,
-  type QueryServiceContract,
-} from '../../services/query_service/query_service';
+import type { QueryServiceContract } from '../../services/query_service/query_service';
+import { QueryServiceScopedToken } from '../../services/query_service/tokens';
 import type { StateWithRule } from '../type_guards';
 import { hasRule } from '../type_guards';
 
@@ -25,7 +23,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(QueryService) private readonly queryService: QueryServiceContract
+    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
   ) {}
 
   private isStepReady(state: Readonly<RulePipelineState>): state is StateWithRule {

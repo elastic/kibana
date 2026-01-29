@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { catchError, filter as rxFilter, lastValueFrom, map, throwError } from 'rxjs';
+import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 
-interface ExecuteQueryParams {
-  query: ESQLSearchParams['query'];
-  filter?: ESQLSearchParams['filter'];
-  params?: ESQLSearchParams['params'];
+export interface ExecuteQueryParams {
+  query: EsqlQueryRequest['query'];
+  filter?: EsqlQueryRequest['filter'];
+  params?: EsqlQueryRequest['params'];
   abortSignal?: AbortSignal;
 }
 
 export interface QueryServiceContract {
-  executeQuery(params: ExecuteQueryParams): Promise<ESQLSearchResponse>;
-  queryResponseToRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[];
+  executeQuery(params: ExecuteQueryParams): Promise<EsqlQueryResponse>;
+  queryResponseToRecords<T extends Record<string, unknown>>(response: EsqlQueryResponse): T[];
 }
 
 @injectable()
 export class QueryService implements QueryServiceContract {
   constructor(
-    private readonly searchClient: IScopedSearchClient,
+    private readonly esClient: ElasticsearchClient,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
@@ -38,50 +35,30 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
-  }: ExecuteQueryParams): Promise<ESQLSearchResponse> {
+  }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     try {
       this.logger.debug({
         message: () =>
           `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
       });
 
-      const request: IKibanaSearchRequest<ESQLSearchParams> = {
-        params: {
+      const response = await this.esClient.esql.query(
+        {
           query,
-          dropNullColumns: false,
+          drop_null_columns: false,
           filter,
           params,
         },
-      };
-
-      const searchResponse = await lastValueFrom(
-        this.searchClient
-          .search<
-            IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchResponse>
-          >(request, {
-            strategy: ESQL_SEARCH_STRATEGY,
-            ...(abortSignal ? { abortSignal } : {}),
-          })
-          .pipe(
-            catchError((error) => {
-              this.logger.error({
-                error,
-                code: 'ESQL_QUERY_ERROR',
-                type: 'QueryServiceError',
-              });
-              return throwError(() => error);
-            }),
-            rxFilter((resp) => !isRunningResponse(resp)),
-            map((resp) => resp.rawResponse)
-          )
+        { signal: abortSignal }
       );
 
+      const rowCount = Array.isArray(response.values) ? response.values.length : 0;
+
       this.logger.debug({
-        message: `QueryService: Query executed successfully, returned ${searchResponse.values.length} rows`,
+        message: `QueryService: Query executed successfully, returned ${rowCount} rows`,
       });
 
-      return searchResponse;
+      return response;
     } catch (error) {
       this.logger.error({
         error,
@@ -93,18 +70,22 @@ export class QueryService implements QueryServiceContract {
     }
   }
 
-  public queryResponseToRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[] {
+  public queryResponseToRecords<T extends Record<string, unknown>>(
+    response: EsqlQueryResponse
+  ): T[] {
     const objects: T[] = [];
+    const columns = response.columns ?? [];
+    const values = response.values ?? [];
 
-    if (response.columns.length === 0 || response.values.length === 0) {
+    if (columns.length === 0 || values.length === 0) {
       return [];
     }
 
-    for (const row of response.values) {
+    for (const row of values) {
       const object: T = {} as T;
 
       for (const [columnIndex, value] of row.entries()) {
-        const columnName = response.columns[columnIndex]?.name as keyof T;
+        const columnName = columns[columnIndex]?.name as keyof T;
 
         if (columnName) {
           object[columnName] = value as T[keyof T];

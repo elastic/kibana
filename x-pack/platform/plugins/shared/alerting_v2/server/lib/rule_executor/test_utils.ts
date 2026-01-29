@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
-
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   RuleExecutionInput,
   RuleExecutionStep,
@@ -58,9 +57,9 @@ export function createQueryPayload(overrides: Partial<QueryPayload> = {}): Query
 }
 
 export function createEsqlResponse(
-  columns: Array<{ name: string; type: string }> = [{ name: 'host.name', type: 'keyword' }],
-  values: unknown[][] = [['host-a'], ['host-b']]
-): ESQLSearchResponse {
+  columns: EsqlQueryResponse['columns'] = [{ name: 'host.name', type: 'keyword' }],
+  values: EsqlQueryResponse['values'] = [['host-a'], ['host-b']]
+): EsqlQueryResponse {
   return {
     columns,
     values,
