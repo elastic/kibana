@@ -120,7 +120,7 @@ describe(
         // x-pack/solutions/security/test/security_solution_cypress/config.ts and x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'aiAssistedRuleCreationEnabled',
+            'aiRuleCreationEnabled',
           ])}`,
         ],
       },

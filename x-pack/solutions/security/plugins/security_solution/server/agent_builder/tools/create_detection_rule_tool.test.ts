@@ -50,7 +50,7 @@ describe('createDetectionRuleTool', () => {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
   };
-  const mockExperimentalFeatures = { aiAssistedRuleCreationEnabled: true } as ExperimentalFeatures;
+  const mockExperimentalFeatures = { aiRuleCreationEnabled: true } as ExperimentalFeatures;
   const tool = createDetectionRuleTool(
     mockCore,
     mockLogger,
@@ -108,7 +108,7 @@ describe('createDetectionRuleTool', () => {
   describe('availability', () => {
     it('returns unavailable when experimental feature is disabled', async () => {
       const toolWithFeatureDisabled = createDetectionRuleTool(mockCore, mockLogger, {
-        aiAssistedRuleCreationEnabled: false,
+        aiRuleCreationEnabled: false,
       } as ExperimentalFeatures);
 
       const availability = await toolWithFeatureDisabled.availability?.handler(
@@ -118,7 +118,7 @@ describe('createDetectionRuleTool', () => {
       expect(availability).toEqual({
         status: 'unavailable',
         reason:
-          'AI rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+          'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
       });
     });
 

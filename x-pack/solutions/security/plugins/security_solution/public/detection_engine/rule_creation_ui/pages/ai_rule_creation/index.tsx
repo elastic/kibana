@@ -54,9 +54,7 @@ const AiRuleCreationPageComponent: React.FC = () => {
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
-  const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
-    'aiAssistedRuleCreationEnabled'
-  );
+  const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
 
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -152,7 +150,7 @@ const AiRuleCreationPageComponent: React.FC = () => {
     [styles.linkBack, submittedPromptValue]
   );
 
-  const isAiRuleCreationAvailable = aiAssistedRuleCreationEnabled && isAgentBuilderEnabled;
+  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
 
   const needsRedirectToDetections = useMemo(() => {
     return redirectToDetections(

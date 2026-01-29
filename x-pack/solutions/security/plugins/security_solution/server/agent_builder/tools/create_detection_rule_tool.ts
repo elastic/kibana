@@ -44,11 +44,11 @@ export function createDetectionRuleTool(
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiAssistedRuleCreationEnabled) {
+        if (!experimentalFeatures?.aiRuleCreationEnabled) {
           return {
             status: 'unavailable',
             reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
           };
         }
 
