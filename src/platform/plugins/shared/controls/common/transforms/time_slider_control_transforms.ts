@@ -8,16 +8,51 @@
  */
 
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { StoredTimeSliderExplicitInput, TimeSliderControlState } from '@kbn/controls-schemas';
+import type { TimeSliderControlState } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
+interface StoredTimeSliderExplicitInput {
+  isAnchored?: boolean;
+  timesliceEndAsPercentageOfTimeRange?: number;
+  timesliceStartAsPercentageOfTimeRange?: number;
+}
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
-    transformOut: (state: StoredTimeSliderExplicitInput): TimeSliderControlState => {
+    transformOut: <
+      StoredStateType extends Partial<StoredTimeSliderExplicitInput & TimeSliderControlState>
+    >(
+      state: StoredStateType
+    ): TimeSliderControlState => {
+      const {
+        isAnchored,
+        is_anchored,
+        /**
+         * Pre 9.4, we had long camelCased names to store the time slider selections. This
+         * transform out renames them from...
+         * - timesliceEndAsPercentageOfTimeRange -> end_percentage_of_time_range
+         * - timesliceStartAsPercentageOfTimeRange -> start_percentage_of_time_range
+         */
+        timesliceEndAsPercentageOfTimeRange,
+        end_percentage_of_time_range,
+        timesliceStartAsPercentageOfTimeRange,
+        start_percentage_of_time_range,
+      } = state;
       return {
-        is_anchored: state.isAnchored,
-        timeslice_end_as_percentage_of_time_range: state.timesliceEndAsPercentageOfTimeRange,
-        timeslice_start_as_percentage_of_time_range: state.timesliceStartAsPercentageOfTimeRange,
+        ...(typeof isAnchored === 'boolean' && { is_anchored: isAnchored }),
+        ...(typeof is_anchored === 'boolean' && { is_anchored }),
+        ...(typeof timesliceEndAsPercentageOfTimeRange === 'number' && {
+          end_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange,
+        }),
+        ...(typeof end_percentage_of_time_range === 'number' && {
+          end_percentage_of_time_range,
+        }),
+        ...(typeof timesliceStartAsPercentageOfTimeRange === 'number' && {
+          start_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange,
+        }),
+        ...(typeof start_percentage_of_time_range === 'number' && {
+          start_percentage_of_time_range,
+        }),
       };
     },
   });
