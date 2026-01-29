@@ -10,7 +10,8 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/249094
+test.describe.skip('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => {
   let ruleId: string;
 
   test.beforeAll(async ({ apiServices }) => {

@@ -117,16 +117,6 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: true,
-
-  /**
-   * Enables the ability to use does not match condition for indicator match rules
-   */
-  doesNotMatchForIndicatorMatchRuleEnabled: true,
-
-  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
@@ -194,7 +184,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -206,9 +196,10 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsWatchlistEnabled: false,
 
   /**
-   * Enables the Gap Auto Fill Scheduler feature.
+   * Enables the Trial Companion feature.
    */
-  gapAutoFillSchedulerEnabled: false,
+  trialCompanionEnabled: false,
+
   /**
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.

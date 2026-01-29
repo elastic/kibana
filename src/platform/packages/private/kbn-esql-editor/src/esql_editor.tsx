@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiOutsideClickDetector,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -35,6 +34,7 @@ import {
   fixESQLQueryWithVariables,
   prettifyQuery,
   hasOnlySourceCommand,
+  getESQLAdHocDataview,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -46,6 +46,7 @@ import type {
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
 } from '@kbn/esql-types';
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -56,6 +57,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
@@ -72,6 +74,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
@@ -88,7 +91,7 @@ import {
 } from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
@@ -102,12 +105,13 @@ import {
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
 
+const VISOR_AUTO_OPEN_DISMISSED_KEY = 'esql:visorAutoOpenDismissed';
+
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
-  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -118,7 +122,6 @@ const ESQLEditorInternal = function ESQLEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
-  hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
@@ -131,6 +134,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  queryStats,
   openVisorOnSourceCommands,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -149,7 +153,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -197,16 +201,19 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
+  const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
+    VISOR_AUTO_OPEN_DISMISSED_KEY,
+    !openVisorOnSourceCommands
+  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRef(false);
+  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -217,25 +224,41 @@ const ESQLEditorInternal = function ESQLEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  // Open visor on initial render if query has only source commands
+  // The visor opens automatically if:
+  // - the user has not dismissed the auto open behavior
+  // - the query contains only a source command
+  // - the visor has not been opened automatically on mount before
+  // - The openVisorOnSourceCommands prop is true
   useEffect(() => {
     if (
-      openVisorOnSourceCommands &&
       !hasOpenedVisorOnMount.current &&
+      !hasUserDismissedVisorAutoOpen &&
+      openVisorOnSourceCommands &&
       code &&
       hasOnlySourceCommand(code)
     ) {
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, openVisorOnSourceCommands]);
+  }, [
+    code,
+    hasOpenedVisorOnMount,
+    hasUserDismissedVisorAutoOpen,
+    openVisorOnSourceCommands,
+    setIsVisorOpen,
+  ]);
+
+  const onToggleVisor = useCallback(() => {
+    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
       setIsVisorOpen(false);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setIsVisorOpen]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -456,7 +479,6 @@ const ESQLEditorInternal = function ESQLEditor({
     editorHeight,
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
-    isCodeEditorExpandedFocused,
     Boolean(editorIsInline),
     Boolean(hasOutline)
   );
@@ -700,19 +722,49 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
+      getKqlSuggestions: async (kqlQuery: string, cursorPositionInKql: number) => {
+        const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
+        if (!hasQuerySuggestions) {
+          return undefined;
+        }
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: minimalQueryRef.current,
+        });
+        const suggestions = await kql?.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          query: kqlQuery,
+          selectionStart: cursorPositionInKql,
+          selectionEnd: cursorPositionInKql,
+          indexPatterns: [dataView],
+        });
+        return (
+          suggestions?.map((suggestion) => {
+            return {
+              text: suggestion.text,
+              label: suggestion.text,
+              detail:
+                typeof suggestion.description === 'string' ? suggestion.description : undefined,
+              kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            };
+          }) ?? []
+        );
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
     getJoinIndicesCallback,
-    kibana.services?.esql,
     canCreateLookupIndex,
+    kibana.services?.esql,
+    kql?.autocomplete,
     dataSourcesCache,
     memoizedSources,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
+    data.dataViews,
     memoizedFieldsFromESQL,
     abortController.signal,
     variablesService?.esqlVariables,
@@ -838,7 +890,8 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd(active);
 
       if (active) {
-        setEditorMessages({ errors: allErrors, warnings: allWarnings });
+        const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
+        setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',
@@ -859,10 +912,6 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd,
     ]
   );
-
-  const toggleVisor = useCallback(() => {
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, []);
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
@@ -1017,8 +1066,6 @@ const ESQLEditorInternal = function ESQLEditor({
       folding: false,
       fontSize: 14,
       hideCursorInOverviewRuler: true,
-      // this becomes confusing with multiple markers, so quick fixes
-      // will be proposed only within the tooltip
       lightbulb: {
         enabled: false,
       },
@@ -1062,7 +1109,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const editorPanel = (
     <>
-      <Global styles={lookupIndexBadgeStyle} />
+      <Global
+        styles={css`
+          ${lookupIndexBadgeStyle}
+        `}
+      />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -1127,141 +1178,135 @@ const ESQLEditorInternal = function ESQLEditor({
         responsive={false}
         ref={containerRef}
       >
-        <EuiOutsideClickDetector
-          onOutsideClick={() => {
-            setIsCodeEditorExpandedFocused(false);
-          }}
-        >
-          <div css={styles.resizableContainer}>
-            <EuiFlexItem
-              data-test-subj={dataTestSubj ?? 'ESQLEditor'}
-              className="ESQLEditor"
-              css={css`
-                max-width: 100%;
-                position: relative;
-              `}
-            >
-              <div css={styles.editorContainer}>
-                <CodeEditor
-                  htmlId={htmlId}
-                  aria-label={formLabel}
-                  languageId={ESQL_LANG_ID}
-                  classNameCss={getEditorOverwrites(theme)}
-                  value={code}
-                  options={codeEditorOptions}
-                  width="100%"
-                  suggestionProvider={suggestionProvider}
-                  hoverProvider={{
-                    provideHover: (model, position, token) => {
-                      if (!hoverProvider?.provideHover) {
-                        return { contents: [] };
-                      }
-                      return hoverProvider?.provideHover(model, position, token);
-                    },
-                  }}
-                  signatureProvider={signatureProvider}
-                  inlineCompletionsProvider={inlineCompletionsProvider}
-                  onChange={onQueryUpdate}
-                  onFocus={() => setLabelInFocus(true)}
-                  onBlur={() => setLabelInFocus(false)}
-                  editorDidMount={async (editor) => {
-                    // Track editor init time once per mount
-                    reportInitLatency();
+        <div css={styles.resizableContainer}>
+          <EuiFlexItem
+            data-test-subj={dataTestSubj ?? 'ESQLEditor'}
+            className="ESQLEditor"
+            css={css`
+              max-width: 100%;
+              position: relative;
+            `}
+          >
+            <div css={styles.editorContainer}>
+              <CodeEditor
+                htmlId={htmlId}
+                aria-label={formLabel}
+                languageId={ESQL_LANG_ID}
+                classNameCss={getEditorOverwrites(theme)}
+                value={code}
+                options={codeEditorOptions}
+                width="100%"
+                suggestionProvider={suggestionProvider}
+                hoverProvider={{
+                  provideHover: (model, position, token) => {
+                    if (!hoverProvider?.provideHover) {
+                      return { contents: [] };
+                    }
+                    return hoverProvider?.provideHover(model, position, token);
+                  },
+                }}
+                signatureProvider={signatureProvider}
+                inlineCompletionsProvider={inlineCompletionsProvider}
+                onChange={onQueryUpdate}
+                onFocus={() => setLabelInFocus(true)}
+                onBlur={() => setLabelInFocus(false)}
+                editorDidMount={async (editor) => {
+                  // Track editor init time once per mount
+                  reportInitLatency();
 
-                    editorRef.current = editor;
-                    const model = editor.getModel();
-                    if (model) {
-                      editorModel.current = model;
-                      await addLookupIndicesDecorator();
+                  editorRef.current = editor;
+                  const model = editor.getModel();
+                  if (model) {
+                    editorModel.current = model;
+                    await addLookupIndicesDecorator();
+                  }
+
+                  // Register custom commands
+                  const commandDisposables = registerCustomCommands({
+                    application,
+                    uiActions,
+                    telemetryService,
+                    editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
+                    getCurrentQuery: () =>
+                      fixESQLQueryWithVariables(
+                        editorRef.current?.getValue() || '',
+                        esqlVariablesRef.current
+                      ),
+                    esqlVariables: esqlVariablesRef,
+                    controlsContext: controlsContextRef,
+                    openTimePickerPopover,
+                  });
+
+                  // Add editor key bindings
+                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+
+                  // Store disposables for cleanup
+                  const currentEditor = editorRef.current;
+                  if (currentEditor) {
+                    if (!editorCommandDisposables.current.has(currentEditor)) {
+                      editorCommandDisposables.current.set(currentEditor, commandDisposables);
+                    }
+                  }
+
+                  // Add Tab keybinding rules for inline suggestions
+                  addTabKeybindingRules();
+
+                  editor.onMouseDown(() => {
+                    if (datePickerOpenStatusRef.current) {
+                      setPopoverPosition({});
+                    }
+                  });
+
+                  editor.onDidFocusEditorText(() => {
+                    // Skip triggering suggestions on initial focus to avoid interfering
+                    // with editor initialization and automated tests
+                    // Also skip when date picker is open to prevent overlap
+                    if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
+                      triggerSuggestions();
                     }
 
-                    // Register custom commands
-                    const commandDisposables = registerCustomCommands({
-                      application,
-                      uiActions,
-                      telemetryService,
-                      editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
-                      getCurrentQuery: () =>
-                        fixESQLQueryWithVariables(
-                          editorRef.current?.getValue() || '',
-                          esqlVariablesRef.current
-                        ),
-                      esqlVariables: esqlVariablesRef,
-                      controlsContext: controlsContextRef,
-                      openTimePickerPopover,
-                    });
+                    isFirstFocusRef.current = false;
+                  });
 
-                    // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
+                  // on CMD/CTRL + / comment out the entire line
+                  editor.addCommand(
+                    // eslint-disable-next-line no-bitwise
+                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                    onCommentLine
+                  );
 
-                    // Store disposables for cleanup
-                    const currentEditor = editorRef.current;
-                    if (currentEditor) {
-                      if (!editorCommandDisposables.current.has(currentEditor)) {
-                        editorCommandDisposables.current.set(currentEditor, commandDisposables);
-                      }
+                  setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                  if (expandToFitQueryOnMount) {
+                    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+                    const lineCount = editor.getModel()?.getLineCount() || 1;
+                    const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
+                    const height = editor.getTopForLineNumber(lineCount + 1) + padding;
+                    if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
+                      setEditorHeight(height);
+                    } else if (height >= EDITOR_MAX_HEIGHT) {
+                      setEditorHeight(EDITOR_MAX_HEIGHT);
                     }
+                  }
+                  editor.onDidLayoutChange((layoutInfoEvent) => {
+                    onLayoutChangeRef.current(layoutInfoEvent);
+                  });
 
-                    // Add Tab keybinding rules for inline suggestions
-                    addTabKeybindingRules();
+                  editor.onDidChangeModelContent(async () => {
+                    trackInputLatencyOnKeystroke(editor.getValue() ?? '');
+                    await addLookupIndicesDecorator();
+                    maybeTriggerSuggestions();
+                  });
 
-                    editor.onMouseDown(() => {
-                      if (datePickerOpenStatusRef.current) {
-                        setPopoverPosition({});
-                      }
-                    });
-
-                    editor.onDidFocusEditorText(() => {
-                      // Skip triggering suggestions on initial focus to avoid interfering
-                      // with editor initialization and automated tests
-                      // Also skip when date picker is open to prevent overlap
-                      if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
-                        triggerSuggestions();
-                      }
-
-                      isFirstFocusRef.current = false;
-                    });
-
-                    // on CMD/CTRL + / comment out the entire line
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-                      onCommentLine
-                    );
-
-                    setMeasuredEditorWidth(editor.getLayoutInfo().width);
-                    if (expandToFitQueryOnMount) {
-                      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-                      const lineCount = editor.getModel()?.getLineCount() || 1;
-                      const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                      const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                      if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
-                        setEditorHeight(height);
-                      } else if (height >= EDITOR_MAX_HEIGHT) {
-                        setEditorHeight(EDITOR_MAX_HEIGHT);
-                      }
-                    }
-                    editor.onDidLayoutChange((layoutInfoEvent) => {
-                      onLayoutChangeRef.current(layoutInfoEvent);
-                    });
-
-                    editor.onDidChangeModelContent(async () => {
-                      trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                      await addLookupIndicesDecorator();
-                      maybeTriggerSuggestions();
-                    });
-
-                    // Auto-focus the editor and move the cursor to the end.
-                    if (!disableAutoFocus) {
-                      editor.focus();
-                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
-                    }
-                  }}
-                />
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiOutsideClickDetector>
+                  // Auto-focus the editor and move the cursor to the end.
+                  if (!disableAutoFocus) {
+                    editor.focus();
+                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                  }
+                }}
+              />
+            </div>
+          </EuiFlexItem>
+        </div>
       </EuiFlexGroup>
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
@@ -1290,28 +1335,22 @@ const ESQLEditorInternal = function ESQLEditor({
           query={code}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
-          onClose={() => setIsVisorOpen(false)}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
+          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter
-        lines={editorModel.current?.getLineCount() || 1}
         styles={{
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
-        code={code}
-        onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         onPrettifyQuery={onPrettifyQuery}
-        detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
-        hideTimeFilterInfo={hideTimeFilterInfo}
-        {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={onClickQueryHistory}
         isLanguageComponentOpen={isLanguageComponentOpen}
@@ -1322,8 +1361,11 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
+        toggleVisor={onToggleVisor}
         hideQuickSearch={hideQuickSearch}
+        queryStats={queryStats}
+        {...editorMessages}
+        onErrorClick={onErrorClick}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SolutionsSection renders a single solution 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeSolutions__title"
   bottomBorder={true}
   paddingSize="xl"
@@ -32,11 +32,11 @@ exports[`SolutionsSection renders a single solution 1`] = `
       }
     />
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`SolutionsSection renders multiple solutions 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeSolutions__title"
   bottomBorder={true}
   paddingSize="xl"
@@ -109,7 +109,7 @@ exports[`SolutionsSection renders multiple solutions 1`] = `
       }
     />
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`SolutionsSection renders null if no solutions are available 1`] = `""`;

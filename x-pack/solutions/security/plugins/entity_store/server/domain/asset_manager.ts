@@ -6,80 +6,121 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import defaults from 'lodash/defaults';
 import { getEntityDefinition } from './definitions/registry';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import type { EntityStoreTaskConfig } from '../tasks/config';
-import { TasksConfig } from '../tasks/config';
-import { EntityStoreTaskType } from '../tasks/constants';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
+import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
+import type { LogExtractionBodyParams } from '../routes/constants';
+import { ENGINE_STATUS } from './constants';
+
+interface AssetManagerDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  taskManager: TaskManagerStartContract;
+  engineDescriptorClient: EngineDescriptorClient;
+  namespace: string;
+}
 
 export class AssetManager {
-  constructor(
-    private logger: Logger,
-    private esClient: ElasticsearchClient,
-    private taskManager: TaskManagerStartContract
-  ) {}
+  private readonly logger: Logger;
+  private readonly esClient: ElasticsearchClient;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly engineDescriptorClient: EngineDescriptorClient;
+  private readonly namespace: string;
 
-  public async init(type: EntityType, logExtractionFrequency?: string) {
-    await this.install(type); // TODO: async
-    await this.start(type, logExtractionFrequency);
+  constructor(deps: AssetManagerDependencies) {
+    this.logger = deps.logger;
+    this.esClient = deps.esClient;
+    this.taskManager = deps.taskManager;
+    this.engineDescriptorClient = deps.engineDescriptorClient;
+    this.namespace = deps.namespace;
   }
 
-  public async start(type: EntityType, logExtractionFrequency?: string) {
-    this.logger.debug(`Scheduling extract entity task for type: ${type}`);
+  public async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ) {
+    await this.install(type, logExtractionParams); // TODO: async
+    await this.start(request, type, logExtractionParams?.frequency);
+  }
 
-    const task: EntityStoreTaskConfig = defaults(
-      {},
-      TasksConfig[EntityStoreTaskType.Values.extractEntity],
-      { interval: logExtractionFrequency }
-    );
+  public async start(request: KibanaRequest, type: EntityType, logExtractionFrequency?: string) {
+    this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
     // TODO: if this fails, set status to failed
     await scheduleExtractEntityTask({
       logger: this.logger,
       taskManager: this.taskManager,
       type,
-      task,
+      frequency: logExtractionFrequency,
+      namespace: this.namespace,
+      request,
     });
   }
+
   public async stop(type: EntityType) {
-    return await stopExtractEntityTask({
+    await stopExtractEntityTask({
       taskManager: this.taskManager,
       logger: this.logger,
       type,
+      namespace: this.namespace,
     });
   }
 
-  public async install(type: EntityType) {
+  public async install(
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<ManagedEntityDefinition> {
     // TODO: return early if already installed
-    this.logger.debug(`Installing assets for entity type: ${type}`);
-    const definition = getEntityDefinition({ type });
+    try {
+      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition(type, this.namespace);
+      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
 
-    await installElasticsearchAssets({
-      esClient: this.esClient,
-      logger: this.logger,
-      definition,
-      namespace: 'default',
-    });
-    this.logger.debug(`Installed definition: ${type}`);
+      await Promise.all([
+        this.engineDescriptorClient.init(type, initialState),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
 
-    return definition;
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return definition;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}: ${error}`);
+      throw error;
+    }
   }
 
   public async uninstall(type: EntityType) {
-    const definition = getEntityDefinition({ type });
-    await this.stop(type);
-    await uninstallElasticsearchAssets({
-      esClient: this.esClient,
-      logger: this.logger,
-      definition,
-      namespace: 'default',
-    });
+    try {
+      const definition = getEntityDefinition(type, this.namespace);
+      await this.stop(type);
 
-    this.logger.debug(`Uninstalled definition: ${type}`);
+      await Promise.all([
+        this.engineDescriptorClient.delete(type),
+        uninstallElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger.get(type),
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+
+      this.logger.get(type).debug(`Uninstalled definition: ${type}`);
+    } catch (error) {
+      this.logger.get(type).error(`Error uninstalling assets for entity type ${type}: ${error}`);
+      throw error;
+    }
   }
 }
