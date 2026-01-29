@@ -19,11 +19,6 @@ const { STRATEGY_DEFAULTS, HTTP_METHODS } = require('./constants');
 
 /**
  * Determines if a top-level schema should be extracted as a component.
- * Top-level schemas are extracted if they:
- * - Are not already a $ref
- * - Have properties (for object types)
- * - Are empty objects (if extractEmpty is true)
- * - Have composition types (oneOf/anyOf/allOf)
  *
  * @param {Object} schema - The schema to check
  * @param {boolean} extractEmpty - Whether to extract empty object schemas
@@ -41,7 +36,7 @@ function shouldExtractTopLevelSchema(schema, extractEmpty) {
 }
 
 /**
- * Extracts a top-level schema (request or response) as a component and replaces it with a $ref.
+ * Extracts a top-level schema as a component and replaces it with a $ref.
  *
  * @param {Object} schema - The schema to extract
  * @param {Object} contentTypeObj - The content type object containing the schema
@@ -84,9 +79,7 @@ function extractAndReplaceTopLevelSchema(
   contentTypeObj.schema = { $ref: `#/components/schemas/${name}` };
 
   processSchema(schemaToStore, {
-    method: baseContext.method,
-    path: baseContext.path,
-    operationId: baseContext.operationId,
+    ...baseContext,
     ...extractionContext,
     propertyPath: [],
   });
@@ -94,7 +87,6 @@ function extractAndReplaceTopLevelSchema(
 
 /**
  * Processes request body schemas for a given method operation.
- * Extracts top-level schemas and recursively processes nested schemas.
  *
  * @param {Object} methodValue - The method operation object
  * @param {Object} baseContext - Base context for the operation
@@ -147,7 +139,6 @@ function processRequestBodySchemas(
 
 /**
  * Processes response schemas for a given method operation.
- * Extracts top-level schemas and recursively processes nested schemas.
  *
  * @param {Object} methodValue - The method operation object
  * @param {Object} baseContext - Base context for the operation
@@ -204,35 +195,27 @@ function processResponseSchemas(
 }
 
 /**
- * Main componentization function
  * Traverses an OpenAPI document and extracts inline schemas into reusable components.
  *
- * Process:
- * 1. Extracts top-level request/response schemas if they have properties or composition types
- * 2. Recursively processes nested schemas (properties, array items, additionalProperties)
- * 3. Extracts oneOf/anyOf/allOf items into separate components
- * 4. Processes pre-existing components in the document
+ * Extracts top-level request/response schemas, recursively processes nested schemas,
+ * extracts oneOf/anyOf/allOf items, and processes pre-existing components.
  *
  * @param {string} relativeFilePath - Path to OAS YAML file relative to repository root
- * @param {Object} options - Configuration options
- * @param {Object} options.log - Logger instance with info/debug/warn/error methods (defaults to console)
- * @param {boolean} options.extractPrimitives - Extract primitive properties as separate components (default: false)
- * @param {boolean} options.removeProperties - Remove extracted properties from parent components (default: false)
- * @param {boolean} options.preserveMetadata - Preserve metadata fields like additionalProperties, default, description (default: true)
- * @param {boolean} options.extractEmpty - Extract empty object schemas { type: 'object' } (default: false)
+ * @param {Object} [options={}] - Configuration options
+ * @param {Object} [options.log=console] - Logger instance with info/debug/warn/error methods
+ * @param {boolean} [options.extractPrimitives=false] - Extract primitive properties as separate components
+ * @param {boolean} [options.removeProperties=false] - Remove extracted properties from parent components
+ * @param {boolean} [options.extractEmpty=true] - Extract empty object schemas { type: 'object' }
  * @returns {Promise<void>}
  *
  * @example
- * // Componentize a single file
  * await componentizeObjectSchemas('oas_docs/bundle.yaml', { log: customLogger });
  *
  * @example
- * // Componentize with strategy options
  * await componentizeObjectSchemas('oas_docs/bundle.yaml', {
  *   log: customLogger,
  *   extractPrimitives: true,
  *   removeProperties: true,
- *   preserveMetadata: false,
  *   extractEmpty: true
  * });
  */
@@ -302,7 +285,6 @@ const componentizeObjectSchemas = async (
         const baseContext = {
           method,
           path: pathName,
-          operationId: methodValue.operationId,
           propertyPath: [],
         };
 
@@ -348,7 +330,6 @@ const componentizeObjectSchemas = async (
       processSchema(componentSchema, {
         method: null,
         path: null,
-        operationId: null,
         isRequest: undefined,
         responseCode: null,
         propertyPath: [],

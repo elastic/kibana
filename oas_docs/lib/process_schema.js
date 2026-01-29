@@ -152,12 +152,6 @@ function extractAndReplaceNestedSchema(
 /**
  * Creates a schema processing function that recursively extracts inline schemas into components.
  *
- * The processor extracts:
- * - Composition types (oneOf/anyOf/allOf) into separate components
- * - Nested object properties into separate components
- * - Array item objects into separate components
- * - additionalProperties objects into separate components
- *
  * @param {Object} components - The components.schemas object to populate with extracted schemas
  * @param {Function} nameGenerator - Function to generate unique component names
  * @param {Object} stats - Statistics object to track extraction metrics
@@ -167,11 +161,10 @@ function extractAndReplaceNestedSchema(
  * @param {number} stats.allOfCount - Counter for allOf items extracted
  * @param {number} stats.maxDepth - Maximum recursion depth reached
  * @param {Object} log - Logger instance with debug/warn methods
- * @param {Object} options - Strategy options
- * @param {boolean} options.extractPrimitives - Extract primitive properties as separate components
- * @param {boolean} options.removeProperties - Remove extracted properties from parent components
- * @param {boolean} options.preserveMetadata - Preserve metadata fields like additionalProperties, default, description
- * @param {boolean} options.extractEmpty - Extract empty object schemas { type: 'object' }
+ * @param {Object} [options={}] - Strategy options
+ * @param {boolean} [options.extractPrimitives=false] - Extract primitive properties as separate components
+ * @param {boolean} [options.removeProperties=false] - Remove extracted properties from parent components
+ * @param {boolean} [options.extractEmpty=true] - Extract empty object schemas { type: 'object' }
  * @returns {Function} processSchema function
  *
  * @example
@@ -182,7 +175,6 @@ function extractAndReplaceNestedSchema(
  * const processSchema = createProcessSchema(components, nameGen, stats, log, {
  *   extractPrimitives: false,
  *   removeProperties: false,
- *   preserveMetadata: true,
  *   extractEmpty: false
  * });
  *

@@ -8,11 +8,11 @@
  */
 /**
  * Default values for refactoring schemas to component references.
-
  *
- * @property {boolean} extractPrimitives - Extract primitive properties as separate components (default: false)
- * @property {boolean} removeProperties - Remove extracted properties from parent components (default: false)
- * @property {boolean} extractEmpty - Extract empty object schemas { type: 'object' } (default: true)
+ * @type {Object}
+ * @property {boolean} extractPrimitives - Extract primitive properties as separate components
+ * @property {boolean} removeProperties - Remove extracted properties from parent components
+ * @property {boolean} extractEmpty - Extract empty object schemas { type: 'object' }
  */
 const STRATEGY_DEFAULTS = {
   extractPrimitives: false,
