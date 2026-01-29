@@ -65,29 +65,6 @@ export function DashboardRenderer({
   getCreationOptions,
   onApiAvailable,
 }: DashboardRendererProps) {
-  useEffect(() => {
-    console.log(convertCamelCasedKeysToSnakeCase({ testKey: 'something', anotherTestKey: 'idk' }));
-    console.log(
-      convertCamelCasedKeysToSnakeCase({
-        testKey: 'something',
-        anotherTestKey: 'idk',
-        nestedKey: {
-          testThisNestedKey: 'i bet this is flat',
-        },
-        deeplyNestedKey: {
-          oneKey: '1',
-          twoKey: '2',
-          threeKey: {
-            aKey: 'apple',
-            bKey: 'banana',
-            cKey: 'cucumber',
-          },
-        },
-        arrayKey: [1, 2, 3, 4],
-      })
-    );
-  }, []);
-
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();

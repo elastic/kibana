@@ -7,26 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { set, snakeCase } from 'lodash';
+import { snakeCase } from 'lodash';
 
 export const convertCamelCasedKeysToSnakeCase = (camelCased: {
   [key: string]: any;
 }): { [key: string]: any } => {
-  const snakeCased: { [key: string]: any } = {};
-
-  const getSnakeCasedStringPath = (path: string, key: string) =>
-    `${path}${path.length ? '.' : ''}${snakeCase(key)}`;
-
-  const convertSubObject = (subObject: object, path: string = '') => {
-    for (const [key, value] of Object.entries(subObject)) {
+  const convertSubObject = (
+    camelCasedSubObject: object,
+    snakeCased: { [key: string]: any } = {}
+  ): object => {
+    for (const [key, value] of Object.entries(camelCasedSubObject)) {
       if (typeof value === 'object' && !Array.isArray(value)) {
-        convertSubObject(value, getSnakeCasedStringPath(path, key));
+        snakeCased[snakeCase(key)] = convertSubObject(value);
       } else {
-        set(snakeCased, getSnakeCasedStringPath(path, key), value);
+        snakeCased[snakeCase(key)] = value;
       }
     }
+    return snakeCased;
   };
-
-  convertSubObject(camelCased); // kick off recursion
-  return snakeCased;
+  return convertSubObject(camelCased);
 };
