@@ -40,7 +40,7 @@ const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
         sorting={false}
         pagination={true}
         tableCaption={i18n.translate(
-          'xpack.securitySolution.dataQualityPanel.summaryActions.checkStatus.errorsViewer.caption',
+          'securitySolutionPackages.errorsViewerComponent.tableCaption',
           {
             defaultMessage: 'Errors viewer',
           }
