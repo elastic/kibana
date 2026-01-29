@@ -9,7 +9,7 @@ import useInterval from 'react-use/lib/useInterval';
 
 import React, { useState } from 'react';
 import { difference } from 'lodash';
-import YourTrialCompanion from './nba_get_setup_panel';
+import { YourTrialCompanion } from './nba_get_setup_panel';
 import { useKibana } from '../common/lib/kibana';
 import { useGetNBA } from './hooks/use_get_nba';
 import { NBA_TODO_LIST } from './nba_translations';
