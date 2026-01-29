@@ -1,6 +1,12 @@
 {
   "packages": [
     {
+      "path": "babel-runtime/node_modules/core-js",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Donation banner"
+    },
+    {
       "path": "backport",
       "lifecycle": "postinstall",
       "required": false,
@@ -29,12 +35,6 @@
       "lifecycle": "postinstall",
       "required": true,
       "reason": "Downloads Cypress required for functional tests"
-    },
-    {
-      "path": "es5-ext",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Displays informational message"
     },
     {
       "path": "esbuild",
