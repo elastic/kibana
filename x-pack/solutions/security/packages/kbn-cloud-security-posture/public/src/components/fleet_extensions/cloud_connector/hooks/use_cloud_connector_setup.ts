@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type {
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
 } from '@kbn/fleet-plugin/public/types';
+import type { AccountType, CloudProvider } from '@kbn/fleet-plugin/public';
 import type { UpdatePolicy } from '../../types';
 import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
 import {
@@ -19,7 +20,14 @@ import {
   updatePolicyInputs,
   isCloudConnectorNameValid,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import {
+  AWS_CLOUD_CONNECTOR_FIELD_NAMES,
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
+  AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+} from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -33,6 +41,9 @@ export interface UseCloudConnectorSetupReturn {
   // Update policy callbacks
   updatePolicyWithNewCredentials: (credentials: CloudConnectorCredentials) => void;
   updatePolicyWithExistingCredentials: (credentials: CloudConnectorCredentials) => void;
+
+  // Account type from package policy inputs
+  accountTypeFromInputs?: AccountType;
 }
 
 // Helper function to extract value from var entry (handles both string and secret reference)
@@ -51,6 +62,37 @@ const extractVarValue = (
   // Handle secret reference objects
   if (typeof varEntry.value === 'object' && 'id' in varEntry.value) {
     return varEntry.value.id;
+  }
+
+  return undefined;
+};
+
+// Helper function to extract account type from package policy inputs
+export const getAccountTypeFromInputs = (
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy
+): AccountType | undefined => {
+  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+  if (!vars) {
+    return undefined;
+  }
+
+  let accountTypeVarName: string;
+
+  if (cloudProvider === 'aws') {
+    accountTypeVarName = AWS_ACCOUNT_TYPE_INPUT_VAR_NAME;
+  } else if (cloudProvider === 'azure') {
+    accountTypeVarName = AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME;
+  } else {
+    return undefined;
+  }
+
+  const accountTypeValue = extractVarValue(vars[accountTypeVarName]);
+
+  // Return the account type if it's a valid AccountType value
+  if (accountTypeValue === SINGLE_ACCOUNT || accountTypeValue === ORGANIZATION_ACCOUNT) {
+    return accountTypeValue;
   }
 
   return undefined;
@@ -88,7 +130,8 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
 export const useCloudConnectorSetup = (
   input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy
+  updatePolicy: UpdatePolicy,
+  cloudProvider?: CloudProvider
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
@@ -101,6 +144,14 @@ export const useCloudConnectorSetup = (
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
     useState<CloudConnectorCredentials>({});
+
+  // Extract account type from inputs
+  const accountTypeFromInputs = useMemo(() => {
+    if (!cloudProvider) {
+      return undefined;
+    }
+    return getAccountTypeFromInputs(cloudProvider, newPolicy);
+  }, [cloudProvider, newPolicy]);
 
   // Update policy with new connection credentials
   const updatePolicyWithNewCredentials = useCallback(
@@ -176,5 +227,6 @@ export const useCloudConnectorSetup = (
     setExistingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
+    accountTypeFromInputs,
   };
 };

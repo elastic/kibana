@@ -12,8 +12,6 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
 import {
@@ -230,12 +228,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
   const { force, id, package: pkg, ...newPolicy } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   let wasPackageAlreadyInstalled = false;
 
   const spaceId = fleetContext.spaceId;
@@ -289,7 +287,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         id,
         force,
         spaceId,
-        authorizationHeader,
       },
       context,
       request
@@ -429,6 +426,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        var_group_selections: restOfBody.var_group_selections ?? packagePolicy.var_group_selections,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
         supports_cloud_connector:
           restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
