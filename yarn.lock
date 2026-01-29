@@ -6790,6 +6790,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feedback-plugin@link:src/platform/plugins/shared/feedback":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
   version "0.0.0"
   uid ""

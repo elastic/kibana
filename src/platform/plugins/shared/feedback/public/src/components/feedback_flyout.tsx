@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
@@ -10,8 +12,10 @@ import type { CoreAuthenticationService } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FeedbackFlyoutBody, FeedbackFlyoutFooter, FeedbackFlyoutHeader } from '.';
-import { FEEDBACK_TYPE } from '../constants';
+import { FeedbackFlyoutHeader } from './feedback_flyout_header';
+import { FeedbackFlyoutBody } from './feedback_flyout_body';
+import { FeedbackFlyoutFooter } from './feedback_flyout_footer';
+import { FEEDBACK_TYPE } from './constants';
 
 interface Props {
   closeFlyout: () => void;

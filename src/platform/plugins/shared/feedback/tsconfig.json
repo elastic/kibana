@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/react-kibana-mount",
+    "@kbn/i18n-react",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
+    "@kbn/test-jest-helpers",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

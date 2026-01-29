@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/feedback-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Feedback form components and utilities",
+  "plugin": {
+    "id": "feedback",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "licensing"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}
