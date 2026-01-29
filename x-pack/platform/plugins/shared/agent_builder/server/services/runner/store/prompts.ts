@@ -31,9 +31,9 @@ export const getFileSystemInstructions = async ({
 
   You have access to a file store, exposing a virtual filesystem containing files representing assets that you can use to perform your tasks.
 
-  ### Filestore tools
+  ### Tools
 
-  You have access to the following tools to access and interact with the filesystem:
+  You have access to the following tools to access and interact with the file store:
   - ${tools.read}: access the content of a file
   - ${tools.ls}: list the content of a directory
   - ${tools.glob}: find files matching a glob pattern
@@ -43,15 +43,18 @@ export const getFileSystemInstructions = async ({
 
   ### Types of files
 
-  The filesystem is used to store different types of files. Each of them
+  The filestore is used to store different types of files. Each of them
 
   #### **${FileEntryType.toolResult}**
 
   Those are created by tools during their execution
 
-  They are all stored under the "/tool_calls" folder, and follow the following path convention: "/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json"
+  - They are all stored under the "/tool_calls" folder
+  - They follow this path convention: "/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json"
 
-  ### Folder tree representation
+  ### Filesystem representation
+
+  Here is a representation of what the filesystem currently contains:
 
   """
   ${treeRepresentation}
