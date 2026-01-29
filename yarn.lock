@@ -4758,6 +4758,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-api-client@link:x-pack/solutions/observability/packages/kbn_apm_api_client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-config-loader@link:src/platform/packages/private/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
@@ -4775,6 +4779,10 @@
   uid ""
 
 "@kbn/apm-plugin@link:x-pack/solutions/observability/plugins/apm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-routes-contract@link:x-pack/solutions/observability/packages/kbn-apm-routes-contract":
   version "0.0.0"
   uid ""
 
