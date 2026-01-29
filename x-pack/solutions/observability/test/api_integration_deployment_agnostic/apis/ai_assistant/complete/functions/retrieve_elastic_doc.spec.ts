@@ -28,7 +28,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('tool: retrieve_elastic_doc', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246824
+  describe.skip('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
@@ -89,9 +90,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // Calling `retrieve_elastic_doc` via the chat/complete endpoint
-    //
-    // FLAKY: https://github.com/elastic/kibana/issues/246371
-    describe.skip('POST /internal/observability_ai_assistant/chat/complete', function () {
+    describe('POST /internal/observability_ai_assistant/chat/complete', function () {
+      // FLAKY on Serverless: https://github.com/elastic/kibana/issues/246371
+      this.tags(['skipServerless']);
       let llmProxy: LlmProxy;
       let connectorId: string;
       let messageAddedEvents: MessageAddEvent[];
@@ -152,8 +153,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(messageAddedEvents.length).to.be.greaterThan(2);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/246370
-      describe.skip('The first request', () => {
+      describe('The first request', () => {
         it('enables the LLM to call `retrieve_elastic_doc`', () => {
           expect(toolCallRequestBody.tool_choice).to.be('auto');
           expect(toolCallRequestBody.tools?.map((t) => t.function.name)).to.contain(

@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.tsx",
+            "lineNumber": 21,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           "({ onDataViewCreated, allowAdHocDataView, showPlainSpinner, onTryESQL, onESQLNavigationComplete, ...services }: AnalyticsNoDataPageProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
+        "lineNumber": 100,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,6 +85,8 @@
               "AnalyticsNoDataPageProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
+            "lineNumber": 100,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,6 +116,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,6 +140,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+            "lineNumber": 48,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -159,6 +171,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,6 +195,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/src/services.tsx",
+            "lineNumber": 28,
+            "columnNumber": 97,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -204,6 +220,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,6 +233,8 @@
             "label": "{\n  get,\n}",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,6 +249,8 @@
                   "<T>(path: string) => Promise<T>"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -241,6 +263,8 @@
                     "label": "path",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+                    "lineNumber": 25,
+                    "columnNumber": 16,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -264,6 +288,8 @@
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -280,6 +306,8 @@
               "(dataView: unknown) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -294,6 +322,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+                "lineNumber": 70,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -314,6 +344,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,6 +362,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -348,6 +382,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -395,6 +431,8 @@
           " & KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -442,6 +480,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/types/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

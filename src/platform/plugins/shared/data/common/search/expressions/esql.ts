@@ -21,8 +21,14 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+  isComputedColumn,
+  getQuerySummary,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
@@ -324,6 +330,21 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         }),
                       },
                     }),
+                    ...(rawResponse &&
+                      'documents_found' in rawResponse && {
+                        documentsProcessed: {
+                          label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
+                            defaultMessage: 'Documents processed',
+                          }),
+                          value: rawResponse.documents_found,
+                          description: i18n.translate(
+                            'data.search.es_search.documentsProcessedDescription',
+                            {
+                              defaultMessage: 'The number of documents processed by the query.',
+                            }
+                          ),
+                        },
+                      }),
                   })
                   .json(params)
                   .ok({ json: { rawResponse }, requestParams });
@@ -363,6 +384,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             ? []
             : body.values;
 
+          // Get query summary to identify computed columns
+          const querySummary = getQuerySummary(query);
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
@@ -393,6 +417,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
+                isComputedColumn: isComputedColumn(name, querySummary),
               };
             }) ?? [];
 

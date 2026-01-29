@@ -27,7 +27,7 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -162,7 +162,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       <p>
         <FormattedMessage
           id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
             showSpacesNote
               ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
@@ -192,11 +192,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 />
               </EuiLink>
             ),
-            elasticManagedLlm: (
+            preconfiguredConnectors: (
               <strong>
                 <FormattedMessage
-                  id="genAiSettings.elasticManagedLlm"
-                  defaultMessage="Elastic Managed LLM"
+                  id="genAiSettings.preconfiguredConnectors"
+                  defaultMessage="pre-configured AI connectors"
                 />
               </strong>
             ),

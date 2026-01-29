@@ -16,6 +16,8 @@
           "() => void"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -37,6 +39,8 @@
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -49,6 +53,8 @@
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
         "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -72,6 +78,8 @@
         }
       ],
       "path": "src/platform/plugins/shared/screenshot_mode/public/types.ts",
+      "lineNumber": 26,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -94,6 +102,8 @@
           "() => void"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -115,6 +125,8 @@
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -127,6 +139,8 @@
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
         "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +157,8 @@
           " & { screenshotMode: Promise<{ isScreenshot: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -174,6 +190,8 @@
         }
       ],
       "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -190,6 +208,8 @@
             "<T = unknown>(key: string, value: T) => void"
           ],
           "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -206,6 +226,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+              "lineNumber": 27,
+              "columnNumber": 37,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -223,6 +245,8 @@
                 "T"
               ],
               "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+              "lineNumber": 27,
+              "columnNumber": 50,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -243,6 +267,8 @@
             "() => void"
           ],
           "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+          "lineNumber": 29,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -260,6 +286,8 @@
       "label": "ScreenshotModeServerStart",
       "description": [],
       "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -278,6 +306,8 @@
             "<unknown, unknown, unknown, any>) => boolean"
           ],
           "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -293,6 +323,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
+              "lineNumber": 18,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -323,6 +355,8 @@
           "(key: string, defaultValue: T | undefined) => T | undefined"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -339,6 +373,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+            "lineNumber": 49,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -356,6 +392,8 @@
               "T | undefined"
             ],
             "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+            "lineNumber": 49,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -379,6 +417,8 @@
           "() => boolean"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -398,6 +438,8 @@
           "(key: string, value: T) => void"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,6 +456,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+            "lineNumber": 27,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,6 +475,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
+            "lineNumber": 27,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -450,6 +496,8 @@
           "() => void"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -469,6 +517,8 @@
           "() => void"
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -490,6 +540,8 @@
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
         "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -502,6 +554,8 @@
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
         "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

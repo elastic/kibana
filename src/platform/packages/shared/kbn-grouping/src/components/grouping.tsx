@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +33,7 @@ import type {
   GroupPanelRenderer,
   GetGroupStats,
   GetAdditionalActionButtons,
+  GroupChildComponentRenderer,
 } from './types';
 import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
@@ -57,16 +54,14 @@ export interface GroupingProps<T> {
   onChangeGroupsItemsPerPage?: (size: number) => void;
   onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
   takeActionItems?: (
     groupFilters: Filter[],
-    groupNumber: number
-  ) => {
-    items: EuiContextMenuPanelItemDescriptor[];
-    panels: EuiContextMenuPanelDescriptor[];
-  };
+    groupNumber: number,
+    groupBucket: GroupingBucket<T>
+  ) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -150,28 +145,27 @@ const GroupingComponent = <T,>({
         const nullGroupMessage = isNullGroup
           ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
           : undefined;
+        const groupFilters = isNullGroup
+          ? getNullGroupFilter(selectedGroup)
+          : createGroupFilter(
+              selectedGroup,
+              Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+              multiValueFields
+            );
+
+        const actionItems = takeActionItems?.(groupFilters, groupNumber, groupBucket);
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
-            <GroupPanel
+            <GroupPanel<T>
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  groupFilter={
-                    isNullGroup
-                      ? getNullGroupFilter(selectedGroup)
-                      : createGroupFilter(
-                          selectedGroup,
-                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
-                          multiValueFields
-                        )
-                  }
-                  groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
-                  takeActionItems={takeActionItems}
+                  actionItems={actionItems}
                   additionalActionButtons={
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
@@ -242,13 +236,16 @@ const GroupingComponent = <T,>({
   }, [emptyGroupingComponent]);
 
   return (
-    <>
+    <div css={() => ({ padding: `0 8px` })}>
       {groupingLevel > 0 ? null : (
         <EuiFlexGroup
           data-test-subj="grouping-table"
           justifyContent="spaceBetween"
           alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
+          css={() => ({
+            paddingBottom: 20,
+            paddingTop: 20,
+          })}
         >
           <EuiFlexItem grow={false}>
             {groupCount > 0 && unitCount > 0 ? (
@@ -318,7 +315,7 @@ const GroupingComponent = <T,>({
           emptyComponent
         )}
       </div>
-    </>
+    </div>
   );
 };
 

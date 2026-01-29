@@ -22,6 +22,7 @@ import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -46,7 +47,6 @@ import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -298,6 +298,10 @@ export type LensComponentProps = Simplify<
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
+      /**
+       * Optional search term to highlight in the panel title
+       */
+      titleHighlight?: string;
     }
 >;
 
@@ -324,7 +328,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
@@ -434,6 +440,9 @@ export interface StructuredDatasourceStates {
   formBased?: FormBasedPersistedState;
   textBased?: TextBasedPersistedState;
 }
+
+/** The supported datasource identifiers */
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<

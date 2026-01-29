@@ -73,6 +73,7 @@ export {
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
+  FLEET_LOG_INDICES,
 } from './constants';
 export {
   // Route services
@@ -196,6 +197,8 @@ export type {
   PackageSpecConditions,
   PackageSpecIcon,
   PackageSpecScreenshot,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
   RegistryPolicyTemplate,
   RegistrySearchResult,
   RegistryInput,

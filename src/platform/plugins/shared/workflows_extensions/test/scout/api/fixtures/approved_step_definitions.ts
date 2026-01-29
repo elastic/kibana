@@ -25,8 +25,20 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
+    id: 'ai.agent',
+    handlerHash: 'af7364aa959fe541e304241fbaddcc21d22382f6421686f666fd67641d3fac2b',
+  },
+  {
+    id: 'ai.classify',
+    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+  },
+  {
     id: 'ai.prompt',
     handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+  },
+  {
+    id: 'ai.summarize',
+    handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
   },
   {
     id: 'data.dedupe',
@@ -37,7 +49,15 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
   },
   {
-    id: 'onechat.runAgent',
-    handlerHash: '601727d71e669530e8ba222ae72d3c8a549145d3ea2e8f6a3dd5109d93e1ceff',
+    id: 'data.regex_extract',
+    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
+  },
+  {
+    id: 'data.regex_replace',
+    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+  },
+  {
+    id: 'search.rerank',
+    handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
 ];

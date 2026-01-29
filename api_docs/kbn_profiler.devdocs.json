@@ -32,6 +32,8 @@
           "({\n  log,\n  name,\n  out,\n  profilePaths,\n  pollIntervalMs,\n  totalTimeoutMs,\n  inactivityTimeoutMs,\n}: Options) => Promise<string>"
         ],
         "path": "src/platform/packages/shared/kbn-profiler/src/concatenate_profiles/concatenate_profiles.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "Options"
             ],
             "path": "src/platform/packages/shared/kbn-profiler/src/concatenate_profiles/concatenate_profiles.ts",
+            "lineNumber": 30,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
           ") => Promise<T>"
         ],
         "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,6 +89,8 @@
               "() => Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,6 +106,8 @@
               "WithProfilerOptions"
             ],
             "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,6 +128,8 @@
         "label": "DEFAULT_SAMPLING_INTERVAL_US",
         "description": [],
         "path": "src/platform/packages/shared/kbn-profiler/src/default_sampling_interval.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

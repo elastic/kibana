@@ -31,7 +31,7 @@
       "spaces",
       "llmTasks"
     ],
-    "optionalPlugins": ["cloud", "onechat"],
+    "optionalPlugins": ["cloud", "agentBuilder"],
     "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "extraPublicDirs": []
   }

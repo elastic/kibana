@@ -22,6 +22,8 @@
           "({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) => Promise<void>"
         ],
         "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "BootstrapArgs"
             ],
             "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
+            "lineNumber": 25,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

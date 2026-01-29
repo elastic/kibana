@@ -24,7 +24,9 @@ import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type {
   GetAdditionalActionButtons,
   GetGroupStats,
+  GroupChildComponentRenderer,
   GroupingArgs,
+  GroupingSort,
   GroupPanelRenderer,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
@@ -93,7 +95,7 @@ export interface AlertsTableComponentProps {
    */
   groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
   tableId: TableIdLiteral;
   to: string;
   settings?: GroupSettings;
@@ -117,6 +119,11 @@ export interface AlertsTableComponentProps {
 
   /** Optional function to get additional action buttons to display in group stats before the Take actions button */
   getAdditionalActionButtons?: GetAdditionalActionButtons<AlertsGroupingAggregation>;
+
+  /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -368,7 +375,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   ]);
 
   const getLevel = useCallback(
-    (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
+    (level: number, levelSelectedGroup: string, parentGroupingFilter?: string) => {
       let rcc;
       if (level < selectedGroups.length - 1) {
         rcc = (groupingFilters: Filter[]) => {
@@ -383,11 +390,16 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           );
         };
       } else {
-        rcc = (groupingFilters: Filter[]) => {
-          return props.renderChildComponent([
-            ...groupingFilters,
-            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-          ]);
+        rcc = (
+          groupingFilters: Filter[],
+          selectedGroup?: string,
+          fieldBucket?: RawBucket<AlertsGroupingAggregation>
+        ) => {
+          return props.renderChildComponent(
+            [...groupingFilters, ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : [])],
+            selectedGroup,
+            fieldBucket
+          );
         };
       }
 
@@ -410,14 +422,13 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
           runtimeMappings={runtimeMappings}
-          selectedGroup={selectedGroup}
+          selectedGroup={levelSelectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
           signalIndexName={dataViewTitle}
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
-          emptyGroupingComponent={props.emptyGroupingComponent}
         />
       );
     },

@@ -198,6 +198,56 @@ export interface FunctionFilterPredicates {
   allowed?: string[];
 }
 
+// PromQL Function Definition Types
+
+export enum PromQLFunctionDefinitionTypes {
+  PROMQL_WITHIN_SERIES = 'promql_within_series',
+  PROMQL_ACROSS_SERIES = 'promql_across_series',
+  PROMQL_VALUE_TRANSFORMATION = 'promql_value_transformation',
+  PROMQL_VECTOR_CONVERSION = 'promql_vector_conversion',
+  PROMQL_SCALAR = 'promql_scalar',
+}
+
+export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
+
+export interface PromQLFunctionParameter {
+  name: string;
+  type: PromQLFunctionParamType;
+  optional: boolean;
+  description?: string;
+}
+
+export interface PromQLSignature {
+  params: PromQLFunctionParameter[];
+  returnType: string;
+  minParams?: number;
+}
+
+export interface PromQLFunctionDefinition {
+  type: PromQLFunctionDefinitionTypes;
+  name: string;
+  description: string;
+  preview?: boolean;
+  ignoreAsSuggestion?: boolean;
+  signatures: PromQLSignature[];
+  locationsAvailable: Location[];
+  examples?: string[];
+}
+
+export interface PromQLESFunctionDefinition {
+  type: string;
+  name: string;
+  description: string;
+  signatures: Array<{
+    params: PromQLFunctionParameter[];
+    variadic: boolean;
+    returnType: string;
+  }>;
+  examples: string[];
+  preview: boolean;
+  snapshot_only: boolean;
+}
+
 export interface Literals {
   name: string;
   description: string;
@@ -240,6 +290,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string | number };
   };
+  unmappedColumnWarning: {
+    message: string;
+    type: { name: string | number };
+  };
   unknownFunction: {
     message: string;
     type: { name: string };
@@ -251,6 +305,14 @@ export interface ValidationErrors {
   unknownSetting: {
     message: string;
     type: { name: string };
+  };
+  unknownCastingType: {
+    message: string;
+    type: { castType: string };
+  };
+  invalidInlineCast: {
+    message: string;
+    type: { castType: string; valueType: string };
   };
   functionNotAllowedHere: {
     message: string;
@@ -299,6 +361,26 @@ export interface ValidationErrors {
   unknownMetadataField: {
     message: string;
     type: { value: string; availableFields: string };
+  };
+  promqlMissingParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlMissingParamValue: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidDateParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidStepParam: {
+    message: string;
+    type: {};
+  };
+  promqlMissingQuery: {
+    message: string;
+    type: {};
   };
   wrongDissectOptionArgumentType: {
     message: string;
@@ -366,6 +448,18 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  invalidSettingValue: {
+    message: string;
+    type: { value: string; setting: string };
+  };
+  unknownMapParameterName: {
+    message: string;
+    type: { paramName: string };
+  };
+  invalidMapParameterValueType: {
+    message: string;
+    type: { paramName: string; expectedType: string; actualType: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
@@ -404,3 +498,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
+
+export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
