@@ -24,7 +24,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { fetch, Agent } from 'undici';
+import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
 import URL from 'url';
 import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
@@ -257,6 +257,7 @@ export async function initializeUiamContainers(log: ToolingLog) {
     method: 'POST',
     headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', ''),
     body: JSON.stringify({ id: MOCK_IDP_UIAM_COSMOS_DB_NAME }),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
     dispatcher: fetchDispatcher,
   });
 
@@ -290,6 +291,7 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
         dispatcher: fetchDispatcher,
       }
     );

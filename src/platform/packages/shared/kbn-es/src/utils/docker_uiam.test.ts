@@ -8,8 +8,8 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import undici, { Response } from 'undici';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import undici from 'undici';
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -337,7 +337,7 @@ describe('#initializeUiamContainers', () => {
   let fetchSpy: jest.SpyInstance;
   beforeEach(() => {
     agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
-    fetchSpy = jest.spyOn(undici, 'fetch');
+    fetchSpy = jest.spyOn(global, 'fetch');
   });
 
   afterEach(() => {
@@ -346,7 +346,7 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database does not exist', async () => {
-    fetchSpy.mockResolvedValue(new Response(null, { status: 201 }));
+    fetchSpy.mockResolvedValue({ ok: true, status: 201 });
 
     await initializeUiamContainers(new ToolingLog());
 
@@ -425,7 +425,7 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database and collections exist', async () => {
-    fetchSpy.mockResolvedValue(new Response(null, { status: 409 }));
+    fetchSpy.mockResolvedValue({ ok: false, status: 409 });
 
     await initializeUiamContainers(new ToolingLog());
 
@@ -436,10 +436,10 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('fails if cannot create database', async () => {
-    fetchSpy.mockImplementationOnce(async () => {
-      const response = new Response(null, { status: 500 });
-      jest.spyOn(response, 'text').mockResolvedValueOnce('Some server error');
-      return response;
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('Some server error'),
     });
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
@@ -453,13 +453,11 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('fails if cannot create collection', async () => {
-    fetchSpy
-      .mockResolvedValueOnce(new Response(null, { status: 201 }))
-      .mockImplementationOnce(async () => {
-        const response = new Response(null, { status: 500 });
-        jest.spyOn(response, 'text').mockResolvedValueOnce('Some server error');
-        return response;
-      });
+    fetchSpy.mockResolvedValueOnce({ ok: true, status: 201 }).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('Some server error'),
+    });
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
       `[Error: Failed to create collection (users): 500 Some server error]`
