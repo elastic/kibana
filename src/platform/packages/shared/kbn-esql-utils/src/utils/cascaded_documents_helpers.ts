@@ -25,10 +25,6 @@ import {
   Walker,
 } from '@kbn/esql-language';
 import type {
-  StatsCommandSummary,
-  StatsFieldSummary,
-} from '@kbn/esql-language/src/ast/mutate/commands/stats';
-import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
@@ -37,9 +33,13 @@ import type {
 } from '@kbn/esql-language/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import type { Terminal } from './esql_fields_utils';
+import { getUsedFields } from './esql_fields_utils';
+import { getFieldTerminals } from './esql_fields_utils';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
-import { getQuerySummaryPerCommandType } from './get_query_summary';
+import { getQuerySummaryPerCommandType, getSummaryPerCommand } from './get_query_summary';
 
 type NodeType = 'group' | 'leaf';
 
@@ -69,6 +69,12 @@ export type SupportedFieldTypes = Exclude<
 export type FieldValue<T extends SupportedFieldTypes> =
   | Parameters<(typeof Builder.expression.literal)[T]>[0]
   | unknown;
+
+export interface StatsCommandSummary {
+  command: ESQLCommand;
+  aggregates: Record<string, FieldSummary>;
+  grouping: Record<string, FieldSummary>;
+}
 
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
@@ -100,7 +106,9 @@ const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields
   );
 };
 
-export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery) {
+export function getStatsCommandToOperateOn(
+  esqlQuery: EsqlQuery
+): (StatsCommandSummary & { index: number }) | null {
   if (esqlQuery.errors.length) {
     return null;
   }
@@ -115,12 +123,15 @@ export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery) {
   // we always want to operate on the last stats command
   const lastStatsCommandIndex = statsCommands.length - 1;
 
-  const summarizedStatsCommand = mutate.commands.stats.summarizeCommand(
-    esqlQuery,
-    statsCommands[lastStatsCommandIndex]
-  );
+  const summarizedStatsCommand = getStatsCommandAtIndexSummary(esqlQuery, lastStatsCommandIndex);
+  if (!summarizedStatsCommand) {
+    return null;
+  }
 
-  return Object.assign(summarizedStatsCommand, { index: lastStatsCommandIndex });
+  return {
+    ...summarizedStatsCommand,
+    index: lastStatsCommandIndex,
+  };
 }
 
 function getESQLQueryDataSourceCommand(
@@ -143,19 +154,42 @@ function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
 /**
  * Returns the summary of the stats command at the given command index in the esql query
  */
-function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
+function getStatsCommandAtIndexSummary(
+  esqlQuery: EsqlQuery,
+  commandIndex: number
+): StatsCommandSummary | null {
   const declarationCommand = mutate.commands.stats.byIndex(esqlQuery.ast, commandIndex);
 
   if (!declarationCommand) {
     return null;
   }
 
-  return mutate.commands.stats.summarizeCommand(esqlQuery, declarationCommand);
+  const summarizedStatsCommand = getSummaryPerCommand(esqlQuery.src, declarationCommand);
+
+  // Transform to map format for easy access
+  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce((acc, grouping) => {
+    acc[grouping.field] = grouping;
+    return acc;
+  }, {} as Record<string, FieldSummary>);
+
+  const agregatesMap = Array.from(summarizedStatsCommand.aggregates ?? []).reduce(
+    (acc, aggregate) => {
+      acc[aggregate.field] = aggregate;
+      return acc;
+    },
+    {} as Record<string, FieldSummary>
+  );
+
+  return {
+    command: declarationCommand,
+    grouping: groupingsMap,
+    aggregates: agregatesMap,
+  };
 }
 
 export function getFieldParamDefinition(
   fieldName: string,
-  fieldTerminals: StatsFieldSummary['terminals'],
+  fieldTerminals: Array<Terminal>,
   esqlVariables: ESQLControlVariable[] | undefined
 ) {
   const fieldParamDef = fieldTerminals.find(
@@ -174,8 +208,8 @@ export function getFieldParamDefinition(
 }
 
 export function getStatsGroupFieldType<
-  T extends StatsFieldSummary | undefined,
-  R = T extends StatsFieldSummary ? string : undefined
+  T extends FieldSummary | undefined,
+  R = T extends FieldSummary ? string : undefined
 >(groupByFields: T): R {
   if (!groupByFields) {
     return undefined as R;
@@ -236,14 +270,12 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     // it will be updated to the actual definition of the group field if it was declared by a preceding stats command
     let groupFieldNode = group;
 
-    const statsCommandsFields = getStatsCommandRuntimeFields(esqlQuery);
-    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
+    const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
+    const lastStatsCommandFields = statsCommandRuntimeFields[statsCommandRuntimeFields.length - 1];
 
     if (!lastStatsCommandFields.has(groupFieldName)) {
       // get all the new fields created by the stats commands in the query,
       // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
-
       const groupDeclarationStatsCommandLookupIndex = statsCommandRuntimeFields.findIndex((field) =>
         field.has(group.field)
       );
@@ -414,13 +446,11 @@ export const constructCascadeQuery = ({
 
     // we make an initial assumption that the field was declared by the stats command being operated on
     let fieldDeclarationCommandSummary = summarizedStatsCommand;
-    const statsCommandsFields = getStatsCommandRuntimeFields(EditorESQLQuery);
-    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
+    const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
+    const lastStatsCommandFields = statsCommandRuntimeFields[statsCommandRuntimeFields.length - 1];
 
     // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
     if (!lastStatsCommandFields.has(pathSegment)) {
-      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
-
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
         field.has(pathSegment)
       );
@@ -499,7 +529,7 @@ export const constructCascadeQuery = ({
 function handleStatsByColumnLeafOperation(
   editorQuery: EsqlQuery,
   operatingStatsCommandIndex: number,
-  columnNode: StatsFieldSummary,
+  columnNode: FieldSummary,
   dataViewFields: DataView['fields'],
   esqlVariables: ESQLControlVariable[] | undefined,
   operationValue: unknown
@@ -514,7 +544,7 @@ function handleStatsByColumnLeafOperation(
   if (
     (operationColumnNameParamValue = getFieldParamDefinition(
       operationColumnName,
-      columnNode.terminals,
+      getFieldTerminals(columnNode.definition),
       esqlVariables
     ))
   ) {
@@ -596,7 +626,7 @@ function handleStatsByColumnLeafOperation(
 function handleStatsByCategorizeLeafOperation(
   editorQuery: EsqlQuery,
   operatingStatsCommandIndex: number,
-  categorizeCommandNode: StatsFieldSummary,
+  categorizeCommandNode: FieldSummary,
   esqlVariables: ESQLControlVariable[] | undefined,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
@@ -636,7 +666,7 @@ function handleStatsByCategorizeLeafOperation(
     if (
       (categorizedFieldNameParamValue = getFieldParamDefinition(
         categorizedFieldName,
-        categorizeCommandNode.terminals,
+        getFieldTerminals(categorizeCommandNode.definition),
         esqlVariables
       ))
     ) {
@@ -647,7 +677,7 @@ function handleStatsByCategorizeLeafOperation(
     }
   }
 
-  const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.column.name)];
+  const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
 
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
@@ -740,12 +770,14 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
     // Add used fields from aggregates
     Object.values(operatingStatsCommand.aggregates).forEach((aggregate) => {
-      aggregate.usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
+      const usedFields = getUsedFields(aggregate.definition);
+      usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
     // Add used fields from grouping
     Object.values(operatingStatsCommand.grouping).forEach((group) => {
-      group.usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
+      const usedFields = getUsedFields(group.definition);
+      usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
     // Find the earliest stats command that created any of the fields used by the operating stats
@@ -820,7 +852,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        fieldDeclaration.terminals,
+        getFieldTerminals(fieldDeclaration.definition),
         esqlVariables
       ))
     ) {
@@ -835,8 +867,8 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       normalizedFieldName =
         isFunctionExpression(fieldDeclaration.arg) &&
         fieldDeclaration.arg.subtype === 'variadic-call'
-          ? fieldDeclaration.definition.text
-          : fieldDeclaration.column.name;
+          ? fieldDeclaration.arg.text
+          : fieldDeclaration.field;
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,

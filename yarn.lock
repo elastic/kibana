@@ -2641,10 +2641,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.7.0.tgz#be160a171687e0820d3f8885681672015aa145c0"
   integrity sha512-hZh7mlV7IPJwpcBHJpZo3J7Flakk4NvWsfhCT+oJKZtwkX4HH6VbQEuUFM2JW9MhD0qH5S4sT+J41Xhpl8aFRQ==
 
-"@elastic/eui-theme-borealis@5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.3.0.tgz#84672790fe92c2ed559a06aca6f9c4ef64aa058f"
-  integrity sha512-LJcRer7+Qjn2mDE56yuuofNzYsAWXlCRDK/ta8Pu4AStfgCA88wOhHue4xWfH99V926WfUG4HePJZCjUIKZ+Qw==
+"@elastic/eui-theme-borealis@5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.4.0.tgz#b392b43457c5db3fb39c6f148799b5e65ffc5803"
+  integrity sha512-2NQ9s7A/EM6VgQlkkw4IUFhyqPvs37M8jVNX5nYjwTPRfQwLBMEUXqYqUhIWMQXzjocf1x2IkzEejT8C9eqbXA==
   dependencies:
     "@elastic/eui-theme-common" "7.3.0"
     chroma-js "^2.4.2"
@@ -2658,10 +2658,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@112.0.0":
-  version "112.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-112.0.0.tgz#5546f4d7c1876804f6e8e280d7618ed47e92d6ac"
-  integrity sha512-LEdRzFQ+Wv2xbHWJY8pBet8rAqKIeMgzZqzCqWRX7kuMijNhk6jenusCZgO4ajJGFhq+dkZkkWrvUaHSWoFe8w==
+"@elastic/eui@112.1.0":
+  version "112.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-112.1.0.tgz#2c1fe3d426e5f40036fa1ac8fd5f2cb96a537193"
+  integrity sha512-tWM6E6iQ+yqxhOBApvsOzdQKR0u4SYSaj7LFi334grUARXWNsYbZOqJoqXcacpkjE0aw20BtdM7OC19AhVB+bw==
   dependencies:
     "@elastic/eui-theme-common" "7.3.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -3903,12 +3903,14 @@
     react-redux "^9.2.0"
     redux "^5.0.1"
 
-"@hey-api/codegen-core@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.4.0.tgz#f2f56d67ecae9fb9f2b90ced3358b25f1faa80c8"
-  integrity sha512-o8rBbEXEUhEPzrHbqImYjwIHm4Oj0r1RPS+5cp8Z66kPO7SEN7PYUgK7XpmSxoy9LPMNK1M5qmCO4cGGwT+ELQ==
+"@hey-api/codegen-core@^0.5.2":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.5.5.tgz#f59e233442c9f151d8a6a4c32c13ee684ad06c38"
+  integrity sha512-f2ZHucnA2wBGAY8ipB4wn/mrEYW+WUxU2huJmUvfDO6AE2vfILSHeF3wCO39Pz4wUYPoAWZByaauftLrOfC12Q==
   dependencies:
+    "@hey-api/types" "0.1.2"
     ansi-colors "4.1.3"
+    c12 "3.3.3"
     color-support "1.1.3"
 
 "@hey-api/json-schema-ref-parser@1.2.2":
@@ -3921,19 +3923,24 @@
     js-yaml "^4.1.1"
     lodash "^4.17.21"
 
-"@hey-api/openapi-ts@0.89.2":
-  version "0.89.2"
-  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.89.2.tgz#a2a73ac152474527a16825d6996a25e0342d0a53"
-  integrity sha512-iEhWfvPbzfcS7BMqHzh2FbMG1ouZVAHwHoYhq/61Rmq/r1Q1NgCZ3xy6QuXZgbTdHe9enMjWXjINLnTj57kWwA==
+"@hey-api/openapi-ts@0.90.3":
+  version "0.90.3"
+  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.90.3.tgz#df0e65cbbe70e4e6456a0e95441426ccb0829b59"
+  integrity sha512-9UT347hVQaph/jwAJJI2l+istWDLw540PTIHUevq9xzRYnHAxC1Aprtv4CYoWkeFv9aMcMrmAbNH7ANPoxEK2A==
   dependencies:
-    "@hey-api/codegen-core" "^0.4.0"
+    "@hey-api/codegen-core" "^0.5.2"
     "@hey-api/json-schema-ref-parser" "1.2.2"
     ansi-colors "4.1.3"
-    c12 "3.3.2"
+    c12 "3.3.3"
     color-support "1.1.3"
     commander "14.0.2"
     open "11.0.0"
     semver "7.7.3"
+
+"@hey-api/types@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@hey-api/types/-/types-0.1.2.tgz#85dc7d034241a65ff1898d6cfce6f567d4fd6589"
+  integrity sha512-uNNtiVAWL7XNrV/tFXx7GLY9lwaaDazx1173cGW3+UEaw4RUPsHEmiB4DSpcjNxMIcrctfz2sGKLnVx5PBG2RA==
 
 "@hono/node-server@^1.19.7":
   version "1.19.9"
@@ -8103,31 +8110,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
+"@kbn/response-ops-alerts-apis@link:x-pack/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-delete@link:src/platform/packages/shared/response-ops/alerts-delete":
+"@kbn/response-ops-alerts-delete@link:x-pack/platform/packages/shared/response-ops/alerts-delete":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
+"@kbn/response-ops-alerts-fields-browser@link:x-pack/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-filters-form@link:src/platform/packages/shared/response-ops/alerts-filters-form":
+"@kbn/response-ops-alerts-filters-form@link:x-pack/platform/packages/shared/response-ops/alerts-filters-form":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
+"@kbn/response-ops-alerts-table@link:x-pack/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-form-generator@link:src/platform/packages/shared/response-ops/form-generator":
+"@kbn/response-ops-form-generator@link:x-pack/platform/packages/shared/response-ops/form-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-recurring-schedule-form@link:src/platform/packages/shared/response-ops/recurring-schedule-form":
+"@kbn/response-ops-recurring-schedule-form@link:x-pack/platform/packages/shared/response-ops/recurring-schedule-form":
   version "0.0.0"
   uid ""
 
@@ -8135,15 +8142,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-form@link:src/platform/packages/shared/response-ops/rule_form":
+"@kbn/response-ops-rule-form@link:x-pack/platform/packages/shared/response-ops/rule_form":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-params@link:src/platform/packages/shared/response-ops/rule_params":
+"@kbn/response-ops-rule-params@link:x-pack/platform/packages/shared/response-ops/rule_params":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rules-apis@link:src/platform/packages/shared/response-ops/rules-apis":
+"@kbn/response-ops-rules-apis@link:x-pack/platform/packages/shared/response-ops/rules-apis":
   version "0.0.0"
   uid ""
 
@@ -9539,6 +9546,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/yarn-install-scripts@link:packages/kbn-yarn-install-scripts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
   version "0.0.0"
   uid ""
@@ -10421,6 +10432,13 @@
   dependencies:
     "@opentelemetry/api" "^1.3.0"
 
+"@opentelemetry/api-logs@0.211.0":
+  version "0.211.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api-logs/-/api-logs-0.211.0.tgz#32d9ed98939956a84d4e2ff5e01598cb9d28d744"
+  integrity sha512-swFdZq8MCdmdR22jTVGQDhwqDzcI4M10nhjXkLr1EsIzXgZBqm4ZlmmcWsg3TSNf+3mzgOiqveXmBLZuDi2Lgg==
+  dependencies:
+    "@opentelemetry/api" "^1.3.0"
+
 "@opentelemetry/api-logs@0.57.2":
   version "0.57.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api-logs/-/api-logs-0.57.2.tgz#d4001b9aa3580367b40fe889f3540014f766cc87"
@@ -10811,6 +10829,15 @@
     "@opentelemetry/instrumentation" "^0.57.1"
     "@opentelemetry/semantic-conventions" "^1.27.0"
 
+"@opentelemetry/instrumentation-hapi@0.57.0":
+  version "0.57.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-hapi/-/instrumentation-hapi-0.57.0.tgz#27b3a44a51444af3100a321f2e40623e89e5bb75"
+  integrity sha512-Os4THbvls8cTQTVA8ApLfZZztuuqGEeqog0XUnyRW7QVF0d/vOVBEcBCk1pazPFmllXGEdNbbat8e2fYIWdFbw==
+  dependencies:
+    "@opentelemetry/core" "^2.0.0"
+    "@opentelemetry/instrumentation" "^0.211.0"
+    "@opentelemetry/semantic-conventions" "^1.27.0"
+
 "@opentelemetry/instrumentation-hapi@^0.55.0":
   version "0.55.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-hapi/-/instrumentation-hapi-0.55.0.tgz#a687b9bddfcc484f2cc85f022c123f83c19883a4"
@@ -11175,6 +11202,15 @@
     require-in-the-middle "^7.1.1"
     semver "^7.5.2"
     shimmer "^1.2.1"
+
+"@opentelemetry/instrumentation@^0.211.0":
+  version "0.211.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.211.0.tgz#d45e20eafa75b5d3e8a9745a6205332893c55f37"
+  integrity sha512-h0nrZEC/zvI994nhg7EgQ8URIHt0uDTwN90r3qQUdZORS455bbx+YebnGeEuFghUT0HlJSrLF4iHw67f+odY+Q==
+  dependencies:
+    "@opentelemetry/api-logs" "0.211.0"
+    import-in-the-middle "^2.0.0"
+    require-in-the-middle "^8.0.0"
 
 "@opentelemetry/otlp-exporter-base@0.202.0":
   version "0.202.0"
@@ -17008,12 +17044,12 @@ bytewise@^1.1.0:
     bytewise-core "^1.2.2"
     typewise "^1.0.3"
 
-c12@3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/c12/-/c12-3.3.2.tgz#8bfb9d57147319e6bf7e8530979c5c4fa68ba602"
-  integrity sha512-QkikB2X5voO1okL3QsES0N690Sn/K9WokXqUsDQsWy5SnYb+psYQFGA10iy1bZHj3fjISKsI67Q90gruvWWM3A==
+c12@3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/c12/-/c12-3.3.3.tgz#cab6604e6e6117fc9e62439a8e8144bbbe5edcd6"
+  integrity sha512-750hTRvgBy5kcMNPdh95Qo+XUBeGo8C7nsKSmedDmaQI+E0r82DwHeM6vBewDe4rGFbnxoa4V9pw+sPh5+Iz8Q==
   dependencies:
-    chokidar "^4.0.3"
+    chokidar "^5.0.0"
     confbox "^0.2.2"
     defu "^6.1.4"
     dotenv "^17.2.3"
@@ -17381,7 +17417,7 @@ cheerio@1.0.0-rc.12, cheerio@^1.0.0-rc.3:
     parse5 "^7.0.0"
     parse5-htmlparser2-tree-adapter "^7.0.0"
 
-chokidar@3.5.3, chokidar@^2.1.2, chokidar@^2.1.8, chokidar@^3.3.1, chokidar@^3.4.0, chokidar@^3.4.1, chokidar@^3.5.1, chokidar@^3.5.3, chokidar@^3.6.0, chokidar@^4.0.3:
+chokidar@3.5.3, chokidar@^2.1.2, chokidar@^2.1.8, chokidar@^3.3.1, chokidar@^3.4.0, chokidar@^3.4.1, chokidar@^3.5.1, chokidar@^3.5.3, chokidar@^3.6.0, chokidar@^5.0.0:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==

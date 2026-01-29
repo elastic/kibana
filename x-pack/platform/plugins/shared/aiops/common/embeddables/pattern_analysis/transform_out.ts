@@ -6,13 +6,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';
 
 export function transformOut(
-  state: StoredPatternAnalysisEmbeddableState,
+  storedState: StoredPatternAnalysisEmbeddableState,
   references?: Reference[]
 ): PatternAnalysisEmbeddableState {
+  const state = transformTitlesOut(storedState);
   const dataViewIdRef = references?.find((ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME);
   return {
     ...state,
