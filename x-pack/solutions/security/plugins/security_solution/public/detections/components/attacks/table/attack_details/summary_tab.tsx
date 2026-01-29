@@ -60,7 +60,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
     [attack.replacements, detailsMarkdown]
   );
 
-  const tacticMetadata = useMemo(() => getTacticMetadata(attack), [attack]);
+  const tacticMetadata = useMemo(() => getTacticMetadata(attack.mitreAttackTactics), [attack]);
 
   const originalAlertIds = useMemo(
     () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),

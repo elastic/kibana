@@ -32,7 +32,7 @@ describe('SectionPanel', () => {
       </SectionPanel>
     );
 
-    expect(screen.getByTestId('section-panel-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('sectionPanelIcon')).toBeInTheDocument();
   });
 
   it('does not render an icon container when icon is not provided', () => {

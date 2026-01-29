@@ -82,17 +82,7 @@ export interface TacticMetadata {
   name: string;
 }
 
-export const getTacticMetadata = (attackDiscovery: AttackDiscovery): TacticMetadata[] =>
-  MITRE_ATTACK_TACTICS_SUBSET.map((tactic, i) => ({
-    detected:
-      attackDiscovery.mitreAttackTactics === undefined
-        ? false
-        : attackDiscovery.mitreAttackTactics.includes(tactic),
-    name: getTacticLabel(tactic),
-    index: i,
-  }));
-
-export const getAttackTacticMetadata = (
+export const getTacticMetadata = (
   mitreAttackTactics: AttackDiscovery['mitreAttackTactics']
 ): TacticMetadata[] =>
   MITRE_ATTACK_TACTICS_SUBSET.map((tactic, i) => ({

@@ -9,21 +9,35 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { AttackChain } from '.';
-import { getAttackTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers';
+import { getTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers';
+import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
 
 jest.mock('@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers', () => ({
-  getAttackTacticMetadata: jest.fn(),
+  getTacticMetadata: jest.fn(),
 }));
 
-const mockedGetAttackTacticMetadata = getAttackTacticMetadata as jest.Mock;
+const mockedGetTacticMetadata = getTacticMetadata as jest.Mock;
 
 describe('AttackChain', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  it('renders the expected detected tactics from attack discovery', () => {
+    const tacticMetadata = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics).filter(
+      (tactic) => tactic.detected
+    );
+    expect(tacticMetadata.length).toBeGreaterThan(0);
+
+    render(<AttackChain attackTactics={mockAttackDiscovery.mitreAttackTactics} />);
+
+    tacticMetadata.forEach((tactic) => {
+      expect(screen.getByText(tactic.name)).toBeInTheDocument();
+    });
+  });
+
   it('renders tactics horizontally by default', () => {
-    mockedGetAttackTacticMetadata.mockReturnValue([
+    mockedGetTacticMetadata.mockReturnValue([
       { name: 'Initial Access', detected: true, index: 0 },
       { name: 'Execution', detected: false, index: 1 },
     ]);
@@ -36,9 +50,7 @@ describe('AttackChain', () => {
   });
 
   it('renders vertical layout without scroll container when isVertical is true', () => {
-    mockedGetAttackTacticMetadata.mockReturnValue([
-      { name: 'Initial Access', detected: true, index: 0 },
-    ]);
+    mockedGetTacticMetadata.mockReturnValue([{ name: 'Initial Access', detected: true, index: 0 }]);
 
     render(<AttackChain attackTactics={undefined} isVertical />);
 
@@ -47,7 +59,7 @@ describe('AttackChain', () => {
   });
 
   it('renders nothing when metadata is empty', () => {
-    mockedGetAttackTacticMetadata.mockReturnValue([]);
+    mockedGetTacticMetadata.mockReturnValue([]);
 
     const { container } = render(<AttackChain attackTactics={undefined} />);
 

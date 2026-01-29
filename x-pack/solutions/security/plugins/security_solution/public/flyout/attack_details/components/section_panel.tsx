@@ -46,7 +46,7 @@ export const SectionPanel = memo(({ children, title, highlightTitle, icon }: Sec
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             {icon && (
-              <EuiFlexItem data-test-subj="section-panel-icon" grow={false}>
+              <EuiFlexItem data-test-subj="sectionPanelIcon" grow={false}>
                 {icon}
               </EuiFlexItem>
             )}

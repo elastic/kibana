@@ -72,7 +72,10 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
     [detailsMarkdown, replacements]
   );
 
-  const tacticMetadata = useMemo(() => getTacticMetadata(attackDiscovery), [attackDiscovery]);
+  const tacticMetadata = useMemo(
+    () => getTacticMetadata(attackDiscovery.mitreAttackTactics),
+    [attackDiscovery]
+  );
 
   const originalAlertIds = useMemo(
     () => attackDiscovery.alertIds.map((id) => replacements?.[id] ?? id),
