@@ -106,7 +106,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       items={certificates?.certs ?? []}
       pagination={pagination}
       tableCaption={i18n.translate('xpack.synthetics.certificates.certificatesList.tableCaption', {
-        defaultMessage: 'Certificate details',
+        defaultMessage: 'Certificates overview',
       })}
       onChange={(newVal) => {
         onChange(newVal.page as Page, newVal.sort as CertSort);
