@@ -280,6 +280,76 @@ describe('Assistant', () => {
     });
   });
 
+  describe('when no connectors exist and user can create them', () => {
+    it('enables header controls while chat stays disabled', async () => {
+      const noConnectorConversation = {
+        ...welcomeConvo,
+        id: 'welcome_id',
+        title: welcomeConvo.title,
+        category: welcomeConvo.category,
+        messages: welcomeConvo.messages,
+        replacements: welcomeConvo.replacements,
+        createdBy: welcomeConvo.createdBy,
+        users: welcomeConvo.users,
+        createdAt: welcomeConvo.createdAt,
+        apiConfig: { ...welcomeConvo.apiConfig, connectorId: '' },
+        isConversationOwner: true,
+      };
+
+      const noConnectorData = {
+        welcome_id: noConnectorConversation,
+      };
+
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: [],
+      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
+        data: noConnectorData,
+      } as unknown as FetchCurrentUserConversations);
+
+      render(
+        <TestProviders>
+          <Assistant
+            lastConversation={{ id: 'welcome_id' }}
+            chatHistoryVisible={true}
+            setChatHistoryVisible={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const addConnectorButton = await screen.findByTestId('addNewConnectorButton');
+      expect(addConnectorButton).toBeEnabled();
+      expect(screen.getByTestId('chat-context-menu')).toBeEnabled();
+      expect(screen.getByTestId('prompt-textarea')).toBeDisabled();
+    });
+  });
+
+  describe('when connectors exist', () => {
+    it('shows the connector selector instead of add button', async () => {
+      const connectors: unknown[] = [
+        {
+          id: 'connector-1',
+          name: 'OpenAI connector',
+          actionTypeId: '.gen-ai',
+        },
+      ];
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: connectors,
+      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+
+      await renderAssistant();
+
+      expect(screen.queryByTestId('addNewConnectorButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('connector-selector')).toBeEnabled();
+    });
+  });
+
   describe('when not authorized', () => {
     it('should be disabled', async () => {
       const { queryByTestId } = await renderAssistant({});
