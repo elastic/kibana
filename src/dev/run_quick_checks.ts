@@ -50,6 +50,7 @@ interface QuickCheck {
 interface CheckResult {
   success: boolean;
   script: string;
+  nodeCommand?: string;
   output: string;
   durationMs: number;
 }
@@ -596,6 +597,7 @@ async function runNodeCommand(
       resolveFn({
         success: code === 0,
         script,
+        nodeCommand,
         output: outputCapture.get(),
         durationMs: Date.now() - startTime,
       });
@@ -605,6 +607,7 @@ async function runNodeCommand(
       resolveFn({
         success: false,
         script,
+        nodeCommand,
         output: error.message,
         durationMs: Date.now() - startTime,
       });
@@ -654,14 +657,11 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
   logger.info(`- Total time: ${total}, effective: ${effective}`);
 
   results.forEach((result) => {
-    const resultLabel = result.success ? '✅' : '❌';
-    const scriptPath = stripRoot(result.script);
-    const runtime = humanizeTime(result.durationMs);
-    logger.write(`--- ${resultLabel} ${scriptPath}: ${runtime}`);
-    if (result.success) {
-      logger.debug(result.output);
-    } else {
-      logger.warning(result.output);
+    if (!result.success) {
+      // Show node command if available, otherwise fall back to shell script
+      const commandDisplay = result.nodeCommand || result.script;
+      logger.info(`- ${commandDisplay}: ${humanizeTime(result.durationMs)}`);
+      logger.error(result.output);
     }
   });
 }
