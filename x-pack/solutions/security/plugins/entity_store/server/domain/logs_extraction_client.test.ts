@@ -49,7 +49,9 @@ describe('LogsExtractionClient', () => {
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockDataViewsService: jest.Mocked<DataViewsService>;
-  let mockEngineDescriptorClient: jest.Mocked<Pick<EngineDescriptorClient, 'find' | 'update'>>;
+  let mockEngineDescriptorClient: jest.Mocked<
+    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,7 +62,7 @@ describe('LogsExtractionClient', () => {
       get: jest.fn(),
     } as unknown as jest.Mocked<DataViewsService>;
     mockEngineDescriptorClient = {
-      find: jest.fn(),
+      findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
     };
 
@@ -95,8 +97,10 @@ describe('LogsExtractionClient', () => {
           .mockReturnValue('logs-*,filebeat-*,.alerts-security.alerts-default'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -111,7 +115,7 @@ describe('LogsExtractionClient', () => {
       expect(result.scannedIndices).toContain('.entities.v2.updates.security_user_default');
       expect(result.scannedIndices).not.toContain('.alerts-security.alerts-default');
 
-      expect(mockEngineDescriptorClient.find).toHaveBeenCalledWith('user');
+      expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
@@ -149,8 +153,10 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -165,7 +171,7 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         logExtractionState: expect.objectContaining({
-          paginationTimestamp: undefined,
+          paginationTimestamp: expect.any(String),
           lastExecutionTimestamp: expect.any(String),
         }),
       });
@@ -187,9 +193,9 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', { lookbackPeriod: '3h', delay: '5s' }) as Awaited<
-          ReturnType<EngineDescriptorClient['find']>
+          ReturnType<EngineDescriptorClient['findOrThrow']>
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
@@ -230,12 +236,12 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', {
           lookbackPeriod: '3h',
           delay: '1m',
           paginationTimestamp,
-        }) as Awaited<ReturnType<EngineDescriptorClient['find']>>
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -270,8 +276,10 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -280,12 +288,58 @@ describe('LogsExtractionClient', () => {
       const fromDate = '2024-01-01T00:00:00.000Z';
       const toDate = '2024-01-02T00:00:00.000Z';
 
-      await client.extractLogs('user', { fromDateISO: fromDate, toDateISO: toDate });
+      await client.extractLogs('user', {
+        specificWindow: { fromDateISO: fromDate, toDateISO: toDate },
+      });
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
         query: expect.stringContaining(fromDate),
       });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(toDate),
+      });
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should not update engine descriptor when specificWindow is provided', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID, type: 'keyword' },
+        ],
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1'],
+          ['2024-01-02T12:00:00.000Z', 'hash2'],
+        ],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user', {
+        specificWindow: {
+          fromDateISO: '2024-01-01T00:00:00.000Z',
+          toDateISO: '2024-01-02T00:00:00.000Z',
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.count).toBe(2);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
 
     it('should handle errors from executeEsqlQuery', async () => {
@@ -293,8 +347,10 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       const testError = new Error('ESQL query failed');
@@ -323,8 +379,10 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -349,8 +407,10 @@ describe('LogsExtractionClient', () => {
         values: [],
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       const error = new Error('Data view not found');
       mockDataViewsService.get.mockRejectedValue(error);
@@ -378,8 +438,10 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        createMockEngineDescriptor('host') as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('host') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
@@ -387,7 +449,7 @@ describe('LogsExtractionClient', () => {
 
       await client.extractLogs('host');
 
-      expect(mockEngineDescriptorClient.find).toHaveBeenCalledWith('host');
+      expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('host');
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -406,8 +468,8 @@ describe('LogsExtractionClient', () => {
       const descriptor = createMockEngineDescriptor('user');
       descriptor.status = 'stopped';
 
-      mockEngineDescriptorClient.find.mockResolvedValue(
-        descriptor as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        descriptor as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
 
       const result = await client.extractLogs('user');
@@ -417,35 +479,6 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
-    });
-
-    it('extractLastSeenTimestamp returns last row @timestamp and throws when column missing', () => {
-      const lastTs = '2024-01-02T12:00:00.000Z';
-      const responseWithTimestamp: ESQLSearchResponse = {
-        columns: [
-          { name: HASHED_ID, type: 'keyword' },
-          { name: '@timestamp', type: 'date' },
-        ],
-        values: [
-          ['hash1', '2024-01-02T10:00:00.000Z'],
-          ['hash2', lastTs],
-        ],
-      };
-      expect(client.extractLastSeenTimestamp(responseWithTimestamp)).toBe(lastTs);
-
-      const responseWithoutTimestamp: ESQLSearchResponse = {
-        columns: [{ name: HASHED_ID, type: 'keyword' }],
-        values: [['hash1']],
-      };
-      expect(() => client.extractLastSeenTimestamp(responseWithoutTimestamp)).toThrow(
-        '@timestamp column not found in esql response'
-      );
-
-      const emptyResponse: ESQLSearchResponse = {
-        columns: [{ name: '@timestamp', type: 'date' }],
-        values: [],
-      };
-      expect(client.extractLastSeenTimestamp(emptyResponse)).toBeUndefined();
     });
   });
 });

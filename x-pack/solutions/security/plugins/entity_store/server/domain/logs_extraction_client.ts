@@ -29,8 +29,10 @@ import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
 
 interface LogsExtractionOptions {
-  fromDateISO: string;
-  toDateISO: string;
+  specificWindow?: {
+    fromDateISO: string;
+    toDateISO: string;
+  };
 }
 
 interface ExtractedLogsSummary {
@@ -56,7 +58,7 @@ export class LogsExtractionClient {
     this.logger.debug('starting entity extraction');
 
     try {
-      const engineDescriptor = await this.engineDescriptorClient.find(type);
+      const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
 
       if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
         return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
@@ -97,6 +99,17 @@ export class LogsExtractionClient {
         logger: this.logger,
       });
 
+      const operationResult = {
+        success: true,
+        count: esqlResponse.values.length,
+        scannedIndices: indexPatterns,
+      };
+
+      // With specific window, we don't need to update the pagination timestamp
+      if (opts?.specificWindow) {
+        return operationResult;
+      }
+
       const paginationTimestamp = this.extractLastSeenTimestamp(esqlResponse);
 
       await this.engineDescriptorClient.update(type, {
@@ -107,19 +120,16 @@ export class LogsExtractionClient {
         },
       });
 
-      return {
-        success: true,
-        count: esqlResponse.values.length,
-        scannedIndices: indexPatterns,
-      };
+      return operationResult;
     } catch (error) {
       return this.handleError(error, type);
     }
   }
 
-  extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse): string | undefined {
+  private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse): string {
     if (esqlResponse.values.length === 0) {
-      return;
+      // if no logs are found, we use the current time as the last seen timestamp
+      return moment().utc().toISOString();
     }
 
     const timestampIndex = esqlResponse.columns.findIndex((column) => column.name === '@timestamp');
@@ -133,15 +143,18 @@ export class LogsExtractionClient {
   private getExtractionWindow(
     logExtractionState: LogExtractionState,
     opts?: LogsExtractionOptions
-  ): { fromDateISO: any; toDateISO: any } {
-    if (opts?.fromDateISO && opts?.toDateISO) {
-      return { fromDateISO: opts.fromDateISO, toDateISO: opts.toDateISO };
+  ): { fromDateISO: string; toDateISO: string } {
+    if (opts?.specificWindow) {
+      return opts.specificWindow;
     }
 
-    const fromDateISO =
-      logExtractionState.paginationTimestamp || this.getFromDate(logExtractionState);
-
     const delayMs = parseDurationToMs(logExtractionState.delay);
+
+    const fromDateISO =
+      logExtractionState.paginationTimestamp ||
+      logExtractionState.lastExecutionTimestamp ||
+      this.getFromDate(logExtractionState);
+
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
@@ -169,7 +182,9 @@ export class LogsExtractionClient {
 
   private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string) {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
-    const cleanAdditionalIndicesPatterns = additionalIndexPatterns.split(',');
+    const cleanAdditionalIndicesPatterns = additionalIndexPatterns
+      .split(',')
+      .filter((index) => index !== '');
     const indexPatterns: string[] = [updatesDataStream, ...cleanAdditionalIndicesPatterns];
 
     try {

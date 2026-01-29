@@ -57,9 +57,7 @@ export const buildLogsExtractionEsqlQuery = ({
 }: LogsExtractionQueryParams): string => {
   const idFieldName = getIdFieldName(identityField);
 
-  return `SET unmapped_fields="nullify";
-  
-  FROM ${indexPatterns.join(', ')}
+  return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE (${entityIdFilter(identityField, type)})
       AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
