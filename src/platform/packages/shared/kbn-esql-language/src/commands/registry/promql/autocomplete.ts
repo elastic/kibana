@@ -17,7 +17,8 @@ import {
   getPromqlFunctionSuggestionsForReturnTypes,
   getPromqlParamTypesForFunction,
 } from '../../definitions/utils/promql';
-import { getFunctionParamIndexAtCursor } from './utils';
+import { getOperatorSuggestion } from '../../definitions/utils/operators';
+import { getFunctionParamIndexAtCursor, PROMQL_BINARY_OPERATORS } from './utils';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../shared/sorting';
 import {
@@ -150,14 +151,24 @@ export async function autocomplete(
     }
 
     case 'after_complete_expression':
-      // Future: suggest binary operators (+, -, *, /, etc.)
-      return [];
+      return getPromqlBinaryOperatorSuggestions();
+
+    case 'after_binary_operator':
+      return [
+        ...suggestMetrics(context, needsWrappedQuery, ESQL_NUMBER_TYPES),
+        ...wrapFunctionSuggestions(needsWrappedQuery),
+      ];
 
     case 'before_grouping':
       return [promqlByCompleteItem];
 
     case 'after_query': {
-      const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+      const textAfterCursor = commandText.substring(cursorPosition - commandStart).trim();
+      const hasContentAfterCursor = textAfterCursor.length > 0;
+
+      const suggestions: ISuggestionItem[] = hasContentAfterCursor
+        ? [...getPromqlBinaryOperatorSuggestions()]
+        : [pipeCompleteItem, ...getPromqlBinaryOperatorSuggestions()];
 
       if (position.canAddGrouping) {
         suggestions.unshift(promqlByCompleteItem);
@@ -397,4 +408,13 @@ function getMetricSuggestionConfig(
     types: baseTypes,
     useRangeVector: expectsRangeVector && !expectsInstantVector,
   };
+}
+
+// ============================================================================
+// Operator Suggestions
+// ============================================================================
+
+/* Returns binary operator suggestions for PromQL expressions. */
+function getPromqlBinaryOperatorSuggestions(): ISuggestionItem[] {
+  return PROMQL_BINARY_OPERATORS.map(getOperatorSuggestion);
 }

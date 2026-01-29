@@ -22,6 +22,7 @@ import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
 import { getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
+import { arithmeticOperators, comparisonFunctions } from '../../definitions/all_operators';
 
 const promqlParamItems = getPromqlParamKeySuggestions();
 const promqlParamTexts = promqlParamItems.map(({ text }) => text);
@@ -629,5 +630,52 @@ describe('index= suggestions', () => {
       contextWithSources,
       cursorPosition
     );
+  });
+});
+
+describe('operator suggestions', () => {
+  const arithmeticOperatorLabels = arithmeticOperators.map((op) => op.name);
+  const comparisonOperatorLabels = comparisonFunctions.map((op) => op.name);
+  const operatorLabels = [...arithmeticOperatorLabels, ...comparisonOperatorLabels];
+
+  test('suggests arithmetic and comparison operators after complete expression', async () => {
+    await expectPromqlSuggestions('PROMQL rate(http_requests_total[5m]) ', {
+      labelsContain: operatorLabels,
+    });
+  });
+
+  test('does not suggest operators inside function arguments', async () => {
+    await expectPromqlSuggestions('PROMQL sum( ', {
+      labelsNotContain: operatorLabels,
+    });
+  });
+
+  test('does not suggest operators after param keyword', async () => {
+    await expectPromqlSuggestions('PROMQL step ', {
+      labelsNotContain: operatorLabels,
+    });
+  });
+
+  test('does not suggest pipe when cursor is between expression and literal', async () => {
+    const query = 'PROMQL avg(http_requests_total) 1000';
+    const cursorPosition = 'PROMQL avg(http_requests_total) '.length;
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: operatorLabels,
+        textsNotContain: ['| '],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('suggests metrics and functions after binary operator', async () => {
+    await expectPromqlSuggestions('PROMQL sum(rate(http_requests_total[5m])) by (job) + ', {
+      labelsContain: ['doubleField', 'rate', 'sum', 'avg'],
+      labelsNotContain: operatorLabels,
+    });
   });
 });

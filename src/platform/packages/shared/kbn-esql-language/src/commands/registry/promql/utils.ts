@@ -22,6 +22,7 @@ import {
   getPromqlFunctionDefinition,
   isPromqlAcrossSeriesFunction,
 } from '../../definitions/utils/promql';
+import { arithmeticOperators, comparisonFunctions } from '../../definitions/all_operators';
 
 // ============================================================================
 // Types
@@ -54,8 +55,12 @@ interface PromqlPosition {
 export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
 
 // Param zone detection
-const TRAILING_PARAM_NAME_REGEX = /([A-Za-z_][A-Za-z0-9_]*)\s*$/;
+const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
 const FUNCTION_ARG_START_TOKENS = ['(', ','];
+
+// Binary operators supported in PromQL
+export const PROMQL_BINARY_OPERATORS = [...arithmeticOperators, ...comparisonFunctions];
+const BINARY_OPERATOR_NAMES = PROMQL_BINARY_OPERATORS.map((op) => op.name);
 
 // ============================================================================
 // Main Entry Point
@@ -136,6 +141,10 @@ function getQueryZonePosition(
         return { type: 'before_grouping' };
       }
 
+      if (checkAfterBinaryOperator(ctx)) {
+        return { type: 'after_binary_operator' };
+      }
+
       if (checkAfterCompleteExpression(ctx)) {
         return { type: 'after_complete_expression' };
       }
@@ -180,6 +189,8 @@ function isQueryLocationUsable(
 
 interface PromQLQueryContext {
   text: string;
+  textBeforeCursor: string;
+  textBeforeCursorTrimmed: string;
   start: number;
   root: PromQLAstQueryExpression;
   relativeCursor: number;
@@ -211,7 +222,20 @@ function getPromQLQueryContext(
 
   const position = findPromqlAstPosition(root, relativeCursor);
 
-  return { text, start, root, relativeCursor, logicalCursor, position };
+  // Cursor and text are relative to the PromQL query substring (not the full command).
+  const textBeforeCursor = text.slice(0, relativeCursor);
+  const textBeforeCursorTrimmed = textBeforeCursor.trimEnd();
+
+  return {
+    text,
+    textBeforeCursor,
+    textBeforeCursorTrimmed,
+    start,
+    root,
+    relativeCursor,
+    logicalCursor,
+    position,
+  };
 }
 
 /** Checks if cursor is inside a grouping clause (by/without). */
@@ -431,11 +455,12 @@ function checkAfterCompleteExpression(ctx: PromQLQueryContext): boolean {
 
 /** Checks if cursor is at expression start: after `(` or after column `=`. */
 function checkAtExpressionStart(ctx: PromQLQueryContext): boolean {
-  const { text, relativeCursor } = ctx;
-  const textBeforeCursor = text.slice(0, relativeCursor);
-  const trimmed = textBeforeCursor.trimEnd();
+  return ctx.textBeforeCursorTrimmed.endsWith('(') || ctx.textBeforeCursorTrimmed.endsWith('=');
+}
 
-  return trimmed.endsWith('(') || trimmed.endsWith('=');
+/** Checks if cursor is after a binary operator: `rate(bytes[5m]) + |`. */
+function checkAfterBinaryOperator(ctx: PromQLQueryContext): boolean {
+  return BINARY_OPERATOR_NAMES.some((op) => ctx.textBeforeCursorTrimmed.endsWith(op));
 }
 
 // ============================================================================
