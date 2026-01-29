@@ -167,6 +167,7 @@ describe('virtualizer', () => {
           virtualItem: expect.any(Object),
           virtualRowStyle: expect.objectContaining({
             transform: expect.stringMatching(/translateY\(\d+px\)/),
+            zIndex: expect.any(Number),
           }),
           isActiveSticky: expect.any(Boolean),
         })
