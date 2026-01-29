@@ -158,4 +158,3 @@ evaluate.describe('ES|QL tool evaluation', { tag: '@svlSearch' }, () => {
     });
   });
 });
-
