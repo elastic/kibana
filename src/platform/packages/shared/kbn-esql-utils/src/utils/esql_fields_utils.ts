@@ -83,7 +83,7 @@ export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
 
 export type Terminal = ESQLColumn | ESQLLiteral | ESQLList;
 /**
- * Retrieves a list of terminal nodes that were found in the field definition. //HD should be here???
+ * Retrieves a list of terminal nodes that were found in the field definition.
  */
 export const getFieldTerminals = (definition: ESQLProperNode) => {
   const terminals: Array<Terminal> = [];
