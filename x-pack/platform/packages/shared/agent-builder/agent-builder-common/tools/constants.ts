@@ -37,10 +37,10 @@ export const platformCoreTools = {
 } as const;
 
 export const filestoreTools = {
-  read: `${internalNamespaces.platformFilestore}.read`,
-  ls: `${internalNamespaces.platformFilestore}.ls`,
-  grep: `${internalNamespaces.platformFilestore}.grep`,
-  glob: `${internalNamespaces.platformFilestore}.glob`,
+  read: `${internalNamespaces.filestore}.read`,
+  ls: `${internalNamespaces.filestore}.ls`,
+  grep: `${internalNamespaces.filestore}.grep`,
+  glob: `${internalNamespaces.filestore}.glob`,
 };
 
 /**
