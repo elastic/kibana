@@ -26,7 +26,10 @@ import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.st
 import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import {
+  type IScopedSearchClient,
+  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -628,7 +631,6 @@ describe('CsvGenerator', () => {
 
         await generateCsv.generateData();
 
-        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalledTimes(1);
         expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalledWith(
           {
             ignore_unavailable: true,
@@ -643,6 +645,13 @@ describe('CsvGenerator', () => {
           }
         );
         expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+
+        expect(mockDataClient.search).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            strategy: INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
+          })
+        );
       });
     });
   });

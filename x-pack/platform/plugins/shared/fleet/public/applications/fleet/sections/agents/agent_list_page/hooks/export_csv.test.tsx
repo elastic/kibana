@@ -10,13 +10,12 @@ import { act, type RenderHookResult } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import type { Agent } from '../../../../../../../common';
+import { sendPostGenerateAgentsReport } from '../../../../../../hooks';
 
 import { useExportCSV } from './export_csv';
 
-const mockSendPostGenerateAgentsReport = jest.fn();
-
 jest.mock('../../../../../../hooks', () => ({
-  sendPostGenerateAgentsReport: mockSendPostGenerateAgentsReport,
+  sendPostGenerateAgentsReport: jest.fn(),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -24,7 +23,11 @@ jest.mock('../../../../../../hooks', () => ({
         addError: jest.fn(),
       },
     },
-    http: {},
+    http: {
+      basePath: {
+        prepend: jest.fn((path) => path),
+      },
+    },
     uiSettings: {
       get: () => 'America/Los_Angeles',
     },
@@ -32,7 +35,7 @@ jest.mock('../../../../../../hooks', () => ({
 }));
 
 describe('export_csv', () => {
-  let result: RenderHookResult<any, any>;
+  let renderResult: RenderHookResult<any, any>;
 
   function render() {
     const renderer = createFleetTestRendererMock();
@@ -42,7 +45,7 @@ describe('export_csv', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
-      result = render();
+      renderResult = render();
     });
   });
 
@@ -55,11 +58,11 @@ describe('export_csv', () => {
     const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, columns, sortOptions);
+      renderResult.result.current(agents, columns, sortOptions);
     });
 
-    expect(mockSendPostGenerateAgentsReport).toBeCalledWith({
-      agentIds: ['agent1', 'agent2'],
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+      agents: ['agent1', 'agent2'],
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',
       sort: sortOptions,
@@ -71,11 +74,11 @@ describe('export_csv', () => {
     const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, columns, undefined);
+      renderResult.result.current(agents, columns, undefined);
     });
 
-    expect(mockSendPostGenerateAgentsReport).toBeCalledWith({
-      agentIds: agents,
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+      agents,
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',
     });
