@@ -9,6 +9,7 @@ import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -62,6 +63,9 @@ import {
 import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
+// Threshold below which we show the "Load more matching samples" button (20%)
+const SPARSE_RESULTS_THRESHOLD = 0.2;
+
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
   const previewDocuments = useSimulatorSelector((snapshot) =>
@@ -110,8 +114,11 @@ const formatter = getPercentageFormatter();
 const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
-  const { changePreviewDocsFilter, clearSimulationConditionFilter: clearConditionFilter } =
-    useStreamEnrichmentEvents();
+  const {
+    changePreviewDocsFilter,
+    clearSimulationConditionFilter: clearConditionFilter,
+    fetchMoreMatchingSamples,
+  } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
@@ -135,8 +142,15 @@ const PreviewDocumentsGroupBy = () => {
   const activeSamples = useSimulatorSelector(
     (state) => selectSamplesForSimulation(state.context).length
   );
+  const isFetchingMore = useSimulatorSelector((state) => state.context.isFetchingMore);
+  const fetchMoreError = useSimulatorSelector((state) => state.context.fetchMoreError);
   const conditionPercentage =
     totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
+  const conditionRate = totalSamples > 0 ? activeSamples / totalSamples : 0;
+
+  // Show "Load more" button when condition is selected and results are sparse
+  const showFetchMoreButton =
+    selectedConditionId && conditionRate < SPARSE_RESULTS_THRESHOLD && totalSamples > 0;
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
@@ -165,6 +179,34 @@ const PreviewDocumentsGroupBy = () => {
               </EuiBadge>
             </EuiFlexGroup>
           </EuiButton>
+        </EuiFlexItem>
+      )}
+      {showFetchMoreButton && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              fetchMoreError
+                ? fetchMoreError.message
+                : i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processor.fetchMoreTooltip',
+                    {
+                      defaultMessage:
+                        'Search for more documents that match this condition to better test your processing pipeline.',
+                    }
+                  )
+            }
+          >
+            <EuiButtonEmpty
+              onClick={fetchMoreMatchingSamples}
+              isLoading={isFetchingMore}
+              iconType={fetchMoreError ? 'warning' : 'refresh'}
+              size="s"
+              color={fetchMoreError ? 'warning' : 'primary'}
+              data-test-subj="streamsAppFetchMoreMatchingSamplesButton"
+            >
+              {fetchMoreMoreButtonLabel}
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
@@ -562,5 +604,12 @@ const selectedButtonLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.processor.conditionFilterSelectedBadge',
   {
     defaultMessage: 'Selected',
+  }
+);
+
+const fetchMoreMoreButtonLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.processor.fetchMoreMatchingSamplesButton',
+  {
+    defaultMessage: 'Load more matching samples',
   }
 );

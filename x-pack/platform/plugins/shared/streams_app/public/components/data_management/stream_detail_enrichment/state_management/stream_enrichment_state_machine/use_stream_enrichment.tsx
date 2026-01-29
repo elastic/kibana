@@ -155,6 +155,9 @@ export const useStreamEnrichmentEvents = () => {
       setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
         service.send({ type: 'previewColumns.setSorting', sorting });
       },
+      fetchMoreMatchingSamples: () => {
+        service.send({ type: 'simulation.fetchMore' });
+      },
       // Pipeline suggestion actions
       suggestPipeline: (params: { connectorId: string; streamName: string }) => {
         service.send({ type: 'suggestion.generate', connectorId: params.connectorId });

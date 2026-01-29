@@ -573,6 +573,9 @@ export const streamEnrichmentMachine = setup({
                         },
                       ],
                     },
+                    'simulation.fetchMore': {
+                      actions: forwardTo('simulator'),
+                    },
                     // Forward other step events to interactive mode machine
                     'step.*': {
                       actions: forwardTo('interactiveMode'),
@@ -600,6 +603,9 @@ export const streamEnrichmentMachine = setup({
                       actions: 'sendResetToSimulator',
                     },
                     'simulation.updateSteps': {
+                      actions: forwardTo('simulator'),
+                    },
+                    'simulation.fetchMore': {
                       actions: forwardTo('simulator'),
                     },
                     // Forward yaml events to YAML mode machine
