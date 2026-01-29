@@ -48,11 +48,7 @@ interface FormState {
   esqlQuery: string;
 }
 
-export function EditQueryStreamFlyout({
-  definition,
-  onClose,
-  onSave,
-}: EditQueryStreamFlyoutProps) {
+export function EditQueryStreamFlyout({ definition, onClose, onSave }: EditQueryStreamFlyoutProps) {
   const { dependencies, core } = useKibana();
   const { notifications } = core;
   const {
@@ -263,7 +259,11 @@ export function EditQueryStreamFlyout({
           <EuiButton
             data-test-subj="streamsAppEditQueryStreamFlyoutSaveButton"
             isLoading={formState.isSubmitting}
-            disabled={(formState.isSubmitted && !formState.isValid) || !!documentsError || isLoadingQuery}
+            disabled={
+              (formState.isSubmitted && !formState.isValid) ||
+              !!documentsError ||
+              isLoadingQueryResults
+            }
             onClick={handleQueryStreamUpdate}
           >
             {i18n.translate('xpack.streams.editQueryStreamFlyout.saveButtonLabel', {
@@ -275,4 +275,3 @@ export function EditQueryStreamFlyout({
     </EuiFlyout>
   );
 }
-

@@ -177,12 +177,12 @@ export function LifecycleBadge({
 
 export function DiscoverBadgeButton({
   stream,
-  isWiredStream,
+  isWiredStream = false,
   hasDataStream = false,
 }: {
   stream: Streams.all.Definition;
   hasDataStream?: boolean;
-  isWiredStream: boolean;
+  isWiredStream?: boolean;
 }) {
   const {
     dependencies: {
@@ -220,10 +220,16 @@ export function DiscoverBadgeButton({
   );
 }
 
-const getESQLQuery = (stream: Streams.all.Definition, hasDataStream: boolean, isWiredStream: boolean) => {
+const getESQLQuery = (
+  stream: Streams.all.Definition,
+  hasDataStream: boolean,
+  isWiredStream: boolean
+) => {
   if (Streams.WiredStream.Definition.is(stream) || hasDataStream) {
     const indexPatterns = getIndexPatternsForStream(stream);
-    return indexPatterns ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}` : undefined;
+    return indexPatterns
+      ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
+      : undefined;
   }
 
   if (Streams.QueryStream.Definition.is(stream)) {

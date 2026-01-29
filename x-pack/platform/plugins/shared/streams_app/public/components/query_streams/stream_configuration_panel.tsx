@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -16,8 +17,8 @@ import {
 } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { EditQueryStreamFlyout } from './edit_query_stream_flyout';
 import { css } from '@emotion/react';
+import { EditQueryStreamFlyout } from './edit_query_stream_flyout';
 
 interface StreamConfigurationPanelProps {
   definition: Streams.QueryStream.GetResponse;
@@ -28,7 +29,7 @@ export function StreamConfigurationPanel({
   definition,
   refreshDefinition,
 }: StreamConfigurationPanelProps) {
-  const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isEditFlyoutOpen, { on: openEditFlyout, off: closeEditFlyout }] = useBoolean(false);
 
   const esqlQuery = definition.stream.query.esql;
 
@@ -61,7 +62,7 @@ export function StreamConfigurationPanel({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="pencil" onClick={() => setIsEditFlyoutOpen(true)}>
+              <EuiButton iconType="pencil" onClick={openEditFlyout}>
                 {i18n.translate('xpack.streams.streamConfigurationPanel.editQueryButtonLabel', {
                   defaultMessage: 'Edit Query with preview',
                 })}
@@ -74,9 +75,9 @@ export function StreamConfigurationPanel({
       {isEditFlyoutOpen && (
         <EditQueryStreamFlyout
           definition={definition}
-          onClose={() => setIsEditFlyoutOpen(false)}
+          onClose={closeEditFlyout}
           onSave={() => {
-            setIsEditFlyoutOpen(false);
+            closeEditFlyout();
             refreshDefinition();
           }}
         />
