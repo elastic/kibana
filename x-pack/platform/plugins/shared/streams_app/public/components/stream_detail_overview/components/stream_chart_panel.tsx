@@ -15,8 +15,8 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { Streams, getDiscoverEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import type { DurationInputArg1, DurationInputArg2 } from 'moment';
 import moment from 'moment';
@@ -57,11 +57,14 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   );
 
   const queries = useMemo(() => {
-    if (!indexPatterns) {
+    const baseQuery = getDiscoverEsqlQuery({
+      definition: definition.stream,
+      indexMode: definition.index_mode,
+    });
+
+    if (!baseQuery) {
       return undefined;
     }
-
-    const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize})`;
 
@@ -69,7 +72,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       baseQuery,
       histogramQuery,
     };
-  }, [bucketSize, indexPatterns]);
+  }, [bucketSize, definition.stream, definition.index_mode]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {
