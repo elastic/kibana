@@ -13,6 +13,7 @@ import {
   setupLlmProxy,
   teardownLlmProxy,
   getLlmMessages,
+  type LlmMessage,
 } from '../utils/llm_proxy/llm_test_helpers';
 import {
   createDistributedTraceWithErrors,
@@ -34,8 +35,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       let logsSynthtraceEsClient: LogsSynthtraceEsClient;
       let traceData: DistributedTraceData;
-      let systemMessage: { role: string; content?: string } | undefined;
-      let userMessage: { role: string; content?: string } | undefined;
+      let systemMessage: LlmMessage;
+      let userMessage: LlmMessage;
       let apiResponse: { summary: string; context: string };
 
       before(async () => {
@@ -75,20 +76,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await apmSynthtraceEsClient.clean();
-        await logsSynthtraceEsClient.clean();
+        await apmSynthtraceEsClient?.clean();
+        await logsSynthtraceEsClient?.clean();
         await teardownLlmProxy(getService, { llmProxy, connectorId });
       });
 
       describe('LLM context', () => {
         it('sends a system prompt to the LLM', () => {
           expect(systemMessage).to.be.an('object');
-          expect(systemMessage?.content).to.contain('SRE Assistant');
+          expect(systemMessage.content).to.contain('SRE Assistant');
         });
 
         it('sends user message with error context', () => {
           expect(userMessage).to.be.an('object');
-          expect(userMessage?.content).to.contain('<ErrorContext>');
+          expect(userMessage.content).to.contain('<ErrorContext>');
         });
 
         it('includes ErrorDetails in context', () => {

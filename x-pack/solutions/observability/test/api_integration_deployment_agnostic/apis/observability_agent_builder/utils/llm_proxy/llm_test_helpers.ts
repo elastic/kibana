@@ -34,27 +34,49 @@ export async function setupLlmProxy(
  */
 export async function teardownLlmProxy(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
-  context: LlmTestContext
+  context: Partial<LlmTestContext>
 ): Promise<void> {
-  await deleteActionConnector(getService, { actionId: context.connectorId });
-  context.llmProxy.close();
+  if (context.connectorId) {
+    await deleteActionConnector(getService, { actionId: context.connectorId });
+  }
+  if (context.llmProxy) {
+    context.llmProxy.close();
+  }
 }
 
-interface LlmMessage {
+export interface LlmMessage {
   role: string;
-  content?: string;
+  content: string;
 }
 
 /**
  * Extracts system and user messages from intercepted LLM requests.
  */
-export function getLlmMessages(llmProxy: LlmProxy, interceptorName: string) {
+export function getLlmMessages(
+  llmProxy: LlmProxy,
+  interceptorName: string
+): { system: LlmMessage; user: LlmMessage } {
   const llmRequest = llmProxy.interceptedRequests.find(
     (r) => r.matchingInterceptorName === interceptorName
   );
-  const messages = llmRequest?.requestBody?.messages as LlmMessage[] | undefined;
-  return {
-    system: messages?.find((m) => m.role === 'system'),
-    user: messages?.find((m) => m.role === 'user'),
-  };
+  if (!llmRequest) {
+    throw new Error(`No LLM request found for interceptor: ${interceptorName}`);
+  }
+
+  const messages = llmRequest.requestBody?.messages as LlmMessage[] | undefined;
+  if (!messages) {
+    throw new Error(`No messages found in LLM request for interceptor: ${interceptorName}`);
+  }
+
+  const system = messages.find((m) => m.role === 'system');
+  const user = messages.find((m) => m.role === 'user');
+
+  if (!system) {
+    throw new Error(`No system message found for interceptor: ${interceptorName}`);
+  }
+  if (!user) {
+    throw new Error(`No user message found for interceptor: ${interceptorName}`);
+  }
+
+  return { system, user };
 }

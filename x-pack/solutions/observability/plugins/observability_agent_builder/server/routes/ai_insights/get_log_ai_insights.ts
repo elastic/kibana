@@ -14,7 +14,6 @@ import dedent from 'dedent';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
-import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import { createAiInsightResult, type AiInsightResult } from './types';
@@ -105,40 +104,6 @@ async function fetchLogContext({
     </LogEntryFields>
   `);
 
-  const additionalContext = await fetchCorrelatedLogsOrCategories({
-    core,
-    logger,
-    esClient,
-    index,
-    id,
-    windowStart,
-    windowEnd,
-  });
-
-  if (additionalContext) {
-    context += additionalContext;
-  }
-
-  return context;
-}
-
-async function fetchCorrelatedLogsOrCategories({
-  core,
-  logger,
-  esClient,
-  index,
-  id,
-  windowStart,
-  windowEnd,
-}: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  logger: Logger;
-  esClient: IScopedClusterClient;
-  index: string;
-  id: string;
-  windowStart: string;
-  windowEnd: string;
-}): Promise<string | null> {
   try {
     const { sequences } = await getCorrelatedLogs({
       core,
@@ -153,47 +118,20 @@ async function fetchCorrelatedLogsOrCategories({
 
     const correlatedSequence = sequences[0];
     if (correlatedSequence?.logs?.length) {
-      return formatContextPart('CorrelatedLogSequence', windowStart, windowEnd, correlatedSequence);
+      context += dedent(`
+        <CorrelatedLogSequence>
+        Time window: ${windowStart} to ${windowEnd}
+        \`\`\`json
+        ${JSON.stringify(correlatedSequence, null, 2)}
+        \`\`\`
+        </CorrelatedLogSequence>
+      `);
     }
   } catch (error) {
     logger.debug(`Failed to fetch correlated logs: ${error.message}`);
   }
 
-  try {
-    const categories = await getLogCategories({
-      core,
-      logger,
-      esClient,
-      index,
-      start: windowStart,
-      end: windowEnd,
-      fields: ['service.name', 'host.name', 'container.id'],
-    });
-
-    if (categories?.length) {
-      return formatContextPart('LogCategories', windowStart, windowEnd, categories);
-    }
-  } catch (error) {
-    logger.debug(`Failed to fetch log categories: ${error.message}`);
-  }
-
-  return null;
-}
-
-function formatContextPart(
-  name: string,
-  windowStart: string,
-  windowEnd: string,
-  data: unknown
-): string {
-  return dedent(`
-    <${name}>
-    Time window: ${windowStart} to ${windowEnd}
-    \`\`\`json
-    ${JSON.stringify(data, null, 2)}
-    \`\`\`
-    </${name}>
-  `);
+  return context;
 }
 
 function generateLogSummary({
@@ -222,7 +160,7 @@ function generateLogSummary({
 
         - **What happened**: Summarize the error in plain language
         - **Where it originated**: Identify the service, component, or code path
-        - **Root cause**: Analyze using CorrelatedLogSequence (or LogCategories if no correlated logs) to understand what happened before and after the error
+        - **Root cause**: Analyze using CorrelatedLogSequence to understand what happened before and after the error
         - **Impact**: Note any affected downstream services or dependencies
         - **Next steps**: Suggest specific actions for investigation or remediation
 
@@ -235,7 +173,7 @@ function generateLogSummary({
 
         - Explain what the log message means in context
         - Identify the source (service, host, container)
-        - If CorrelatedLogSequence or LogCategories is available, use it to provide additional context
+        - If CorrelatedLogSequence is available, use it to provide additional context
 
         Base your analysis strictly on the provided data. Be specific and reference actual field values.
 

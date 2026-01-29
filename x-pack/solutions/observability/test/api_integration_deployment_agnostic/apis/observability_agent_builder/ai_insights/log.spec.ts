@@ -74,12 +74,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        if (logsSynthtraceEsClient) {
-          await logsSynthtraceEsClient.clean();
-        }
-        if (llmProxy && connectorId) {
-          await teardownLlmProxy(getService, { llmProxy, connectorId });
-        }
+        await logsSynthtraceEsClient?.clean();
+        await teardownLlmProxy(getService, { llmProxy, connectorId });
       });
 
       it('returns summary and context for error log with additional context', async () => {
@@ -106,9 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body.summary).to.contain(MOCKED_AI_SUMMARY_ERROR);
 
         const { user: userMessage } = getLlmMessages(llmProxy, 'error-log-ai-insight');
-        const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
-        const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
-        expect(hasCorrelatedLogs || hasLogCategories).to.be(true);
+        expect(userMessage.content).to.contain('<CorrelatedLogSequence>');
       });
 
       it('returns summary and context for info log with additional context', async () => {
@@ -137,9 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body.summary).to.contain(MOCKED_AI_SUMMARY_INFO);
 
         const { user: userMessage } = getLlmMessages(llmProxy, 'info-log-ai-insight');
-        const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
-        const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
-        expect(hasCorrelatedLogs || hasLogCategories).to.be(true);
+        expect(userMessage.content).to.contain('<CorrelatedLogSequence>');
       });
     });
   });

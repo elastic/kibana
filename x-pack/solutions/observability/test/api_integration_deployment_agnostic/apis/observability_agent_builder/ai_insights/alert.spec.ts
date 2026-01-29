@@ -105,8 +105,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await teardownLlmProxy(getService, { llmProxy, connectorId });
+        await apmSynthtraceEsClient?.clean();
 
-        await apmSynthtraceEsClient.clean();
         await alertingApi.cleanUpAlerts({
           roleAuthc,
           ruleId: createdRuleId,
