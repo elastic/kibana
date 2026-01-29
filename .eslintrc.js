@@ -2367,6 +2367,26 @@ module.exports = {
       },
     },
     {
+      // Ensure correct expect import path in solutions scout API tests
+      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_expect_import': 'error',
+      },
+    },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/deployment_agnostic_test_context': 'error',
+      },
+    },
+
+    {
       // Restrict fs imports in production code (exclude test files, scripts, etc.)
       files: [
         'src/platform/plugins/shared/**/*.ts',
