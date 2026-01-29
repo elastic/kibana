@@ -9,6 +9,11 @@
 
 import { snakeCase } from 'lodash';
 
+/**
+ * This function takes an object and recursively converts all of the keys to `snaked_cased`
+ * @param camelCased The object with `camelCased` keys
+ * @returns The object with `snake_cased` keys
+ */
 export const convertCamelCasedKeysToSnakeCase = (camelCased: {
   [key: string]: any;
 }): { [key: string]: any } => {
