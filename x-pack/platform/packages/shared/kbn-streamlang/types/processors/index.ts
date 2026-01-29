@@ -417,20 +417,20 @@ export const redactProcessorSchema = processorBaseWithWhereSchema
       .array(NonEmptyString)
       .nonempty()
       .describe(
-        'Grok patterns to match sensitive data (e.g., "%{IP:client}", "%{EMAILADDRESS:email}")'
+        'Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")'
       ),
     pattern_definitions: z
       .optional(z.record(z.string()))
       .describe('Custom pattern definitions to use in the patterns'),
     prefix: z
       .optional(z.string())
-      .describe('Prefix to prepend to the redacted pattern name (default: "<")'),
+      .describe('Prefix to prepend to the redacted pattern name (defaults to "<")'),
     suffix: z
       .optional(z.string())
-      .describe('Suffix to append to the redacted pattern name (default: ">")'),
+      .describe('Suffix to append to the redacted pattern name (defaults to ">")'),
     ignore_missing: z
       .optional(z.boolean())
-      .describe('Skip processing when source field is missing (default: true)'),
+      .describe('Skip processing when source field is missing (defaults to true)'),
   })
   .describe(
     'Redact processor - Mask sensitive data using Grok patterns'
