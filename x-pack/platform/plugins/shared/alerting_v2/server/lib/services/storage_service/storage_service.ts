@@ -84,7 +84,7 @@ export class StorageService implements StorageServiceContract {
       return;
     }
 
-    const firstErrorItem = response.items.find((item) => item.index?.error);
+    const firstErrorItem = response.items.find((item) => item.create?.error);
     if (!firstErrorItem) {
       return;
     }
@@ -106,13 +106,13 @@ export class StorageService implements StorageServiceContract {
     docsCount: number;
     response: BulkResponse;
   }): string {
-    const failedItemCount = response.items.filter((item) => item.index?.error).length;
+    const failedItemCount = response.items.filter((item) => item.create?.error).length;
 
     if (!response.errors) {
-      return `StorageService: Successfully bulk indexed ${docsCount} documents to index: ${index}`;
+      return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;
     }
 
     const successItemCount = docsCount - failedItemCount;
-    return `StorageService: Bulk index completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
+    return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
   }
 }

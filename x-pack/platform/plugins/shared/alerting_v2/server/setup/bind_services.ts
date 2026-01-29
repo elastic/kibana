@@ -9,6 +9,7 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -29,6 +30,7 @@ import {
 import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
+  bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
