@@ -8,15 +8,16 @@
  */
 
 import { snakeCase } from 'lodash';
+import type { SnakeCasedKeys } from './types';
 
 /**
  * This function takes an object and recursively converts all of the keys to `snaked_cased`
  * @param camelCased The object with `camelCased` keys
  * @returns The object with `snake_cased` keys
  */
-export const convertCamelCasedKeysToSnakeCase = (camelCased: {
-  [key: string]: any;
-}): { [key: string]: any } => {
+export const convertCamelCasedKeysToSnakeCase = <StateType extends object = object>(
+  camelCased: StateType
+): SnakeCasedKeys<StateType> => {
   const convertSubObject = (
     camelCasedSubObject: object,
     snakeCased: { [key: string]: any } = {}
@@ -30,5 +31,5 @@ export const convertCamelCasedKeysToSnakeCase = (camelCased: {
     }
     return snakeCased;
   };
-  return convertSubObject(camelCased);
+  return convertSubObject(camelCased) as SnakeCasedKeys<StateType>;
 };
