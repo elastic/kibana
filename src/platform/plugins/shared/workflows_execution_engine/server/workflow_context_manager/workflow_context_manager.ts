@@ -11,7 +11,6 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
 import {
-  ExecutionStatus,
   type SerializedError,
   type StackFrame,
   type StepContext,
