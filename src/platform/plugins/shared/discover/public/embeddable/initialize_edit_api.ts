@@ -100,7 +100,7 @@ export function initializeEditApi<
             tab: {
               id: uuid,
               label:
-                getTitle() ??
+                getTitle() ||
                 i18n.translate('discover.embeddable.byValueTabName', {
                   defaultMessage: 'By-value Discover session',
                 }),
