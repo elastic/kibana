@@ -39,21 +39,21 @@ const InteractiveWrapper = ({
   const getColumnMap = createMockGetColumnMap();
 
   return (
-      <FieldsBrowser
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-          action('onClose')();
-        }}
-        onSelect={(fieldName, oldLength) => {
-          action('onSelect')(fieldName, oldLength);
-        }}
-        http={http}
-        getColumnMap={getColumnMap}
-        queryString={queryString}
-        suggestedFieldNames={suggestedFieldNames}
-        position={{ top: 100, left: 100 }}
-      />
+    <FieldsBrowser
+      isOpen={isOpen}
+      onClose={() => {
+        setIsOpen(false);
+        action('onClose')();
+      }}
+      onSelect={(fieldName, oldLength) => {
+        action('onSelect')(fieldName, oldLength);
+      }}
+      http={http}
+      getColumnMap={getColumnMap}
+      queryString={queryString}
+      suggestedFieldNames={suggestedFieldNames}
+      position={{ top: 100, left: 100 }}
+    />
   );
 };
 

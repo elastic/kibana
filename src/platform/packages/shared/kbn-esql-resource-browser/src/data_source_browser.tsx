@@ -288,13 +288,17 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [options, searchValue, selectedTypes, selectedIntegrations, availableIntegrations.length]);
 
   const handleSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[], event: unknown, changedOption: EuiSelectableOption | undefined) => {
+    (
+      newOptions: EuiSelectableOption[],
+      event: unknown,
+      changedOption: EuiSelectableOption | undefined
+    ) => {
       let newSelected;
 
       if (changedOption?.checked === 'on') {
         newSelected = [...selectedItems, changedOption.key as string];
       } else {
-        newSelected = selectedItems.filter((o) => o !== changedOption?.key as string);
+        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
       }
 
       setSelectedItems(newSelected);

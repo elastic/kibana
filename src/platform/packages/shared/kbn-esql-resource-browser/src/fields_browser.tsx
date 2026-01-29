@@ -74,7 +74,6 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   suggestedFieldNames,
   http,
 }) => {
-
   const [items, setItems] = useState<ESQLFieldWithMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');

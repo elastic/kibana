@@ -38,21 +38,21 @@ const InteractiveWrapper = ({
   const core = createMockCore();
 
   return (
-      <DataSourceBrowser
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-          action('onClose')();
-        }}
-        onSelect={(sources) => {
-          action('onSelect')(sources);
-        }}
-        core={core}
-        getLicense={mockGetLicense}
-        isTSCommand={isTSCommand}
-        initialSources={initialSources}
-        position={{ top: 100, left: 100 }}
-      />
+    <DataSourceBrowser
+      isOpen={isOpen}
+      onClose={() => {
+        setIsOpen(false);
+        action('onClose')();
+      }}
+      onSelect={(sources) => {
+        action('onSelect')(sources);
+      }}
+      core={core}
+      getLicense={mockGetLicense}
+      isTSCommand={isTSCommand}
+      initialSources={initialSources}
+      position={{ top: 100, left: 100 }}
+    />
   );
 };
 
@@ -61,7 +61,5 @@ export const Default: Story = {
 };
 
 export const WithInitialSelection: Story = {
-  render: () => (
-    <InteractiveWrapper initialSources={['logs-*', 'kibana_sample_data_logs']} />
-  ),
+  render: () => <InteractiveWrapper initialSources={['logs-*', 'kibana_sample_data_logs']} />,
 };

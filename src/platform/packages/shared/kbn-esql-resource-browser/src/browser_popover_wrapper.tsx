@@ -59,7 +59,11 @@ export interface BrowserPopoverWrapperProps<TItem> {
   items: EuiSelectableOption[];
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (options: EuiSelectableOption[], event: unknown, changedOption: EuiSelectableOption | undefined) => void;
+  onSelect: (
+    options: EuiSelectableOption[],
+    event: unknown,
+    changedOption: EuiSelectableOption | undefined
+  ) => void;
   position?: { top?: number; left?: number };
   // Data fetching
   fetchData: () => Promise<TItem[]>;
