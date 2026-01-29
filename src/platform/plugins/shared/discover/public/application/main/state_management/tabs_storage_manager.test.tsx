@@ -43,6 +43,7 @@ const mockTab1 = getTabStateMock({
   },
   attributes: {
     visContext: { someKey: 'test' } as unknown as UnifiedHistogramVisContext,
+    controlGroupJson: undefined,
   },
 });
 
@@ -493,6 +494,7 @@ describe('TabsStorageManager', () => {
       internalState: {},
       attributes: {
         visContext: { someKey: 'updatedValue' } as unknown as UnifiedHistogramVisContext,
+        controlGroupJson: '{}',
       },
       appState: {
         columns: ['a', 'b', 'c'],

@@ -28,6 +28,7 @@ export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 interface LegacyInternalState {
   visContext?: TabState['attributes']['visContext']; // visContext got moved from internalState to attributes
+  controlGroupJson?: TabState['attributes']['controlGroupJson']; // controlGroupJson got moved from internalState to attributes
 }
 
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
@@ -220,8 +221,16 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
-    const controlGroupState = internalState?.controlGroupJson
-      ? parseControlGroupJson(internalState.controlGroupJson)
+
+    let controlGroupJson = attributes?.controlGroupJson;
+
+    // migration from the older format where controlGroupJson was stored in internalState
+    if (internalState?.controlGroupJson && !attributes?.controlGroupJson) {
+      controlGroupJson = internalState.controlGroupJson;
+    }
+
+    const controlGroupState = controlGroupJson
+      ? parseControlGroupJson(controlGroupJson)
       : undefined;
     const esqlVariables = controlGroupState
       ? extractEsqlVariables(controlGroupState)
@@ -234,9 +243,11 @@ export const createTabsStorageManager = ({
       attributes: {
         ...defaultTabState.attributes,
         ...attributes,
+        controlGroupJson,
       },
       appState: appState || {},
       globalState: globalState || {},
+      controlGroupState,
       esqlVariables,
     };
 

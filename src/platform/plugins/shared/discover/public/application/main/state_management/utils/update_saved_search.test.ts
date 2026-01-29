@@ -64,7 +64,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -85,7 +84,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -114,7 +112,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -143,7 +140,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -162,7 +158,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -181,7 +176,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -200,7 +194,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -224,7 +217,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       appState: undefined,
       globalState,
       services: discoverServiceMock,

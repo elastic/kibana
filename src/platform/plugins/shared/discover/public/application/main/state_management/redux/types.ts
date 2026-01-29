@@ -134,13 +134,13 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
-    controlGroupJson?: string;
     searchSessionId?: string;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
+    controlGroupJson: string | undefined;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.

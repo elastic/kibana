@@ -261,6 +261,14 @@ export const internalStateSlice = createSlice({
           action.payload.overriddenVisContextAfterInvalidation;
       }),
 
+    setAttributeControlGroupJson: (
+      state,
+      action: TabAction<{ controlGroupJson: TabState['attributes']['controlGroupJson'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.attributes.controlGroupJson = action.payload.controlGroupJson;
+      }),
+
     setControlGroupState: (
       state,
       action: TabAction<{

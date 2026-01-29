@@ -25,6 +25,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   },
   attributes: {
     visContext: undefined,
+    controlGroupJson: undefined,
   },
   overriddenVisContextAfterInvalidation: undefined,
   controlGroupState: undefined,

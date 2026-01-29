@@ -55,7 +55,6 @@ export const fromSavedObjectTabToTabState = ({
     label: tab.label,
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
-      controlGroupJson: tab.controlGroupJson,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
@@ -68,6 +67,7 @@ export const fromSavedObjectTabToTabState = ({
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       visContext: tab.visContext,
+      controlGroupJson: tab.controlGroupJson,
     },
   };
 };
@@ -108,7 +108,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   chartInterval: tab.chartInterval,
   density: tab.density,
   visContext: undefined, // managed via Redux state now
-  controlGroupJson: tab.controlGroupJson,
+  controlGroupJson: undefined, // managed via Redux state now
 });
 
 export const fromTabStateToSavedObjectTab = ({
@@ -148,7 +148,7 @@ export const fromTabStateToSavedObjectTab = ({
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
     visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.initialInternalState?.controlGroupJson,
+    controlGroupJson: tab.attributes?.controlGroupJson,
   };
 };
 
@@ -191,6 +191,6 @@ export const fromSavedSearchToSavedObjectTab = ({
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
     visContext: tab.attributes?.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
+    controlGroupJson: tab.attributes?.controlGroupJson,
   };
 };

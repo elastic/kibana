@@ -11,7 +11,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
-import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   extractEsqlVariables,
@@ -21,7 +20,6 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
 
 /**
  * Custom hook to manage ESQL variables in the control group for Discover.
@@ -56,10 +54,14 @@ export const useESQLVariables = ({
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
+  const setAttributeControlGroupJson = useCurrentTabAction(
+    internalStateActions.setAttributeControlGroupJson
+  );
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
   const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-  const savedSearchState = useSavedSearch();
+  const controlGroupJson = useCurrentTabSelector((tab) => tab.attributes.controlGroupJson);
+  const activeControlGroupJsonRef = useRef<string | undefined>(controlGroupJson);
   const pendingQueryUpdate = useRef<string>();
 
   useEffect(() => {
@@ -69,13 +71,18 @@ export const useESQLVariables = ({
     }
 
     // Handling the reset unsaved changes badge
-    const savedSearchResetSubscription = stateContainer.savedSearchState
-      .getInitial$()
-      .pipe(skip(1)) // Skip the initial emission since it's a BehaviorSubject
-      .subscribe((initialSavedSearch) => {
-        const savedControlGroupState = parseControlGroupJson(initialSavedSearch?.controlGroupJson);
-        controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
-      });
+    if (activeControlGroupJsonRef.current !== controlGroupJson) {
+      activeControlGroupJsonRef.current = controlGroupJson;
+      const savedControlGroupState = parseControlGroupJson(controlGroupJson);
+      controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
+    }
+  }, [controlGroupJson, controlGroupApi, isEsqlMode]);
+
+  useEffect(() => {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
+      return;
+    }
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       const controlGroupState =
@@ -84,9 +91,13 @@ export const useESQLVariables = ({
       const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
         return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
       }, {});
-      stateContainer.savedSearchState.updateControlState({
-        nextControlState: transformedState,
-      });
+      const nextControlGroupJson = JSON.stringify(transformedState);
+      activeControlGroupJsonRef.current = nextControlGroupJson;
+      dispatch(
+        setAttributeControlGroupJson({
+          controlGroupJson: nextControlGroupJson,
+        })
+      );
       dispatch(
         setControlGroupState({
           controlGroupState: transformedState,
@@ -108,7 +119,6 @@ export const useESQLVariables = ({
 
     return () => {
       inputSubscription.unsubscribe();
-      savedSearchResetSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,
@@ -116,6 +126,7 @@ export const useESQLVariables = ({
     dispatch,
     isEsqlMode,
     onUpdateESQLQuery,
+    setAttributeControlGroupJson,
     setControlGroupState,
     setEsqlVariables,
     stateContainer.dataState,
@@ -149,8 +160,8 @@ export const useESQLVariables = ({
     if (currentControlGroupState && Object.keys(currentControlGroupState).length > 0) {
       return currentControlGroupState;
     }
-    return parseControlGroupJson(savedSearchState?.controlGroupJson);
-  }, [currentControlGroupState, savedSearchState?.controlGroupJson]);
+    return parseControlGroupJson(controlGroupJson);
+  }, [currentControlGroupState, controlGroupJson]);
 
   return {
     onSaveControl,

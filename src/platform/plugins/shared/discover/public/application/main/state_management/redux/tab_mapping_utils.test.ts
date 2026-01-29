@@ -28,6 +28,7 @@ const tab1 = getTabStateMock({
   },
   attributes: {
     visContext: { foo: 'bar' },
+    controlGroupJson: undefined,
   },
   globalState: {
     timeRange: { from: 'now-7d', to: 'now' },
@@ -43,6 +44,7 @@ const tab2 = getTabStateMock({
   },
   attributes: {
     visContext: { bar: 'foo' },
+    controlGroupJson: undefined,
   },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
@@ -84,6 +86,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
+            "controlGroupJson": undefined,
             "visContext": Object {
               "bar": "foo",
             },
@@ -111,7 +114,6 @@ describe('tab mapping utils', () => {
           },
           "id": "2",
           "initialInternalState": Object {
-            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
@@ -167,6 +169,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
+            "controlGroupJson": undefined,
             "visContext": Object {
               "bar": "foo",
             },
@@ -194,7 +197,6 @@ describe('tab mapping utils', () => {
           },
           "id": "2",
           "initialInternalState": Object {
-            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },

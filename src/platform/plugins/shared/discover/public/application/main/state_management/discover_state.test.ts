@@ -672,7 +672,6 @@ describe('Discover state', () => {
       const savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -944,7 +943,6 @@ describe('Discover state', () => {
       let savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -986,7 +984,6 @@ describe('Discover state', () => {
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -1048,7 +1045,6 @@ describe('Discover state', () => {
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({

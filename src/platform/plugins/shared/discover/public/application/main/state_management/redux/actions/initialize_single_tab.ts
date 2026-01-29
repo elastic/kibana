@@ -95,11 +95,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     if (esqlControls) {
-      tabInitialInternalState = {
-        ...tabInitialInternalState,
-        controlGroupJson: JSON.stringify(esqlControls),
-      };
+      dispatch(
+        internalStateSlice.actions.setAttributeControlGroupJson({
+          tabId,
+          controlGroupJson: JSON.stringify(esqlControls),
+        })
+      );
 
+      // TODO later: refactor from having controlGroupState and esqlVariables in Redux state to have selectors for them
       dispatch(
         internalStateSlice.actions.setControlGroupState({
           tabId,
@@ -245,7 +248,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         ? copySavedSearch(persistedTabSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
-      initialInternalState: tabInitialInternalState,
       appState: initialAppState,
       globalState: initialGlobalState,
       services,
