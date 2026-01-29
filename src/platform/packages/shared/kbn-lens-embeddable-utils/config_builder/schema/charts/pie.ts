@@ -29,6 +29,7 @@ import {
   groupIsNotCollapsed,
   legendNestedSchema,
   legendVisibleSchema,
+  validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 
@@ -105,7 +106,7 @@ function validateForMultipleMetrics({
       return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2';
     }
   }
-  return validateColouringAssignments({ metrics, group_by });
+  return validateColoringAssignments({ metrics, group_by });
 }
 
 /**
@@ -195,9 +196,3 @@ export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchema
 export type PieState = TypeOf<typeof pieStateSchema>;
 export type PieStateNoESQL = TypeOf<typeof pieStateSchemaNoESQL>;
 export type PieStateESQL = TypeOf<typeof pieStateSchemaESQL>;
-function validateColouringAssignments(arg0: {
-  metrics: PartitionMetric[];
-  group_by: { collapse_by?: string }[] | undefined;
-}) {
-  throw new Error('Function not implemented.');
-}
