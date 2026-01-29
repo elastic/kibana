@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - console
+    - security
     - discover_enhanced
     - index_management
     - infra
