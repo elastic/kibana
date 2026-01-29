@@ -8,13 +8,15 @@
 import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { labels } from '../../utils/i18n';
 import { AgentBuilderPromptsTable } from './table/prompts_table';
+import { PromptFormModal } from './prompt_form_modal';
 
 export const AgentBuilderPrompts = () => {
   const { euiTheme } = useEuiTheme();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderPromptsPage">
@@ -35,17 +37,16 @@ export const AgentBuilderPrompts = () => {
             key="new-prompt-button"
             fill
             iconType="plus"
-            onClick={() => {
-              // TODO: Implement new prompt creation
-            }}
+            onClick={() => setIsCreateModalOpen(true)}
           >
-            <EuiText size="s">{labels.prompts.newPromptButton}</EuiText>
+            <EuiText size="s">{labels.prompts.newPromptButtonLabel}</EuiText>
           </EuiButton>,
         ]}
       />
       <KibanaPageTemplate.Section>
         <AgentBuilderPromptsTable />
       </KibanaPageTemplate.Section>
+      <PromptFormModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </KibanaPageTemplate>
   );
 };

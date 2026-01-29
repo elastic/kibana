@@ -23,6 +23,8 @@ import type { UserPrompt } from '../../../../../common/http_api/user_prompts';
 import { usePrompts } from '../../../hooks/prompts/use_prompts';
 import { usePromptsTableSearch } from '../../../hooks/prompts/use_prompts_table_search';
 import { labels } from '../../../utils/i18n';
+import { PromptFormModal } from '../prompt_form_modal';
+import { DeletePromptModal } from '../delete_prompt_modal';
 import { PromptsQuickActions } from './prompts_table_quick_actions';
 
 const MAX_CONTENT_PREVIEW_LENGTH = 100;
@@ -44,6 +46,8 @@ export const AgentBuilderPromptsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
+  const [editPromptId, setEditPromptId] = useState<string | undefined>();
+  const [deletePrompt, setDeletePrompt] = useState<{ id: string; name: string } | undefined>();
 
   const resetPage = useCallback(() => {
     setTablePageIndex(0);
@@ -61,12 +65,18 @@ export const AgentBuilderPromptsTable = memo(() => {
   });
 
   const handleEdit = useCallback((promptId: string) => {
-    // TODO: Implement edit prompt navigation
+    setEditPromptId(promptId);
   }, []);
 
-  const handleDelete = useCallback((promptId: string) => {
-    // TODO: Implement delete prompt
-  }, []);
+  const handleDelete = useCallback(
+    (promptId: string) => {
+      const prompt = prompts.find((p) => p.id === promptId);
+      if (prompt) {
+        setDeletePrompt({ id: promptId, name: prompt.name });
+      }
+    },
+    [prompts]
+  );
 
   const dateFormat = useUiSetting<string>('dateFormat');
 
@@ -166,6 +176,19 @@ export const AgentBuilderPromptsTable = memo(() => {
           )
         }
       />
+      <PromptFormModal
+        isOpen={!!editPromptId}
+        onClose={() => setEditPromptId(undefined)}
+        promptId={editPromptId}
+      />
+      {deletePrompt && (
+        <DeletePromptModal
+          isOpen={!!deletePrompt}
+          onClose={() => setDeletePrompt(undefined)}
+          promptId={deletePrompt.id}
+          promptName={deletePrompt.name}
+        />
+      )}
     </>
   );
 });

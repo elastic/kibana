@@ -554,5 +554,37 @@ export const labels = {
     deletePromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.deletePromptErrorToast', {
       defaultMessage: 'Failed to delete prompt',
     }),
+    // Modal labels
+    idLabel: i18n.translate('xpack.agentBuilder.prompts.idLabel', {
+      defaultMessage: 'ID',
+    }),
+    idPlaceholder: i18n.translate('xpack.agentBuilder.prompts.idPlaceholder', {
+      defaultMessage: 'Enter prompt ID',
+    }),
+    namePlaceholder: i18n.translate('xpack.agentBuilder.prompts.namePlaceholder', {
+      defaultMessage: 'Enter prompt name',
+    }),
+    contentPlaceholder: i18n.translate('xpack.agentBuilder.prompts.contentPlaceholder', {
+      defaultMessage: 'Enter prompt content',
+    }),
+    deleteModalTitle: (promptName: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.deleteModal.title', {
+        defaultMessage: 'Delete {promptName}',
+        values: { promptName },
+      }),
+    deleteModalCancelButton: i18n.translate('xpack.agentBuilder.prompts.deleteModal.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    deleteModalConfirmButton: i18n.translate(
+      'xpack.agentBuilder.prompts.deleteModal.confirmButton',
+      {
+        defaultMessage: 'Delete',
+      }
+    ),
+    loadPromptErrorToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.loadPromptErrorToast', {
+        defaultMessage: 'Failed to load prompt "{promptId}"',
+        values: { promptId },
+      }),
   },
 };
