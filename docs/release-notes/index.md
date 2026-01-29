@@ -167,7 +167,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Improves the Console UI to make key actions more intuitive. The **Play** button is now more prominent, a new **Copy to language** button provides quick access to export the selected command in your preferred coding language, and the context menu has been updated to allow you to set a default language preference [#242487]({{kib-pull}}242487).
 
 **Workflows**:
-* Elastic Workflows is now available in technical preview. Build YAML-based workflows to automate actions across {{es}},{{kib}}, external systems, and AI. Workflows support manual, scheduled, and alert-based triggers, conditional logic, and integrations with existing connectors and Agent Builder. You must turn on the feature to get started. Refer to [](docs-content://explore-analyze/workflows/setup.md) for more details.
+* Elastic Workflows is now available in technical preview. Build YAML-based workflows to automate actions across {{es}},{{kib}}, external systems, and AI. Workflows support manual, scheduled, and alert-based triggers, conditional logic, and integrations with existing connectors and Agent Builder. You must turn on the feature to get started. Refer to [Set up workflows](docs-content://explore-analyze/workflows/setup.md) for more details.
 
 ### Fixes [kibana-9.3.0-fixes]
 
