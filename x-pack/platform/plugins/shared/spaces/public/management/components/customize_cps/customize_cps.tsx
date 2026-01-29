@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
 import { type FC, useCallback } from 'react';
 import React from 'react';
 
@@ -76,14 +76,16 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
           label={i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
             defaultMessage: 'Cross-project search default scope',
           })}
+          labelAppend={'...'}
         >
-          <ProjectPickerContent
-            projectRouting={space.projectRouting}
-            onProjectRoutingChange={updateProjectRouting}
-            fetchProjects={fetchProjects}
-            isReadonly={!canEdit()}
-            showTitle={false}
-          />
+          <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+            <ProjectPickerContent
+              projectRouting={space.projectRouting}
+              onProjectRoutingChange={updateProjectRouting}
+              fetchProjects={fetchProjects}
+              isReadonly={!canEdit()}
+            />
+          </EuiPanel>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </SectionPanel>
