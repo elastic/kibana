@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import type { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
 import {

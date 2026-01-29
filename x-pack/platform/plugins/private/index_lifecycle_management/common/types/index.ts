@@ -9,6 +9,14 @@ export type * from './api';
 
 export * from '@kbn/index-lifecycle-management-common-shared';
 
+import type { Index as IndexImported } from '@kbn/index-management-plugin/common';
+
+// index management plugin uses number for these fields
+export interface Index extends Omit<IndexImported, 'size' | 'primary_size'> {
+  size?: string;
+  primary_size?: string;
+}
+
 /**
  * These roles reflect how nodes are stratified into different data tiers.
  */
