@@ -1,8 +1,8 @@
 # https://buildkite.com/elastic/kibana-uiam-verify-and-promote/
 
 ### Parameters for this job:
-# FORCE_PUBLISH: if set to true, promotion will happen on non-main branches
 # UIAM_IMAGE: the full image path for the docker image to test
+# FORCE_PUBLISH: if set to true, promotion will happen on non-main branches
 
 agents:
   image: family/kibana-ubuntu-2404

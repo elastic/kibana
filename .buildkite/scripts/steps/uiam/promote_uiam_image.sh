@@ -23,12 +23,7 @@ else
   SOURCE_IMAGE="$BASE_UIAM_REPO:$SOURCE_IMAGE_OR_TAG"
 fi
 
-if [[ "${PUBLISH_DOCKER_TAG:-}" =~ ^(1|true)$ ]]; then
-  echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
-else
-  echo "--- Skipping UIAM image promotion because PUBLISH_DOCKER_TAG is not set"
-  exit 0
-fi
+echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to '$TARGET_IMAGE'"
 
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
@@ -83,7 +78,6 @@ ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE" 2>/dev/null || echo '[]')
 UIAM_COMMIT_HASH=$(echo "$ORIG_IMG_DATA" | jq -r '.[].Config.Labels["org.opencontainers.image.revision"] // "unknown"')
 
 echo "Image push to $TARGET_IMAGE successful."
-echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
 
 echo "--- Annotating build with info"
 cat << EOT | buildkite-agent annotate --style "success"

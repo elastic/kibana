@@ -49,8 +49,6 @@ spec:
         Weekly build:
           cronline: 0 9 * * 1 America/New_York
           message: Weekly build
-          env:
-            PUBLISH_DOCKER_TAG: 'true'
           branch: main
       tags:
         - kibana

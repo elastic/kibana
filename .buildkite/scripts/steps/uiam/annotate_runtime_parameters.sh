@@ -18,6 +18,7 @@ fi
 docker_with_retry pull "$UIAM_IMAGE"
 UIAM_VERSION=$(docker inspect --format='{{json .Config.Labels}}' "$UIAM_IMAGE" | jq -r '.["org.opencontainers.image.revision"] // "unknown"' | cut -c1-12)
 
+# Find the most accurate image tag
 if [[ "$UIAM_IMAGE" == *":git-"* ]]; then
   UIAM_IMAGE_FULL=$UIAM_IMAGE
 else
