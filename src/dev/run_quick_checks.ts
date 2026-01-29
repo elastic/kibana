@@ -286,19 +286,59 @@ interface ListrContext {
 
 function createListrTask(check: CheckToRun, label: string): ListrTask<ListrContext> {
   const scriptName = getScriptShortName(check.script);
+  const command = getCommandForCheck(check);
   return {
     title: `${label} ${scriptName}`,
     task: async (ctx, task) => {
       const result = await runCheckAsync(check);
       ctx.results.push(result);
       const time = humanizeTime(result.durationMs);
+      const commandSuffix = showCommands ? ` (${command})` : '';
       if (result.success) {
-        task.title = `${label} ${scriptName} (${time})`;
+        task.title = `${label} ${scriptName} (${time})${commandSuffix}`;
       } else {
-        throw new Error(`${scriptName} failed (${time})`);
+        throw new Error(`${scriptName} failed (${time})${commandSuffix}`);
       }
     },
   };
+}
+
+/** Returns the command that will be executed for a check */
+function getCommandForCheck(check: CheckToRun): string {
+  const { script, nodeCommand, filesArg, pathArg, packagesArg, positionalPackages } = check;
+
+  // When running locally (not CI) and a nodeCommand is available, run it directly
+  if (!IS_CI && nodeCommand) {
+    let fullCommand = nodeCommand;
+    const args: string[] = [];
+
+    if (targetFiles && filesArg) {
+      args.push(`${filesArg} ${targetFiles}`);
+    }
+
+    if (targetPackages) {
+      if (positionalPackages) {
+        args.push(targetPackages.split(',').join(' '));
+      } else if (packagesArg) {
+        args.push(`${packagesArg} ${targetPackages}`);
+      } else if (pathArg) {
+        const pathArgs = targetPackages
+          .split(',')
+          .map((pkg) => `${pathArg} ./${pkg}`)
+          .join(' ');
+        args.push(pathArgs);
+      }
+    }
+
+    if (args.length > 0) {
+      fullCommand = `${nodeCommand} ${args.join(' ')}`;
+    }
+
+    return fullCommand;
+  }
+
+  // In CI or when no nodeCommand, use shell script
+  return `bash ${script}`;
 }
 
 async function runPartitionedChecks(
@@ -477,10 +517,6 @@ async function runNodeCommand(
   startTime: number
 ): Promise<CheckResult> {
   return new Promise((resolveFn) => {
-    if (showCommands) {
-      logger.info(`[${getScriptShortName(script)}] Running: ${nodeCommand}`);
-    }
-
     const parts = nodeCommand.split(' ');
     const cmd = parts[0];
     const args = parts.slice(1);
@@ -520,10 +556,6 @@ async function runNodeCommand(
 async function runShellScript(script: string, startTime: number): Promise<CheckResult> {
   return new Promise((resolveFn) => {
     validateScriptPath(script);
-
-    if (showCommands) {
-      logger.info(`[${getScriptShortName(script)}] Running: bash ${script}`);
-    }
 
     const scriptProcess = spawn('bash', [script], {
       cwd: REPO_ROOT,
