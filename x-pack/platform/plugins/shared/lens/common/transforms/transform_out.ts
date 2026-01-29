@@ -6,6 +6,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
@@ -22,13 +23,14 @@ import { findLensReference, isByRefLensState } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 
 /**
- * Transform from Lens Serialized State to Lens API format
+ * Transform from Lens Stored State to Lens API format
  */
 export const getTransformOut = ({
   builder,
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(state, panelReferences) {
+  return function transformOut(storedState, panelReferences) {
+    const state = transformTitlesOut(storedState);
     const enhancements = state.enhancements
       ? transformEnhancementsOut?.(state.enhancements, panelReferences ?? [])
       : undefined;
