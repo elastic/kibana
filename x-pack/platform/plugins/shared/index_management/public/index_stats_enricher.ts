@@ -29,7 +29,6 @@ export const indexStatsEnricher = {
             uuid: indices[name]?.uuid,
             documents_deleted: indices[name]?.primaries?.docs?.deleted ?? 0,
             primary_size: indices[name]?.primaries?.store?.size_in_bytes ?? 0,
-            documents: indices[name]?.primaries?.docs?.count ?? 0,
             size: indices[name]?.total?.store?.size_in_bytes ?? 0,
           })),
           source: SOURCE,

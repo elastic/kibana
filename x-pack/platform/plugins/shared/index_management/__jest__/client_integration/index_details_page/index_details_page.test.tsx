@@ -12,6 +12,7 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import type { RouteComponentProps } from 'react-router-dom';
+import numeral from '@elastic/numeral';
 
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsSection } from '../../../common/constants';
@@ -373,7 +374,11 @@ describe('<IndexDetailsPage />', () => {
       await renderPage();
       const storageDetails = screen.getByTestId('indexDetailsStorage').textContent;
       expect(storageDetails).toBe(
-        `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
+        `Storage${numeral(testIndexMock.primary_size).format('0.00 b')}Primary${numeral(
+          testIndexMock.size
+        ).format('0.00 b')}TotalShards${testIndexMock.primary} Primary / ${
+          testIndexMock.replica
+        } Replicas `
       );
     });
 
