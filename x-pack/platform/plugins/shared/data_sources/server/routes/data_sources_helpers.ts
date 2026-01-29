@@ -58,13 +58,15 @@ async function importMcpTools(
   actions: ActionsPluginStart,
   request: KibanaRequest,
   connectorId: string,
-  toolNames: string[],
+  tools: Array<{ name: string; description: string }>,
   name: string,
   logger: Logger
 ): Promise<string[]> {
-  if (toolNames.length === 0) {
+  if (tools.length === 0) {
     return [];
   }
+
+  const toolNames = tools.map((tool) => tool.name);
 
   const mcpTools = await getNamedMcpTools({
     actions,
@@ -78,15 +80,20 @@ async function importMcpTools(
     throw new Error(`No imported connector tools found for ${name}`);
   }
 
+  const dataSourceTools = mcpTools.map((tool) => ({
+    name: tool.name,
+    description: tool.description + ' ' + tools.find((t) => t.name === tool.name)!.description,
+  }));
+
   let importedToolIds: string[] = [];
   try {
-    if (mcpTools && mcpTools.length > 0) {
+    if (dataSourceTools && dataSourceTools.length > 0) {
       const { results } = await bulkCreateMcpTools({
         registry,
         actions,
         request,
         connectorId,
-        tools: mcpTools,
+        tools: dataSourceTools,
         namespace: name,
       });
       importedToolIds = results.map((result) => result.toolId);

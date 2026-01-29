@@ -60,7 +60,7 @@ export interface CustomOAuthConfiguration {
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
-  importedTools?: string[];
+  importedTools?: Array<{ name: string; description: string }>;
 }
 
 /**

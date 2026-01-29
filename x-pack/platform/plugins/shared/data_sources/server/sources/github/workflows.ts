@@ -7,7 +7,7 @@
 export function generateGithubSearchWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'search'
-description: 'Search for issues in a GitHub repository'
+description: 'Search through Github. Use the Github search query syntax.'
 enabled: true
 triggers:
   - type: 'manual'
