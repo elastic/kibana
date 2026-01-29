@@ -22,9 +22,13 @@ import { getLogDocumentById } from './get_log_document_by_id';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import { getLogDocumentById } from './get_log_document_by_id';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import type { AiInsightResult, ContextEvent } from './types';
 
 export interface GetLogAiInsightsParams {
+  core: ObservabilityAgentBuilderCoreSetup;
   index: string;
   id: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -45,6 +49,7 @@ export interface LogDocument {
 }
 
 export async function getLogAiInsights({
+  core,
   index,
   id,
   esClient,
@@ -53,6 +58,7 @@ export async function getLogAiInsights({
   core,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
+
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
@@ -233,6 +239,8 @@ function generateLogSummary({
         - **Next steps**: Suggest specific actions for investigation or remediation
 
         Base your analysis strictly on the provided data.
+        
+        ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
       `)
     : dedent(`
         You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
@@ -242,6 +250,8 @@ function generateLogSummary({
         - If CorrelatedLogSequence or LogCategories is available, use it to provide additional context
 
         Base your analysis strictly on the provided data. Be specific and reference actual field values.
+        
+        ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
       `);
 
   const userPrompt = dedent(`
