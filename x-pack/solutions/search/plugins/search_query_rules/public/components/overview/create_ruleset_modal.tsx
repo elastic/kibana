@@ -66,7 +66,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
         <EuiModalHeaderTitle
           id={modalTitleId}
           data-test-subj="searchRulesetCreateRulesetModalHeader"
-          component="div"
+          component="h2"
         >
           <FormattedMessage
             id="xpack.queryRules.createRulesetModal.title"
