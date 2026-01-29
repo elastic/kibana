@@ -15,19 +15,17 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiSwitch,
-  EuiText,
   euiTextBreakWord,
   useEuiTheme,
 } from '@elastic/eui';
 import { css as classNameCss } from '@emotion/css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
+import { DataErrorsSwitch } from './data_errors_switch';
 
 interface TypeConsts {
   color: 'danger' | 'warning' | 'text';
@@ -131,49 +129,6 @@ function ErrorsWarningsContent({
   );
 }
 
-function ErrorsWarningsFooter({
-  dataErrorsControl,
-  closePopover,
-}: {
-  dataErrorsControl: DataErrorsControl;
-  closePopover: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const { onChange: onChangeDataErrors, enabled: dataErrorsEnabled } = dataErrorsControl;
-
-  const onChangeDataErrorsSwitch = useCallback(() => {
-    onChangeDataErrors(!dataErrorsEnabled);
-    closePopover();
-  }, [onChangeDataErrors, dataErrorsEnabled, closePopover]);
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      css={css`
-        padding: ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      `}
-    >
-      <EuiFlexItem>
-        <EuiSwitch
-          compressed
-          checked={dataErrorsEnabled}
-          onChange={onChangeDataErrorsSwitch}
-          label={
-            <EuiText size="xs">
-              <FormattedMessage
-                id="esqlEditor.query.dataErrorsLabel"
-                defaultMessage="Highlight data errors"
-              />
-            </EuiText>
-          }
-          data-test-subj="ESQLEditor-footerPopover-dataErrorsSwitch"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
 export function ErrorsWarningsFooterPopover({
   isPopoverOpen,
   items,
@@ -233,10 +188,7 @@ export function ErrorsWarningsFooterPopover({
             <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
           )}
           {dataErrorsControl && (
-            <ErrorsWarningsFooter
-              dataErrorsControl={dataErrorsControl}
-              closePopover={closePopover}
-            />
+            <DataErrorsSwitch dataErrorsControl={dataErrorsControl} closePopover={closePopover} />
           )}
         </EuiPopover>
       </EuiFlexGroup>
