@@ -70,16 +70,9 @@ export const getWorkflowExecution = async ({
       spaceId,
     });
 
-    // Handle race condition: workflow in terminal status but steps not yet visible or still non-terminal
-    // This can happen due to ES refresh lag (refresh: false on writes, 1-second default refresh interval)
-    // Instead of forcing expensive refresh, temporarily report workflow as RUNNING to keep the client polling
-    // until ES naturally refreshes and step statuses become consistent
     let effectiveStatus = workflowExecutionDoc.status;
-    const hasIncompleteSteps =
-      stepExecutions.length === 0 ||
-      stepExecutions.some((stepExec) => !isTerminalStatus(stepExec.status));
 
-    if (isTerminalStatus(workflowExecutionDoc.status) && hasIncompleteSteps) {
+    if (shouldReportAsRunning(workflowExecutionDoc, stepExecutions)) {
       effectiveStatus = ExecutionStatus.RUNNING;
     }
 
@@ -94,6 +87,32 @@ export const getWorkflowExecution = async ({
     throw error;
   }
 };
+
+/**
+ * Checks if step executions are incomplete due to ES refresh lag.
+ * Returns true if any of these conditions are met:
+ * - No steps found yet (workflow can't be without step executions)
+ * - Not all step executions are indexed yet (count mismatch)
+ * - Some steps are still non-terminal (searches from end for performance, as typically the last steps are still running)
+ */
+function shouldReportAsRunning(
+  workflowExecution: EsWorkflowExecution,
+  stepExecutions: EsWorkflowStepExecution[]
+): boolean {
+  if (!isTerminalStatus(workflowExecution.status)) {
+    return false;
+  }
+
+  if (workflowExecution.stepExecutionsCount === undefined) {
+    return false;
+  }
+
+  return (
+    stepExecutions.length === 0 ||
+    stepExecutions.length !== workflowExecution.stepExecutionsCount ||
+    stepExecutions.findLast((stepExec) => !isTerminalStatus(stepExec.status)) !== undefined
+  );
+}
 
 function transformToWorkflowExecutionDetailDto(
   id: string,

@@ -400,6 +400,8 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      workflowExecutionUpdate.stepExecutionsCount =
+        this.workflowExecutionState.getAllStepExecutions().length;
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
