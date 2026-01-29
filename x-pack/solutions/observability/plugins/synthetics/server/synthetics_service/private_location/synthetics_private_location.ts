@@ -9,7 +9,13 @@ import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/p
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
+import {
+  syntheticsMonitorSOTypes,
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+} from '../../../common/types/saved_objects';
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
@@ -81,6 +87,54 @@ export class SyntheticsPrivateLocation {
    */
   getLegacyPolicyId(configId: string, locId: string, spaceId: string) {
     return `${configId}-${locId}-${spaceId}`;
+  }
+
+  /**
+   * Gets all unique spaces that have any synthetics monitors.
+   * Uses aggregation for efficiency instead of iterating through all monitors.
+   */
+  async getAllSpacesWithMonitors(): Promise<string[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const spaces = new Set<string>();
+
+    try {
+      const result = await soClient.find<
+        unknown,
+        {
+          namespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+          legacyNamespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+        }
+      >({
+        type: syntheticsMonitorSOTypes,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+        aggs: {
+          namespaces: {
+            terms: { field: `${syntheticsMonitorSavedObjectType}.namespace`, size: 1000 },
+          },
+          legacyNamespaces: {
+            terms: { field: `${legacySyntheticsMonitorTypeSingle}.namespace`, size: 1000 },
+          },
+        },
+      });
+
+      // Collect namespaces from both new and legacy monitor types
+      result.aggregations?.namespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+      result.aggregations?.legacyNamespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+    } catch (e) {
+      this.server.logger.error(`Error fetching spaces with monitors: ${e.message}`);
+    }
+
+    return [...spaces];
   }
 
   async generateNewPolicy(
@@ -303,20 +357,19 @@ export class SyntheticsPrivateLocation {
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      // Get all spaces the monitor exists in for legacy policy cleanup
-      const monitorSpaces = config[ConfigKey.KIBANA_SPACES] || [];
-      const allSpaces = [...new Set([spaceId, ...monitorSpaces])];
-
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
         const newId = this.getPolicyId(config, privateLocation.id);
+        const legacyIdPrefix = `${config.id}-${privateLocation.id}-`;
 
         // Check for new format policy
         const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId);
-        // Find legacy policies for this config+location from all spaces monitor exists in
-        const legacyPolicyIds = allSpaces
-          .map((space) => this.getLegacyPolicyId(config.id, privateLocation.id, space))
-          .filter((legacyId) => existingPolicies?.some((policy) => policy.id === legacyId));
+        // Find ALL legacy policies for this config+location by matching ID prefix pattern
+        // This catches legacy policies from any space, not just spaces the monitor currently exists in
+        const legacyPolicyIds =
+          existingPolicies
+            ?.filter((policy) => policy.id.startsWith(legacyIdPrefix) && policy.id !== newId)
+            .map((policy) => policy.id) || [];
         const hasAnyLegacyPolicy = legacyPolicyIds.length > 0;
         const hasPolicy = hasNewFormatPolicy || hasAnyLegacyPolicy;
 
@@ -338,7 +391,7 @@ export class SyntheticsPrivateLocation {
             if (hasNewFormatPolicy) {
               // Policy already exists with new format, just update it
               policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
-              // Delete legacy policies from all spaces monitor exists in
+              // Delete all legacy policies found
               policiesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicy) {
               // Legacy policies exist - migrate to new format
@@ -354,7 +407,7 @@ export class SyntheticsPrivateLocation {
             if (hasNewFormatPolicy) {
               policiesToDelete.push(newId);
             }
-            // Delete legacy policies from all spaces monitor exists in
+            // Delete all legacy policies found
             policiesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
@@ -402,7 +455,7 @@ export class SyntheticsPrivateLocation {
   /**
    * Fetches existing package policies for the given configs and locations.
    * Looks for new (space-agnostic) format and legacy format for all spaces
-   * the monitor exists in (via KIBANA_SPACES).
+   * that have any synthetics monitors.
    */
   async getExistingPolicies(
     configs: HeartbeatConfig[],
@@ -411,18 +464,19 @@ export class SyntheticsPrivateLocation {
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
 
+    // Get all spaces that have any synthetics monitors
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    // Include current space in case it has no monitors yet
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+
     // Use Set to automatically handle duplicates
     const policyIdsToFetch = new Set<string>();
 
     for (const config of configs) {
-      // Get all spaces the monitor exists in (deduplicated, including current space)
-      const monitorSpaces = config[ConfigKey.KIBANA_SPACES] || [];
-      const allSpaces = new Set([spaceId, ...monitorSpaces]);
-
       for (const privateLocation of allPrivateLocations) {
         // Add new format (space-agnostic)
         policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        // Add legacy format for all spaces the monitor exists in
+        // Add legacy format for all spaces that have any monitors
         for (const space of allSpaces) {
           policyIdsToFetch.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
         }
@@ -490,6 +544,11 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
 
+    // Get all spaces that have any synthetics monitors
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    // Include current space in case it has no monitors yet
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+
     // Use Set to automatically handle duplicates
     const policyIdsToDelete = new Set<string>();
 
@@ -497,14 +556,10 @@ export class SyntheticsPrivateLocation {
       const { locations } = config;
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      // Get all spaces the monitor exists in (deduplicated, including current space)
-      const monitorSpaces = config[ConfigKey.KIBANA_SPACES] || [];
-      const allSpaces = new Set([spaceId, ...monitorSpaces]);
-
       for (const privateLocation of monitorPrivateLocations) {
         // Add new format ID
         policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
-        // Add legacy format IDs for all spaces the monitor exists in
+        // Add legacy format IDs for all spaces that have any monitors
         for (const space of allSpaces) {
           policyIdsToDelete.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
         }
