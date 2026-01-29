@@ -11,6 +11,7 @@ import { useRouteMatch, useLocation } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
+import { omit } from 'lodash';
 
 import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../../../../../common/constants';
 
@@ -62,8 +63,14 @@ export const CopyPackagePolicyPage = memo(() => {
   const packagePolicyData = useMemo(() => {
     if (packagePolicy.data?.item) {
       return {
-        ...packagePolicy.data.item,
+        ...omit(packagePolicy.data.item, 'id'), // Delete id to force new id creation
         name: 'copy-' + packagePolicy.data.item.name,
+        inputs: packagePolicy.data.item.inputs.map((input) => ({
+          ...omit(input, 'id'),
+          streams: input.streams?.map((stream) => ({
+            ...omit(stream, 'id'),
+          })),
+        })),
       };
     }
   }, [packagePolicy.data?.item]);
