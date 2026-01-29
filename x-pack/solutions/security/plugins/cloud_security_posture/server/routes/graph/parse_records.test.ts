@@ -25,7 +25,7 @@ describe('parseRecords', () => {
   });
 
   it('returns empty nodes and edges for empty input', () => {
-    const result = parseRecords(mockLogger, []);
+    const result = parseRecords(mockLogger, [], []);
     expect(result.nodes).toEqual([]);
     expect(result.edges).toEqual([]);
     expect(result.messages).toBeUndefined();
@@ -62,7 +62,7 @@ describe('parseRecords', () => {
         sourceCountryCodes: [],
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
 
     // Should have 3 nodes: actor (entity ID), target (entity ID), label
     expect(result.nodes.length).toBe(3);
@@ -137,7 +137,7 @@ describe('parseRecords', () => {
         sourceCountryCodes: [],
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
     const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
@@ -208,7 +208,7 @@ describe('parseRecords', () => {
         sourceCountryCodes: [],
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
 
     // Event 1 creates: test-actor-hash (MD5), test-target-hash (MD5)
     // Event 2 creates: test-actor-hash (reused), test-target-hash (reused)
@@ -267,7 +267,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
       expect(labelNode).toHaveProperty('color', 'danger');
@@ -303,7 +303,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
       expect(labelNode).toHaveProperty('color', 'danger');
@@ -362,7 +362,7 @@ describe('parseRecords', () => {
         isOriginAlert: true,
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
     const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
 
     // All events use MD5 hashes for actor and target groups
@@ -434,7 +434,7 @@ describe('parseRecords', () => {
     ];
     // nodesLimit = 2, so only first record should be processed
     // First record creates 3 nodes (actor group, target group, label)
-    const result = parseRecords(mockLogger, records, 2);
+    const result = parseRecords(mockLogger, records, [], 2);
     expect(result.nodes.length).toBeLessThanOrEqual(3);
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
@@ -473,7 +473,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Should have actor group with both type and sub_type entities
       const actorNode = result.nodes.find(
@@ -536,7 +536,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find((n) => n.label === 'Services') as EntityNodeDataModel;
       expect(actorNode).toBeDefined();
@@ -607,7 +607,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Should create unknown target node
       const unknownNode = result.nodes.find((n) => n.label === 'Unknown') as EntityNodeDataModel;
@@ -665,7 +665,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -706,7 +706,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -751,7 +751,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -798,7 +798,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -844,7 +844,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: ['JP', 'CA'],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Check actor node has host IPs
       const actorNode = result.nodes.find((n) => n.label === 'Global Users') as EntityNodeDataModel;
@@ -896,7 +896,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Nodes should not have IP or country code properties when arrays are empty
       const actorNode = result.nodes.find((n) => n.label === 'Local Users') as EntityNodeDataModel;
@@ -948,7 +948,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const userNode = result.nodes.find((n) => n.label === 'actor1') as EntityNodeDataModel;
       expect(userNode).toBeDefined();
@@ -1003,7 +1003,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Find actor and target nodes by group ID (which is entity ID for single entities)
       const actorNode = result.nodes.find(
@@ -1067,7 +1067,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-entity1-entity2-entity3'
@@ -1123,7 +1123,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Find actor and target nodes by MD5 hash (nodes always use actorNodeId/targetNodeId)
       const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
@@ -1185,7 +1185,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-user1-user2-user3'
@@ -1248,7 +1248,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-user1-user2-user3'
@@ -1305,7 +1305,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
       expect(actorNode).toBeDefined();
       expect(actorNode.documentsData).toHaveLength(1);
@@ -1358,7 +1358,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const targetNode = result.nodes.find(
         (n) => n.id === '63861393ae85888aeb59aab1672b3957'
@@ -1435,7 +1435,7 @@ describe('parseRecords', () => {
           sourceCountryCodes: [],
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-actor1-actor2-actor3'

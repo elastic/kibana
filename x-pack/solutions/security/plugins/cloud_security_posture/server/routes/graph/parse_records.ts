@@ -505,7 +505,7 @@ const createRelationshipNodes = (
         // Parse all source doc data to collect documents and entity names
         const documentsData: NodeDocumentDataModel[] = [];
         const entityNames: string[] = [];
-        record.sourceDocData?.forEach((docDataJson) => {
+        castArray(record.sourceDocData).forEach((docDataJson) => {
           try {
             const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
             documentsData.push(docData);
@@ -542,7 +542,7 @@ const createRelationshipNodes = (
         } as EntityNodeDataModel;
       } else {
         // Single entity - use the first source doc data
-        const sourceDocDataJson = record.sourceDocData?.[0];
+        const sourceDocDataJson = castArray(record.sourceDocData)[0];
         context.nodesMap[sourceNodeId] = parseEntityDocData(sourceNodeId, sourceDocDataJson);
       }
     }
@@ -557,7 +557,7 @@ const createRelationshipNodes = (
         // Parse all target doc data to collect documents and entity names
         const documentsData: NodeDocumentDataModel[] = [];
         const entityNames: string[] = [];
-        record.targetDocData?.forEach((docDataJson) => {
+        castArray(record.targetDocData).forEach((docDataJson) => {
           try {
             const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
             documentsData.push(docData);
@@ -594,7 +594,7 @@ const createRelationshipNodes = (
         } as EntityNodeDataModel;
       } else {
         // Single entity - use the first target doc data
-        const targetDocDataJson = record.targetDocData?.[0];
+        const targetDocDataJson = castArray(record.targetDocData)[0];
         context.nodesMap[targetNodeId] = parseEntityDocData(targetNodeId, targetDocDataJson);
       }
     }

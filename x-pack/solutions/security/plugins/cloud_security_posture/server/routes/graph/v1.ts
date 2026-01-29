@@ -7,7 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { fetchGraph, fetchEntityRelationships } from './fetch_graph';
+import { fetchGraph } from './fetch_graph';
 import type { EsQuery, EntityId, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
@@ -45,40 +45,18 @@ export const getGraph = async ({
     }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
-  // Fetch events (existing logic) - only if originEventIds are provided
-  const eventResultsPromise = fetchGraph({
+  const { events, relationships } = await fetchGraph({
     esClient,
-    showUnknownTarget,
     logger,
     start,
     end,
     originEventIds: originEventIds ?? [],
+    showUnknownTarget,
     indexPatterns,
     spaceId,
     esQuery,
+    entityIds,
   });
 
-  // Optionally fetch relationships in parallel when entityIds are provided
-  const hasEntityIds = entityIds && entityIds.length > 0;
-
-  const relationshipResultsPromise = hasEntityIds
-    ? fetchEntityRelationships({
-        esClient,
-        logger,
-        entityIds,
-        spaceId,
-      })
-    : Promise.resolve([]);
-
-  // Wait for both in parallel
-  const [eventResults, relationshipResults] = await Promise.all([
-    eventResultsPromise,
-    relationshipResultsPromise,
-  ]);
-
-  logger.trace(
-    `Fetched [events: ${eventResults.records.length}] [relationships: ${relationshipResults.length}]`
-  );
-
-  return parseRecords(logger, eventResults.records, relationshipResults, nodesLimit);
+  return parseRecords(logger, events, relationships, nodesLimit);
 };

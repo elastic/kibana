@@ -18,7 +18,6 @@ import {
 import {
   getEnrichPolicyId,
   getEntitiesLatestIndexName,
-  getEntitiesLatestIndexNameV1,
 } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   ENTITY_RELATIONSHIP_FIELDS,
@@ -43,7 +42,11 @@ interface BuildEsqlQueryParams {
   alertsMappingsIncluded: boolean;
 }
 
-export const fetchGraph = async ({
+/**
+ * Fetches events/alerts from logs and alerts indices.
+ * This is the core event fetching logic used by fetchGraph.
+ */
+export const fetchEvents = async ({
   esClient,
   logger,
   start,
@@ -114,6 +117,80 @@ export const fetchGraph = async ({
       ],
     })
     .toRecords<GraphEdge>();
+};
+
+export interface FetchGraphParams {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  start: string | number;
+  end: string | number;
+  originEventIds: OriginEventId[];
+  showUnknownTarget: boolean;
+  indexPatterns: string[];
+  spaceId: string;
+  esQuery?: EsQuery;
+  entityIds?: EntityId[];
+}
+
+export interface FetchGraphResult {
+  events: GraphEdge[];
+  relationships: RelationshipEdge[];
+}
+
+/**
+ * Fetches graph data including both events and entity relationships.
+ * Orchestrates parallel fetching of events from logs/alerts and relationships from entity store.
+ */
+export const fetchGraph = async ({
+  esClient,
+  logger,
+  start,
+  end,
+  originEventIds,
+  showUnknownTarget,
+  indexPatterns,
+  spaceId,
+  esQuery,
+  entityIds,
+}: FetchGraphParams): Promise<FetchGraphResult> => {
+  // Fetch events
+  const eventsPromise = fetchEvents({
+    esClient,
+    logger,
+    start,
+    end,
+    originEventIds,
+    showUnknownTarget,
+    indexPatterns,
+    spaceId,
+    esQuery,
+  });
+
+  // Optionally fetch relationships in parallel when entityIds are provided
+  const hasEntityIds = entityIds && entityIds.length > 0;
+  const relationshipsPromise = hasEntityIds
+    ? fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds,
+        spaceId,
+      })
+    : Promise.resolve([]);
+
+  // Wait for both in parallel
+  const [eventsResult, relationshipsResult] = await Promise.all([
+    eventsPromise,
+    relationshipsPromise,
+  ]);
+
+  logger.trace(
+    `Fetched [events: ${eventsResult.records.length}] [relationships: ${relationshipsResult.length}]`
+  );
+
+  return {
+    events: eventsResult.records,
+    relationships: relationshipsResult,
+  };
 };
 
 const buildDslFilter = (
@@ -464,24 +541,19 @@ ${buildEnrichedEntityFieldsEsql()}
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
   relationshipFields: readonly string[];
-  isLookupIndexAvailable: boolean;
-  spaceId: string;
 }
 
 /**
  * Builds ES|QL query for fetching entity relationships from the generic entities index.
  * Uses FORK to expand each relationship field and aggregates results.
- * The relationshipQuery filter is applied via the DSL filter parameter.
- * Conditionally includes LOOKUP JOIN, ENRICH, or fallback for target entity enrichment.
+ * The filter is applied via the DSL filter parameter.
+ * Uses LOOKUP JOIN to enrich target entity metadata.
+ * Note: This function should only be called when the entities index is in lookup mode.
  */
 const buildRelationshipsEsqlQuery = ({
   indexName,
   relationshipFields,
-  isLookupIndexAvailable,
-  spaceId,
 }: BuildRelationshipsEsqlQueryParams): string => {
-  const enrichPolicyName = getEnrichPolicyId(spaceId);
-
   // Build COALESCE statements for each relationship field
   const coalesceStatements = relationshipFields
     .map(
@@ -494,15 +566,12 @@ const buildRelationshipsEsqlQuery = ({
   const forkBranches = relationshipFields
     .map(
       (field) =>
-        `  (MV_EXPAND entity.relationships.${field} | EVAL _relationship = "${field}" | EVAL _target_id = entity.relationships.${field} | DROP entity.relationships.*)`
+        `  (MV_EXPAND entity.relationships.${field} | EVAL relationship = "${field}" | EVAL _target_id = entity.relationships.${field} | DROP entity.relationships.*)`
     )
     .join('\n');
 
-  // Build enrichment section based on available method
-  // Since we're querying the entity store index, either lookup mode or enrich policy should be available
-  // We need to store source entity fields before LOOKUP JOIN as they get overwritten
-  const enrichmentSection = isLookupIndexAvailable
-    ? `// Store source entity fields before lookup (they get overwritten by target entity fields)
+  // Store source entity fields before LOOKUP JOIN as they get overwritten by target entity fields
+  const enrichmentSection = `// Store source entity fields before lookup (they get overwritten by target entity fields)
 | RENAME _source_id = entity.id
 | RENAME _source_name = entity.name
 | RENAME _source_type = entity.type
@@ -517,9 +586,7 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME entity.id = _source_id
 | RENAME entity.name = _source_name
 | RENAME entity.type = _source_type
-| RENAME entity.sub_type = _source_sub_type`
-    : `// Enrich target entity metadata using enrich policy
-| ENRICH ${enrichPolicyName} ON _target_id WITH _target_name = entity.name, _target_type = entity.type, _target_sub_type = entity.sub_type`;
+| RENAME entity.sub_type = _source_sub_type`;
 
   // The ecsParentField hint is needed to later query actions done TO this entity
   // (e.g., to find events where this entity is the target).
@@ -575,68 +642,7 @@ ${enrichmentSection}
   ),
   targetIdsCount = COUNT_DISTINCT(_target_id),
   targetDocData = VALUES(targetDocData)
-    BY sourceEntityType = entity.type, sourceEntitySubType = entity.sub_type, targetEntityType = _target_type, targetEntitySubType = _target_sub_type, _relationship`;
-};
-
-/**
- * Parses ES|QL response into RelationshipEdge records.
- */
-const parseRelationshipRecords = (
-  response: EsqlToRecords<Record<string, unknown>>
-): RelationshipEdge[] => {
-  const records: RelationshipEdge[] = [];
-
-  for (const record of response.records) {
-    const relationship = record._relationship as string;
-    const count = record.count as number;
-
-    // Source entity grouping (like actors in events)
-    const sourceNodeId = record.sourceNodeId as string;
-    const sourceIds = Array.isArray(record.sourceIds)
-      ? (record.sourceIds as string[])
-      : [record.sourceIds as string];
-    const sourceIdsCount = record.sourceIdsCount as number;
-    const sourceEntityType = record.sourceEntityType as string | undefined;
-    const sourceEntitySubType = record.sourceEntitySubType as string | undefined;
-    const sourceDocData = record.sourceDocData
-      ? Array.isArray(record.sourceDocData)
-        ? (record.sourceDocData as string[])
-        : [record.sourceDocData as string]
-      : undefined;
-
-    // Target entity grouping (like targets in events)
-    const targetNodeId = record.targetNodeId as string;
-    const targetIds = Array.isArray(record.targetIds)
-      ? (record.targetIds as string[])
-      : [record.targetIds as string];
-    const targetIdsCount = record.targetIdsCount as number;
-    const targetEntityType = record.targetEntityType as string | undefined;
-    const targetEntitySubType = record.targetEntitySubType as string | undefined;
-    const targetDocData = record.targetDocData
-      ? Array.isArray(record.targetDocData)
-        ? (record.targetDocData as string[])
-        : [record.targetDocData as string]
-      : undefined;
-
-    records.push({
-      relationship,
-      count,
-      sourceNodeId,
-      sourceIds,
-      sourceIdsCount,
-      sourceEntityType,
-      sourceEntitySubType,
-      sourceDocData,
-      targetNodeId,
-      targetIds,
-      targetIdsCount,
-      targetEntityType,
-      targetEntitySubType,
-      targetDocData,
-    });
-  }
-
-  return records;
+    BY sourceEntityType = entity.type, sourceEntitySubType = entity.sub_type, targetEntityType = _target_type, targetEntitySubType = _target_sub_type, relationship`;
 };
 
 /**
@@ -667,6 +673,7 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
 /**
  * Fetches entity relationships from the generic entities index.
  * Queries for all relationship types for entities matching the provided entityIds.
+ * Note: Relationships are only available in v2 entity store with lookup mode enabled.
  */
 export const fetchEntityRelationships = async ({
   esClient,
@@ -679,24 +686,22 @@ export const fetchEntityRelationships = async ({
   entityIds: EntityId[];
   spaceId: string;
 }): Promise<RelationshipEdge[]> => {
-  // Check if the entities lookup index exists and is in lookup mode (preferred)
-  // If not, fall back to using enrich policy (deprecated) with v1 index
+  const indexName = getEntitiesLatestIndexName(spaceId);
+
+  // Relationships require v2 entity store with lookup mode for LOOKUP JOIN enrichment
   const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  if (!isLookupIndexAvailable) {
+    logger.debug(
+      `Entities index [${indexName}] is not in lookup mode, skipping relationship fetch`
+    );
+    return [];
+  }
 
-  // Use v2 index for LOOKUP JOIN, v1 index for ENRICH policy
-  const indexName = isLookupIndexAvailable
-    ? getEntitiesLatestIndexName(spaceId)
-    : getEntitiesLatestIndexNameV1(spaceId);
-
-  logger.trace(
-    `Fetching relationships from index [${indexName}] for ${entityIds.length} entities (lookup mode: ${isLookupIndexAvailable})`
-  );
+  logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
-    isLookupIndexAvailable,
-    spaceId,
   });
   const filter = buildRelationshipDslFilter(entityIds);
 
@@ -710,13 +715,11 @@ export const fetchEntityRelationships = async ({
         filter,
         query,
       })
-      .toRecords<Record<string, unknown>>();
+      .toRecords<RelationshipEdge>();
 
-    const records = parseRelationshipRecords(response);
+    logger.trace(`Fetched [${response.records.length}] relationship records`);
 
-    logger.trace(`Fetched [${records.length}] relationship records`);
-
-    return records;
+    return response.records;
   } catch (error) {
     // If the index doesn't exist, return empty array
     if (error.statusCode === 404) {

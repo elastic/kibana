@@ -25,7 +25,7 @@ describe('getGraph', () => {
   });
 
   it('should call fetchGraph and parseRecords with correct parameters', async () => {
-    const fakeFetchResult = { records: ['record1', 'record2'] };
+    const fakeFetchResult = { events: ['event1', 'event2'], relationships: [] };
     (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
 
     const parsedResult = { nodes: ['node1'], edges: ['edge1'], messages: ['msg1'] };
@@ -52,7 +52,6 @@ describe('getGraph', () => {
 
     expect(fetchGraph).toHaveBeenCalledWith({
       esClient,
-      showUnknownTarget: true,
       logger: mockLogger,
       start: 0,
       end: 100,
@@ -60,16 +59,23 @@ describe('getGraph', () => {
         { id: 'event1', isAlert: false },
         { id: 'event2', isAlert: false },
       ],
+      showUnknownTarget: true,
       indexPatterns: ['pattern1', 'pattern2'],
       spaceId: 'testSpace',
       esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
+      entityIds: undefined,
     });
-    expect(parseRecords).toHaveBeenCalledWith(mockLogger, fakeFetchResult.records, 10);
+    expect(parseRecords).toHaveBeenCalledWith(
+      mockLogger,
+      fakeFetchResult.events,
+      fakeFetchResult.relationships,
+      10
+    );
     expect(result).toEqual(parsedResult);
   });
 
   it('should use default indexPatterns if not provided', async () => {
-    const fakeFetchResult = { records: [] };
+    const fakeFetchResult = { events: [], relationships: [] };
     (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
 
     const parsedResult = { nodes: [], edges: [], messages: [] };
