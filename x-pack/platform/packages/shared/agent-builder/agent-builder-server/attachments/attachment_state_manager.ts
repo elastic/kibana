@@ -32,6 +32,8 @@ export interface AttachmentUpdateInput {
   description?: string;
   /** New hidden status */
   hidden?: boolean;
+  /** New readonly status */
+  readonly?: boolean;
 }
 
 /**
@@ -115,8 +117,17 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     this.attachments = new Map();
     this.options = options;
     for (const attachment of initialAttachments) {
-      this.attachments.set(attachment.id, structuredClone(attachment));
+      const next = structuredClone(attachment);
+      if (next.readonly === undefined) {
+        next.readonly = this.getDefaultReadonly(next.type);
+      }
+      this.attachments.set(next.id, next);
     }
+  }
+
+  private getDefaultReadonly(type: string): boolean {
+    const definition = this.options.getTypeDefinition(type);
+    return definition?.isReadonly ?? true;
   }
 
   private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
@@ -236,6 +247,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       active: true,
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
+      readonly: input.readonly ?? this.getDefaultReadonly(input.type),
     };
 
     this.attachments.set(id, attachment);
@@ -256,6 +268,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
     if (input.hidden !== undefined) {
       attachment.hidden = input.hidden;
+      this.dirty = true;
+    }
+    if (input.readonly !== undefined) {
+      attachment.readonly = input.readonly;
       this.dirty = true;
     }
 

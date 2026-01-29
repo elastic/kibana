@@ -24,6 +24,7 @@ const attachmentUpdateSchema = z.object({
  */
 export const createAttachmentUpdateTool = ({
   attachmentManager,
+  attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
   id: platformCoreTools.attachmentUpdate,
   type: ToolType.builtin,
@@ -50,6 +51,20 @@ export const createAttachmentUpdateTool = ({
         results: [
           createErrorResult({
             message: `Cannot update deleted attachment '${attachmentId}'. Restore it first.`,
+            metadata: { attachment_id: attachmentId },
+          }),
+        ],
+      };
+    }
+
+    const definition = attachmentsService?.getTypeDefinition(existing.type);
+    const typeReadonly = definition?.isReadonly ?? true;
+    const isReadonly = typeReadonly || existing.readonly === true;
+    if (isReadonly) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Attachment '${attachmentId}' is read-only`,
             metadata: { attachment_id: attachmentId },
           }),
         ],
