@@ -10,7 +10,8 @@
 import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
-import { XY_API_LINE_INTERPOLATION, type XYDecorations } from '../../../schema/charts/xy';
+import type { XYDecorations } from '../../../schema/charts/xy';
+import { XY_API_LINE_INTERPOLATION } from '../../../schema/charts/xy';
 import { stripUndefined } from '../utils';
 
 const curveTypeAPItoState: Record<$Values<typeof XY_API_LINE_INTERPOLATION>, XYCurveType> = {

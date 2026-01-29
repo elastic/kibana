@@ -8,15 +8,15 @@
  */
 
 import type { XYState as XYLensState } from '@kbn/lens-common';
-import { type AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
 import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
+import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
 import { getIdForLayer, isLensStateDataLayer } from './helpers';
-import type { DataSourceStateLayer } from '../../utils';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import {
   buildAPIAnnotationsLayer,
