@@ -34,7 +34,7 @@ export const PlaygroundDeprecationNotice = () => {
       data-test-subj="playgroundDeprecationNotice"
       announceOnMount
     >
-      <EuiText>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="xpack.searchPlayground.playgroundDeprecationNotice.description"
