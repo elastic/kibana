@@ -32,11 +32,6 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  CREATE_NEW_RULE_TOUR_ANCHOR,
-  RuleFeatureTour,
-} from '../../components/rules_table/feature_tour/rules_feature_tour';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
 import {
   GapAutoFillSchedulerProvider,
@@ -63,10 +58,6 @@ const RulesPageContent = () => {
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
-
-  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'doesNotMatchForIndicatorMatchRuleEnabled'
-  );
 
   if (
     redirectToDetections(
@@ -147,7 +138,7 @@ const RulesPageContent = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
+              <EuiFlexItem grow={false}>
                 <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
                   fill
@@ -158,7 +149,6 @@ const RulesPageContent = () => {
                   {i18n.ADD_NEW_RULE}
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
-              {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
           {isRuleSettingsModalOpen && canAccessGapAutoFill && (
