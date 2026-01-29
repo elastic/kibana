@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 
@@ -23,10 +24,85 @@ type CommonlyUsedTimeRange =
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
+  // Dashboard shell and mode controls
+  private readonly settingsFlyout;
+  private readonly settingsButton;
+  private readonly editModeButton;
+  private readonly viewOnlyModeButton;
+  private readonly dashboardViewport;
+  private readonly embeddablePanel;
+
+  // Add panel flow
+  private readonly addTopNavButton;
+  private readonly openAddPanelFlyoutButton;
+  private readonly panelSelectionFlyout;
+  private readonly panelSelectionList;
+  private readonly panelSelectionSearchInput;
+
+  // Save flows
+  private readonly savedObjectTitleInput;
+  private readonly confirmSaveButton;
+
+  // Library flyout
+  private readonly savedObjectsFinderTable;
+  private readonly savedObjectFinderLoadingIndicator;
+  private readonly savedObjectFinderSearchInput;
+  private readonly addEmbeddableSuccess;
+
+  // Markdown panel
+  private readonly markdownEditorApplyButton;
+  private readonly markdownRenderer;
+
+  // Customize panel flyout
+  private readonly customizePanelFlyout;
+  private readonly customizePanelSaveButton;
+  private readonly customizePanelCancelButton;
+  private readonly customizePanelTimeRangeQuickMenuButton;
 
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
+
+    // Dashboard shell and mode controls
+    this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
+    this.settingsButton = this.page.testSubj.locator('dashboardSettingsButton');
+    this.editModeButton = this.page.testSubj.locator('dashboardEditMode');
+    this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
+    this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
+    this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
+
+    // Add panel flow
+    this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
+    this.openAddPanelFlyoutButton = this.page.testSubj.locator('dashboardOpenAddPanelFlyoutButton');
+    this.panelSelectionFlyout = this.page.testSubj.locator('dashboardPanelSelectionFlyout');
+    this.panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
+    this.panelSelectionSearchInput = this.page.testSubj.locator(
+      'dashboardPanelSelectionFlyout__searchInput'
+    );
+
+    // Save flows
+    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+
+    // Library flyout
+    this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');
+    this.savedObjectFinderLoadingIndicator = this.page.testSubj.locator(
+      'savedObjectFinderLoadingIndicator'
+    );
+    this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
+
+    // Markdown panel
+    this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
+    this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
+
+    // Customize panel flyout
+    this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
+    this.customizePanelSaveButton = this.page.testSubj.locator('saveCustomizePanelButton');
+    this.customizePanelCancelButton = this.page.testSubj.locator('cancelCustomizePanelButton');
+    this.customizePanelTimeRangeQuickMenuButton = this.page.testSubj.locator(
+      'customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton'
+    );
   }
 
   async goto() {
@@ -44,13 +120,13 @@ export class DashboardApp {
   }
 
   private getSettingsFlyout() {
-    return this.page.testSubj.locator('dashboardSettingsFlyout');
+    return this.settingsFlyout;
   }
 
   async openSettingsFlyout() {
-    if ((await this.getSettingsFlyout().count()) === 0) {
-      await this.page.testSubj.click('dashboardSettingsButton');
-      await this.getSettingsFlyout().waitFor({ state: 'visible' });
+    if (!(await this.getSettingsFlyout().isVisible())) {
+      await this.settingsButton.click();
+      await expect(this.getSettingsFlyout()).toBeVisible();
     }
   }
 
@@ -64,87 +140,84 @@ export class DashboardApp {
 
   async applyDashboardSettings() {
     await this.page.testSubj.click('applyCustomizeDashboardButton');
-    await this.getSettingsFlyout().waitFor({ state: 'hidden' });
+    await expect(this.getSettingsFlyout()).toBeHidden();
   }
 
   // ============================================================
-  // View Mode Methods (mirrors FTR's dashboard page object)
+  // View Mode Methods
   // ============================================================
 
   /**
    * Checks if the dashboard is in view mode.
-   * Matches FTR's getIsInViewMode().
    */
   async getIsInViewMode(): Promise<boolean> {
-    return this.page.testSubj.locator('dashboardEditMode').isVisible();
+    return this.editModeButton.isVisible();
   }
 
   /**
    * Switches the dashboard to edit mode.
-   * Matches FTR's switchToEditMode().
+   * Switches the dashboard to edit mode.
    */
   async switchToEditMode() {
     const isViewMode = await this.getIsInViewMode();
     if (isViewMode) {
-      await this.page.testSubj.click('dashboardEditMode');
+      await this.editModeButton.click();
       // Wait for edit mode to be active (drag handles appear)
-      await this.page.testSubj.waitForSelector('embeddablePanelDragHandle', { state: 'visible' });
+      await expect(this.page.testSubj.locator('embeddablePanelDragHandle')).toBeVisible();
     }
   }
 
   /**
    * Clicks the cancel button to exit edit mode without saving.
-   * Matches FTR's clickCancelOutOfEditMode().
+   * Clicks the cancel button to exit edit mode without saving.
    */
   async clickCancelOutOfEditMode() {
-    const isEditMode = await this.page.testSubj.locator('dashboardViewOnlyMode').isVisible();
+    const isEditMode = await this.viewOnlyModeButton.isVisible();
     if (isEditMode) {
-      await this.page.testSubj.click('dashboardViewOnlyMode');
+      await this.viewOnlyModeButton.click();
       // Wait for view mode to be active
-      await this.page.testSubj.waitForSelector('dashboardEditMode', { state: 'visible' });
+      await expect(this.editModeButton).toBeVisible();
     }
   }
 
   /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
-   * Matches the FTR pattern from add_panel.ts openAddPanelFlyout().
+   * Opens the "Add panel" flyout for selecting panel types to add.
    */
   async openAddPanelFlyout() {
     // Click top nav add menu button and wait for menu to appear
-    await this.page.testSubj.click('dashboardAddTopNavButton');
-    await this.page.testSubj.waitForSelector('dashboardOpenAddPanelFlyoutButton', {
-      state: 'visible',
-    });
+    await this.addTopNavButton.click();
+    await expect(this.openAddPanelFlyoutButton).toBeVisible();
 
     // Click to open the panel selection flyout and wait for it to appear
-    await this.page.testSubj.click('dashboardOpenAddPanelFlyoutButton');
-    await this.page.testSubj.waitForSelector('dashboardPanelSelectionFlyout', { state: 'visible' });
-    await this.page.testSubj.waitForSelector('dashboardPanelSelectionList', { state: 'visible' });
+    await this.openAddPanelFlyoutButton.click();
+    await expect(this.panelSelectionFlyout).toBeVisible();
+    await expect(this.panelSelectionList).toBeVisible();
   }
 
   async openNewLensPanel() {
     await this.openAddPanelFlyout();
     await this.page.testSubj.click('create-action-Lens');
-    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+    await expect(this.page.testSubj.locator('lnsApp')).toBeVisible();
   }
 
   async saveDashboard(name: string) {
     await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
-    await this.page.testSubj.fill('savedObjectTitle', name);
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
+    await this.savedObjectTitleInput.fill(name);
+    await this.confirmSaveButton.click();
+    await expect(this.confirmSaveButton).toBeHidden();
   }
 
   async clickQuickSave() {
     const quickSaveMenuItem = this.page.testSubj.locator('dashboardQuickSaveMenuItem');
-    if ((await quickSaveMenuItem.count()) > 0) {
-      await this.page.testSubj.click('dashboardQuickSaveMenuItem');
+    if (await quickSaveMenuItem.isVisible()) {
+      await quickSaveMenuItem.click();
       return;
     }
 
     const interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
-    if ((await interactiveSaveMenuItem.count()) > 0) {
-      await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
+    if (await interactiveSaveMenuItem.isVisible()) {
+      await interactiveSaveMenuItem.click();
       return;
     }
 
@@ -159,9 +232,9 @@ export class DashboardApp {
     }
 
     const unsavedBadge = this.page.testSubj.locator('dashboardUnsavedChangesBadge');
-    if ((await unsavedBadge.count()) > 0) {
+    if (await unsavedBadge.isVisible()) {
       await this.clickQuickSave();
-      await unsavedBadge.waitFor({ state: 'hidden' });
+      await expect(unsavedBadge).toBeHidden();
       await this.toasts.closeAll();
     }
 
@@ -171,7 +244,7 @@ export class DashboardApp {
   }
 
   // ============================================================
-  // Library Panel Methods (mirrors FTR's DashboardAddPanelService)
+  // Library Panel Methods
   // ============================================================
 
   /**
@@ -179,12 +252,11 @@ export class DashboardApp {
    * Low-level building block used by addEmbeddable().
    */
   private async openLibraryFlyout() {
-    await this.page.testSubj.click('dashboardAddTopNavButton');
+    await this.addTopNavButton.click();
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
-    await this.page.testSubj.waitForSelector('savedObjectsFinderTable', { state: 'visible' });
-    await this.page.testSubj.waitForSelector('savedObjectFinderLoadingIndicator', {
-      state: 'hidden',
-      timeout: 30000,
+    await expect(this.savedObjectsFinderTable).toBeVisible();
+    await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
+      timeout: 30_000,
     });
   }
 
@@ -193,7 +265,7 @@ export class DashboardApp {
    */
   private async closeLibraryFlyout() {
     await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('euiFlyoutCloseButton', { state: 'hidden' });
+    await expect(this.page.testSubj.locator('euiFlyoutCloseButton')).toBeHidden();
   }
 
   /**
@@ -204,27 +276,25 @@ export class DashboardApp {
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
    */
   private async filterEmbeddableNames(embeddableName: string, embeddableType?: string) {
-    // Build search query exactly like FTR does:
+    // Build search query using type filter and quoted name.
     // type:(search) "Rendering Test:-saved-search" (only first dash replaced with space)
     const typePrefix = embeddableType ? `type:(${embeddableType}) ` : '';
     const searchQuery = `${typePrefix}"${embeddableName.replace('-', ' ')}"`;
 
-    const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
-    await searchInput.click();
-    await searchInput.clear();
+    await this.savedObjectFinderSearchInput.click();
+    await this.savedObjectFinderSearchInput.clear();
     // Use native type() which fires keydown/keyup/keypress events (not insertText)
-    await searchInput.type(searchQuery, { delay: 50 });
+    await this.savedObjectFinderSearchInput.type(searchQuery, { delay: 50 });
 
     // Wait for search results to load
-    await this.page.testSubj.waitForSelector('savedObjectFinderLoadingIndicator', {
-      state: 'hidden',
-      timeout: 30000,
+    await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
+      timeout: 30_000,
     });
   }
 
   /**
    * Core method to add an embeddable from the library.
-   * Mirrors FTR's dashboardAddPanel.addEmbeddable() exactly.
+   * Adds an embeddable from the library.
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
@@ -235,17 +305,16 @@ export class DashboardApp {
 
     // Click on the saved object title
     const titleSelector = `savedObjectTitle${embeddableName.split(' ').join('-')}`;
-    await this.page.testSubj.waitForSelector(titleSelector, { state: 'visible' });
-    await this.page.testSubj.click(titleSelector);
+    const titleButton = this.page.testSubj.locator(titleSelector);
+    await expect(titleButton).toBeVisible();
+    await titleButton.click();
 
     // Wait for success indicator
-    await this.page.testSubj.waitForSelector('addEmbeddableToDashboardSuccess', {
-      state: 'visible',
-    });
+    await expect(this.addEmbeddableSuccess).toBeVisible();
 
     await this.closeLibraryFlyout();
 
-    // Close "Added successfully" toast (matches FTR behavior)
+    // Close "Added successfully" toast
     await this.toasts.closeAll();
   }
 
@@ -283,20 +352,20 @@ export class DashboardApp {
    */
   async addMarkdownPanel(content: string) {
     await this.openAddPanelFlyout();
-    await this.page.testSubj.fill('dashboardPanelSelectionFlyout__searchInput', 'Markdown text');
+    await this.panelSelectionSearchInput.fill('Markdown text');
     await this.page.testSubj.click('create-action-Markdown text');
 
     const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
-    await editorInput.waitFor({ state: 'visible' });
+    await expect(editorInput).toBeVisible();
     await editorInput.fill(content);
-    await this.page.testSubj.click('markdownEditorApplyButton');
+    await this.markdownEditorApplyButton.click();
 
-    await this.page.testSubj.waitForSelector('markdownRenderer', { state: 'visible' });
+    await expect(this.markdownRenderer).toBeVisible();
   }
 
   async addMapPanel() {
     await this.openAddPanelFlyout();
-    await this.page.testSubj.fill('dashboardPanelSelectionFlyout__searchInput', 'Maps');
+    await this.panelSelectionSearchInput.fill('Maps');
     await this.page.testSubj.click('create-action-Maps');
   }
 
@@ -310,16 +379,14 @@ export class DashboardApp {
     await this.page.testSubj.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
     if (options.customTimeRageCommonlyUsed) {
       await this.page.testSubj.click('customizePanelShowCustomTimeRange');
-      await this.page.testSubj.click(
-        'customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton'
-      );
+      await this.customizePanelTimeRangeQuickMenuButton.click();
       await this.page.testSubj.click(
         `superDatePickerCommonlyUsed_${options.customTimeRageCommonlyUsed.value}`
       );
     }
 
-    await this.page.testSubj.click('saveCustomizePanelButton');
-    await this.page.testSubj.waitForSelector('saveCustomizePanelButton', { state: 'hidden' });
+    await this.customizePanelSaveButton.click();
+    await expect(this.customizePanelSaveButton).toBeHidden();
   }
 
   async removePanel(name: string | 'embeddableError') {
@@ -329,9 +396,7 @@ export class DashboardApp {
     await this.page.testSubj.locator(panelHeaderTestSubj).hover();
     await this.page.testSubj.click('embeddablePanelToggleMenuIcon');
     await this.page.testSubj.click('embeddablePanelAction-deletePanel');
-    await this.page.testSubj.waitForSelector(panelHeaderTestSubj, {
-      state: 'hidden',
-    });
+    await expect(this.page.testSubj.locator(panelHeaderTestSubj)).toBeHidden();
   }
 
   async waitForPanelsToLoad(
@@ -341,17 +406,12 @@ export class DashboardApp {
       selector: '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
     }
   ) {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < options.timeout) {
-      const count = await this.page.locator(options.selector).count();
-      if (count === expectedCount) return;
-      // Short polling interval
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await this.page.waitForTimeout(100);
-    }
-
-    throw new Error(`Timeout waiting for ${expectedCount} elements matching ${options.selector}`);
+    await expect
+      .poll(() => this.page.locator(options.selector).count(), {
+        timeout: options.timeout,
+        intervals: [100],
+      })
+      .toBe(expectedCount);
   }
 
   /**
@@ -370,7 +430,7 @@ export class DashboardApp {
    * Gets the count of panels on the dashboard
    */
   async getPanelCount(): Promise<number> {
-    return this.page.testSubj.locator('embeddablePanel').count();
+    return this.embeddablePanel.count();
   }
 
   /**
@@ -417,8 +477,7 @@ export class DashboardApp {
   }
 
   async getPanelGroupOrder(): Promise<string[]> {
-    const panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
-    const panelGroups = await panelSelectionList
+    const panelGroups = await this.panelSelectionList
       .locator('[data-test-subj*="dashboardEditorMenu-"]')
       .all();
 
@@ -442,8 +501,7 @@ export class DashboardApp {
   }
 
   async getPanelTypeCount(): Promise<number> {
-    const panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
-    return panelSelectionList.locator('li').count();
+    return this.panelSelectionList.locator('li').count();
   }
 
   /**
@@ -451,7 +509,7 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine completion.
    */
   async waitForRenderComplete() {
-    await this.page.testSubj.waitForSelector('dshDashboardViewport', { state: 'visible' });
+    await expect(this.dashboardViewport).toBeVisible();
 
     try {
       const count = await this.getSharedItemsCount();
@@ -463,19 +521,17 @@ export class DashboardApp {
       // fall back to embeddable panel count
     }
 
-    const panels = this.page.testSubj.locator('embeddablePanel');
-    const count = await panels.count();
+    const count = await this.embeddablePanel.count();
     if (count > 0) {
       await this.waitForPanelsToLoad(count);
     }
   }
 
   // ============================================================
-  // Customize Panel Methods (mirrors FTR's DashboardCustomizePanel)
+  // Customize Panel Methods
   // ============================================================
 
   private readonly customTimeRangeToggleTestSubj = 'customizePanelShowCustomTimeRange';
-  private readonly customizePanelTestSubj = 'customizePanel';
 
   private async waitForCustomTimeRangeToggleState(enabled: boolean) {
     const expected = enabled ? 'true' : 'false';
@@ -488,7 +544,7 @@ export class DashboardApp {
   }
 
   private getCustomizePanelFlyout() {
-    return this.page.testSubj.locator(this.customizePanelTestSubj);
+    return this.customizePanelFlyout;
   }
 
   async enableCustomTimeRange() {
@@ -526,12 +582,12 @@ export class DashboardApp {
 
   async openCustomizePanel(title?: string) {
     await this.clickPanelAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
-    await this.page.testSubj.waitForSelector('customizePanel', { state: 'visible' });
+    await expect(this.customizePanelFlyout).toBeVisible();
   }
 
   async closeCustomizePanel() {
-    await this.page.testSubj.click('cancelCustomizePanelButton');
-    await this.page.testSubj.waitForSelector('customizePanel', { state: 'hidden' });
+    await this.customizePanelCancelButton.click();
+    await expect(this.customizePanelFlyout).toBeHidden();
   }
 
   async getCustomPanelTitle() {
@@ -571,28 +627,28 @@ export class DashboardApp {
   }
 
   async saveCustomizePanel() {
-    await this.page.testSubj.click('saveCustomizePanelButton');
-    await this.page.testSubj.waitForSelector('customizePanel', { state: 'hidden' });
+    await this.customizePanelSaveButton.click();
+    await expect(this.customizePanelFlyout).toBeHidden();
   }
 
   async expectTimeRangeBadgeExists() {
-    await this.page.testSubj.waitForSelector('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE', {
-      state: 'visible',
-    });
+    await expect(
+      this.page.testSubj.locator('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE')
+    ).toBeVisible();
   }
 
   async expectTimeRangeBadgeMissing() {
-    await this.page.testSubj.waitForSelector('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE', {
-      state: 'hidden',
-    });
+    await expect(
+      this.page.testSubj.locator('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE')
+    ).toBeHidden();
   }
 
   async expectEmptyPlaceholderVisible() {
-    await this.page.testSubj.waitForSelector('emptyPlaceholder', { state: 'visible' });
+    await expect(this.page.testSubj.locator('emptyPlaceholder')).toBeVisible();
   }
 
   async expectXYVisChartVisible() {
-    await this.page.testSubj.waitForSelector('xyVisChart', { state: 'visible' });
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
 
   async clickTimeRangeBadge() {
@@ -600,12 +656,12 @@ export class DashboardApp {
   }
 
   // ============================================================
-  // Panel Action Methods (mirrors FTR's DashboardPanelActionsService)
+  // Panel Action Methods
   // ============================================================
 
   /**
    * Formats a panel title for use in test subject selectors.
-   * Matches FTR: title.replace(/\s/g, '')
+   * Formats a panel title for test subject selectors.
    */
   private formatTitleForTestSubj(title: string): string {
     return title.replace(/\s/g, '');
@@ -613,13 +669,13 @@ export class DashboardApp {
 
   /**
    * Gets the hover actions wrapper for a panel by title.
-   * Matches FTR's getPanelWrapper(title).
+   * Gets the hover actions wrapper for a panel by title.
    *
    * @param title - Panel title. If empty, finds first panel by class.
    */
   getPanelHoverActionsLocator(title?: string) {
     if (!title) {
-      // FTR fallback: find first panel by class when no title provided
+      // Fallback: find first panel by class when no title provided
       return this.page.locator('.embPanel__hoverActionsAnchor');
     }
     return this.page.testSubj.locator(
@@ -630,7 +686,7 @@ export class DashboardApp {
   /**
    * Opens the context menu for a panel.
    * Scrolls the panel into view and clicks the menu toggle.
-   * Matches FTR's openContextMenu(wrapper).
+   * Opens the context menu for a panel.
    */
   async openPanelContextMenu(title?: string) {
     const panelWrapper = this.getPanelHoverActionsLocator(title);
@@ -640,33 +696,32 @@ export class DashboardApp {
     // Check if menu is already open
     const isOpen = await this.page.testSubj.locator('embeddablePanelContextMenuOpen').isVisible();
     if (!isOpen) {
-      // FTR: wrapper.findByTestSubject('embeddablePanelToggleMenuIcon')
+      // Click the menu icon inside the panel wrapper.
       // Click the menu icon INSIDE the panel wrapper, not globally
       const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
       await menuIcon.click();
-      await this.page.testSubj.waitForSelector('embeddablePanelContextMenuOpen', {
-        state: 'visible',
-      });
+      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeVisible();
     }
   }
 
   async navigateToLensEditorFromPanel(title?: string) {
     await this.openPanelContextMenu(title);
     await this.page.testSubj.click('embeddablePanelAction-editPanel');
-    await this.page.testSubj.waitForSelector('navigateToLensEditorLink', { state: 'visible' });
-    await this.page.testSubj.click('navigateToLensEditorLink');
+    const navigateToLensEditorLink = this.page.testSubj.locator('navigateToLensEditorLink');
+    await expect(navigateToLensEditorLink).toBeVisible();
+    await navigateToLensEditorLink.click();
 
     const confirmModal = this.page.testSubj.locator('confirmModalConfirmButton');
-    if ((await confirmModal.count()) > 0) {
+    if (await confirmModal.isVisible()) {
       await confirmModal.click();
     }
 
-    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+    await expect(this.page.testSubj.locator('lnsApp')).toBeVisible();
   }
 
   /**
    * Checks if a panel action exists as a descendant of the panel wrapper.
-   * Matches FTR's panelActionExists() which uses descendantExists.
+   * Checks if a panel action exists as a descendant of the panel wrapper.
    */
   private async panelActionExistsInWrapper(
     actionTestSubj: string,
@@ -679,7 +734,7 @@ export class DashboardApp {
 
   /**
    * Clicks a panel action from the hover actions or context menu.
-   * Matches FTR's clickPanelAction(testSubject, wrapper).
+   * Clicks a panel action from the hover actions or context menu.
    *
    * Key difference from before: checks if action is DESCENDANT of panel wrapper,
    * not just globally visible. This prevents clicking wrong panel's actions.
@@ -689,7 +744,7 @@ export class DashboardApp {
     await panelWrapper.scrollIntoViewIfNeeded();
     await panelWrapper.hover();
 
-    // Check if action exists as descendant of panel wrapper (FTR pattern)
+    // Check if action exists as descendant of panel wrapper
     const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
 
     if (existsInWrapper) {
@@ -721,38 +776,38 @@ export class DashboardApp {
 
   /**
    * Unlinks a panel from the library, converting it to a "by value" panel.
-   * Matches FTR's unlinkFromLibrary(title) - includes verification.
+   * Unlinks a panel from the library and verifies it is unlinked.
    */
   async unlinkFromLibrary(title?: string) {
     await this.clickPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
-    await this.page.testSubj.waitForSelector('unlinkPanelSuccess', { state: 'visible' });
-    // FTR also verifies the panel is now unlinked
+    await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
+    // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
   }
 
   /**
    * Saves a panel to the library with a new title.
-   * Matches FTR's saveToLibrary(newTitle, oldTitle) - includes verification.
+   * Saves a panel to the library and verifies it is linked.
    */
   async saveToLibrary(newTitle: string, currentTitle?: string) {
     await this.clickPanelAction('embeddablePanelAction-saveToLibrary', currentTitle);
 
     // Fill in the new title
-    await this.page.testSubj.fill('savedObjectTitle', newTitle);
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.savedObjectTitleInput.fill(newTitle);
+    await this.confirmSaveButton.click();
 
     // Wait for success
-    await this.page.testSubj.waitForSelector('addPanelToLibrarySuccess', { state: 'visible' });
-    // FTR also verifies the panel is now linked
+    await expect(this.page.testSubj.locator('addPanelToLibrarySuccess')).toBeVisible();
+    // Verify the panel is now linked
     await this.expectLinkedToLibrary(newTitle);
   }
 
   /**
    * Checks if a panel has a specific action available.
    * Checks both hover actions and context menu.
-   * Matches FTR's panelActionExists pattern.
+   * Checks if a panel has a specific action available.
    *
-   * Uses count() > 0 to match FTR's allowHidden: true behavior
+   * Uses count() > 0 to include hidden elements.
    * (finds elements even if not visible).
    */
   async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
@@ -761,7 +816,7 @@ export class DashboardApp {
     await panelWrapper.hover();
 
     // Check if action exists in panel wrapper (hover actions)
-    // Using count() to match FTR's allowHidden: true behavior
+    // Using count() to include hidden elements
     const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
     if (existsInWrapper) {
       return true;
@@ -769,7 +824,7 @@ export class DashboardApp {
 
     // Check in context menu
     await this.openPanelContextMenu(title);
-    // Use count() > 0 to find elements even if hidden (matches FTR's allowHidden: true)
+    // Use count() > 0 to find elements even if hidden
     const actionInMenu = this.page.testSubj.locator(actionTestSubj);
     const count = await actionInMenu.count();
 
@@ -780,7 +835,7 @@ export class DashboardApp {
 
   /**
    * Asserts that a panel action exists (throws if not found).
-   * Matches FTR's expectExistsPanelAction().
+   * Asserts that a panel action exists (throws if not found).
    */
   async expectExistsPanelAction(actionTestSubj: string, title?: string) {
     const exists = await this.panelHasAction(actionTestSubj, title);
@@ -808,13 +863,13 @@ export class DashboardApp {
   /**
    * Verifies a panel is linked to the library.
    * A linked panel has the "Unlink from library" action available.
-   * Matches FTR's expectLinkedToLibrary(title).
+   * Verifies a panel is linked to the library.
    *
-   * FTR switches to edit mode before checking because library actions
+   * Switches to edit mode before checking because library actions
    * may not be available in view mode.
    */
   async expectLinkedToLibrary(title?: string) {
-    // FTR checks view mode and switches to edit mode if needed
+    // Switch to edit mode if needed
     const isViewMode = await this.getIsInViewMode();
     if (isViewMode) {
       await this.switchToEditMode();
@@ -831,13 +886,13 @@ export class DashboardApp {
   /**
    * Verifies a panel is NOT linked to the library.
    * A non-linked panel has the "Save to library" action available.
-   * Matches FTR's expectNotLinkedToLibrary(title).
+   * Verifies a panel is NOT linked to the library.
    *
-   * FTR switches to edit mode before checking because library actions
+   * Switches to edit mode before checking because library actions
    * may not be available in view mode.
    */
   async expectNotLinkedToLibrary(title?: string) {
-    // FTR checks view mode and switches to edit mode if needed
+    // Switch to edit mode if needed
     const isViewMode = await this.getIsInViewMode();
     if (isViewMode) {
       await this.switchToEditMode();
