@@ -124,7 +124,7 @@ export { Threshold } from './components/custom_threshold/components/threshold';
 
 // Only export lazy versions to keep bundle size down
 // Consumers should define their own columns configuration
-export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { ObservabilityAlertsTableLazy as ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
 export { AlertActions } from './components/alerts_table/components/alert_actions_lazy';
 export type {
   ObservabilityAlertsTableContext,

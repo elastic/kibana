@@ -9,7 +9,7 @@ import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
