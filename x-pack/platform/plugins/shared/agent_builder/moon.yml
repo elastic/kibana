@@ -105,6 +105,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/home-plugin'
   - '@kbn/use-observable'
+  - '@kbn/data-plugin'
 tags:
   - plugin
   - prod
