@@ -271,7 +271,7 @@ export function CloudForwarderPanel() {
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.cloudforwarderPanel.launchStackDescription"
-                    defaultMessage="Launch the CloudFormation stack in AWS to deploy the EDOT Cloud Forwarder."
+                    defaultMessage="Launch the CloudFormation stack in AWS to deploy the EDOT Cloud Forwarder. This will deploy it in your default AWS Region, be sure to switch your region in the AWS console to the region your s3 bucket resides in before deploying the stack."
                   />
                 </p>
               </EuiText>
