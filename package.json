@@ -1759,6 +1759,7 @@
     "@kbn/web-worker-stub": "link:packages/kbn-web-worker-stub",
     "@kbn/whereis-pkg-cli": "link:packages/kbn-whereis-pkg-cli",
     "@kbn/workspaces": "link:src/platform/packages/shared/kbn-workspaces",
+    "@kbn/yarn-install-scripts": "link:packages/kbn-yarn-install-scripts",
     "@kbn/yarn-lock-validator": "link:packages/kbn-yarn-lock-validator",
     "@mapbox/vector-tile": "1.3.1",
     "@mswjs/http-middleware": "0.10.3",
