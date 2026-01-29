@@ -183,19 +183,13 @@ describe('getSourceOfJoinTarget', () => {
     const joinCommand = synth.cmd`LOOKUP JOIN join_index1 ON join_field1`;
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
-    expect(joinTarget).toMatchObject({
-      type: 'source',
-      name: 'join_index1',
-    });
+    expect(joinTarget).toBe('join_index1');
   });
 
   it('returns target index with alias', () => {
     const joinCommand = synth.cmd`LOOKUP JOIN join_index2 AS j ON join_field2`;
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
-    expect(joinTarget).toMatchObject({
-      type: 'source',
-      name: 'join_index2',
-    });
+    expect(joinTarget).toBe('join_index2');
   });
 
   it('returns target index of an incomplete command', () => {
@@ -206,9 +200,6 @@ describe('getSourceOfJoinTarget', () => {
     });
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
-    expect(joinTarget).toMatchObject({
-      type: 'source',
-      name: 'lookup_index',
-    });
+    expect(joinTarget).toBe('lookup_index');
   });
 });

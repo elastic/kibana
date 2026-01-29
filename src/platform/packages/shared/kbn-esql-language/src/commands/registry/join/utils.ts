@@ -11,7 +11,6 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { within } from '../../../ast/location';
 import { isOptionNode } from '../../../ast/is';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type {
   ESQLAstAllCommands,
   ESQLAstJoinCommand,
@@ -74,12 +73,11 @@ export const getLookupFields = async (
     return [];
   }
   const joinTarget = getLookupJoinSource(command as ESQLAstJoinCommand);
-  const joinIndexPattern = LeafPrinter.print(joinTarget);
-  const columns = await getColumnsForQuery(`FROM ${joinIndexPattern}`);
+  const columns = await getColumnsForQuery(`FROM ${joinTarget}`);
 
-  if (lookupIndexFieldSet.key !== joinIndexPattern) {
+  if (joinTarget && lookupIndexFieldSet.key !== joinTarget) {
     lookupIndexFieldSet.set = new Set<string>(columns.map((c) => c.name));
-    lookupIndexFieldSet.key = joinIndexPattern;
+    lookupIndexFieldSet.key = joinTarget;
   }
 
   return columns;

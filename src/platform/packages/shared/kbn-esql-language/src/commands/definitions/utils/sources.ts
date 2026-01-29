@@ -18,6 +18,7 @@ import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { isAsExpression, Walker } from '../../../ast';
+import { LeafPrinter } from '../../../pretty_print';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -262,11 +263,15 @@ export const specialIndicesToSuggestions = (
  * For example, in the following JOIN command, it returns the source node representing "lookup_index":
  * | LOOKUP JOIN lookup_index AS l ON source_index.id = l.id
  */
-export const getLookupJoinSource = (command: ESQLAstJoinCommand): ESQLSource => {
+export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undefined => {
   const firstArg = command.args[0];
   const argumentToWalk = isAsExpression(firstArg) ? firstArg.args[0] : firstArg;
 
-  return Walker.match(argumentToWalk, {
+  const sourceNode = Walker.match(argumentToWalk, {
     type: 'source',
-  }) as ESQLSource;
+  });
+
+  if (sourceNode) {
+    return LeafPrinter.print(sourceNode);
+  }
 };
