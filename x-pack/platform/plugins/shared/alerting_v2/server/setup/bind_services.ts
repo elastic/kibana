@@ -8,6 +8,7 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { RulesClient } from '../lib/rules_client';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -28,6 +29,7 @@ import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
+  bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);

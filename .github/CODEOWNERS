@@ -1767,6 +1767,9 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 
 
+# Alerting alerting_v2
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/response-ops
+
 ### END Observability Plugins
 
 # Presentation

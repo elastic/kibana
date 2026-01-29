@@ -31,10 +31,10 @@ const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
-    alert_series_id: { type: 'keyword' },
     last_series_event_timestamp: { type: 'date' },
     actor: { type: 'keyword' },
     action_type: { type: 'keyword' },
+    group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     rule_id: { type: 'keyword' },
     source: { type: 'keyword' },
@@ -43,13 +43,15 @@ const mappings: estypes.MappingTypeMapping = {
 
 export const alertActionSchema = z.object({
   '@timestamp': z.string(),
-  alert_series_id: z.string(),
+  group_hash: z.string(),
   last_series_event_timestamp: z.string(),
-  actor: z.string(),
+  actor: z.string().nullable(),
   action_type: z.string(),
   episode_id: z.string(),
   rule_id: z.string(),
-  source: z.string(),
+  source: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  reason: z.string().optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;

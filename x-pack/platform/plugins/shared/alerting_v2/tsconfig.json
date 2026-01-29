@@ -42,12 +42,12 @@
     "@kbn/es-errors",
     "@kbn/alerting-v2-schemas",
     "@kbn/zod",
+    "@kbn/safer-lodash-set",
     "@kbn/core-di-internal",
     "@kbn/i18n",
     "@kbn/zod-helpers",
+    "@kbn/esql-language",
     "@kbn/core-saved-objects-api-server-mocks"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
