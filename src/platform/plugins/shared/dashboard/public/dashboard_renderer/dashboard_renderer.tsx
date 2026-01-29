@@ -14,10 +14,7 @@ import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/e
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import {
-  convertCamelCasedKeysToSnakeCase,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
