@@ -648,7 +648,7 @@ Observed Overhead: 163 / 189 = 0.86 (actually faster than theoretical!)
 
 ## 5. Summary & Recommendations
 
-After running all the tests above, we started recognizing patterns in how monitors behave at different capacities. The relationship between monitor count, journey duration, and cycle spread became clear, allowing us to derive a predictable capacity formula.
+After running all the tests above, patterns emerged in how monitors behave at different capacities. The relationship between monitor count, journey duration, and cycle spread became clear, allowing the derivation of a predictable capacity formula.
 
 ### The Capacity Formula
 
@@ -886,6 +886,54 @@ max_monitors = capacity_constant / avg_journey_duration
 
 > [!WARNING]
 > **Default timeout limit**: Journeys > 46 seconds will fail with CMD_TIMEOUT regardless of capacity
+
+---
+
+## 6. The Bottom Line
+
+I have derived a reliable formula to predict how many browser monitors a single agent can handle.
+
+### The Capacity Formula
+
+```
+Max Monitors = (Schedule Interval × CPU Cores) / (Overhead Factor × Average Duration)
+```
+
+*   **Schedule Interval**: In seconds (e.g., 180s for 3 minutes).
+*   **CPU Cores**: The number of cores assigned to the container (e.g., 2).
+*   **Average Duration**: How long one monitor run takes (in seconds).
+*   **Overhead Factor**: The "safety margin" variable (see below).
+
+### 1. Which Overhead Factor Should You Use?
+
+The reports tested two factors. Choose based on your risk tolerance:
+
+*   **Use 2.5 (Recommended for Production)**:
+    *   **Why**: Provides a ~50% safety buffer. Keeps CPU usage stable and handles network variability.
+    *   **Result**: 100% reliability in tests.
+    *   **Example**: On a 2-core agent with a 3-minute schedule, you can safely run **32 simple monitors** (4.5s duration).
+
+*   **Use 1.4 (Aggressive / Max Capacity)**:
+    *   **Why**: Pushes the agent to the absolute limit (200% CPU usage on 2 cores). Zero room for error.
+    *   **Result**: Validated as the "breaking point" in tests.
+    *   **Example**: On the same setup, you can squeeze in **50-57 simple monitors**, but any hiccup will cause gaps.
+
+### 2. The "Hidden" Hard Limit: 46 Seconds
+
+There is a hard constraint independent of capacity: **The Default Timeout**.
+
+*   **The Findings**: Any journey taking longer than **~46 seconds** will fail with `CMD_TIMEOUT`, even if your agent is sitting idle.
+*   **The Fix**: If your journey takes >35s, you are in the danger zone. You **must** explicitly increase the monitor timeout setting in your configuration.
+*   **Evidence**: In Report 2.5 (Test 4.3), running just 4 monitors failed because the journey took ~44s, hitting the timeout wall despite having plenty of CPU capacity.
+
+### 3. Reliability & Trustworthiness
+
+The data is highly reliable because it was cross-validated:
+1.  **Consistency**: The formula accurately predicted the breaking point across different schedules (3-min vs 10-min) and journey types (Simple vs Complex).
+2.  **Concurrency**: Confirmed that the agent runs exactly **N** browsers concurrently, where N = CPU cores.
+3.  **Failure Mode**: The failure mechanism is clear.
+    *   **Capacity Failure**: Monitors go "Pending" (queue builds up).
+    *   **Timeout Failure**: Monitors go "Down" with `CMD_TIMEOUT` (individual runs take too long).
 
 ---
 
