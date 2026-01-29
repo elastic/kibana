@@ -13,12 +13,7 @@ import {
   FILE_FORMATS,
   updatePipelineTimezone,
 } from '@kbn/file-upload-common';
-import type {
-  AnalysisResult,
-  FormattedOverrides,
-  InputData,
-  InputOverrides,
-} from '@kbn/file-upload-common';
+import type { AnalysisResult, FormattedOverrides, InputOverrides } from '@kbn/file-upload-common';
 import type {
   IngestDocumentSimulation,
   IngestSimulateResponse,
@@ -31,7 +26,7 @@ const PREVIEW_DOC_LIMIT = 20;
 export async function analyzeFile(
   client: IScopedClusterClient,
   logger: Logger,
-  data: InputData,
+  data: string,
   overrides: InputOverrides,
   includePreview: boolean
 ): Promise<AnalysisResult> {
@@ -54,8 +49,9 @@ export async function analyzeFile(
       const pipeline = cloneDeep(results.ingest_pipeline);
       updatePipelineTimezone(pipeline);
       const reader = getReader(results);
-      const buffer = Buffer.from(data);
-      const docs = reader.read(buffer.buffer).slice(0, PREVIEW_DOC_LIMIT);
+      const encoder = new TextEncoder();
+      const arrayBuffer = encoder.encode(data).buffer;
+      const docs = reader.read(arrayBuffer).slice(0, PREVIEW_DOC_LIMIT);
       if (results.format === FILE_FORMATS.NDJSON) {
         previewDocs = {
           docs: docs.map((doc: any) => ({
