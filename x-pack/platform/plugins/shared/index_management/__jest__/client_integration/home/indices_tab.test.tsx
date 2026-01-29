@@ -369,7 +369,7 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByTestId('indexTableCell-primary')).toHaveTextContent('1');
       expect(screen.getByTestId('indexTableCell-replica')).toHaveTextContent('1');
       expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
-      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156kb');
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
     });
 
     test('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', async () => {
@@ -392,7 +392,7 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
       // Size and docs should be shown
       expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
-      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156kb');
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
       // Health, status, primary, replica should NOT be shown (enableIndexStats is false)
       expect(screen.queryByTestId('indexTableCell-health')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();

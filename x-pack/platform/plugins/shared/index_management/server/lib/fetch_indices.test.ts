@@ -198,7 +198,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             hidden: false,
             data_stream: undefined,
             documents: 100,
-            size: '1000b',
+            size: 1000,
           },
         ],
       });
