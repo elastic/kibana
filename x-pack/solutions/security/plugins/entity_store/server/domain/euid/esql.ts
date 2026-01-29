@@ -6,18 +6,18 @@
  */
 
 import type { EntityType } from '../definitions/entity_schema';
-import { getEntityDefinition } from '../definitions/registry';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty } from '../esql/strings';
 
 export function getEuidEsqlFilter(entityType: EntityType) {
-  const { identityField } = getEntityDefinition(entityType, 'default');
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
   return identityField.requiresOneOfFields
     .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
     .join(' OR ');
 }
 
 export function getEuidEsqlEvaluation(entityType: EntityType) {
-  const { identityField } = getEntityDefinition(entityType, 'default');
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
 
   if (identityField.euidFields.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');

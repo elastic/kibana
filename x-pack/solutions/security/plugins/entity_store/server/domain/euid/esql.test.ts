@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEuidEsqlEvaluation } from './esql';
+import { getEuidEsqlEvaluation, getEuidEsqlFilter } from './esql';
 
 const normalize = (s: string) =>
   s
@@ -13,6 +13,23 @@ const normalize = (s: string) =>
     .map((line) => line.replace(/\s{2,}/g, ' ').trim())
     .filter((line) => line.length > 0)
     .join('\n');
+
+describe('getEuidEsqlFilter', () => {
+  it('returns single field condition for generic (one required field)', () => {
+    const result = getEuidEsqlFilter('generic');
+
+    const expected = '(entity.id IS NOT NULL AND entity.id != "")';
+    expect(result).toBe(expected);
+  });
+
+  it('returns OR of required fields for host', () => {
+    const result = getEuidEsqlFilter('host');
+
+    const expected =
+      '(host.entity.id IS NOT NULL AND host.entity.id != "") OR (host.id IS NOT NULL AND host.id != "") OR (host.name IS NOT NULL AND host.name != "") OR (host.hostname IS NOT NULL AND host.hostname != "")';
+    expect(result).toBe(expected);
+  });
+});
 
 describe('getEuidEsqlEvaluation', () => {
   it('returns field IS NOT NULL AND field != "" for non-calculated identity (generic)', () => {

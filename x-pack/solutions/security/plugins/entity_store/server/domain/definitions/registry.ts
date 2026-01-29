@@ -23,12 +23,18 @@ const entitiesDefinitionRegistry = {
 } as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
 
 export function getEntityDefinition(type: EntityType, namespace: string): ManagedEntityDefinition {
-  const description = entitiesDefinitionRegistry[type];
-  assert(description, `No entity description found for type: ${type}`);
+  const definition = getEntityDefinitionWithoutId(type);
 
   return {
-    ...description,
+    ...definition,
     id: getEntityDefinitionId(type, namespace),
     type,
   };
+}
+
+export function getEntityDefinitionWithoutId(type: EntityType): EntityDefinitionWithoutId {
+  const definition = entitiesDefinitionRegistry[type];
+  assert(definition, `No entity description found for type: ${type}`);
+
+  return definition;
 }

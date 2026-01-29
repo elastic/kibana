@@ -68,3 +68,4 @@ export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
+export type EuidAttribute = EuidField | EuidSeparator;
