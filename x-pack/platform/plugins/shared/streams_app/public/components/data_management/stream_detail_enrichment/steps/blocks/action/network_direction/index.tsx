@@ -12,7 +12,6 @@ import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 export const NetworkDirectionProcessorForm = () => {
   return (
     <>
-      TODO: Implement Concat Processor Form
       <EuiSpacer size="m" />
       <IgnoreMissingToggle />
       <IgnoreFailureToggle />
