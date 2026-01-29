@@ -27,7 +27,6 @@ import {
   ConnectorInputSchemas,
   ConnectorOutputSchemas,
   ConnectorSpecsInputSchemas,
-  // ConnectorSpecsOutputSchemas,
   staticConnectors,
 } from './connector_action_schema';
 // Import the singleton instance of StepSchemas
