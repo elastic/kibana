@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { errors } from '@elastic/elasticsearch';
 import { secondsFromNow, secondsFromDate } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import {
@@ -961,6 +962,36 @@ describe('TaskManagerRunner', () => {
       const loggerCall = logger.error.mock.calls[0][0];
       const loggerMeta = logger.error.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'user-error']);
+    });
+    test('logs ES auth errors as user errors', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new errors.ResponseError({
+                  warnings: [],
+                  meta: {} as never,
+                  statusCode: 401,
+                });
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Task bar \\"foo\\" failed: ResponseError: Response Error"`
+      );
       expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'user-error']);
     });
     test('provides execution context on run', async () => {
