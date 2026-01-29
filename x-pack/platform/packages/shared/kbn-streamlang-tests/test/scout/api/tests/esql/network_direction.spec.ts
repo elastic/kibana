@@ -102,5 +102,41 @@ apiTest.describe(
         expect(esqlResult.documents[1]).toHaveProperty(['network.direction'], null);
       }
     );
+
+    apiTest('should set network direction with where condition', async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-network-direction-where';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'network_direction',
+            source_ip: 'source_ip',
+            destination_ip: 'destination_ip',
+            internal_networks: ['private'],
+            where: {
+              field: 'event.kind',
+              eq: 'test',
+            },
+          } as NetworkDirectionProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      const docs = [
+        { source_ip: '128.232.110.120', destination_ip: '192.168.1.1', event: { kind: 'test' } },
+        {
+          source_ip: '128.232.110.120',
+          destination_ip: '192.168.1.1',
+          event: { kind: 'production' },
+        },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
+      expect(esqlResult.documents[1]).toHaveProperty(['network.direction'], null);
+    });
   }
 );

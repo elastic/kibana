@@ -8,10 +8,28 @@
 import { Builder, type ESQLAstCommand, type ESQLAstItem } from '@kbn/esql-language';
 import type { NetworkDirectionProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
+import { conditionToESQLAst } from '../condition_to_esql';
 
 const DEFAULT_TARGET_FIELD = 'network.direction';
 
-// TODO - add jsdoc
+/**
+ * Converts a Streamlang NetworkDirectionProcessor into a list of ES|QL AST commands.
+ *
+ * @param processor - The NetworkDirectionProcessor to convert
+ * @returns A list of ES|QL AST commands
+ * @example
+ * Input:
+ * ```
+ * {
+ *   source_ip: '128.232.110.120',
+ *   destination_ip: '192.168.1.1',
+ *   internal_networks: ['private'],
+ * }
+ * ```
+ * Output:
+ * ```
+ * | EVAL network.direction = NETWORK_DIRECTION('128.232.110.120', '192.168.1.1', ['private'])
+ */
 export const convertNetworkDirectionProcessorToESQL = (
   processor: NetworkDirectionProcessor
 ): ESQLAstCommand[] => {
@@ -43,6 +61,8 @@ export const convertNetworkDirectionProcessorToESQL = (
       : Builder.expression.column(processor.internal_networks_field);
   networkDirectionFuncArgs.push(networksArg);
 
+  const toColumn = Builder.expression.column(target_field);
+
   const networkDirectionFunc = Builder.expression.func.call('NETWORK_DIRECTION', [
     ...networkDirectionFuncArgs,
   ]);
@@ -52,16 +72,27 @@ export const convertNetworkDirectionProcessorToESQL = (
     commands.push(missingFieldFilter);
   }
 
-  // TODO - handle where
-
-  const toColumn = Builder.expression.column(target_field);
-
-  commands.push(
-    Builder.command({
-      name: 'eval',
-      args: [Builder.expression.func.binary('=', [toColumn, networkDirectionFunc])],
-    })
-  );
+  if ('where' in processor && processor.where && !('always' in processor.where)) {
+    const conditionExpression = conditionToESQLAst(processor.where);
+    const caseExpression = Builder.expression.func.call('CASE', [
+      conditionExpression,
+      networkDirectionFunc,
+      Builder.expression.literal.nil(),
+    ]);
+    commands.push(
+      Builder.command({
+        name: 'eval',
+        args: [Builder.expression.func.binary('=', [toColumn, caseExpression])],
+      })
+    );
+  } else {
+    commands.push(
+      Builder.command({
+        name: 'eval',
+        args: [Builder.expression.func.binary('=', [toColumn, networkDirectionFunc])],
+      })
+    );
+  }
 
   return commands;
 };
