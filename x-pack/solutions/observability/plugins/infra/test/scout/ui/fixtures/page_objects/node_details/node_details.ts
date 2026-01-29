@@ -7,7 +7,8 @@
 
 import type { Moment } from 'moment';
 import rison from '@kbn/rison';
-import { type KibanaUrl, type Locator, type ScoutPage, expect } from '@kbn/scout-oblt';
+import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { EXTENDED_TIMEOUT } from '../../constants';
 
 interface QueryParams {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from '@kbn/scout-oblt';
+import { test } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   generateApmData,
   generateLogsData,

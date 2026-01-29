@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type Locator, type ScoutPage } from '@kbn/scout';
+import { type Locator, type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Wait for an element to be visible and enabled (not disabled)
