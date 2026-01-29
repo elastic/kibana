@@ -1,9 +1,8 @@
 # https://buildkite.com/elastic/kibana-uiam-verify-and-promote/
 
 ### Parameters for this job:
-# PUBLISH_DOCKER_TAG: if set to 1/true, passing runs will promote the tested UIAM image to latest-verified.
+# FORCE_PUBLISH: if set to true, promotion will happen on non-main branches
 # UIAM_IMAGE: the full image path for the docker image to test
-# BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
   image: family/kibana-ubuntu-2404
@@ -55,7 +54,7 @@ steps:
   - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
     command: .buildkite/scripts/steps/uiam/promote_uiam_image.sh $UIAM_IMAGE
     key: promote-uiam-image
-    if: "build.branch == 'main'"
+    if: "build.branch == 'main' || build.env('FORCE_PUBLISH') == 'true'"
     retry:
       automatic:
         - exit_status: '-1'
