@@ -80,13 +80,15 @@ export const listSearchSources = async ({
     });
 
     // aliases
-    const aliasSources = resolveRes.aliases.map<AliasSearchSource>((alias) => {
-      return {
-        type: EsResourceType.alias,
-        name: alias.name,
-        indices: Array.isArray(alias.indices) ? alias.indices : [alias.indices],
-      };
-    });
+    const aliasSources = resolveRes.aliases
+      .filter((alias) => includeHidden || !('hidden' in alias && alias.hidden))
+      .map<AliasSearchSource>((alias) => {
+        return {
+          type: EsResourceType.alias,
+          name: alias.name,
+          indices: Array.isArray(alias.indices) ? alias.indices : [alias.indices],
+        };
+      });
 
     // indices
     const resolvedDataStreamNames = dataStreamSources.map((ds) => ds.name);

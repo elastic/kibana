@@ -22,8 +22,12 @@ const indexItem = (
   return { name, attributes: ['open'], ...opts };
 };
 
-const aliasItem = (name: string, indices: string[]): IndicesResolveIndexResolveIndexAliasItem => {
-  return { name, indices };
+const aliasItem = (
+  name: string,
+  indices: string[],
+  opts: { hidden?: boolean } = {}
+): IndicesResolveIndexResolveIndexAliasItem & { hidden?: boolean } => {
+  return { name, indices, ...opts };
 };
 
 const datastreamItem = (
@@ -262,6 +266,47 @@ describe('listSearchSources', () => {
       'index-4',
     ]);
     expect(results.aliases.map((item) => item.name)).toEqual(['alias-1', 'alias-2']);
+  });
+
+  it('excludes hidden aliases by default', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [],
+      aliases: [
+        aliasItem('alias-1', ['foo', 'bar']),
+        aliasItem('alias-2', ['hello', 'dolly'], { hidden: true }),
+        aliasItem('alias-3', ['baz']),
+      ],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '*',
+      esClient,
+    });
+
+    expect(results.aliases.length).toBe(2);
+    expect(results.aliases.map((item) => item.name)).toEqual(['alias-1', 'alias-3']);
+  });
+
+  it('includes hidden aliases when includeHidden=true', async () => {
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [],
+      aliases: [
+        aliasItem('alias-1', ['foo', 'bar']),
+        aliasItem('alias-2', ['hello', 'dolly'], { hidden: true }),
+        aliasItem('alias-3', ['baz']),
+      ],
+      data_streams: [],
+    });
+
+    const results = await listSearchSources({
+      pattern: '*',
+      includeHidden: true,
+      esClient,
+    });
+
+    expect(results.aliases.length).toBe(3);
+    expect(results.aliases.map((item) => item.name)).toEqual(['alias-1', 'alias-2', 'alias-3']);
   });
 
   it('truncates per-type results to max `perTypeLimit`', async () => {
