@@ -17,6 +17,11 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiPopoverTitle,
+  EuiTitle,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -116,12 +121,29 @@ export const ProjectPicker = ({
         panelProps={{ css: styles.popover }}
         hasArrow
       >
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        {isReadonly && (
+          <EuiCallOut
+            size="s"
+            css={styles.callout}
+            title={strings.getProjectPickerReadonlyCallout()}
+            iconType="info"
+          />
+        )}
         <ProjectPickerContent
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           fetchProjects={fetchProjects}
           isReadonly={isReadonly}
-          settingsComponent={settingsComponent}
         />
       </EuiPopover>
     </EuiTourStep>
@@ -153,5 +175,9 @@ const projectPickerStyles = {
   disabledButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.s,
+    }),
+  callout: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
     }),
 };

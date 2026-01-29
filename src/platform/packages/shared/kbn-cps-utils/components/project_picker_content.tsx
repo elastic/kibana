@@ -11,13 +11,11 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiPopoverTitle,
   EuiButtonGroup,
   EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,8 +32,6 @@ export interface ProjectPickerContentProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
-  showTitle?: boolean;
-  settingsComponent?: React.ReactNode;
 }
 
 const projectPickerOptions = [
@@ -56,8 +52,6 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
-  showTitle = true,
-  settingsComponent,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
@@ -74,28 +68,6 @@ export const ProjectPickerContent = ({
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      {showTitle && (
-        <EuiFlexItem grow={false}>
-          <EuiPopoverTitle paddingSize="s">
-            <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <EuiTitle size="xxs">
-                  <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
-            </EuiFlexGroup>
-          </EuiPopoverTitle>
-          {isReadonly && (
-            <EuiCallOut
-              size="s"
-              css={styles.callout}
-              title={strings.getProjectPickerReadonlyCallout()}
-              iconType="info"
-            />
-          )}
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           isFullWidth
@@ -152,7 +124,7 @@ const projectPickerContentStyles = {
     }),
   buttonGroup: ({ euiTheme }: UseEuiTheme) =>
     css({
-      margin: euiTheme.size.s,
+      margin: euiTheme.size.m,
     }),
   projectCountHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -166,9 +138,5 @@ const projectPickerContentStyles = {
   listContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-  callout: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
     }),
 };
