@@ -30,6 +30,7 @@ import {
   EisCloudConnectPromoCallout,
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
+import numeral from '@elastic/numeral';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
@@ -83,6 +84,9 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
+
+  const sizeFormatted = numeral(size).format('0.0b');
+  const primarySizeFormatted = numeral(primarySize).format('0.0b');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
@@ -141,7 +145,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       )}
 
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
+        <StorageDetails
+          size={sizeFormatted}
+          primarySize={primarySizeFormatted}
+          primary={primary}
+          replica={replica}
+        />
 
         <StatusDetails
           documents={documents}
@@ -150,7 +159,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           health={health}
         />
 
-        <SizeDocCountDetails size={size} documents={documents} />
+        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 

@@ -22,7 +22,7 @@ import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 
 export const SizeDocCountDetails: FunctionComponent<{
-  size: Index['size'];
+  size: string;
   documents: Index['documents'];
 }> = ({ size, documents }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
