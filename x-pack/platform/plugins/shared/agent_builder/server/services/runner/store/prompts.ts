@@ -43,11 +43,12 @@ export const getFileSystemInstructions = async ({
 
   ### Types of files
 
-  The filestore is used to store different types of files. Each of them
+  The filestore is used to store different types of files. Each of them represents a different concept in the system.
 
-  #### **${FileEntryType.toolResult}**
+  #### ${FileEntryType.toolResult}
 
-  Those are created by tools during their execution
+  Those are the results from all prior tool calls you performed during the current conversation, exposed
+  so that you can access them later when required.
 
   - They are all stored under the "/tool_calls" folder
   - They follow this path convention: "/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json"
