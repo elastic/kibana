@@ -54,6 +54,7 @@ const scriptOptions: RunOptions = {
   `,
   flags: {
     string: ['dir', 'checks', 'file', 'files'],
+    boolean: ['fix'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
@@ -61,6 +62,8 @@ const scriptOptions: RunOptions = {
         --files            Optional list of target files (comma or newline delimited). When provided,
                            the script identifies which Kibana plugins/packages contain these files
                            and scopes checks to those packages.
+        --fix              Enable auto-fix mode. When enabled, checks that may change files run
+                           sequentially to avoid conflicts. Defaults to true in CI, false locally.
                            
                            Environment variables set for check scripts:
                              - QUICK_CHECK_TARGET_FILES: comma-separated list of target files
@@ -130,35 +133,43 @@ void run(async ({ log, flagsReader }) => {
     checksToRun = checksToRun.filter((check) => !check.skipLocal);
   }
 
-  // Partition checks based on mayChangeFiles flag
-  const fileChangingChecks = checksToRun
-    .filter((check) => check.mayChangeFiles)
-    .map((check) => ({
-      script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
-      nodeCommand: check.nodeCommand,
-      filesArg: check.filesArg,
-      pathArg: check.pathArg,
-      packagesArg: check.packagesArg,
-      positionalPackages: check.positionalPackages,
-    }));
+  // Determine fix mode: defaults to true in CI, false locally
+  // Can be explicitly set via --fix flag
+  const fixFlagValue = flagsReader.boolean('fix');
+  const fixMode = fixFlagValue !== undefined ? fixFlagValue : IS_CI;
 
-  const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles)
-    .map((check) => ({
-      script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
-      nodeCommand: check.nodeCommand,
-      filesArg: check.filesArg,
-      pathArg: check.pathArg,
-      packagesArg: check.packagesArg,
-      positionalPackages: check.positionalPackages,
-    }));
+  // Map all checks to CheckToRun format
+  const allChecks = checksToRun.map((check) => ({
+    script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
+    nodeCommand: check.nodeCommand,
+    filesArg: check.filesArg,
+    pathArg: check.pathArg,
+    packagesArg: check.packagesArg,
+    positionalPackages: check.positionalPackages,
+    mayChangeFiles: check.mayChangeFiles,
+  }));
 
-  logger.write(
-    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} sequential, ${regularChecks.length} parallel) using ${MAX_PARALLELISM} cores...`
-  );
-  logger.write('');
+  let results: CheckResult[];
   const startTime = Date.now();
-  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
+
+  if (fixMode) {
+    // Fix mode: partition checks - mayChangeFiles run sequentially, others in parallel
+    const fileChangingChecks = allChecks.filter((check) => check.mayChangeFiles);
+    const regularChecks = allChecks.filter((check) => !check.mayChangeFiles);
+
+    logger.write(
+      `--- Running ${checksToRun.length} checks with --fix (${fileChangingChecks.length} sequential, ${regularChecks.length} parallel) using ${MAX_PARALLELISM} cores...`
+    );
+    logger.write('');
+    results = await runPartitionedChecks(fileChangingChecks, regularChecks);
+  } else {
+    // No fix mode: run all checks in parallel for maximum speed
+    logger.write(
+      `--- Running ${checksToRun.length} checks in parallel using ${MAX_PARALLELISM} cores...`
+    );
+    logger.write('');
+    results = await runAllChecksInParallel(allChecks);
+  }
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
@@ -249,6 +260,7 @@ interface CheckToRun {
   pathArg?: string;
   packagesArg?: string;
   positionalPackages?: boolean;
+  mayChangeFiles?: boolean;
 }
 
 interface ListrContext {
@@ -313,6 +325,47 @@ async function runPartitionedChecks(
     ],
     {
       concurrent: true, // Run both groups concurrently
+      exitOnError: false,
+      renderer: (IS_CI ? 'verbose' : 'default') as any,
+      rendererOptions: {
+        collapseSubtasks: false,
+        collapseErrors: false,
+      },
+    }
+  );
+
+  try {
+    await list.run(context);
+  } catch {
+    // Errors are tracked in results, we don't need to throw
+  }
+
+  return context.results;
+}
+
+async function runAllChecksInParallel(checks: CheckToRun[]): Promise<CheckResult[]> {
+  const context: ListrContext = { results: [] };
+
+  // Create tasks for all checks
+  const tasks: ListrTask<ListrContext>[] = checks.map((check, idx) =>
+    createListrTask(check, `[${idx + 1}/${checks.length}]`)
+  );
+
+  const list = new Listr<ListrContext>(
+    [
+      {
+        title: 'All checks (parallel)',
+        task: (_, task) =>
+          task.newListr(tasks, {
+            concurrent: MAX_PARALLELISM, // Run in parallel
+            exitOnError: false, // Continue even if one fails
+            rendererOptions: { collapseSubtasks: false },
+          }),
+        skip: () => tasks.length === 0,
+      },
+    ],
+    {
+      concurrent: false,
       exitOnError: false,
       renderer: (IS_CI ? 'verbose' : 'default') as any,
       rendererOptions: {
