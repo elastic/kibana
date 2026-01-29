@@ -45,14 +45,11 @@ export const createLogsWithErrors = async ({
   const end = moment().subtract(14, 'minutes').valueOf();
   const range = timerange(start, end);
 
-  const errorMessage = 'Failed to process payment: Connection timeout';
-  const warningMessage = 'High latency detected in payment processing';
-  const infoMessage = 'Payment request received';
 
   const getLogLevelAndMessage = (index: number) => {
-    if (index === 0) return { logLevel: 'error' as const, message: errorMessage };
-    if (index === 1) return { logLevel: 'warn' as const, message: warningMessage };
-    return { logLevel: 'info' as const, message: infoMessage };
+    if (index === 0) return { logLevel: 'error' as const, message: 'Failed to process payment: Connection timeout' };
+    if (index === 1) return { logLevel: 'warn' as const, message: 'High latency detected in payment processing' };
+    return { logLevel: 'info' as const, message: 'Payment request received' };
   };
 
   const logs = range
