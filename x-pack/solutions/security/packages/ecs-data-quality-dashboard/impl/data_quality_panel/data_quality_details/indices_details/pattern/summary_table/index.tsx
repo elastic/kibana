@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
