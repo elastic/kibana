@@ -209,6 +209,7 @@ export function makeEmbeddableServices(
 export function mockDynamicActionsManager() {
   return {
     api: {
+      enhancements: { dynamicActions: {} },
       setDynamicActions: jest.fn(),
       dynamicActionsState$: {},
     } as unknown as EmbeddableDynamicActionsManager['api'],

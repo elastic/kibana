@@ -36,17 +36,15 @@ describe('transformEnhancementsOut', () => {
       Object {
         "drilldowns": Array [
           Object {
-            "config": Object {
-              "dashboardRefName": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:8aeddba7-a7ed-42e2-988e-794c8435028d:dashboardId",
-              "open_in_new_tab": false,
-              "type": "dashboard_drilldown",
-              "use_filters": true,
-              "use_time_range": true,
-            },
+            "dashboardRefName": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:8aeddba7-a7ed-42e2-988e-794c8435028d:dashboardId",
             "label": "Go to Dashboard",
+            "open_in_new_tab": false,
             "triggers": Array [
               "FILTER_TRIGGER",
             ],
+            "type": "dashboard_drilldown",
+            "use_filters": true,
+            "use_time_range": true,
           },
         ],
       }
@@ -77,14 +75,12 @@ describe('transformEnhancementsOut', () => {
       Object {
         "drilldowns": Array [
           Object {
-            "config": Object {
-              "open_in_new_tab": false,
-              "type": "discover_drilldown",
-            },
             "label": "Open in Discover",
+            "open_in_new_tab": false,
             "triggers": Array [
               "FILTER_TRIGGER",
             ],
+            "type": "discover_drilldown",
           },
         ],
       }
@@ -119,16 +115,14 @@ describe('transformEnhancementsOut', () => {
       Object {
         "drilldowns": Array [
           Object {
-            "config": Object {
-              "encode_url": true,
-              "open_in_new_tab": true,
-              "type": "url_drilldown",
-              "url": "https://localhost/?{{event.key}}",
-            },
+            "encode_url": true,
             "label": "Go to URL",
+            "open_in_new_tab": true,
             "triggers": Array [
               "VALUE_CLICK_TRIGGER",
             ],
+            "type": "url_drilldown",
+            "url": "https://localhost/?{{event.key}}",
           },
         ],
       }

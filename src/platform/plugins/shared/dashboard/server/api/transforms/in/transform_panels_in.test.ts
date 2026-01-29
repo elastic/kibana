@@ -113,7 +113,7 @@ describe('transformPanelsIn', () => {
     beforeAll(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../kibana_services').embeddableService = {
-        getTransforms: () => ({ getSchema: () => TestEmbeddableSchema }),
+        getTransforms: () => ({ schema: TestEmbeddableSchema }),
       };
     });
 
