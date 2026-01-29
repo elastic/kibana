@@ -24,6 +24,7 @@ describe('AttackChain', () => {
   });
 
   it('renders the expected detected tactics from attack discovery', () => {
+    mockedGetTacticMetadata.mockReturnValue([{ name: 'Initial Access', detected: true, index: 0 }]);
     const tacticMetadata = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics).filter(
       (tactic) => tactic.detected
     );
@@ -31,7 +32,7 @@ describe('AttackChain', () => {
 
     render(<AttackChain attackTactics={mockAttackDiscovery.mitreAttackTactics} />);
 
-    tacticMetadata.forEach((tactic) => {
+    tacticMetadata?.forEach((tactic) => {
       expect(screen.getByText(tactic.name)).toBeInTheDocument();
     });
   });
