@@ -65,6 +65,9 @@ describe('ScriptsLibrary', () => {
 
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
+    // navigate to scripts lib. page before each test
+    history.push(SCRIPTS_LIBRARY_PATH);
+
     render = () => {
       renderResult = mockedContext.render(<ScriptsLibrary data-test-subj="test" />);
       return renderResult;
@@ -77,17 +80,12 @@ describe('ScriptsLibrary', () => {
 
   describe('Page elements', () => {
     it('renders the Scripts Library page', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render();
-      const { getByTestId } = renderResult;
 
-      expect(getByTestId('test')).toBeInTheDocument();
+      expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
     it('should show the page header', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render();
       const { getByTestId } = renderResult;
 
@@ -106,8 +104,6 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render();
       const { queryByTestId } = renderResult;
       const uploadButton = queryByTestId('test-uploadScriptButton');
@@ -116,8 +112,6 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should show an empty table when there are no scripts', () => {
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render();
       const { getByText, getByTestId } = renderResult;
 
@@ -162,8 +156,6 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
-
       render();
       expect(useToastsMock().addDanger).toHaveBeenCalledWith(
         'There was an error fetching the scripts list: fetch failed!'
@@ -175,7 +167,6 @@ describe('ScriptsLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId });
       setupScriptsList([script]);
 
-      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -195,6 +186,51 @@ describe('ScriptsLibrary', () => {
         fireEvent.click(detailsButton);
         expect(getByTestId('test-endpointScriptFlyout-details')).toBeInTheDocument();
       });
+    });
+
+    it('should show edit flyout when clicked on row action `Edit` item', () => {
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      setupScriptsList([script]);
+
+      render();
+
+      const { getByTestId } = renderResult;
+      const range = getByTestId('test-table-record-range-label');
+      expect(range).toHaveTextContent(`Showing 1-1 of 1 script`);
+
+      const actionsButton = getByTestId(`test-table-row-actions-${scriptId}`);
+      expect(actionsButton).toBeInTheDocument();
+      fireEvent.click(actionsButton);
+
+      waitFor(() => {
+        const actionsPanel = getByTestId(`test-table-row-actions-${scriptId}-contextMenuPanel`);
+        expect(actionsPanel).toBeInTheDocument();
+
+        const editButton = getByTestId('actionEdit');
+        expect(editButton).toBeInTheDocument();
+        fireEvent.click(editButton);
+        expect(getByTestId('test-endpointScriptFlyout-edit')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show edit flyout when loaded via URL without `canWriteScriptsLibrary` privilege', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      setupScriptsList([script]);
+
+      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=edit&selectedScriptId=${scriptId}`));
+      render();
+
+      const { queryByTestId } = renderResult;
+      expect(queryByTestId('test-endpointScriptFlyout-edit')).not.toBeInTheDocument();
     });
   });
 });
