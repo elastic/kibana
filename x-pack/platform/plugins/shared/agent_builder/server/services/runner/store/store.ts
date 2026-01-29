@@ -6,17 +6,17 @@
  */
 
 import type {
-  IFileSystemStore,
+  IFileStore,
   FsEntry,
   FileEntry,
   LsEntry,
   GrepMatch,
   DirEntryWithChildren,
-} from '@kbn/agent-builder-server/runner/filesystem';
+} from '@kbn/agent-builder-server/runner/filestore';
 import type { IVirtualFileSystem } from './filesystem';
 import { normalizePath, dirname } from './filesystem/path_utils';
 
-export class FileSystemStore implements IFileSystemStore {
+export class FileSystemStore implements IFileStore {
   private readonly filesystem: IVirtualFileSystem;
 
   constructor({ filesystem }: { filesystem: IVirtualFileSystem }) {

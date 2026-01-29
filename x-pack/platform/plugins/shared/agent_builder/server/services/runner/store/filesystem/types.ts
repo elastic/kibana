@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 
 // ============================================================================
 // Volume types

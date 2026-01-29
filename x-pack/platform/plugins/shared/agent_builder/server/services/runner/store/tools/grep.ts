@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import { filesystemTools } from '@kbn/agent-builder-common/tools';
+import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 
 const schema = z.object({
@@ -28,18 +28,18 @@ const schema = z.object({
 });
 
 export const grepTool = ({
-  fsStore,
+  filestore,
 }: {
-  fsStore: IFileSystemStore;
+  filestore: IFileStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: filesystemTools.grep,
+    id: filestoreTools.grep,
     description: `Search for text matching a pattern in files`,
     type: ToolType.builtin,
     schema,
-    tags: ['store'],
+    tags: ['filestore'],
     handler: async ({ pattern, globPattern, context, fixed }, ctx) => {
-      const matches = await fsStore.grep(pattern, globPattern, { context, fixed });
+      const matches = await filestore.grep(pattern, globPattern, { context, fixed });
 
       // Transform matches to a simpler format for the response
       const results = matches.map((match) => ({

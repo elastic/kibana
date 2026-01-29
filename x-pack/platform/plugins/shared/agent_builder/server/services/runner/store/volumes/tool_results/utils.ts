@@ -8,8 +8,9 @@
 import type { ConversationRound, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filesystem';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ToolCallFileEntry } from './types';
 
 export const getToolCallEntryPath = ({
@@ -25,6 +26,7 @@ export const getToolCallEntryPath = ({
 };
 
 export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEntry => {
+  const stringifiedContent = JSON.stringify(result.result.data, undefined, 2);
   return {
     type: 'file',
     path: getToolCallEntryPath({
@@ -34,18 +36,18 @@ export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEnt
     }),
     content: {
       raw: result.result.data,
-      plain_text: JSON.stringify(result.result.data, undefined, 2),
+      plain_text: stringifiedContent,
     },
     metadata: {
+      // generic meta
       type: FileEntryType.toolResult,
       id: result.result.tool_result_id,
-      content_length: 0, // TODO
+      token_count: estimateTokens(stringifiedContent),
       readonly: true,
-      extra: {
-        tool_result_type: result.result.type,
-        tool_call_id: result.tool_call_id,
-        tool_id: result.tool_id,
-      },
+      // specific tool-result meta
+      tool_result_type: result.result.type,
+      tool_call_id: result.tool_call_id,
+      tool_id: result.tool_id,
     },
   };
 };

@@ -36,11 +36,11 @@ export const platformCoreTools = {
   attachmentDiff: platformCoreTool('attachment_diff'),
 } as const;
 
-export const filesystemTools = {
-  read: `${internalNamespaces.platformFilesystem}.read`,
-  ls: `${internalNamespaces.platformFilesystem}.ls`,
-  grep: `${internalNamespaces.platformFilesystem}.grep`,
-  glob: `${internalNamespaces.platformFilesystem}.glob`,
+export const filestoreTools = {
+  read: `${internalNamespaces.platformFilestore}.read`,
+  ls: `${internalNamespaces.platformFilestore}.ls`,
+  grep: `${internalNamespaces.platformFilestore}.grep`,
+  glob: `${internalNamespaces.platformFilestore}.glob`,
 };
 
 /**

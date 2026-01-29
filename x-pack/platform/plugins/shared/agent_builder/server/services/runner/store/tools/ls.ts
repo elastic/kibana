@@ -7,14 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import { filesystemTools } from '@kbn/agent-builder-common/tools';
+import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type {
-  IFileSystemStore,
+  IFileStore,
   LsEntry,
   FileEntryMetadata,
-} from '@kbn/agent-builder-server/runner/filesystem';
+} from '@kbn/agent-builder-server/runner/filestore';
 
 const schema = z.object({
   path: z.string().describe('Path of the directory to list'),
@@ -28,18 +28,18 @@ const schema = z.object({
 });
 
 export const lsTool = ({
-  fsStore,
+  filestore,
 }: {
-  fsStore: IFileSystemStore;
+  filestore: IFileStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: filesystemTools.ls,
+    id: filestoreTools.ls,
     description: `List files and directories at the given path`,
     type: ToolType.builtin,
     schema,
-    tags: ['store'],
+    tags: ['filestore'],
     handler: async ({ path, depth }, context) => {
-      const entries = await fsStore.ls(path, { depth });
+      const entries = await filestore.ls(path, { depth });
       const summaries = entries.map(stripContent);
 
       return {

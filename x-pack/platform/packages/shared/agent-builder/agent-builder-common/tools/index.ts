@@ -9,7 +9,7 @@ export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  filesystemTools,
+  filestoreTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,

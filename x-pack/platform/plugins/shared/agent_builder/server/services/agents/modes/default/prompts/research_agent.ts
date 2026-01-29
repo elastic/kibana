@@ -28,7 +28,7 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions, filesystem } = params;
+  const { initialMessages, actions, filestore } = params;
   const clearSystemMessage = params.configuration.research.replace_default_instructions;
   return [
     [
@@ -40,7 +40,7 @@ export const getResearchAgentPrompt = async (
     ...getConversationAttachmentsSystemMessages(
       params.processedConversation.versionedAttachmentPresentation
     ),
-    ['system', await getFileSystemInstructions({ filesystem })],
+    ['system', await getFileSystemInstructions({ filesystem: filestore })],
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
@@ -53,7 +53,7 @@ export const getBaseSystemMessage = async ({
   conversationTimestamp,
   processedConversation: { attachmentTypes },
   outputSchema,
-  filesystem,
+  filestore,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -66,7 +66,7 @@ That answering agent will have access to the conversation history and to all inf
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
 3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
 
-${await getFileSystemInstructions({ filesystem })}
+${await getFileSystemInstructions({ filesystem: filestore })}
 
 ## INSTRUCTIONS
 
@@ -92,7 +92,7 @@ export const getResearchSystemMessage = async ({
   conversationTimestamp,
   processedConversation: { attachmentTypes },
   outputSchema,
-  filesystem,
+  filestore,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -179,7 +179,7 @@ Constraints:
       - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
       - Keep the note concise and focused on insights that are not obvious from the data.
 
-${await getFileSystemInstructions({ filesystem })}
+${await getFileSystemInstructions({ filesystem: filestore })}
 
 ${customInstructionsBlock(customInstructions)}
 

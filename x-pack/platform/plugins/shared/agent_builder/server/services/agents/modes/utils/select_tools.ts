@@ -16,7 +16,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
-import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -31,7 +31,7 @@ export const selectTools = async ({
   toolProvider,
   agentConfiguration,
   attachmentsService,
-  filesystem,
+  filestore,
   spaceId,
   runner,
 }: {
@@ -39,7 +39,7 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filesystem: IFileSystemStore;
+  filestore: IFileStore;
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
@@ -65,7 +65,7 @@ export const selectTools = async ({
   });
 
   // create tools for filesystem
-  const fsTools = getStoreTools({ fsStore: filesystem });
+  const fsTools = getStoreTools({ filestore });
   const convertedFsTools = fsTools.map((tool) => builtinToolToExecutable({ tool, runner }));
 
   // pick tools from provider (from agent config and attachment-type tools)

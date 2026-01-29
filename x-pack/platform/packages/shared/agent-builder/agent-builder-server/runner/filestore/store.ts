@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { FileEntry, DirEntry } from './fs';
+import type { FileEntry, DirEntry } from './filesystem';
 
-export interface IFileSystemStore {
+/**
+ * Main interface for the public API of the file store.
+ */
+export interface IFileStore {
   /**
    * Read a file entry from the store.
    *
@@ -31,16 +34,22 @@ export interface IFileSystemStore {
    * Search files with text matching the given pattern.
    *
    * @param pattern The pattern to search for.
-   * @param globPattern The glob pattern to match files against.
+   * @param glob The glob pattern to match files against.
    * @param options.context Optional number of lines of context to include before and after the match.
    * @param options.fixed If true, treat pattern as literal text (like grep -F). Default: false (regex).
    */
   grep(
     pattern: string,
-    globPattern: string,
+    glob: string,
     options?: { context?: number; fixed?: boolean }
   ): Promise<GrepMatch[]>;
 }
+
+/**
+ * Distinct interface for the API exposed to tool handlers.
+ * The same for now, but will change in the future.
+ */
+export type IToolFileStore = IFileStore;
 
 export interface DirEntryWithChildren extends DirEntry {
   children?: LsEntry[];

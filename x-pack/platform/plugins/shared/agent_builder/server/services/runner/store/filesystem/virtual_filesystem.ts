@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import type { FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { Volume, MountOptions, GlobOptions, ListOptions, IVirtualFileSystem } from './types';
 import { normalizePath, joinPath } from './path_utils';
 

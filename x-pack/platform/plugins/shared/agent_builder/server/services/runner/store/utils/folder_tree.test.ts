@@ -6,12 +6,12 @@
  */
 
 import type {
-  IFileSystemStore,
+  IFileStore,
   LsEntry,
   DirEntryWithChildren,
   FileEntry,
-} from '@kbn/agent-builder-server/runner/filesystem';
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filesystem';
+} from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { buildFolderTree } from './folder_tree';
 
 const createMockFileEntry = (path: string): FileEntry => ({
@@ -20,7 +20,7 @@ const createMockFileEntry = (path: string): FileEntry => ({
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    content_length: 100,
+    token_count: 100,
     readonly: true,
   },
   content: { raw: { data: 'test' } },
@@ -32,7 +32,7 @@ const createMockDirEntry = (path: string, children?: LsEntry[]): DirEntryWithChi
   children,
 });
 
-const createMockStore = (lsResult: LsEntry[]): IFileSystemStore => ({
+const createMockStore = (lsResult: LsEntry[]): IFileStore => ({
   read: jest.fn(),
   ls: jest.fn().mockResolvedValue(lsResult),
   glob: jest.fn(),

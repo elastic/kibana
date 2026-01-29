@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import { filesystemTools } from '@kbn/agent-builder-common/tools';
+import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import {
   estimateTokens,
   truncateTokens,
@@ -30,18 +30,18 @@ const schema = z.object({
 const SAFEGUARD_TOKEN_COUNT = 10_000;
 
 export const readTool = ({
-  fsStore,
+  filestore,
 }: {
-  fsStore: IFileSystemStore;
+  filestore: IFileStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: filesystemTools.read,
-    description: `Read the content of a file on the filesystem`,
+    id: filestoreTools.read,
+    description: `Read the content of a file in the filestore based on its path`,
     type: ToolType.builtin,
     schema,
-    tags: ['store'],
+    tags: ['filestore'],
     handler: async ({ path, raw }, context) => {
-      const entry = await fsStore.read(path);
+      const entry = await filestore.read(path);
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
@@ -56,7 +56,7 @@ export const readTool = ({
         content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
         const tokenCount = estimateTokens(content);
         if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
-          content = truncateTokens(content, SAFEGUARD_TOKEN_COUNT);
+          content = truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT);
           truncated = true;
         }
       }

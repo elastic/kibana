@@ -26,7 +26,7 @@ import type {
   PromptManager,
   ConversationStateManager,
 } from '../runner';
-import type { IFileSystemStore } from '../runner/filesystem';
+import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
 
 export type AgentHandlerFn = (
@@ -105,9 +105,9 @@ export interface AgentHandlerContext {
    */
   logger: Logger;
   /**
-   * Filesystem store to access data from the agent's virtual filesystem
+   * File store to access data from the agent's virtual filesystem
    */
-  filesystem: IFileSystemStore;
+  filestore: IFileStore;
 }
 
 /**

@@ -16,7 +16,7 @@ export const createStore = ({ conversation }: { conversation?: Conversation }) =
   const resultStore = createResultStore({ conversation });
   filesystem.mount(resultStore.getVolume());
 
-  const fsStore = new FileSystemStore({ filesystem });
+  const filestore = new FileSystemStore({ filesystem });
 
-  return { filesystem, fsStore, resultStore };
+  return { filesystem, filestore, resultStore };
 };

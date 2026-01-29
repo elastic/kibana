@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileSystemStore } from './store';
 import { VirtualFileSystem, MemoryVolume } from './filesystem';
 
@@ -19,7 +19,7 @@ const createFileEntry = (
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    content_length: 100,
+    token_count: 100,
     readonly: true,
   },
   content,

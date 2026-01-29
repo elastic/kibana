@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { filesystemTools } from '@kbn/agent-builder-common/tools';
-import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filesystem';
+import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { buildFolderTree } from './utils/folder_tree';
 
 const tools = {
-  read: sanitizeToolId(filesystemTools.read),
-  ls: sanitizeToolId(filesystemTools.ls),
-  glob: sanitizeToolId(filesystemTools.glob),
-  grep: sanitizeToolId(filesystemTools.grep),
+  read: sanitizeToolId(filestoreTools.read),
+  ls: sanitizeToolId(filestoreTools.ls),
+  glob: sanitizeToolId(filestoreTools.glob),
+  grep: sanitizeToolId(filestoreTools.grep),
 };
 
 export const getFileSystemInstructions = async ({
   filesystem,
 }: {
-  filesystem: IFileSystemStore;
+  filesystem: IFileStore;
 }): Promise<string> => {
   const treeRepresentation = await buildFolderTree(filesystem, { maxFilesPerFolder: 3 });
 

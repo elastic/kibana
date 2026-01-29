@@ -7,7 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
-import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ResolvedConfiguration } from '../../types';
 import type { ProcessedConversation } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
@@ -16,7 +16,7 @@ export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
   processedConversation: ProcessedConversation;
-  filesystem: IFileSystemStore;
+  filestore: IFileStore;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
 }

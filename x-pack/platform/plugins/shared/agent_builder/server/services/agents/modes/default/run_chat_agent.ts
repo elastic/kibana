@@ -82,7 +82,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
-    filesystem,
+    filestore,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation });
@@ -111,7 +111,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filesystem,
+    filestore,
     request,
     spaceId: context.spaceId,
     runner: context.runner,
@@ -147,7 +147,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
-    filesystem,
+    filestore,
     processedConversation,
     outputSchema,
     conversationTimestamp,

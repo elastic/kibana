@@ -13,7 +13,7 @@ export enum FileEntryType {
   attachment = 'attachment',
 }
 
-export interface FileEntryMetadata<TExtraMeta extends object = {}> {
+export type FileEntryMetadata<TExtraMeta extends object = {}> = {
   /**
    * Type of the entry (tool_result, attachment...)
    */
@@ -23,18 +23,14 @@ export interface FileEntryMetadata<TExtraMeta extends object = {}> {
    */
   id: string;
   /**
-   * Estimated length of the content of the entry.
+   * Estimated length, in tokens, of the content of the raw content.
    */
-  content_length: number;
+  token_count: number;
   /**
    * Defines if the entry can be modified or not.
    */
   readonly: boolean;
-  /**
-   * Extra per type metadata.
-   */
-  extra?: TExtraMeta;
-}
+} /** extra per-type metadata */ & TExtraMeta;
 
 export interface FileEntryContent<TData extends object = object> {
   /**

@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import { filesystemTools } from '@kbn/agent-builder-common/tools';
+import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { IFileSystemStore, FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import type { IFileStore, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 
 const schema = z.object({
@@ -17,18 +17,18 @@ const schema = z.object({
 });
 
 export const globTool = ({
-  fsStore,
+  filestore,
 }: {
-  fsStore: IFileSystemStore;
+  filestore: IFileStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: filesystemTools.glob,
+    id: filestoreTools.glob,
     description: `Find files matching a glob pattern`,
     type: ToolType.builtin,
     schema,
-    tags: ['store'],
+    tags: ['filestore'],
     handler: async ({ pattern }, context) => {
-      const entries = await fsStore.glob(pattern);
+      const entries = await filestore.glob(pattern);
       const summaries = entries.map(toSummary);
 
       return {

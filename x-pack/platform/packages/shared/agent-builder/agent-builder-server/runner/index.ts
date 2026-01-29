@@ -47,3 +47,16 @@ export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } fro
 export type { AttachmentsService } from './attachments_service';
 export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
+export { FileEntryType } from './filestore';
+export type {
+  IToolFileStore,
+  IFileStore,
+  LsEntry,
+  FsEntry,
+  DirEntry,
+  DirEntryWithChildren,
+  GrepMatch,
+  FileEntry,
+  FileEntryMetadata,
+  FileEntryContent,
+} from './filestore';

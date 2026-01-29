@@ -7,10 +7,10 @@
 
 import type {
   FileEntry,
-  IFileSystemStore,
+  IFileStore,
   LsEntry,
   DirEntryWithChildren,
-} from '@kbn/agent-builder-server/runner/filesystem';
+} from '@kbn/agent-builder-server/runner/filestore';
 
 export interface BuildFolderTreeOptions {
   /**
@@ -57,7 +57,7 @@ export interface BuildFolderTreeOptions {
  * ```
  */
 export async function buildFolderTree(
-  fsStore: IFileSystemStore,
+  fsStore: IFileStore,
   options: BuildFolderTreeOptions = {}
 ): Promise<string> {
   const { path = '/', maxDepth = 5, maxFilesPerFolder = 3, initialIndent = 0 } = options;
