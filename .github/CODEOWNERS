@@ -1169,7 +1169,7 @@ x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-tea
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
-x-pack/solutions/observability/plugins/observability @elastic/actionable-obs-team
+x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-exploration-team
@@ -1508,6 +1508,65 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 ### Observability Plugins
 
+# Observability plugin
+/x-pack/solutions/observability/plugins/observability/common/annotations.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/common/custom_threshold @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/common/custom_threshold_rule @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/common/locators @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/common/utils/alerting @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_actions @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_overview @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_search_bar @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_sources @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alerts_flyout @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alerts_table @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.stories.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_status_indicator.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/annotations @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/custom_threshold @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/rule_condition_chart @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/components/rule_kql_filter @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_app_link @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/create_use_rules_link.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.test.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_case_view_navigation.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_delete_rules.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_disable_rule.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_enable_rule.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_data.test.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_data.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_detail.test.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_detail.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.test.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_available_rules_with_descriptions.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_filtered_rule_types.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_rules_table_filters.test.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_rules_table_filters.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_run_rule.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_summary_time_range.tsx @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_update_api_key.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/locators @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/alert_details @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/annotations @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/cases @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/rule_details @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/rules @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/rules @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/typings/alerts.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v1.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v2.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v3.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/lib/rules @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/routes/alerts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/saved_objects/threshold.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/services @elastic/actionable-obs-team
+
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/data_usage @elastic/kibana-management
@@ -1665,6 +1724,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/actionable-obs-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/actionable-obs-team
 
+
 # Elastic Stack Monitoring
 /x-pack/platform/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/platform/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
@@ -1709,19 +1769,19 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional/apps/uptime @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional/services/uptime @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional/apps/uptime @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/alerting_api_integration/observability/index.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/actionable-obs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
@@ -1749,6 +1809,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/observability_page.ts @elastic/observability-ui
+/x-pack/solutions/observability/plugins/observability/server/services/index.ts @elastic/observability-ui
 
 # Observability onboarding tour
 /x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux
@@ -2297,13 +2358,13 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/solutions/observability/test/screenshot_creation/ @elastic/response-ops
 /x-pack/solutions/security/test/screenshot_creation/ @elastic/response-ops
-/x-pack/platform/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
+/x-pack/platform/test/rule_registry @elastic/response-ops @elastic/actionable-obs-team
 /x-pack/platform/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/platform/test/serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/platform/test/serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
 /x-pack/solutions/observability/test/serverless/functional/page_objects/svl_oblt_overview_page.ts @elastic/response-ops
 /x-pack/platform/test/alerting_api_integration/ @elastic/response-ops
-/x-pack/solutions/observability/test/alerting_api_integration/observability @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/alerting_api_integration/observability @elastic/actionable-obs-team
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/platform/test/plugin_api_integration/test_suites/event_log/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
@@ -3152,9 +3213,9 @@ docs/reference                                @elastic/experience-docs
 x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-management-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
