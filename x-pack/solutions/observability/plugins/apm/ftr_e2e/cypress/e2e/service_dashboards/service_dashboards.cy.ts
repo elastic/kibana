@@ -5,6 +5,8 @@
  * 2.0.
  */
 import url from 'url';
+import { synthtrace } from '../../../synthtrace';
+import { generateData } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -21,8 +23,17 @@ const apiToIntercept = {
 
 describe('Service dashboard - aws lambda', () => {
   let dashboardId: string;
+  before(() => {
+    synthtrace.index(
+      generateData({
+        start: new Date(start).getTime(),
+        end: new Date(end).getTime(),
+      })
+    );
+  });
 
   after(() => {
+    synthtrace.clean();
     cy.request({
       method: 'DELETE',
       url: `/api/dashboards/${dashboardId}`,
