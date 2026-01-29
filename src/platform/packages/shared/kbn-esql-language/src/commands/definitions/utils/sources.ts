@@ -262,7 +262,7 @@ export const specialIndicesToSuggestions = (
  * For example, in the following JOIN command, it returns the source node representing "lookup_index":
  * | LOOKUP JOIN lookup_index AS l ON source_index.id = l.id
  */
-export const getSourceOfJoinTarget = (command: ESQLAstJoinCommand): ESQLSource => {
+export const getLookupJoinSource = (command: ESQLAstJoinCommand): ESQLSource => {
   const firstArg = command.args[0];
   const argumentToWalk = isAsExpression(firstArg) ? firstArg.args[0] : firstArg;
 

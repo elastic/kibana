@@ -15,7 +15,7 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
-  getSourceOfJoinTarget,
+  getLookupJoinSource,
 } from './sources';
 import { EsqlQuery, synth } from '../../../composer';
 import { Walker, type ESQLAstJoinCommand } from '../../../..';
@@ -181,7 +181,7 @@ describe('buildSourcesDefinitions with timeseries', () => {
 describe('getSourceOfJoinTarget', () => {
   it('returns target index fields', () => {
     const joinCommand = synth.cmd`LOOKUP JOIN join_index1 ON join_field1`;
-    const joinTarget = getSourceOfJoinTarget(joinCommand as ESQLAstJoinCommand);
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
     expect(joinTarget).toMatchObject({
       type: 'source',
@@ -191,7 +191,7 @@ describe('getSourceOfJoinTarget', () => {
 
   it('returns target index with alias', () => {
     const joinCommand = synth.cmd`LOOKUP JOIN join_index2 AS j ON join_field2`;
-    const joinTarget = getSourceOfJoinTarget(joinCommand as ESQLAstJoinCommand);
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
     expect(joinTarget).toMatchObject({
       type: 'source',
       name: 'join_index2',
@@ -204,7 +204,7 @@ describe('getSourceOfJoinTarget', () => {
       type: 'command',
       name: 'join',
     });
-    const joinTarget = getSourceOfJoinTarget(joinCommand as ESQLAstJoinCommand);
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
     expect(joinTarget).toMatchObject({
       type: 'source',
