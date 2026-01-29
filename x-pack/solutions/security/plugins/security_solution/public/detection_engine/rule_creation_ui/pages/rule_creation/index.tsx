@@ -809,6 +809,28 @@ const CreateRulePageComponent: React.FC<{
     [actionsStepForm.isValid, activeStep, editStep]
   );
 
+  const addToChatButton = useMemo(
+    () =>
+      sendToAgentChat ? (
+        <AddRuleAttachmentToChatButton
+          defineStepData={defineStepData}
+          aboutStepData={aboutStepData}
+          scheduleStepData={scheduleStepData}
+          actionsStepData={actionsStepData}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          size="s"
+        />
+      ) : undefined,
+    [
+      sendToAgentChat,
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+    ]
+  );
+
   const onToggleCollapsedMemo = useCallback(
     () => setIsRulePreviewVisible((isVisible) => !isVisible),
     []
@@ -855,18 +877,7 @@ const CreateRulePageComponent: React.FC<{
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
-                        askAiAssistantButton={
-                          sendToAgentChat ? (
-                            <AddRuleAttachmentToChatButton
-                              defineStepData={defineStepData}
-                              aboutStepData={aboutStepData}
-                              scheduleStepData={scheduleStepData}
-                              actionsStepData={actionsStepData}
-                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-                              size="s"
-                            />
-                          ) : undefined
-                        }
+                        addToChatButton={addToChatButton}
                       />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion

@@ -17,7 +17,7 @@ const CustomHeaderPage: React.FC<
     togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
     isRulePreviewVisible: boolean;
     setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
-    askAiAssistantButton?: React.ReactNode;
+    addToChatButton?: React.ReactNode;
   }
 > = ({
   backOptions,
@@ -27,7 +27,7 @@ const CustomHeaderPage: React.FC<
   isRulePreviewVisible,
   setIsRulePreviewVisible,
   backComponent,
-  askAiAssistantButton,
+  addToChatButton,
 }) => (
   <HeaderPage
     backOptions={backOptions}
@@ -36,7 +36,7 @@ const CustomHeaderPage: React.FC<
     backComponent={backComponent}
   >
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {askAiAssistantButton && <EuiFlexItem grow={false}>{askAiAssistantButton}</EuiFlexItem>}
+      {addToChatButton && <EuiFlexItem grow={false}>{addToChatButton}</EuiFlexItem>}
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="preview-container"

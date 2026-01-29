@@ -67,7 +67,7 @@ export const AI_RULE_CREATION_CANCEL_BUTTON = i18n.translate(
 export const AI_RULE_CREATION_CANCELLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.aiRuleCreation.cancelledMessage',
   {
-    defaultMessage: 'The AI Rule Creation process was cancelled.',
+    defaultMessage: 'The AI rule creation process was cancelled.',
   }
 );
 

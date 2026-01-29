@@ -26,7 +26,7 @@ interface AiRuleCreationUpdatesProps {
  */
 export const AiRuleCreationUpdates: React.FC<AiRuleCreationUpdatesProps> = ({ updates }) => {
   const comments: EuiCommentProps[] = updates.map((update) => ({
-    username: 'AI agent',
+    username: 'Threat Hunting Agent',
     timelineAvatarAriaLabel: 'Tool progress',
     event: (
       <FormattedMessage
