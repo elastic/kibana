@@ -336,6 +336,48 @@ describe('EvaluationScoreRepository', () => {
         error
       );
     });
+
+    it('should default totalRepetitions to 1 when run_metadata.total_repetitions is missing', async () => {
+      const docWithoutRepetitions = createMockScoreDocument({
+        run_metadata: {
+          git_branch: 'main',
+          git_commit_sha: 'abc123',
+          total_repetitions: undefined as unknown as number,
+        },
+      });
+
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: docWithoutRepetitions }] },
+        } as any)
+        .mockResolvedValueOnce({
+          aggregations: {
+            by_dataset: {
+              buckets: [
+                {
+                  key: 'dataset-1',
+                  dataset_name: { buckets: [{ key: 'Test Dataset' }] },
+                  unique_examples: { value: 5 },
+                  by_evaluator: {
+                    buckets: [
+                      {
+                        key: 'Correctness',
+                        score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 5 },
+                        score_median: { values: { '50.0': 0.85 } },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        } as any);
+
+      const result = await repository.getStatsByRunId('run-123');
+
+      expect(result?.totalRepetitions).toBe(1);
+      expect(result?.stats[0].numExamples).toBe(5); // 5 unique examples * 1 repetition
+    });
   });
 
   describe('getScoresByRunId', () => {

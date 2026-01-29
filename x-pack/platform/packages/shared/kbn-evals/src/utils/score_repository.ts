@@ -287,7 +287,8 @@ export class EvaluationScoreRepository {
         query: { term: { run_id: runId } },
         aggs: {
           by_dataset: {
-            terms: { field: 'example.dataset.id', size: 100 },
+            // High limit to accommodate large evaluation suites; typical runs have <100 datasets
+            terms: { field: 'example.dataset.id', size: 10000 },
             aggs: {
               dataset_name: {
                 terms: { field: 'example.dataset.name', size: 1 },
@@ -296,7 +297,8 @@ export class EvaluationScoreRepository {
                 cardinality: { field: 'example.id' },
               },
               by_evaluator: {
-                terms: { field: 'evaluator.name', size: 50 },
+                // High limit to accommodate many evaluators; typical runs have <20 evaluators
+                terms: { field: 'evaluator.name', size: 1000 },
                 aggs: {
                   score_stats: {
                     extended_stats: { field: 'evaluator.score' },
@@ -338,7 +340,7 @@ export class EvaluationScoreRepository {
         | undefined;
 
       const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
-      const totalRepetitions = firstDoc.run_metadata.total_repetitions;
+      const totalRepetitions = firstDoc.run_metadata?.total_repetitions ?? 1;
       for (const datasetBucket of datasetBuckets) {
         const datasetId = datasetBucket.key;
         const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
