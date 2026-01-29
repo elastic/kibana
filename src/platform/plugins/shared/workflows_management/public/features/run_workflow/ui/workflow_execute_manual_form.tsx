@@ -306,7 +306,7 @@ export const WorkflowExecuteManualForm = ({
             <EuiToolTip
               content={i18n.translate('workflows.workflowExecuteManualForm.normalizeDataTooltip', {
                 defaultMessage:
-                  'When enabled, workflow engine will expands flat ECS-style field names (e.g., "kibana.alert.rule.name") into nested objects while preserving original flat keys for backward compatibility.',
+                  'When enabled, workflow engine will expand flat ECS-style field names (e.g., "kibana.alert.rule.name") into nested objects while preserving original flat keys for backward compatibility.',
               })}
             >
               <EuiFlexGroup gutterSize="xs" alignItems="center">
