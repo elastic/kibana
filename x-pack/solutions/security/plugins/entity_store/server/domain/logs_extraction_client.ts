@@ -128,7 +128,7 @@ export class LogsExtractionClient {
 
   private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse): string {
     if (esqlResponse.values.length === 0) {
-      // if no logs are found, we use the current time as the last seen timestamp
+      // if no logs are found, we use the current time as the last seenTimestamp
       return moment().utc().toISOString();
     }
 
@@ -140,6 +140,14 @@ export class LogsExtractionClient {
     return esqlResponse.values[esqlResponse.values.length - 1][timestampIndex] as string;
   }
 
+  // Window scenarios:
+  // 1. specificWindow has been provided, early return
+  // 2. Fresh entity store, no paginationTimestamp or lastExecutionTimestamp:
+  //    fromDate = now - lookbackPeriod | toDate = now - delay
+  // 3. PaginationTimestamp is present:
+  //    fromDate = paginationTimestamp | toDate = now - delay
+  // 4. LastExecutionTimestamp is present:
+  //    fromDate = lastExecutionTimestamp | toDate = now - delay
   private getExtractionWindow(
     logExtractionState: LogExtractionState,
     opts?: LogsExtractionOptions
