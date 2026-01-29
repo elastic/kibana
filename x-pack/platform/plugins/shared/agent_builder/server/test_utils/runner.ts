@@ -94,8 +94,7 @@ export const createStateManagerMock = (): StateManagerMock => {
 export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock => {
   return {
     get: jest.fn(),
-    getLatest: jest.fn(),
-    getVersion: jest.fn(),
+    getAttachmentRecord: jest.fn(),
     getActive: jest.fn(),
     getAll: jest.fn(),
     getDiff: jest.fn(),
@@ -106,6 +105,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     permanentDelete: jest.fn(),
     rename: jest.fn(),
     resolveRefs: jest.fn(),
+    resolveAttachment: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),

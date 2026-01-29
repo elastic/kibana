@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -66,8 +67,8 @@ export const createAttachmentDiffTool = ({
       };
     }
 
-    const fromVersionData = await attachmentManager.get(attachmentId, { version: fromVersion });
-    const toVersionData = await attachmentManager.get(attachmentId, { version: toVersion });
+    const fromVersionData = getVersion(attachment, fromVersion);
+    const toVersionData = getVersion(attachment, toVersion);
 
     return {
       results: [

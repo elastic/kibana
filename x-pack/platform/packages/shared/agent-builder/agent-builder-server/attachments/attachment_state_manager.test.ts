@@ -9,7 +9,7 @@ import type {
   VersionedAttachment,
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
-import { hashContent } from '@kbn/agent-builder-common/attachments';
+import { hashContent, getLatestVersion, getVersion } from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -18,6 +18,7 @@ import type { AttachmentTypeDefinition } from './type_definition';
 
 describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
+  const mockContext = { request: {} as any, spaceId: 'default' };
 
   const getTypeDefinition = (type: string): AttachmentTypeDefinition | undefined => {
     switch (type) {
@@ -188,13 +189,14 @@ describe('AttachmentStateManager', () => {
     it('returns the attachment by ID', async () => {
       const added = await manager.add({ id: 'test-1', type: 'text', data: { content: 'Test' } });
 
-      const retrieved = manager.get('test-1');
+      const retrieved = await manager.get('test-1', { context: mockContext });
 
-      expect(retrieved).toEqual(added);
+      expect(retrieved?.id).toEqual('test-1');
+      expect(retrieved?.data.data).toEqual(added.versions[0].data);
     });
 
-    it('returns undefined for non-existent ID', () => {
-      const result = manager.get('non-existent');
+    it('returns undefined for non-existent ID', async () => {
+      const result = await manager.get('non-existent', { context: mockContext });
 
       expect(result).toBeUndefined();
     });
@@ -205,14 +207,16 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'v1' } });
       await manager.update('test-1', { data: { content: 'v2' } });
 
-      const latest = manager.getLatest('test-1');
+      const record = manager.getAttachmentRecord('test-1')!;
+      const latest = getLatestVersion(record);
 
       expect(latest?.version).toBe(2);
       expect(latest?.data).toEqual({ content: 'v2' });
     });
 
     it('returns undefined for non-existent attachment', () => {
-      expect(manager.getLatest('non-existent')).toBeUndefined();
+      const record = manager.getAttachmentRecord('non-existent');
+      expect(record).toBeUndefined();
     });
   });
 
@@ -222,7 +226,8 @@ describe('AttachmentStateManager', () => {
       await manager.update('test-1', { data: { content: 'v2' } });
       await manager.update('test-1', { data: { content: 'v3' } });
 
-      const v2 = manager.getVersion('test-1', 2);
+      const record = manager.getAttachmentRecord('test-1')!;
+      const v2 = getVersion(record, 2);
 
       expect(v2?.version).toBe(2);
       expect(v2?.data).toEqual({ content: 'v2' });
@@ -231,7 +236,8 @@ describe('AttachmentStateManager', () => {
     it('returns undefined for non-existent version', async () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'v1' } });
 
-      expect(manager.getVersion('test-1', 99)).toBeUndefined();
+      const record = manager.getAttachmentRecord('test-1')!;
+      expect(getVersion(record, 99)).toBeUndefined();
     });
   });
 
@@ -340,7 +346,7 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' } });
 
       const result = manager.delete('test-1');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.active).toBe(false);
@@ -375,7 +381,7 @@ describe('AttachmentStateManager', () => {
       manager.delete('test-1');
 
       const result = manager.restore('test-1');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.active).toBe(true);
@@ -411,7 +417,7 @@ describe('AttachmentStateManager', () => {
       const result = manager.permanentDelete('test-1');
 
       expect(result).toBe(true);
-      expect(manager.get('test-1')).toBeUndefined();
+      expect(manager.getAttachmentRecord('test-1')).toBeUndefined();
       expect(manager.getAll()).toHaveLength(0);
     });
 
@@ -434,7 +440,7 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' } });
 
       const result = manager.rename('test-1', 'New Name');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.description).toBe('New Name');
@@ -616,8 +622,8 @@ describe('AttachmentStateManager', () => {
       const mgr = createAttachmentStateManager(initial, { getTypeDefinition });
 
       expect(mgr.getAll()).toHaveLength(2);
-      expect(mgr.get('existing-1')).toBeDefined();
-      expect(mgr.get('existing-2')).toBeDefined();
+      expect(mgr.getAttachmentRecord('existing-1')).toBeDefined();
+      expect(mgr.getAttachmentRecord('existing-2')).toBeDefined();
     });
 
     it('deep clones initial attachments to avoid mutation', () => {
@@ -629,7 +635,7 @@ describe('AttachmentStateManager', () => {
       initial[0].description = 'mutated';
 
       // Manager should not be affected
-      expect(mgr.get('test-1')?.description).toBeUndefined();
+      expect(mgr.getAttachmentRecord('test-1')?.description).toBeUndefined();
     });
 
     it('starts clean (no changes) when initialized', () => {

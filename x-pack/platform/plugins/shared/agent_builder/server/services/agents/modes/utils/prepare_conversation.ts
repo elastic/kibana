@@ -84,7 +84,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
   for (const input of inputs) {
     // Prefer stable IDs (if provided)
     if (input.id) {
-      const existing = attachmentStateManager.get(input.id);
+      const existing = attachmentStateManager.getAttachmentRecord(input.id);
       if (existing) {
         await attachmentStateManager.update(input.id, {
           data: input.data,
