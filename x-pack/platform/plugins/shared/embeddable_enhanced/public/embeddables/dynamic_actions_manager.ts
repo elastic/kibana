@@ -29,6 +29,7 @@ export function initializeDynamicActionsManager(
     dynamicActionsState$,
     setDynamicActions: (enhancements) => {
       dynamicActionsState$.next(getDynamicActionsState(enhancements));
+      storage.reload$.next();
     },
   };
   const storage = new DynamicActionStorage(uuid, getTitle, api);
@@ -55,7 +56,7 @@ export function initializeDynamicActionsManager(
     getLatestState,
     serializeState: () => getLatestState(),
     reinitializeState: (lastState: DynamicActionsSerializedState) => {
-      api.setDynamicActions(lastState.enhancements);
+      api.setDynamicActions(getDynamicActionsState(extractEnhancements(lastState)));
     },
     startDynamicActions: () => {
       dynamicActions.start().catch((error) => {
