@@ -20,6 +20,7 @@ import {
   getInsightsOnboardingTaskId,
   STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/insights_onboarding';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -46,36 +47,27 @@ const insightsOnboardingTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new generation task'),
-        from: timestampFromString,
-        to: timestampFromString,
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-        steps: z
-          .array(z.nativeEnum(InsightsOnboardingStep))
-          .optional()
-          .default([
-            InsightsOnboardingStep.DescriptionGeneration,
-            InsightsOnboardingStep.FeaturesIdentification,
-            InsightsOnboardingStep.QueriesGeneration,
-          ])
-          .describe(
-            'Optional list of step to perform as part of the stream insights onboarding in the specified sequence. By default it will execute all step.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-      }),
-      z.object({
-        action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: timestampFromString,
+      to: timestampFromString,
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+      steps: z
+        .array(z.nativeEnum(InsightsOnboardingStep))
+        .optional()
+        .default([
+          InsightsOnboardingStep.DescriptionGeneration,
+          InsightsOnboardingStep.FeaturesIdentification,
+          InsightsOnboardingStep.QueriesGeneration,
+        ])
+        .describe(
+          'Optional list of step to perform as part of the stream insights onboarding in the specified sequence. By default it will execute all step.'
+        ),
+    }),
   }),
   handler: async ({
     params,
@@ -183,23 +175,14 @@ const insightsTaskRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new generation task'),
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-      }),
-      z.object({
-        action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-      }),
-    ]),
+    body: taskActionSchema({
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+    }),
   }),
   handler: async ({
     params,

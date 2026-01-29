@@ -19,6 +19,7 @@ import {
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/features_identification';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -256,25 +257,16 @@ export const featuresTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule'),
-        from: dateFromString,
-        to: dateFromString,
-        connector_id: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel'),
-      }),
-      z.object({
-        action: z.literal('acknowledge'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: dateFromString,
+      to: dateFromString,
+      connector_id: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+    }),
   }),
   handler: async ({
     params,
