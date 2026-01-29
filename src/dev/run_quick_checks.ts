@@ -54,7 +54,7 @@ const scriptOptions: RunOptions = {
   `,
   flags: {
     string: ['dir', 'checks', 'file', 'files'],
-    boolean: ['fix'],
+    boolean: ['fix', 'show-commands'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
@@ -64,11 +64,8 @@ const scriptOptions: RunOptions = {
                            and scopes checks to those packages.
         --fix              Enable auto-fix mode. When enabled, checks that may change files run
                            sequentially to avoid conflicts. Defaults to true in CI, false locally.
+        --show-commands    Show the exact command being run for each check. Useful for debugging.
                            
-                           Environment variables set for check scripts:
-                             - QUICK_CHECK_TARGET_FILES: comma-separated list of target files
-                             - QUICK_CHECK_TARGET_PACKAGES: comma-separated list of affected package directories
-                             - QUICK_CHECK_TARGET_PACKAGE_IDS: comma-separated list of affected package IDs
       `,
   },
   log: {
@@ -76,6 +73,10 @@ const scriptOptions: RunOptions = {
     defaultLevel: process.env.CI === 'true' ? 'debug' : 'info',
   },
 };
+
+let showCommands = false;
+let targetFiles: string | undefined;
+let targetPackages: string | undefined;
 
 let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
@@ -91,9 +92,9 @@ void run(async ({ log, flagsReader }) => {
   process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
 
   // Handle optional --files parameter
-  const targetFiles = flagsReader.string('files');
-  if (targetFiles) {
-    const fileListArray = targetFiles
+  const filesArg = flagsReader.string('files');
+  if (filesArg) {
+    const fileListArray = filesArg
       .trim()
       .split(/[,\n]/)
       .map((f) => f.trim())
@@ -102,12 +103,9 @@ void run(async ({ log, flagsReader }) => {
     // Find affected packages for the given files
     const affectedPackages = findAffectedPackages(fileListArray);
 
-    // Set environment variables for check scripts
-    process.env.QUICK_CHECK_TARGET_FILES = fileListArray.join(',');
-    process.env.QUICK_CHECK_TARGET_PACKAGES = affectedPackages
-      .map((pkg) => pkg.normalizedRepoRelativeDir)
-      .join(',');
-    process.env.QUICK_CHECK_TARGET_PACKAGE_IDS = affectedPackages.map((pkg) => pkg.id).join(',');
+    // Set module-level variables for use in runCheckAsync
+    targetFiles = fileListArray.join(',');
+    targetPackages = affectedPackages.map((pkg) => pkg.normalizedRepoRelativeDir).join(',');
 
     logger.info(`Target files specified: ${fileListArray.length} file(s)`);
     logger.info(
@@ -137,6 +135,9 @@ void run(async ({ log, flagsReader }) => {
   // Can be explicitly set via --fix flag
   const fixFlagValue = flagsReader.boolean('fix');
   const fixMode = fixFlagValue !== undefined ? fixFlagValue : IS_CI;
+
+  // Set show-commands mode for debugging
+  showCommands = flagsReader.boolean('show-commands') ?? false;
 
   // Map all checks to CheckToRun format
   const allChecks = checksToRun.map((check) => ({
@@ -395,9 +396,6 @@ async function runCheckAsync(checkToRun: CheckToRun): Promise<CheckResult> {
   const { script, nodeCommand, filesArg, pathArg, packagesArg, positionalPackages } = checkToRun;
   const startTime = Date.now();
 
-  const targetFiles = process.env.QUICK_CHECK_TARGET_FILES;
-  const targetPackages = process.env.QUICK_CHECK_TARGET_PACKAGES;
-
   // When running locally (not CI) and a nodeCommand is available, run it directly
   // This is faster than running through the shell script
   if (!IS_CI && nodeCommand) {
@@ -463,6 +461,10 @@ async function runNodeCommand(
   startTime: number
 ): Promise<CheckResult> {
   return new Promise((resolveFn) => {
+    if (showCommands) {
+      logger.debug(`[${getScriptShortName(script)}] Running: ${nodeCommand}`);
+    }
+
     const parts = nodeCommand.split(' ');
     const cmd = parts[0];
     const args = parts.slice(1);
@@ -502,6 +504,10 @@ async function runNodeCommand(
 async function runShellScript(script: string, startTime: number): Promise<CheckResult> {
   return new Promise((resolveFn) => {
     validateScriptPath(script);
+
+    if (showCommands) {
+      logger.debug(`[${getScriptShortName(script)}] Running: bash ${script}`);
+    }
 
     const scriptProcess = spawn('bash', [script], {
       cwd: REPO_ROOT,

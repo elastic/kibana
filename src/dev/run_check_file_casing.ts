@@ -37,52 +37,62 @@ const IGNORE_PATTERNS = [
   'x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/snapshots',
 ];
 
-run(async ({ log }) => {
-  // Check for target files from quick_checks --files parameter
-  const targetFiles = process.env.QUICK_CHECK_TARGET_FILES;
+run(
+  async ({ log, flagsReader }) => {
+    const filesArg = flagsReader.string('files');
 
-  let paths: string[];
+    let paths: string[];
 
-  if (targetFiles) {
-    // Filter to only the specified files
-    const targetFileList = targetFiles
-      .split(',')
-      .map((f) => f.trim())
-      .filter(Boolean);
-    log.info(`Checking file casing for ${targetFileList.length} specified file(s)`);
+    if (filesArg) {
+      // Filter to only the specified files
+      const targetFileList = filesArg
+        .split(',')
+        .map((f) => f.trim())
+        .filter(Boolean);
+      log.info(`Checking file casing for ${targetFileList.length} specified file(s)`);
 
-    // Filter out files that don't exist and files matching ignore patterns
-    paths = targetFileList.filter((filePath) => {
-      // Check if file exists
-      if (!existsSync(filePath)) {
-        log.debug(`Skipping non-existent file: ${filePath}`);
-        return false;
-      }
-
-      // Check if file matches any ignore pattern
-      for (const pattern of IGNORE_PATTERNS) {
-        const regex = new RegExp(
-          '^' + pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*') + '$'
-        );
-        if (regex.test(filePath)) {
-          log.debug(`Skipping ignored file: ${filePath}`);
+      // Filter out files that don't exist and files matching ignore patterns
+      paths = targetFileList.filter((filePath) => {
+        // Check if file exists
+        if (!existsSync(filePath)) {
+          log.debug(`Skipping non-existent file: ${filePath}`);
           return false;
         }
-      }
 
-      return true;
-    });
-  } else {
-    // Default: scan all files in the repo
-    paths = await globby('**/*', {
-      cwd: REPO_ROOT,
-      onlyFiles: true,
-      gitignore: true,
-      ignore: IGNORE_PATTERNS,
-    });
+        // Check if file matches any ignore pattern
+        for (const pattern of IGNORE_PATTERNS) {
+          const regex = new RegExp(
+            '^' + pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*') + '$'
+          );
+          if (regex.test(filePath)) {
+            log.debug(`Skipping ignored file: ${filePath}`);
+            return false;
+          }
+        }
+
+        return true;
+      });
+    } else {
+      // Default: scan all files in the repo
+      paths = await globby('**/*', {
+        cwd: REPO_ROOT,
+        onlyFiles: true,
+        gitignore: true,
+        ignore: IGNORE_PATTERNS,
+      });
+    }
+
+    const files = paths.map((path) => new File(path));
+
+    await checkFileCasing(log, files);
+  },
+  {
+    flags: {
+      string: ['files'],
+      help: `
+        --files    Optional comma-separated list of files to check. If not provided,
+                   checks all files in the repository.
+      `,
+    },
   }
-
-  const files = paths.map((path) => new File(path));
-
-  await checkFileCasing(log, files);
-});
+);

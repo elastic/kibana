@@ -49,7 +49,8 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/file_casing.sh",
-    "nodeCommand": "node scripts/check_file_casing --quiet"
+    "nodeCommand": "node scripts/check_file_casing --quiet",
+    "filesArg": "--files"
   },
   {
     "script": ".buildkite/scripts/steps/checks/licenses.sh",
