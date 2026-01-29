@@ -8,16 +8,21 @@ import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
 import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
-import { isChildOf, isSchema, routingDefinitionListSchema, getEsqlViewName } from '@kbn/streams-schema';
+import {
+  isChildOf,
+  isSchema,
+  routingDefinitionListSchema,
+  getEsqlViewName,
+} from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import type {
   StreamRoutingContext,
   StreamRoutingEvent,
   StreamRoutingInput,
   StreamRoutingServiceDependencies,
 } from './types';
-import type { SampleDocument } from '@kbn/streams-schema';
 import {
   createUpsertStreamActor,
   createStreamFailureNofitier,

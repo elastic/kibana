@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
-import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
+import { getSegments, MAX_NESTING_LEVEL, type SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
@@ -32,7 +32,6 @@ import {
   useStreamRoutingEvents,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
-  useQueryStreamSamples,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
@@ -54,7 +53,15 @@ export function PreviewPanel() {
   if (routingSnapshot.matches({ ready: 'queryMode' })) {
     // Query mode rendering branch
     if (isQueryModeCreating) {
-      content = <QueryStreamPreviewPanel />;
+      const queryStreamSamples = routingSnapshot.context.queryStreamSamples;
+      content = (
+        <QueryStreamPreviewPanel
+          streamName={definition.stream.name}
+          documents={queryStreamSamples.documents}
+          documentsError={queryStreamSamples.documentsError}
+          isLoading={queryStreamSamples.isLoading}
+        />
+      );
     } else {
       content = <QueryModeIdlePanel />;
     }
@@ -323,15 +330,19 @@ const QueryModeIdlePanel = () => (
 /**
  * Panel for previewing query stream ES|QL results during creation
  */
-const QueryStreamPreviewPanel = () => {
-  const queryStreamSamples = useQueryStreamSamples();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const streamName = routingSnapshot.context.definition.stream.name;
-
+const QueryStreamPreviewPanel = ({
+  streamName,
+  documents,
+  documentsError,
+  isLoading,
+}: {
+  streamName: string;
+  documents: SampleDocument[];
+  documentsError: Error | undefined;
+  isLoading: boolean;
+}) => {
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
-
-  const { documents, documentsError, isLoading } = queryStreamSamples;
   const hasDocuments = !isEmpty(documents);
 
   const [sorting, setSorting] = useState<{
@@ -399,8 +410,7 @@ const QueryStreamPreviewPanel = () => {
         body={
           <EuiText size="s">
             {i18n.translate('xpack.streams.streamDetail.preview.queryStreamEmptyBody', {
-              defaultMessage:
-                'Try adjusting your ES|QL query or selecting a different time range.',
+              defaultMessage: 'Try adjusting your ES|QL query or selecting a different time range.',
             })}
           </EuiText>
         }

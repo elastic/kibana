@@ -351,7 +351,9 @@ function QueryModeChildrenList() {
   const { euiTheme } = useEuiTheme();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
-  const isCreating = useStreamsRoutingSelector((state) => state.matches({ ready: { queryMode: 'creating' } }));
+  const isCreating = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: 'creating' } })
+  );
   const { createQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
@@ -418,12 +420,12 @@ function QueryModeChildrenList() {
                 content={
                   !canManage
                     ? i18n.translate(
-                      'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
-                      {
-                        defaultMessage:
-                          "You don't have sufficient privileges to create query streams.",
-                      }
-                    )
+                        'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
+                        {
+                          defaultMessage:
+                            "You don't have sufficient privileges to create query streams.",
+                        }
+                      )
                     : undefined
                 }
               >
