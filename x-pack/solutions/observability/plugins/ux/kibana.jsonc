@@ -38,6 +38,7 @@
       "lens",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "spaces"
     ],
     "requiredBundles": [

@@ -46,6 +46,7 @@
       "embeddableEnhanced",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "security",
       "serverless",
       "spaces"

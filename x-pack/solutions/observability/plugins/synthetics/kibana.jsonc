@@ -54,6 +54,7 @@
       "licenseManagement",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "embeddableEnhanced",
       "maintenanceWindows"
     ],

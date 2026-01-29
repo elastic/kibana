@@ -51,6 +51,7 @@
       "profilingDataAccess",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "licenseManagement",
       "serverless"
     ],
