@@ -5,20 +5,13 @@
  * 2.0.
  */
 
+import { EuiCallOut } from '@elastic/eui';
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { FullTraceWaterfallProps } from '@kbn/apm-types';
-import { EuiCallOut } from '@elastic/eui';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { TraceWaterfall } from '.';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { Loading } from './loading';
-import { TraceWaterfall } from '.';
-
-export function createFullTraceWaterfallRenderer({ core }: { core: CoreStart }) {
-  createCallApmApi(core);
-  return (props: FullTraceWaterfallProps) => <FullTraceWaterfallRenderer {...props} />;
-}
 
 export function FullTraceWaterfallRenderer({
   traceId,

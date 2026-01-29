@@ -7,19 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
-import type { CoreStart } from '@kbn/core/public';
 import { EuiCallOut } from '@elastic/eui';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { FocusedTraceWaterfall } from '.';
 import { Loading } from '../trace_waterfall/loading';
 
-export function createFocusedTraceWaterfallRenderer({ core }: { core: CoreStart }) {
-  createCallApmApi(core);
-  return (props: FocusedTraceWaterfallProps) => <FocusedTraceWaterfallRenderer {...props} />;
-}
-
-function FocusedTraceWaterfallRenderer({
+export function FocusedTraceWaterfallRenderer({
   traceId,
   rangeFrom,
   rangeTo,
