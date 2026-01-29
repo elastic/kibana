@@ -340,7 +340,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           description: i18n.translate(
                             'data.search.es_search.documentsQueriedDescription',
                             {
-                              defaultMessage: 'The number of documents queried by the query.',
+                              defaultMessage: 'The number of documents processed by the query.',
                             }
                           ),
                         },
