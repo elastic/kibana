@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const INCLUDED_OPERATIONS = [
-  'search',
-  'index',
-  'update',
-  'indices.exists',
-  'indices.delete',
-  'indices.create',
-  'bulk',
-  'esql.query',
-  'ingest.simulate',
-];
+import React from 'react';
+
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+
+import icon from './google_drive.png';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={icon} {...props} />;
+};

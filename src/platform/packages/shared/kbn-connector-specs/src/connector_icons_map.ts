@@ -64,4 +64,10 @@ export const ConnectorIconsMap: Map<
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
+  ],
 ]);

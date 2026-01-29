@@ -10,9 +10,9 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/868f66c).
- * Generated at: 2026-01-21T16:44:56.585Z
- * Source: elasticsearch-specification repository (8 APIs)
+ * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/b0cefb9).
+ * Generated at: 2026-01-25T11:50:01.506Z
+ * Source: elasticsearch-specification repository (9 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -24,6 +24,7 @@ import { INDEX_CONTRACT } from './elasticsearch.index.gen';
 import { INDICES_CREATE_CONTRACT } from './elasticsearch.indices_create.gen';
 import { INDICES_DELETE_CONTRACT } from './elasticsearch.indices_delete.gen';
 import { INDICES_EXISTS_CONTRACT } from './elasticsearch.indices_exists.gen';
+import { INGEST_SIMULATE_CONTRACT } from './elasticsearch.ingest_simulate.gen';
 import { SEARCH_CONTRACT } from './elasticsearch.search.gen';
 import { UPDATE_CONTRACT } from './elasticsearch.update.gen';
 import type { InternalConnectorContract } from '../../../types/latest';
@@ -36,6 +37,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
   INDICES_CREATE_CONTRACT,
   INDICES_DELETE_CONTRACT,
   INDICES_EXISTS_CONTRACT,
+  INGEST_SIMULATE_CONTRACT,
   SEARCH_CONTRACT,
   UPDATE_CONTRACT,
 ];

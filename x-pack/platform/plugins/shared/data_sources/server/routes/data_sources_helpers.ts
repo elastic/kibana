@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-catalog-plugin';
+import type { DataSource, ConnectorReference } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { createStackConnector } from '../utils/create_stack_connector';
@@ -21,11 +21,22 @@ import type {
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 
+/**
+ * Credentials configuration for creating stack connectors.
+ * Each entry corresponds to a StackConnectorConfig in the data source.
+ */
+export interface StackConnectorCredentials {
+  /** The credentials (token, API key, etc.) for this connector */
+  credentials: string;
+  /** Optional: Use an existing stack connector ID instead of creating a new one */
+  existingConnectorId?: string;
+}
+
 interface CreateDataSourceAndResourcesParams {
   name: string;
   type: string;
-  credentials: string;
-  stackConnectorId?: string;
+  /** Array of credentials, one for each stack connector in the data source */
+  stackConnectorCredentials: StackConnectorCredentials[];
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   logger: Logger;
@@ -47,9 +58,10 @@ function slugify(input: string): string {
 /**
  * Creates data source Saved Object, as well as all related resources (stack connectors, tools, workflows)
  *
- * Supports two patterns:
- * 1. Reuse existing stack connector: Pass stackConnectorId (e.g., from UI flyout)
- * 2. Create new stack connector: Omit stackConnectorId, provide name and token
+ * Supports composite data sources with multiple stack connectors.
+ * For each connector config in the data source:
+ * - If existingConnectorId is provided, reuse it
+ * - Otherwise, create a new stack connector with the provided credentials
  */
 export async function createDataSourceAndRelatedResources(
   params: CreateDataSourceAndResourcesParams
@@ -57,8 +69,7 @@ export async function createDataSourceAndRelatedResources(
   const {
     name,
     type,
-    credentials,
-    stackConnectorId,
+    stackConnectorCredentials,
     savedObjectsClient,
     request,
     logger,
@@ -70,36 +81,49 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
+  const connectorRefs: ConnectorReference[] = [];
 
-  let finalStackConnectorId: string;
-
-  // Pattern 1: Reuse existing stack connector (from flyout)
-  if (stackConnectorId) {
-    logger.info(`Reusing existing stack connector: ${stackConnectorId}`);
-    finalStackConnectorId = stackConnectorId;
-  }
-  // Pattern 2: Create new stack connector (direct API call)
-  else {
-    const toolRegistry = await agentBuilder.tools.getRegistry({ request });
-    const stackConnectorConfig = dataSource.stackConnector;
-    const stackConnector: ActionResult = await createStackConnector(
-      toolRegistry,
-      actions,
-      request,
-      stackConnectorConfig,
-      name,
-      toolIds,
-      credentials,
-      logger
-    );
-
-    finalStackConnectorId = stackConnector.id;
-  }
-
-  // Create workflows and tools
-  const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+
+  // Create or reuse stack connectors for each connector config
+  for (let i = 0; i < dataSource.stackConnectors.length; i++) {
+    const connectorConfig = dataSource.stackConnectors[i];
+    const credentialsConfig = stackConnectorCredentials[i];
+
+    if (!credentialsConfig) {
+      logger.warn(
+        `No credentials provided for connector index ${i} (type: ${connectorConfig.type}), skipping`
+      );
+      continue;
+    }
+
+    // Reuse existing stack connector if ID is provided
+    if (credentialsConfig.existingConnectorId) {
+      logger.info(
+        `Reusing existing stack connector: ${credentialsConfig.existingConnectorId} for ${connectorConfig.type}`
+      );
+      connectorRefs.push({ type: connectorConfig.type, id: credentialsConfig.existingConnectorId });
+    }
+    // Create new stack connector
+    else {
+      logger.info(`Creating new stack connector for type: ${connectorConfig.type}`);
+      const stackConnector: ActionResult = await createStackConnector(
+        toolRegistry,
+        actions,
+        request,
+        connectorConfig,
+        name,
+        toolIds,
+        credentialsConfig.credentials,
+        logger
+      );
+      connectorRefs.push({ type: connectorConfig.type, id: stackConnector.id });
+    }
+  }
+
+  // Create workflows and tools using connector references (type + id)
+  const spaceId = getSpaceId(savedObjectsClient);
+  const workflowInfos = dataSource.generateWorkflows(connectorRefs);
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
@@ -119,7 +143,7 @@ export async function createDataSourceAndRelatedResources(
     workflowIds.push(workflow.id);
 
     if (workflowInfo.shouldGenerateABTool) {
-      // e.g., "sources.github.search_issues" -> "search_issues"
+      // Extract base workflow name (e.g., "sources.notion.search" -> "search")
       const workflowBaseName = originalName.split('.').pop() || originalName;
 
       // Tool ID structure: type.data_source_name.workflow_base_name
@@ -148,7 +172,7 @@ export async function createDataSourceAndRelatedResources(
     updatedAt: now,
     workflowIds,
     toolIds,
-    kscIds: [finalStackConnectorId],
+    kscIds: connectorRefs.map((ref) => ref.id),
   });
 
   return savedObject.id;

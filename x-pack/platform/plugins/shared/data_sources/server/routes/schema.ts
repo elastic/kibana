@@ -43,9 +43,27 @@ export function convertSOtoAPIResponse(
   };
 }
 
-export const createDataSourceRequestSchema = schema.object({
-  type: schema.string({ minLength: 1 }),
-  name: schema.maybe(schema.string({ minLength: 1 })),
+/**
+ * Schema for credentials for a single connector
+ */
+const connectorCredentialsSchema = schema.object({
+  /** The connector type (e.g., '.google_drive', '.jina') */
+  connector_type: schema.string({ minLength: 1 }),
+  /** The credentials (token, API key, etc.) for this connector */
   credentials: schema.maybe(schema.string({ minLength: 1 })),
-  stack_connector_id: schema.maybe(schema.string({ minLength: 1 })),
+  /** Optional: Use an existing stack connector ID instead of creating a new one */
+  existing_connector_id: schema.maybe(schema.string({ minLength: 1 })),
+});
+
+export const createDataSourceRequestSchema = schema.object({
+  /** The data source type (e.g., 'google_drive', 'notion') */
+  type: schema.string({ minLength: 1 }),
+  /** Display name for the data source */
+  name: schema.maybe(schema.string({ minLength: 1 })),
+  /**
+   * Credentials for each connector required by this data source.
+   * The array should match the stackConnectors defined in the data source definition.
+   * Optional connectors can be omitted.
+   */
+  connector_credentials: schema.arrayOf(connectorCredentialsSchema),
 });

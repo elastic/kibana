@@ -48,7 +48,9 @@ describe('registerRoutes', () => {
     },
   };
   const mockDataCatalog = {
-    getCatalog: jest.fn(),
+    getCatalog: jest.fn().mockReturnValue({
+      get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+    }),
   };
 
   const mockGetStartServices = jest.fn().mockResolvedValue([
@@ -132,11 +134,6 @@ describe('registerRoutes', () => {
         page: 1,
       });
 
-      // Mock catalog to return iconType
-      mockDataCatalog.getCatalog.mockReturnValue({
-        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
-      });
-
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
@@ -202,11 +199,6 @@ describe('registerRoutes', () => {
 
       mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
 
-      // Mock catalog to return iconType
-      mockDataCatalog.getCatalog.mockReturnValue({
-        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
-      });
-
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[1][1];
@@ -254,7 +246,7 @@ describe('registerRoutes', () => {
   describe('POST /api/data_sources', () => {
     it('should create a new data source and call the helper with correct params', async () => {
       const mockDataSource = {
-        stackConnector: { type: '.bearer_connector' },
+        stackConnectors: [{ type: '.notion', required: true }],
         generateWorkflows: jest.fn(),
       };
 
@@ -271,7 +263,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'My Notion Data Source',
           type: 'notion',
-          credentials: 'secret-token-123',
+          connector_credentials: [{ connector_type: '.notion', credentials: 'secret-token-123' }],
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -282,7 +274,9 @@ describe('registerRoutes', () => {
         expect.objectContaining({
           name: 'My Notion Data Source',
           type: 'notion',
-          credentials: 'secret-token-123',
+          stackConnectorCredentials: [
+            { credentials: 'secret-token-123', existingConnectorId: undefined },
+          ],
           dataSource: mockDataSource,
         })
       );
@@ -306,7 +300,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Invalid Data Source',
           type: 'invalid-type',
-          credentials: 'token',
+          connector_credentials: [{ connector_type: '.notion', credentials: 'token' }],
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -324,7 +318,7 @@ describe('registerRoutes', () => {
 
     it('should handle errors during creation', async () => {
       const mockDataSource = {
-        stackConnector: { type: '.bearer_connector' },
+        stackConnectors: [{ type: '.notion', required: true }],
         generateWorkflows: jest.fn(),
       };
 
@@ -343,7 +337,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Test Data Source',
           type: 'notion',
-          credentials: 'token',
+          connector_credentials: [{ connector_type: '.notion', credentials: 'token' }],
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();

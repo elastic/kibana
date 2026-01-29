@@ -160,7 +160,7 @@ describe('createConnectorAndRelatedResources', () => {
       },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {}, role: 'primary' as const }],
       generateWorkflows: jest.fn().mockReturnValue([
         {
           content: 'workflow yaml content',
@@ -177,7 +177,7 @@ describe('createConnectorAndRelatedResources', () => {
     const result = await createDataSourceAndRelatedResources({
       name: 'My Test Connector',
       type: 'test_type',
-      credentials: 'secret-token-123',
+      stackConnectorCredentials: [{ credentials: 'secret-token-123' }],
       savedObjectsClient: mockSavedObjectsClient,
       request: mockRequest,
       logger: mockLogger,
@@ -235,7 +235,7 @@ describe('createConnectorAndRelatedResources', () => {
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {}, role: 'primary' as const }],
       generateWorkflows: jest.fn().mockReturnValue([
         {
           content: 'workflow yaml content',
@@ -251,7 +251,7 @@ describe('createConnectorAndRelatedResources', () => {
     await createDataSourceAndRelatedResources({
       name: 'Test',
       type: 'test',
-      credentials: 'token',
+      stackConnectorCredentials: [{ credentials: 'token' }],
       savedObjectsClient: mockSavedObjectsClient,
       request: mockRequest,
       logger: mockLogger,

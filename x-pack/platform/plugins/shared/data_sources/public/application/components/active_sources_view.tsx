@@ -13,16 +13,18 @@ import { ActiveSourcesTable } from './active_sources_table';
 import { ConfirmDeleteActiveSourceModal } from './confirm_delete_active_source_modal';
 import { useActiveSources } from '../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
+import { useCloneActiveSource } from '../hooks/use_clone_active_source';
+import { useAddConnectorFlyout } from '../hooks/use_add_connector_flyout';
 import { useEditActiveSourceFlyout } from '../hooks/use_edit_active_source_flyout';
-import { useCloneActiveSourceFlyout } from '../hooks/use_clone_active_source_flyout';
+import { useDataSources } from '../hooks/use_connectors';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
+  const { dataSources } = useDataSources();
   const [selectedSource, setSelectedSource] = useState<ActiveSource | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
-  const [sourceToClone, setSourceToClone] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
     setSelectedSource(null);
@@ -32,12 +34,14 @@ export const ActiveSourcesView: React.FC = () => {
   const { mutate: deleteActiveSource, isLoading: isDeleting } =
     useDeleteActiveSource(handleCancelDelete);
 
-  const { openFlyout: openCloneFlyout, flyout: cloneFlyout } = useCloneActiveSourceFlyout({
-    sourceToClone,
-    onConnectorCreated: () => {
-      setSourceToClone(null);
-    },
-  });
+  const { getCloneName } = useCloneActiveSource();
+
+  // Setup clone flyout
+  const {
+    openFlyout: openCloneFlyout,
+    flyout: cloneFlyout,
+    optionalPrompt: cloneOptionalPrompt,
+  } = useAddConnectorFlyout({});
 
   const handleCloseEditFlyout = useCallback(() => {
     setSourceToEdit(null);
@@ -58,12 +62,16 @@ export const ActiveSourcesView: React.FC = () => {
 
   const handleClone = useCallback(
     (source: ActiveSource) => {
-      setSourceToClone(source);
-      // Open the add connector flyout with pre-selected type
-      // User will need to select/create credentials (no secrets cloned)
-      openCloneFlyout();
+      // Find the DataSource definition for this type
+      const ds = dataSources.find((d) => d.id === source.type);
+      if (ds) {
+        // Open the add connector flyout with pre-selected type and suggested name
+        // User will need to select/create credentials (no secrets cloned)
+        const cloneName = getCloneName(source);
+        openCloneFlyout(ds, ds.id, cloneName);
+      }
     },
-    [openCloneFlyout]
+    [dataSources, openCloneFlyout, getCloneName]
   );
 
   const handleDelete = useCallback((source: ActiveSource) => {
@@ -127,6 +135,7 @@ export const ActiveSourcesView: React.FC = () => {
       )}
       {editFlyout}
       {cloneFlyout}
+      {cloneOptionalPrompt}
     </>
   );
 };

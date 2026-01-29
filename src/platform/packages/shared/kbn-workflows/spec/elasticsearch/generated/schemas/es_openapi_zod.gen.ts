@@ -2319,6 +2319,79 @@ export const types_indices = z.union([
     z.array(types_index_name)
 ]);
 
+export const ingest_types_user_agent_property = z.unknown();
+
+export const types_grok_pattern = z.string();
+
+export const ingest_types_json_processor_conflict_strategy = z.enum(['replace', 'merge']);
+
+export const ingest_types_input_config = z.object({
+    input_field: z.string(),
+    output_field: z.string()
+});
+
+export const ingest_types_inference_config_classification = z.object({
+    num_top_classes: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Specifies the number of top class predictions to return.'
+    })),
+    num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Specifies the maximum number of feature importance values per document.'
+    })),
+    results_field: z.optional(types_field),
+    top_classes_results_field: z.optional(types_field),
+    prediction_field_type: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Specifies the type of the predicted field to write.\nValid values are: `string`, `number`, `boolean`.'
+    }))
+});
+
+export const ingest_types_inference_config_regression = z.object({
+    results_field: z.optional(types_field),
+    num_top_feature_importance_values: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Specifies the maximum number of feature importance values per document.'
+    }))
+});
+
+export const ingest_types_inference_config = z.object({
+    regression: z.optional(ingest_types_inference_config_regression),
+    classification: z.optional(ingest_types_inference_config_classification)
+});
+
+export const ingest_types_geo_grid_target_format = z.enum(['geojson', 'wkt']);
+
+export const ingest_types_geo_grid_tile_type = z.enum([
+    'geotile',
+    'geohex',
+    'geohash'
+]);
+
+export const ingest_types_fingerprint_digest = z.enum([
+    'MD5',
+    'SHA-1',
+    'SHA-256',
+    'SHA-512',
+    'MurmurHash3'
+]);
+
+export const types_geo_shape_relation = z.enum([
+    'intersects',
+    'disjoint',
+    'within',
+    'contains'
+]);
+
+export const ingest_types_convert_type = z.enum([
+    'integer',
+    'long',
+    'double',
+    'float',
+    'boolean',
+    'ip',
+    'string',
+    'auto'
+]);
+
+export const ingest_types_shape_type = z.enum(['geo_shape', 'shape']);
+
 export const types_uuid = z.string();
 
 export const types_mapping_data_stream_timestamp = z.object({
@@ -2564,6 +2637,18 @@ export const types_mapping_all_field = z.object({
     store_term_vector_positions: z.boolean(),
     store_term_vectors: z.boolean()
 });
+
+/**
+ * Some APIs will return values such as numbers also as a string (notably epoch timestamps). This behavior
+ * is used to capture this behavior while keeping the semantics of the field type.
+ *
+ * Depending on the target language, code generators can keep the union or remove it and leniently parse
+ * strings to the target type.
+ */
+export const spec_utils_stringified_version_number = z.union([
+    types_version_number,
+    z.string()
+]);
 
 /**
  * Base type for multi-bucket aggregation results that can hold sub-aggregations results.
@@ -5892,13 +5977,85 @@ export const types_aggregations_hdr_percentile_ranks_aggregate = types_aggregati
 
 export const types_aggregations_hdr_percentiles_aggregate = types_aggregations_percentiles_aggregate_base.and(z.record(z.string(), z.unknown()));
 
+export const ingest_types_pipeline_simulation_status_options = z.enum([
+    'success',
+    'error',
+    'error_ignored',
+    'skipped',
+    'dropped'
+]);
+
+export const ingest_types_redact = z.object({
+    _is_redacted: z.boolean().register(z.globalRegistry, {
+        description: 'indicates if document has been redacted'
+    })
+});
+
+export const ingest_types_ingest = z.object({
+    _redact: z.optional(ingest_types_redact),
+    timestamp: types_date_time,
+    pipeline: z.optional(types_name)
+});
+
+/**
+ * The simulated document, with optional metadata.
+ */
+export const ingest_types_document_simulation = z.object({
+    _id: types_id,
+    _index: types_index_name,
+    _ingest: ingest_types_ingest,
+    _routing: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Value used to send the document to a specific primary shard.'
+    })),
+    _source: z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+        description: 'JSON body for the document.'
+    }),
+    _version: z.optional(spec_utils_stringified_version_number),
+    _version_type: z.optional(types_version_type)
+}).register(z.globalRegistry, {
+    description: 'The simulated document, with optional metadata.'
+});
+
+export const ingest_types_pipeline_processor_result = z.object({
+    doc: z.optional(ingest_types_document_simulation),
+    tag: z.optional(z.string()),
+    processor_type: z.optional(z.string()),
+    status: z.optional(ingest_types_pipeline_simulation_status_options),
+    description: z.optional(z.string()),
+    ignored_error: z.optional(types_error_cause),
+    error: z.optional(types_error_cause)
+});
+
+export const ingest_types_simulate_document_result = z.object({
+    doc: z.optional(ingest_types_document_simulation),
+    error: z.optional(types_error_cause),
+    processor_results: z.optional(z.array(ingest_types_pipeline_processor_result))
+});
+
+export const ingest_types_document = z.object({
+    _id: z.optional(types_id),
+    _index: z.optional(types_index_name),
+    _source: z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'JSON body for the document.'
+    })
+});
+
+export const ingest_types_field_access_pattern = z.enum(['classic', 'flexible']);
+
 export const types_indices_response_base = types_acknowledged_response_base.and(z.object({
     _shards: z.optional(types_shard_statistics)
 }));
 
-export const esql_types_esql_param = z.union([
+export const esql_types_single_or_multi_value = z.union([
     types_field_value,
     z.array(types_field_value)
+]);
+
+export const esql_types_named_value = z.record(z.string(), esql_types_single_or_multi_value);
+
+export const esql_types_esql_params = z.union([
+    z.array(esql_types_single_or_multi_value),
+    z.array(esql_types_named_value)
 ]);
 
 export const esql_types_esql_shard_failure = z.object({
@@ -7770,6 +7927,753 @@ export const types_aggregations_adjacency_matrix_aggregation = types_aggregation
     }))
 }));
 
+export const ingest_types_user_agent_processor = z.lazy((): any => ingest_types_processor_base).and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    regex_file: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.'
+    })),
+    target_field: z.optional(types_field),
+    properties: z.optional(z.array(ingest_types_user_agent_property).register(z.globalRegistry, {
+        description: 'Controls what properties are added to `target_field`.'
+    })),
+    extract_device_type: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Extracts device type from the user agent string on a best-effort basis.'
+    }))
+}));
+
+export const ingest_types_processor_container = z.object({
+    get append() {
+        return z.optional(z.lazy((): any => ingest_types_append_processor));
+    },
+    get attachment() {
+        return z.optional(z.lazy((): any => ingest_types_attachment_processor));
+    },
+    get bytes() {
+        return z.optional(z.lazy((): any => ingest_types_bytes_processor));
+    },
+    get cef() {
+        return z.optional(z.lazy((): any => ingest_types_cef_processor));
+    },
+    get circle() {
+        return z.optional(z.lazy((): any => ingest_types_circle_processor));
+    },
+    get community_id() {
+        return z.optional(z.lazy((): any => ingest_types_community_id_processor));
+    },
+    get convert() {
+        return z.optional(z.lazy((): any => ingest_types_convert_processor));
+    },
+    get csv() {
+        return z.optional(z.lazy((): any => ingest_types_csv_processor));
+    },
+    get date() {
+        return z.optional(z.lazy((): any => ingest_types_date_processor));
+    },
+    get date_index_name() {
+        return z.optional(z.lazy((): any => ingest_types_date_index_name_processor));
+    },
+    get dissect() {
+        return z.optional(z.lazy((): any => ingest_types_dissect_processor));
+    },
+    get dot_expander() {
+        return z.optional(z.lazy((): any => ingest_types_dot_expander_processor));
+    },
+    get drop() {
+        return z.optional(z.lazy((): any => ingest_types_drop_processor));
+    },
+    get enrich() {
+        return z.optional(z.lazy((): any => ingest_types_enrich_processor));
+    },
+    get fail() {
+        return z.optional(z.lazy((): any => ingest_types_fail_processor));
+    },
+    get fingerprint() {
+        return z.optional(z.lazy((): any => ingest_types_fingerprint_processor));
+    },
+    get foreach() {
+        return z.optional(z.lazy((): any => ingest_types_foreach_processor));
+    },
+    get ip_location() {
+        return z.optional(z.lazy((): any => ingest_types_ip_location_processor));
+    },
+    get geo_grid() {
+        return z.optional(z.lazy((): any => ingest_types_geo_grid_processor));
+    },
+    get geoip() {
+        return z.optional(z.lazy((): any => ingest_types_geo_ip_processor));
+    },
+    get grok() {
+        return z.optional(z.lazy((): any => ingest_types_grok_processor));
+    },
+    get gsub() {
+        return z.optional(z.lazy((): any => ingest_types_gsub_processor));
+    },
+    get html_strip() {
+        return z.optional(z.lazy((): any => ingest_types_html_strip_processor));
+    },
+    get inference() {
+        return z.optional(z.lazy((): any => ingest_types_inference_processor));
+    },
+    get join() {
+        return z.optional(z.lazy((): any => ingest_types_join_processor));
+    },
+    get json() {
+        return z.optional(z.lazy((): any => ingest_types_json_processor));
+    },
+    get kv() {
+        return z.optional(z.lazy((): any => ingest_types_key_value_processor));
+    },
+    get lowercase() {
+        return z.optional(z.lazy((): any => ingest_types_lowercase_processor));
+    },
+    get network_direction() {
+        return z.optional(z.lazy((): any => ingest_types_network_direction_processor));
+    },
+    get pipeline() {
+        return z.optional(z.lazy((): any => ingest_types_pipeline_processor));
+    },
+    get redact() {
+        return z.optional(z.lazy((): any => ingest_types_redact_processor));
+    },
+    get registered_domain() {
+        return z.optional(z.lazy((): any => ingest_types_registered_domain_processor));
+    },
+    get remove() {
+        return z.optional(z.lazy((): any => ingest_types_remove_processor));
+    },
+    get rename() {
+        return z.optional(z.lazy((): any => ingest_types_rename_processor));
+    },
+    get reroute() {
+        return z.optional(z.lazy((): any => ingest_types_reroute_processor));
+    },
+    get script() {
+        return z.optional(z.lazy((): any => ingest_types_script_processor));
+    },
+    get set() {
+        return z.optional(z.lazy((): any => ingest_types_set_processor));
+    },
+    get set_security_user() {
+        return z.optional(z.lazy((): any => ingest_types_set_security_user_processor));
+    },
+    get sort() {
+        return z.optional(z.lazy((): any => ingest_types_sort_processor));
+    },
+    get split() {
+        return z.optional(z.lazy((): any => ingest_types_split_processor));
+    },
+    get terminate() {
+        return z.optional(z.lazy((): any => ingest_types_terminate_processor));
+    },
+    get trim() {
+        return z.optional(z.lazy((): any => ingest_types_trim_processor));
+    },
+    get uppercase() {
+        return z.optional(z.lazy((): any => ingest_types_uppercase_processor));
+    },
+    get urldecode() {
+        return z.optional(z.lazy((): any => ingest_types_url_decode_processor));
+    },
+    get uri_parts() {
+        return z.optional(z.lazy((): any => ingest_types_uri_parts_processor));
+    },
+    user_agent: z.optional(ingest_types_user_agent_processor)
+});
+
+export const ingest_types_uri_parts_processor = z.lazy((): any => ingest_types_processor_base).and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    keep_original: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the processor copies the unparsed URI to `<target_field>.original`.'
+    })),
+    remove_if_successful: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the processor removes the `field` after parsing the URI string.\nIf parsing fails, the processor does not remove the `field`.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_processor_base = z.object({
+    description: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Description of the processor.\nUseful for describing the purpose of the processor or its configuration.'
+    })),
+    if: z.optional(types_script),
+    ignore_failure: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Ignore failures for the processor.'
+    })),
+    on_failure: z.optional(z.array(ingest_types_processor_container).register(z.globalRegistry, {
+        description: 'Handle failures for the processor.'
+    })),
+    tag: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Identifier for the processor.\nUseful for debugging and metrics.'
+    }))
+});
+
+export const ingest_types_url_decode_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_uppercase_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_trim_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_terminate_processor = ingest_types_processor_base.and(z.record(z.string(), z.unknown()));
+
+export const ingest_types_split_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    preserve_trailing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Preserves empty trailing fields, if any.'
+    })),
+    separator: z.string().register(z.globalRegistry, {
+        description: 'A regex which matches the separator, for example, `,` or `\\s+`.'
+    }),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_sort_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    order: z.optional(types_sort_order),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_set_security_user_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Controls what user related properties are added to the field.'
+    }))
+}));
+
+export const ingest_types_set_processor = ingest_types_processor_base.and(z.object({
+    copy_from: z.optional(types_field),
+    field: types_field,
+    ignore_empty_value: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document.'
+    })),
+    media_type: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The media type for encoding `value`.\nApplies only when value is a template snippet.\nMust be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.'
+    })),
+    override: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` processor will update fields with pre-existing non-null-valued field.\nWhen set to `false`, such fields will not be touched.'
+    })),
+    value: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'The value to be set for the field.\nSupports template snippets.\nMay specify only one of `value` or `copy_from`.'
+    }))
+}));
+
+export const ingest_types_script_processor = ingest_types_processor_base.and(z.object({
+    id: z.optional(types_id),
+    lang: z.optional(types_script_language),
+    params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+        description: 'Object containing parameters for the script.'
+    })),
+    source: z.optional(types_script_source)
+}));
+
+export const ingest_types_reroute_processor = ingest_types_processor_base.and(z.object({
+    destination: z.optional(z.string().register(z.globalRegistry, {
+        description: 'A static value for the target. Can’t be set when the dataset or namespace option is set.'
+    })),
+    dataset: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ])),
+    namespace: z.optional(z.union([
+        z.string(),
+        z.array(z.string())
+    ]))
+}));
+
+export const ingest_types_rename_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    target_field: types_field
+}));
+
+export const ingest_types_remove_processor = ingest_types_processor_base.and(z.object({
+    field: types_fields,
+    keep: z.optional(types_fields),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    }))
+}));
+
+export const ingest_types_registered_domain_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    target_field: z.optional(types_field),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
+    }))
+}));
+
+export const ingest_types_redact_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    patterns: z.array(types_grok_pattern).register(z.globalRegistry, {
+        description: 'A list of grok expressions to match and redact named captures with'
+    }),
+    pattern_definitions: z.optional(z.record(z.string(), z.string())),
+    prefix: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Start a redacted section with this token'
+    })),
+    suffix: z.optional(z.string().register(z.globalRegistry, {
+        description: 'End a redacted section with this token'
+    })),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    skip_if_unlicensed: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document'
+    })),
+    trace_redact: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted'
+    }))
+}));
+
+export const ingest_types_pipeline_processor = ingest_types_processor_base.and(z.object({
+    name: types_name,
+    ignore_missing_pipeline: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Whether to ignore missing pipelines instead of failing.'
+    }))
+}));
+
+export const ingest_types_network_direction_processor = ingest_types_processor_base.and(z.object({
+    source_ip: z.optional(types_field),
+    destination_ip: z.optional(types_field),
+    target_field: z.optional(types_field),
+    internal_networks: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of internal networks. Supports IPv4 and IPv6 addresses and ranges in\nCIDR notation. Also supports the named ranges listed below. These may be\nconstructed with template snippets. Must specify only one of\ninternal_networks or internal_networks_field.'
+    })),
+    internal_networks_field: z.optional(types_field),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
+    }))
+}));
+
+export const ingest_types_lowercase_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_key_value_processor = ingest_types_processor_base.and(z.object({
+    exclude_keys: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of keys to exclude from document.'
+    })),
+    field: types_field,
+    field_split: z.string().register(z.globalRegistry, {
+        description: 'Regex pattern to use for splitting key-value pairs.'
+    }),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    include_keys: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'List of keys to filter and insert into document.\nDefaults to including all keys.'
+    })),
+    prefix: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Prefix to be added to extracted keys.'
+    })),
+    strip_brackets: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`. strip brackets `()`, `<>`, `[]` as well as quotes `\'` and `"` from extracted values.'
+    })),
+    target_field: z.optional(types_field),
+    trim_key: z.optional(z.string().register(z.globalRegistry, {
+        description: 'String of characters to trim from extracted keys.'
+    })),
+    trim_value: z.optional(z.string().register(z.globalRegistry, {
+        description: 'String of characters to trim from extracted values.'
+    })),
+    value_split: z.string().register(z.globalRegistry, {
+        description: 'Regex pattern to use for splitting the key from the value within a key-value pair.'
+    })
+}));
+
+export const ingest_types_json_processor = ingest_types_processor_base.and(z.object({
+    add_to_root: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Flag that forces the parsed JSON to be added at the top level of the document.\n`target_field` must not be set when this option is chosen.'
+    })),
+    add_to_root_conflict_strategy: z.optional(ingest_types_json_processor_conflict_strategy),
+    allow_duplicate_keys: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'When set to `true`, the JSON parser will not fail if the JSON contains duplicate keys.\nInstead, the last encountered value for any duplicate key wins.'
+    })),
+    field: types_field,
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_join_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    separator: z.string().register(z.globalRegistry, {
+        description: 'The separator character.'
+    }),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_inference_processor = ingest_types_processor_base.and(z.object({
+    model_id: types_id,
+    target_field: z.optional(types_field),
+    field_map: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
+        description: 'Maps the document field names to the known field names of the model.\nThis mapping takes precedence over any default mappings provided in the model configuration.'
+    })),
+    inference_config: z.optional(ingest_types_inference_config),
+    input_output: z.optional(z.union([
+        ingest_types_input_config,
+        z.array(ingest_types_input_config)
+    ])),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true and any of the input fields defined in input_ouput are missing\nthen those missing fields are quietly ignored, otherwise a missing field causes a failure.\nOnly applies when using input_output configurations to explicitly list the input fields.'
+    }))
+}));
+
+export const ingest_types_html_strip_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_gsub_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    pattern: z.string().register(z.globalRegistry, {
+        description: 'The pattern to be replaced.'
+    }),
+    replacement: z.string().register(z.globalRegistry, {
+        description: 'The string to replace the matching patterns with.'
+    }),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_grok_processor = ingest_types_processor_base.and(z.object({
+    ecs_compatibility: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Must be disabled or v1. If v1, the processor uses patterns with Elastic\nCommon Schema (ECS) field names.'
+    })),
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    pattern_definitions: z.optional(z.record(z.string(), z.string()).register(z.globalRegistry, {
+        description: 'A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor.\nPatterns matching existing names will override the pre-existing definition.'
+    })),
+    patterns: z.array(types_grok_pattern).register(z.globalRegistry, {
+        description: 'An ordered list of grok expression to match and extract named captures with.\nReturns on the first expression in the list that matches.'
+    }),
+    trace_match: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.'
+    }))
+}));
+
+export const ingest_types_geo_ip_processor = ingest_types_processor_base.and(z.object({
+    database_file: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.'
+    })),
+    field: types_field,
+    first_only: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only the first found geoip data will be returned, even if the field contains an array.'
+    })),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Controls what properties are added to the `target_field` based on the geoip lookup.'
+    })),
+    target_field: z.optional(types_field),
+    download_database_on_pipeline_creation: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created.\nElse, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.'
+    }))
+}));
+
+export const ingest_types_geo_grid_processor = ingest_types_processor_base.and(z.object({
+    field: z.string().register(z.globalRegistry, {
+        description: 'The field to interpret as a geo-tile.=\nThe field format is determined by the `tile_type`.'
+    }),
+    tile_type: ingest_types_geo_grid_tile_type,
+    target_field: z.optional(types_field),
+    parent_field: z.optional(types_field),
+    children_field: z.optional(types_field),
+    non_children_field: z.optional(types_field),
+    precision_field: z.optional(types_field),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    target_format: z.optional(ingest_types_geo_grid_target_format)
+}));
+
+export const ingest_types_ip_location_processor = ingest_types_processor_base.and(z.object({
+    database_file: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.'
+    })),
+    field: types_field,
+    first_only: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, only the first found IP location data will be returned, even if the field contains an array.'
+    })),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Controls what properties are added to the `target_field` based on the IP location lookup.'
+    })),
+    target_field: z.optional(types_field),
+    download_database_on_pipeline_creation: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created.\nElse, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.'
+    }))
+}));
+
+export const ingest_types_foreach_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the processor silently exits without changing the document if the `field` is `null` or missing.'
+    })),
+    processor: ingest_types_processor_container
+}));
+
+export const ingest_types_fingerprint_processor = ingest_types_processor_base.and(z.object({
+    fields: types_fields,
+    target_field: z.optional(types_field),
+    salt: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Salt value for the hash function.'
+    })),
+    method: z.optional(ingest_types_fingerprint_digest),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true, the processor ignores any missing fields. If all fields are\nmissing, the processor silently exits without modifying the document.'
+    }))
+}));
+
+export const ingest_types_fail_processor = ingest_types_processor_base.and(z.object({
+    message: z.string().register(z.globalRegistry, {
+        description: 'The error message thrown by the processor.\nSupports template snippets.'
+    })
+}));
+
+export const ingest_types_enrich_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    max_matches: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The maximum number of matched documents to include under the configured target field.\nThe `target_field` will be turned into a json array if `max_matches` is higher than 1, otherwise `target_field` will become a json object.\nIn order to avoid documents getting too large, the maximum allowed value is 128.'
+    })),
+    override: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If processor will update fields with pre-existing non-null-valued field.\nWhen set to `false`, such fields will not be touched.'
+    })),
+    policy_name: z.string().register(z.globalRegistry, {
+        description: 'The name of the enrich policy to use.'
+    }),
+    shape_relation: z.optional(types_geo_shape_relation),
+    target_field: types_field
+}));
+
+export const ingest_types_drop_processor = ingest_types_processor_base.and(z.record(z.string(), z.unknown()));
+
+export const ingest_types_dot_expander_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    override: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Controls the behavior when there is already an existing nested object that conflicts with the expanded field.\nWhen `false`, the processor will merge conflicts by combining the old and the new values into an array.\nWhen `true`, the value from the expanded field will overwrite the existing value.'
+    })),
+    path: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The field that contains the field to expand.\nOnly required if the field to expand is part another object field, because the `field` option can only understand leaf fields.'
+    }))
+}));
+
+export const ingest_types_dissect_processor = ingest_types_processor_base.and(z.object({
+    append_separator: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The character(s) that separate the appended fields.'
+    })),
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    pattern: z.string().register(z.globalRegistry, {
+        description: 'The pattern to apply to the field.'
+    })
+}));
+
+export const ingest_types_date_index_name_processor = ingest_types_processor_base.and(z.object({
+    date_formats: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'An array of the expected date formats for parsing dates / timestamps in the document being preprocessed.\nCan be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.'
+    })),
+    date_rounding: z.string().register(z.globalRegistry, {
+        description: 'How to round the date when formatting the date into the index name. Valid values are:\n`y` (year), `M` (month), `w` (week), `d` (day), `h` (hour), `m` (minute) and `s` (second).\nSupports template snippets.'
+    }),
+    field: types_field,
+    index_name_format: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The format to be used when printing the parsed date into the index name.\nA valid java time pattern is expected here.\nSupports template snippets.'
+    })),
+    index_name_prefix: z.optional(z.string().register(z.globalRegistry, {
+        description: 'A prefix of the index name to be prepended before the printed date.\nSupports template snippets.'
+    })),
+    locale: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.'
+    })),
+    timezone: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.'
+    }))
+}));
+
+export const ingest_types_date_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    formats: z.array(z.string()).register(z.globalRegistry, {
+        description: 'An array of the expected date formats.\nCan be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.'
+    }),
+    locale: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The locale to use when parsing the date, relevant when parsing month names or week days.\nSupports template snippets.'
+    })),
+    target_field: z.optional(types_field),
+    timezone: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The timezone to use when parsing the date.\nSupports template snippets.'
+    })),
+    output_format: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The format to use when writing the date to target_field. Must be a valid\njava time pattern.'
+    }))
+}));
+
+export const ingest_types_csv_processor = ingest_types_processor_base.and(z.object({
+    empty_value: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+        description: 'Value used to fill empty fields.\nEmpty fields are skipped if this is not provided.\nAn empty field is one with no value (2 consecutive separators) or empty quotes (`""`).'
+    })),
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    quote: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Quote used in CSV, has to be single character string.'
+    })),
+    separator: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Separator used in CSV, has to be single character string.'
+    })),
+    target_fields: types_fields,
+    trim: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Trim whitespaces in unquoted fields.'
+    }))
+}));
+
+export const ingest_types_convert_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field),
+    type: ingest_types_convert_type
+}));
+
+export const ingest_types_community_id_processor = ingest_types_processor_base.and(z.object({
+    source_ip: z.optional(types_field),
+    source_port: z.optional(types_field),
+    destination_ip: z.optional(types_field),
+    destination_port: z.optional(types_field),
+    iana_number: z.optional(types_field),
+    icmp_type: z.optional(types_field),
+    icmp_code: z.optional(types_field),
+    transport: z.optional(types_field),
+    target_field: z.optional(types_field),
+    seed: z.optional(z.number().register(z.globalRegistry, {
+        description: 'Seed for the community ID hash. Must be between 0 and 65535 (inclusive). The\nseed can prevent hash collisions between network domains, such as a staging\nand production network that use the same addressing scheme.'
+    })),
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true and any required fields are missing, the processor quietly exits\nwithout modifying the document.'
+    }))
+}));
+
+export const ingest_types_circle_processor = ingest_types_processor_base.and(z.object({
+    error_distance: z.number().register(z.globalRegistry, {
+        description: 'The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for `geo_shape`, unit-less for `shape`).'
+    }),
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist, the processor quietly exits without modifying the document.'
+    })),
+    shape_type: ingest_types_shape_type,
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_cef_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field),
+    ignore_empty_values: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and value is anempty string in extensions, the processor quietly exits without modifying the document.'
+    })),
+    timezone: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.'
+    }))
+}));
+
+export const ingest_types_bytes_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.'
+    })),
+    target_field: z.optional(types_field)
+}));
+
+export const ingest_types_attachment_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    ignore_missing: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true` and field does not exist, the processor quietly exits without modifying the document.'
+    })),
+    indexed_chars: z.optional(z.number().register(z.globalRegistry, {
+        description: 'The number of chars being used for extraction to prevent huge fields.\nUse `-1` for no limit.'
+    })),
+    indexed_chars_field: z.optional(types_field),
+    properties: z.optional(z.array(z.string()).register(z.globalRegistry, {
+        description: 'Array of properties to select to be stored.\nCan be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.'
+    })),
+    target_field: z.optional(types_field),
+    remove_binary: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If true, the binary field will be removed from the document'
+    })),
+    resource_name: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Field containing the name of the resource to decode.\nIf specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.'
+    }))
+}));
+
+export const ingest_types_append_processor = ingest_types_processor_base.and(z.object({
+    field: types_field,
+    value: z.optional(z.union([
+        z.record(z.string(), z.unknown()),
+        z.array(z.record(z.string(), z.unknown()))
+    ])),
+    media_type: z.optional(z.string().register(z.globalRegistry, {
+        description: 'The media type for encoding `value`.\nApplies only when value is a template snippet.\nMust be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.'
+    })),
+    copy_from: z.optional(types_field),
+    allow_duplicates: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `false`, the processor does not append values already present in the field.'
+    })),
+    ignore_empty_values: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'If `true`, the processor will skip empty values from the source (e.g. empty strings, and null values),\nrather than appending them to the field.'
+    }))
+}));
+
 export const types_mapping_icu_collation_property = z.lazy((): any => types_mapping_doc_values_property_base).and(z.object({
     type: z.enum(['icu_collation_keyword']),
     norms: z.optional(z.boolean()),
@@ -9025,6 +9929,28 @@ export const global_search_response_body = z.object({
     terminated_early: z.optional(z.boolean())
 });
 
+export const ingest_types_pipeline = z.object({
+    description: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Description of the ingest pipeline.'
+    })),
+    on_failure: z.optional(z.array(ingest_types_processor_container).register(z.globalRegistry, {
+        description: 'Processors to run immediately after a processor failure.'
+    })),
+    processors: z.optional(z.array(ingest_types_processor_container).register(z.globalRegistry, {
+        description: 'Processors used to perform transformations on documents before indexing.\nProcessors run sequentially in the order specified.'
+    })),
+    version: z.optional(types_version_number),
+    deprecated: z.optional(z.boolean().register(z.globalRegistry, {
+        description: 'Marks this ingest pipeline as deprecated.\nWhen a deprecated ingest pipeline is referenced as the default or final pipeline when creating or updating a non-deprecated index template, Elasticsearch will emit a deprecation warning.'
+    })),
+    _meta: z.optional(types_metadata),
+    created_date: z.optional(types_date_time),
+    created_date_millis: z.optional(types_epoch_time_unit_millis),
+    modified_date: z.optional(types_date_time),
+    modified_date_millis: z.optional(types_epoch_time_unit_millis),
+    field_access_pattern: z.optional(ingest_types_field_access_pattern)
+});
+
 export const indices_types_alias = z.object({
     filter: z.optional(types_query_dsl_query_container),
     index_routing: z.optional(types_routing),
@@ -9422,6 +10348,19 @@ export const search_allow_no_indices = z.boolean().register(z.globalRegistry, {
 export const search_index = types_indices;
 
 /**
+ * If `true`, the response includes output data for each processor in the executed pipeline.
+ */
+export const ingest_simulate_verbose = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the response includes output data for each processor in the executed pipeline.'
+});
+
+/**
+ * The pipeline to test.
+ * If you don't specify a `pipeline` in the request body, this parameter is required.
+ */
+export const ingest_simulate_id = types_id;
+
+/**
  * If `true`, the request's actions must target a data stream (existing or to be created).
  */
 export const index_require_data_stream = z.boolean().register(z.globalRegistry, {
@@ -9693,6 +10632,13 @@ export const search = z.object({
     stats: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'The stats groups to associate with the search.\nEach group maintains a statistics aggregation for its associated searches.\nYou can retrieve these stats using the indices stats API.'
     }))
+});
+
+export const ingest_simulate = z.object({
+    docs: z.array(ingest_types_document).register(z.globalRegistry, {
+        description: 'Sample documents to test in the pipeline.'
+    }),
+    pipeline: z.optional(ingest_types_pipeline)
 });
 
 export const bulk = z.array(z.union([
@@ -10029,9 +10975,7 @@ export const esql_query_request = z.object({
         })),
         filter: z.optional(types_query_dsl_query_container),
         locale: z.optional(z.string()),
-        params: z.optional(z.array(esql_types_esql_param).register(z.globalRegistry, {
-            description: 'To avoid any attempts of hacking or code injection, extract the values in a separate list of parameters. Use question mark placeholders (?) in the query string for each of the parameters.'
-        })),
+        params: z.optional(esql_types_esql_params),
         profile: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'If provided and `true` the response will include an extra `profile` object\nwith information on how the query was executed. This information is for human debugging\nand its format can change at any time but it can give some insight into the performance\nof each part of the query.'
         })),
@@ -10087,6 +11031,66 @@ export const indices_create_response = z.object({
     index: types_index_name,
     shards_acknowledged: z.boolean(),
     acknowledged: z.boolean()
+});
+
+export const ingest_simulate_request = z.object({
+    body: ingest_simulate,
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        verbose: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes output data for each processor in the executed pipeline.'
+        }))
+    }))
+});
+
+export const ingest_simulate_response = z.object({
+    docs: z.array(ingest_types_simulate_document_result)
+});
+
+export const ingest_simulate1_request = z.object({
+    body: ingest_simulate,
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        verbose: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes output data for each processor in the executed pipeline.'
+        }))
+    }))
+});
+
+export const ingest_simulate1_response = z.object({
+    docs: z.array(ingest_types_simulate_document_result)
+});
+
+export const ingest_simulate2_request = z.object({
+    body: ingest_simulate,
+    path: z.object({
+        id: types_id
+    }),
+    query: z.optional(z.object({
+        verbose: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes output data for each processor in the executed pipeline.'
+        }))
+    }))
+});
+
+export const ingest_simulate2_response = z.object({
+    docs: z.array(ingest_types_simulate_document_result)
+});
+
+export const ingest_simulate3_request = z.object({
+    body: ingest_simulate,
+    path: z.object({
+        id: types_id
+    }),
+    query: z.optional(z.object({
+        verbose: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the response includes output data for each processor in the executed pipeline.'
+        }))
+    }))
+});
+
+export const ingest_simulate3_response = z.object({
+    docs: z.array(ingest_types_simulate_document_result)
 });
 
 export const search_request = z.object({
