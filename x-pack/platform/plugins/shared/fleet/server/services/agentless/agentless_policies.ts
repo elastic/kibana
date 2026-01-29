@@ -23,7 +23,6 @@ import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/const
 
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
@@ -100,9 +99,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
-    const authorizationHeader = request
-      ? HTTPAuthorizationHeader.parseFromRequest(request, user?.username)
-      : null;
 
     const spaceId = this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
@@ -167,7 +163,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           data_output_id: outputId,
           is_protected: false,
         },
-        { id: agentPolicyId, skipDeploy: true, authorizationHeader, user }
+        { id: agentPolicyId, skipDeploy: true, request, user }
       );
 
       createdAgentPolicyId = agentPolicy.id;
@@ -221,7 +217,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           force,
           bumpRevision: false,
           spaceId,
-          authorizationHeader,
           user,
         },
         context,
