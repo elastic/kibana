@@ -4,27 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isPending, useFetcher } from '../../hooks/use_fetcher';
-import { Loading } from './loading';
-import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
-import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 
-export function TraceWaterfallEmbeddable({
-  serviceName,
+import { EuiCallOut } from '@elastic/eui';
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { TraceWaterfall } from '.';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { Loading } from './loading';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+
+interface Props extends FullTraceWaterfallProps {
+  core: CoreStart;
+}
+
+export function FullTraceWaterfallRenderer({
+  traceId,
   rangeFrom,
   rangeTo,
-  traceId,
+  serviceName,
   scrollElement,
   onNodeClick,
-  getRelatedErrorsHref,
   onErrorClick,
-  mode,
-}: ApmTraceWaterfallEmbeddableEntryProps) {
-  const isFiltered = mode === 'filtered';
-
+  core,
+}: Props) {
+  useEffectOnce(() => {
+    createCallApmApi(core);
+  });
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
@@ -33,12 +41,11 @@ export function TraceWaterfallEmbeddable({
           query: {
             start: rangeFrom,
             end: rangeTo,
-            serviceName: isFiltered ? serviceName : undefined,
           },
         },
       });
     },
-    [rangeFrom, rangeTo, traceId, isFiltered, serviceName]
+    [rangeFrom, rangeTo, traceId]
   );
 
   if (isPending(status)) {
@@ -65,12 +72,10 @@ export function TraceWaterfallEmbeddable({
       errors={data.errors}
       onClick={onNodeClick}
       scrollElement={scrollElement}
-      getRelatedErrorsHref={getRelatedErrorsHref}
       isEmbeddable
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
-      isFiltered={isFiltered}
       agentMarks={data.agentMarks}
       showCriticalPathControl
     />
