@@ -39,12 +39,12 @@ export const getValidCidrRange = (searchString: string): { isValid: boolean; ipT
       return { isValid: false };
     }
     const [ip, prefixLength] = ipaddr.parseCIDR(searchString);
-    const isIpv4 = ip.kind() === 'ipv4';
-    const maxPrefixLength = isIpv4 ? 32 : 128;
+    const ipType = ip.kind() as IpType;
+    const maxPrefixLength = ipType === 'ipv4' ? 32 : 128;
     if (prefixLength < 0 || prefixLength > maxPrefixLength) {
       return { isValid: false };
     }
-    return { isValid: true, ipType: isIpv4 ? 'ipv4' : 'ipv6' };
+    return { isValid: true, ipType };
   } catch {
     return { isValid: false };
   }
