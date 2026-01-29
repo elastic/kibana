@@ -9,7 +9,7 @@ import {
   createModelVersionTestMigrator,
   type ModelVersionTestMigrator,
 } from '@kbn/core-test-helpers-model-versions';
-import { maintenanceWindowSavedObjectType } from './';
+import { maintenanceWindowSavedObjectType } from '.';
 
 describe('Maintenance Window Model Version Migrations', () => {
   let migrator: ModelVersionTestMigrator;
