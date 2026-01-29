@@ -14,6 +14,7 @@ import { createHash } from 'crypto';
 import { pipeline, Transform, Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { setTimeout } from 'timers/promises';
+import { fetch } from 'undici';
 
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';

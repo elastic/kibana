@@ -11,7 +11,7 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 // Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
-require('cross-fetch/polyfill');
+require('whatwg-fetch');
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });

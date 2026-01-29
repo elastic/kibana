@@ -2095,6 +2095,7 @@
     "webpack-dev-server": "5.2.1",
     "webpack-merge": "6.0.1",
     "webpack-sources": "3.2.3",
+    "whatwg-fetch": "3.6.20",
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.19.2",
