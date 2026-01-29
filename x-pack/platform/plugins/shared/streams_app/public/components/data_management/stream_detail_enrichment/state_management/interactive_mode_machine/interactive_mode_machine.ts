@@ -76,6 +76,7 @@ export const interactiveModeMachine = setup({
   actions: {
     notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
     cancelSuggestionTask: (_, __: { streamName: string }) => {},
+    acknowledgeSuggestionTask: (_, __: { streamName: string }) => {},
     addProcessor: assign(
       (
         assignArgs,
@@ -519,6 +520,12 @@ export const interactiveModeMachine = setup({
             },
             'suggestion.dismiss': {
               target: 'idle',
+              actions: [
+                {
+                  type: 'acknowledgeSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
+              ],
             },
           },
         },
@@ -527,11 +534,22 @@ export const interactiveModeMachine = setup({
           on: {
             'suggestion.accept': {
               target: 'idle',
-              actions: [{ type: 'syncToDSL' }, { type: 'clearSuggestion' }],
+              actions: [
+                {
+                  type: 'acknowledgeSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
+                { type: 'syncToDSL' },
+                { type: 'clearSuggestion' },
+              ],
             },
             'suggestion.dismiss': {
               target: 'idle',
               actions: [
+                {
+                  type: 'acknowledgeSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
                 { type: 'clearSuggestion' },
                 {
                   type: 'overwriteSteps',
@@ -724,6 +742,22 @@ export const createInteractiveModeMachineImplementations = ({
         } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
         .catch(() => {
           // Ignore errors - task may not exist or may have already completed
+        });
+    },
+    acknowledgeSuggestionTask: (_, params: { streamName: string }) => {
+      // Fire-and-forget acknowledge request - clears the suggestion from the server
+      // so it doesn't appear in the badge count on the listing page
+      // TypeScript has trouble with discriminated unions in route types,
+      // so we use a type assertion here
+      streamsRepositoryClient
+        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
+          params: {
+            path: { name: params.streamName },
+            body: { action: 'acknowledge' },
+          },
+        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
+        .catch(() => {
+          // Ignore errors - task may not exist or may have already been acknowledged
         });
     },
   },
