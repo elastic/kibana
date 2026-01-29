@@ -6,8 +6,29 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import * as euidModule from './domain/euid';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');
   return new EntityStorePlugin(initializerContext);
 }
+
+/**
+ * Library API: euid helpers for use by other plugins.
+ * Import the `euid` object instead of using the plugin start contract.
+ *
+ * @example
+ * import { euid, type EntityType } from '@kbn/entity-store-plugin/server';
+ * euid.getIdFromObject('host', doc);
+ * euid.getEuidPainlessEvaluation('user');
+ */
+export const euid = {
+  getIdFromObject: euidModule.getIdFromObject,
+  getFieldValue: euidModule.getFieldValue,
+  getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
+  getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+  getEuidEsqlFilter: euidModule.getEuidEsqlFilter,
+  getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
+};
+
+export type { EntityType } from './domain/definitions/entity_schema';
