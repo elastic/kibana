@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getServiceUrls } from './get_service_urls';
 
-jest.mock('node-fetch');
+const mockedFetch = jest.spyOn(global, 'fetch');
 jest.mock('./ssl');
 jest.mock('./get_service_urls', () => ({
   ...jest.requireActual('./get_service_urls'),
   discoverAuth: jest.fn(),
 }));
-
-const { Response } = jest.requireActual('node-fetch');
 
 const logger = createLogger(LogLevel.debug);
 const runOptions = {
@@ -262,8 +259,8 @@ describe('getServiceUrls', () => {
 });
 
 function mockFetchWithAllowedSegments(allowedUrlSegments: string[]) {
-  (fetch as unknown as jest.Mock).mockImplementation(async (url: string) => {
-    if (allowedUrlSegments.some((segment) => url.includes(segment))) {
+  mockedFetch.mockImplementation(async (url) => {
+    if (allowedUrlSegments.some((segment) => (url as string).includes(segment))) {
       return new Response(null, { status: 200 });
     }
 
