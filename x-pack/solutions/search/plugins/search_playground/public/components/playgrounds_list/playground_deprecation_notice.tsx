@@ -20,12 +20,14 @@ export const PlaygroundDeprecationNotice = () => {
   return (
     <EuiCallOut
       iconType="info"
-      title={i18n.translate('xpack.searchPlayground.playgroundDeprecationNotice.title', {
+      title={i18n.translate('xpack.searchPlayground.playgroundDeprecationNotice.calloutTitle', {
         defaultMessage: 'Deprecation Notice',
       })}
       aria-label={i18n.translate(
-        'xpack.searchPlayground.playgroundDeprecationNotice.arialabel.playgroundDeprecationNoticeLabel',
-        { defaultMessage: 'Playground deprecation Notice' }
+        'xpack.searchPlayground.playgroundDeprecationNotice.arialabel.calloutTitle',
+        {
+          defaultMessage: 'Playground deprecation Notice',
+        }
       )}
       color="warning"
       heading="h4"
@@ -52,7 +54,7 @@ export const PlaygroundDeprecationNotice = () => {
                   data-test-subj="searchPlaygroundPlaygroundDeprecationNoticeAgentBuilderLink"
                   onClick={navigateToAgentBuilder}
                   aria-label={i18n.translate(
-                    'xpack.searchPlayground.playgroundDeprecationNotice.ariaLabel.agentBuilderLabel',
+                    'xpack.searchPlayground.playgroundDeprecationNotice.arialabel.agentBuilderRedirectLabel',
                     { defaultMessage: 'Agent builder' }
                   )}
                 >
