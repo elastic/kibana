@@ -215,7 +215,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const tabAttributes = useCurrentTabSelector((tab) => tab.attributes);
+  const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
   const getModifiedVisAttributes = useCallback<
@@ -239,10 +239,7 @@ export const useDiscoverHistogram = (
       esqlVariables,
       controlsState: currentTabControlState,
       // visContext should be in sync with current query
-      externalVisContext:
-        isEsqlMode && canImportVisContext(tabAttributes.visContext)
-          ? tabAttributes.visContext
-          : undefined,
+      externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
     };
   }, [
@@ -258,7 +255,7 @@ export const useDiscoverHistogram = (
     relativeTimeRange,
     searchSessionId,
     query,
-    tabAttributes.visContext,
+    visContext,
     getModifiedVisAttributes,
   ]);
 
