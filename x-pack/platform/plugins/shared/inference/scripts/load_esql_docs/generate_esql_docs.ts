@@ -422,14 +422,6 @@ function processSection(rawContent: string, functionName: string): string {
   return sectionContent;
 }
 
-function extractFunctionSections(content: string): Array<{ name: string; content: string }> {
-  const rawSections = extractRawFunctionSections(content);
-  return rawSections.map((section) => ({
-    name: section.name,
-    content: processSection(section.rawContent, section.name),
-  }));
-}
-
 /**
  * Extract brief description from raw section content
  */
