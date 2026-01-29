@@ -9,25 +9,19 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import type { PartitionMetric } from './partition_shared';
+import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 import {
-  legendNestedSchema,
-  legendTruncateAfterLinesSchema,
-  legendVisibleSchema,
   legendSizeSchema,
-  valueDisplaySchema,
-  validateGroupings,
-} from './partition_shared';
-import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -43,6 +37,7 @@ const mosaicStateSharedSchema = {
       },
       {
         meta: {
+          id: 'mosaicLegend',
           description: 'Legend configuration for mosaic chart appearance and behavior',
         },
       }
@@ -51,34 +46,26 @@ const mosaicStateSharedSchema = {
   value_display: valueDisplaySchema,
 };
 
-const partitionStatePrimaryMetricOptionsSchema = schema.object({});
+const partitionStatePrimaryMetricOptionsSchema = {};
 
-const partitionStateBreakdownByOptionsSchema = schema.object(
-  {
-    /**
-     * Color configuration: color mapping
-     */
-    color: schema.maybe(colorMappingSchema),
-    /**
-     * Collapse by function. This parameter is used to collapse the
-     * metric chart when the number of columns is bigger than the
-     * number of columns specified in the columns parameter.
-     * Possible values:
-     * - 'avg': Collapse by average
-     * - 'sum': Collapse by sum
-     * - 'max': Collapse by max
-     * - 'min': Collapse by min
-     * - 'none': Do not collapse
-     */
-    collapse_by: schema.maybe(collapseBySchema),
-  },
-  {
-    meta: {
-      description:
-        'Configuration options for breakdown dimensions in a mosaic partition, including color settings and collapse behavior',
-    },
-  }
-);
+const partitionStateBreakdownByOptionsSchema = {
+  /**
+   * Color configuration: color mapping
+   */
+  color: schema.maybe(colorMappingSchema),
+  /**
+   * Collapse by function. This parameter is used to collapse the
+   * metric chart when the number of columns is bigger than the
+   * number of columns specified in the columns parameter.
+   * Possible values:
+   * - 'avg': Collapse by average
+   * - 'sum': Collapse by sum
+   * - 'max': Collapse by max
+   * - 'min': Collapse by min
+   * - 'none': Do not collapse
+   */
+  collapse_by: schema.maybe(collapseBySchema),
+};
 
 export const mosaicStateSchemaNoESQL = schema.object(
   {
@@ -86,6 +73,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
     /**
@@ -116,9 +104,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
      */
     group_breakdown_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(
-          schema.object({ collapse_by: schema.maybe(collapseBySchema) })
-        ),
+        mergeAllBucketsWithChartDimensionSchema({ collapse_by: schema.maybe(collapseBySchema) }),
         {
           minSize: 1,
           maxSize: 100,
@@ -129,6 +115,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   },
   {
     meta: {
+      id: 'mosaicNoESQL',
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -136,7 +123,6 @@ export const mosaicStateSchemaNoESQL = schema.object(
       group_by,
       group_breakdown_by,
     }: {
-      metrics: Array<PartitionMetric>;
       group_by: Array<{ collapse_by?: string }>;
       group_breakdown_by?: Array<{ collapse_by?: string }>;
     }) => {
@@ -165,12 +151,8 @@ const mosaicStateSchemaESQL = schema.object(
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: schema.arrayOf(
-      schema.allOf(
-        [
-          schema.object(genericOperationOptionsSchema),
-          partitionStatePrimaryMetricOptionsSchema,
-          esqlColumnSchema,
-        ],
+      esqlColumnOperationWithLabelAndFormatSchema.extends(
+        partitionStatePrimaryMetricOptionsSchema,
         {
           meta: {
             description:
@@ -187,49 +169,29 @@ const mosaicStateSchemaESQL = schema.object(
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
-    group_by: schema.maybe(
-      schema.arrayOf(
-        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-          meta: {
-            description:
-              'Breakdown dimension configuration for ES|QL mode, combining breakdown options with column selection',
-          },
-        }),
-        {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
-        }
-      )
-    ),
-
+    group_by: schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+    }),
     group_breakdown_by: schema.maybe(
-      schema.arrayOf(
-        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-          meta: {
-            description:
-              'Group breakdown dimension configuration for ES|QL mode, combining breakdown options with column selection',
-          },
-        }),
-        {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
-        }
-      )
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
+      })
     ),
   },
   {
     meta: {
+      id: 'mosaicESQL',
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
     validate: ({
-      metrics,
       group_by,
       group_breakdown_by,
     }: {
-      metrics: Array<PartitionMetric>;
       group_by?: Array<{ collapse_by?: string }>;
       group_breakdown_by?: Array<{ collapse_by?: string }>;
     }) => {
@@ -242,13 +204,14 @@ const mosaicStateSchemaESQL = schema.object(
       ) {
         return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
       }
-      return validateGroupings({ metrics, group_by });
+      return;
     },
   }
 );
 
 export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
+    id: 'mosaicChartSchema',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

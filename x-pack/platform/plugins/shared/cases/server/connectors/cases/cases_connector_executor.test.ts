@@ -79,6 +79,7 @@ describe('CasesConnectorExecutor', () => {
 
   const params: CasesConnectorRunParams = {
     alerts,
+    autoPushCase: null,
     groupedAlerts: null,
     groupingBy,
     owner,
@@ -3173,6 +3174,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      autoPushCase: null,
     };
 
     describe('run', () => {

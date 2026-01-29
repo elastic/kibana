@@ -9,13 +9,14 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ResponseButton } from './response_button';
-import { ExpandableSection } from './expandable_section';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'response';
 
@@ -25,7 +26,11 @@ const KEY = 'response';
 export const ResponseSection = memo(() => {
   const { isRulePreview, getFieldsData } = useDocumentDetailsContext();
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
   const eventKind = getField(getFieldsData('event.kind'));
 
   const content = useMemo(() => {
@@ -70,7 +75,8 @@ export const ResponseSection = memo(() => {
           defaultMessage="Response"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       data-test-subj={RESPONSE_SECTION_TEST_ID}
     >
       {content}
