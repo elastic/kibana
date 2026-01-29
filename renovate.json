@@ -2165,9 +2165,9 @@
       "enabled": true
     },
     {
-      "groupName": "cross-fetch",
+      "groupName": "whatwg-fetch",
       "matchDepNames": [
-        "cross-fetch"
+        "whatwg-fetch"
       ],
       "reviewers": [
         "team:kibana-operations"

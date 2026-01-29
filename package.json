@@ -1942,7 +1942,6 @@
     "cli-table3": "0.6.1",
     "content-security-policy-parser": "0.6.0",
     "cpy": "8.1.2",
-    "cross-fetch": "4.1.0",
     "css-loader": "7.1.2",
     "cssnano": "7.1.2",
     "cssnano-preset-default": "7.0.10",
