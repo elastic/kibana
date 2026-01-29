@@ -755,7 +755,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: 'date',
         },
       ],
