@@ -108,17 +108,17 @@ echo "--- Building Product Doc Artifacts"
 
 # Build artifacts for each product (default inference)
 echo "--- Building artifacts with default inference"
-node scripts/build_product_doc_artifacts.js --product-name=kibana "${STACK_VERSION_ARGS[@]}"
-node scripts/build_product_doc_artifacts.js --product-name=elasticsearch "${STACK_VERSION_ARGS[@]}"
-node scripts/build_product_doc_artifacts.js --product-name=security "${STACK_VERSION_ARGS[@]}"
-node scripts/build_product_doc_artifacts.js --product-name=observability "${STACK_VERSION_ARGS[@]}"
+node scripts/build_product_doc_artifacts.js --product-name=kibana
+node scripts/build_product_doc_artifacts.js --product-name=elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=security
+node scripts/build_product_doc_artifacts.js --product-name=observability
 
 # Build artifacts with E5 inference
 echo "--- Building artifacts with E5 inference"
-node scripts/build_product_doc_artifacts.js --product-name=kibana "${STACK_VERSION_ARGS[@]}" --inference-id=.multilingual-e5-small-elasticsearch
-node scripts/build_product_doc_artifacts.js --product-name=elasticsearch "${STACK_VERSION_ARGS[@]}" --inference-id=.multilingual-e5-small-elasticsearch
-node scripts/build_product_doc_artifacts.js --product-name=observability "${STACK_VERSION_ARGS[@]}" --inference-id=.multilingual-e5-small-elasticsearch
-node scripts/build_product_doc_artifacts.js --product-name=security "${STACK_VERSION_ARGS[@]}" --inference-id=.multilingual-e5-small-elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=kibana --inference-id=.multilingual-e5-small-elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=elasticsearch --inference-id=.multilingual-e5-small-elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=observability --inference-id=.multilingual-e5-small-elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=security --inference-id=.multilingual-e5-small-elasticsearch
 
 echo "✅ All product doc artifacts built successfully"
 

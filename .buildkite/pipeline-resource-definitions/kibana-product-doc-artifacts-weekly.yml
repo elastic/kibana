@@ -47,8 +47,8 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
         Weekly build:
-          cronline: 0 9 * * 6 America/Chicago  # Saturday 9 AM CT
-          message: Weekly product documentation artifacts build
+          cronline: 0 9 */14 * * America/Chicago  # Every 14 days at 9 AM CT
+          message: Biweekly product documentation artifacts build
           branch: main
           env:
             STACK_VERSION: ''
