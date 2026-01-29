@@ -22,4 +22,4 @@ export const POPOVER_OFFSET = 5;
 export const TOOLTIP_OFFSET = 4;
 export const ITEM_HORIZONTAL_SPACING_OFFSET = 32;
 export const SUB_MENU_ICON_SPACING_OFFSET = 48;
-export const BADGE_SPACING_OFFSET = 56;
+export const BADGE_SPACING_OFFSET = 60;
