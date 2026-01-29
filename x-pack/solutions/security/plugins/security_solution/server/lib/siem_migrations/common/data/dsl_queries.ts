@@ -40,7 +40,6 @@ export const dsl = {
   isEligibleForTranslation(): QueryDslQueryContainer {
     return {
       bool: {
-        filter: [{ term: { status: 'pending' } }],
         must_not: [
           {
             bool: {
