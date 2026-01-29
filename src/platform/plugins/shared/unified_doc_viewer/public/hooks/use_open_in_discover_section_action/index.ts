@@ -15,14 +15,12 @@ import {
 } from '../../components/observability/traces/common/constants';
 import { useDocViewerExtensionActionsContext } from '../use_doc_viewer_extension_actions';
 
-interface BaseParams {
+interface UseOpenInDiscoverSectionActionParams {
   tabLabel: string;
   dataTestSubj: string;
+  href?: string;
+  esql?: string;
 }
-
-export type UseOpenInDiscoverSectionActionParams =
-  | (BaseParams & { href: string; esql?: string })
-  | (BaseParams & { href?: string; esql: string });
 
 export function useOpenInDiscoverSectionAction(
   params: UseOpenInDiscoverSectionActionParams
