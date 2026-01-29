@@ -91,7 +91,7 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
   } else {
     // Unconditional removal: use DROP command
     // Add missing field filter if needed (ignore_missing = false)
-    const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+    const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
     if (missingFieldFilter) {
       commands.push(missingFieldFilter);
     }

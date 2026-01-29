@@ -37,5 +37,70 @@ apiTest.describe(
       expect(esqlResult.documents).toHaveLength(1);
       expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
     });
+
+    apiTest(
+      'should set network direction with internal networks field',
+      async ({ testBed, esql }) => {
+        const indexName = 'stream-e2e-test-network-direction-internal-networks-field';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'network_direction',
+              source_ip: 'source_ip',
+              destination_ip: 'destination_ip',
+              internal_networks_field: 'test_network_direction_field',
+            } as NetworkDirectionProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+
+        const docs = [
+          {
+            source_ip: '128.232.110.120',
+            destination_ip: '192.168.1.1',
+            test_network_direction_field: ['private'],
+          },
+        ];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents).toHaveLength(1);
+        expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
+      }
+    );
+
+    apiTest(
+      'should set network direction with ignore_missing option',
+      async ({ testBed, esql }) => {
+        const indexName = 'stream-e2e-test-network-direction-ignore-missing';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'network_direction',
+              source_ip: 'source_ip',
+              destination_ip: 'destination_ip',
+              internal_networks: ['private'],
+              ignore_missing: true,
+            } as NetworkDirectionProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+
+        const docs = [
+          { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },
+          { destination_ip: '192.168.1.1' },
+        ];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents).toHaveLength(2);
+        expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
+        expect(esqlResult.documents[1]).toHaveProperty(['network.direction'], null);
+      }
+    );
   }
 );

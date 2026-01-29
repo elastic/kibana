@@ -7,6 +7,7 @@
 
 import { Builder, type ESQLAstCommand, type ESQLAstItem } from '@kbn/esql-language';
 import type { NetworkDirectionProcessor } from '../../../../types/processors';
+import { buildIgnoreMissingFilter } from './common';
 
 const DEFAULT_TARGET_FIELD = 'network.direction';
 
@@ -46,7 +47,11 @@ export const convertNetworkDirectionProcessorToESQL = (
     ...networkDirectionFuncArgs,
   ]);
 
-  // TODO - handle ignore missing
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, source_ip, destination_ip);
+  if (missingFieldFilter) {
+    commands.push(missingFieldFilter);
+  }
+
   // TODO - handle where
 
   const toColumn = Builder.expression.column(target_field);
