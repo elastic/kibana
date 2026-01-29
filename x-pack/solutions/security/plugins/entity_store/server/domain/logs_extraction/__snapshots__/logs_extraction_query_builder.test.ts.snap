@@ -5,7 +5,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   
   FROM test-index-*
     METADATA _index
-  | WHERE (entity.id IS NOT NULL AND entity.id != \\"\\")
+  | WHERE ((entity.id IS NOT NULL AND entity.id != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
@@ -285,28 +285,16 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.host.entity.id = CONCAT(\\"host:\\", 
-      CASE(
-        host.entity.id IS NOT NULL AND host.entity.id != \\"\\", host.entity.id,
-        COALESCE(
-                CASE(host.id IS NOT NULL AND host.id != \\"\\", host.id, NULL),
-                CASE(host.domain IS NOT NULL AND host.domain != \\"\\",
-                  CASE(
-                    host.name IS NOT NULL AND host.name != \\"\\", CONCAT(host.name, \\".\\", host.domain),
-                    host.hostname IS NOT NULL AND host.hostname != \\"\\", CONCAT(host.hostname, \\".\\", host.domain),
-                    NULL
-                  ),
-                  NULL
-                ),
-                CASE(host.name IS NOT NULL AND host.name != \\"\\", host.name, NULL),
-                CASE(host.hostname IS NOT NULL AND host.hostname != \\"\\", host.hostname, NULL),
-                NULL
-              )
-      )
-    )
+  | EVAL recent.entity.id = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
+(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
+(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
+(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
   | STATS
     recent.timestamp = MAX(@timestamp),
-    recent.host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)),
+    recent.host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp),
+ recent.host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)),
  recent.host.domain = MV_DEDUPE(TOP(TO_STRING(host.domain), 10)),
  recent.host.hostname = MV_DEDUPE(TOP(TO_STRING(host.hostname), 10)),
  recent.host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)),
@@ -351,13 +339,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.relationships.Dependent_of = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.Dependent_of), 10)),
  recent.entity.relationships.Owned_by = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.Owned_by), 10)),
  recent.entity.relationships.Accessed_frequently_by = MV_DEDUPE(TOP(TO_STRING(host.entity.relationships.Accessed_frequently_by), 10))
-    BY recent.host.entity.id
+    BY recent.entity.id
   | LOOKUP JOIN latest-index
-      ON recent.host.entity.id == host.entity.id
+      ON recent.entity.id == entity.id
   | RENAME
-    recent.host.entity.id AS host.entity.id
+    recent.entity.id AS entity.id
   | EVAL
-    host.name = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.name, host.name), recent.host.name)),
+    host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
+ host.name = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.name, host.name), recent.host.name)),
  host.domain = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.domain, host.domain), recent.host.domain)),
  host.hostname = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.hostname, host.hostname), recent.host.hostname)),
  host.id = MV_DEDUPE(COALESCE(MV_APPEND(recent.host.id, host.id), recent.host.id)),
@@ -402,13 +391,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.Dependent_of = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), recent.entity.relationships.Dependent_of)),
  entity.relationships.Owned_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), recent.entity.relationships.Owned_by)),
  entity.relationships.Accessed_frequently_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), recent.entity.relationships.Accessed_frequently_by)),
- entity.id = host.entity.id,
+ entity.id = entity.id,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
  entity.EngineMetadata.Type = \\"host\\",
  entity.type = COALESCE(entity.type, \\"Host\\"),
     entity.hashedId = HASH(\\"MD5\\", entity.id)
-  | KEEP host.name,
+  | KEEP host.entity.id,
+ host.name,
  host.domain,
  host.hostname,
  host.id,
@@ -457,7 +447,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.id,
  entity.hashedId,
  entity.EngineMetadata.Type,
- host.entity.id
+ entity.id
   | SORT @timestamp ASC"
 `;
 
@@ -471,15 +461,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.service.entity.id = CONCAT(\\"service:\\", 
-      CASE(
-        service.entity.id IS NOT NULL AND service.entity.id != \\"\\", service.entity.id,
-        CASE(service.name IS NOT NULL AND service.name != \\"\\", service.name, NULL)
-      )
-    )
+  | EVAL recent.entity.id = CONCAT(\\"service:\\", CASE((service.entity.id IS NOT NULL AND service.entity.id != \\"\\"), service.entity.id,
+(service.name IS NOT NULL AND service.name != \\"\\"), service.name, NULL))
   | STATS
     recent.timestamp = MAX(@timestamp),
-    recent.service.name = MV_DEDUPE(TOP(TO_STRING(service.name), 10)),
+    recent.service.entity.id = FIRST(TO_STRING(service.entity.id), @timestamp),
+ recent.service.name = MV_DEDUPE(TOP(TO_STRING(service.name), 10)),
  recent.service.address = MV_DEDUPE(TOP(TO_STRING(service.address), 10)),
  recent.service.environment = MV_DEDUPE(TOP(TO_STRING(service.environment), 10)),
  recent.service.ephemeral_id = MV_DEDUPE(TOP(TO_STRING(service.ephemeral_id), 10)),
@@ -523,13 +510,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.relationships.Communicates_with = MV_DEDUPE(TOP(TO_STRING(service.entity.relationships.Communicates_with), 10)),
  recent.entity.relationships.Depends_on = MV_DEDUPE(TOP(TO_STRING(service.entity.relationships.Depends_on), 10)),
  recent.entity.relationships.Dependent_of = MV_DEDUPE(TOP(TO_STRING(service.entity.relationships.Dependent_of), 10))
-    BY recent.service.entity.id
+    BY recent.entity.id
   | LOOKUP JOIN latest-index
-      ON recent.service.entity.id == service.entity.id
+      ON recent.entity.id == entity.id
   | RENAME
-    recent.service.entity.id AS service.entity.id
+    recent.entity.id AS entity.id
   | EVAL
-    service.name = MV_DEDUPE(COALESCE(MV_APPEND(recent.service.name, service.name), recent.service.name)),
+    service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
+ service.name = MV_DEDUPE(COALESCE(MV_APPEND(recent.service.name, service.name), recent.service.name)),
  service.address = MV_DEDUPE(COALESCE(MV_APPEND(recent.service.address, service.address), recent.service.address)),
  service.environment = MV_DEDUPE(COALESCE(MV_APPEND(recent.service.environment, service.environment), recent.service.environment)),
  service.ephemeral_id = MV_DEDUPE(COALESCE(MV_APPEND(recent.service.ephemeral_id, service.ephemeral_id), recent.service.ephemeral_id)),
@@ -573,13 +561,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.relationships.Communicates_with = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Communicates_with, entity.relationships.Communicates_with), recent.entity.relationships.Communicates_with)),
  entity.relationships.Depends_on = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), recent.entity.relationships.Depends_on)),
  entity.relationships.Dependent_of = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), recent.entity.relationships.Dependent_of)),
- entity.id = service.entity.id,
+ entity.id = entity.id,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
  entity.EngineMetadata.Type = \\"service\\",
  entity.type = COALESCE(entity.type, \\"Service\\"),
     entity.hashedId = HASH(\\"MD5\\", entity.id)
-  | KEEP service.name,
+  | KEEP service.entity.id,
+ service.name,
  service.address,
  service.environment,
  service.ephemeral_id,
@@ -627,7 +616,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.id,
  entity.hashedId,
  entity.EngineMetadata.Type,
- service.entity.id
+ entity.id
   | SORT @timestamp ASC"
 `;
 
@@ -641,34 +630,18 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
   | SORT @timestamp ASC
   | LIMIT 10000
-  | EVAL recent.user.entity.id = CONCAT(\\"user:\\", 
-      CASE(
-        user.entity.id IS NOT NULL AND user.entity.id != \\"\\", user.entity.id,
-        COALESCE(
-                CASE(user.name IS NOT NULL AND user.name != \\"\\",
-                  CASE(
-                    host.entity.id IS NOT NULL AND host.entity.id != \\"\\", CONCAT(user.name, \\"@\\", host.entity.id),
-                    host.id IS NOT NULL AND host.id != \\"\\", CONCAT(user.name, \\"@\\", host.id),
-                    host.name IS NOT NULL AND host.name != \\"\\", CONCAT(user.name, \\"@\\", host.name),
-                    NULL
-                  ),
-                  NULL
-                ),
-                CASE(user.id IS NOT NULL AND user.id != \\"\\", user.id, NULL),
-                CASE(user.email IS NOT NULL AND user.email != \\"\\", user.email, NULL),
-                CASE(
-                  user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\", 
-                  CONCAT(user.name, \\".\\", user.domain),
-                  NULL
-                ),  
-                CASE(user.name IS NOT NULL AND user.name != \\"\\", user.name, NULL),
-                NULL
-              )
-      )
-    )
+  | EVAL recent.entity.id = CONCAT(\\"user:\\", CASE((user.entity.id IS NOT NULL AND user.entity.id != \\"\\"), user.entity.id,
+(user.name IS NOT NULL AND user.name != \\"\\" AND host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), CONCAT(user.name, \\"@\\", host.entity.id),
+(user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\"), CONCAT(user.name, \\"@\\", host.id),
+(user.name IS NOT NULL AND user.name != \\"\\" AND host.name IS NOT NULL AND host.name != \\"\\"), CONCAT(user.name, \\"@\\", host.name),
+(user.id IS NOT NULL AND user.id != \\"\\"), user.id,
+(user.email IS NOT NULL AND user.email != \\"\\"), user.email,
+(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\"), CONCAT(user.name, \\"@\\", user.domain),
+(user.name IS NOT NULL AND user.name != \\"\\"), user.name, NULL))
   | STATS
     recent.timestamp = MAX(@timestamp),
-    recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)),
+    recent.user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp),
+ recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)),
  recent.user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)),
  recent.user.name = MV_DEDUPE(TOP(TO_STRING(user.name), 10)),
  recent.user.full_name = MV_DEDUPE(TOP(TO_STRING(user.full_name), 10)),
@@ -712,13 +685,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.entity.relationships.Owns = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.Owns), 10)),
  recent.entity.relationships.Supervises = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.Supervises), 10)),
  recent.entity.relationships.Supervised_by = MV_DEDUPE(TOP(TO_STRING(user.entity.relationships.Supervised_by), 10))
-    BY recent.user.entity.id
+    BY recent.entity.id
   | LOOKUP JOIN latest-index
-      ON recent.user.entity.id == user.entity.id
+      ON recent.entity.id == entity.id
   | RENAME
-    recent.user.entity.id AS user.entity.id
+    recent.entity.id AS entity.id
   | EVAL
-    user.domain = MV_DEDUPE(COALESCE(MV_APPEND(recent.user.domain, user.domain), recent.user.domain)),
+    user.entity.id = COALESCE(user.entity.id, recent.user.entity.id),
+ user.domain = MV_DEDUPE(COALESCE(MV_APPEND(recent.user.domain, user.domain), recent.user.domain)),
  user.email = MV_DEDUPE(COALESCE(MV_APPEND(recent.user.email, user.email), recent.user.email)),
  user.name = MV_DEDUPE(COALESCE(MV_APPEND(recent.user.name, user.name), recent.user.name)),
  user.full_name = MV_DEDUPE(COALESCE(MV_APPEND(recent.user.full_name, user.full_name), recent.user.full_name)),
@@ -762,13 +736,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.relationships.Owns = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Owns, entity.relationships.Owns), recent.entity.relationships.Owns)),
  entity.relationships.Supervises = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Supervises, entity.relationships.Supervises), recent.entity.relationships.Supervises)),
  entity.relationships.Supervised_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), recent.entity.relationships.Supervised_by)),
- entity.id = user.entity.id,
+ entity.id = entity.id,
     @timestamp = recent.timestamp,
  entity.name = COALESCE(entity.name, entity.id),
  entity.EngineMetadata.Type = \\"user\\",
  entity.type = COALESCE(entity.type, \\"Identity\\"),
     entity.hashedId = HASH(\\"MD5\\", entity.id)
-  | KEEP user.domain,
+  | KEEP user.entity.id,
+ user.domain,
  user.email,
  user.name,
  user.full_name,
@@ -816,6 +791,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.id,
  entity.hashedId,
  entity.EngineMetadata.Type,
- user.entity.id
+ entity.id
   | SORT @timestamp ASC"
 `;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { collectValues as collect } from './field_retention_operations';
+import { collectValues as collect, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
-import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
@@ -16,40 +15,20 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   identityField: {
-    calculated: true,
-    defaultIdField: 'host.entity.id',
-    defaultIdFieldMapping: { type: 'keyword' },
-    requiresOneOfFields: ['host.id', 'host.name', 'host.hostname'],
-
-    /*
-      Implements the following rank
-      1. host.entity.id           --> implemented as the default id field
-      2. host.id
-      3. host.name . host.domain
-      4. host.hostname . host.domain
-      5. host.name
-      6. host.hostname
-    */
-    esqlEvaluation: `COALESCE(
-                CASE(${esqlIsNotNullOrEmpty('host.id')}, host.id, NULL),
-                CASE(${esqlIsNotNullOrEmpty('host.domain')},
-                  CASE(
-                    ${esqlIsNotNullOrEmpty('host.name')}, CONCAT(host.name, ".", host.domain),
-                    ${esqlIsNotNullOrEmpty(
-                      'host.hostname'
-                    )}, CONCAT(host.hostname, ".", host.domain),
-                    NULL
-                  ),
-                  NULL
-                ),
-                CASE(${esqlIsNotNullOrEmpty('host.name')}, host.name, NULL),
-                CASE(${esqlIsNotNullOrEmpty('host.hostname')}, host.hostname, NULL),
-                NULL
-              )`,
+    requiresOneOfFields: ['host.entity.id', 'host.id', 'host.name', 'host.hostname'],
+    euidFields: [
+      [{ field: 'host.entity.id' }],
+      [{ field: 'host.id' }],
+      [{ field: 'host.name' }, { separator: '.' }, { field: 'host.domain' }],
+      [{ field: 'host.hostname' }, { separator: '.' }, { field: 'host.domain' }],
+      [{ field: 'host.name' }],
+      [{ field: 'host.hostname' }],
+    ],
   },
   entityTypeFallback: 'Host',
   indexPatterns: [],
   fields: [
+    oldestValue({ source: 'host.entity.id' }),
     collect({ source: 'host.name' }),
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),

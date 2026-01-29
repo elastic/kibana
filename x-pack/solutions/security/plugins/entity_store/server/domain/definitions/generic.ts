@@ -9,19 +9,18 @@ import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
-export const GENERIC_IDENTITY_FIELD = 'entity.id';
-
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
-  // Generic doesn't have type prefix on the id
   identityField: {
-    calculated: false,
-    field: GENERIC_IDENTITY_FIELD,
-    mapping: { type: 'keyword' },
+    requiresOneOfFields: ['entity.id'],
+    euidFields: [[{ field: 'entity.id' }]],
   },
   indexPatterns: [],
   fields: [
+    // entity.id doesn't need to be mapped because it's the main entity field
+    // and it's already mapped by default
+
     ...getEntityFieldsDescriptions(),
 
     newestValue({ source: 'cloud.account.id' }),

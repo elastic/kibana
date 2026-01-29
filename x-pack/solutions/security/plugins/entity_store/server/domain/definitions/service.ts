@@ -5,30 +5,23 @@
  * 2.0.
  */
 
-import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
+// import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { collectValues as collect, newestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
   identityField: {
-    calculated: true,
-    defaultIdField: 'service.entity.id',
-    defaultIdFieldMapping: { type: 'keyword' },
-    requiresOneOfFields: ['service.name'],
-
-    /*
-      Implements the following rank
-      1. service.entity.id    --> implemented as the default id field
-      2. service.name
-    */
-    esqlEvaluation: `CASE(${esqlIsNotNullOrEmpty('service.name')}, service.name, NULL)`,
+    requiresOneOfFields: ['service.entity.id', 'service.name'],
+    euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
   },
   indexPatterns: [],
   entityTypeFallback: 'Service',
   fields: [
+    oldestValue({ source: 'service.entity.id' }),
+
     collect({ source: 'service.name' }),
     collect({ source: 'service.address' }),
     collect({ source: 'service.environment' }),
