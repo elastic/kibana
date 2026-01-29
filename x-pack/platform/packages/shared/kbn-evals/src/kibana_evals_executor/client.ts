@@ -73,8 +73,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     return withInferenceContext(async () => {
       const datasetId = computeDatasetId(dataset);
       const experimentId = randomUUID();
-      const repetitions = this.options.repetitions ?? 5;
-      const runConcurrency = Math.max(1, concurrency ?? 1);
+      const repetitions = this.options.repetitions ?? 3;
+      const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
 
       const evaluationRuns: RanExperiment['evaluationRuns'] = [];
@@ -133,6 +133,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
+                  exampleIndex,
+                  repetitionIndex: rep,
                 });
               });
             })

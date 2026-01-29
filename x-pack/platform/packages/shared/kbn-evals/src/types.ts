@@ -157,6 +157,11 @@ export interface RanExperiment {
   evaluationRuns: Array<{
     name: string;
     result?: EvaluationResult;
+    exampleIndex?: number;
+    repetitionIndex?: number;
+    experimentRunId?: string;
+    traceId?: string | null;
+    exampleId?: string;
   }>;
   experimentMetadata?: Record<string, unknown>;
 }

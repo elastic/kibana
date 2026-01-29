@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import { buildFlattenedScoreDocuments } from './report_model_score';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import type { RanExperiment } from '../types';
 
 describe('buildFlattenedScoreDocuments', () => {
   const taskModel = {
@@ -22,21 +21,21 @@ describe('buildFlattenedScoreDocuments', () => {
     provider: 'anthropic',
   };
 
-  it('populates example.id and input_hash from dataset examples', async () => {
-    const phoenixClient = {
-      getDatasetExamples: jest.fn().mockResolvedValue([
-        { id: 'example-1', input: { question: 'one' } },
-      ]),
-    } as unknown as KibanaPhoenixClient;
-
+  it('builds documents with dataset name and input hash from runs', async () => {
     const experiments = [
       {
         id: 'exp-1',
         datasetId: 'dataset-1',
+        datasetName: 'Dataset 1',
+        runs: {
+          'run-1': { exampleIndex: 0, repetition: 0, input: { question: 'one' } },
+        },
         evaluationRuns: [
           {
             name: 'Correctness',
             result: { score: 0.5 },
+            exampleIndex: 0,
+            repetitionIndex: 0,
           },
         ],
       },
@@ -48,29 +47,26 @@ describe('buildFlattenedScoreDocuments', () => {
       evaluatorModel,
       runId: 'run-123',
       totalRepetitions: 1,
-      phoenixClient,
     });
 
-    expect(docs[0].example.id).toBe('example-1');
+    expect(docs[0].example.dataset.name).toBe('Dataset 1');
+    expect(docs[0].example.id).toBe('0');
     expect(docs[0].example.input_hash).not.toBe('');
   });
 
-  it('uses run data input and example id when available', async () => {
-    const phoenixClient = {
-      getDatasetExamples: jest.fn().mockResolvedValue([]),
-    } as unknown as KibanaPhoenixClient;
-
+  it('uses experiment run id to resolve example id when available', async () => {
     const experiments = [
       {
         id: 'exp-1',
         datasetId: 'dataset-1',
+        datasetName: 'Dataset 1',
         runs: {
-          'example-2': { input: { question: 'two' } },
+          'run-1': { datasetExampleId: 'example-2', traceId: 'trace-1', input: { question: 'two' } },
         },
         evaluationRuns: [
           {
             name: 'Correctness',
-            exampleId: 'example-2',
+            experimentRunId: 'run-1',
             repetitionIndex: 0,
             result: { score: 0.9 },
           },
@@ -84,10 +80,10 @@ describe('buildFlattenedScoreDocuments', () => {
       evaluatorModel,
       runId: 'run-123',
       totalRepetitions: 1,
-      phoenixClient,
     });
 
     expect(docs[0].example.id).toBe('example-2');
     expect(docs[0].example.input_hash).not.toBe('');
+    expect(docs[0].task.trace_id).toBe('trace-1');
   });
 });

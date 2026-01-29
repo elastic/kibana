@@ -338,10 +338,12 @@ export class EvaluationScoreRepository {
         | undefined;
 
       const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
+      const totalRepetitions = firstDoc.run_metadata.total_repetitions;
       for (const datasetBucket of datasetBuckets) {
         const datasetId = datasetBucket.key;
         const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
-        const numExamples = datasetBucket.unique_examples?.value ?? 0;
+        const uniqueExamples = datasetBucket.unique_examples?.value ?? 0;
+        const numExamples = uniqueExamples * totalRepetitions;
 
         const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
         for (const evalBucket of evaluatorBuckets) {
@@ -369,7 +371,7 @@ export class EvaluationScoreRepository {
         stats,
         taskModel: firstDoc.task.model,
         evaluatorModel: firstDoc.evaluator.model,
-        totalRepetitions: firstDoc.run_metadata.total_repetitions,
+        totalRepetitions,
       };
     } catch (error) {
       this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
