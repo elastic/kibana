@@ -8,6 +8,7 @@ spec:
   type: url
   targets:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/cloud-security-posture/cspm-agentless-scout.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/evals/kibana-evals.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-agent-builder-smoke-tests-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-api-docs.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-apis-capacity-testing-daily.yml
@@ -63,4 +64,3 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-investigations.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-rule-management.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/trigger-version-dependent-jobs.yml
-    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/evals/kibana-evals.yml
