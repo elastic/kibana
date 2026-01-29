@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   TransformEnhancementsIn,
   TransformEnhancementsOut,
 } from '@kbn/embeddable-plugin/common';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
@@ -32,7 +32,8 @@ export function getTransforms(
         references: enhancementResult.references,
       };
     },
-    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
+    transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
+      const state = transformTitlesOut(storedState);
       const enhancementsState = state.enhancements
         ? transformEnhancementsOut(state.enhancements, references ?? [])
         : undefined;
