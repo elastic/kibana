@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
+import { ACTION_OPEN_IN_DISCOVER } from '../../common/constants';
 import { Chart } from '../chart';
 import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getLatencyChart } from './trace_charts_definition';
@@ -22,7 +23,7 @@ const LatencyChartContent = ({
   color,
   title,
 }: LatencyChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter } =
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
@@ -47,19 +48,20 @@ const LatencyChartContent = ({
       services={services}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
+      onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
       syncCursor
       syncTooltips
+      extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
     />
   );
 };
 
 export const LatencyChart = () => {
-  const { filters, dataSource, indexes } = useTraceMetricsContext();
+  const { filters, indexes } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
-    dataSource,
     indexes,
     filters,
   });
