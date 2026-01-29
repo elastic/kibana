@@ -47,6 +47,10 @@ const UpdateCaseTimestampsBody = z.object({
 
 /**
  * Internal-only, dev-only routes used by the Security Solution data generator script.
+ *
+ * `PUT /internal/security_solution/data_generator/cases/{caseId}/timestamps` backdates a Case by updating
+ * its saved object `created_at` (ISO timestamp) so generated demo cases fall within the requested time range.
+ * Gated by `x-elastic-internal-origin`, a privileged principal, and a Cases access check.
  */
 export const registerDataGeneratorRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -56,8 +60,8 @@ export const registerDataGeneratorRoutes = (
     .put({
       path: '/internal/security_solution/data_generator/cases/{caseId}/timestamps',
       access: 'internal',
-      // We authorize explicitly in the handler by verifying the current user can access the case via Cases.
-      // (Kibana route-level authz requires at least one privilege entry when enabled.)
+      // Authz is enforced in-handler via Cases because this needs per-case authorization; a static
+      // route-level privilege gate is too coarse (and doesn't map cleanly for serverless API-key principals).
       security: {
         authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' },
       },
