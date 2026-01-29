@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Native fetch doesn't support credentials in URLs, so we need to extract them
   const { username, password, ...serverWithoutAuth } = kibanaServer;
   const kibanaServerUrl = formatUrl(serverWithoutAuth);
-  const authHeader =
+  const authHeader: Record<string, string> =
     username && password
       ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
       : {};
