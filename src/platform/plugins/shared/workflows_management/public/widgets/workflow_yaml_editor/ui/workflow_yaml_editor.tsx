@@ -9,7 +9,14 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
@@ -30,6 +37,7 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
+import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
@@ -212,6 +220,16 @@ export const WorkflowYAMLEditor = ({
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
 
+  // Lifecycle - moved before useAgentBuilderIntegration since it depends on isEditorMounted
+  const [isEditorMounted, setIsEditorMounted] = useState(false);
+
+  // Agent Builder integration for AI-assisted editing
+  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+    editorRef,
+    yamlDocumentRef,
+    isEditorMounted,
+  });
+
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
     interceptMonacoYamlProvider();
@@ -251,9 +269,6 @@ export const WorkflowYAMLEditor = ({
     }
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
-
-  // Lifecycle
-  const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -540,33 +555,68 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
         <StepActions onStepActionClicked={onStepRun} />
       </div>
-      {isDevelopment && (
+      {/* Editor toolbar - AI Agent button and debug tools */}
+      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div
           css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {/* Debug: Download Schema Button - Only show in development */}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                css={styles.downloadSchemaButton}
-                iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
-                size="xs"
-                aria-label="Download JSON schema for debugging"
-                onClick={downloadSchema}
-                tabIndex={0}
-                disabled={workflowJsonSchemaStrict === null}
-                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.currentTarget.click();
+            {/* AI Agent Button - Only show when agent builder is available */}
+            {isAgentBuilderAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="workflows.yamlEditor.aiAgentTooltip"
+                      defaultMessage="Ask AI to help edit this workflow"
+                    />
                   }
-                }}
-              >
-                <FormattedMessage
-                  id="workflows.yamlEditor.downloadSchemaButtonLabel"
-                  defaultMessage="JSON Schema"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                >
+                  <EuiButtonEmpty
+                    iconType="sparkles"
+                    size="xs"
+                    aria-label="Open AI Agent"
+                    onClick={openAgentChat}
+                    data-test-subj="workflowYamlEditorAiAgentButton"
+                    tabIndex={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.currentTarget.click();
+                      }
+                    }}
+                  >
+                    <FormattedMessage
+                      id="workflows.yamlEditor.aiAgentButtonLabel"
+                      defaultMessage="AI Agent"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {/* Debug: Download Schema Button - Only show in development */}
+            {isDevelopment && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  css={styles.downloadSchemaButton}
+                  iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
+                  size="xs"
+                  aria-label="Download JSON schema for debugging"
+                  onClick={downloadSchema}
+                  tabIndex={0}
+                  disabled={workflowJsonSchemaStrict === null}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.currentTarget.click();
+                    }
+                  }}
+                >
+                  <FormattedMessage
+                    id="workflows.yamlEditor.downloadSchemaButtonLabel"
+                    defaultMessage="JSON Schema"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </div>
       )}

@@ -109,7 +109,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    return {
+    const agentBuilderSetup: AgentBuilderPluginSetup = {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
@@ -120,6 +120,16 @@ export class AgentBuilderPlugin
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
       },
     };
+
+    // Register with workflowsManagement plugin if available.
+    // This enables workflowsManagement to register its AI integration components
+    // (agents, tools, attachments) without creating a circular dependency.
+    if (setupDeps.workflowsManagement?.registerAgentBuilder) {
+      this.logger.debug('Registering Agent Builder with Workflows Management');
+      setupDeps.workflowsManagement.registerAgentBuilder(agentBuilderSetup);
+    }
+
+    return agentBuilderSetup;
   }
 
   start(

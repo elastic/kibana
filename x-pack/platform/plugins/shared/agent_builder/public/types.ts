@@ -43,6 +43,13 @@ export interface OpenConversationFlyoutReturn {
 
 export interface ConfigSchema {}
 
+/**
+ * WorkflowsManagement plugin setup contract interface (minimal, to avoid circular imports).
+ */
+export interface WorkflowsManagementPluginSetupContract {
+  registerAgentBuilder: (agentBuilder: AgentBuilderPluginStart) => void;
+}
+
 export interface AgentBuilderSetupDependencies {
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
@@ -51,6 +58,7 @@ export interface AgentBuilderSetupDependencies {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  workflowsManagement?: WorkflowsManagementPluginSetupContract;
 }
 
 export interface AgentBuilderStartDependencies {

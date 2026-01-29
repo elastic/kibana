@@ -39,6 +39,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Workflows
+  'platform.workflows.get_step_definitions',
+  'platform.workflows.get_examples',
 ];
 
 /**
@@ -49,6 +53,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   `${internalNamespaces.observability}.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
+  'platform.workflows.editor',
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {

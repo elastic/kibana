@@ -36,9 +36,56 @@ import type { WorkflowsManagementApi } from './workflows_management/workflows_ma
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
+  /**
+   * Register the Agent Builder plugin with Workflows Management.
+   * This is called by the agentBuilder plugin during its setup phase to allow
+   * workflowsManagement to register agents, tools, and attachments without
+   * creating a circular dependency.
+   */
+  registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => void;
 }
 
 export type WorkflowsServerPluginStart = Record<string, never>;
+
+/**
+ * AgentBuilder plugin setup contract interface.
+ * Defined here to avoid circular dependency with @kbn/agent-builder-plugin.
+ */
+export interface AgentBuilderPluginSetupContract {
+  agents: {
+    register: (definition: {
+      id: string;
+      name: string;
+      description: string;
+      avatar_icon?: string;
+      configuration: {
+        instructions?: string;
+        tools?: Array<{ tool_ids: string[] }>;
+      };
+    }) => void;
+  };
+  tools: {
+    register: (definition: {
+      id: string;
+      type: string;
+      description: string;
+      tags?: string[];
+      schema: unknown;
+      handler: (
+        params: unknown,
+        context: unknown
+      ) => Promise<{ results: Array<{ type: string; data: unknown }> }>;
+    }) => void;
+  };
+  attachments: {
+    registerType: (definition: {
+      id: string;
+      type: string;
+      validate: (input: unknown) => { valid: boolean; data?: unknown; error?: string };
+      format: (data: unknown) => { type: string; value: string };
+    }) => void;
+  };
+}
 
 export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;
@@ -48,6 +95,7 @@ export interface WorkflowsServerPluginSetupDeps {
   spaces?: SpacesPluginStart;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetupContract;
 }
 
 export interface WorkflowsServerPluginStartDeps {
