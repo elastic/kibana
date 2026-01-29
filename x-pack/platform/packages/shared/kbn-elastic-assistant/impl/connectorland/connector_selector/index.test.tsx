@@ -12,9 +12,7 @@ import { mockAssistantAvailability, TestProviders } from '../../mock/test_provid
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 import * as i18n from '../translations';
 import { useLoadConnectors } from '../use_load_connectors';
-import type { QueryObserverSuccessResult } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { AIConnector } from '.';
+import { createMockUseLoadConnectorsResult } from '../../mock/test_helpers';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();
@@ -28,41 +26,6 @@ const defaultProps = {
 const connectorTwo = mockConnectors[1];
 
 const mockRefetchConnectors = jest.fn();
-
-// Helper function to create a properly typed mock return value
-// Returns a QueryObserverSuccessResult which is compatible with UseQueryResult
-const createMockUseLoadConnectorsResult = (
-  overrides: Partial<QueryObserverSuccessResult<AIConnector[], IHttpFetchError>>
-): QueryObserverSuccessResult<AIConnector[], IHttpFetchError> => {
-  return {
-    data: [] as AIConnector[],
-    error: null,
-    isError: false,
-    isLoading: false,
-    isSuccess: true,
-    isFetching: false,
-    isInitialLoading: false,
-    isLoadingError: false,
-    isRefetchError: false,
-    isRefetching: false,
-    isStale: false,
-    isPreviousData: false,
-    status: 'success',
-    dataUpdatedAt: 0,
-    errorUpdatedAt: 0,
-    errorUpdateCount: 0,
-    failureCount: 0,
-    failureReason: null,
-    fetchStatus: 'idle',
-    isFetched: true,
-    isFetchedAfterMount: true,
-    isPaused: false,
-    isPlaceholderData: false,
-    refetch: jest.fn(),
-    remove: jest.fn(),
-    ...overrides,
-  };
-};
 
 jest.mock('../use_load_connectors', () => ({
   useLoadConnectors: jest.fn(),
@@ -142,7 +105,9 @@ describe('Connector selector', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('addNewConnectorButton')).toBeEnabled();
+    const addButton = screen.getByTestId('addNewConnectorButton');
+    expect(addButton).toBeInTheDocument();
+    expect(addButton).toBeEnabled();
   });
 
   it('disables add connector button when user cannot create connectors', () => {
@@ -169,7 +134,9 @@ describe('Connector selector', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('addNewConnectorButton')).toBeDisabled();
+    const addButton = screen.getByTestId('addNewConnectorButton');
+    expect(addButton).toBeInTheDocument();
+    expect(addButton).toBeDisabled();
   });
 
   it('renders add new connector button if no selected connector is provided', () => {
