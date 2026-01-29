@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XYCurveTypes } from '@kbn/expression-xy-plugin/common';
 import { XY_API_LINE_INTERPOLATION, type XYDecorations } from '../../../schema/charts/xy';
 import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 
@@ -43,7 +42,7 @@ describe('XY Appearances Transforms', () => {
   it('should preserve complex config through State -> API -> State', () => {
     const original = {
       valueLabels: 'show' as const,
-      curveType: XYCurveTypes.CURVE_STEP_AFTER,
+      curveType: 'CURVE_STEP_AFTER' as const,
       fillOpacity: 0.8,
       minBarHeight: 2,
       hideEndzones: false,
