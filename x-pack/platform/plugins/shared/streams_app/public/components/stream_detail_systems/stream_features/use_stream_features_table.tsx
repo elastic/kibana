@@ -158,8 +158,7 @@ export function useStreamFeaturesTable({
         name: FEATURE_COLUMN_HEADER_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          const displayTitle =
-            feature.title ?? Object.values(feature.value).join(', ');
+          const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
           return (
             <EuiLink
               onClick={() => onSelectFeature(feature)}

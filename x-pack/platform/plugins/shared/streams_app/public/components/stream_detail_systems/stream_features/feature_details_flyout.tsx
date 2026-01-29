@@ -62,8 +62,7 @@ export function FeatureDetailsFlyout({
     showDeleteModal();
   };
 
-  const displayTitle =
-    feature.title ?? Object.values(feature.value).join(', ');
+  const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
   const formattedValue = Object.values(feature.value).join(', ');
 
   const generalInfoItems = [
