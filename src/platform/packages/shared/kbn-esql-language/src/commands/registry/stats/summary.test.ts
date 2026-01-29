@@ -68,7 +68,7 @@ describe('STATS summary', () => {
       expectedGrouping: ['a😎', '?123', 'a.?b.?0.😎'],
     },
     {
-      description: 'can have params and quoted fields in grouping',
+      description: 'works well with BUCKET function',
       query: 'FROM index | STATS BY BUCKET(@timestamp,50,?_tstart,?_tend)',
       expectedNewColumns: ['BUCKET(@timestamp,50,?_tstart,?_tend)'],
       expectedAggregates: [],
