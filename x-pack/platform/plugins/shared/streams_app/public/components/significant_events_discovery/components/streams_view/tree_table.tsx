@@ -23,7 +23,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams, TaskStatus } from '@kbn/streams-schema';
-import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import type { OnboardingResult } from '@kbn/streams-schema/src/onboarding';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
@@ -61,7 +61,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, TaskResult<InsightsOnboardingResult>>;
+  streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
   loading?: boolean;
   searchQuery?: Query;
   onSelectionChange?: (selectedStreams: ListStreamDetail[]) => void;
@@ -368,7 +368,7 @@ export function StreamsTreeTable({
               render: (item: TableRow) => (
                 <QueriesColumn
                   streamName={item.stream.name}
-                  streamInsightsOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
                 />
               ),
             },

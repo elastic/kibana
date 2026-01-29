@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { TaskStatus } from '@kbn/streams-schema';
-import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import type { OnboardingResult } from '@kbn/streams-schema/src/onboarding';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import { compact } from 'lodash';
 import pMap from 'p-map';
@@ -56,14 +56,14 @@ export function StreamsView() {
   const [selectedStreams, setSelectedStreams] = useState<ListStreamDetail[]>([]);
   const significantEventsFetchState = useFetchSignificantEvents();
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
-    Record<string, TaskResult<InsightsOnboardingResult>>
+    Record<string, TaskResult<OnboardingResult>>
   >({});
   const aiFeatures = useAIFeatures();
-  const { scheduleInsightsOnboardingTask, cancelInsightsOnboardingTask } = useInsightsApi(
+  const { scheduleOnboardingTask, cancelOnboardingTask } = useInsightsApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );
   const onStreamStatusUpdate = useCallback(
-    (streamName: string, taskResult: TaskResult<InsightsOnboardingResult>) => {
+    (streamName: string, taskResult: TaskResult<OnboardingResult>) => {
       setStreamOnboardingResultMap((currentMap) => ({
         ...currentMap,
         [streamName]: taskResult,
@@ -93,11 +93,11 @@ export function StreamsView() {
     processStatusUpdateQueue();
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
 
-  const bulkScheduleInsightsOnboardingTask = async (streamList: string[]) => {
+  const bulkScheduleOnboardingTask = async (streamList: string[]) => {
     await pMap(
       streamList,
       async (streamName) => {
-        await scheduleInsightsOnboardingTask(streamName);
+        await scheduleOnboardingTask(streamName);
       },
       { concurrency: 10 }
     );
@@ -112,7 +112,7 @@ export function StreamsView() {
       })
       .map((item) => item.stream.name);
 
-    await bulkScheduleInsightsOnboardingTask(streamList);
+    await bulkScheduleOnboardingTask(streamList);
     streamList.forEach((streamName) => {
       onboardingStatusUpdateQueue.add(streamName);
     });
@@ -120,14 +120,14 @@ export function StreamsView() {
   };
 
   const onOnboardStreamActionClick = async (streamName: string) => {
-    await bulkScheduleInsightsOnboardingTask([streamName]);
+    await bulkScheduleOnboardingTask([streamName]);
 
     onboardingStatusUpdateQueue.add(streamName);
     processStatusUpdateQueue();
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
-    cancelInsightsOnboardingTask(streamName);
+    cancelOnboardingTask(streamName);
   };
 
   return (

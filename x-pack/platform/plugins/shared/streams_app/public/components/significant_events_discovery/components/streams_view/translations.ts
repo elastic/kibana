@@ -66,21 +66,21 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
 );
 
 export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamInsightsOnboardingButtonEmptyLabel',
+  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
   {
     defaultMessage: 'Onboard Streams',
   }
 );
 
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamInsightsOnboardingButtonEmptyLabel',
+  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
     defaultMessage: 'Onboard stream',
   }
 );
 
 export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamInsightsOnboardingButtonEmptyLabel',
+  'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamOnboardingButtonEmptyLabel',
   {
     defaultMessage: 'Stop stream onboarding',
   }

@@ -23,13 +23,13 @@ export function useInsightsApi(connectorId?: string) {
 
   return useMemo(
     () => ({
-      /* Insights Onboarding */
+      /* Onboarding */
 
-      scheduleInsightsOnboardingTask: async (streamName: string) => {
+      scheduleOnboardingTask: async (streamName: string) => {
         const { from, to } = getLast24HoursTimeRange();
 
         await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/insights_onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_task',
           {
             signal,
             params: {
@@ -44,9 +44,9 @@ export function useInsightsApi(connectorId?: string) {
           }
         );
       },
-      getInsightsOnboardingTaskStatus: async (streamName: string) => {
+      getOnboardingTaskStatus: async (streamName: string) => {
         return streamsRepositoryClient.fetch(
-          'GET /internal/streams/{streamName}/insights_onboarding/_status',
+          'GET /internal/streams/{streamName}/onboarding/_status',
           {
             signal,
             params: {
@@ -55,9 +55,9 @@ export function useInsightsApi(connectorId?: string) {
           }
         );
       },
-      cancelInsightsOnboardingTask: async (streamName: string) => {
+      cancelOnboardingTask: async (streamName: string) => {
         await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/insights_onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_task',
           {
             signal,
             params: {

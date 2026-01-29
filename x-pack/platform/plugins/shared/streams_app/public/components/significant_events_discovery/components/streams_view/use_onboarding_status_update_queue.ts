@@ -6,7 +6,7 @@
  */
 
 import { TaskStatus } from '@kbn/streams-schema';
-import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import type { OnboardingResult } from '@kbn/streams-schema/src/onboarding';
 import pMap from 'p-map';
 import { useRef, useCallback } from 'react';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
@@ -15,7 +15,7 @@ import { useAIFeatures } from '../../../../hooks/use_ai_features';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
-  status: TaskResult<InsightsOnboardingResult>
+  status: TaskResult<OnboardingResult>
 ) => void;
 
 export function useOnboardingStatusUpdateQueue(
@@ -25,15 +25,13 @@ export function useOnboardingStatusUpdateQueue(
   const isProcessing = useRef(false);
 
   const aiFeatures = useAIFeatures();
-  const { getInsightsOnboardingTaskStatus } = useInsightsApi(
-    aiFeatures?.genAiConnectors.selectedConnector
-  );
+  const { getOnboardingTaskStatus } = useInsightsApi(aiFeatures?.genAiConnectors.selectedConnector);
 
   const updateStatuses = useCallback(async (): Promise<void> => {
     await pMap(
       queue.current,
       async (streamName) => {
-        const taskResult = await getInsightsOnboardingTaskStatus(streamName);
+        const taskResult = await getOnboardingTaskStatus(streamName);
 
         onStreamStatusUpdate(streamName, taskResult);
 
@@ -48,7 +46,7 @@ export function useOnboardingStatusUpdateQueue(
       await new Promise((res) => setTimeout(res, 2000));
       await updateStatuses();
     }
-  }, [getInsightsOnboardingTaskStatus, onStreamStatusUpdate]);
+  }, [getOnboardingTaskStatus, onStreamStatusUpdate]);
 
   const processStatusUpdateQueue = useCallback(async () => {
     if (isProcessing.current) {

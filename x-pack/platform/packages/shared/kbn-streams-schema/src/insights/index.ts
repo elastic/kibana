@@ -6,10 +6,6 @@
  */
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { GenerateDescriptionResult } from '../api/description_generation';
-import type { IdentifyFeaturesResult } from '../api/features';
-import type { SignificantEventsQueriesGenerationResult } from '../api/significant_events';
-import type { TaskResult } from '../tasks/types';
 
 export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
 
@@ -33,14 +29,3 @@ export interface InsightsResult {
   tokensUsed: ChatCompletionTokenCount;
 }
 
-export interface InsightsOnboardingResult {
-  descriptionTaskResult?: TaskResult<GenerateDescriptionResult>;
-  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
-  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
-}
-
-export enum InsightsOnboardingStep {
-  DescriptionGeneration = 'description_generation',
-  FeaturesIdentification = 'features_identification',
-  QueriesGeneration = 'queries_generation',
-}

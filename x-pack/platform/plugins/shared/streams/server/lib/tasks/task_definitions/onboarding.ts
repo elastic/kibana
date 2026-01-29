@@ -5,36 +5,24 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
-import { convertGetResponseIntoUpsertRequest, TaskStatus } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
-import {
-  type InsightsOnboardingResult,
-  InsightsOnboardingStep,
-} from '@kbn/streams-schema/src/insights';
-import type { GenerateDescriptionResult } from '@kbn/streams-schema/src/api/description_generation';
+import { type OnboardingResult, OnboardingStep } from '@kbn/streams-schema/src/onboarding';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import type { StreamsTaskType, TaskContext } from '.';
-import { readStream } from '../../../routes/streams/crud/read_stream';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
-import type { AttachmentClient } from '../../streams/attachments/attachment_client';
-import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
-import {
-  type DescriptionGenerationTaskParams,
-  DESCRIPTION_GENERATION_TASK_TYPE,
-  getDescriptionGenerationTaskId,
-} from './description_generation';
 import type { FeaturesIdentificationTaskParams } from './features_identification';
 import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
@@ -46,23 +34,23 @@ import {
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from './significant_events_queries_generation';
 
-export interface InsightsOnboardingTaskParams {
+export interface OnboardingTaskParams {
   connectorId: string;
   streamName: string;
   from: number;
   to: number;
-  steps: InsightsOnboardingStep[];
+  steps: OnboardingStep[];
 }
 
-export const STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE = 'streams_insights_onboarding';
+export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getInsightsOnboardingTaskId(streamName: string) {
-  return `${STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE}_${streamName}`;
+export function getOnboardingTaskId(streamName: string) {
+  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
-export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
+export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
-    [STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE]: {
+    [STREAMS_ONBOARDING_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -72,21 +60,14 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
               }
 
               const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
-                .params as TaskParams<InsightsOnboardingTaskParams>;
+                .params as TaskParams<OnboardingTaskParams>;
 
-              const {
-                taskClient,
-                streamsClient,
-                inferenceClient,
-                attachmentClient,
-                queryClient,
-                scopedClusterClient,
-              } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
-              });
+              const { taskClient, inferenceClient, queryClient } =
+                await taskContext.getScopedClients({
+                  request: runContext.fakeRequest,
+                });
 
               try {
-                let descriptionTaskResult: TaskResult<GenerateDescriptionResult> | undefined;
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
                 let queriesTaskResult:
                   | TaskResult<SignificantEventsQueriesGenerationResult>
@@ -94,36 +75,7 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case InsightsOnboardingStep.DescriptionGeneration:
-                      const descriptionTaskId = await scheduleDescriptionGenerationTask(
-                        {
-                          connectorId,
-                          start: from,
-                          end: to,
-                          streamName,
-                        },
-                        taskClient,
-                        runContext.fakeRequest
-                      );
-
-                      descriptionTaskResult = await waitForSubtask<
-                        DescriptionGenerationTaskParams,
-                        GenerateDescriptionResult
-                      >(descriptionTaskId, runContext.taskInstance.id, taskClient);
-
-                      if (descriptionTaskResult.status !== TaskStatus.Completed) {
-                        return;
-                      }
-
-                      await saveDescription(descriptionTaskResult.description, streamName, {
-                        streamsClient,
-                        queryClient,
-                        attachmentClient,
-                        scopedClusterClient,
-                      });
-                      break;
-
-                    case InsightsOnboardingStep.FeaturesIdentification:
+                    case OnboardingStep.FeaturesIdentification:
                       const featuresTaskId = await scheduleFeaturesIdentificationTask(
                         {
                           connectorId,
@@ -145,7 +97,7 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
                       }
                       break;
 
-                    case InsightsOnboardingStep.QueriesGeneration:
+                    case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
                           connectorId,
@@ -170,14 +122,14 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
                       break;
 
                     default:
-                      throw new Error(`No implementation for "${step}" insights onboarding step.`);
+                      throw new Error(`No implementation for "${step}" onboarding step.`);
                   }
                 }
 
-                await taskClient.complete<InsightsOnboardingTaskParams, InsightsOnboardingResult>(
+                await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
                   { connectorId, streamName, from, to, steps },
-                  { descriptionTaskResult, featuresTaskResult, queriesTaskResult }
+                  { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
                 // Get connector info for error enrichment
@@ -199,7 +151,7 @@ export function createStreamsInsightsOnboardingTask(taskContext: TaskContext) {
                   { error }
                 );
 
-                await taskClient.fail<InsightsOnboardingTaskParams>(
+                await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
                     connectorId,
@@ -249,54 +201,6 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
     }, sleepInterval);
   }).finally(() => {
     clearInterval(intervalId);
-  });
-}
-
-async function scheduleDescriptionGenerationTask(
-  params: DescriptionGenerationTaskParams,
-  taskClient: TaskClient<StreamsTaskType>,
-  request: KibanaRequest
-): Promise<string> {
-  const id = getDescriptionGenerationTaskId(params.streamName);
-
-  await taskClient.schedule<DescriptionGenerationTaskParams>({
-    task: {
-      type: DESCRIPTION_GENERATION_TASK_TYPE,
-      id,
-      space: '*',
-    },
-    params,
-    request,
-  });
-
-  return id;
-}
-
-async function saveDescription(
-  description: string,
-  streamName: string,
-  deps: {
-    streamsClient: StreamsClient;
-    queryClient: QueryClient;
-    attachmentClient: AttachmentClient;
-    scopedClusterClient: IScopedClusterClient;
-  }
-) {
-  const { queryClient, attachmentClient, streamsClient, scopedClusterClient } = deps;
-  const streamResponse = await readStream({
-    name: streamName,
-    queryClient,
-    attachmentClient,
-    streamsClient,
-    scopedClusterClient,
-  });
-  const upsertRequest = convertGetResponseIntoUpsertRequest(streamResponse);
-
-  upsertRequest.stream.description = description;
-
-  await streamsClient.upsertStream({
-    request: upsertRequest,
-    name: streamName,
   });
 }
 

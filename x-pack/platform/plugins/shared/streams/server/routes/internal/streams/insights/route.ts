@@ -8,155 +8,14 @@
 import type { InsightsResult } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
-import {
-  InsightsOnboardingStep,
-  type InsightsOnboardingResult,
-} from '@kbn/streams-schema/src/insights';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
-import type { InsightsOnboardingTaskParams } from '../../../../lib/tasks/task_definitions/insights_onboarding';
-import {
-  getInsightsOnboardingTaskId,
-  STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/insights_onboarding';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { handleTaskAction } from '../../../utils/task_helpers';
-
-const timestampFromString = z.string().transform((input) => new Date(input).getTime());
-
-/* Insights Onboarding Task */
-
-export type InsightsOnboardingTaskResult = TaskResult<InsightsOnboardingResult>;
-
-const insightsOnboardingTaskRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/insights_onboarding/_task',
-  options: {
-    access: 'internal',
-    summary: 'Onboard stream for insights discovery',
-    description:
-      'Generate description, features and queries for a stream, the data that is necessary for insights discovery.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ streamName: z.string() }),
-    body: taskActionSchema({
-      from: timestampFromString,
-      to: timestampFromString,
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      steps: z
-        .array(z.nativeEnum(InsightsOnboardingStep))
-        .optional()
-        .default([
-          InsightsOnboardingStep.DescriptionGeneration,
-          InsightsOnboardingStep.FeaturesIdentification,
-          InsightsOnboardingStep.QueriesGeneration,
-        ])
-        .describe(
-          'Optional list of step to perform as part of the stream insights onboarding in the specified sequence. By default it will execute all step.'
-        ),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<InsightsOnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { streamName },
-      body,
-    } = params;
-    const insightsOnboardingTaskId = getInsightsOnboardingTaskId(streamName);
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE,
-              taskId: insightsOnboardingTaskId,
-              params: await (async (): Promise<InsightsOnboardingTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connectorId,
-                  uiSettingsClient,
-                  logger,
-                });
-
-                return {
-                  connectorId,
-                  streamName,
-                  from: body.from,
-                  to: body.to,
-                  steps: body.steps,
-                };
-              })(),
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    return handleTaskAction<InsightsOnboardingTaskParams, InsightsOnboardingResult>({
-      taskClient,
-      taskId: insightsOnboardingTaskId,
-      ...actionParams,
-    });
-  },
-});
-
-const insightsOnboardingStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/insights_onboarding/_status',
-  options: {
-    access: 'internal',
-    summary: 'Check the status of insights onboarding',
-    description: 'Check the status of insights onboarding progress for a stream',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ streamName: z.string() }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<InsightsOnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { streamName },
-    } = params;
-    const taskId = getInsightsOnboardingTaskId(streamName);
-
-    return taskClient.getStatus<InsightsOnboardingTaskParams, InsightsOnboardingResult>(taskId);
-  },
-});
 
 /* Insights Discovery Task */
 
@@ -255,8 +114,6 @@ const insightsStatusRoute = createServerRoute({
 });
 
 export const internalInsightsRoutes = {
-  ...insightsOnboardingTaskRoute,
-  ...insightsOnboardingStatusRoute,
   ...insightsTaskRoute,
   ...insightsStatusRoute,
 };
