@@ -202,7 +202,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
-    let unmountFunc = () => { };
+    let unmountFunc = () => {};
     if (currentConversation) {
       // need in order for code block controls to be added to the DOM
       setTimeout(() => {

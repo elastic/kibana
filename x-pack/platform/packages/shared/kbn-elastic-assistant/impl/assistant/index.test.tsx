@@ -27,6 +27,15 @@ import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { welcomeConvo } from '../mock/conversation';
+import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
+  DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
+  STREAMING_LOCAL_STORAGE_KEY,
+} from '../assistant_context/constants';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -141,6 +150,7 @@ describe('Assistant', () => {
         actionTypeId: '.gen-ai',
       },
     ];
+
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
       isFetchedAfterMount: true,
@@ -150,12 +160,24 @@ describe('Assistant', () => {
     jest
       .mocked(useFetchCurrentUserConversations)
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
+
     jest.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
-    jest
-      .mocked(useLocalStorage)
-      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
-        typeof useLocalStorage
-      >);
+
+    const localStorageDefaults: Array<[string, unknown]> = [
+      [LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY, mockData.welcome_id],
+      [LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY, mockData.welcome_id.id],
+      [SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY, false],
+      [CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY, true],
+      [STREAMING_LOCAL_STORAGE_KEY, true],
+      [KNOWLEDGE_BASE_LOCAL_STORAGE_KEY, DEFAULT_KNOWLEDGE_BASE_SETTINGS],
+    ];
+
+    jest.mocked(useLocalStorage).mockImplementation((key, initialValue) => {
+      const match = localStorageDefaults.find(([storageKey]) => key.includes(storageKey));
+      const value = match ? match[1] : initialValue;
+      return [value, persistToLocalStorage] as unknown as ReturnType<typeof useLocalStorage>;
+    });
+
     jest
       .mocked(useSessionStorage)
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
