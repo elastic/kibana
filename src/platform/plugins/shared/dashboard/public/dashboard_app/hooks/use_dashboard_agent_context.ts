@@ -344,7 +344,7 @@ export function useDashboardAgentContext({
 
           // Guard: only apply events for our dashboard attachment
           if (sessionAttachmentId && data.dashboardAttachmentId !== sessionAttachmentId) {
-            return;
+            // TODO: We need to make sure that we're adding panels to the correct dashboard
           }
 
           // TODO: Handle DASHBOARD_PANEL_REMOVED_EVENT
