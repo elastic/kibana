@@ -320,7 +320,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(previousResponseText).to.contain(FIRST_RESPONSE);
     });
 
-    it('Connect LLM button is not present when on connectors page', async () => {
+    it('shows EuiCallOut in embedded Agent Builder flyout when on connectors page', async () => {
       await deleteConnectors(supertest);
 
       await agentBuilder.navigateToApp('conversations/new');
@@ -337,8 +337,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(currentUrl).to.contain('triggersActionsConnectors/connectors');
       });
 
-      await testSubjects.missingOrFail('connectLLMButton');
-
+      await testSubjects.click('AgentBuilderNavControlButton');
+      await testSubjects.existOrFail('connectLLMOnConnectorsPageCallout');
       await createConnector(llmProxy, supertest);
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useObservable } from '@kbn/use-observable';
@@ -30,14 +30,25 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   const currentLocation = useObservable(application.currentLocation$, '');
   const isOnConnectorsPage = currentLocation.includes('triggersActionsConnectors/connectors');
 
-  const primaryButton = (
+  const primaryAction = isOnConnectorsPage ? (
+    <EuiCallOut
+      announceOnMount
+      size="s"
+      iconType="info"
+      title={
+        <FormattedMessage
+          id="xpack.agentBuilder.access.prompt.addLlm.onConnectorsPageCalloutTitle"
+          defaultMessage="Configure your LLM connection on this page"
+        />
+      }
+      data-test-subj="connectLLMOnConnectorsPageCallout"
+    />
+  ) : (
     <EuiButton
       fill
       onClick={() => {
         navigationService.navigateToLlmConnectorsManagement();
       }}
-      disabled={isOnConnectorsPage}
-      aria-current={isOnConnectorsPage ? 'page' : undefined}
       data-test-subj="connectLLMButton"
     >
       <FormattedMessage
@@ -64,7 +75,7 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
       variant={variant}
       errorType="ADD_LLM_CONNECTION"
       imageSrc={brainImage}
-      primaryButton={primaryButton}
+      primaryButton={primaryAction}
       secondaryButton={secondaryButton}
     />
   );
