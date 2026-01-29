@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
+import { debounce } from 'lodash';
 import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+  DEBOUNCE_TIME
 } from '../../common/constants';
 
 interface DimensionsSelectorProps {
@@ -102,6 +104,29 @@ export const DimensionsSelector = ({
     singleSelection,
   ]);
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Create debounced onChange only for multi-selection mode
+  const debouncedOnChange = useMemo(() => {
+    if (singleSelection) {
+      return null;
+    }
+    return debounce((dimensions: Dimension[]) => {
+      onChangeRef.current(dimensions);
+    }, DEBOUNCE_TIME);
+  }, [singleSelection]);
+
+  useEffect(() => {
+    return () => {
+      if (debouncedOnChange) {
+        debouncedOnChange.cancel();
+      }
+    };
+  }, [debouncedOnChange]);
+
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
@@ -110,14 +135,25 @@ export const DimensionsSelector = ({
       const newSelection = dimensions.filter((d) => selectedValues.has(d.name));
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
-      onChange(limitedSelection);
+
+      // For single selection, call onChange immediately
+      if (singleSelection || !debouncedOnChange) {
+        onChange(limitedSelection);
+      } else {
+        debouncedOnChange.cancel();
+        debouncedOnChange(limitedSelection);
+      }
     },
-    [onChange, dimensions]
+    [onChange, dimensions, singleSelection, debouncedOnChange]
   );
 
   const handleClearAll = useCallback(() => {
+    if (debouncedOnChange) {
+      debouncedOnChange.cancel();
+    }
+
     onChange([]);
-  }, [onChange]);
+  }, [onChange, debouncedOnChange]);
 
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
