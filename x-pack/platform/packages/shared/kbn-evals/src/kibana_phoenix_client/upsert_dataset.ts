@@ -9,6 +9,7 @@ import type { PhoenixClient } from '@arizeai/phoenix-client';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
+import { phoenixFetch } from './client';
 
 const UPSERT_DATASET = /* GraphQL */ `
   mutation UpsertDataset(
@@ -34,7 +35,7 @@ async function graphQLRequest<T>(
   query: string,
   variables: Record<string, unknown>
 ): Promise<T> {
-  const res = await fetch(`${client.config.baseUrl}/graphql`, {
+  const res = await phoenixFetch(`${client.config.baseUrl}/graphql`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
