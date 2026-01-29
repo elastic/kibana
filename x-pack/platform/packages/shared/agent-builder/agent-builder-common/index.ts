@@ -87,6 +87,7 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
+  type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,

@@ -170,6 +170,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     modelProvider,
     toolsService,
     resultStore,
+    attachmentStateManager,
     logger,
     promptManager,
     stateManager,
@@ -194,6 +195,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
+    attachments: attachmentStateManager,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

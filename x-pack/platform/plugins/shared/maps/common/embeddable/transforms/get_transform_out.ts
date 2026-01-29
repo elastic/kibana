@@ -6,21 +6,23 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { StoredMapEmbeddableState } from './types';
-import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
-import type { MapByValueState } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
+import type { MapByValueState } from '../types';
+import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredMapEmbeddableState } from './types';
 
 export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
   function transformOut(
-    state: StoredMapEmbeddableState,
+    storedState: StoredMapEmbeddableState,
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;
