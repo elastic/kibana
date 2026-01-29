@@ -40,30 +40,23 @@ export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
       {queryStats.durationInMs && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
-            <p>
-              {i18n.translate('esqlEditor.queryStats.queryDuration', {
-                defaultMessage: 'Completed {duration}',
-                values: {
-                  duration: queryStats.durationInMs,
-                },
-              })}
-            </p>
+            <p>{queryStats.durationInMs}</p>
           </EuiText>
         </EuiFlexItem>
       )}
-      {queryStats.totalDocumentsQueried !== undefined && (
+      {queryStats.totalDocumentsProcessed !== undefined && (
         <EuiFlexItem grow={false}>
           <EuiText
             size="xs"
             color="subdued"
-            data-test-subj="ESQLEditor-queryStats-totalDocumentsQueries"
+            data-test-subj="ESQLEditor-queryStats-totalDocumentsProcessed"
           >
             <p>
               {queryStats.durationInMs && '| '}
-              {i18n.translate('esqlEditor.queryStats.documentsQueries', {
-                defaultMessage: '{count} documents queried',
+              {i18n.translate('esqlEditor.queryStats.documentsProcessed', {
+                defaultMessage: '{count} documents processed',
                 values: {
-                  count: formatDocumentCount(queryStats.totalDocumentsQueried ?? 0),
+                  count: formatDocumentCount(queryStats.totalDocumentsProcessed ?? 0),
                 },
               })}
             </p>

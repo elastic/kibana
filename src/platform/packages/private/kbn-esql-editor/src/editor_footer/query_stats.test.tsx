@@ -16,7 +16,7 @@ describe('ESQLQueryStats', () => {
   it('should render query duration when provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: '150ms',
-      totalDocumentsQueried: undefined,
+      totalDocumentsProcessed: undefined,
     };
 
     render(<ESQLQueryStats queryStats={queryStats} />);
@@ -29,7 +29,7 @@ describe('ESQLQueryStats', () => {
   it('should render total documents queried when provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: undefined,
-      totalDocumentsQueried: 5000,
+      totalDocumentsProcessed: 5000,
     };
 
     render(<ESQLQueryStats queryStats={queryStats} />);
@@ -42,7 +42,7 @@ describe('ESQLQueryStats', () => {
   it('should render both duration and documents queried when both are provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: '250ms',
-      totalDocumentsQueried: 1500000,
+      totalDocumentsProcessed: 1500000,
     };
 
     render(<ESQLQueryStats queryStats={queryStats} />);
@@ -59,7 +59,7 @@ describe('ESQLQueryStats', () => {
   it('should not render duration when not provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: undefined,
-      totalDocumentsQueried: 1000,
+      totalDocumentsProcessed: 1000,
     };
 
     render(<ESQLQueryStats queryStats={queryStats} />);
@@ -70,7 +70,7 @@ describe('ESQLQueryStats', () => {
   it('should not render documents queried when not provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: '100ms',
-      totalDocumentsQueried: undefined,
+      totalDocumentsProcessed: undefined,
     };
 
     render(<ESQLQueryStats queryStats={queryStats} />);
@@ -83,7 +83,7 @@ describe('ESQLQueryStats', () => {
   describe('document count formatting', () => {
     it('should format counts in billions', () => {
       const queryStats: ESQLQueryStatsType = {
-        totalDocumentsQueried: 2500000000,
+        totalDocumentsProcessed: 2500000000,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);
@@ -94,7 +94,7 @@ describe('ESQLQueryStats', () => {
 
     it('should format counts in millions', () => {
       const queryStats: ESQLQueryStatsType = {
-        totalDocumentsQueried: 3200000,
+        totalDocumentsProcessed: 3200000,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);
@@ -105,7 +105,7 @@ describe('ESQLQueryStats', () => {
 
     it('should format counts in thousands', () => {
       const queryStats: ESQLQueryStatsType = {
-        totalDocumentsQueried: 4500,
+        totalDocumentsProcessed: 4500,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);
@@ -116,7 +116,7 @@ describe('ESQLQueryStats', () => {
 
     it('should display counts below 1000 as is', () => {
       const queryStats: ESQLQueryStatsType = {
-        totalDocumentsQueried: 999,
+        totalDocumentsProcessed: 999,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);
@@ -127,7 +127,7 @@ describe('ESQLQueryStats', () => {
 
     it('should format whole numbers without decimal points', () => {
       const queryStats: ESQLQueryStatsType = {
-        totalDocumentsQueried: 2000000,
+        totalDocumentsProcessed: 2000000,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);
@@ -139,7 +139,7 @@ describe('ESQLQueryStats', () => {
     it('should include pipe when both duration and documents are present', () => {
       const queryStats: ESQLQueryStatsType = {
         durationInMs: '100ms',
-        totalDocumentsQueried: 5000,
+        totalDocumentsProcessed: 5000,
       };
 
       render(<ESQLQueryStats queryStats={queryStats} />);

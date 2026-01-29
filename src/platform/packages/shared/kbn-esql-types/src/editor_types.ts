@@ -29,7 +29,7 @@ export interface ESQLQueryStats {
   /** Duration of the last query in milliseconds */
   durationInMs?: string;
   /** Total number of documents queried in the last query */
-  totalDocumentsQueried?: number;
+  totalDocumentsProcessed?: number;
 }
 
 /** @internal **/

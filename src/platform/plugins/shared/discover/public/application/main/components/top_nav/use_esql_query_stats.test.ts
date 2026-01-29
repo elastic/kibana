@@ -43,10 +43,10 @@ describe('useESQLQueryStats', () => {
       const request = mockRequestAdapter.start('test', { id: 'test-id' });
       request.stats({
         queryTime: { label: 'Query time', value: '150ms', description: 'Query time' },
-        documentsQueried: {
-          label: 'Documents queried',
+        documentsProcessed: {
+          label: 'Documents processed',
           value: 5000,
-          description: 'Documents queried',
+          description: 'Documents processed',
         },
       });
       mockRequestAdapter.emit('change');
@@ -54,7 +54,7 @@ describe('useESQLQueryStats', () => {
 
     expect(result.current).toEqual({
       durationInMs: '150ms',
-      totalDocumentsQueried: 5000,
+      totalDocumentsProcessed: 5000,
     });
   });
 
@@ -65,10 +65,10 @@ describe('useESQLQueryStats', () => {
       const request1 = mockRequestAdapter.start('test1', { id: 'test-id-1' });
       request1.stats({
         queryTime: { label: 'Query time', value: '100ms', description: 'Query time' },
-        documentsQueried: {
-          label: 'Documents queried',
+        documentsProcessed: {
+          label: 'Documents processed',
           value: 1000,
-          description: 'Documents queried',
+          description: 'Documents processed',
         },
       });
       mockRequestAdapter.emit('change');
@@ -76,17 +76,17 @@ describe('useESQLQueryStats', () => {
 
     expect(result.current).toEqual({
       durationInMs: '100ms',
-      totalDocumentsQueried: 1000,
+      totalDocumentsProcessed: 1000,
     });
 
     act(() => {
       const request2 = mockRequestAdapter.start('test2', { id: 'test-id-2' });
       request2.stats({
         queryTime: { label: 'Query time', value: '250ms', description: 'Query time' },
-        documentsQueried: {
-          label: 'Documents queried',
+        documentsProcessed: {
+          label: 'Documents processed',
           value: 3000,
-          description: 'Documents queried',
+          description: 'Documents processed',
         },
       });
       mockRequestAdapter.emit('change');
@@ -94,7 +94,7 @@ describe('useESQLQueryStats', () => {
 
     expect(result.current).toEqual({
       durationInMs: '250ms',
-      totalDocumentsQueried: 3000,
+      totalDocumentsProcessed: 3000,
     });
   });
 
