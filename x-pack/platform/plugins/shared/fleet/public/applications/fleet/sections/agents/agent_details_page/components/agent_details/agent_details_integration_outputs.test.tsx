@@ -14,9 +14,10 @@ import type { Agent } from '../../../../../types';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
-import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
+import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 
-describe('AgentDetailsIntegrationInputs', () => {
+describe('AgentDetailsIntegrationOutputs', () => {
   const agent: Agent = {
     id: '123',
     packages: [],
@@ -27,24 +28,28 @@ describe('AgentDetailsIntegrationInputs', () => {
     local_metadata: {},
   };
 
-  const packageMock = createPackagePolicyMock();
+  let packageMock = createPackagePolicyMock();
 
-  const renderComponent = () => {
+  const renderComponent = (outputs?: OutputsForAgentPolicy) => {
     const renderer = createFleetTestRendererMock();
     return renderer.render(
-      <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />
+      <AgentDetailsIntegrationOutputs agent={agent} packagePolicy={packageMock} outputs={outputs} />
     );
   };
 
+  beforeEach(() => {
+    packageMock = createPackagePolicyMock();
+  });
+
   it('renders a default health icon when the agent has no components at all', async () => {
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a default health icon when the package input has no match in the agent component units', async () => {
+  it('renders a default health icon when the package output has no match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -54,7 +59,7 @@ describe('AgentDetailsIntegrationInputs', () => {
         units: [
           {
             id: 'endpoint-default',
-            type: 'input',
+            type: 'output',
             status: 'HEALTHY',
             message: 'Applied policy',
           },
@@ -63,13 +68,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a success health icon when the package input has a match in the agent component units', async () => {
+  it('renders a success health icon when the package output has a match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -83,14 +88,20 @@ describe('AgentDetailsIntegrationInputs', () => {
             status: 'HEALTHY',
             message: 'Applied policy',
           },
+          {
+            id: `endpoint-default`,
+            type: 'output',
+            status: 'HEALTHY',
+            message: 'It works',
+          },
         ],
       },
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+      component.getByTestId('agentDetailsIntegrationsOutputStatusHealthSuccess')
     ).toBeInTheDocument();
   });
 
@@ -105,9 +116,9 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    await userEvent.click(component.getByTestId('agentIntegrationsOutputsTitle'));
     expect(
-      component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+      component.queryByTestId('agentDetailsIntegrationsOutputStatusHealthSuccess')
     ).not.toBeInTheDocument();
   });
 
@@ -117,7 +128,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     const component = renderComponent();
     await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
     await userEvent.click(component.container.querySelector('#endpoint')!);
-    expect(component.getByText('Endpoint')).toBeInTheDocument();
+    expect(component.getByText('Endpoint: default')).toBeInTheDocument();
   });
 
   it('should render input type using input id for otelcol inputs', async () => {
@@ -131,7 +142,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     const component = renderComponent();
     await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
     await userEvent.click(component.container.querySelector('#otelcol')!);
-    expect(component.getByText('otelcol/my-otelcol-input')).toBeInTheDocument();
+    expect(component.getByText('otelcol/my-otelcol-input: default')).toBeInTheDocument();
   });
 
   it('should render input type using input type for non-otelcol inputs', async () => {
@@ -145,6 +156,35 @@ describe('AgentDetailsIntegrationInputs', () => {
     const component = renderComponent();
     await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
     await userEvent.click(component.container.querySelector('#logfile')!);
-    expect(component.getByText('Logs')).toBeInTheDocument();
+    expect(component.getByText('Logs: default')).toBeInTheDocument();
+  });
+
+  it('should render input with output name', async () => {
+    packageMock.inputs.push({
+      type: 'logfile',
+      enabled: true,
+      streams: [],
+      id: 'logfile/my-logfile-input',
+    });
+
+    packageMock.output_id = 'custom-output';
+
+    const component = renderComponent({
+      monitoring: {
+        output: { id: 'default', name: 'Default' },
+      },
+      data: {
+        output: { id: 'default', name: 'Default' },
+        integrations: [
+          {
+            id: 'custom-output',
+            name: 'My Custom Output',
+          },
+        ],
+      },
+    });
+    await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    await userEvent.click(component.container.querySelector('#logfile')!);
+    expect(component.getByText('Logs: My Custom Output')).toBeInTheDocument();
   });
 });
