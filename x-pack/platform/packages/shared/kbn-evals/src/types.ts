@@ -152,6 +152,7 @@ export interface RanExperiment {
       expected: Example['output'];
       metadata: Example['metadata'];
       output: TaskOutput;
+      traceId?: string | null;
     }
   >;
   evaluationRuns: Array<{

@@ -21,6 +21,7 @@ import type {
   RanExperiment,
   TaskOutput,
 } from '../types';
+import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
 function normalizeExample(example: Example) {
   return {
@@ -96,7 +97,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 `🔧 Running task "task" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
               );
 
-              const taskOutput = await task(example);
+              let taskTraceId: string | null = null;
+              const taskOutput = await withTaskSpan('task', {}, async () => {
+                const output = await task(example);
+                taskTraceId = getCurrentTraceId();
+                return output;
+              });
 
               runs[runKey] = {
                 exampleIndex,
@@ -105,6 +111,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
+                traceId: taskTraceId,
               };
 
               this.options.log.info(
@@ -116,25 +123,31 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const result = await evaluator.evaluate({
-                    input: example.input,
-                    output: taskOutput,
-                    expected: example.output ?? null,
-                    metadata: example.metadata ?? {},
+                  let evaluatorTraceId: string | null = null;
+                  const result = await withEvaluatorSpan(evaluator.name, {}, async () => {
+                    const evaluationResult = await evaluator.evaluate({
+                      input: example.input,
+                      output: taskOutput,
+                      expected: example.output ?? null,
+                      metadata: example.metadata ?? {},
+                    });
+                    evaluatorTraceId = getCurrentTraceId();
+                    return evaluationResult;
                   });
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result };
+                  return { evaluatorName: evaluator.name, result, traceId: evaluatorTraceId };
                 })
               );
 
-              results.forEach(({ evaluatorName, result }) => {
+              results.forEach(({ evaluatorName, result, traceId }) => {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
                   exampleIndex,
                   repetitionIndex: rep,
+                  traceId,
                 });
               });
             })

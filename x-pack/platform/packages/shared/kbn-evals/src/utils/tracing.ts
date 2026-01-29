@@ -5,9 +5,30 @@
  * 2.0.
  */
 
-import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
+import { createWithActiveSpan, type WithActiveSpanOptions } from '@kbn/tracing-utils';
 import { ROOT_CONTEXT, context, trace } from '@opentelemetry/api';
+
+const EVALS_TRACER = trace.getTracer('@kbn/evals');
+const withActiveEvalsSpan = createWithActiveSpan({
+  tracer: EVALS_TRACER,
+});
+
+export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
+  return context.with(ROOT_CONTEXT, () => {
+    return withActiveEvalsSpan(
+      name,
+      {
+        ...opts,
+        attributes: {
+          'inscrumentationScope.name': '@kbn/evals',
+          'task.name': name,
+          ...opts.attributes,
+        },
+      },
+      cb
+    );
+  });
+}
 
 /**
  * Use this wrapper when you want to include trace-based metrics with evaluations and use qualitative evaluators within the
@@ -16,7 +37,7 @@ import { ROOT_CONTEXT, context, trace } from '@opentelemetry/api';
 export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
   // Execute callback in the context with baggage
   return context.with(ROOT_CONTEXT, () => {
-    return withActiveInferenceSpan(
+    return withActiveEvalsSpan(
       name,
       {
         ...opts,

@@ -62,7 +62,7 @@ export async function buildFlattenedScoreDocuments({
         exampleIndex?: number;
         repetitionIndex?: number;
         experimentRunId?: string;
-        traceId?: string;
+        traceId?: string | null;
         name: string;
         result?: {
           score?: number | null;
@@ -104,7 +104,7 @@ export async function buildFlattenedScoreDocuments({
           },
         },
         task: {
-          trace_id: (runEntry as any)?.traceId ?? getCurrentTraceId(),
+          trace_id: runEntry?.traceId ?? getCurrentTraceId(),
           repetition_index: repetitionIndex,
           model: taskModel,
         },
