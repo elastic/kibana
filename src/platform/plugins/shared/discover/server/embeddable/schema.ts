@@ -118,56 +118,59 @@ export const datasetTypeSchema = schema.oneOf([
   ),
 ]);
 
-const dataTableSchema = schema.object({
-  columns: schema.arrayOf(columnSchema, { maxSize: 100, defaultValue: [] }),
-  sort: schema.arrayOf(sortSchema, { maxSize: 100, defaultValue: [] }),
-  view_mode: schema.oneOf(
-    [
-      schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-      schema.literal(VIEW_MODE.PATTERN_LEVEL),
-      schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-    ],
-    { defaultValue: VIEW_MODE.DOCUMENT_LEVEL }
-  ),
-  density: schema.oneOf(
-    [
-      schema.literal(Density.COMPACT),
-      schema.literal(Density.EXPANDED),
-      schema.literal(Density.NORMAL),
-    ],
-    { defaultValue: Density.COMPACT }
-  ),
-  header_row_height: schema.number({
-    min: -1,
-    max: 5,
-    defaultValue: 3,
-    meta: {
-      description:
-        'Height of the header row in the data table. A value of -1 indicates automatic height adjustment based on content.',
-    },
-  }),
-  row_height: schema.number({
-    min: -1,
-    max: 5,
-    defaultValue: 3,
-    meta: {
-      description:
-        'Height of the data row(s) in the data table. A value of -1 indicates automatic height adjustment based on content.',
-    },
-  }),
-  rows_per_page: schema.oneOf(
-    [
-      schema.literal(10),
-      schema.literal(25),
-      schema.literal(50),
-      schema.literal(100),
-      schema.literal(250),
-      schema.literal(500),
-    ],
-    { defaultValue: 100 }
-  ),
-  sample_size: schema.number({ min: 10, max: 500, defaultValue: 500 }),
-});
+const dataTableSchema = schema.object(
+  {
+    columns: schema.arrayOf(columnSchema, { maxSize: 100, defaultValue: [] }),
+    sort: schema.arrayOf(sortSchema, { maxSize: 100, defaultValue: [] }),
+    view_mode: schema.oneOf(
+      [
+        schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+        schema.literal(VIEW_MODE.PATTERN_LEVEL),
+        schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+      ],
+      { defaultValue: VIEW_MODE.DOCUMENT_LEVEL }
+    ),
+    density: schema.oneOf(
+      [
+        schema.literal(Density.COMPACT),
+        schema.literal(Density.EXPANDED),
+        schema.literal(Density.NORMAL),
+      ],
+      { defaultValue: Density.COMPACT }
+    ),
+    header_row_height: schema.number({
+      min: -1,
+      max: 5,
+      defaultValue: 3,
+      meta: {
+        description:
+          'Height of the header row in the data table. A value of -1 indicates automatic height adjustment based on content.',
+      },
+    }),
+    row_height: schema.number({
+      min: -1,
+      max: 5,
+      defaultValue: 3,
+      meta: {
+        description:
+          'Height of the data row(s) in the data table. A value of -1 indicates automatic height adjustment based on content.',
+      },
+    }),
+    rows_per_page: schema.oneOf(
+      [
+        schema.literal(10),
+        schema.literal(25),
+        schema.literal(50),
+        schema.literal(100),
+        schema.literal(250),
+        schema.literal(500),
+      ],
+      { defaultValue: 100 }
+    ),
+    sample_size: schema.number({ min: 10, max: 500, defaultValue: 500 }),
+  },
+  { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
+);
 
 const classicTabSchema = schema.allOf([
   dataTableSchema,
