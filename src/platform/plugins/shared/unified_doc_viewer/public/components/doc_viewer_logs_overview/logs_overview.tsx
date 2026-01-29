@@ -25,6 +25,7 @@ import type {
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import type { DocViewerExtensionParams } from '@kbn/discover-plugin/public/context_awareness/types';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -39,6 +40,7 @@ import { TraceWaterfall } from '../observability/traces/components/trace_waterfa
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
+import { DocViewerExtensionActionsProvider } from '../../hooks/use_doc_viewer_extension_actions';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
@@ -47,6 +49,7 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: ObservabilityIndexes;
   showTraceWaterfall?: boolean;
+  actions?: DocViewerExtensionParams['actions'];
 };
 
 export interface LogsOverviewApi {
@@ -69,6 +72,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamProcessingLink,
       indexes,
       showTraceWaterfall = true,
+      actions,
     },
     ref
   ) => {
@@ -131,7 +135,11 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             dataView={dataView}
           />
           <DataSourcesProvider indexes={indexes}>
-            {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
+            {showSimilarErrors ? (
+              <DocViewerExtensionActionsProvider actions={actions}>
+                <SimilarErrors hit={hit} />
+              </DocViewerExtensionActionsProvider>
+            ) : null}
             <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
             <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
             {isStacktraceAvailable && (

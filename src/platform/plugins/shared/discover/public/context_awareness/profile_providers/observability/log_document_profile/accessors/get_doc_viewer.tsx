@@ -25,6 +25,7 @@ import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import type { LogDocumentProfileProvider } from '../profile';
+import type { DocViewerExtensionParams } from '../../../../types';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -67,6 +68,7 @@ export const createGetDocViewer =
                 logsAIInsightFeature={logsAIInsightFeature}
                 streamsFeature={streamsFeature}
                 indexes={indexes}
+                actions={params.actions}
                 {...props}
               />
             );
@@ -84,6 +86,8 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
   streamsFeature: ObservabilityStreamsFeature | undefined;
   indexes: ObservabilityIndexes;
+  actions?: DocViewerExtensionParams['actions'];
+  // TODO should I add this to DocViewRenderProps ?
 }
 
 const LogOverviewTab = ({
@@ -92,6 +96,7 @@ const LogOverviewTab = ({
   logsAIInsightFeature,
   streamsFeature,
   indexes,
+  actions,
   ...props
 }: LogOverviewTabProps) => {
   const [logsOverviewApi, setLogsOverviewApi] = useState<UnifiedDocViewerLogsOverviewApi | null>(
@@ -102,6 +107,7 @@ const LogOverviewTab = ({
   return (
     <UnifiedDocViewerLogsOverview
       {...props}
+      actions={actions}
       ref={setLogsOverviewApi}
       renderAIAssistant={logsAIAssistantFeature?.render}
       renderAIInsight={logsAIInsightFeature?.render}
