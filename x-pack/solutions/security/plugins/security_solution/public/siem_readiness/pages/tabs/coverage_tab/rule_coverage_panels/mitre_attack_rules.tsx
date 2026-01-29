@@ -97,41 +97,24 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     [getIntegrations?.data]
   );
 
-  // 1. Identify all unique indices used by enabled rules to check for data presence
   const activeRuleIndices = useMemo(() => {
-    const indices = new Set<string>();
-    enabledRules.forEach((rule: DetectionRule) => {
-      if (rule.index) [rule.index].flat().forEach((idx) => indices.add(idx));
-    });
-    return Array.from(indices);
+    return Array.from(new Set(enabledRules.flatMap((rule: DetectionRule) => rule.index || [])));
   }, [enabledRules]);
 
-  const { data: MitreAttackIndicesDocCounts } = useMitreAttackIndicesDocCounts(activeRuleIndices);
+  const { data: mitreAttackIndicesDocCounts } = useMitreAttackIndicesDocCounts(activeRuleIndices);
 
-  // Calculate total unique MITRE-related rules
+  // // Calculate total unique MITRE-related rules
   const totalMitreRules = useMemo((): number => {
-    const uniqueRuleIds = new Set<string>();
+    // 1. Create a lowercase set for O(1) lookups
+    const staticTacticSet = new Set(MITRE_TACTICS_LIST.map((t) => t.toLowerCase()));
 
-    enabledRules.forEach((rule: DetectionRule) => {
-      if (rule.threat) {
-        rule.threat.forEach((threat: ThreatElement) => {
-          if (threat.tactic?.name) {
-            const tacticName = threat.tactic.name.trim();
-
-            // Check if this tactic matches any of our static tactics
-            const matchingStaticTactic = MITRE_TACTICS_LIST.find(
-              (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
-            );
-
-            if (matchingStaticTactic) {
-              uniqueRuleIds.add(rule.rule_id || rule.id || '');
-            }
-          }
-        });
-      }
-    });
-
-    return uniqueRuleIds.size;
+    return enabledRules.filter((rule: DetectionRule) =>
+      // 2. Return true if ANY threat tactic matches our set
+      rule.threat?.some((threat) => {
+        const name = threat.tactic?.name?.trim().toLowerCase();
+        return name && staticTacticSet.has(name);
+      })
+    ).length;
   }, [enabledRules]);
 
   // 2. Map each MITRE tactic to its specific coverage status
@@ -158,14 +141,14 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         );
 
         // Track if the rule's indices actually contain any documents
-        const hasLiveEvidence = [rule.index]
+        const ruleHasData = [rule.index]
           .flat()
           .some((idx) =>
-            MitreAttackIndicesDocCounts?.find(
+            mitreAttackIndicesDocCounts?.find(
               (count) => count.index === idx && count.exists && count.docCount > 0
             )
           );
-        if (!hasLiveEvidence) rulesMissingDataCount++;
+        if (!ruleHasData) rulesMissingDataCount++;
       });
 
       // Semantic Color Logic
@@ -173,9 +156,9 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
       const hasActiveRules = rulesForTactic.length > 0;
 
       const statusColor = hasMissingDependencies
-        ? euiTheme.colors.vis.euiColorVis7 // Warning/Incomplete
+        ? euiTheme.colors.borderBaseDanger // Warning/Incomplete
         : hasActiveRules
-        ? euiTheme.colors.vis.euiColorVis1 // Healthy
+        ? euiTheme.colors.borderBaseAccentSecondary // Healthy
         : euiTheme.colors.lightShade; // Inactive
 
       return {
@@ -187,9 +170,9 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         statusColor,
       };
     });
-  }, [enabledRules, installedPackageNames, MitreAttackIndicesDocCounts, euiTheme]);
+  }, [enabledRules, installedPackageNames, mitreAttackIndicesDocCounts, euiTheme]);
 
-  if (!getDetectionRules.data || !getIntegrations?.data) {
+  if (!getDetectionRules.data) {
     return (
       <EuiPanel hasBorder>
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
