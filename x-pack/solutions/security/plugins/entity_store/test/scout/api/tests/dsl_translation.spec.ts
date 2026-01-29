@@ -9,16 +9,14 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { apiTest, expect } from '@kbn/scout-security';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  COMMON_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+  UPDATES_INDEX,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidDslFilterBasedOnDocument } from '../../../../server/domain/euid/dsl';
-
-const UPDATES_INDEX = {
-  generic: '.entities.v2.updates.security_generic_default',
-  host: '.entities.v2.updates.security_host_default',
-  user: '.entities.v2.updates.security_user_default',
-  service: '.entities.v2.updates.security_service_default',
-} as const;
 
 function getTotal(hits: { total?: number | { value: number } }): number {
   const total = hits.total;
