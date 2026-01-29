@@ -23,6 +23,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
   actionItems,
   ecsData,
+  addToTimeline,
 }) => {
   const { read } = useKibana().services.application.capabilities.osquery;
 
@@ -43,6 +44,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
             startDate={startDate}
             ruleName={ruleName}
             ecsData={ecsData}
+            addToTimeline={addToTimeline}
           />
         );
       })}
