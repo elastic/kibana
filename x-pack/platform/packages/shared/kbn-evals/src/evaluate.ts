@@ -214,12 +214,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(phoenixClient);
 
-      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
-        ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
-        : esClient;
-
       const report = await buildEvaluationReport({
         experiments: await phoenixClient.getRanExperiments(),
         model,
@@ -344,11 +338,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   evaluationAnalysisService: [
     async ({ evaluationsEsClient, log }, use) => {
-      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
-        ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
-        : esClient;
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const helper = new EvaluationAnalysisService(scoreRepository, log);
       await use(helper);

@@ -92,7 +92,7 @@ EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-gemini-2-5-pro}" \
 TRACING_ES_URL="${TRACING_ES_URL:-}" \
 EVALUATIONS_ES_URL="${EVALUATIONS_ES_URL:-}" \
 node scripts/playwright test \
-  --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/test/scout/ui/playwright.config.ts \
-  x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/evals/esql/esql.spec.ts
+  --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts \
+  x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/esql/esql.spec.ts
 
 
