@@ -20,8 +20,8 @@ describe('Maintenance Window Model Version Migrations', () => {
     });
   });
 
-  describe('Schedule backfill from v1 to v4', () => {
-    it('properly backfills schedule when upgrading from v1 to v4', () => {
+  describe('Schedule backfill from v3 to v4', () => {
+    it('properly backfills schedule when upgrading from v3 to v4', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
@@ -43,7 +43,7 @@ describe('Maintenance Window Model Version Migrations', () => {
 
       const migrated = migrator.migrate({
         document: doc,
-        fromVersion: 1,
+        fromVersion: 3,
         toVersion: 4,
       });
 
@@ -64,7 +64,7 @@ describe('Maintenance Window Model Version Migrations', () => {
       });
     });
 
-    it('scope backfill from v1 to v4', () => {
+    it('scope backfill scopedQuery from v3 to v4', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
@@ -108,7 +108,7 @@ describe('Maintenance Window Model Version Migrations', () => {
 
       const migrated = migrator.migrate({
         document: doc,
-        fromVersion: 1,
+        fromVersion: 3,
         toVersion: 4,
       });
 
@@ -154,7 +154,7 @@ describe('Maintenance Window Model Version Migrations', () => {
       });
     });
 
-    it('handles documents without rRule and scopedQuery', () => {
+    it('handles documents without rRule and scopedQuery from v3 to v4', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',
@@ -168,7 +168,7 @@ describe('Maintenance Window Model Version Migrations', () => {
 
       const migrated = migrator.migrate({
         document: doc,
-        fromVersion: 1,
+        fromVersion: 3,
         toVersion: 4,
       });
 
