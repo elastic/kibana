@@ -51,6 +51,7 @@ export function getOnboardingTaskId(streamName: string) {
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
     [STREAMS_ONBOARDING_TASK_TYPE]: {
+      timeout: '60m',
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
