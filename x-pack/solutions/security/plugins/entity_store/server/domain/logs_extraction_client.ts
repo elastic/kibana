@@ -26,6 +26,7 @@ import {
 } from './assets/external_indices_contants';
 import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
+import { parseDurationToMs } from '../infra/time';
 
 interface LogsExtractionOptions {
   fromDateISO: string;
@@ -138,11 +139,17 @@ export class LogsExtractionClient {
     }
 
     const fromDateISO =
-      logExtractionState.paginationTimestamp ||
-      moment().utc().subtract(logExtractionState.lookbackPeriod, 'minutes').toISOString();
-    const toDateISO = moment().utc().toISOString();
+      logExtractionState.paginationTimestamp || this.getFromDate(logExtractionState);
+
+    const delayMs = parseDurationToMs(logExtractionState.delay);
+    const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
+  }
+
+  private getFromDate(logExtractionState: LogExtractionState): string {
+    const lookbackPeriodMs = parseDurationToMs(logExtractionState.lookbackPeriod);
+    return moment().utc().subtract(lookbackPeriodMs, 'millisecond').toISOString();
   }
 
   private handleError(error: any, type: EntityType): ExtractedLogsSummary {

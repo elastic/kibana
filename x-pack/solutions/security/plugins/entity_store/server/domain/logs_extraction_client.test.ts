@@ -10,12 +10,14 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import moment from 'moment';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
 import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
 import type { EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { LogExtractionState } from './definitions/saved_objects/constants';
+import type { EntityType } from './definitions/entity_schema';
 
 jest.mock('../infra/elasticsearch/esql');
 jest.mock('../infra/elasticsearch/ingest');
@@ -23,12 +25,16 @@ jest.mock('../infra/elasticsearch/ingest');
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
 
-function createMockEngineDescriptor(type: 'user' | 'host' = 'user') {
+function createMockEngineDescriptor(
+  type: EntityType = 'user',
+  overrides?: Partial<{ lookbackPeriod: string; delay: string; paginationTimestamp: string }>
+) {
   const logExtractionState = LogExtractionState.parse({
     docsLimit: 10000,
     additionalIndexPattern: '',
-    lookbackPeriod: '3h',
-    paginationTimestamp: undefined,
+    lookbackPeriod: overrides?.lookbackPeriod ?? '3h',
+    delay: overrides?.delay ?? '1m',
+    paginationTimestamp: overrides?.paginationTimestamp,
   });
   return {
     type,
@@ -163,6 +169,92 @@ describe('LogsExtractionClient', () => {
           lastExecutionTimestamp: expect.any(String),
         }),
       });
+    });
+
+    it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID, type: 'keyword' },
+        ],
+        values: [],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.find.mockResolvedValue(
+        createMockEngineDescriptor('user', { lookbackPeriod: '3h', delay: '5s' }) as Awaited<
+          ReturnType<EngineDescriptorClient['find']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      const expectedFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
+      const expectedTo = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(expectedFrom),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(expectedTo),
+      });
+
+      jest.useRealTimers();
+    });
+
+    it('should use paginationTimestamp as from and subtract delay for to', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const paginationTimestamp = '2025-01-15T10:30:00.000Z';
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID, type: 'keyword' },
+        ],
+        values: [],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.find.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+        }) as Awaited<ReturnType<EngineDescriptorClient['find']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      const expectedTo = moment.utc(fixedNow).subtract(1, 'minute').toISOString();
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(paginationTimestamp),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(expectedTo),
+      });
+
+      jest.useRealTimers();
     });
 
     it('should use custom date range when provided', async () => {
