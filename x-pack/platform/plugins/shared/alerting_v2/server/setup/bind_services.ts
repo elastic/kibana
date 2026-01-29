@@ -28,6 +28,7 @@ import {
 } from '../lib/services/storage_service/tokens';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { DirectorService } from '../lib/director/director';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -91,4 +92,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new StorageService(esClient, loggerService);
     })
     .inSingletonScope();
+
+  bind(DirectorService).toSelf().inSingletonScope();
 }
