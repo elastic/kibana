@@ -1878,7 +1878,6 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           runEnrichmentTests();
-          
         });
 
         describe('via LOOKUP JOIN (v2)', () => {

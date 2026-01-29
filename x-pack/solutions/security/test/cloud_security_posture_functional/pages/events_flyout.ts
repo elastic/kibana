@@ -37,8 +37,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  // Failing: See https://github.com/elastic/kibana/issues/247414
-  describe.skip('Security Network Page - Graph visualization', function () {
+  describe('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -448,7 +447,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 12,
+            expectedCount: 22,
           });
         });
 
@@ -459,6 +458,114 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         });
 
         runEnrichmentTests();
+
+        // will be skipped until https://github.com/elastic/kibana/issues/247770 is implemented
+        describe.skip('Entity Relationships', () => {
+          it('expanded flyout - event with service target and entity relationships', async () => {
+            // Navigate to events page with the SetIamPolicy event
+            // Note: getFlyoutFilter uses document id, not event.id
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('multi-relationships-event-1')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            // Expected nodes:
+            // - 1 actor node (gcp-admin-user)
+            // - 1 service target node (data-pipeline)
+            // - 1 label node (SetIamPolicy action)
+            const expectedNodes = 3;
+            await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+
+            // Verify actor node
+            const actorNodeId = 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com';
+            await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Service Account');
+            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP Service Account');
+
+            // Verify service target node
+            const serviceTargetNodeId = 'data-pipeline@my-gcp-project.iam.gserviceaccount.com';
+            await expandedFlyoutGraph.assertNodeEntityTag(serviceTargetNodeId, 'Service Account');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              serviceTargetNodeId,
+              'GCP Service Account'
+            );
+          });
+
+          it('expanded flyout - event with host target and entity relationships', async () => {
+            // Navigate to events page with the instances.start event
+            // Note: getFlyoutFilter uses document id, not event.id
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('multi-relationships-event-2')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            // Expected nodes:
+            // - 1 actor node (gcp-compute-operator)
+            // - 1 host target node (database-server-prod-1)
+            // - 1 label node (instances.start action)
+            const expectedNodes = 3;
+            await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+
+            // Verify actor node
+            const actorNodeId = 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com';
+            await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
+            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+
+            // Verify host target node
+            const hostTargetNodeId =
+              'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(hostTargetNodeId, 'Host');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              hostTargetNodeId,
+              'GCP Compute Instance'
+            );
+          });
+
+          it('expanded flyout - entity with Owns and Communicates_with relationships', async () => {
+            // Navigate to events page with the SetIamPolicy event to get service account target
+            // Note: getFlyoutFilter uses document id, not event.id
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('multi-relationships-event-1')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+
+            // Verify the service target node which has relationships
+            const serviceTargetNodeId = 'data-pipeline@my-gcp-project.iam.gserviceaccount.com';
+            await expandedFlyoutGraph.assertNodeEntityTag(serviceTargetNodeId, 'Service Account');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              serviceTargetNodeId,
+              'GCP Service Account'
+            );
+          });
+        });
       });
     });
   });
