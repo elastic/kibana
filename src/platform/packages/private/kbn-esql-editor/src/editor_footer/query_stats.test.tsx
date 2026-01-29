@@ -23,10 +23,10 @@ describe('ESQLQueryStats', () => {
 
     const durationElement = screen.getByTestId('ESQLEditor-queryStats-queryDuration');
     expect(durationElement).toBeInTheDocument();
-    expect(durationElement).toHaveTextContent('Completed 150ms');
+    expect(durationElement).toHaveTextContent('150ms');
   });
 
-  it('should render total documents queried when provided', () => {
+  it('should render total documents processed when provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: undefined,
       totalDocumentsProcessed: 5000,
@@ -34,12 +34,12 @@ describe('ESQLQueryStats', () => {
 
     render(<ESQLQueryStats queryStats={queryStats} />);
 
-    const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
+    const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
     expect(documentsElement).toBeInTheDocument();
-    expect(documentsElement).toHaveTextContent('5K documents queried');
+    expect(documentsElement).toHaveTextContent('5K documents processed');
   });
 
-  it('should render both duration and documents queried when both are provided', () => {
+  it('should render both duration and documents processed when both are provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: '250ms',
       totalDocumentsProcessed: 1500000,
@@ -49,11 +49,11 @@ describe('ESQLQueryStats', () => {
 
     const durationElement = screen.getByTestId('ESQLEditor-queryStats-queryDuration');
     expect(durationElement).toBeInTheDocument();
-    expect(durationElement).toHaveTextContent('Completed 250ms');
+    expect(durationElement).toHaveTextContent('250ms');
 
-    const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
+    const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
     expect(documentsElement).toBeInTheDocument();
-    expect(documentsElement).toHaveTextContent('| 1.5M documents queried');
+    expect(documentsElement).toHaveTextContent('| 1.5M documents processed');
   });
 
   it('should not render duration when not provided', () => {
@@ -67,7 +67,7 @@ describe('ESQLQueryStats', () => {
     expect(screen.queryByTestId('ESQLEditor-queryStats-queryDuration')).not.toBeInTheDocument();
   });
 
-  it('should not render documents queried when not provided', () => {
+  it('should not render documents processed when not provided', () => {
     const queryStats: ESQLQueryStatsType = {
       durationInMs: '100ms',
       totalDocumentsProcessed: undefined,
@@ -76,7 +76,7 @@ describe('ESQLQueryStats', () => {
     render(<ESQLQueryStats queryStats={queryStats} />);
 
     expect(
-      screen.queryByTestId('ESQLEditor-queryStats-totalDocumentsQueries')
+      screen.queryByTestId('ESQLEditor-queryStats-totalDocumentsProcessed')
     ).not.toBeInTheDocument();
   });
 
@@ -88,8 +88,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('2.5B documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('2.5B documents processed');
     });
 
     it('should format counts in millions', () => {
@@ -99,8 +99,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('3.2M documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('3.2M documents processed');
     });
 
     it('should format counts in thousands', () => {
@@ -110,8 +110,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('4.5K documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('4.5K documents processed');
     });
 
     it('should display counts below 1000 as is', () => {
@@ -121,8 +121,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('999 documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('999 documents processed');
     });
 
     it('should format whole numbers without decimal points', () => {
@@ -132,8 +132,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('2M documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('2M documents processed');
     });
 
     it('should include pipe when both duration and documents are present', () => {
@@ -144,8 +144,8 @@ describe('ESQLQueryStats', () => {
 
       render(<ESQLQueryStats queryStats={queryStats} />);
 
-      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsQueries');
-      expect(documentsElement).toHaveTextContent('| 5K documents queried');
+      const documentsElement = screen.getByTestId('ESQLEditor-queryStats-totalDocumentsProcessed');
+      expect(documentsElement).toHaveTextContent('| 5K documents processed');
     });
   });
 });
