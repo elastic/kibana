@@ -102,21 +102,21 @@ export const OtelKubernetesPanel: React.FC = () => {
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const otelKubeStackValuesFileUrl = data
     ? buildValuesFileUrl({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-    })
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
     : undefined;
   const installStackCommand = data
     ? buildInstallStackCommand({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
-      elasticsearchUrl: data.elasticsearchUrl,
-      apiKeyEncoded: data.apiKeyEncoded,
-      agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-      useWiredStreams,
-    })
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
+        elasticsearchUrl: data.elasticsearchUrl,
+        apiKeyEncoded: data.apiKeyEncoded,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+        useWiredStreams,
+      })
     : undefined;
 
   return (
@@ -248,84 +248,84 @@ export const OtelKubernetesPanel: React.FC = () => {
           },
           ...(isMetricsOnboardingEnabled
             ? [
-              {
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelKubernetesPanel.instrumentApplicationStepTitle',
-                  {
-                    defaultMessage: 'Instrument your application (optional)',
-                  }
-                ),
-                children: (
-                  <>
-                    <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
-                        {
-                          defaultMessage:
-                            'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
-                        }
-                      )}
-                    </p>
-                    <EuiSpacer />
-                    <EuiButtonGroup
-                      legend={i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.selectProgrammingLanguageLegend',
-                        {
-                          defaultMessage: 'Select a programming language',
-                        }
-                      )}
-                      idSelected={idSelected}
-                      onChange={(optionId) => setIdSelected(optionId)}
-                      options={[
-                        {
-                          id: 'nodejs',
-                          label: 'Node.js',
-                        },
-                        {
-                          id: 'java',
-                          label: 'Java',
-                        },
-                        {
-                          id: 'python',
-                          label: 'Python',
-                        },
-                        {
-                          id: 'dotnet',
-                          label: '.NET',
-                        },
-                        {
-                          id: 'go',
-                          label: 'Go',
-                        },
-                      ]}
-                    />
-                    <EuiSpacer />
-                    <p
-                      css={css`
+                {
+                  title: i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.instrumentApplicationStepTitle',
+                    {
+                      defaultMessage: 'Instrument your application (optional)',
+                    }
+                  ),
+                  children: (
+                    <>
+                      <p>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
+                          {
+                            defaultMessage:
+                              'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
+                          }
+                        )}
+                      </p>
+                      <EuiSpacer />
+                      <EuiButtonGroup
+                        legend={i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.selectProgrammingLanguageLegend',
+                          {
+                            defaultMessage: 'Select a programming language',
+                          }
+                        )}
+                        idSelected={idSelected}
+                        onChange={(optionId) => setIdSelected(optionId)}
+                        options={[
+                          {
+                            id: 'nodejs',
+                            label: 'Node.js',
+                          },
+                          {
+                            id: 'java',
+                            label: 'Java',
+                          },
+                          {
+                            id: 'python',
+                            label: 'Python',
+                          },
+                          {
+                            id: 'dotnet',
+                            label: '.NET',
+                          },
+                          {
+                            id: 'go',
+                            label: 'Go',
+                          },
+                        ]}
+                      />
+                      <EuiSpacer />
+                      <p
+                        css={css`
                           font-weight: ${theme.euiTheme.font.weight.bold};
                         `}
-                    >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.step3a.title',
-                        {
-                          defaultMessage: '3(a) - Start with one of these annotations methods:',
-                        }
-                      )}
-                    </p>
-                    <EuiSpacer />
-                    <EuiAccordion
-                      id={'otelKubernetesAccordionSingleDeployment'}
-                      paddingSize="s"
-                      buttonContent={i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.annotation.deployment',
-                        {
-                          defaultMessage:
-                            'Annotate specific deployment Pods modifying its manifest',
-                        }
-                      )}
-                    >
-                      <EuiCodeBlock paddingSize="m" language="yaml" isCopyable={true}>
-                        {`apiVersion: apps/v1
+                      >
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.step3a.title',
+                          {
+                            defaultMessage: '3(a) - Start with one of these annotations methods:',
+                          }
+                        )}
+                      </p>
+                      <EuiSpacer />
+                      <EuiAccordion
+                        id={'otelKubernetesAccordionSingleDeployment'}
+                        paddingSize="s"
+                        buttonContent={i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.annotation.deployment',
+                          {
+                            defaultMessage:
+                              'Annotate specific deployment Pods modifying its manifest',
+                          }
+                        )}
+                      >
+                        <EuiCodeBlock paddingSize="m" language="yaml" isCopyable={true}>
+                          {`apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
@@ -341,76 +341,76 @@ spec:
       - image: myapplication-image
         name: app
       ...`}
-                      </EuiCodeBlock>
-                    </EuiAccordion>
-                    <EuiSpacer />
-                    <EuiAccordion
-                      id={'otelKubernetesAccordionAllResources'}
-                      paddingSize="s"
-                      buttonContent={i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.annotation.resources',
-                        { defaultMessage: 'Annotate all resources in a namespace' }
-                      )}
-                    >
+                        </EuiCodeBlock>
+                      </EuiAccordion>
+                      <EuiSpacer />
+                      <EuiAccordion
+                        id={'otelKubernetesAccordionAllResources'}
+                        paddingSize="s"
+                        buttonContent={i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.annotation.resources',
+                          { defaultMessage: 'Annotate all resources in a namespace' }
+                        )}
+                      >
+                        <EuiCodeBlock
+                          paddingSize="m"
+                          language="bash"
+                          isCopyable={true}
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                        >
+                          {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
+                        </EuiCodeBlock>
+                      </EuiAccordion>
+                      <EuiSpacer />
+                      <p
+                        css={css`
+                          font-weight: ${theme.euiTheme.font.weight.bold};
+                        `}
+                      >
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelKubernetesPanel.step3b.title',
+                          {
+                            defaultMessage:
+                              '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
+                          }
+                        )}
+                      </p>
+                      <EuiSpacer />
                       <EuiCodeBlock
                         paddingSize="m"
                         language="bash"
                         isCopyable={true}
-                        data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                        data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
                       >
-                        {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
-                      </EuiCodeBlock>
-                    </EuiAccordion>
-                    <EuiSpacer />
-                    <p
-                      css={css`
-                          font-weight: ${theme.euiTheme.font.weight.bold};
-                        `}
-                    >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.step3b.title',
-                        {
-                          defaultMessage:
-                            '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
-                        }
-                      )}
-                    </p>
-                    <EuiSpacer />
-                    <EuiCodeBlock
-                      paddingSize="m"
-                      language="bash"
-                      isCopyable={true}
-                      data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
-                    >
-                      {`kubectl rollout restart deployment myapp -n my-namespace
+                        {`kubectl rollout restart deployment myapp -n my-namespace
 
 kubectl describe pod <myapp-pod-name> -n my-namespace`}
-                    </EuiCodeBlock>
-                    <EuiSpacer />
-                    <p>
-                      <FormattedMessage
-                        id="xpack.observability_onboarding.otelKubernetesPanel.forOtherLanguagesThatLabel"
-                        defaultMessage="For other languages where auto-instrumentation is not available, {link}"
-                        values={{
-                          link: (
-                            <EuiLink
-                              href="https://ela.st/8-16-otel-apm-instrumentation"
-                              data-test-subj="observabilityOnboardingOtelKubernetesPanelReferToTheDocumentationLink"
-                              target="_blank"
-                            >
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelKubernetesPanel.referToTheDocumentationLinkLabel',
-                                { defaultMessage: 'refer to the documentation' }
-                              )}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </>
-                ),
-              },
-            ]
+                      </EuiCodeBlock>
+                      <EuiSpacer />
+                      <p>
+                        <FormattedMessage
+                          id="xpack.observability_onboarding.otelKubernetesPanel.forOtherLanguagesThatLabel"
+                          defaultMessage="For other languages where auto-instrumentation is not available, {link}"
+                          values={{
+                            link: (
+                              <EuiLink
+                                href="https://ela.st/8-16-otel-apm-instrumentation"
+                                data-test-subj="observabilityOnboardingOtelKubernetesPanelReferToTheDocumentationLink"
+                                target="_blank"
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelKubernetesPanel.referToTheDocumentationLinkLabel',
+                                  { defaultMessage: 'refer to the documentation' }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </p>
+                    </>
+                  ),
+                },
+              ]
             : []),
           {
             title: i18n.translate(
@@ -446,60 +446,60 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                   actionLinks={
                     isMetricsOnboardingEnabled
                       ? [
-                        {
-                          id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                          title: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
-                            {
-                              defaultMessage: 'Check your Kubernetes cluster health:',
-                            }
-                          ),
-                          label: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
-                            {
-                              defaultMessage: 'Explore Kubernetes Cluster Dashboard',
-                            }
-                          ),
-                          href:
-                            dashboardLocator?.getRedirectUrl({
-                              dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                            }) ?? '',
-                        },
-                        {
-                          id: 'services',
-                          title: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
-                            {
-                              defaultMessage: 'Check your application services:',
-                            }
-                          ),
-                          label: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
-                            {
-                              defaultMessage: 'Explore Service inventory',
-                            }
-                          ),
-                          href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-                        },
-                      ]
+                          {
+                            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
+                              {
+                                defaultMessage: 'Check your Kubernetes cluster health:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
+                              {
+                                defaultMessage: 'Explore Kubernetes Cluster Dashboard',
+                              }
+                            ),
+                            href:
+                              dashboardLocator?.getRedirectUrl({
+                                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                              }) ?? '',
+                          },
+                          {
+                            id: 'services',
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
+                              {
+                                defaultMessage: 'Check your application services:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
+                              {
+                                defaultMessage: 'Explore Service inventory',
+                              }
+                            ),
+                            href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
+                          },
+                        ]
                       : [
-                        {
-                          id: 'logs',
-                          title: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
-                            {
-                              defaultMessage: 'View and analyze your logs:',
-                            }
-                          ),
-                          label: i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
-                            {
-                              defaultMessage: 'Explore logs',
-                            }
-                          ),
-                          href: logsLocator?.getRedirectUrl({}) ?? '',
-                        },
-                      ]
+                          {
+                            id: 'logs',
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
+                              {
+                                defaultMessage: 'View and analyze your logs:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
+                              {
+                                defaultMessage: 'Explore logs',
+                              }
+                            ),
+                            href: logsLocator?.getRedirectUrl({}) ?? '',
+                          },
+                        ]
                   }
                 />
               </>
