@@ -88,6 +88,7 @@ describe('APIKeysAPIClient', () => {
       from: 0,
       size: 10,
       sort: { field: 'creation', direction: 'asc' },
+      filters: {},
     } as QueryApiKeyParams;
 
     await expect(apiClient.queryApiKeys(mockQueryParams)).resolves.toBe(mockResponse);
