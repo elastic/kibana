@@ -71,20 +71,28 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
       end: testData.END_DATE,
     });
 
-    await test.step('Click on waterfall accordion', async () => {
+    const child1Span = page.getByTestId('waterfallItem').filter({ hasText: 'child1' });
+
+    await test.step('Verify waterfall item is initially visible', async () => {
+      await expect(child1Span).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+    });
+
+    await test.step('Click on waterfall accordion to fold', async () => {
       await page.getByTestId('apmWaterfallButton').click();
     });
 
-    await test.step('Verify transaction details flyout is hidden', async () => {
-      await expect(page.getByLabel('View details for child1')).toBeHidden();
+    await test.step('Verify waterfall item is hidden after folding', async () => {
+      await expect(child1Span).toBeHidden();
     });
 
-    await test.step('Click on the same waterfall accordion', async () => {
+    await test.step('Click on the same waterfall accordion to unfold', async () => {
       await page.getByTestId('apmWaterfallButton').click();
     });
 
-    await test.step('Verify transaction details flyout is visible', async () => {
-      await expect(page.getByLabel('View details for child1')).toBeVisible();
+    await test.step('Verify waterfall item is visible after unfolding', async () => {
+      await expect(child1Span).toBeVisible();
     });
   });
 

@@ -16,11 +16,13 @@ import type { AppMenuPrimaryActionItem, AppMenuSecondaryActionItem } from '../ty
 interface AppMenuPopoverActionButtonsProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
+  onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopoverActionButtons = ({
   primaryActionItem,
   secondaryActionItem,
+  onCloseOverflowButton,
 }: AppMenuPopoverActionButtonsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
@@ -55,12 +57,16 @@ export const AppMenuPopoverActionButtons = ({
         <EuiFlexItem grow={false}>
           <AppMenuActionButton
             {...secondaryActionItem}
+            run={(params) => {
+              secondaryActionItem?.run?.(params);
+              onCloseOverflowButton?.();
+            }}
             isPopoverOpen={openPopoverId === secondaryActionItem.id}
             onPopoverToggle={() => {
               handlePopoverToggle(secondaryActionItem.id);
             }}
             onPopoverClose={handleOnPopoverClose}
-            popoverAnchorPosition="downLeft"
+            onCloseOverflowButton={onCloseOverflowButton}
           />
         </EuiFlexItem>
       )}
@@ -68,12 +74,16 @@ export const AppMenuPopoverActionButtons = ({
         <EuiFlexItem grow={false}>
           <AppMenuActionButton
             {...primaryActionItem}
+            run={(params) => {
+              primaryActionItem?.run?.(params);
+              onCloseOverflowButton?.();
+            }}
             isPopoverOpen={openPopoverId === primaryActionItem.id}
             onPopoverToggle={() => {
               handlePopoverToggle(primaryActionItem.id);
             }}
             onPopoverClose={handleOnPopoverClose}
-            popoverAnchorPosition="downLeft"
+            onCloseOverflowButton={onCloseOverflowButton}
           />
         </EuiFlexItem>
       )}

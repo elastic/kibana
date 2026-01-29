@@ -71,15 +71,13 @@ describe('transformDashboardOut', () => {
       description: 'my description',
     };
     expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      controlGroupInput: {
-        controls: [
-          {
-            config: { anyKey: 'some value' },
-            uid: 'foo',
-            type: 'type1',
-          } as unknown as PinnedControlState,
-        ],
-      },
+      pinned_panels: [
+        {
+          config: { anyKey: 'some value' },
+          uid: 'foo',
+          type: 'type1',
+        } as unknown as PinnedControlState,
+      ],
       description: 'my description',
       options: {
         hide_panel_titles: false,
@@ -151,19 +149,17 @@ describe('transformDashboardOut', () => {
       },
     ];
     expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
-      controlGroupInput: {
-        controls: [
-          {
-            uid: 'foo',
-            grow: false,
-            width: 'small',
-            config: {
-              anyKey: 'some value',
-            },
-            type: 'type1',
-          } as unknown as PinnedControlState,
-        ],
-      },
+      pinned_panels: [
+        {
+          uid: 'foo',
+          grow: false,
+          width: 'small',
+          config: {
+            anyKey: 'some value',
+          },
+          type: 'type1',
+        } as unknown as PinnedControlState,
+      ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {

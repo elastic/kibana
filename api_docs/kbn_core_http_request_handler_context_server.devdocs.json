@@ -22,6 +22,8 @@
           "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client\n     which uses the credentials of the incoming request\n   - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing\n     all the registered types.\n   - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - {@link IUiSettingsClient | uiSettings.client} - uiSettings client\n     which uses the credentials of the incoming request"
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "SavedObjectsRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,6 +58,8 @@
               "ElasticsearchRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +76,8 @@
               "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,6 +94,8 @@
               "UiSettingsRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,6 +112,8 @@
               "DeprecationsRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,6 +130,8 @@
               "SecurityRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -134,6 +148,8 @@
               "UserProfileRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -150,6 +166,8 @@
           "\nThe `core` context provided to route handler during the preboot phase."
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +184,8 @@
               "PrebootUiSettingsRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -187,6 +207,8 @@
           "RequestHandlerContextBase"
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,6 +227,8 @@
               ">"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -221,6 +245,8 @@
           "\n`uiSettings` http request context provider during the preboot phase."
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,6 +263,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -258,6 +286,8 @@
           "RequestHandlerContextBase"
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,6 +306,8 @@
               ">"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -299,6 +331,8 @@
           " & { [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>; }"
         ],
         "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

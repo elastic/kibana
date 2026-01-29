@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth, PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type {
+  // controls are currently the only pinnable panels, so that is why these types exist in `controls-schemas` for now
+  ControlWidth as PinnedPanelWidth,
+  PinnedControlLayoutState as PinnedPanelLayoutState,
+} from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
@@ -23,10 +27,10 @@ export interface DashboardLayoutPanel {
 export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayoutPanel =>
   Boolean((panel as DashboardLayoutPanel).type) && Boolean((panel as DashboardLayoutPanel).grid);
 
-export interface DashboardPinnableControl {
+export interface DashboardPinnablePanel {
   type: DashboardPanel['type'];
   grow?: boolean;
-  width?: ControlWidth;
+  width?: PinnedPanelWidth;
   order?: number;
 }
 
@@ -35,8 +39,8 @@ export interface DashboardLayout {
     [uuid: string]: DashboardLayoutPanel;
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'grid' | 'title'> };
-  controls: {
-    [id: string]: PinnedControlLayoutState;
+  pinnedPanels: {
+    [id: string]: PinnedPanelLayoutState;
   };
 }
 

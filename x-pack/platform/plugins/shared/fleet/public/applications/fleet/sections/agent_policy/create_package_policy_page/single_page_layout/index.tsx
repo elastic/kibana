@@ -72,6 +72,11 @@ import {
   StepSelectHosts,
 } from '../components';
 
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../services/var_group_helpers';
+
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { packageHasAtLeastOneSecret } from '../utils';
@@ -115,6 +120,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   integration,
   pkgLabel,
   addIntegrationFlyoutProps,
+  defaultPolicyData,
+  noBreadcrumb,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -144,7 +151,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
+    queryParamsPolicyId || (defaultPolicyData?.policy_ids?.length ?? 0) > 0
+      ? SelectedPolicyTab.EXISTING
+      : SelectedPolicyTab.NEW
   );
 
   const {
@@ -217,6 +226,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setNewAgentPolicy,
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
+    defaultPolicyData,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -240,6 +250,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setHasAgentPolicyError]
   );
+
+  // Derive var_group_selections from policy for StepConfigurePackagePolicy
+  // Note: StepDefinePackagePolicy handles its own initialization and state management
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(packageInfo?.var_groups, isAgentlessSelected);
+  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, isAgentlessSelected]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -361,8 +380,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicies,
       packageInfo,
       integrationInfo,
+      defaultPolicyData,
     }),
-    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicies,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      defaultPolicyData,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -378,7 +406,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
+        selectedAgentPolicyIds={
+          queryParamsPolicyId
+            ? [queryParamsPolicyId]
+            : defaultPolicyData?.policy_ids
+            ? defaultPolicyData?.policy_ids
+            : []
+        }
       />
     ),
     [
@@ -392,6 +426,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateSelectedPolicyTab,
       queryParamsPolicyId,
       setHasAgentPolicyError,
+      defaultPolicyData,
     ]
   );
 
@@ -466,6 +501,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
+            isAgentlessSelected={isAgentlessSelected}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
@@ -494,6 +530,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isAgentlessSelected={isAgentlessSelected}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -530,6 +567,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       isAddIntegrationFlyout,
+      varGroupSelections,
     ]
   );
 
@@ -725,7 +763,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && !addIntegrationFlyoutProps && (
+            {packageInfo && !addIntegrationFlyoutProps && !noBreadcrumb && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}

@@ -24,11 +24,20 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/logging'
   - '@kbn/zod-helpers'
+  - '@kbn/task-manager-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-server'
   - '@kbn/config-schema'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-types'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/scout-security'
+  - '@kbn/core-saved-objects-server'
 tags:
   - plugin
   - prod
@@ -42,6 +51,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*.ts
     - '!target/**/*'
 tasks:
   jest:

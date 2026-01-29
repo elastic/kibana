@@ -200,7 +200,7 @@ describe('GroupedSubLevelComponent', () => {
   });
 
   it('processes groupTakeActionItems correctly', async () => {
-    const groupTakeActionItems = jest.fn(() => ({ items: [], panels: [] }));
+    const groupTakeActionItems = jest.fn(() => undefined);
     render(
       <TestProviders>
         <GroupedSubLevelComponent {...testProps} groupTakeActionItems={groupTakeActionItems} />

@@ -58,11 +58,13 @@ export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   getESQLStatsQueryMeta,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
+export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 
 // Callback functions
 export * from './utils/callbacks';

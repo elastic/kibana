@@ -176,6 +176,7 @@ export const McpHealthBanner = ({
 
   return (
     <EuiCallOut
+      data-test-subj={`agentBuilderMcpHealthBanner-${status}`}
       title={title}
       iconType={iconType}
       color="danger"

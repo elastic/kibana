@@ -32,6 +32,8 @@
           " extends Error"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               "\nThe response's HTTP status code."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 80,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,6 +62,8 @@
               "\nThe response's HTTP status text."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 84,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,6 +77,8 @@
               "\nThe request's URL."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 88,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,6 +95,8 @@
               "Blob"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 92,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -101,6 +111,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 96,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -117,6 +129,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 102,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -134,6 +148,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 102,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,6 +167,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 102,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -168,6 +186,8 @@
                   "Blob"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 102,
+                "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -201,6 +221,8 @@
           "Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 13727,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,6 +237,8 @@
               "\"geojson\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13782,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,6 +250,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13783,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,6 +263,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13784,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -248,6 +276,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13785,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,6 +289,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13786,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,6 +302,8 @@
             "label": "attribution",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13787,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,6 +318,8 @@
               "string | { [_: string]: string; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13788,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +331,8 @@
             "label": "isTileClipped",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13789,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +344,8 @@
             "label": "reparseOverscaled",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13790,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,6 +360,8 @@
               "string | GeoJSON.GeoJSON | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13791,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -334,6 +376,8 @@
               "{ data?: string | GeoJSON.GeoJSON | undefined; cluster?: boolean | undefined; clusterMaxZoom?: number | undefined; clusterRadius?: number | undefined; clusterMinPoints?: number | undefined; generateId?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13792,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,6 +394,8 @@
               " | undefined; superclusterOptions?: supercluster.Options<any, any> | undefined; clusterProperties?: supercluster.ClusterProperties | undefined; filter?: unknown[] | undefined; promoteId?: string | undefined; collectResourceTiming?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13793,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -364,6 +410,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13794,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,6 +426,8 @@
               "Actor"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13795,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,6 +439,8 @@
             "label": "_pendingLoads",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13796,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,6 +452,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13797,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -411,6 +465,8 @@
             "label": "_removed",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13798,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,6 +481,8 @@
               "() => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13802,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -443,6 +501,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13803,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -457,6 +517,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13803,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -477,6 +539,8 @@
               "(data: string | GeoJSON.GeoJSON) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13804,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,6 +557,8 @@
                   "string | GeoJSON.GeoJSON"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13809,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -515,6 +581,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13810,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -531,6 +599,8 @@
                   "GeoJSONSourceDiff"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13824,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -551,6 +621,8 @@
               "() => Promise<GeoJSON.GeoJSON>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13825,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -573,6 +645,8 @@
               ">"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13832,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -595,6 +669,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13838,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -611,6 +687,8 @@
                   "SetClusterOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13847,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -631,6 +709,8 @@
               "(clusterId: number) => Promise<number>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13848,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -647,6 +727,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13854,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -669,6 +751,8 @@
               "(clusterId: number) => Promise<GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13855,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -685,6 +769,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13861,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -707,6 +793,8 @@
               "(clusterId: number, limit: number, offset: number) => Promise<GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13862,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -723,6 +811,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13887,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -740,6 +830,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13887,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -757,6 +849,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13887,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -781,6 +875,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13888,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -798,6 +894,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13894,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -816,6 +914,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13895,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -832,6 +932,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13896,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -846,6 +948,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13896,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -864,6 +968,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13897,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -878,6 +984,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13897,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -896,6 +1004,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13898,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -910,6 +1020,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13898,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -928,6 +1040,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13899,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -945,6 +1059,8 @@
               "GeoJSONSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13900,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -961,6 +1077,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13901,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -987,6 +1105,8 @@
           "LngLat"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 543,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1000,6 +1120,8 @@
               "\nLongitude, measured in degrees."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 566,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,6 +1135,8 @@
               "\nLatitude, measured in degrees."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 570,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1027,6 +1151,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 574,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1043,6 +1169,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 578,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1060,6 +1188,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 578,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1081,6 +1211,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 579,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1101,6 +1233,8 @@
               "() => [number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 591,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1121,6 +1255,8 @@
               "() => string"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 605,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1143,6 +1279,8 @@
               ") => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 616,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1159,6 +1297,8 @@
                   "LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 629,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1184,6 +1324,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1200,6 +1342,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 645,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1227,6 +1371,8 @@
           "LngLatBounds"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 1741,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1241,6 +1387,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1761,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1255,6 +1403,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1762,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1269,6 +1419,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1763,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1291,6 +1443,8 @@
                   "] | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1783,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1309,6 +1463,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1791,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1331,6 +1487,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1792,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1347,6 +1505,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1797,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1369,6 +1529,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1798,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1385,6 +1547,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1803,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1409,6 +1573,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1804,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1427,6 +1593,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1809,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1448,6 +1616,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1810,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1469,6 +1639,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1821,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1490,6 +1662,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1827,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1511,6 +1685,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1833,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1532,6 +1708,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1839,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1552,6 +1730,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1845,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1572,6 +1752,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1851,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1592,6 +1774,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1857,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1612,6 +1796,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1863,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1632,6 +1818,8 @@
               "() => [number, number][]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1869,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1652,6 +1840,8 @@
               "() => string"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1884,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1672,6 +1862,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1896,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1694,6 +1886,8 @@
               ") => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1902,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1710,6 +1904,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1919,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1735,6 +1931,8 @@
               "LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1920,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1752,6 +1950,8 @@
                   " | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1935,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1777,6 +1977,8 @@
               "LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1936,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1793,6 +1995,8 @@
                   "LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1948,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1810,6 +2014,8 @@
                   "number | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 1948,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1833,6 +2039,8 @@
               "LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 1949,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1860,6 +2068,8 @@
           " extends Camera"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 10629,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1874,6 +2084,8 @@
               "Style"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10661,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1888,6 +2100,8 @@
               "Painter"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10662,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1902,6 +2116,8 @@
               "HandlerManager"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10663,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1916,6 +2132,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10664,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1930,6 +2148,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10665,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1944,6 +2164,8 @@
               "HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10666,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1958,6 +2180,8 @@
               "{ [x: string]: HTMLElement; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10667,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1969,6 +2193,8 @@
             "label": "_interactive",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10668,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1980,6 +2206,8 @@
             "label": "_showTileBoundaries",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10669,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1991,6 +2219,8 @@
             "label": "_showCollisionBoxes",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10670,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2002,6 +2232,8 @@
             "label": "_showPadding",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10671,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2013,6 +2245,8 @@
             "label": "_showOverdrawInspector",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10672,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,6 +2258,8 @@
             "label": "_repaint",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10673,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,6 +2271,8 @@
             "label": "_vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10674,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2049,6 +2287,8 @@
               "HTMLCanvasElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10675,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,6 +2303,8 @@
               "number | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10676,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2074,6 +2316,8 @@
             "label": "_maxTileCacheZoomLevels",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10677,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2088,6 +2332,8 @@
               "AbortController"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10678,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2099,6 +2345,8 @@
             "label": "_styleDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10679,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2110,6 +2358,8 @@
             "label": "_sourcesDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10680,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2121,6 +2371,8 @@
             "label": "_placementDirty",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10681,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2132,6 +2384,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10682,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2143,6 +2397,8 @@
             "label": "_idleTriggered",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10683,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2154,6 +2410,8 @@
             "label": "_fullyLoaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10684,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2165,6 +2423,8 @@
             "label": "_trackResize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10685,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2179,6 +2439,8 @@
               "ResizeObserver"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10686,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2195,6 +2457,8 @@
               "; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10687,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2206,6 +2470,8 @@
             "label": "_refreshExpiredTiles",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10688,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2220,6 +2486,8 @@
               "Hash"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10689,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2236,6 +2504,8 @@
               "[]; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10690,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2247,6 +2517,8 @@
             "label": "_fadeDuration",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10691,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2258,6 +2530,8 @@
             "label": "_crossSourceCollisions",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10692,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2269,6 +2543,8 @@
             "label": "_crossFadingFactor",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10693,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2280,6 +2556,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10694,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2294,6 +2572,8 @@
               "TaskQueue"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10695,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2309,6 +2589,8 @@
               "[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10696,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2320,6 +2602,8 @@
             "label": "_mapId",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10697,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2334,6 +2618,8 @@
               "string | false"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10698,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2345,6 +2631,8 @@
             "label": "_validateStyle",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10699,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2359,6 +2647,8 @@
               "RequestManager"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10700,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2373,6 +2663,8 @@
               "{ \"AttributionControl.ToggleAttribution\": string; \"AttributionControl.MapFeedback\": string; \"FullscreenControl.Enter\": string; \"FullscreenControl.Exit\": string; \"GeolocateControl.FindMyLocation\": string; \"GeolocateControl.LocationNotAvailable\": string; \"LogoControl.Title\": string; \"Map.Title\": string; \"Marker.Title\": string; \"NavigationControl.ResetBearing\": string; \"NavigationControl.ZoomIn\": string; \"NavigationControl.ZoomOut\": string; \"Popup.Close\": string; \"ScaleControl.Feet\": string; \"ScaleControl.Meters\": string; \"ScaleControl.Kilometers\": string; \"ScaleControl.Miles\": string; \"ScaleControl.NauticalMiles\": string; \"GlobeControl.Enable\": string; \"GlobeControl.Disable\": string; \"TerrainControl.Enable\": string; \"TerrainControl.Disable\": string; \"CooperativeGesturesHandler.WindowsHelpText\": string; \"CooperativeGesturesHandler.MacHelpText\": string; \"CooperativeGesturesHandler.MobileHelpText\": string; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10701,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2384,6 +2676,8 @@
             "label": "_removed",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10702,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2395,6 +2689,8 @@
             "label": "_clickTolerance",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10703,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2409,6 +2705,8 @@
               "number | null | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10704,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2423,6 +2721,8 @@
               "[number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10705,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2441,6 +2741,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10709,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2458,6 +2760,8 @@
                   "MapSourceDataEvent"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10709,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2476,6 +2780,8 @@
               "ScrollZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10715,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2492,6 +2798,8 @@
               "BoxZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10720,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2508,6 +2816,8 @@
               "DragRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10725,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2524,6 +2834,8 @@
               "DragPanHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10731,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2540,6 +2852,8 @@
               "KeyboardHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10736,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2556,6 +2870,8 @@
               "DoubleClickZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10741,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2572,6 +2888,8 @@
               "TwoFingersTouchZoomRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10746,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2588,6 +2906,8 @@
               "TwoFingersTouchPitchHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10751,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2604,6 +2924,8 @@
               "CooperativeGesturesHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10756,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2619,6 +2941,8 @@
               "\nThe map's property which determines whether to cancel, or retain, tiles from the current viewport which are still loading but which belong to a farther (smaller) zoom level than the current one.\n* If `true`, when zooming in, tiles which didn't manage to load for previous zoom levels will become canceled. This might save some computing resources for slower devices, but the map details might appear more abruptly at the end of the zoom.\n* If `false`, when zooming in, the previous zoom level(s) tiles will progressively appear, giving a smoother map details experience. However, more tiles will be rendered in a short period of time."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10761,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2633,6 +2957,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10768,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2647,6 +2973,8 @@
                   "MapOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10768,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2674,6 +3002,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10776,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2690,6 +3020,8 @@
                   "IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10791,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2708,6 +3040,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10791,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2731,6 +3065,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10792,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2747,6 +3083,8 @@
                   "IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10808,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2769,6 +3107,8 @@
               ") => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10809,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2785,6 +3125,8 @@
                   "IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10824,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2810,6 +3152,8 @@
               "CameraOptions"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10825,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2824,6 +3168,8 @@
                   "LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10825,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2839,6 +3185,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10825,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2854,6 +3202,8 @@
                   "LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10825,
+                "columnNumber": 67,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2869,6 +3219,8 @@
                   "number | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10825,
+                "columnNumber": 79,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2890,6 +3242,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10826,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2906,6 +3260,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10846,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2921,6 +3277,8 @@
                   "boolean | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10846,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2939,6 +3297,8 @@
               "(constrainTransform?: boolean | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10847,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2953,6 +3313,8 @@
                   "boolean | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10847,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2973,6 +3335,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10854,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2993,6 +3357,8 @@
               "(pixelRatio: number) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10860,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3009,6 +3375,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10868,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3030,6 +3398,8 @@
               "LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10869,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3052,6 +3422,8 @@
               " | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10879,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3075,6 +3447,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10888,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3092,6 +3466,8 @@
                   " | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10909,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3113,6 +3489,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10910,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3129,6 +3507,8 @@
                   "number | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10929,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3149,6 +3529,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10930,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3170,6 +3552,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10940,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3186,6 +3570,8 @@
                   "number | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10954,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3206,6 +3592,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10955,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3227,6 +3615,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10965,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3243,6 +3633,8 @@
                   "number | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10975,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3263,6 +3655,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10976,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3284,6 +3678,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10982,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3300,6 +3696,8 @@
                   "number | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 10992,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3320,6 +3718,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10993,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3342,6 +3742,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 10999,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3365,6 +3767,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11014,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3381,6 +3785,8 @@
                   "boolean | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11031,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3404,6 +3810,8 @@
               "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11032,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3420,6 +3828,8 @@
                   "LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11044,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3445,6 +3855,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11045,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3461,6 +3873,8 @@
                   "PointLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11059,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3483,6 +3897,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11060,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3503,6 +3919,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11069,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3523,6 +3941,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11078,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3544,6 +3964,8 @@
               "DelegatedListener"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11087,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3558,6 +3980,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11087,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3573,6 +3997,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11087,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3588,6 +4014,8 @@
                   "Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11087,
+                "columnNumber": 82,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3608,6 +4036,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11088,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3622,6 +4052,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11088,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3637,6 +4069,8 @@
                   "DelegatedListener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11088,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3657,6 +4091,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11089,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3671,6 +4107,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11089,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3686,6 +4124,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11089,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3701,6 +4141,8 @@
                   "Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11089,
+                "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3747,6 +4189,8 @@
               "; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11090,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3763,6 +4207,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11195,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3780,6 +4226,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11195,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3799,6 +4247,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11195,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3843,6 +4293,8 @@
               "; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11196,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3859,6 +4311,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11203,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3876,6 +4330,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11203,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3895,6 +4351,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11203,
+                "columnNumber": 69,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3939,6 +4397,8 @@
               "; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11204,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3955,6 +4415,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11210,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3974,6 +4436,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11210,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4018,6 +4482,8 @@
               "; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11211,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4034,6 +4500,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11217,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4051,6 +4519,8 @@
                   "Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11217,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4089,6 +4559,8 @@
               " | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11218,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4105,6 +4577,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11234,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4122,6 +4596,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11234,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4141,6 +4617,8 @@
                   "[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11234,
+                "columnNumber": 66,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4181,6 +4659,8 @@
               " | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11235,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4197,6 +4677,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11242,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4214,6 +4696,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11242,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4233,6 +4717,8 @@
                   "[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11242,
+                "columnNumber": 71,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4271,6 +4757,8 @@
               " | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11243,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4287,6 +4775,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11249,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4306,6 +4796,8 @@
                   "[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11249,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4344,6 +4836,8 @@
               " | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11250,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4360,6 +4854,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11256,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4378,6 +4874,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11256,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4414,6 +4912,8 @@
               "): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11257,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4430,6 +4930,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11265,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4447,6 +4949,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11265,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4466,6 +4970,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11265,
+                "columnNumber": 65,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4502,6 +5008,8 @@
               "): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11266,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4518,6 +5026,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11274,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4535,6 +5045,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11274,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4554,6 +5066,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11274,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4590,6 +5104,8 @@
               "): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11275,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4606,6 +5122,8 @@
                   "T"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11281,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4625,6 +5143,8 @@
                   "[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11281,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4661,6 +5181,8 @@
               "): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11282,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4677,6 +5199,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11288,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4694,6 +5218,8 @@
                   "Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11288,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4728,6 +5254,8 @@
               "[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11289,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4751,6 +5279,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11368,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4769,6 +5299,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11371,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4795,6 +5327,8 @@
               "[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11372,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4811,6 +5345,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11402,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4829,6 +5365,8 @@
                   " | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11402,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4857,6 +5395,8 @@
               ") | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11403,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4875,6 +5415,8 @@
                   " | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11450,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4896,6 +5438,8 @@
                   ") | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11450,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4918,6 +5462,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11451,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4934,6 +5480,8 @@
                   "RequestTransformFunction"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11462,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4952,6 +5500,8 @@
               "(key: \"AttributionControl.ToggleAttribution\" | \"AttributionControl.MapFeedback\" | \"FullscreenControl.Enter\" | \"FullscreenControl.Exit\" | \"GeolocateControl.FindMyLocation\" | \"GeolocateControl.LocationNotAvailable\" | \"LogoControl.Title\" | \"Map.Title\" | \"Marker.Title\" | \"NavigationControl.ResetBearing\" | \"NavigationControl.ZoomIn\" | \"NavigationControl.ZoomOut\" | \"Popup.Close\" | \"ScaleControl.Feet\" | \"ScaleControl.Meters\" | \"ScaleControl.Kilometers\" | \"ScaleControl.Miles\" | \"ScaleControl.NauticalMiles\" | \"GlobeControl.Enable\" | \"GlobeControl.Disable\" | \"TerrainControl.Enable\" | \"TerrainControl.Disable\" | \"CooperativeGesturesHandler.WindowsHelpText\" | \"CooperativeGesturesHandler.MacHelpText\" | \"CooperativeGesturesHandler.MobileHelpText\") => string"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11463,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4966,6 +5516,8 @@
                   "\"AttributionControl.ToggleAttribution\" | \"AttributionControl.MapFeedback\" | \"FullscreenControl.Enter\" | \"FullscreenControl.Exit\" | \"GeolocateControl.FindMyLocation\" | \"GeolocateControl.LocationNotAvailable\" | \"LogoControl.Title\" | \"Map.Title\" | \"Marker.Title\" | \"NavigationControl.ResetBearing\" | \"NavigationControl.ZoomIn\" | \"NavigationControl.ZoomOut\" | \"Popup.Close\" | \"ScaleControl.Feet\" | \"ScaleControl.Meters\" | \"ScaleControl.Kilometers\" | \"ScaleControl.Miles\" | \"ScaleControl.NauticalMiles\" | \"GlobeControl.Enable\" | \"GlobeControl.Disable\" | \"TerrainControl.Enable\" | \"TerrainControl.Disable\" | \"CooperativeGesturesHandler.WindowsHelpText\" | \"CooperativeGesturesHandler.MacHelpText\" | \"CooperativeGesturesHandler.MobileHelpText\""
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11463,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4990,6 +5542,8 @@
               ") | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11464,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5006,6 +5560,8 @@
                   " | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11464,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5025,6 +5581,8 @@
                   ") | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11464,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5043,6 +5601,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11465,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5065,6 +5625,8 @@
               ") | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11466,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5080,6 +5642,8 @@
                   "StyleSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11466,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5099,6 +5663,8 @@
                   ") | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11466,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5123,6 +5689,8 @@
               ") | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11467,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5137,6 +5705,8 @@
                   "StyleSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11467,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5156,6 +5726,8 @@
                   ") | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11467,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5177,6 +5749,8 @@
               "StyleSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11468,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5197,6 +5771,8 @@
               "() => boolean | void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11480,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5223,6 +5799,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11491,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5239,6 +5817,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11528,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5258,6 +5838,8 @@
                   "CanvasSourceSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11528,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5278,6 +5860,8 @@
               "(id: string) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11529,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5294,6 +5878,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11542,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5318,6 +5904,8 @@
               " | null) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11543,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5335,6 +5923,8 @@
                   " | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11554,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5357,6 +5947,8 @@
               " | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11555,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5377,6 +5969,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11564,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5398,6 +5992,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11575,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5414,6 +6010,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11584,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5440,6 +6038,8 @@
               ">(id: string) => TSource | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11585,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5456,6 +6056,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11607,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5485,6 +6087,8 @@
               "> | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11608,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5501,6 +6105,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11642,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5519,6 +6125,8 @@
                   "StyleImageInterface"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11642,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5538,6 +6146,8 @@
                   "> | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11646,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5560,6 +6170,8 @@
               " | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11647,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5576,6 +6188,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11667,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5595,6 +6209,8 @@
                   " | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11667,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5616,6 +6232,8 @@
               "StyleImage"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11672,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5632,6 +6250,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11685,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5654,6 +6274,8 @@
               "(id: string) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11686,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5670,6 +6292,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11702,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5692,6 +6316,8 @@
               "(id: string) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11703,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5708,6 +6334,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11717,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5732,6 +6360,8 @@
               "<HTMLImageElement | ImageBitmap>>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11718,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5748,6 +6378,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11734,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5770,6 +6402,8 @@
               "() => string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11735,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5796,6 +6430,8 @@
               ", beforeId?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11748,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5812,6 +6448,8 @@
                   "AddLayerObject"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11827,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5829,6 +6467,8 @@
                   "string | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11827,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5849,6 +6489,8 @@
               "(id: string, beforeId?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11828,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5865,6 +6507,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11840,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5882,6 +6526,8 @@
                   "string | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11840,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5902,6 +6548,8 @@
               "(id: string) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11841,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5918,6 +6566,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11854,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5941,6 +6591,8 @@
               "(id: string) => StyleLayer | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11855,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5957,6 +6609,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11869,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5979,6 +6633,8 @@
               "() => string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11870,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5999,6 +6655,8 @@
               "(layerId: string, minzoom: number, maxzoom: number) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11881,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6015,6 +6673,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11901,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6032,6 +6692,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11901,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6049,6 +6711,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11901,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6075,6 +6739,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11902,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6091,6 +6757,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11935,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6109,6 +6777,8 @@
                   " | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11935,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6127,6 +6797,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11935,
+                "columnNumber": 66,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6148,6 +6820,8 @@
               "FilterSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11936,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6164,6 +6838,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11942,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6191,6 +6867,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11943,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6207,6 +6885,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11959,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6224,6 +6904,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11959,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6241,6 +6923,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11959,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6259,6 +6943,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11959,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6279,6 +6965,8 @@
               "(layerId: string, name: string) => unknown"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11960,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6295,6 +6983,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11967,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6312,6 +7002,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11967,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6336,6 +7028,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11968,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6352,6 +7046,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11980,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6369,6 +7065,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11980,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6386,6 +7084,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11980,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6404,6 +7104,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11980,
+                "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6424,6 +7126,8 @@
               "(layerId: string, name: string) => any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11981,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6440,6 +7144,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11988,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6457,6 +7163,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11988,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6481,6 +7189,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 11989,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6497,6 +7207,8 @@
                   "string | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11999,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6515,6 +7227,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 11999,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6535,6 +7249,8 @@
               "() => string | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12000,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6557,6 +7273,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12006,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6573,6 +7291,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12017,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6590,6 +7310,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12017,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6608,6 +7330,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12017,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6628,6 +7352,8 @@
               "(id: string) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12018,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6644,6 +7370,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12028,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6664,6 +7392,8 @@
               "() => { id: string; url: string; }[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12029,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6686,6 +7416,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12038,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6702,6 +7434,8 @@
                   "string | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12048,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6720,6 +7454,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12048,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6744,6 +7480,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12049,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6760,6 +7498,8 @@
                   "LightSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12060,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6778,6 +7518,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12060,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6799,6 +7541,8 @@
               "LightSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12061,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6823,6 +7567,8 @@
               " | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12067,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6839,6 +7585,8 @@
                   "SkySpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12078,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6857,6 +7605,8 @@
                   " | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12078,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6878,6 +7628,8 @@
               "SkySpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12079,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6902,6 +7654,8 @@
               ", state: any) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12089,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6918,6 +7672,8 @@
                   "FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12125,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6935,6 +7691,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12125,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6957,6 +7715,8 @@
               ", key?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12126,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6973,6 +7733,8 @@
                   "FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12172,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6990,6 +7752,8 @@
                   "string | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12172,
+                "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -7012,6 +7776,8 @@
               ") => any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12173,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7028,6 +7794,8 @@
                   "FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12199,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7050,6 +7818,8 @@
               "() => HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12200,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7072,6 +7842,8 @@
               "() => HTMLElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12206,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7096,6 +7868,8 @@
               "() => HTMLCanvasElement"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12219,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7114,6 +7888,8 @@
               "() => number[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12228,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7130,6 +7906,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12229,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7146,6 +7924,8 @@
               "(width: number, height: number, pixelRatio: number) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12230,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7160,6 +7940,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12230,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7175,6 +7957,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12230,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7190,6 +7974,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12230,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7208,6 +7994,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12231,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7228,6 +8016,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12232,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7242,6 +8032,8 @@
                   "ITransform"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12232,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7257,6 +8049,8 @@
                   "ICameraHelper"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12232,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7275,6 +8069,8 @@
               "(event: any) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12233,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -7290,6 +8086,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12233,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7306,6 +8104,8 @@
               "(event: any) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12234,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -7321,6 +8121,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12234,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7337,6 +8139,8 @@
               "(event: any) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12235,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -7352,6 +8156,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12235,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7370,6 +8176,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12236,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7388,6 +8196,8 @@
               "(id: number) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12262,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7402,6 +8212,8 @@
                   "number"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12262,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7422,6 +8234,8 @@
               "() => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12275,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7440,6 +8254,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12283,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7461,6 +8277,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12293,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7477,6 +8295,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12305,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -7492,6 +8312,8 @@
               "\nGets and sets a Boolean indicating whether the map will render an outline\naround each tile and the tile ID. These tile boundaries are useful for\ndebugging.\n\nThe uncompressed file size of the first vector source is drawn in the top left\ncorner of each tile, next to the tile ID.\n"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12306,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7503,6 +8325,8 @@
             "label": "showTileBoundaries",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12320,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7516,6 +8340,8 @@
               "\nGets and sets a Boolean indicating whether the map will visualize\nthe padding offsets."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12321,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7527,6 +8353,8 @@
             "label": "showPadding",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12326,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7540,6 +8368,8 @@
               "\nGets and sets a Boolean indicating whether the map will render boxes\naround all symbols in the data source, revealing which symbols\nwere rendered or which were hidden due to collisions.\nThis information is useful for debugging."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12327,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7551,6 +8381,8 @@
             "label": "showCollisionBoxes",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12334,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7564,6 +8396,8 @@
               "\nGets and sets a Boolean indicating whether the map should color-code\neach fragment to show how many times it has been shaded.\nWhite fragments have been shaded 8 or more times.\nBlack fragments have been shaded 0 times.\nThis information is useful for debugging."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12335,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7575,6 +8409,8 @@
             "label": "showOverdrawInspector",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12343,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7588,6 +8424,8 @@
               "\nGets and sets a Boolean indicating whether the map will\ncontinuously repaint. This information is useful for analyzing performance."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12344,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7599,6 +8437,8 @@
             "label": "repaint",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12349,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7610,6 +8450,8 @@
             "label": "vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12350,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7621,6 +8463,8 @@
             "label": "vertices",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12351,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7634,6 +8478,8 @@
               "\nReturns the package version of the library"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12352,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7650,6 +8496,8 @@
               "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12357,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7671,6 +8519,8 @@
               "ProjectionSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12364,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7693,6 +8543,8 @@
               ") => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 12373,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7709,6 +8561,8 @@
                   "ProjectionSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 12378,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7739,6 +8593,8 @@
           "<MouseEvent>"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 9322,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7755,6 +8611,8 @@
               "\"click\" | \"dblclick\" | \"contextmenu\" | \"mousemove\" | \"mouseup\" | \"mousedown\" | \"mouseout\" | \"mouseover\" | \"mouseenter\" | \"mouseleave\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9339,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7771,6 +8629,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9343,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7787,6 +8647,8 @@
               "MouseEvent"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9347,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7803,6 +8665,8 @@
               "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9351,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7819,6 +8683,8 @@
               "LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9355,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7835,6 +8701,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9359,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -7850,6 +8718,8 @@
               "\n`true` if `preventDefault` has been called."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9371,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7861,6 +8731,8 @@
             "label": "_defaultPrevented",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9375,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7875,6 +8747,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 9376,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7889,6 +8763,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 9376,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7904,6 +8780,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 9376,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7919,6 +8797,8 @@
                   "MouseEvent"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 9376,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7934,6 +8814,8 @@
                   "any"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 9376,
+                "columnNumber": 67,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7966,6 +8848,8 @@
           "Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 13921,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7980,6 +8864,8 @@
               "\"raster\" | \"raster-dem\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13951,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7991,6 +8877,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13952,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8002,6 +8890,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13953,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8013,6 +8903,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13954,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8024,6 +8916,8 @@
             "label": "url",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13955,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8035,6 +8929,8 @@
             "label": "scheme",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13956,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8046,6 +8942,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13957,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8060,6 +8958,8 @@
               "[number, number, number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13958,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8074,6 +8974,8 @@
               "TileBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13964,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8085,6 +8987,8 @@
             "label": "roundZoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13965,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8099,6 +9003,8 @@
               "Dispatcher"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13966,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8113,6 +9019,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13967,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8127,6 +9035,8 @@
               "string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13968,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8138,6 +9048,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13969,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8154,6 +9066,8 @@
               "RasterDEMSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13970,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8168,6 +9082,8 @@
               "AbortController"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13971,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8182,6 +9098,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13972,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8196,6 +9114,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13972,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8213,6 +9133,8 @@
                   "RasterDEMSourceSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13972,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8228,6 +9150,8 @@
                   "Dispatcher"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13972,
+                "columnNumber": 93,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8243,6 +9167,8 @@
                   "Evented"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13972,
+                "columnNumber": 117,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8261,6 +9187,8 @@
               "(sourceDataChanged?: boolean | undefined) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13973,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8275,6 +9203,8 @@
                   "boolean | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13973,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -8293,6 +9223,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13974,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8311,6 +9243,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13975,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8325,6 +9259,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13975,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8343,6 +9279,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13976,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8359,6 +9297,8 @@
               "(callback: Function) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13977,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8373,6 +9313,8 @@
                   "Function"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13977,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8393,6 +9335,8 @@
               "(tiles: string[]) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13978,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8409,6 +9353,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13983,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8429,6 +9375,8 @@
               "(url: string) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13984,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8445,6 +9393,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13989,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8466,6 +9416,8 @@
               "RasterDEMSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13990,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8482,6 +9434,8 @@
               "(tileID: OverscaledTileID) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13991,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8496,6 +9450,8 @@
                   "OverscaledTileID"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13991,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8514,6 +9470,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13992,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8528,6 +9486,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13992,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8546,6 +9506,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13993,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8560,6 +9522,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13993,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8578,6 +9542,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13994,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8592,6 +9558,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 13994,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8610,6 +9578,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 13995,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8638,6 +9608,8 @@
           "Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 14029,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -8652,6 +9624,8 @@
               "\"vector\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14065,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8663,6 +9637,8 @@
             "label": "id",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14066,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8674,6 +9650,8 @@
             "label": "minzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14067,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8685,6 +9663,8 @@
             "label": "maxzoom",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14068,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8696,6 +9676,8 @@
             "label": "url",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14069,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8707,6 +9689,8 @@
             "label": "scheme",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14070,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8718,6 +9702,8 @@
             "label": "tileSize",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14071,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8732,6 +9718,8 @@
               "string | { [_: string]: string; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14072,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8748,6 +9736,8 @@
               " | undefined; volatile?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14073,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8759,6 +9749,8 @@
             "label": "_collectResourceTiming",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14074,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8773,6 +9765,8 @@
               "Dispatcher"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14075,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8787,6 +9781,8 @@
               "Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14076,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8801,6 +9797,8 @@
               "[number, number, number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14077,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8815,6 +9813,8 @@
               "string[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14083,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8829,6 +9829,8 @@
               "TileBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14084,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8840,6 +9842,8 @@
             "label": "reparseOverscaled",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14085,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8851,6 +9855,8 @@
             "label": "isTileClipped",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14086,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8865,6 +9871,8 @@
               "AbortController"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14087,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8876,6 +9884,8 @@
             "label": "_loaded",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14088,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -8890,6 +9900,8 @@
               "any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14089,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -8904,6 +9916,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14089,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8919,6 +9933,8 @@
                   "VectorTileSourceOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14089,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8934,6 +9950,8 @@
                   "Dispatcher"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14089,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8949,6 +9967,8 @@
                   "Evented"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14089,
+                "columnNumber": 84,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -8967,6 +9987,8 @@
               "() => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14090,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8983,6 +10005,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14091,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -8999,6 +10023,8 @@
               "(tileID: OverscaledTileID) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14092,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9013,6 +10039,8 @@
                   "OverscaledTileID"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14092,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9033,6 +10061,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14093,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9047,6 +10077,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14093,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9065,6 +10097,8 @@
               "(callback: Function) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14094,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9079,6 +10113,8 @@
                   "Function"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14094,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9099,6 +10135,8 @@
               "(tiles: string[]) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14095,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9115,6 +10153,8 @@
                   "string[]"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14100,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9135,6 +10175,8 @@
               "(url: string) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14101,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9151,6 +10193,8 @@
                   "string"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14106,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9169,6 +10213,8 @@
               "() => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14107,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9186,6 +10232,8 @@
               "VectorSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14108,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9202,6 +10250,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14109,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9216,6 +10266,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14109,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9234,6 +10286,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14111,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9248,6 +10302,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14111,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9266,6 +10322,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14112,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9280,6 +10338,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 14112,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9298,6 +10358,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 14113,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9322,6 +10384,8 @@
           "CustomLayerInterface"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 6272,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9335,6 +10399,8 @@
               "\nA unique layer id."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6339,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9351,6 +10417,8 @@
               "\"custom\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6343,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9367,6 +10435,8 @@
               "\"3d\" | \"2d\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6347,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9385,6 +10455,8 @@
               ") => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6351,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -9400,6 +10472,8 @@
                   "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6271,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -9420,6 +10494,8 @@
                   "; }"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6271,
+                "columnNumber": 87,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -9439,6 +10515,8 @@
               " | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6368,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9457,6 +10535,8 @@
               ", gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6374,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9473,6 +10553,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6381,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9490,6 +10572,8 @@
                   "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6381,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9512,6 +10596,8 @@
               ", gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 6382,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9528,6 +10614,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6389,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9545,6 +10633,8 @@
                   "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 6389,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9570,6 +10660,8 @@
           "Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 2494,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9581,6 +10673,8 @@
             "label": "type",
             "description": [],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2505,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9594,6 +10688,8 @@
               "\nThe id for the source. Must not be used by any existing source."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2506,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9607,6 +10703,8 @@
               "\nThe minimum zoom level for the source."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2510,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9620,6 +10718,8 @@
               "\nThe maximum zoom level for the source."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2514,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9633,6 +10733,8 @@
               "\nThe tile size for the source."
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2518,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9649,6 +10751,8 @@
               "string | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2522,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9665,6 +10769,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2526,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9681,6 +10787,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2530,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9695,6 +10803,8 @@
               "CanonicalTileID | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2534,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9711,6 +10821,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2535,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9725,6 +10837,8 @@
               "string[] | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2539,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9741,6 +10855,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2540,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9759,6 +10875,8 @@
               "() => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2544,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -9779,6 +10897,8 @@
               ") => unknown"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2548,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9795,6 +10915,8 @@
                   "Event"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2552,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9817,6 +10939,8 @@
               ") => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2553,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9833,6 +10957,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2557,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9855,6 +10981,8 @@
               ") => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2558,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9871,6 +10999,8 @@
                   "Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2562,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9891,6 +11021,8 @@
               "(tile: Tile) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2563,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9907,6 +11039,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2568,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9927,6 +11061,8 @@
               "((tileID: OverscaledTileID) => boolean) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2569,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9943,6 +11079,8 @@
                   "OverscaledTileID"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2573,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9963,6 +11101,8 @@
               "((tile: Tile) => Promise<void>) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2574,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9979,6 +11119,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2578,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9999,6 +11141,8 @@
               "((tile: Tile) => Promise<void>) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2579,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10015,6 +11159,8 @@
                   "Tile"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "lineNumber": 2583,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -10033,6 +11179,8 @@
               "() => any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2584,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -10053,6 +11201,8 @@
               "(() => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2590,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -10072,6 +11222,8 @@
               " | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "lineNumber": 2594,
+            "columnNumber": 2,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10094,6 +11246,8 @@
           "{ compact?: boolean | undefined; customAttribution?: string | string[] | undefined; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 9566,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10111,6 +11265,8 @@
           "{ id?: string | number | undefined; source: string; sourceLayer?: string | undefined; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 6520,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10128,6 +11284,8 @@
           "LegacyFilterSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
+        "lineNumber": 424,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10159,6 +11317,8 @@
           "BackgroundLayerSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
+        "lineNumber": 957,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10195,6 +11355,8 @@
           ", \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 1687,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10240,6 +11402,8 @@
           " | undefined; pitchWithRotate?: boolean | undefined; rollEnabled?: boolean | undefined; pixelRatio?: number | undefined; validateStyle?: boolean | undefined; maxCanvasSize?: [number, number] | undefined; cancelPendingTileRequestsWhileZooming?: boolean | undefined; centerClampedToGround?: boolean | undefined; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 10334,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10264,6 +11428,8 @@
           "; sourceDataChanged?: boolean | undefined; tile: any; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 9298,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10279,6 +11445,8 @@
           "{ x: number; y: number; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 1054,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10299,6 +11467,8 @@
           "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "lineNumber": 7755,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10324,6 +11494,8 @@
           "ImageSourceSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
+        "lineNumber": 671,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10355,6 +11527,8 @@
           "[]; }"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
+        "lineNumber": 507,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10373,6 +11547,8 @@
           "node_modules/maplibre-gl/dist/maplibre-gl"
         ],
         "path": "src/platform/packages/private/kbn-mapbox-gl/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
