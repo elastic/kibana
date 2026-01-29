@@ -13,7 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
@@ -55,14 +55,14 @@ export const getWorkflowExecution = async ({
       throw error;
     }
 
-    const doc = response._source;
+    const workflowExecutionDoc = response._source;
 
     // Verify spaceId matches for security/multi-tenancy
-    if (!doc || doc.spaceId !== spaceId) {
+    if (!workflowExecutionDoc || workflowExecutionDoc.spaceId !== spaceId) {
       return null;
     }
 
-    let stepExecutions = await searchStepExecutions({
+    const stepExecutions = await searchStepExecutions({
       esClient,
       logger,
       stepsExecutionIndex,
@@ -70,20 +70,25 @@ export const getWorkflowExecution = async ({
       spaceId,
     });
 
-    // If workflow is in terminal status but no steps found, refresh and retry
-    // Steps may not be visible yet due to refresh: false on writes
-    if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
-      await esClient.indices.refresh({ index: stepsExecutionIndex });
-      stepExecutions = await searchStepExecutions({
-        esClient,
-        logger,
-        stepsExecutionIndex,
-        workflowExecutionId,
-        spaceId,
-      });
+    // Handle race condition: workflow in terminal status but steps not yet visible or still non-terminal
+    // This can happen due to ES refresh lag (refresh: false on writes, 1-second default refresh interval)
+    // Instead of forcing expensive refresh, temporarily report workflow as RUNNING to keep the client polling
+    // until ES naturally refreshes and step statuses become consistent
+    let effectiveStatus = workflowExecutionDoc.status;
+    const hasIncompleteSteps =
+      stepExecutions.length === 0 ||
+      stepExecutions.some((stepExec) => !isTerminalStatus(stepExec.status));
+
+    if (isTerminalStatus(workflowExecutionDoc.status) && hasIncompleteSteps) {
+      effectiveStatus = ExecutionStatus.RUNNING;
     }
 
-    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
+    return transformToWorkflowExecutionDetailDto(
+      workflowExecutionId,
+      { ...workflowExecutionDoc, status: effectiveStatus },
+      stepExecutions,
+      logger
+    );
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
