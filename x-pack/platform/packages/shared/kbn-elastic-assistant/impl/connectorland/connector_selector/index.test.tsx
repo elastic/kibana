@@ -8,9 +8,13 @@
 import React from 'react';
 import { ConnectorSelector } from '.';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 import * as i18n from '../translations';
+import { useLoadConnectors } from '../use_load_connectors';
+import type { QueryObserverSuccessResult } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { AIConnector } from '.';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();
@@ -24,17 +28,44 @@ const defaultProps = {
 const connectorTwo = mockConnectors[1];
 
 const mockRefetchConnectors = jest.fn();
+
+// Helper function to create a properly typed mock return value
+// Returns a QueryObserverSuccessResult which is compatible with UseQueryResult
+const createMockUseLoadConnectorsResult = (
+  overrides: Partial<QueryObserverSuccessResult<AIConnector[], IHttpFetchError>>
+): QueryObserverSuccessResult<AIConnector[], IHttpFetchError> => {
+  return {
+    data: [] as AIConnector[],
+    error: null,
+    isError: false,
+    isLoading: false,
+    isSuccess: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoadingError: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    isPreviousData: false,
+    status: 'success',
+    dataUpdatedAt: 0,
+    errorUpdatedAt: 0,
+    errorUpdateCount: 0,
+    failureCount: 0,
+    failureReason: null,
+    fetchStatus: 'idle',
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isPaused: false,
+    isPlaceholderData: false,
+    refetch: jest.fn(),
+    remove: jest.fn(),
+    ...overrides,
+  };
+};
+
 jest.mock('../use_load_connectors', () => ({
-  useLoadConnectors: jest.fn(() => {
-    return {
-      data: mockConnectors,
-      error: null,
-      isSuccess: true,
-      isLoading: false,
-      isFetching: false,
-      refetch: mockRefetchConnectors,
-    };
-  }),
+  useLoadConnectors: jest.fn(),
 }));
 
 jest.mock('../use_load_action_types', () => ({
@@ -51,8 +82,8 @@ const OriginalMutationObserver = global.MutationObserver;
 
 beforeAll(() => {
   class MockMutationObserver {
-    observe() { }
-    disconnect() { }
+    observe() {}
+    disconnect() {}
     takeRecords() {
       return [];
     }
@@ -81,7 +112,66 @@ jest.mock('../add_connector_modal', () => ({
 describe('Connector selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useLoadConnectors).mockReturnValue(
+      createMockUseLoadConnectorsResult({
+        data: mockConnectors,
+        error: null,
+        isSuccess: true,
+        isLoading: false,
+        isFetching: false,
+        refetch: mockRefetchConnectors,
+      })
+    );
   });
+
+  it('enables add connector button when user can create connectors and none exist', () => {
+    jest.mocked(useLoadConnectors).mockReturnValue(
+      createMockUseLoadConnectorsResult({
+        data: [],
+        error: null,
+        isSuccess: true,
+        isLoading: false,
+        isFetching: false,
+        refetch: mockRefetchConnectors,
+      })
+    );
+
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('addNewConnectorButton')).toBeEnabled();
+  });
+
+  it('disables add connector button when user cannot create connectors', () => {
+    jest.mocked(useLoadConnectors).mockReturnValue(
+      createMockUseLoadConnectorsResult({
+        data: [],
+        error: null,
+        isSuccess: true,
+        isLoading: false,
+        isFetching: false,
+        refetch: mockRefetchConnectors,
+      })
+    );
+
+    render(
+      <TestProviders
+        assistantAvailability={{
+          ...mockAssistantAvailability,
+          hasConnectorsAllPrivilege: false,
+          hasConnectorsReadPrivilege: true,
+        }}
+      >
+        <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('addNewConnectorButton')).toBeDisabled();
+  });
+
   it('renders add new connector button if no selected connector is provided', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -91,6 +181,7 @@ describe('Connector selector', () => {
     fireEvent.click(getByTestId('connector-selector'));
     expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
+
   it('renders with provided selected connector', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -100,6 +191,7 @@ describe('Connector selector', () => {
     expect(getByTestId('connector-selector')).toBeInTheDocument();
     expect(getByTestId('connector-selector')).toHaveTextContent('Captain Connector');
   });
+
   it('Calls onConnectorSelectionChange with new selection', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -111,6 +203,7 @@ describe('Connector selector', () => {
     fireEvent.click(getByTestId(connectorTwo.id));
     expect(onConnectorSelectionChange).toHaveBeenCalledWith(connectorTwo);
   });
+
   it('Calls onConnectorSelectionChange once new connector is saved', () => {
     const { getByTestId } = render(
       <TestProviders>

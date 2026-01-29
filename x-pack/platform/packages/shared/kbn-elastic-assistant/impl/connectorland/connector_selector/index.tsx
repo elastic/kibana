@@ -146,6 +146,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
     const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+    const isAddConnectorDisabled = isDisabled || !assistantAvailability.hasConnectorsAllPrivilege;
 
     // Group connectors into pre-configured and custom
     const { customConnectors, preConfiguredConnectors } = useMemo(
@@ -269,7 +270,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
-            isDisabled={localIsDisabled}
+            isDisabled={isAddConnectorDisabled}
             size="xs"
             onClick={() => setIsConnectorModalVisible(true)}
           >
