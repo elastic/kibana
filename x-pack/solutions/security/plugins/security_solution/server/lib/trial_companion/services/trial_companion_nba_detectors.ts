@@ -61,7 +61,7 @@ export const installedPackagesM1 = (
       }
       return undefined;
     } catch (error) {
-      logger.error('verifyNonDefaultPackagesInstalled: Error fetching Fleet packages', error);
+      logger.error('installedPackagesM1: Error fetching installed packages or agent logs', error);
       throw error;
     }
   };
@@ -94,7 +94,7 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
     const rulesCount = customEnabled + elasticEnabled;
 
     deps.logger.debug(
-      `verifyEnabledSecurityRulesCount: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
+      `detectionRulesInstalledM3: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
     );
     return rulesCount > 0 ? undefined : Milestone.M3;
   };
@@ -131,12 +131,13 @@ export const savedDiscoverySessionsM2 = (deps: UsageCollectorDeps): DetectorF =>
 
 export const aiFeaturesM5 = (esClient: ElasticsearchClient): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
+    const deltaT = 'now-30d';
     const attackDiscoveryResponse = await esClient.count({
       index: '.alerts-security.attack.discovery.alerts-*',
       query: {
         range: {
           '@timestamp': {
-            gte: 'now-14d',
+            gte: deltaT,
           },
         },
       },
@@ -149,7 +150,7 @@ export const aiFeaturesM5 = (esClient: ElasticsearchClient): DetectorF => {
       query: {
         range: {
           '@timestamp': {
-            gte: 'now-14d',
+            gte: deltaT,
           },
         },
       },
@@ -162,7 +163,7 @@ export const aiFeaturesM5 = (esClient: ElasticsearchClient): DetectorF => {
       query: {
         range: {
           updated_at: {
-            gte: 'now-14d',
+            gte: deltaT,
           },
         },
       },
@@ -192,7 +193,7 @@ async function fetchCollectorResults<T>(
 
     return result as T;
   } catch (error) {
-    logger.error(`cases: Error fetching security solution telemetry: ${error}`);
+    logger.error(`fetchCollectorResults: Error fetching security solution telemetry: ${error}`);
     throw error;
   }
 }
