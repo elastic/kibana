@@ -58,13 +58,9 @@ export function prepareInlineEditPanel(
     closeFlyout,
     onApply,
     onCancel,
-    hideTimeFilterInfo,
     applyButtonLabel,
   }: Partial<
-    Pick<
-      EditConfigPanelProps,
-      'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo' | 'applyButtonLabel'
-    >
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'applyButtonLabel'>
   > = {}) {
     const currentState = getState();
     const isNewPanel = initialState.isNewPanel;
@@ -154,7 +150,6 @@ export function prepareInlineEditPanel(
             onApply?.(newAttributes);
           }
         }}
-        hideTimeFilterInfo={hideTimeFilterInfo}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
         applyButtonLabel={applyButtonLabel}
