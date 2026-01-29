@@ -85,8 +85,8 @@ export const doctorCmd: Command<void> = {
       const mode = scoutProcesses.includes('--stateful')
         ? 'stateful'
         : scoutProcesses.includes('--serverless')
-          ? 'serverless'
-          : undefined;
+        ? 'serverless'
+        : undefined;
 
       const details = [mode, configDir ? `config-dir=${configDir}` : undefined]
         .filter(Boolean)
