@@ -17,11 +17,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
-import {
-  defaultGroupStatsAggregations,
-  defaultGroupStatsRenderer,
-} from '../../alerts_table/grouping_settings';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -43,9 +38,12 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
-import { groupingOptions, groupingSettings } from './grouping_configs';
+import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import * as i18n from './translations';
 import { buildConnectorIdFilter } from './filtering_configs';
+import type { GroupTakeActionItems } from '../../alerts_table/types';
+import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
+import { useGroupStats } from './grouping_settings/use_group_stats';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -104,7 +102,7 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
+    const [{ loading: userInfoLoading }] = useUserData();
 
     const { loading: listsConfigLoading } = useListsConfig();
 
@@ -217,6 +215,8 @@ export const TableSection = React.memo(
           );
         }
 
+        const filteredAlertsCount = fieldBucket?.attackRelatedAlerts?.doc_count ?? 0;
+
         return (
           <AttackDetailsContainer
             attack={attack}
@@ -224,24 +224,23 @@ export const TableSection = React.memo(
             groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
             isTableLoading={isLoading}
+            filteredAlertsCount={filteredAlertsCount}
           />
         );
       },
       [defaultFilters, getAttack, isLoading, showAnonymized]
     );
 
-    const groupTakeActionItems = useGroupTakeActionsItems({
-      currentStatus: statusFilter,
-      showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
-    });
-
-    const accordionExtraActionGroupStats = useMemo(
-      () => ({
-        aggregations: defaultGroupStatsAggregations,
-        renderer: defaultGroupStatsRenderer,
-      }),
-      []
+    const groupTakeActionItems: GroupTakeActionItems = useCallback(
+      ({ selectedGroup, groupBucket }) => {
+        const attack = getAttack(selectedGroup, groupBucket);
+        if (!attack) return;
+        return <AttacksGroupTakeActionItems attack={attack} />;
+      },
+      [getAttack]
     );
+
+    const accordionExtraActionGroupStats = useGroupStats();
 
     const dataViewSpec = useMemo(() => {
       return dataView.toSpec(true);
