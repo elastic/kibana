@@ -26,7 +26,7 @@ export function InfoPanel({ title, children }: InfoPanelProps) {
       `}
     >
       <EuiText
-        size="s"
+        size="xs"
         css={css`
           background: ${euiTheme.colors.backgroundBaseSubdued};
           padding: ${euiTheme.size.m};

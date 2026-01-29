@@ -30,6 +30,7 @@ import { LoadingPanel } from '../../loading_panel';
 import { SparkPlot } from '../../spark_plot';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { QueryDetailsFlyout } from './query_details_flyout';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
@@ -37,6 +38,9 @@ export function QueriesTable() {
   const [searchQuery, setSearchQuery] = useState('');
   const { data, isLoading: loading } = useFetchSignificantEvents({ query: searchQuery });
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
+  const [selectedItemForDetails, setSelectedItemForDetails] = useState<SignificantEventItem | null>(
+    null
+  );
 
   if (loading && !data) {
     return <LoadingPanel size="l" />;
@@ -47,7 +51,7 @@ export function QueriesTable() {
       field: 'details',
       name: '',
       width: '40px',
-      render: () => (
+      render: (_: unknown, item: SignificantEventItem) => (
         <EuiButtonIcon
           data-test-subj="queriesDetailsButton"
           iconType="expand"
@@ -55,7 +59,7 @@ export function QueriesTable() {
             'xpack.streams.significantEventsDiscovery.queriesTable.detailsButtonAriaLabel',
             { defaultMessage: 'View details' }
           )}
-          onClick={() => {}}
+          onClick={() => setSelectedItemForDetails(item)}
         />
       ),
     },
@@ -153,7 +157,8 @@ export function QueriesTable() {
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <>
+      <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
@@ -257,6 +262,13 @@ export function QueriesTable() {
           }}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+      {selectedItemForDetails && (
+        <QueryDetailsFlyout
+          item={selectedItemForDetails}
+          onClose={() => setSelectedItemForDetails(null)}
+        />
+      )}
+    </>
   );
 }
