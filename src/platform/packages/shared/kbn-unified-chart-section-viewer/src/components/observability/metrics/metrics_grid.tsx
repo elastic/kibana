@@ -244,7 +244,7 @@ const ChartItem = React.memo(
         return isSupported
           ? createESQLQuery({
               metric,
-              dimensions,
+              splitAccessors: dimensions.map((dim) => dim.name),
               whereStatements,
             })
           : '';
