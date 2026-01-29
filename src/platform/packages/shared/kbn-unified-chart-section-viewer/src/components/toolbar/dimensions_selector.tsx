@@ -122,8 +122,8 @@ export const DimensionsSelector = ({
     if (singleSelection) {
       return null;
     }
-    return debounce((dimensions: Dimension[]) => {
-      onChangeRef.current(dimensions);
+    return debounce((dim: Dimension[]) => {
+      onChangeRef.current(dim);
     }, DEBOUNCE_TIME);
   }, [singleSelection]);
 
