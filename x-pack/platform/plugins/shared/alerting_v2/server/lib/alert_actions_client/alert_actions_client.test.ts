@@ -7,11 +7,12 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import type { CreateAlertActionData } from '../../routes/schemas/alert_action_schema';
+import { of } from 'rxjs';
+import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
 import type { QueryService } from '../services/query_service/query_service';
-import { createMockQueryService } from '../services/query_service/query_service.mock';
+import { createQueryService } from '../services/query_service/query_service.mock';
 import type { StorageService } from '../services/storage_service/storage_service';
-import { createMockStorageService } from '../services/storage_service/storage_service.mock';
+import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
   aBulkAlertEventsESQLResponse,
@@ -22,16 +23,14 @@ import {
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
   const request = httpServerMock.createKibanaRequest();
-  const queryService = createMockQueryService();
-  const storageService = createMockStorageService();
+  const { queryService, mockSearchClient: queryServiceSearchClient } = createQueryService();
+  const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
   const security = securityMock.createStart();
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    security.authc.getCurrentUser = jest.fn().mockReturnValue({
-      username: 'test-user',
-    });
-    storageService.bulkIndexDocs.mockResolvedValue(undefined);
+    security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
+    storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
     client = new AlertActionsClient(request, queryService, storageService, security);
   });
 
@@ -40,23 +39,23 @@ describe('AlertActionsClient', () => {
   });
 
   describe('createAction', () => {
-    const actionData: CreateAlertActionData = {
+    const actionData: CreateAlertActionBody = {
       action_type: 'ack',
       episode_id: 'episode-1',
     };
 
     it('should successfully create an action', async () => {
-      queryService.executeQuery.mockResolvedValueOnce(anAlertEventESQLResponse());
+      queryServiceSearchClient.search.mockReturnValue(
+        of({ rawResponse: anAlertEventESQLResponse() })
+      );
 
       await client.createAction({
         groupHash: 'test-group-hash',
         action: actionData,
       });
 
-      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
-
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-      const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
       expect(callArgs.index).toBe('.alerts-actions');
       expect(callArgs.docs).toHaveLength(1);
       expect(callArgs.docs[0]).toMatchObject({
@@ -86,7 +85,7 @@ describe('AlertActionsClient', () => {
     });
 
     it('should handle action with episode_id', async () => {
-      const actionWithEpisode: CreateAlertActionData = {
+      const actionWithEpisode: CreateAlertActionBody = {
         action_type: 'ack',
         episode_id: 'episode-2',
       };
