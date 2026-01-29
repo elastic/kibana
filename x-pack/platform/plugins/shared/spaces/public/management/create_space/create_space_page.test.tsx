@@ -428,11 +428,6 @@ describe('ManageSpacePage', () => {
 
     await updateSpace(false, 'oblt');
 
-    // Note: Testing actual projectRouting interaction would require mocking
-    // the ProjectPickerContent component or integration-level testing.
-    // For now, we verify that the CPS panel is present when capability is enabled,
-    // and that the form can be submitted successfully.
-
     const createButton = screen.getByTestId('save-space-button');
     await userEvent.click(createButton);
 
@@ -440,7 +435,6 @@ describe('ManageSpacePage', () => {
       expect(spacesManager.createSpace).toHaveBeenCalled();
     });
 
-    // Verify the call includes the expected fields
     const callArgs = spacesManager.createSpace.mock.calls[0][0];
     expect(callArgs).toMatchObject({
       id: 'new-space-name',
