@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
+import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
 
-import { SAVED_OBJECT_TYPES } from '@kbn/cases-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions_legacy';
 
@@ -19,7 +19,7 @@ export async function getInternalSavedObjectsClient(
     return coreStart.savedObjects.createInternalRepository([
       'alert',
       legacyRuleActionsSavedObjectType,
-      ...SAVED_OBJECT_TYPES,
+      ...getSavedObjectsTypes(),
     ]) as unknown as SavedObjectsClientContract;
   });
 }

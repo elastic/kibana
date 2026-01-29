@@ -18,7 +18,7 @@ import type {
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { getAttachmentsAndUserActionsForCases } from './utils';
-import { getSavedObjectsTypes } from '..';
+import { getSavedObjectsTypes } from '../../../common';
 
 export async function handleExport({
   context,

@@ -21,7 +21,7 @@ import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 import type { ConfigType } from '../config';
-import { getSavedObjectsTypes } from '../saved_object_types';
+import { getSavedObjectsTypes } from '../../common';
 
 export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
 

@@ -56,7 +56,7 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
-import { getSavedObjectsTypes } from '../saved_object_types';
+import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;

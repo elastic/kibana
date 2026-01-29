@@ -7,14 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import {
-  CASE_SAVED_OBJECT,
-  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_TEMPLATE_SAVED_OBJECT,
-} from '../../common/constants';
+import { CASE_TEMPLATE_SAVED_OBJECT } from '../../common/constants';
 import { createCaseSavedObjectType } from './cases/cases';
 import { caseConfigureSavedObjectType } from './configure';
 import { createCaseCommentSavedObjectType } from './comments';
@@ -67,23 +60,4 @@ export const registerSavedObjects = ({
   if (templatesConfig?.enabled) {
     core.savedObjects.registerType(caseTemplateSavedObjectType);
   }
-};
-
-/**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
- */
-export const getSavedObjectsTypes = (config?: Partial<ConfigType>): string[] => {
-  const baseSavedObjects = [
-    CASE_SAVED_OBJECT,
-    CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-    CASE_USER_ACTION_SAVED_OBJECT,
-    CASE_COMMENT_SAVED_OBJECT,
-    CASE_CONFIGURE_SAVED_OBJECT,
-  ];
-
-  if (!config?.templates?.enabled) {
-    return baseSavedObjects;
-  }
-
-  return [...baseSavedObjects, CASE_TEMPLATE_SAVED_OBJECT];
 };

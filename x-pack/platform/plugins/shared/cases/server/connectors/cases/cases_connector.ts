@@ -25,7 +25,7 @@ import {
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
 import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
-import { getSavedObjectsTypes } from '../../saved_object_types';
+import { getSavedObjectsTypes } from '../../../common';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
