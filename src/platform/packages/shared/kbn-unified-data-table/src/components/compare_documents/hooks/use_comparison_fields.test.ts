@@ -64,11 +64,11 @@ describe('useComparisonFields', () => {
     const { comparisonFields, totalFields } = renderFields();
     expect(comparisonFields).toEqual([
       'timestamp',
+      '_index',
       'bytes',
       'extension',
       'message',
       'scripted',
-      '_index',
     ]);
     expect(totalFields).toBe(6);
   });
@@ -83,11 +83,11 @@ describe('useComparisonFields', () => {
     const { comparisonFields, totalFields } = renderFields({ transformHit: matchValues });
     expect(comparisonFields).toEqual([
       'timestamp',
+      '_index',
       'bytes',
       'extension',
       'message',
       'scripted',
-      '_index',
     ]);
     expect(totalFields).toBe(6);
     const { comparisonFields: comparisonFields2, totalFields: totalFields2 } = renderFields({
@@ -115,7 +115,7 @@ describe('useComparisonFields', () => {
 
   it('should filter out fields where all values are null/undefined if showAllFields is true', () => {
     const { comparisonFields, totalFields } = renderFields({ transformHit: clearValues });
-    expect(comparisonFields).toEqual(['timestamp', 'message', 'scripted', '_index']);
+    expect(comparisonFields).toEqual(['timestamp', '_index', 'message', 'scripted']);
     expect(totalFields).toBe(4);
   });
 

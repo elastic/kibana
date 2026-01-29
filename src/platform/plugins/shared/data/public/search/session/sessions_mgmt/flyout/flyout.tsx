@@ -11,12 +11,10 @@ import {
   EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +26,10 @@ import { SearchSessionsMgmtTable } from '../components/table';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { BackgroundSearchOpenedHandler, LocatorsStart } from '../types';
 import { getColumns } from './get_columns';
-import { FLYOUT_WIDTH } from './constants';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 export const Flyout = ({
-  onClose,
+  flyoutId,
   api,
   coreStart,
   usageCollector,
@@ -43,8 +40,9 @@ export const Flyout = ({
   appId,
   trackingProps,
   onBackgroundSearchOpened,
+  onClose,
 }: {
-  onClose: () => void;
+  flyoutId: string;
   api: SearchSessionsMgmtAPI;
   coreStart: CoreStart;
   usageCollector: SearchUsageCollector;
@@ -55,14 +53,14 @@ export const Flyout = ({
   appId?: string;
   trackingProps: { openedFrom: string };
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  onClose: () => void;
 }) => {
-  const flyoutId = useGeneratedHtmlId();
   const technicalPreviewLabel = i18n.translate('data.session_mgmt.technical_preview_label', {
     defaultMessage: 'Technical preview',
   });
 
   return (
-    <EuiFlyout size={FLYOUT_WIDTH} aria-labelledby={flyoutId} onClose={onClose}>
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiTitle id={flyoutId} size="m">
@@ -98,6 +96,6 @@ export const Flyout = ({
           <FormattedMessage id="data.session_mgmt.close_flyout" defaultMessage="Close" />
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };
