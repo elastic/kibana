@@ -11,6 +11,11 @@ import type { ServiceHealthStatus } from './service_health_status';
 
 export type SloStatus = keyof GroupedStatsResult['summary'];
 
+export interface ServiceAlertsSeverity {
+  critical: number;
+  warning: number;
+}
+
 export interface ServiceListItem {
   serviceName: string;
   healthStatus?: ServiceHealthStatus;
@@ -21,6 +26,7 @@ export interface ServiceListItem {
   transactionErrorRate?: number | null;
   environments?: string[];
   alertsCount?: number;
+  alertsSeverity?: ServiceAlertsSeverity;
   overflowCount?: number | null;
   sloStatus?: SloStatus;
   sloCount?: number;

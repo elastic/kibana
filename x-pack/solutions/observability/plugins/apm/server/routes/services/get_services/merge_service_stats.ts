@@ -12,7 +12,7 @@ import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
-import type { SloStatus } from '../../../../common/service_inventory';
+import type { SloStatus, ServiceAlertsSeverity } from '../../../../common/service_inventory';
 
 export interface MergedServiceStat {
   serviceName: string;
@@ -24,6 +24,7 @@ export interface MergedServiceStat {
   throughput?: number;
   healthStatus?: ServiceHealthStatus;
   alertsCount?: number;
+  alertsSeverity?: ServiceAlertsSeverity;
   sloStatus?: SloStatus;
   sloCount?: number;
 }

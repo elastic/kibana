@@ -905,7 +905,9 @@ const serviceAlertsRoute = createApmServerRoute({
       end,
     });
 
-    return servicesAlerts.length > 0 ? servicesAlerts[0] : { serviceName, alertsCount: 0 };
+    return servicesAlerts.length > 0
+      ? servicesAlerts[0]
+      : { serviceName, alertsCount: 0, severity: { critical: 0, warning: 0 } };
   },
 });
 
