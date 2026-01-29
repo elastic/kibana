@@ -10,9 +10,9 @@
 import React from 'react';
 import { screen, act, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { FeedbackFlyoutBody } from './feedback_flyout_body';
+import { FeedbackBody } from './feedback_body';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { FEEDBACK_TYPE } from './constants';
+import { FEEDBACK_TYPE } from '../constants';
 
 const license = licensingMock.createLicense({
   license: {
@@ -32,74 +32,72 @@ const propsMock = {
   userEmail: '',
 };
 
-describe('FeedbackFlyoutBody', () => {
+describe('FeedbackBody', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders flyout body', async () => {
+  it('should render flyout body', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const body = screen.getByTestId('feedbackFlyoutBody');
+    const body = screen.getByTestId('feedbackFormBody');
 
     expect(body).toBeInTheDocument();
   });
 
-  it('renders email address inside email input', async () => {
+  it('should render email address inside email input', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} userEmail="test@elastic.co" />);
+      renderWithI18n(<FeedbackBody {...propsMock} userEmail="test@elastic.co" />);
     });
 
-    const body = screen.getByTestId('feedbackFlyoutBody');
+    const body = screen.getByTestId('feedbackFormBody');
 
     expect(body).toBeInTheDocument();
 
-    const emailInput = screen.getByTestId('feedbackEmailInput');
+    const emailInput = screen.getByTestId('feedbackFormEmailInput');
 
     expect(emailInput).toBeInTheDocument();
     expect(emailInput).toHaveValue('test@elastic.co');
   });
 
-  it('renders feedback text inside textarea', async () => {
+  it('should render feedback text inside textarea', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} feedbackText="Test feedback" />);
+      renderWithI18n(<FeedbackBody {...propsMock} feedbackText="Test feedback" />);
     });
 
-    const body = screen.getByTestId('feedbackFlyoutBody');
+    const body = screen.getByTestId('feedbackFormBody');
 
     expect(body).toBeInTheDocument();
 
-    const feedbackTextarea = screen.getByTestId('feedbackTextArea');
+    const feedbackTextarea = screen.getByTestId('feedbackFormTextArea');
 
     expect(feedbackTextarea).toBeInTheDocument();
     expect(feedbackTextarea).toHaveValue('Test feedback');
   });
 
-  it('renders select with feedback type options', async () => {
+  it('should render select with feedback type options', async () => {
     await act(async () => {
-      renderWithI18n(
-        <FeedbackFlyoutBody {...propsMock} feedbackType={FEEDBACK_TYPE.ISSUE_REPORT} />
-      );
+      renderWithI18n(<FeedbackBody {...propsMock} feedbackType={FEEDBACK_TYPE.ISSUE_REPORT} />);
     });
 
-    const body = screen.getByTestId('feedbackFlyoutBody');
+    const body = screen.getByTestId('feedbackFormBody');
 
     expect(body).toBeInTheDocument();
 
-    const feedbackTypeSelect = screen.getByTestId('feedbackTypeSelect');
+    const feedbackTypeSelect = screen.getByTestId('feedbackFormTypeSelect');
 
     expect(feedbackTypeSelect).toBeInTheDocument();
     expect(feedbackTypeSelect).toHaveValue(FEEDBACK_TYPE.ISSUE_REPORT);
   });
 
-  it('calls handleChangeFeedbackType when feedback type is changed', async () => {
+  it('should call handleChangeFeedbackType when feedback type is changed', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const feedbackTypeSelect = screen.getByTestId('feedbackTypeSelect');
+    const feedbackTypeSelect = screen.getByTestId('feedbackFormTypeSelect');
 
     expect(feedbackTypeSelect).toBeInTheDocument();
 
@@ -108,12 +106,12 @@ describe('FeedbackFlyoutBody', () => {
     expect(propsMock.handleChangeFeedbackType).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handleChangeEmail when email input is changed', async () => {
+  it('should call handleChangeEmail when email input is changed', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const emailInput = screen.getByTestId('feedbackEmailInput');
+    const emailInput = screen.getByTestId('feedbackFormEmailInput');
 
     expect(emailInput).toBeInTheDocument();
 
@@ -124,12 +122,12 @@ describe('FeedbackFlyoutBody', () => {
     expect(propsMock.handleChangeEmail).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handleChangeFeedbackText when feedback text is changed', async () => {
+  it('should call handleChangeFeedbackText when feedback text is changed', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackFlyoutBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const feedbackTextarea = screen.getByTestId('feedbackTextArea');
+    const feedbackTextarea = screen.getByTestId('feedbackFormTextArea');
 
     expect(feedbackTextarea).toBeInTheDocument();
 

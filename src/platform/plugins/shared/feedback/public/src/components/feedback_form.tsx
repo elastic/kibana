@@ -12,18 +12,17 @@ import type { CoreAuthenticationService } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FeedbackFlyoutHeader } from './feedback_flyout_header';
-import { FeedbackFlyoutBody } from './feedback_flyout_body';
-import { FeedbackFlyoutFooter } from './feedback_flyout_footer';
-import { FEEDBACK_TYPE } from './constants';
+import { FeedbackHeader } from './feedback_header';
+import { FeedbackBody } from './feedback_body';
+import { FeedbackFooter } from './feedback_footer';
+import { FEEDBACK_TYPE } from '../constants';
 
 interface Props {
-  closeFlyout: () => void;
   getCurrentUser: CoreAuthenticationService['getCurrentUser'];
   getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Props) => {
+export const FeedbackForm = ({ getCurrentUser, getLicense }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackType, setFeedbackType] = useState(FEEDBACK_TYPE.FEATURE_REQUEST);
   const [feedbackText, setFeedbackText] = useState('');
@@ -75,10 +74,10 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
   const Divider = () => <span css={dividerCss} aria-hidden="true" />;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackFlyout" css={flyoutCss}>
-      <FeedbackFlyoutHeader closeFlyout={closeFlyout} />
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackForm" css={flyoutCss}>
+      <FeedbackHeader />
       <Divider />
-      <FeedbackFlyoutBody
+      <FeedbackBody
         feedbackType={feedbackType}
         feedbackText={feedbackText}
         userEmail={userEmail}
@@ -88,7 +87,7 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
         getLicense={getLicense}
       />
       <Divider />
-      <FeedbackFlyoutFooter
+      <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
       />

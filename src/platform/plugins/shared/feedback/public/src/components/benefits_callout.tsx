@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
-import { ELASTIC_SUPPORT_URL } from './constants';
+import { ELASTIC_SUPPORT_URL } from '../constants';
 
 interface Props {
   licenseType: string;
@@ -21,11 +21,11 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
   <>
     <EuiSpacer size="m" />
     <EuiCallOut
-      data-test-subj="benefitsCallout"
+      data-test-subj="feedbackBenefitsCallout"
       color="warning"
       title={
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.benefitsCallout.title"
+          id="feedback.form.benefitsCallout.title"
           defaultMessage="Use your {licenseType} license benefits instead"
           values={{
             licenseType: capitalize(licenseType),
@@ -35,13 +35,13 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
     >
       <EuiText component="p" size="s">
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.benefitsCallout.content"
+          id="feedback.form.benefitsCallout.content"
           defaultMessage="Submit issues and enhancement requests using your dedicated support channel. If your feedback is not urgent, you may still use this form."
         />
       </EuiText>
       <EuiButton href={ELASTIC_SUPPORT_URL} color="warning" fill target="_blank">
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.benefitsCallout.supportButton"
+          id="feedback.form.benefitsCallout.supportButton"
           defaultMessage="Access support channel"
         />
       </EuiButton>

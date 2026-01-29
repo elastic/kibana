@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import type { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiHeaderSectionItemButton, EuiText } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FeedbackFlyout } from './feedback_flyout';
+import { FeedbackForm } from './feedback_form';
 
 interface Props {
   core: CoreStart;
@@ -22,55 +21,28 @@ interface Props {
 }
 
 export const FeedbackButton = ({ core, getLicense }: Props) => {
-  let flyoutRef: OverlayRef | null = null;
-
-  const closeFlyout = () => {
-    flyoutRef?.close();
-    flyoutRef = null;
-  };
-
-  const toogleFlyout = () => {
-    if (flyoutRef) {
-      closeFlyout();
-      return;
-    }
-
-    flyoutRef = core.overlays.openFlyout(
+  const openModal = () => {
+    core.overlays.openModal(
       toMountPoint(
-        <FeedbackFlyout
+        <FeedbackForm
           getCurrentUser={core.security.authc.getCurrentUser}
-          closeFlyout={closeFlyout}
           getLicense={getLicense}
         />,
         core.rendering
-      ),
-      {
-        'data-test-subj': 'feedbackFlyout',
-        type: 'push',
-        maxWidth: 400,
-        hideCloseButton: true,
-      }
+      )
     );
-
-    flyoutRef.onClose.finally(() => {
-      flyoutRef = null;
-    });
   };
 
   return (
     <EuiHeaderSectionItemButton
       data-test-subj="feedbackButton"
       aria-haspopup={true}
-      aria-label={i18n.translate('xpack.intercepts.feedbackButton.ariaLabel', {
+      aria-label={i18n.translate('feedback.button.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
-      iconType="comment"
-      textProps={false}
-      onClick={toogleFlyout}
+      onClick={openModal}
     >
-      <EuiText size="s">
-        <FormattedMessage id="xpack.intercepts.feedbackButton.text" defaultMessage="Feedback" />
-      </EuiText>
+      <EuiIcon type="comment" size="m" />
     </EuiHeaderSectionItemButton>
   );
 };

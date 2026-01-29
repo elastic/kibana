@@ -8,9 +8,9 @@
  */
 
 export { FeedbackButton } from './components';
-export { FeedbackFlyout } from './components';
-export { FeedbackFlyoutBody } from './components';
-export { FeedbackFlyoutFooter } from './components';
-export { FeedbackFlyoutHeader } from './components';
+export { FeedbackForm } from './components';
+export { FeedbackBody } from './components';
+export { FeedbackFooter } from './components';
+export { FeedbackHeader } from './components';
 export { BenefitsCallout } from './components';
-export { ELASTIC_SUPPORT_URL, FEEDBACK_TYPE } from './components';
+export { ELASTIC_SUPPORT_URL, FEEDBACK_TYPE } from './constants';

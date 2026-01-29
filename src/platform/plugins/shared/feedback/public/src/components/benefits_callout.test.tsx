@@ -11,8 +11,8 @@ import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { screen, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { FEEDBACK_TYPE } from './constants';
-import { FeedbackFlyoutBody } from './feedback_flyout_body';
+import { FEEDBACK_TYPE } from '../constants';
+import { FeedbackBody } from './feedback_body';
 
 const commonPropsMock = {
   feedbackText: '',
@@ -27,7 +27,7 @@ describe('BenefitsCallout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders callout correctly with proper license type text displayed', async () => {
+  it('should render callout correctly with proper license type text displayed', async () => {
     const license = licensingMock.createLicense({
       license: {
         type: 'platinum',
@@ -38,7 +38,7 @@ describe('BenefitsCallout', () => {
 
     await act(async () => {
       renderWithI18n(
-        <FeedbackFlyoutBody
+        <FeedbackBody
           feedbackType={FEEDBACK_TYPE.FEATURE_REQUEST}
           getLicense={getLicense}
           {...commonPropsMock}
@@ -46,13 +46,13 @@ describe('BenefitsCallout', () => {
       );
     });
 
-    const callout = await screen.findByTestId('benefitsCallout');
+    const callout = await screen.findByTestId('feedbackBenefitsCallout');
 
     expect(callout).toBeInTheDocument();
     expect(callout).toHaveTextContent('Use your Platinum license benefits instead');
   });
 
-  it('does not render callout for trial license type', async () => {
+  it('should not render callout for trial license type', async () => {
     const license = licensingMock.createLicense({
       license: {
         type: 'trial',
@@ -63,7 +63,7 @@ describe('BenefitsCallout', () => {
 
     await act(async () => {
       renderWithI18n(
-        <FeedbackFlyoutBody
+        <FeedbackBody
           feedbackType={FEEDBACK_TYPE.FEATURE_REQUEST}
           getLicense={getLicense}
           {...commonPropsMock}
@@ -71,10 +71,10 @@ describe('BenefitsCallout', () => {
       );
     });
 
-    expect(screen.queryByTestId('benefitsCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('feedbackBenefitsCallout')).not.toBeInTheDocument();
   });
 
-  it('does not render callout for undefined license type', async () => {
+  it('should not render callout for undefined license type', async () => {
     const license = licensingMock.createLicense({
       license: {
         type: undefined,
@@ -85,7 +85,7 @@ describe('BenefitsCallout', () => {
 
     await act(async () => {
       renderWithI18n(
-        <FeedbackFlyoutBody
+        <FeedbackBody
           feedbackType={FEEDBACK_TYPE.FEATURE_REQUEST}
           getLicense={getLicense}
           {...commonPropsMock}
@@ -93,10 +93,10 @@ describe('BenefitsCallout', () => {
       );
     });
 
-    expect(screen.queryByTestId('benefitsCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('feedbackBenefitsCallout')).not.toBeInTheDocument();
   });
 
-  it('does not render callout for other feedback type', async () => {
+  it('should not render callout for other feedback type', async () => {
     const license = licensingMock.createLicense({
       license: {
         type: 'platinum',
@@ -107,7 +107,7 @@ describe('BenefitsCallout', () => {
 
     await act(async () => {
       renderWithI18n(
-        <FeedbackFlyoutBody
+        <FeedbackBody
           feedbackType={FEEDBACK_TYPE.OTHER_FEEDBACK}
           getLicense={getLicense}
           {...commonPropsMock}
@@ -115,6 +115,6 @@ describe('BenefitsCallout', () => {
       );
     });
 
-    expect(screen.queryByTestId('benefitsCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('feedbackBenefitsCallout')).not.toBeInTheDocument();
   });
 });

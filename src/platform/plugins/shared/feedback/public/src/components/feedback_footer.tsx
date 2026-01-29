@@ -24,7 +24,7 @@ interface Props {
   submitFeedback: () => void;
 }
 
-export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
+export const FeedbackFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const footerCss = css`
@@ -32,14 +32,14 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
   `;
 
   return (
-    <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFlyoutFooter">
+    <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.intercepts.feedbackFlyout.form.infoText"
+                  id="feedback.footer.sessionDataIncludedText"
                   defaultMessage="Session data included"
                 />
               </EuiText>
@@ -50,7 +50,7 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
                 color="subdued"
                 content={
                   <FormattedMessage
-                    id="xpack.intercepts.feedbackFlyout.form.infoTooltip"
+                    id="feedback.footer.infoTooltip"
                     defaultMessage="By sending feedback, you acknowledge that session information is collected along with your input to help us better understand your experience. Please do not include any sensitive, personal, or confidential information in this form."
                   />
                 }
@@ -64,14 +64,11 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            data-test-subj="sendFeedbackButton"
+            data-test-subj="feedbackSendFeedbackButton"
             disabled={isSendFeedbackButtonDisabled}
             onClick={submitFeedback}
           >
-            <FormattedMessage
-              id="xpack.intercepts.feedbackFlyout.form.sendButton.text"
-              defaultMessage="Send"
-            />
+            <FormattedMessage id="feedback.footer.sendButton" defaultMessage="Send" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

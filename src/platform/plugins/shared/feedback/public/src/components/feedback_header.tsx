@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './feedback_button';
-export { FeedbackForm } from './feedback_form';
-export { FeedbackBody } from './feedback_body';
-export { FeedbackFooter } from './feedback_footer';
-export { FeedbackHeader } from './feedback_header';
-export { BenefitsCallout } from './benefits_callout';
+import React from 'react';
+import { EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+export const FeedbackHeader = () => (
+  <EuiFlexItem grow={false} data-test-subj="feedbackFormHeader">
+    <EuiTitle size="l">
+      <h2>
+        <FormattedMessage id="feedback.form.header.title" defaultMessage="Feedback" />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+);

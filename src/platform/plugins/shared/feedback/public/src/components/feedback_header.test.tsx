@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './feedback_button';
-export { FeedbackForm } from './feedback_form';
-export { FeedbackBody } from './feedback_body';
-export { FeedbackFooter } from './feedback_footer';
-export { FeedbackHeader } from './feedback_header';
-export { BenefitsCallout } from './benefits_callout';
+import React from 'react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { FeedbackHeader } from './feedback_header';
+
+describe('FeedbackHeader', () => {
+  it('should render the feedback form header', () => {
+    renderWithI18n(<FeedbackHeader />);
+    const header = screen.getByTestId('feedbackFormHeader');
+
+    expect(header).toBeInTheDocument();
+  });
+});
