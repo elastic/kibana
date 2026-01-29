@@ -56,7 +56,7 @@ const partitionStatePrimaryMetricOptionsSchema = schema.object({});
 const partitionStateBreakdownByOptionsSchema = schema.object(
   {
     /**
-     * Color configuration: static color, color by value, or color mapping
+     * Color configuration: color mapping
      */
     color: schema.maybe(colorMappingSchema),
     /**

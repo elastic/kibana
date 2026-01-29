@@ -188,10 +188,11 @@ function convertAPICategoryDisplayOption(
   return option ?? 'default';
 }
 
-function convertAPILegendDisplayOption(option: PartitionState): Pick<
+function convertAPILegendDisplayOption(
+  option: PartitionState
+): Pick<
   PartitionLens['state']['visualization']['layers'][0],
   'legendDisplay' | 'nestedLegend' | 'legendMaxLines' | 'legendSize' | 'truncateLegend'
-  // | 'legendStats'
 > {
   const legend = option?.legend;
   const legendOptions = legend
@@ -199,7 +200,7 @@ function convertAPILegendDisplayOption(option: PartitionState): Pick<
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
         legendSize: legend?.size,
         legendMaxLines: legend?.truncate_after_lines,
-        // legendStats: 'legendStats' in legend ? legend?.legendStats : undefined,
+        truncateLegend: legend?.truncate_after_lines != null,
       })
     : {};
   if (legend?.visible === 'auto' || legend?.visible == null) {
@@ -401,7 +402,7 @@ export function fromLensStateToAPI(config: LensAttributes): PartitionState {
   };
 }
 
-function convertAPIValueDisplayToLensState(
+function convertStateValueDisplayToAPI(
   option: LensPartitionVisualizationState['layers'][0]['numberDisplay']
 ): NonNullable<PartitionState['value_display']>['mode'] | undefined {
   if (option === 'percent') {
@@ -417,15 +418,16 @@ function fromLensStateToSharedPartitionAPI(
   visualization: PartitionLens['state']['visualization']
 ): PartitionState['legend'] {
   const layerState = visualization.layers[0];
+  const legend = stripUndefined({
+    visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
+    truncate_after_lines: layerState.legendMaxLines,
+    nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
+    size: layerState.legendSize,
+  });
   return stripUndefined({
-    legend: stripUndefined({
-      visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
-      truncate_after_lines: layerState.legendMaxLines,
-      nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
-      size: layerState.legendSize,
-    }),
+    legend: Object.keys(legend).length > 0 ? legend : undefined,
     value_display: stripUndefined({
-      mode: convertAPIValueDisplayToLensState(layerState.numberDisplay),
+      mode: convertStateValueDisplayToAPI(layerState.numberDisplay),
       percent_decimals: layerState.percentDecimals,
     }),
   });
