@@ -46,6 +46,8 @@ export interface VersionedAttachment<
   active?: boolean;
   /** Whether the attachment should be hidden from the user */
   hidden?: boolean;
+  /** Whether the attachment is read-only in this conversation */
+  readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
 }
@@ -90,6 +92,8 @@ export interface VersionedAttachmentInput<
   description?: string;
   /** Whether the attachment should be hidden */
   hidden?: boolean;
+  /** Whether the attachment should be read-only */
+  readonly?: boolean;
 }
 
 // Zod schemas for validation
@@ -115,6 +119,7 @@ export const versionedAttachmentSchema = z.object({
   description: z.string().optional(),
   active: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  readonly: z.boolean().optional(),
   client_id: z.string().optional(),
 });
 
@@ -124,6 +129,7 @@ export const versionedAttachmentInputSchema = z.object({
   data: z.unknown(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
+  readonly: z.boolean().optional(),
 });
 
 export const attachmentDiffSchema = z.object({

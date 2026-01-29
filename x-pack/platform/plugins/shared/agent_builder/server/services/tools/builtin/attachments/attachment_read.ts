@@ -27,6 +27,8 @@ const attachmentReadSchema = z.object({
  */
 export const createAttachmentReadTool = ({
   attachmentManager,
+  attachmentsService,
+  formatContext,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
   id: platformCoreTools.attachmentRead,
   type: ToolType.builtin,
@@ -63,6 +65,34 @@ export const createAttachmentReadTool = ({
       };
     }
 
+    let data = versionData.data;
+    if (attachmentsService && formatContext) {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      const typeReadonly = definition?.isReadonly ?? true;
+      const isReadonly = typeReadonly || attachment.readonly === true;
+      if (definition && isReadonly) {
+        try {
+          const formatted = await definition.format(
+            {
+              id: attachment.id,
+              type: attachment.type,
+              data: versionData.data,
+            },
+            formatContext
+          );
+          if (formatted.getRepresentation) {
+            const representation = await formatted.getRepresentation();
+            data =
+              representation.type === 'text'
+                ? representation.value
+                : JSON.stringify(representation);
+          }
+        } catch {
+          data = versionData.data;
+        }
+      }
+    }
+
     return {
       results: [
         {
@@ -72,7 +102,7 @@ export const createAttachmentReadTool = ({
             attachment_id: attachmentId,
             type: attachment.type,
             version: versionData.version,
-            data: versionData.data,
+            data,
           },
         },
       ],
