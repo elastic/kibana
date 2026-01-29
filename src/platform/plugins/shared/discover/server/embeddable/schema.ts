@@ -18,12 +18,10 @@ import {
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE, Density } from '@kbn/saved-search-plugin/common';
 
-const columnSchema = schema.recordOf(
-  schema.string(), // field name
-  schema.object({
-    width: schema.maybe(schema.number({ min: 0 })),
-  })
-);
+const columnSchema = schema.object({
+  column: schema.string(), // field name
+  width: schema.maybe(schema.number({ min: 0 })),
+});
 
 const sortSchema = schema.object({
   column: schema.string(), // field name
