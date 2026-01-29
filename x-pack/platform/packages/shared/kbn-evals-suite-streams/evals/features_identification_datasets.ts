@@ -1079,7 +1079,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           '@timestamp': '2026-03-15T14:30:00.160Z',
-          message: 'Storage bucket configured: s3://my-bucket (could be MinIO or AWS)',
+          message: 'Storage bucket configured: s3://my-bucket',
           'service.name': 'worker-daemon',
           'log.level': 'INFO',
         },
