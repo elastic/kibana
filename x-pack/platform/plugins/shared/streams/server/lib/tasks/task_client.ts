@@ -256,7 +256,7 @@ export class TaskClient<TaskType extends string> {
     const response = await this.storageClient.search({
       query: { match_all: {} },
       size: 10000,
-      track_total_hits: true,
+      track_total_hits: false,
       _source: ['created_at'],
     });
 
@@ -272,18 +272,10 @@ export class TaskClient<TaskType extends string> {
    */
   public async deleteTask(id: string): Promise<void> {
     this.logger.debug(`Deleting task ${id}`);
-
-    try {
-      await this.storageClient.delete({
-        id,
-        refresh: true,
-      });
-      this.logger.debug(`Successfully deleted task ${id}`);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await this.storageClient.delete({
+      id,
+      refresh: true,
+    });
+    this.logger.debug(`Successfully deleted task ${id}`);
   }
 }

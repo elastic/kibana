@@ -59,7 +59,6 @@ export const streamsRouteRepository = {
   ...significantEventsRoutes,
   ...queryRoutes,
   ...attachmentRoutes,
-  ...internalInsightsRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
