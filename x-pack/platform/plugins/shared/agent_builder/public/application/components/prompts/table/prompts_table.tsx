@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiFlexGroup,
   EuiSearchBar,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  formatDate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { memo, useCallback, useState } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { UserPrompt } from '../../../../../common/http_api/user_prompts';
 import { usePrompts } from '../../../hooks/prompts/use_prompts';
 import { usePromptsTableSearch } from '../../../hooks/prompts/use_prompts_table_search';
 import { labels } from '../../../utils/i18n';
+import { PromptsQuickActions } from './prompts_table_quick_actions';
 
-// Placeholder columns - will be replaced with actual columns later
-const getPromptsTableColumns = () => [
-  {
-    field: 'id',
-    name: 'ID',
-  },
-];
+const MAX_CONTENT_PREVIEW_LENGTH = 100;
+
+const promptsQuickActionsHoverStyles = css`
+  .euiTableRow:hover .prompts-quick-actions {
+    visibility: visible;
+  }
+`;
+
+const truncateContent = (content: string, maxLength: number): string => {
+  if (content.length <= maxLength) {
+    return content;
+  }
+  return `${content.substring(0, maxLength)}...`;
+};
 
 export const AgentBuilderPromptsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
@@ -49,7 +60,61 @@ export const AgentBuilderPromptsTable = memo(() => {
     query: searchQuery || undefined,
   });
 
-  const columns = getPromptsTableColumns();
+  const handleEdit = useCallback((promptId: string) => {
+    // TODO: Implement edit prompt navigation
+  }, []);
+
+  const handleDelete = useCallback((promptId: string) => {
+    // TODO: Implement delete prompt
+  }, []);
+
+  const dateFormat = useUiSetting<string>('dateFormat');
+
+  const columns: Array<EuiBasicTableColumn<UserPrompt>> = useMemo(
+    () => [
+      {
+        field: 'name',
+        name: labels.prompts.nameLabel,
+        width: '20%',
+        render: (name: string) => (
+          <EuiText size="s">
+            <strong>{name}</strong>
+          </EuiText>
+        ),
+      },
+      {
+        field: 'content',
+        name: labels.prompts.contentLabel,
+        width: '60%',
+        render: (content: string) => (
+          <EuiText size="s" color="subdued">
+            {truncateContent(content, MAX_CONTENT_PREVIEW_LENGTH)}
+          </EuiText>
+        ),
+      },
+      {
+        field: 'updated_at',
+        name: labels.prompts.updatedAtLabel,
+        width: '15%',
+        render: (updatedAt: string) => (
+          <EuiText size="s" color="subdued">
+            {formatDate(updatedAt, dateFormat)}
+          </EuiText>
+        ),
+      },
+      {
+        width: '100px',
+        align: 'right',
+        name: '',
+        render: (prompt: UserPrompt) => (
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+            <PromptsQuickActions prompt={prompt} onEdit={handleEdit} onDelete={handleDelete} />
+          </EuiFlexGroup>
+        ),
+      },
+    ],
+    [dateFormat, handleEdit, handleDelete]
+  );
 
   return (
     <>
@@ -63,6 +128,7 @@ export const AgentBuilderPromptsTable = memo(() => {
           table {
             background-color: transparent; /* Ensure top border visibility */
           }
+          ${promptsQuickActionsHoverStyles}
         `}
         loading={isLoading}
         columns={columns}

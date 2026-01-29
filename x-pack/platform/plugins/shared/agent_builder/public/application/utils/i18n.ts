@@ -512,5 +512,22 @@ export const labels = {
     newPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.newPromptButtonLabel', {
       defaultMessage: 'New prompt',
     }),
+    // Table columns
+    nameLabel: i18n.translate('xpack.agentBuilder.prompts.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    contentLabel: i18n.translate('xpack.agentBuilder.prompts.contentLabel', {
+      defaultMessage: 'Content',
+    }),
+    updatedAtLabel: i18n.translate('xpack.agentBuilder.prompts.updatedAtLabel', {
+      defaultMessage: 'Last updated',
+    }),
+    // Actions
+    editPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.editPromptButtonLabel', {
+      defaultMessage: 'Edit prompt',
+    }),
+    deletePromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.deletePromptButtonLabel', {
+      defaultMessage: 'Delete prompt',
+    }),
   },
 };
